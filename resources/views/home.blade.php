@@ -2,6 +2,30 @@
 // Prevent horizontal scroll on html/body at all zoom levels
 echo '<style>html,body{overflow-x:hidden!important;}</style>';
 
+// Define categories if they're not coming from the backend
+$categories = [
+    (object)['name' => 'Live Cams'],
+    (object)['name' => 'New Models'],
+    (object)['name' => 'VIP Models'],
+    (object)['name' => 'HD Channels'],
+    (object)['name' => '4K Quality'],
+    (object)['name' => 'Top Rated'],
+    (object)['name' => 'Most Viewed'],
+    (object)['name' => 'Recently Online'],
+];
+
+// Define gender tabs function if it doesn't exist
+if (!function_exists('gender_tabs')) {
+    function gender_tabs() {
+        return [
+            (object)['slug' => 'female', 'label' => 'FEMALE'],
+            (object)['slug' => 'male', 'label' => 'MALE'],
+            (object)['slug' => 'trans', 'label' => 'TRANS'],
+            (object)['slug' => 'couple', 'label' => 'COUPLE'],
+        ];
+    }
+}
+
 // Dummy data for featured escorts (top performers)
 $featuredEscorts = [
     [
@@ -62,88 +86,88 @@ $featuredEscorts = [
 ];
 
 // Dummy data for latest escorts from Australia (matching the image design)
-$latestEscorts = [
-    [
-        'name' => 'Dixie Laveaux',
-        'price' => 180,
-        'location' => 'Bondi Junction',
-        'type' => 'Escort',
-        'time_ago' => '6 minutes ago',
-        'verified' => true,
-        'featured' => true,
-        'image' => 'https://images.unsplash.com/photo-1494790108777-467efef4493f?w=400&h=500&fit=crop',
-    ],
-    [
-        'name' => 'Queen Alexa',
-        'price' => 500,
-        'location' => 'Melbourne',
-        'type' => 'Escort',
-        'time_ago' => '6 minutes ago',
-        'verified' => true,
-        'featured' => true,
-        'image' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop',
-    ],
-    [
-        'name' => 'Butt Plug in my Ass',
-        'price' => 300,
-        'location' => 'Pennant Hills',
-        'type' => 'Escort',
-        'time_ago' => '7 minutes ago',
-        'verified' => true,
-        'featured' => true,
-        'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=500&fit=crop',
-    ],
-    [
-        'name' => 'Players of Pleasure',
-        'price' => 250,
-        'location' => 'Dee Why',
-        'type' => 'Escort',
-        'time_ago' => '8 minutes ago',
-        'verified' => true,
-        'featured' => true,
-        'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop',
-    ],
-    [
-        'name' => 'Naughty Kitty69',
-        'price' => 250,
-        'location' => 'Craigieburn',
-        'type' => 'Escort',
-        'time_ago' => '8 minutes ago',
-        'verified' => true,
-        'featured' => true,
-        'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop',
-    ],
-    [
-        'name' => 'Scarlet Rose',
-        'price' => 350,
-        'location' => 'Sydney',
-        'type' => 'Escort',
-        'time_ago' => '9 minutes ago',
-        'verified' => true,
-        'featured' => false,
-        'image' => 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=500&fit=crop',
-    ],
-    [
-        'name' => 'Mia Sapphire',
-        'price' => 220,
-        'location' => 'Brisbane',
-        'type' => 'Escort',
-        'time_ago' => '10 minutes ago',
-        'verified' => false,
-        'featured' => true,
-        'image' => 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=500&fit=crop',
-    ],
-    [
-        'name' => 'Luna Night',
-        'price' => 280,
-        'location' => 'Perth',
-        'type' => 'Escort',
-        'time_ago' => '12 minutes ago',
-        'verified' => true,
-        'featured' => false,
-        'image' => 'https://images.unsplash.com/photo-1464863979621-258859e62245?w=400&h=500&fit=crop',
-    ],
-];
+// $latestEscorts = [
+//     [
+//         'name' => 'Dixie Laveaux',
+//         'price' => 180,
+//         'location' => 'Bondi Junction',
+//         'type' => 'Escort',
+//         'time_ago' => '6 minutes ago',
+//         'verified' => true,
+//         'featured' => true,
+//         'image' => 'https://images.unsplash.com/photo-1494790108777-467efef4493f?w=400&h=500&fit=crop',
+//     ],
+//     [
+//         'name' => 'Queen Alexa',
+//         'price' => 500,
+//         'location' => 'Melbourne',
+//         'type' => 'Escort',
+//         'time_ago' => '6 minutes ago',
+//         'verified' => true,
+//         'featured' => true,
+//         'image' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop',
+//     ],
+//     [
+//         'name' => 'Butt Plug in my Ass',
+//         'price' => 300,
+//         'location' => 'Pennant Hills',
+//         'type' => 'Escort',
+//         'time_ago' => '7 minutes ago',
+//         'verified' => true,
+//         'featured' => true,
+//         'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=500&fit=crop',
+//     ],
+//     [
+//         'name' => 'Players of Pleasure',
+//         'price' => 250,
+//         'location' => 'Dee Why',
+//         'type' => 'Escort',
+//         'time_ago' => '8 minutes ago',
+//         'verified' => true,
+//         'featured' => true,
+//         'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop',
+//     ],
+//     [
+//         'name' => 'Naughty Kitty69',
+//         'price' => 250,
+//         'location' => 'Craigieburn',
+//         'type' => 'Escort',
+//         'time_ago' => '8 minutes ago',
+//         'verified' => true,
+//         'featured' => true,
+//         'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop',
+//     ],
+//     [
+//         'name' => 'Scarlet Rose',
+//         'price' => 350,
+//         'location' => 'Sydney',
+//         'type' => 'Escort',
+//         'time_ago' => '9 minutes ago',
+//         'verified' => true,
+//         'featured' => false,
+//         'image' => 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=500&fit=crop',
+//     ],
+//     [
+//         'name' => 'Mia Sapphire',
+//         'price' => 220,
+//         'location' => 'Brisbane',
+//         'type' => 'Escort',
+//         'time_ago' => '10 minutes ago',
+//         'verified' => false,
+//         'featured' => true,
+//         'image' => 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=500&fit=crop',
+//     ],
+//     [
+//         'name' => 'Luna Night',
+//         'price' => 280,
+//         'location' => 'Perth',
+//         'type' => 'Escort',
+//         'time_ago' => '12 minutes ago',
+//         'verified' => true,
+//         'featured' => false,
+//         'image' => 'https://images.unsplash.com/photo-1464863979621-258859e62245?w=400&h=500&fit=crop',
+//     ],
+// ];
 
 // Dummy data for top escorts grid
 $dummyTopEscorts = [
@@ -214,11 +238,16 @@ $dummyTopEscorts = [
             touchStartX: 0,
             touchEndX: 0,
             featuredTotalSlides: {{ count($featuredEscorts) }},
-            latestTotalSlides: {{ count($latestEscorts) }},
+            {{-- latestTotalSlides: {{ count($latestEscorts) }}, --}}
+            slidesPerView: 4,
 
             init() {
                 this.updateGridCols();
-                window.addEventListener('resize', () => this.updateGridCols());
+                this.updateSlidesPerView();
+                window.addEventListener('resize', () => {
+                    this.updateGridCols();
+                    this.updateSlidesPerView();
+                });
                 this.startAutoplay();
             },
 
@@ -231,6 +260,18 @@ $dummyTopEscorts = [
                     this.gridCols = 3;
                 } else {
                     this.gridCols = 4;
+                }
+            },
+
+            updateSlidesPerView() {
+                if(window.innerWidth < 640) {
+                    this.slidesPerView = 1;
+                } else if(window.innerWidth < 768) {
+                    this.slidesPerView = 2;
+                } else if(window.innerWidth < 1024) {
+                    this.slidesPerView = 3;
+                } else {
+                    this.slidesPerView = 4;
                 }
             },
 
@@ -249,11 +290,11 @@ $dummyTopEscorts = [
 
             // Latest slider functions
             latestNextSlide() {
-                this.latestCurrentSlide = (this.latestCurrentSlide + 1) % this.latestTotalSlides;
+                this.latestCurrentSlide = (this.latestCurrentSlide + 1) % Math.ceil(this.latestTotalSlides / this.slidesPerView);
             },
 
             latestPrevSlide() {
-                this.latestCurrentSlide = (this.latestCurrentSlide - 1 + this.latestTotalSlides) % this.latestTotalSlides;
+                this.latestCurrentSlide = (this.latestCurrentSlide - 1 + Math.ceil(this.latestTotalSlides / this.slidesPerView)) % Math.ceil(this.latestTotalSlides / this.slidesPerView);
             },
 
             latestGoToSlide(index) {
@@ -314,6 +355,11 @@ $dummyTopEscorts = [
                         this.latestPrevSlide();
                     }
                 }
+            },
+
+            // Get total pages for latest slider
+            getLatestTotalPages() {
+                return Math.ceil(this.latestTotalSlides / this.slidesPerView);
             }
         }">
 
@@ -477,7 +523,7 @@ $dummyTopEscorts = [
             </div>
 
             <!-- Latest Escorts from Australia Slider (New - Matching the image design) -->
-            <div class="mb-8 md:mb-10">
+            {{-- <div class="mb-8 md:mb-10">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                         Latest Escorts from <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-500">Australia</span>
@@ -498,10 +544,10 @@ $dummyTopEscorts = [
                     <!-- Slider Container -->
                     <div class="relative overflow-hidden">
                         <div class="flex transition-transform duration-500 ease-out gap-3 md:gap-4"
-                             :style="{ transform: 'translateX(-' + (latestCurrentSlide * (100 / (window.innerWidth < 640 ? 1 : window.innerWidth < 768 ? 2 : window.innerWidth < 1024 ? 3 : 4))) + '%)' }">
+                             :style="{ transform: 'translateX(-' + (latestCurrentSlide * 100) + '%)' }">
 
                             @foreach($latestEscorts as $index => $escort)
-                            <div class="w-full min-w-[calc(100%-0.75rem)] xs:min-w-[calc(50%-0.375rem)] sm:min-w-[calc(33.333%-0.5rem)] lg:min-w-[calc(25%-0.5rem)] flex-shrink-0">
+                            <div class="w-full flex-shrink-0" :style="{ minWidth: (100 / slidesPerView) + '%' }">
                                 <div class="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-pink-500 transition-all duration-300 group">
                                     <!-- Image Container -->
                                     <div class="relative aspect-square overflow-hidden">
@@ -571,15 +617,15 @@ $dummyTopEscorts = [
 
                     <!-- Slide Indicators for mobile -->
                     <div class="flex md:hidden justify-center gap-1.5 mt-4">
-                        @for($i = 0; $i < ceil(count($latestEscorts) / (window.innerWidth < 640 ? 1 : 2)); $i++)
-                        <button @click="latestGoToSlide({{ $i }})"
-                                class="transition-all duration-300 touch-manipulation"
-                                :class="latestCurrentSlide === {{ $i }} ? 'w-4 h-1.5 bg-pink-500 rounded-full' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80 rounded-full'">
-                        </button>
-                        @endfor
+                        <template x-for="i in getLatestTotalPages()" :key="i">
+                            <button @click="latestGoToSlide(i-1)"
+                                    class="transition-all duration-300 touch-manipulation"
+                                    :class="latestCurrentSlide === (i-1) ? 'w-4 h-1.5 bg-pink-500 rounded-full' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80 rounded-full'">
+                            </button>
+                        </template>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <!-- Unified Search & Filter Bar -->
             <div class="bg-gray-900/90 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg border border-gray-800 mb-6">
