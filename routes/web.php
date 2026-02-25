@@ -19,6 +19,15 @@ Route::get('/', function () {
     return view('home', compact('categories'));
 });
 
+Route::get('/signup', function () {
+    return view('signup');
+});
+
+Route::get('/otp-verification', function () {
+    return view('otp-verification');
+});
+
+
 Route::get('/terms-and-conditions', function () {
     $terms = TermCondition::query()
         ->where('is_active', true)
