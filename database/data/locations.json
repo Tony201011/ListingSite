@@ -1,0 +1,70 @@
+{
+  "countries": [
+    {
+      "name": "India",
+      "code": "IN",
+      "states": [
+        { "name": "Maharashtra", "cities": ["Mumbai", "Pune", "Nagpur"] },
+        { "name": "Gujarat", "cities": ["Ahmedabad", "Surat", "Vadodara"] },
+        { "name": "Karnataka", "cities": ["Bengaluru", "Mysuru", "Mangaluru"] }
+      ]
+    },
+    {
+      "name": "United States",
+      "code": "US",
+      "states": [
+        { "name": "California", "cities": ["Los Angeles", "San Diego", "San Jose"] },
+        { "name": "Texas", "cities": ["Houston", "Dallas", "Austin"] },
+        { "name": "Florida", "cities": ["Miami", "Orlando", "Tampa"] }
+      ]
+    },
+    {
+      "name": "United Kingdom",
+      "code": "GB",
+      "states": [
+        { "name": "England", "cities": ["London", "Manchester", "Birmingham"] },
+        { "name": "Scotland", "cities": ["Glasgow", "Edinburgh", "Aberdeen"] }
+      ]
+    },
+    {
+      "name": "Canada",
+      "code": "CA",
+      "states": [
+        { "name": "Ontario", "cities": ["Toronto", "Ottawa", "Hamilton"] },
+        { "name": "British Columbia", "cities": ["Vancouver", "Victoria", "Kelowna"] }
+      ]
+    },
+    {
+      "name": "Australia",
+      "code": "AU",
+      "states": [
+        { "name": "New South Wales", "cities": ["Sydney", "Newcastle", "Wollongong"] },
+        { "name": "Victoria", "cities": ["Melbourne", "Geelong", "Ballarat"] }
+      ]
+    },
+    {
+      "name": "Germany",
+      "code": "DE",
+      "states": [
+        { "name": "Bavaria", "cities": ["Munich", "Nuremberg", "Augsburg"] },
+        { "name": "Berlin", "cities": ["Berlin"] }
+      ]
+    },
+    {
+      "name": "France",
+      "code": "FR",
+      "states": [
+        { "name": "Ile-de-France", "cities": ["Paris", "Boulogne-Billancourt", "Versailles"] },
+        { "name": "Provence-Alpes-Cote d'Azur", "cities": ["Marseille", "Nice", "Toulon"] }
+      ]
+    },
+    {
+      "name": "United Arab Emirates",
+      "code": "AE",
+      "states": [
+        { "name": "Dubai", "cities": ["Dubai"] },
+        { "name": "Abu Dhabi", "cities": ["Abu Dhabi", "Al Ain"] }
+      ]
+    }
+  ]
+}
