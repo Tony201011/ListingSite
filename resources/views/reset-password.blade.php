@@ -14,7 +14,7 @@
         <!-- CENTER LOGO TEXT -->
         <div style="flex:1; background:#c893b8; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
             <h2 style="margin:0; font-size:40px; font-weight:700; color:#000;">
-                realbabes.com.au
+                hotescorts.com.au
             </h2>
             <span style="font-size:12px; letter-spacing:2px; color:#333;">
                 REAL WOMEN NEAR YOU
