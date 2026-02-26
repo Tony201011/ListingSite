@@ -46,6 +46,11 @@ Route::get('/my-profile-2', function () {
 });
 
 
+Route::get('/my-rate', function () {
+    return view('my-rate');
+});
+
+
 Route::get('/otp-verification', function () {
     return view('otp-verification');
 });
