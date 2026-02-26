@@ -11,27 +11,27 @@
 
             <!-- Your name -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Your name</h2>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your name</h2>
                 <input type="text" value="Sourabh wadhwa" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem;;">
             </div>
 
             <!-- Your introduction line -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Your introduction line</h2>
+                 <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your introduction line</h2>
                 <textarea rows="3" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem;;">I am Sourabh Wadhwa, a 24-year-old student from Mumbai. I have always been fascinated by the world of fashion and style, and I believe that every woman should feel confident and beautiful in what she wears.</textarea>
             </div>
 
             <!-- Your mobile number -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Your mobile number</h2>
+                 <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your mobile number</h2>
                 <input type="text" value="0415573077" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem;;">
             </div>
 
             <!-- Your profile text -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Your profile text</h2>
-                <div style="color: #555; font-size: 0.95rem; margin-bottom: 10px; background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #e04ecb;">
-                    It is illegal in India to describe your sexual services in detail, you also cannot refer to the term massage. In Q4 you cannot advertise 'doubles', if you are in WC please do not forget to mention your SWA Licence number.
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your profile text</h2>
+                <div style="color: #555; font-size: 0.95rem; margin-bottom: 10px;padding: 15px;">
+                    It is illegal in Vic & QLD to describe your sexual services in details, you also cannot refer to the term massage. In QLD you cannot advertise 'doubles'. If you are in VIC please do not forget to mention your SWA Licence number
                 </div>
                 <div style="color: #333; font-size: 0.95rem; margin-bottom: 10px;">
                    You can use our special features for
@@ -61,13 +61,13 @@ or you can type them down here.
 
             <!-- Suburb -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Suburb <span style="font-weight: normal; color: #888; font-size: 0.9rem;">(your primary main work suburb, select it from the list while typing)</span></h2>
+                 <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Suburb <span style="font-weight: normal; color: #888; font-size: 0.9rem;">(your primary main work suburb, select it from the list while typing)</span></h2>
                 <input type="text" value="Melbourne VIC" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem;">
             </div>
 
             <!-- Your age group -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Your age group</h2>
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your age group</h2>
                 <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
                     <option>- Select your age</option>
                     <option>18-24</option>
@@ -80,7 +80,7 @@ or you can type them down here.
 
             <!-- Hair color -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Hair color</h2>
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Hair color</h2>
                 <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
                     <option>- Select your hair color</option>
                     <option>Blonde</option>
@@ -93,7 +93,7 @@ or you can type them down here.
 
             <!-- Hair length -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Hair length</h2>
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Hair length</h2>
                 <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
                     <option>- Select your hair length</option>
                     <option>Short</option>
@@ -105,7 +105,7 @@ or you can type them down here.
 
             <!-- Ethnicity -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Ethnicity</h2>
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Ethnicity</h2>
                 <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
                     <option>- Select your ethnicity</option>
                     <option>Caucasian</option>
@@ -118,7 +118,7 @@ or you can type them down here.
 
             <!-- Body type -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Body type</h2>
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Body type</h2>
                 <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
                     <option>- Select your body type</option>
                     <option>Slender</option>
@@ -131,7 +131,7 @@ or you can type them down here.
 
             <!-- Bust size -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Bust size</h2>
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Bust size</h2>
                 <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
                     <option>- Select your bust size</option>
                     <option>A cup</option>
@@ -144,7 +144,7 @@ or you can type them down here.
 
             <!-- Your length -->
             <div style="margin-bottom: 25px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 8px;">Your length</h2>
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your length</h2>
                 <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
                     <option>- Select your length category</option>
                     <option>Under 5'0"</option>
@@ -157,12 +157,12 @@ or you can type them down here.
 
             <!-- Select the tags that apply to you -->
             <div style="margin-bottom: 30px;">
-                <h2 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 10px;">Select the tags that apply to you</h2>
+                 <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Select the tags that apply to you</h2>
                 <p style="color: #666; margin-bottom: 15px; font-size: 0.95rem;">These tags will show up on your profile, and will improve your profile getting found in search.</p>
 
                 <!-- Select 1 of the following tags (optional) -->
                 <div style="margin-bottom: 20px;">
-                    <h3 style="font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 10px;">Select 1 of the following tags <span style="font-weight: normal; color: #888;">(optional)</span></h3>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #222; margin-bottom: 10px;">Select 1 of the following tags <span style="font-weight: normal; color: #888;">(optional)</span></h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                         <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">milf</span>
                         <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">girl next door</span>
@@ -179,7 +179,7 @@ or you can type them down here.
 
                 <!-- Select any of the tags that apply to you (optional) -->
                 <div style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 600; color: #444; margin-bottom: 10px;">Select any of the tags that apply to you <span style="font-weight: normal; color: #888;">(optional)</span></h3>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #222; margin-bottom: 10px;">Select any of the tags that apply to you <span style="font-weight: normal; color: #888;">(optional)</span></h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                         <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">heterosexual</span>
                         <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">bisexual</span>
@@ -215,7 +215,7 @@ or you can type them down here.
 
                 <!-- Select up to 12 tags of the following tags (optional) -->
                 <div style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 600; color: #444; margin-bottom: 10px;">Select up to 12 tags of the following tags <span style="font-weight: normal; color: #888;">(optional)</span></h3>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #222; margin-bottom: 10px;">Select up to 12 tags of the following tags <span style="font-weight: normal; color: #888;">(optional)</span></h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                         <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">outfit requests welcome</span>
                         <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">lingerie</span>
@@ -251,8 +251,8 @@ or you can type them down here.
 
             <!-- Your services -->
             <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 10px;">Your services</h2>
-                <p style="color: #222; margin-bottom: 10px; font-weight: 500;">Select any of the services below that you provide:</p>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Your services</h2>
+                <p style="color: #222; margin-bottom: 10px; font-weight: 700;">Select any of the services below that you provide:</p>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Standard service (not QFC or PSE)</span></label>
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">GFE</span></label>
@@ -273,7 +273,7 @@ or you can type them down here.
 
             <!-- Are you available for -->
             <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 10px;">Are you available for:</h2>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Are you available for:</h2>
                 <div style="display: flex; gap: 30px; flex-wrap: wrap;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="availability"> Incalls only</label>
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="availability"> Outcalls only</label>
@@ -283,13 +283,13 @@ or you can type them down here.
 
             <!-- How can people contact you? -->
             <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 10px;">How can people contact you?</h2>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">How can people contact you?</h2>
                 <p style="color: #555; margin-bottom: 10px;">Email enquiries will be sent to: s8813w@gmail.com</p>
             </div>
 
             <!-- Phone and Email contact form -->
             <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 10px;">Phone and Email contact form</h2>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Phone and Email contact form</h2>
                 <div style="display: flex; gap: 30px; flex-wrap: wrap;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="contact_method"> Phone only</label>
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="contact_method"> Email contact form only (Your phone number will not be displayed if you select this option)</label>
@@ -298,7 +298,7 @@ or you can type them down here.
 
             <!-- How can people contact you by phone? -->
             <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 10px;">How can people contact you by phone?</h2>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">How can people contact you by phone?</h2>
                 <div style="display: flex; gap: 30px; flex-wrap: wrap;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="phone_contact"> Accept phone calls & SMS messages</label>
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="phone_contact"> Accept phone calls only</label>
@@ -308,7 +308,7 @@ or you can type them down here.
 
             <!-- Do you want to use our time waster shield for SMS -->
             <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 10px;">Do you want to use our time waster shield for SMS what is this?</h2>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Do you want to use our time waster shield for SMS what is this?</h2>
                 <div style="display: flex; gap: 30px; flex-wrap: wrap;">
                     <label style="font-weight: 600; color: #555; font-size: 0.95rem;display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="time_waster"> No</label>
                     <label style="font-weight: 600; color: #555; font-size: 0.95rem;display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="time_waster"> Yes</label>
@@ -316,21 +316,22 @@ or you can type them down here.
             </div>
 
             <!-- Optional fields -->
+
             <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 600; color: #333; margin-bottom: 15px;">Optional fields</h2>
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 15px;">Optional fields</h2>
 
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 500; margin-bottom: 5px;font-weight: 600; color: #555; font-size: 0.95rem;">Your Twitter handle</label>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #222; font-size: 0.95rem;">Your Twitter handle</label>
                     <input type="text" value="@yourtwittername" style="font-weight: 600; color: #555; font-size: 0.95rem;width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 500; margin-bottom: 5px;font-weight: 600; color: #555; font-size: 0.95rem;">Your website</label>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #222; font-size: 0.95rem;">Your website</label>
                     <input type="text" value="eg. https://www.realbabes.com.au" style="font-weight: 600; color: #555; font-size: 0.95rem;width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 500; margin-bottom: 5px;font-weight: 600; color: #555; font-size: 0.95rem;">OnlyFans username</label>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #222; font-size: 0.95rem;">OnlyFans username</label>
                     <input type="text" value="@onlyfansusername" style="font-weight: 600; color: #555; font-size: 0.95rem;width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px;">
                 </div>
             </div>
