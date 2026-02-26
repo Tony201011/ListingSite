@@ -41,6 +41,10 @@ Route::get('/my-profile-1', function () {
 });
 
 
+Route::get('/my-profile-2', function () {
+    return view('my-profile-2');
+});
+
 
 Route::get('/otp-verification', function () {
     return view('otp-verification');
