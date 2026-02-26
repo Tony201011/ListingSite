@@ -34,6 +34,12 @@ Route::get('/reset-password', function () {
 });
 
 
+//after sign in page profile pagge when user not fill any informatiom
+
+Route::get('/my-profile-1', function () {
+    return view('my-profile-1');
+});
+
 
 
 Route::get('/otp-verification', function () {
