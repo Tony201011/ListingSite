@@ -200,17 +200,6 @@
                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(224,78,203,0.3)';">
                 Yes sign me up
             </button>
-
-            <!-- Footer with Naughty Shoes Image - EXACT as in image -->
-            <div style="text-align: center; margin-top: 40px;">
-                <!-- Naughty Shoes Image - Dummy Image with high heel emoji -->
-                <div style="margin: 0 auto 15px auto; width: 70px; height: 70px; background: #e04ecb; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                    <span style="font-size: 40px; line-height: 1;">👠</span>
-                </div>
-                <div style="font-size: 1.1rem; color: #e04ecb; font-weight: 500; letter-spacing: 0.5px;">
-                    Put on your naughty shoes and join Realbabes today
-                </div>
-            </div>
         </form>
     </div>
 </div>
