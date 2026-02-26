@@ -40,7 +40,7 @@
             Login to your HOTESCORTS profile
         </h1>
 
-        <!-- Login Form -->
+        <!-- Login Form Card -->
         <div style="background: #ffffff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 35px 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 25px;">
             <form method="POST" action="#">
                 @csrf
@@ -88,24 +88,24 @@
 
                 <!-- Login Button -->
                 <button type="submit"
-                        style="width: 100%; background: linear-gradient(135deg, #e04ecb 0%, #c13ab0 100%); color: white; font-weight: 700; font-size: 1.3rem; padding: 16px 0; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(224,78,203,0.3);"
+                        style="width: 100%; background: linear-gradient(135deg, #e04ecb 0%, #c13ab0 100%); color: white; font-weight: 700; font-size: 1.3rem; padding: 16px 0; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(224,78,203,0.3); margin-bottom: 25px;"
                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(224,78,203,0.4)';"
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(224,78,203,0.3)';">
                     Login
                 </button>
             </form>
-        </div>
 
-        <!-- Forgot Password Links -->
-        <div style="text-align: center; margin-bottom: 30px;">
-            <p style="color: #666; margin-bottom: 12px;">
-                Forgot your login details?
-                <a href="#" style="color: #e04ecb; text-decoration: none; font-weight: 500;">you can reset it here</a>
-            </p>
-            <p style="color: #666;">
-                If you haven't signed up before,
-                <a href="#" style="color: #e04ecb; text-decoration: none; font-weight: 500;">you can sign up here</a>
-            </p>
+            <!-- Forgot Password & Signup Links - Inside the form card exactly as in sample image -->
+            <div style="text-align: center; border-top: 1px solid #eee; padding-top: 25px;">
+                <p style="color: #666; margin-bottom: 12px; font-size: 0.95rem;">
+                    Forgot your login details?
+                    <a href="#" style="color: #e04ecb; text-decoration: none; font-weight: 500; border-bottom: 1px dotted #e04ecb;">you can reset it here</a>
+                </p>
+                <p style="color: #666; font-size: 0.95rem;">
+                    If you haven't signed up before,
+                    <a href="#" style="color: #e04ecb; text-decoration: none; font-weight: 500; border-bottom: 1px dotted #e04ecb;">you can sign up here</a>
+                </p>
+            </div>
         </div>
     </div>
 </div>
@@ -123,11 +123,6 @@ body, html {
 @media (max-width: 900px) {
     div[style*="max-width: 800px"] {
         padding: 20px 15px !important;
-    }
-
-    div[style*="display: flex"][style*="gap: 15px"] {
-        gap: 10px !important;
-        font-size: 0.8rem !important;
     }
 
     h1 {
@@ -152,6 +147,10 @@ body, html {
         gap: 15px !important;
         flex-direction: column !important;
         align-items: center !important;
+    }
+
+    div[style*="padding: 35px 30px"] {
+        padding: 20px 15px !important;
     }
 }
 
@@ -185,15 +184,13 @@ a:hover {
     text-decoration: underline !important;
 }
 
-/* Top navigation styling */
-div[style*="gap: 15px"] a {
-    transition: color 0.3s ease;
+/* Style for links in the form card */
+div[style*="border-top: 1px solid #eee"] a {
+    transition: all 0.3s ease;
 }
 
-/* Keep the pink Signup link as shown in image */
-div[style*="gap: 15px"] a[style*="color: #e04ecb"] {
-    color: #e04ecb !important;
-    font-weight: 600;
+div[style*="border-top: 1px solid #eee"] a:hover {
+    border-bottom-color: #e04ecb !important;
 }
 </style>
 @endsection
