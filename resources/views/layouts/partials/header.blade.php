@@ -3,7 +3,7 @@
         <div class="flex justify-between h-16 items-center">
             <div class="flex-shrink-0 flex items-center">
                 <span class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-                    PREMIUM<span class="text-white">BABES</span>
+                    HOT<span class="text-white">ESCORTS</span>
                 </span>
             </div>
 

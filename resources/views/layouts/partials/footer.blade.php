@@ -1,7 +1,7 @@
 <footer class="bg-gray-950 py-12 px-4 border-t border-gray-900">
     <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
         <div>
-            <span class="text-xl font-bold text-purple-500">PREMIUMBABES</span>
+            <span class="text-xl font-bold text-purple-500">Hotescorts</span>
             <p class="text-gray-500 mt-4 leading-relaxed">The leading independent directory for premium companionship across Australia. We prioritize safety, verification, and high-quality photography.</p>
         </div>
         <div>
