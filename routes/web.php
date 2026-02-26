@@ -28,6 +28,14 @@ Route::get('/signin', function () {
     return view('signin');
 });
 
+
+Route::get('/reset-password', function () {
+    return view('reset-password');
+});
+
+
+
+
 Route::get('/otp-verification', function () {
     return view('otp-verification');
 });
