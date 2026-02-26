@@ -1,313 +1,179 @@
-@php
-// Prevent horizontal scroll on html/body at all zoom levels
-echo '<style>html,body{overflow-x:hidden!important;}</style>';
-
-// Dummy data for slider
-$sliderModels = [
-    [
-        'name' => 'Sophia Rose',
-        'location' => 'Sydney',
-        'price' => '$180',
-        'image' => 'https://images.unsplash.com/photo-1494790108777-467efef4493f?w=600&h=800&fit=crop',
-        'tags' => ['VIP', 'LIVE', 'HD'],
-        'online' => true,
-    ],
-    [
-        'name' => 'Isabella Marie',
-        'location' => 'Melbourne',
-        'price' => '$250',
-        'image' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop',
-        'tags' => ['TOP', '4K', 'NEW'],
-        'online' => true,
-    ],
-    [
-        'name' => 'Mia Johnson',
-        'location' => 'Brisbane',
-        'price' => '$200',
-        'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=800&fit=crop',
-        'tags' => ['PREMIUM', 'VERIFIED'],
-        'online' => false,
-    ],
-    [
-        'name' => 'Emma Wilson',
-        'location' => 'Perth',
-        'price' => '$160',
-        'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop',
-        'tags' => ['NEW', 'HD'],
-        'online' => true,
-    ],
-    [
-        'name' => 'Olivia Brown',
-        'location' => 'Gold Coast',
-        'price' => '$300',
-        'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop',
-        'tags' => ['VIP', 'TOP'],
-        'online' => true,
-    ],
-];
-
-// Stats data
-$stats = [
-    ['number' => '500+', 'label' => 'Active Models'],
-    ['number' => '50K+', 'label' => 'Happy Clients'],
-    ['number' => '24/7', 'label' => 'Support'],
-];
-
-// Simulated phone number from previous step
-$phoneNumber = '+61 412 345 678';
-@endphp
-
 @extends('layouts.frontend')
 
 @section('content')
-<section class="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 min-h-screen pb-16 overflow-x-hidden">
-    <div class="max-w-7xl mx-auto pt-4 md:pt-8 px-3 sm:px-4 md:px-8">
-        <!-- OTP Verification Container -->
-        <div class="bg-gray-900/90 rounded-2xl md:rounded-3xl shadow-2xl border border-gray-800 overflow-hidden">
-            <div class="flex flex-col lg:flex-row">
-                <!-- Left Side - OTP Verification Form -->
-                <div class="lg:w-3/5 p-6 md:p-8 lg:p-10">
-                    <!-- Logo -->
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center">
-                            <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <span class="text-2xl font-bold text-white">RealBabes</span>
-                            <span class="text-xs text-gray-400 block">Australia's Premier Directory</span>
-                        </div>
+<!-- ================= TOP SIGNUP BANNER ================= -->
+<div style="width:100%; background:#b784a7;">
+    <div style="display:flex; width:100%; height:350px; overflow:hidden;">
+        <!-- LEFT IMAGE -->
+        <div style="
+            flex:1;
+            background:url('https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1200&auto=format&fit=crop') center center/cover no-repeat;
+            position:relative;">
+            <div style="position:absolute; inset:0; background:rgba(92,53,89,0.6);"></div>
+        </div>
+        <!-- CENTER LOGO TEXT -->
+        <div style="flex:1; background:#c893b8; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
+            <h2 style="margin:0; font-size:40px; font-weight:700; color:#000;">
+                hotescorts.com.au
+            </h2>
+            <span style="font-size:12px; letter-spacing:2px; color:#333;">
+                REAL WOMEN NEAR YOU
+            </span>
+        </div>
+        <!-- RIGHT IMAGE -->
+        <div style="
+            flex:1;
+            background:url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop') center center/cover no-repeat;
+            position:relative;">
+            <div style="position:absolute; inset:0; background:rgba(92,53,89,0.6);"></div>
+        </div>
+    </div>
+</div>
+<!-- ================= END BANNER ================= -->
+
+<!-- Main Content -->
+<div style="background: #ffffff; min-height: 100vh;">
+    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px 20px 20px;">
+
+        <!-- OTP Verification Header -->
+        <h1 style="font-size: 2.5rem; font-weight: 700; color: #222; margin-bottom: 5px; border-left: 5px solid #e04ecb; padding-left: 15px;">
+            Verify Your <span style="color: #e04ecb;">Number</span>
+        </h1>
+
+        <!-- Description -->
+        <div style="margin: 25px 0 20px 0;">
+            <p style="font-size: 1.1rem; color: #555; margin-bottom: 10px;">
+                <i class="fas fa-shield-alt" style="color: #e04ecb; margin-right: 8px;"></i>
+                We've sent a verification code to your phone. Please enter it below.
+            </p>
+        </div>
+
+        <hr style="border: none; border-top: 2px solid #f0f0f0; margin: 25px 0;">
+
+        <!-- OTP Verification Form -->
+        <div style="background: #ffffff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 35px 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+
+            <!-- Phone Number Display -->
+            <div style="background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 45px; height: 45px; background: #e04ecb; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-phone-alt" style="color: white; font-size: 18px;"></i>
                     </div>
-
-                    <!-- Back Button -->
-                    <div class="mb-6">
-                        {{-- <a href="{{ route('signup') }}" class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition"> --}}
-
-                            <a href="#" class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                            </svg>
-                            <span>Back to Signup</span>
-                        </a>
+                    <div>
+                        <div style="font-size: 0.85rem; color: #888; margin-bottom: 3px;">Verifying number</div>
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #333;">+61 412 345 678</div>
                     </div>
-
-                    <!-- Header -->
-                    <div class="mb-8">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
-                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2">
-                                    Verify Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Number</span>
-                                </h1>
-                                <p class="text-gray-400">We've sent a verification code to your phone</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Phone Number Display -->
-                    <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-4 mb-8 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-phone-alt text-green-400"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-400">Verifying number</p>
-                                <p class="text-white font-semibold">{{ $phoneNumber }}</p>
-                            </div>
-                        </div>
-                         <a href="#" class="text-pink-400 hover:text-pink-300 text-sm font-medium">
-                        {{-- <a href="{{ route('signup') }}" class="text-pink-400 hover:text-pink-300 text-sm font-medium"> --}}
-                            Change
-                        </a>
-                    </div>
-
-                    <!-- OTP Form -->
-                    <form class="space-y-6" x-data="otpVerification()" x-init="init()" @submit.prevent="verifyOTP">
-                        <!-- OTP Input Fields -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-3">
-                                <i class="fas fa-lock mr-2 text-pink-400"></i>Enter 6-digit verification code
-                            </label>
-
-                            <!-- OTP Digits -->
-                            <div class="flex gap-2 justify-between mb-4">
-                                <template x-for="(digit, index) in 6" :key="index">
-                                    <input type="text"
-                                           x-model="otpDigits[index]"
-                                           x-ref="'otpInput' + index"
-                                           @input="handleInput(index, $event)"
-                                           @keydown="handleKeydown(index, $event)"
-                                           @paste="handlePaste"
-                                           @focus="focusedIndex = index"
-                                           maxlength="1"
-                                           class="w-12 h-14 text-center text-xl font-bold bg-gray-800 border-2 border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                                           :class="{ 'border-pink-500 ring-2 ring-pink-500': focusedIndex === index }">
-                                </template>
-                            </div>
-
-                            <!-- Timer and Resend -->
-                            <div class="flex items-center justify-between mt-4">
-                                <div class="flex items-center gap-2 text-sm">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    <span class="text-gray-400" x-text="timerText"></span>
-                                </div>
-                                <button type="button"
-                                        @click="resendOTP"
-                                        :disabled="!canResend"
-                                        class="text-pink-400 hover:text-pink-300 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
-                                        x-text="resendText">
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Verification Status -->
-                        <div x-show="verificationStatus"
-                             x-transition
-                             class="p-4 rounded-xl"
-                             :class="verificationStatus?.type === 'success' ? 'bg-green-500/20 border border-green-500/30' : 'bg-red-500/20 border border-red-500/30'">
-                            <div class="flex items-center gap-3">
-                                <i :class="verificationStatus?.type === 'success' ? 'fas fa-check-circle text-green-400' : 'fas fa-exclamation-circle text-red-400'"></i>
-                                <span class="text-sm" :class="verificationStatus?.type === 'success' ? 'text-green-400' : 'text-red-400'" x-text="verificationStatus?.message"></span>
-                            </div>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit"
-                                :disabled="!isOtpComplete || isVerifying"
-                                class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <i class="fas fa-check-circle" x-show="!isVerifying"></i>
-                            <svg x-show="isVerifying" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span x-text="isVerifying ? 'Verifying...' : 'VERIFY & CONTINUE'"></span>
-                        </button>
-
-                        <!-- Help Text -->
-                        <p class="text-center text-gray-500 text-sm">
-                            <i class="fas fa-question-circle mr-1"></i>
-                            Didn't receive the code? Check your spam or
-                            <button type="button" @click="showHelp" class="text-pink-400 hover:text-pink-300">
-                                contact support
-                            </button>
-                        </p>
-                    </form>
-
-                    <!-- Footer Note -->
-                    <p class="text-center text-gray-500 text-sm mt-8">
-                        <i class="fas fa-heart text-pink-500"></i>
-                        Your privacy and security are our top priorities
-                        <i class="fas fa-heart text-pink-500"></i>
-                    </p>
                 </div>
+                <a href="#" style="color: #e04ecb; font-weight: 500; text-decoration: none; font-size: 0.95rem;">
+                    Change <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 5px;"></i>
+                </a>
+            </div>
 
-                <!-- Right Side - Slider (Same as signup page) -->
-                <div class="lg:w-2/5 bg-gradient-to-br from-purple-900/50 to-pink-900/50 p-6 md:p-8 lg:p-10 flex flex-col">
-                    <!-- Slider Header -->
-                    <div class="mb-8">
-                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
-                            Featured <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">Models</span>
-                        </h2>
-                        <p class="text-gray-300">Join 500+ verified babes today</p>
-                    </div>
+            <div x-data="otpVerification()" x-init="init()">
+                <form @submit.prevent="verifyOTP">
+                    <!-- OTP Input Fields -->
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; font-weight: 600; color: #333; margin-bottom: 15px;">
+                            <i class="fas fa-lock" style="color: #e04ecb; margin-right: 8px;"></i>
+                            Enter 6-digit verification code
+                        </label>
 
-                    <!-- Slider Container -->
-                    <div class="relative flex-1" x-data="slider()" x-init="init()">
-                        <!-- Slider -->
-                        <div class="relative h-[400px] rounded-2xl overflow-hidden group">
-                            <template x-for="(slide, index) in slides" :key="index">
-                                <div x-show="currentSlide === index"
-                                     x-transition:enter="transition ease-out duration-500"
-                                     x-transition:enter-start="opacity-0 scale-105"
-                                     x-transition:enter-end="opacity-100 scale-100"
-                                     class="absolute inset-0">
-                                    <!-- Background Image -->
-                                    <div class="absolute inset-0 bg-cover bg-center"
-                                         :style="{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.8), transparent), url(${slide.image})` }">
-                                    </div>
-
-                                    <!-- Content -->
-                                    <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <span x-show="slide.online"
-                                                  class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30 flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                                LIVE NOW
-                                            </span>
-                                        </div>
-                                        <h3 class="text-2xl font-bold text-white mb-1" x-text="slide.name"></h3>
-                                        <p class="text-gray-300 text-sm mb-3 flex items-center gap-1">
-                                            <svg class="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                            </svg>
-                                            <span x-text="slide.location"></span>
-                                        </p>
-                                        <div class="flex flex-wrap gap-2 mb-3">
-                                            <template x-for="tag in slide.tags" :key="tag">
-                                                <span class="bg-purple-600/80 text-white text-xs px-3 py-1 rounded-full border border-purple-400/30">
-                                                    <span x-text="tag"></span>
-                                                </span>
-                                            </template>
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-pink-400 font-bold text-xl" x-text="slide.price"></span>
-                                            <button class="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm px-4 py-2 rounded-lg hover:shadow-lg transition transform hover:scale-105">
-                                                View Profile
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <!-- Navigation Arrows -->
-                            <button @click="prevSlide"
-                                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 backdrop-blur-sm transition opacity-0 group-hover:opacity-100 z-10">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                                </svg>
-                            </button>
-                            <button @click="nextSlide"
-                                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 backdrop-blur-sm transition opacity-0 group-hover:opacity-100 z-10">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Navigation Dots -->
-                        <div class="flex justify-center gap-2 mt-4">
-                            <template x-for="(slide, index) in slides" :key="index">
-                                <button @click="currentSlide = index"
-                                        class="h-2 rounded-full transition-all duration-300"
-                                        :class="currentSlide === index ? 'w-6 bg-pink-500' : 'w-2 bg-white/30 hover:bg-white/50'">
-                                </button>
+                        <!-- OTP Digits - FIXED VERSION -->
+                        <div style="display: flex; gap: 10px; justify-content: space-between; margin-bottom: 20px;">
+                            <template x-for="(digit, index) in 6" :key="index">
+                                <input type="text"
+                                       x-model="otpDigits[index]"
+                                       :ref="'otpInput' + index"
+                                       @input="handleInput(index, $event)"
+                                       @keydown="handleKeydown(index, $event)"
+                                       @paste="handlePaste"
+                                       @focus="focusedIndex = index"
+                                       maxlength="1"
+                                       style="width: 60px; height: 70px; text-align: center; font-size: 24px; font-weight: 700; background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; color: #333; outline: none; transition: all 0.3s;"
+                                       :style="focusedIndex === index ? 'border-color: #e04ecb; box-shadow: 0 0 0 3px rgba(224,78,203,0.1);' : ''">
                             </template>
                         </div>
+
+                        <!-- Timer and Resend -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 15px;">
+                            <div style="display: flex; align-items: center; gap: 8px; color: #666; font-size: 0.95rem;">
+                                <i class="far fa-clock" style="color: #e04ecb;"></i>
+                                <span x-text="timerText"></span>
+                            </div>
+                            <button type="button"
+                                    @click="resendOTP"
+                                    :disabled="!canResend"
+                                    style="background: none; border: none; color: #e04ecb; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.3s;"
+                                    :style="!canResend ? 'opacity: 0.5; cursor: not-allowed;' : ''"
+                                    x-text="resendText">
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Stats -->
-                    <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
-                        @foreach($stats as $stat)
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-white">{{ $stat['number'] }}</div>
-                            <div class="text-xs text-gray-400">{{ $stat['label'] }}</div>
-                        </div>
-                        @endforeach
+                    <!-- Verification Status Message -->
+                    <div x-show="verificationStatus"
+                         x-transition
+                         style="padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;"
+                         :style="verificationStatus?.type === 'success' ? 'background: #e6f7e6; border: 1px solid #a5d6a5;' : 'background: #fee; border: 1px solid #fcc;'">
+                        <i :class="verificationStatus?.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"
+                           :style="verificationStatus?.type === 'success' ? 'color: #4caf50;' : 'color: #f44336;'"></i>
+                        <span :style="verificationStatus?.type === 'success' ? 'color: #2e7d32;' : 'color: #c62828;'"
+                              x-text="verificationStatus?.message"></span>
                     </div>
+
+                    <!-- Verification Info Box - Matching signup page style -->
+                    <div style="background: #e8f0fe; border-left: 4px solid #e04ecb; border-radius: 6px; padding: 15px; font-size: 0.95rem; color: #333; margin: 25px 0;">
+                        <div style="display: flex; gap: 10px;">
+                            <i class="fas fa-info-circle" style="color: #e04ecb; font-size: 20px;"></i>
+                            <div>
+                                <span style="font-weight: 600;">Why we verify your number?</span> We verify all our babes to ensure authenticity. This helps us maintain a safe community of real babes only. <span style="font-weight: 600;">We will NEVER publish or share this phone number without your permission.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button - FIXED VISIBILITY -->
+                    <button type="submit"
+                            :disabled="!isOtpComplete || isVerifying"
+                            style="width: 100%; background: linear-gradient(135deg, #e04ecb 0%, #c13ab0 100%); color: white; font-weight: 700; font-size: 1.3rem; padding: 16px 0; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(224,78,203,0.3); display: flex; align-items: center; justify-content: center; gap: 10px;"
+                            :style="!isOtpComplete || isVerifying ? 'opacity: 0.6; cursor: not-allowed;' : ''"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(224,78,203,0.4)';"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(224,78,203,0.3)';">
+                        <i class="fas fa-check-circle" x-show="!isVerifying"></i>
+                        <i class="fas fa-spinner fa-spin" x-show="isVerifying" style="display: none;"></i>
+                        <span x-text="isVerifying ? 'Verifying...' : 'VERIFY & CONTINUE'"></span>
+                    </button>
+                </form>
+
+                <!-- Help Text -->
+                <p style="text-align: center; margin-top: 25px; color: #888; font-size: 0.9rem;">
+                    <i class="fas fa-question-circle" style="color: #e04ecb; margin-right: 5px;"></i>
+                    Didn't receive the code?
+                    <button type="button" @click="showHelp" style="background: none; border: none; color: #e04ecb; font-weight: 600; cursor: pointer; text-decoration: underline;">
+                        Contact support
+                    </button>
+                </p>
+
+                <!-- Back to Signup Link -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="#" style="color: #666; text-decoration: none; font-size: 0.95rem; transition: all 0.3s;">
+                        <i class="fas fa-arrow-left" style="margin-right: 5px;"></i>
+                        Back to Signup
+                    </a>
                 </div>
             </div>
         </div>
+
+        <!-- Footer Note -->
+        <p style="text-align: center; color: #999; font-size: 0.9rem; margin-top: 30px;">
+            <i class="fas fa-heart" style="color: #e04ecb;"></i>
+            Your privacy and security are our top priorities
+            <i class="fas fa-heart" style="color: #e04ecb;"></i>
+        </p>
     </div>
-</section>
+</div>
 
 <!-- Alpine.js Component for OTP Verification -->
+<script src="//unpkg.com/alpinejs" defer></script>
 <script>
     function otpVerification() {
         return {
@@ -324,8 +190,9 @@ $phoneNumber = '+61 412 345 678';
                 this.startTimer();
                 // Auto-focus first input
                 this.$nextTick(() => {
-                    if (this.$refs.otpInput0) {
-                        this.$refs.otpInput0.focus();
+                    const firstInput = this.$refs['otpInput0'];
+                    if (firstInput && firstInput[0]) {
+                        firstInput[0].focus();
                     }
                 });
             },
@@ -367,7 +234,9 @@ $phoneNumber = '+61 412 345 678';
                     this.focusedIndex = index + 1;
                     this.$nextTick(() => {
                         const nextInput = this.$refs['otpInput' + (index + 1)];
-                        if (nextInput) nextInput.focus();
+                        if (nextInput && nextInput[0]) {
+                            nextInput[0].focus();
+                        }
                     });
                 }
             },
@@ -378,7 +247,9 @@ $phoneNumber = '+61 412 345 678';
                     this.focusedIndex = index - 1;
                     this.$nextTick(() => {
                         const prevInput = this.$refs['otpInput' + (index - 1)];
-                        if (prevInput) prevInput.focus();
+                        if (prevInput && prevInput[0]) {
+                            prevInput[0].focus();
+                        }
                     });
                 }
 
@@ -387,7 +258,9 @@ $phoneNumber = '+61 412 345 678';
                     this.focusedIndex = index - 1;
                     this.$nextTick(() => {
                         const prevInput = this.$refs['otpInput' + (index - 1)];
-                        if (prevInput) prevInput.focus();
+                        if (prevInput && prevInput[0]) {
+                            prevInput[0].focus();
+                        }
                     });
                 }
 
@@ -396,7 +269,9 @@ $phoneNumber = '+61 412 345 678';
                     this.focusedIndex = index + 1;
                     this.$nextTick(() => {
                         const nextInput = this.$refs['otpInput' + (index + 1)];
-                        if (nextInput) nextInput.focus();
+                        if (nextInput && nextInput[0]) {
+                            nextInput[0].focus();
+                        }
                     });
                 }
             },
@@ -418,13 +293,17 @@ $phoneNumber = '+61 412 345 678';
                     this.focusedIndex = nextEmptyIndex;
                     this.$nextTick(() => {
                         const nextInput = this.$refs['otpInput' + nextEmptyIndex];
-                        if (nextInput) nextInput.focus();
+                        if (nextInput && nextInput[0]) {
+                            nextInput[0].focus();
+                        }
                     });
                 } else {
                     this.focusedIndex = 5;
                     this.$nextTick(() => {
                         const lastInput = this.$refs.otpInput5;
-                        if (lastInput) lastInput.focus();
+                        if (lastInput && lastInput[0]) {
+                            lastInput[0].focus();
+                        }
                     });
                 }
             },
@@ -462,13 +341,6 @@ $phoneNumber = '+61 412 345 678';
                             message: '✗ Invalid verification code. Please try again.'
                         };
                         this.isVerifying = false;
-
-                        // Clear OTP fields on error (optional)
-                        // this.otpDigits = ['', '', '', '', '', ''];
-                        // this.focusedIndex = 0;
-                        // this.$nextTick(() => {
-                        //     if (this.$refs.otpInput0) this.$refs.otpInput0.focus();
-                        // });
                     }
                 }, 1500);
             },
@@ -494,41 +366,7 @@ $phoneNumber = '+61 412 345 678';
             },
 
             showHelp() {
-                alert('Please contact support at support@realbabes.com.au or call 1800 123 456');
-            }
-        }
-    }
-
-    function slider() {
-        return {
-            currentSlide: 0,
-            slides: @json($sliderModels),
-            interval: null,
-
-            init() {
-                this.startAutoplay();
-            },
-
-            startAutoplay() {
-                this.interval = setInterval(() => {
-                    this.nextSlide();
-                }, 5000);
-            },
-
-            stopAutoplay() {
-                clearInterval(this.interval);
-            },
-
-            nextSlide() {
-                this.currentSlide = (this.currentSlide + 1) % this.slides.length;
-            },
-
-            prevSlide() {
-                this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
-            },
-
-            goToSlide(index) {
-                this.currentSlide = index;
+                alert('Please contact support at support@hotescorts.com.au or call 1800 123 456');
             }
         }
     }
@@ -538,27 +376,54 @@ $phoneNumber = '+61 412 345 678';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-/* Custom styles for the OTP page */
-.group:hover .group-hover\:opacity-100 {
-    opacity: 1;
+/* Global Styles */
+body, html {
+    overflow-x: hidden !important;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
-/* Smooth transitions */
-* {
-    -webkit-tap-highlight-color: transparent;
+/* Responsive Design */
+@media (max-width: 900px) {
+    div[style*="max-width: 800px"] {
+        padding: 20px 15px !important;
+    }
+
+    div[style*="display: flex"][style*="gap: 10px"][style*="justify-content: space-between"] {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+    }
+
+    input[style*="width: 60px"] {
+        width: 45px !important;
+        height: 55px !important;
+        font-size: 20px !important;
+    }
+
+    h1 {
+        font-size: 2rem !important;
+    }
+
+    [style*="border-radius: 12px"] {
+        padding: 25px 20px !important;
+    }
 }
 
-/* Custom scrollbar */
-.scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #a78bfa;
-    border-radius: 20px;
+@media (max-width: 768px) {
+    div[style*="height:350px"] {
+        height: 250px !important;
+    }
+
+    div[style*="font-size:40px"] {
+        font-size: 28px !important;
+    }
+
+    input[style*="width: 60px"] {
+        width: 40px !important;
+        height: 50px !important;
+        font-size: 18px !important;
+    }
 }
 
 /* OTP input spin button removal */
@@ -567,18 +432,37 @@ input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
 input[type=number] {
     -moz-appearance: textfield;
 }
 
-/* Focus ring animation */
-@keyframes focusPulse {
-    0%, 100% { box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.5); }
-    50% { box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.3); }
+/* Hover Effects */
+input:hover {
+    border-color: #e04ecb !important;
 }
 
-.focus-ring-pulse:focus {
-    animation: focusPulse 1.5s infinite;
+/* Smooth Transitions */
+input, button {
+    transition: all 0.3s ease;
+}
+
+/* Focus States */
+input:focus {
+    outline: none;
+    border-color: #e04ecb;
+    box-shadow: 0 0 0 3px rgba(224,78,203,0.1);
+}
+
+/* Button hover effect */
+button[type="submit"]:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(224,78,203,0.4);
+}
+
+/* Link hover effect */
+a:hover {
+    color: #e04ecb !important;
 }
 </style>
 @endsection
