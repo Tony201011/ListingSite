@@ -51,6 +51,12 @@ Route::get('/my-rate', function () {
 });
 
 
+
+Route::get('/my-availability', function () {
+    return view('my-availability');
+});
+
+
 Route::get('/otp-verification', function () {
     return view('otp-verification');
 });
