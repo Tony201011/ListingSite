@@ -72,6 +72,11 @@ Route::get('/click-here-to-verify', function () {
 });
 
 
+Route::get('/view-profile-setting', function () {
+    return view('view-profile-setting');
+});
+
+
 
 
 
