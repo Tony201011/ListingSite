@@ -4,10 +4,10 @@
 <div style="background: #fff; min-height: 100vh;">
     <div style="max-width: 1100px; margin: 0 auto; padding: 40px 20px;">
 
-        <!-- Dashboard button & warning banner (as provided) -->
+        <!-- Dashboard button & verification banner (UPDATED TEXT) -->
         <button style="background: #e0e0e0; color: #b33e9e; border: none; border-radius: 6px; padding: 6px 18px; font-size: 1rem; font-weight: 500; margin-bottom: 18px; cursor: pointer;">&lt; To dashboard</button>
         <div style="background: #f76c6c; color: #fff; font-size: 1.08rem; font-weight: 500; border-radius: 6px; padding: 10px 18px; margin-bottom: 18px;">
-            Your profile is currently not approved. You need to send verification photos. <a href="#" style="color: #fff; text-decoration: underline; font-weight: 600;">More info</a>
+            Your profile is not yet verified. Verified profiles get a Verified badge. <a href="#" style="color: #fff; text-decoration: underline; font-weight: 600;">Verify now</a>
         </div>
 
         <!-- Action buttons grid (responsive) -->
@@ -101,8 +101,8 @@
                     </ul>
                 </section>
 
-                <!-- pending verification -->
-                <div class="pending-verification">Pending verification by Realbabes Admin</div>
+                <!-- pending verification (UPDATED TEXT) -->
+                <div class="pending-verification">Verification pending</div>
             </div>
 
             <!-- RIGHT COLUMN: Contact block + Photos -->
