@@ -19,7 +19,10 @@
 
         <!-- Upload button / Click to add photos - now left-aligned -->
         <div style="margin-top: 10px;">
-            <button id="openUploadModalBtn" style="padding: 16px 40px; background: #e04ecb; border: none; border-radius: 8px; font-size: 1.4rem; font-weight: 400; color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(224,78,203,0.18); transition: all 0.3s;">Click to add photos</button>
+            <div class="photo-btn-row">
+                <button id="openUploadModalBtn" class="photo-main-btn">Click to add photos</button>
+                <a href="#" class="photo-secondary-btn">Continue setting up your profile</a>
+            </div>
         </div>
 
         <!-- MODAL - Upload Interface -->
@@ -62,7 +65,7 @@
                         <div style="margin-top: 20px;">
                             <button id="capture-btn" style="padding: 10px 32px; background: #2196f3; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; color: white; cursor: pointer;">Capture</button>
                         </div>
-                        <div id="captured-preview" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
+                    Continue setting up your profile
                     </div>
                 </div>
             </div>
@@ -225,6 +228,64 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+/* Add photo page button row */
+.photo-btn-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+.photo-main-btn {
+    padding: 10px 24px;
+    background: #e04ecb;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(224,78,203,0.18);
+    transition: all 0.3s;
+    outline: none;
+    min-width: 180px;
+}
+.photo-secondary-btn {
+    padding: 10px 24px;
+    background: #fff;
+    border: 2px solid #e04ecb;
+    border-radius: 8px;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: #b3aeb5;
+    cursor: pointer;
+    min-width: 180px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s;
+    outline: none;
+    box-sizing: border-box;
+}
+.photo-main-btn:hover, .photo-secondary-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(224,78,203,0.22);
+}
+
+@media (max-width: 600px) {
+    .photo-btn-row {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    .photo-main-btn, .photo-secondary-btn {
+        width: 100%;
+        min-width: 0;
+        font-size: 1rem;
+        padding: 10px 8px;
+    }
+}
 /* Global Styles */
 body, html {
     overflow-x: hidden !important;
