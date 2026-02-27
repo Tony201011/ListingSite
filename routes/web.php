@@ -61,6 +61,12 @@ Route::get('/set-your-availability', function () {
     return view('set-your-availability');
 });
 
+Route::get('/add-photo', function () {
+    return view('add-photo');
+});
+
+
+
 
 Route::get('/otp-verification', function () {
     return view('otp-verification');
