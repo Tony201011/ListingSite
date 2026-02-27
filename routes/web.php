@@ -89,6 +89,11 @@ Route::get('/otp-verification', function () {
 });
 
 
+Route::get('/purchase-credit', function () {
+    return view('purchase-credit');
+});
+
+
 Route::get('/after-image-upload', function () {
     return view('after-image-upload');
 });
