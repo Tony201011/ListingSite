@@ -67,6 +67,17 @@ Route::get('/add-photo', function () {
 
 
 
+Route::get('/click-here-to-verify', function () {
+    return view('click-here-to-verify');
+});
+
+
+
+
+
+
+
+
 
 Route::get('/otp-verification', function () {
     return view('otp-verification');
