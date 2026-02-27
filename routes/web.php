@@ -57,6 +57,11 @@ Route::get('/my-availability', function () {
 });
 
 
+Route::get('/set-your-availability', function () {
+    return view('set-your-availability');
+});
+
+
 Route::get('/otp-verification', function () {
     return view('otp-verification');
 });
