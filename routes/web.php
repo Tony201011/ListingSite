@@ -73,6 +73,11 @@ Route::get('/otp-verification', function () {
 });
 
 
+Route::get('/after-image-upload', function () {
+    return view('after-image-upload');
+});
+
+
 Route::get('/terms-and-conditions', function () {
     $terms = TermCondition::query()
         ->where('is_active', true)
