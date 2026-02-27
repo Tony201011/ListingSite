@@ -1,131 +1,125 @@
 @extends('layouts.frontend')
 
 @section('content')
-
+<!-- Navigation Menu - Exactly as in image -->
 
 <!-- Main Content - My Rates Page -->
 <div style="background: #ffffff; min-height: 100vh;">
     <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
 
-        <!-- Go Back Link -->
-        <a href="#" style="display: inline-block; margin-bottom: 20px; color: #e04ecb; text-decoration: none; font-weight: 500;">
-            &larr; Go back
-        </a>
+        <!-- Go Back Button -->
+        <button onclick="window.history.back()" style="background: #cfa1b8; color: white; border: none; border-radius: 8px; padding: 6px 18px; font-size: 1rem; font-weight: 500; margin-bottom: 30px; cursor: pointer;">&lt; Go back</button>
 
         <!-- Page Title -->
-        <h1 style="font-size: 2.2rem; font-weight: 700; color: #222; margin-bottom: 20px;">
-            My rates
-        </h1>
+        <h1 style="font-size: 2.5rem; font-weight: 500; color: #333; margin-bottom: 10px;">My rates</h1>
 
         <!-- Description Paragraph -->
-        <p style="font-size: 1rem; color: #555; margin-bottom: 30px; line-height: 1.6;">
-            You can group your rates by the type of services you offer, for example:<br>
-            massages, gfe, pse, kink/bdsm, netflix and chill, online services, lunch/dinner dates, extended & overnight dates, fmty, etc.
+        <p style="font-size: 1.15rem; color: #222; margin-bottom: 18px; line-height: 1.6;">
+            You can group your rates by the type of services you offer, for example: <br>
+            <span style="color: #222; font-size: 1.08rem;">massages, <b>gfe</b>, <b>pse</b>, kink/bdsm, netflix and chill, online services, lunch / dinner dates, extended & overnight dates, fmty, etc.</span>
         </p>
+        <hr style="border: none; border-top: 2px dotted #a16ba1; margin: 30px 0 25px 0;">
 
         <!-- Your rates (not in a group) Section -->
-        <div style="padding: 25px; margin-bottom: 30px">
-            <h2 style="font-size: 1.5rem; font-weight: 600; color: #333; margin-bottom: 10px;">
-                Your rates (not in a group)
-            </h2>
-            <p style="font-size: 0.95rem; color: #666; margin-bottom: 20px; line-height: 1.5;">
-                If you don't have many rates or there is no need to put them in separate groups then you can list them here.
+        <div style="padding: 0 0 25px 0; margin-bottom: 30px">
+            <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 0;">
+                <h2 style="font-size: 1.35rem; font-weight: 500; color: #222; margin-bottom: 0; margin-right: 8px;">Your rates</h2>
+                <span style="font-size: 1.05rem; color: #666; font-weight: 400;">(not in a group)</span>
+            </div>
+            <p style="font-size: 1rem; color: #7a7a7a; margin-bottom: 18px; line-height: 1.5;">
+                If you don't have many rates or there is no need to put them in seprate groups then you can list them here.
             </p>
 
-            <!-- Rates Table (with example rows) -->
+            <!-- Rates Table (initially empty) -->
             <div style="overflow-x: auto; margin-bottom: 25px;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #f0f0f0;">
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;"></th>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Incall</th>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Outcall</th>
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                    <thead id="ratesTableHead" style="display: none;">
+                        <tr style="background: #f0f0f0; border-bottom: 2px solid #ddd;">
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd; color: #222; font-size: 1.08rem; font-weight: 700;">Description</th>
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd; color: #222; font-size: 1.08rem; font-weight: 700;">Incall</th>
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd; color: #222; font-size: 1.08rem; font-weight: 700;">Outcall</th>
                         </tr>
                     </thead>
                     <tbody id="ratesList">
+                        <!-- Rows will be added here dynamically -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- "Add new rate" text (exactly as in image) -->
-            <p style="font-size: 0.95rem; color: #666; margin-bottom: 15px;">
-                Add new rate if you don't have an incall or outcall rate then you can leave that field blank.
-            </p>
+            <!-- Add Rates Button (visible by default) -->
+            <button id="showAddRateBtn" onclick="toggleAddRateForm()" style="padding: 8px 28px; background: #e04ecb; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; color: white; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 10px rgba(224,78,203,0.2); display: inline-block; margin-bottom: 10px;">add rates</button>
 
-            <!-- Add Rate Form (always visible) -->
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #f0f0f0;">
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Description</th>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Incall</th>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Outcall</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Row 1: What do i type in here? with inputs -->
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">
-                                <input type="text" id="newDesc" placeholder="What do i type in here?" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            </td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">
-                                <input type="text" id="newIncall" placeholder="$" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            </td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">
-                                <input type="text" id="newOutcall" placeholder="$" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            </td>
-                        </tr>
-                        <!-- Row 2: Extra info optional (only description input) -->
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">
-                                <input type="text" id="extraInfo" placeholder="Extra info optional" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            </td>
-                            <td style="padding: 8px; border: 1px solid #ddd;"></td>
-                            <td style="padding: 8px; border: 1px solid #ddd;"></td>
-                        </tr>
-                        <!-- Row 3: Another "What do i type in here?" (optional) -->
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">
-                                <input type="text" id="extraDesc" placeholder="What do i type in here?" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            </td>
-                            <td style="padding: 8px; border: 1px solid #ddd;"></td>
-                            <td style="padding: 8px; border: 1px solid #ddd;"></td>
-                        </tr>
-                        <!-- Row 4: Buttons +add rate and cancel -->
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;"></td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">
-                                <button onclick="addNewRate()" style="padding: 8px 20px; background: #4CAF50; border: none; border-radius: 50px; font-size: 0.95rem; font-weight: 500; color: white; cursor: pointer; width: 100%;">
-                                    + add rate
-                                </button>
-                            </td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">
-                                <button onclick="clearAddForm()" style="padding: 8px 20px; background: #f0f0f0; border: none; border-radius: 50px; font-size: 0.95rem; font-weight: 500; color: #666; cursor: pointer; width: 100%;">
-                                    cancel
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Hidden Add Rate Form (initially hidden) -->
+            <div id="addRateForm" style="display: none; margin-top: 30px;">
+                <div style="background: #fff; border: 1px solid #e4c6d6; border-radius: 10px; box-shadow: 0 2px 12px 0 rgba(224,78,203,0.07); padding: 24px 28px 20px 28px; max-width: 950px; margin: 0 auto;">
+                    <div style="border-bottom: 1px solid #eee; padding-bottom: 16px; margin-bottom: 22px;">
+                        <span style="font-size: 1.25rem; font-weight: 600; color: #222;">Add new rate</span>
+                        <span style="font-size: 1rem; color: #444; font-weight: 400; margin-left: 8px;">If you don't have an incall or outcall rate then you can leave that field blank</span>
+                    </div>
+                    <form onsubmit="event.preventDefault(); addNewRate();">
+                        <div style="display: flex; gap: 18px; margin-bottom: 18px;">
+                            <div style="flex: 2;">
+                                <label style="font-weight: 700; color: #222; margin-bottom: 4px; display: block;">Description</label>
+                                <input type="text" id="newDesc" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; color: #222; font-weight: 600;">
+                                <div style="color: #3490dc; font-size: 0.97rem; margin-top: 2px;">What do i type in here?</div>
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-weight: 700; color: #222; margin-bottom: 4px; display: block;">Incall</label>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="background: #f3f3f3; border: 1px solid #ccc; border-radius: 4px 0 0 4px; padding: 8px 10px; color: #888; font-size: 1rem; border-right: none;">$</span>
+                                    <input type="text" id="newIncall" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-left: none; border-radius: 0 5px 5px 0; font-size: 1rem; color: #222; font-weight: 600;">
+                                </div>
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-weight: 700; color: #222; margin-bottom: 4px; display: block;">Outcall</label>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="background: #f3f3f3; border: 1px solid #ccc; border-radius: 4px 0 0 4px; padding: 8px 10px; color: #888; font-size: 1rem; border-right: none;">$</span>
+                                    <input type="text" id="newOutcall" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-left: none; border-radius: 0 5px 5px 0; font-size: 1rem; color: #222; font-weight: 600;">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 18px;">
+                            <label style="font-weight: 700; color: #222; margin-bottom: 4px; display: block;">Extra info <span style="font-weight: 400; color: #888; font-size: 1rem;">optional</span></label>
+                            <textarea id="extraInfo" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; color: #222; font-weight: 600;"></textarea>
+                            <div style="color: #3490dc; font-size: 0.97rem; margin-top: 2px;">What do i type in here?</div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" style="padding: 8px 28px; background: #e04ecb; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; color: white; cursor: pointer; margin-right: 5px;">+ add rate</button>
+                            <button type="button" onclick="toggleAddRateForm()" style="padding: 8px 22px; background: #eee; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; color: #b3aeb5; cursor: pointer;">cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
+        <hr style="border: none; border-top: 1px solid #bbb; margin: 35px 0 25px 0;">
         <!-- Create a new group Section -->
-        <div style="padding: 25px;">
-            <h2 style="font-size: 1.5rem; font-weight: 600; color: #333; margin-bottom: 10px;">
-                Create a new group
-            </h2>
-            <p style="font-size: 0.95rem; color: #666; margin-bottom: 20px; line-height: 1.5;">
-                If you like to create groups, use the button below to create a group for a specific service you offer.
-            </p>
-            <button style="padding: 12px 30px; background: #e04ecb; border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; color: white; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 10px rgba(224,78,203,0.2);">
-                create a new rates group
-            </button>
+        <div style="padding: 0;">
+            <h2 style="font-size: 1.2rem; font-weight: 500; color: #222; margin-bottom: 8px;">Create a new group</h2>
+            <p style="font-size: 1rem; color: #7a7a7a; margin-bottom: 15px; line-height: 1.5;">If you like to create groups, use the button below to create a group for a specific service you offer.</p>
+            <button style="padding: 8px 28px; background: #e04ecb; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; color: white; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 10px rgba(224,78,203,0.2);">create a new rates group</button>
         </div>
     </div>
 </div>
 
+
 <script>
+
+    function toggleAddRateForm() {
+        var form = document.getElementById('addRateForm');
+        var btn = document.getElementById('showAddRateBtn');
+        var tableHead = document.getElementById('ratesTableHead');
+        if (form.style.display === 'none') {
+            form.style.display = 'block';
+            btn.style.display = 'none';
+            tableHead.style.display = '';
+        } else {
+            form.style.display = 'none';
+            btn.style.display = 'inline-block';
+            tableHead.style.display = 'none';
+        }
+    }
+
     function addNewRate() {
         // Get values from the first row
         var desc = document.getElementById('newDesc').value.trim();
@@ -141,9 +135,9 @@
         var tableBody = document.getElementById('ratesList');
         var newRow = document.createElement('tr');
         newRow.innerHTML = `
-            <td style="padding: 10px; border: 1px solid #ddd;">${desc}</td>
-            <td style="padding: 10px; border: 1px solid #ddd;">${incall}</td>
-            <td style="padding: 10px; border: 1px solid #ddd;">${outcall}</td>
+            <td style="padding: 10px; border: 1px solid #ddd; color: #222; font-size: 1.05rem; font-weight: 600;">${desc}</td>
+            <td style="padding: 10px; border: 1px solid #ddd; color: #222; font-size: 1.05rem; font-weight: 600;">${incall}</td>
+            <td style="padding: 10px; border: 1px solid #ddd; color: #222; font-size: 1.05rem; font-weight: 600;">${outcall}</td>
         `;
         tableBody.appendChild(newRow);
 
@@ -151,15 +145,6 @@
         document.getElementById('newDesc').value = '';
         document.getElementById('newIncall').value = '';
         document.getElementById('newOutcall').value = '';
-    }
-
-    function clearAddForm() {
-        // Clear all input fields in the add form
-        document.getElementById('newDesc').value = '';
-        document.getElementById('newIncall').value = '';
-        document.getElementById('newOutcall').value = '';
-        document.getElementById('extraInfo').value = '';
-        document.getElementById('extraDesc').value = '';
     }
 </script>
 
