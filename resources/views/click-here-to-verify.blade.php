@@ -439,9 +439,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Footer (optional) -->
-<div class="verify-footer">
-    About us &nbsp; | &nbsp; Links &nbsp; | &nbsp; Terms of use &nbsp; | &nbsp; Privacy &nbsp; | &nbsp; Contact us<br>
-    <span style="font-size:0.92em;">this site is restricted to persons 18 years and over</span>
-</div>
 @endsection
