@@ -59,7 +59,7 @@
                 </a>
             </div>
 
-            <!-- Alpine Component (unchanged functionality) -->
+            <!-- Alpine Component -->
             <div x-data="otpVerification()" x-init="init()">
                 <form @submit.prevent="verifyOTP">
                     <!-- OTP Input Fields with smaller boxes -->
@@ -71,8 +71,8 @@
                             Enter 6‑digit verification code
                         </label>
 
-                        <!-- OTP Digits Grid – smaller boxes (w-12 h-12, text-xl) -->
-                        <div class="grid grid-cols-6 gap-1.5 sm:gap-2 mb-4">
+                        <!-- OTP Digits Row – tighter, centered spacing -->
+                        <div class="flex items-center gap-1.5 sm:gap-2 mb-4">
                             <template x-for="(digit, index) in 6" :key="index">
                                 <input type="text"
                                        x-model="otpDigits[index]"
