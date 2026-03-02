@@ -110,6 +110,11 @@ Route::get('/after-image-upload', function () {
 });
 
 
+Route::get('/purchase-history', function () {
+    return view('purchase-history');
+});
+
+
 Route::get('/terms-and-conditions', function () {
     $terms = TermCondition::query()
         ->where('is_active', true)
