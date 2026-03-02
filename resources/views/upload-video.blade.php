@@ -51,11 +51,22 @@
 
                 <template x-if="videoName">
                     <div class="space-y-4">
-                        <video x-show="previewUrl" :src="previewUrl" controls class="w-full rounded-lg border border-gray-200"></video>
+                        <div class="relative">
+                            <button
+                                type="button"
+                                @click="clearSelection()"
+                                class="absolute top-1.5 right-1.5 z-10 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white/95 border border-red-200 text-red-600 hover:bg-red-50 transition"
+                                aria-label="Delete selected video"
+                            >
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <video x-show="previewUrl" :src="previewUrl" controls class="w-full rounded-lg border border-gray-200"></video>
+                        </div>
                         <p class="text-sm font-medium text-gray-700" x-text="videoName"></p>
                         <div class="flex items-center justify-center gap-2">
                             <button type="button" @click="$refs.videoInput.click()" class="px-4 py-2 rounded-lg border border-pink-200 text-pink-700 hover:bg-pink-50 text-sm font-semibold transition">Replace</button>
-                            <button type="button" @click="clearSelection()" class="px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm font-semibold transition">Delete</button>
                         </div>
                     </div>
                 </template>

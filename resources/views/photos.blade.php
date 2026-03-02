@@ -38,7 +38,17 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" x-show="photos.length">
                 <template x-for="photo in photos" :key="photo.id">
-                    <div class="rounded-xl border border-gray-200 overflow-hidden bg-white">
+                    <div class="relative rounded-xl border border-gray-200 overflow-hidden bg-white">
+                        <button
+                            type="button"
+                            @click="removePhoto(photo.id)"
+                            class="absolute top-1.5 right-1.5 z-10 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white/95 border border-red-200 text-red-600 hover:bg-red-50 transition"
+                            aria-label="Delete photo"
+                        >
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
                         <div class="aspect-[3/4] bg-gray-100 flex items-center justify-center text-sm text-gray-500" x-text="photo.label"></div>
                         <div class="p-3 space-y-2">
                             <div class="flex items-center justify-between">
@@ -49,16 +59,9 @@
                                 <button
                                     type="button"
                                     @click="setCover(photo.id)"
-                                    class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg border border-pink-200 text-pink-700 hover:bg-pink-50 transition"
+                                    class="w-full px-3 py-2 text-xs font-semibold rounded-lg border border-pink-200 text-pink-700 hover:bg-pink-50 transition"
                                 >
                                     Set as cover
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="removePhoto(photo.id)"
-                                    class="px-3 py-2 text-xs font-semibold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition"
-                                >
-                                    Delete
                                 </button>
                             </div>
                         </div>

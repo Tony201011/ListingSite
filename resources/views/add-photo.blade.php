@@ -52,10 +52,31 @@
 
                     <template x-if="selectedFiles.length > 0">
                         <div class="mt-4 bg-white border border-gray-200 rounded-xl p-4">
-                            <p class="text-sm font-semibold text-gray-700 mb-2">Selected files (<span x-text="selectedFiles.length"></span>)</p>
-                            <div class="space-y-1 max-h-32 overflow-y-auto">
-                                <template x-for="file in selectedFiles" :key="file.name + file.size">
-                                    <p class="text-sm text-gray-600 truncate" x-text="file.name"></p>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm font-semibold text-gray-700">Selected files (<span x-text="selectedFiles.length"></span>)</p>
+                                <button
+                                    type="button"
+                                    @click="clearSelectedFiles()"
+                                    class="text-xs font-semibold text-red-600 hover:text-red-700"
+                                >
+                                    Delete all
+                                </button>
+                            </div>
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                <template x-for="(file, index) in selectedFiles" :key="file.name + file.size + index">
+                                    <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2">
+                                        <p class="text-sm text-gray-600 truncate" x-text="file.name"></p>
+                                        <button
+                                            type="button"
+                                            @click="removeSelectedFile(index)"
+                                            class="h-6 w-6 shrink-0 inline-flex items-center justify-center rounded-full bg-white/95 border border-red-200 text-red-600 hover:bg-red-50 transition"
+                                            aria-label="Delete selected photo"
+                                        >
+                                            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </template>
                             </div>
                         </div>
@@ -74,7 +95,19 @@
                         <template x-if="capturedImage">
                             <div class="mt-4">
                                 <p class="text-sm font-semibold text-gray-700 mb-2">Captured preview</p>
-                                <img :src="capturedImage" alt="Captured photo" class="w-28 h-28 object-cover rounded-lg border-2 border-pink-300">
+                                <div class="relative inline-block">
+                                    <button
+                                        type="button"
+                                        @click="clearCapturedPhoto()"
+                                        class="absolute top-1.5 right-1.5 z-10 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white/95 border border-red-200 text-red-600 hover:bg-red-50 transition"
+                                        aria-label="Delete captured photo"
+                                    >
+                                        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <img :src="capturedImage" alt="Captured photo" class="w-28 h-28 object-cover rounded-lg border-2 border-pink-300">
+                                </div>
                             </div>
                         </template>
                     </div>
@@ -125,6 +158,22 @@
                 this.selectedFiles = Array.from(event.dataTransfer.files || []);
             },
 
+            removeSelectedFile(index) {
+                this.selectedFiles.splice(index, 1);
+
+                if (!this.selectedFiles.length && this.$refs.fileInput) {
+                    this.$refs.fileInput.value = '';
+                }
+            },
+
+            clearSelectedFiles() {
+                this.selectedFiles = [];
+
+                if (this.$refs.fileInput) {
+                    this.$refs.fileInput.value = '';
+                }
+            },
+
             async startCamera() {
                 if (this.stream) {
                     return;
@@ -162,6 +211,10 @@
                 const context = canvasElement.getContext('2d');
                 context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
                 this.capturedImage = canvasElement.toDataURL('image/png');
+            },
+
+            clearCapturedPhoto() {
+                this.capturedImage = '';
             }
         }
     }
