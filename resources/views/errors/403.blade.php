@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 Forbidden</title>
+    <title>403 - Access Denied</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -22,9 +22,12 @@
                     <circle cx="24" cy="32" r="2" fill="currentColor"/>
                 </svg>
                 <h1 class="text-6xl font-extrabold text-pink-400 mb-2">403</h1>
-                <h2 class="text-2xl font-bold text-white mb-4">Forbidden</h2>
-                <p class="text-gray-300 mb-8">Sorry, you don't have permission to access this page.<br>Please contact the administrator if you believe this is an error.</p>
-                <a href="/" class="inline-block px-6 py-3 bg-gradient-to-r from-pink-600 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:from-pink-500 hover:to-pink-600 transition">Go Home</a>
+                <h2 class="text-2xl font-bold text-white mb-4">Access Denied</h2>
+                <p class="text-gray-300 mb-8">You do not have permission to access this page.<br>If you think this is a mistake, please sign in with the correct account or contact support.</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <a href="{{ url('/signin') }}" class="inline-block px-6 py-3 border border-pink-400 text-pink-200 rounded-full font-semibold hover:bg-pink-500/10 transition">Sign In</a>
+                    <a href="{{ url('/') }}" class="inline-block px-6 py-3 bg-gradient-to-r from-pink-600 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:from-pink-500 hover:to-pink-600 transition">Back to Home</a>
+                </div>
             </div>
         </div>
     </div>

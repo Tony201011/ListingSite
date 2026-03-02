@@ -228,6 +228,10 @@ Route::get('/contact-us', function () {
     ]);
 })->name('contact-us');
 
+Route::get('/403', function () {
+    abort(403);
+});
+
 Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
