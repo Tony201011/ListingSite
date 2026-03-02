@@ -72,7 +72,7 @@
                         </label>
 
                         <!-- OTP Digits Row – tighter, centered spacing -->
-                        <div class="flex items-center gap-1.5 sm:gap-2 mb-4">
+                        <div class="flex items-center justify-center gap-1.5 sm:gap-2 mb-4">
                             <template x-for="(digit, index) in 6" :key="index">
                                 <input type="text"
                                        x-model="otpDigits[index]"
