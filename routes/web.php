@@ -63,11 +63,47 @@ Route::get('/set-your-availability', function () {
 
 Route::get('/add-photo', function () {
     return view('add-photo');
+})->name('add-photo');
+
+Route::get('/photos', function () {
+    return view('photos');
 });
 
-Route::get('/add-photo', function () {
-    return view('add-photo');
-})->name('add-photo');
+Route::get('/my-videos', function () {
+    return view('my-videos');
+});
+
+Route::get('/my-tours', function () {
+    return view('my-tours');
+});
+
+Route::get('/short-url', function () {
+    return view('short-url');
+});
+
+Route::get('/online-now', function () {
+    return view('online-now');
+});
+
+Route::get('/available-now', function () {
+    return view('available-now');
+});
+
+Route::get('/set-and-forget', function () {
+    return view('set-and-forget');
+});
+
+Route::get('/my-babe-rank', function () {
+    return view('my-babe-rank');
+});
+
+Route::get('/profile-message', function () {
+    return view('profile-message');
+});
+
+Route::get('/hide-profile', function () {
+    return view('hide-profile');
+});
 
 
 
