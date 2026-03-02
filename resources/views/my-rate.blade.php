@@ -1,219 +1,190 @@
 @extends('layouts.frontend')
 
 @section('content')
-<!-- Navigation Menu - Exactly as in image -->
+<!-- ================= HERO BANNER ================= -->
+<div class="relative overflow-hidden bg-gradient-to-r from-[#667eea] to-[#764ba2]">
+    <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop');"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">hotescorts.com.au</h1>
+        <p class="text-xl text-white/90 tracking-widest">REAL WOMEN NEAR YOU</p>
+    </div>
+</div>
 
-<!-- Main Content - My Rates Page -->
-<div style="background: #ffffff; min-height: 100vh;">
-    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+<!-- Main Content -->
+<div class="bg-[#f8fafc] min-h-screen py-10">
+    <div class="max-w-4xl mx-auto px-5">
 
-        <!-- Go Back Button -->
-        <button onclick="window.history.back()" style="background: #cfa1b8; color: white; border: none; border-radius: 8px; padding: 6px 18px; font-size: 1rem; font-weight: 500; margin-bottom: 30px; cursor: pointer;">&lt; Go back</button>
+        <!-- Back button -->
+        <button onclick="window.history.back()" class="inline-flex items-center text-[#9f7aea] hover:text-[#764ba2] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Go back
+        </button>
 
         <!-- Page Title -->
-        <h1 style="font-size: 2.5rem; font-weight: 500; color: #333; margin-bottom: 10px;">My rates</h1>
-
-        <!-- Description Paragraph -->
-        <p style="font-size: 1.15rem; color: #222; margin-bottom: 18px; line-height: 1.6;">
-            You can group your rates by the type of services you offer, for example: <br>
-            <span style="color: #222; font-size: 1.08rem;">massages, <b>gfe</b>, <b>pse</b>, kink/bdsm, netflix and chill, online services, lunch / dinner dates, extended & overnight dates, fmty, etc.</span>
-        </p>
-        <hr style="border: none; border-top: 2px dotted #a16ba1; margin: 30px 0 25px 0;">
-
-        <!-- Your rates (not in a group) Section -->
-        <div style="padding: 0 0 25px 0; margin-bottom: 30px">
-            <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 0;">
-                <h2 style="font-size: 1.35rem; font-weight: 500; color: #222; margin-bottom: 0; margin-right: 8px;">Your rates</h2>
-                <span style="font-size: 1.05rem; color: #666; font-weight: 400;">(not in a group)</span>
-            </div>
-            <p style="font-size: 1rem; color: #7a7a7a; margin-bottom: 18px; line-height: 1.5;">
-                If you don't have many rates or there is no need to put them in seprate groups then you can list them here.
-            </p>
-
-            <!-- Rates Table (initially empty) -->
-            <div style="overflow-x: auto; margin-bottom: 25px;">
-                <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
-                    <thead id="ratesTableHead" style="display: none;">
-                        <tr style="background: #f0f0f0; border-bottom: 2px solid #ddd;">
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd; color: #222; font-size: 1.08rem; font-weight: 700;">Description</th>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd; color: #222; font-size: 1.08rem; font-weight: 700;">Incall</th>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd; color: #222; font-size: 1.08rem; font-weight: 700;">Outcall</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ratesList">
-                        <!-- Rows will be added here dynamically -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Add Rates Button (visible by default) -->
-            <button id="showAddRateBtn" onclick="toggleAddRateForm()" style="padding: 8px 28px; background: #e04ecb; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; color: white; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 10px rgba(224,78,203,0.2); display: inline-block; margin-bottom: 10px;">add rates</button>
-
-            <!-- Hidden Add Rate Form (initially hidden) -->
-            <div id="addRateForm" style="display: none; margin-top: 30px;">
-                <div style="background: #fff; border: 1px solid #e4c6d6; border-radius: 10px; box-shadow: 0 2px 12px 0 rgba(224,78,203,0.07); padding: 24px 28px 20px 28px; max-width: 950px; margin: 0 auto;">
-                    <div style="border-bottom: 1px solid #eee; padding-bottom: 16px; margin-bottom: 22px;">
-                        <span style="font-size: 1.25rem; font-weight: 600; color: #222;">Add new rate</span>
-                        <span style="font-size: 1rem; color: #444; font-weight: 400; margin-left: 8px;">If you don't have an incall or outcall rate then you can leave that field blank</span>
-                    </div>
-                    <form onsubmit="event.preventDefault(); addNewRate();">
-                        <div style="display: flex; gap: 18px; margin-bottom: 18px;">
-                            <div style="flex: 2;">
-                                <label style="font-weight: 700; color: #222; margin-bottom: 4px; display: block;">Description</label>
-                                <input type="text" id="newDesc" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; color: #222; font-weight: 600;">
-                                <div style="color: #3490dc; font-size: 0.97rem; margin-top: 2px;">What do i type in here?</div>
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="font-weight: 700; color: #222; margin-bottom: 4px; display: block;">Incall</label>
-                                <div style="display: flex; align-items: center;">
-                                    <span style="background: #f3f3f3; border: 1px solid #ccc; border-radius: 4px 0 0 4px; padding: 8px 10px; color: #888; font-size: 1rem; border-right: none;">$</span>
-                                    <input type="text" id="newIncall" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-left: none; border-radius: 0 5px 5px 0; font-size: 1rem; color: #222; font-weight: 600;">
-                                </div>
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="font-weight: 700; color: #222; margin-bottom: 4px; display: block;">Outcall</label>
-                                <div style="display: flex; align-items: center;">
-                                    <span style="background: #f3f3f3; border: 1px solid #ccc; border-radius: 4px 0 0 4px; padding: 8px 10px; color: #888; font-size: 1rem; border-right: none;">$</span>
-                                    <input type="text" id="newOutcall" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-left: none; border-radius: 0 5px 5px 0; font-size: 1rem; color: #222; font-weight: 600;">
-                                </div>
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 18px;">
-                            <label style="font-weight: 700; color: #222; margin-bottom: 4px; display: block;">Extra info <span style="font-weight: 400; color: #888; font-size: 1rem;">optional</span></label>
-                            <textarea id="extraInfo" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; color: #222; font-weight: 600;"></textarea>
-                            <div style="color: #3490dc; font-size: 0.97rem; margin-top: 2px;">What do i type in here?</div>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="submit" style="padding: 8px 28px; background: #e04ecb; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; color: white; cursor: pointer; margin-right: 5px;">+ add rate</button>
-                            <button type="button" onclick="toggleAddRateForm()" style="padding: 8px 22px; background: #eee; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; color: #b3aeb5; cursor: pointer;">cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <div class="mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#9f7aea] pl-4">
+                My <span class="text-[#9f7aea]">Rates</span>
+            </h2>
         </div>
 
-        <hr style="border: none; border-top: 1px solid #bbb; margin: 35px 0 25px 0;">
-        <!-- Create a new group Section -->
-        <div style="padding: 0;">
-            <h2 style="font-size: 1.2rem; font-weight: 500; color: #222; margin-bottom: 8px;">Create a new group</h2>
-            <p style="font-size: 1rem; color: #7a7a7a; margin-bottom: 15px; line-height: 1.5;">If you like to create groups, use the button below to create a group for a specific service you offer.</p>
-            <button style="padding: 8px 28px; background: #e04ecb; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; color: white; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 10px rgba(224,78,203,0.2);">create a new rates group</button>
+        <!-- Description card -->
+        <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100 mb-8">
+            <p class="text-gray-700 text-lg leading-relaxed">
+                You can group your rates by the type of services you offer, for example:
+                <span class="block mt-2 text-gray-600 text-base">
+                    massages, <span class="font-semibold text-[#9f7aea]">gfe</span>, <span class="font-semibold text-[#9f7aea]">pse</span>, kink/bdsm, netflix and chill, online services, lunch / dinner dates, extended & overnight dates, fmty, etc.
+                </span>
+            </p>
+        </div>
+
+        <!-- Alpine Component for Rates -->
+        <div x-data="ratesManager()" x-init="init()" class="space-y-8">
+            <!-- Your rates (not in a group) Section -->
+            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100">
+                <div class="flex items-baseline flex-wrap gap-2 mb-2">
+                    <h2 class="text-2xl font-semibold text-gray-800">Your rates</h2>
+                    <span class="text-gray-500 text-sm">(not in a group)</span>
+                </div>
+                <p class="text-gray-600 mb-6">
+                    If you don't have many rates or there is no need to put them in separate groups, you can list them here.
+                </p>
+
+                <!-- Rates Table -->
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full border-collapse border border-gray-300 rounded-lg">
+                        <thead x-show="rates.length > 0" class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left font-semibold text-gray-700 border border-gray-300">Description</th>
+                                <th class="p-3 text-left font-semibold text-gray-700 border border-gray-300">Incall</th>
+                                <th class="p-3 text-left font-semibold text-gray-700 border border-gray-300">Outcall</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratesList" class="divide-y divide-gray-200">
+                            <template x-for="(rate, index) in rates" :key="index">
+                                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                    <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.desc"></td>
+                                    <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.incall ? '$' + rate.incall : '—'"></td>
+                                    <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.outcall ? '$' + rate.outcall : '—'"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                    <p x-show="rates.length === 0" class="text-gray-500 italic py-4 text-center border border-gray-200 rounded-lg mt-4">
+                        No rates added yet. Click "Add rate" to create your first rate.
+                    </p>
+                </div>
+
+                <!-- Add Rate Button -->
+                <button x-show="!showForm" @click="showForm = true" class="bg-[#9f7aea] hover:bg-[#764ba2] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                    + Add rate
+                </button>
+
+                <!-- Add Rate Form -->
+                <div x-show="showForm" x-transition class="mt-8">
+                    <div class="bg-purple-50 border border-[#9f7aea] rounded-xl p-6">
+                        <div class="border-b border-[#9f7aea]/30 pb-4 mb-6">
+                            <span class="text-xl font-semibold text-gray-800">Add new rate</span>
+                            <span class="text-gray-600 text-sm ml-3">If you don't have an incall or outcall rate, leave blank</span>
+                        </div>
+
+                        <form @submit.prevent="addRate" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="md:col-span-1">
+                                    <label class="block font-medium text-gray-700 mb-1">Description</label>
+                                    <input type="text" x-model="newRate.desc" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9f7aea] focus:border-transparent" placeholder="e.g. 1 hour GFE">
+                                    <p class="text-[#9f7aea] text-xs mt-1">What do I type in here?</p>
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-700 mb-1">Incall ($)</label>
+                                    <input type="text" x-model="newRate.incall" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9f7aea] focus:border-transparent" placeholder="250">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-gray-700 mb-1">Outcall ($)</label>
+                                    <input type="text" x-model="newRate.outcall" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9f7aea] focus:border-transparent" placeholder="300">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block font-medium text-gray-700 mb-1">Extra info <span class="text-gray-400 font-normal">(optional)</span></label>
+                                <textarea x-model="newRate.extra" rows="2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9f7aea] focus:border-transparent" placeholder="Additional details..."></textarea>
+                                <p class="text-[#9f7aea] text-xs mt-1">What do I type in here?</p>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+                                <button type="submit" class="bg-[#9f7aea] hover:bg-[#764ba2] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition">
+                                    + Add rate
+                                </button>
+                                <button type="button" @click="showForm = false; resetForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-6 py-3 rounded-full transition">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create a new group Section -->
+            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Create a new group</h2>
+                <p class="text-gray-600 mb-6">If you like to create groups, use the button below to create a group for a specific service you offer.</p>
+                <button class="bg-[#9f7aea] hover:bg-[#764ba2] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                    + Create a new rates group
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Alpine.js and Font Awesome -->
+<script src="//unpkg.com/alpinejs" defer></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <script>
+    function ratesManager() {
+        return {
+            // State
+            rates: [],                // Array of rate objects
+            showForm: false,          // Toggle add form
+            newRate: {
+                desc: '',
+                incall: '',
+                outcall: '',
+                extra: ''
+            },
 
-    function toggleAddRateForm() {
-        var form = document.getElementById('addRateForm');
-        var btn = document.getElementById('showAddRateBtn');
-        var tableHead = document.getElementById('ratesTableHead');
-        if (form.style.display === 'none') {
-            form.style.display = 'block';
-            btn.style.display = 'none';
-            tableHead.style.display = '';
-        } else {
-            form.style.display = 'none';
-            btn.style.display = 'inline-block';
-            tableHead.style.display = 'none';
+            // Methods
+            init() {
+                // Load any saved rates from localStorage or API if needed
+                // For demo, we can start with some example data
+                // this.rates = [
+                //     { desc: '1 hour GFE', incall: '250', outcall: '300', extra: '' }
+                // ];
+            },
+
+            addRate() {
+                // Validate description (at least)
+                const desc = this.newRate.desc.trim() || '—';
+                const incall = this.newRate.incall.trim() || '';
+                const outcall = this.newRate.outcall.trim() || '';
+
+                this.rates.push({
+                    desc: desc,
+                    incall: incall,
+                    outcall: outcall,
+                    extra: this.newRate.extra.trim()
+                });
+
+                // Reset form and hide it
+                this.resetForm();
+                this.showForm = false;
+            },
+
+            resetForm() {
+                this.newRate = { desc: '', incall: '', outcall: '', extra: '' };
+            }
         }
     }
-
-    function addNewRate() {
-        // Get values from the first row
-        var desc = document.getElementById('newDesc').value.trim();
-        var incall = document.getElementById('newIncall').value.trim();
-        var outcall = document.getElementById('newOutcall').value.trim();
-
-        // Use placeholder if empty
-        if (!desc) desc = '—';
-        if (!incall) incall = '—';
-        if (!outcall) outcall = '—';
-
-        // Add a new row to the rates table
-        var tableBody = document.getElementById('ratesList');
-        var newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td style="padding: 10px; border: 1px solid #ddd; color: #222; font-size: 1.05rem; font-weight: 600;">${desc}</td>
-            <td style="padding: 10px; border: 1px solid #ddd; color: #222; font-size: 1.05rem; font-weight: 600;">${incall}</td>
-            <td style="padding: 10px; border: 1px solid #ddd; color: #222; font-size: 1.05rem; font-weight: 600;">${outcall}</td>
-        `;
-        tableBody.appendChild(newRow);
-
-        // Clear only the first row inputs (the main ones)
-        document.getElementById('newDesc').value = '';
-        document.getElementById('newIncall').value = '';
-        document.getElementById('newOutcall').value = '';
-    }
 </script>
-
-<style>
-/* Global Styles */
-body, html {
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
-
-/* Button Hover Effects */
-button:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(224,78,203,0.3) !important;
-    transition: all 0.3s ease;
-}
-
-/* Link Hover */
-a:hover {
-    color: #e04ecb !important;
-    transition: color 0.2s;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    div[style*="padding: 40px 20px"] {
-        padding: 20px 15px !important;
-    }
-
-    h1 {
-        font-size: 1.8rem !important;
-    }
-
-    h2 {
-        font-size: 1.3rem !important;
-    }
-
-    button {
-        width: 100% !important;
-        padding: 12px 20px !important;
-        font-size: 0.95rem !important;
-    }
-
-    div[style*="display: flex"][style*="gap: 25px"] {
-        gap: 15px !important;
-        justify-content: center !important;
-    }
-
-    div[style*="margin-left: auto"] {
-        margin-left: 0 !important;
-    }
-
-    table, tbody, tr, td {
-        font-size: 0.9rem;
-    }
-
-    input {
-        font-size: 0.9rem;
-    }
-}
-
-/* Small phones */
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.5rem !important;
-    }
-}
-</style>
 @endsection

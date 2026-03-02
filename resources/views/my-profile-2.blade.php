@@ -165,7 +165,7 @@
 
                 <div class="space-y-6">
                     <div>
-                        <h3 class="font-medium text-gray-800 mb-3">Primary identity <span class="text-gray-500 text-sm">(select one)</span></h3>
+                        <h3 class="font-semibold text-[#e04ecb] mb-3">Primary identity <span class="text-[#e04ecb] text-sm">(select one)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @php
                                 $primaryTags = ['milf', 'girl next door', 'courage', 'trans', 'sympho', 'sex goddess', 'naughty housewife', 'pornstar', 'kinky lady', 'elite courtesan'];
@@ -177,7 +177,7 @@
                     </div>
 
                     <div>
-                        <h3 class="font-medium text-gray-800 mb-3">Attributes <span class="text-gray-500 text-sm">(multiple allowed)</span></h3>
+                        <h3 class="font-semibold text-[#e04ecb] mb-3">Attributes <span class="text-[#e04ecb] text-sm">(multiple allowed)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @php
                                 $attrTags = ['heterosexual', 'bisexual', 'high end trans only', 'cheap trans available', 'natural boobs', 'enhanced boobs', 'covered in tattoos', 'some tattoos', 'no tattoos', 'lingerie piercing', 'clit piercing', 'body piercings', 'long legs', 'curly hair', 'big boobs', 'round bottom', 'natural bush', 'well groomed', 'fully shaved or waxed', 'anal ok', 'no anal', 'fair skin', 'tanned skin', 'asian skin', 'dark skin', 'quickies', 'no quickies', 'non smoker', 'covid vaccinated'];
@@ -189,7 +189,7 @@
                     </div>
 
                     <div>
-                        <h3 class="font-medium text-gray-800 mb-3">Services & style <span class="text-gray-500 text-sm">(up to 12)</span></h3>
+                        <h3 class="font-semibold text-[#e04ecb] mb-3">Services & style <span class="text-[#e04ecb] text-sm">(up to 12)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @php
                                 $styleTags = ['outfit requests welcome', 'lingerie', 'high heels', 'thigh high boots', 'pegging', 'pregnant', 'classy', 'love conversations', 'shower facilities', 'wicked wall', 'squirt', 'party kick', 'groupie kick', 'stripper', 'touring escort', 'published pornstar', 'model', 'sexual experience', 'french kissing', 'no kissing', 'toys', 'no rough sex', 'rough sex ok', 'spanking', 'fantasy experiences', 'school girl fantasy', 'secretary fantasy', 'nurse fantasy'];
