@@ -1,85 +1,78 @@
 @extends('layouts.frontend')
 
 @section('content')
-<!-- ================= TOP SIGNUP BANNER ================= -->
-<div style="width:100%; background:#b784a7;">
-    <div style="display:flex; width:100%; height:350px; overflow:hidden;">
-        <!-- LEFT IMAGE -->
-        <div style="
-            flex:1;
-            background:url('https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1200&auto=format&fit=crop') center center/cover no-repeat;
-            position:relative;">
-            <div style="position:absolute; inset:0; background:rgba(92,53,89,0.6);"></div>
-        </div>
-        <!-- CENTER LOGO TEXT -->
-        <div style="flex:1; background:#c893b8; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
-            <h2 style="margin:0; font-size:40px; font-weight:700; color:#000;">
-                hotescorts.com.au
-            </h2>
-            <span style="font-size:12px; letter-spacing:2px; color:#333;">
-                REAL WOMEN NEAR YOU
-            </span>
-        </div>
-        <!-- RIGHT IMAGE -->
-        <div style="
-            flex:1;
-            background:url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop') center center/cover no-repeat;
-            position:relative;">
-            <div style="position:absolute; inset:0; background:rgba(92,53,89,0.6);"></div>
-        </div>
+<!-- ================= HERO BANNER (same as sign‑in) ================= -->
+<div class="relative overflow-hidden bg-gradient-to-r from-[#667eea] to-[#764ba2]">
+    <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop');"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">hotescorts.com.au</h1>
+        <p class="text-xl text-white/90 tracking-widest">REAL WOMEN NEAR YOU</p>
     </div>
 </div>
-<!-- ================= END BANNER ================= -->
 
 <!-- Main Content -->
-<div style="background: #ffffff; min-height: 100vh;">
-    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px 20px 20px;">
+<div class="bg-[#f8fafc] min-h-screen py-10">
+    <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
 
-        <!-- OTP Verification Header -->
-        <h1 style="font-size: 2.5rem; font-weight: 700; color: #222; margin-bottom: 5px; border-left: 5px solid #e04ecb; padding-left: 15px;">
-            Verify Your <span style="color: #e04ecb;">Number</span>
-        </h1>
+        <!-- Optional back link (same style as sign‑in) -->
+        <a href="javascript:history.back()" class="inline-flex items-center text-[#9f7aea] hover:text-[#764ba2] transition-colors mb-4 text-sm font-medium">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Go back
+        </a>
 
-        <!-- Description -->
-        <div style="margin: 25px 0 20px 0;">
-            <p style="font-size: 1.1rem; color: #555; margin-bottom: 10px;">
-                <i class="fas fa-shield-alt" style="color: #e04ecb; margin-right: 8px;"></i>
-                We've sent a verification code to your phone. Please enter it below.
-            </p>
+        <!-- Header with purple left border (matches sign‑in) -->
+        <div class="mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#9f7aea] pl-4">
+                Verify Your <span class="text-[#9f7aea]">Number</span>
+            </h2>
         </div>
 
-        <hr style="border: none; border-top: 2px solid #f0f0f0; margin: 25px 0;">
+        <!-- Description -->
+        <p class="text-gray-600 mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-[#9f7aea]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            We've sent a verification code to your phone. Please enter it below.
+        </p>
 
-        <!-- OTP Verification Form -->
-        <div style="background: #ffffff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 35px 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+        <hr class="border-t-2 border-gray-200 mb-8">
 
-            <!-- Phone Number Display -->
-            <div style="background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="width: 45px; height: 45px; background: #e04ecb; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-phone-alt" style="color: white; font-size: 18px;"></i>
+        <!-- OTP Verification Card (styled exactly like sign‑in form) -->
+        <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
+            <!-- Phone number display (pill style) -->
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-[#9f7aea] rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
                     </div>
                     <div>
-                        <div style="font-size: 0.85rem; color: #888; margin-bottom: 3px;">Verifying number</div>
-                        <div style="font-size: 1.2rem; font-weight: 600; color: #333;">+61 412 345 678</div>
+                        <div class="text-sm text-gray-500">Verifying number</div>
+                        <div class="text-xl font-semibold text-gray-800">+61 412 345 678</div>
                     </div>
                 </div>
-                <a href="#" style="color: #e04ecb; font-weight: 500; text-decoration: none; font-size: 0.95rem;">
-                    Change <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 5px;"></i>
+                <a href="#" class="text-[#9f7aea] font-medium hover:text-[#6b46c1] transition text-sm">
+                    Change <i class="fas fa-chevron-right text-xs ml-1"></i>
                 </a>
             </div>
 
+            <!-- Alpine Component (unchanged functionality) -->
             <div x-data="otpVerification()" x-init="init()">
                 <form @submit.prevent="verifyOTP">
-                    <!-- OTP Input Fields -->
-                    <div style="margin-bottom: 25px;">
-                        <label style="display: block; font-weight: 600; color: #333; margin-bottom: 15px;">
-                            <i class="fas fa-lock" style="color: #e04ecb; margin-right: 8px;"></i>
-                            Enter 6-digit verification code
+                    <!-- OTP Input Fields with smaller boxes -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-800 mb-3">
+                            <svg class="w-5 h-5 inline mr-2 text-[#9f7aea]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            Enter 6‑digit verification code
                         </label>
 
-                        <!-- OTP Digits - FIXED VERSION -->
-                        <div style="display: flex; gap: 10px; justify-content: space-between; margin-bottom: 20px;">
+                        <!-- OTP Digits Grid – smaller boxes (w-12 h-12, text-xl) -->
+                        <div class="grid grid-cols-6 gap-1.5 sm:gap-2 mb-4">
                             <template x-for="(digit, index) in 6" :key="index">
                                 <input type="text"
                                        x-model="otpDigits[index]"
@@ -89,22 +82,23 @@
                                        @paste="handlePaste"
                                        @focus="focusedIndex = index"
                                        maxlength="1"
-                                       style="width: 60px; height: 70px; text-align: center; font-size: 24px; font-weight: 700; background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; color: #333; outline: none; transition: all 0.3s;"
-                                       :style="focusedIndex === index ? 'border-color: #e04ecb; box-shadow: 0 0 0 3px rgba(224,78,203,0.1);' : ''">
+                                       class="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-bold bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none transition-all"
+                                       :class="{'border-[#9f7aea] ring-2 ring-[#9f7aea]/20': focusedIndex === index}">
                             </template>
                         </div>
 
-                        <!-- Timer and Resend -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 15px;">
-                            <div style="display: flex; align-items: center; gap: 8px; color: #666; font-size: 0.95rem;">
-                                <i class="far fa-clock" style="color: #e04ecb;"></i>
-                                <span x-text="timerText"></span>
+                        <!-- Timer and Resend – more compact -->
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full">
+                                <svg class="w-4 h-4 text-[#9f7aea]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span x-text="timerText" class="text-gray-700"></span>
                             </div>
                             <button type="button"
                                     @click="resendOTP"
                                     :disabled="!canResend"
-                                    style="background: none; border: none; color: #e04ecb; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.3s;"
-                                    :style="!canResend ? 'opacity: 0.5; cursor: not-allowed;' : ''"
+                                    class="bg-transparent border-0 text-[#9f7aea] font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition"
                                     x-text="resendText">
                             </button>
                         </div>
@@ -113,66 +107,62 @@
                     <!-- Verification Status Message -->
                     <div x-show="verificationStatus"
                          x-transition
-                         style="padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;"
-                         :style="verificationStatus?.type === 'success' ? 'background: #e6f7e6; border: 1px solid #a5d6a5;' : 'background: #fee; border: 1px solid #fcc;'">
-                        <i :class="verificationStatus?.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"
-                           :style="verificationStatus?.type === 'success' ? 'color: #4caf50;' : 'color: #f44336;'"></i>
-                        <span :style="verificationStatus?.type === 'success' ? 'color: #2e7d32;' : 'color: #c62828;'"
-                              x-text="verificationStatus?.message"></span>
+                         class="p-4 rounded-xl mb-6 flex items-center gap-3 border"
+                         :class="verificationStatus?.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'">
+                        <i :class="verificationStatus?.type === 'success' ? 'fas fa-check-circle text-green-600' : 'fas fa-exclamation-circle text-red-600'"></i>
+                        <span x-text="verificationStatus?.message"></span>
                     </div>
 
-                    <!-- Verification Info Box - Matching signup page style -->
-                    <div style="background: #e8f0fe; border-left: 4px solid #e04ecb; border-radius: 6px; padding: 15px; font-size: 0.95rem; color: #333; margin: 25px 0;">
-                        <div style="display: flex; gap: 10px;">
-                            <i class="fas fa-info-circle" style="color: #e04ecb; font-size: 20px;"></i>
+                    <!-- Info Box (matching sign‑in's style) -->
+                    <div class="bg-blue-50 border-l-4 border-[#9f7aea] rounded-xl p-4 text-gray-700 text-sm my-6">
+                        <div class="flex gap-3">
+                            <svg class="w-5 h-5 text-[#9f7aea] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
                             <div>
-                                <span style="font-weight: 600;">Why we verify your number?</span> We verify all our babes to ensure authenticity. This helps us maintain a safe community of real babes only. <span style="font-weight: 600;">We will NEVER publish or share this phone number without your permission.</span>
+                                <span class="font-semibold">Why we verify your number?</span> We verify all our babes to ensure authenticity. This helps us maintain a safe community of real babes only. <span class="font-semibold">We will NEVER publish or share this phone number without your permission.</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Submit Button - FIXED VISIBILITY -->
+                    <!-- Submit Button (same gradient as sign‑in) -->
                     <button type="submit"
                             :disabled="!isOtpComplete || isVerifying"
-                            style="width: 100%; background: linear-gradient(135deg, #e04ecb 0%, #c13ab0 100%); color: white; font-weight: 700; font-size: 1.3rem; padding: 16px 0; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(224,78,203,0.3); display: flex; align-items: center; justify-content: center; gap: 10px;"
-                            :style="!isOtpComplete || isVerifying ? 'opacity: 0.6; cursor: not-allowed;' : ''"
-                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(224,78,203,0.4)';"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(224,78,203,0.3)';">
+                            class="w-full bg-gradient-to-r from-[#9f7aea] to-[#6b46c1] text-white font-bold text-xl py-4 rounded-full shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle" x-show="!isVerifying"></i>
-                        <i class="fas fa-spinner fa-spin" x-show="isVerifying" style="display: none;"></i>
+                        <i class="fas fa-spinner fa-spin" x-show="isVerifying" x-cloak></i>
                         <span x-text="isVerifying ? 'Verifying...' : 'VERIFY & CONTINUE'"></span>
                     </button>
                 </form>
 
-                <!-- Help Text -->
-                <p style="text-align: center; margin-top: 25px; color: #888; font-size: 0.9rem;">
-                    <i class="fas fa-question-circle" style="color: #e04ecb; margin-right: 5px;"></i>
+                <!-- Help & Back Links (same as sign‑in footer links) -->
+                <p class="text-center text-gray-500 text-sm mt-6">
+                    <i class="fas fa-question-circle text-[#9f7aea] mr-1"></i>
                     Didn't receive the code?
-                    <button type="button" @click="showHelp" style="background: none; border: none; color: #e04ecb; font-weight: 600; cursor: pointer; text-decoration: underline;">
+                    <button type="button" @click="showHelp" class="bg-transparent border-0 text-[#9f7aea] font-semibold underline cursor-pointer hover:text-[#6b46c1]">
                         Contact support
                     </button>
                 </p>
 
-                <!-- Back to Signup Link -->
-                <div style="text-align: center; margin-top: 20px;">
-                    <a href="#" style="color: #666; text-decoration: none; font-size: 0.95rem; transition: all 0.3s;">
-                        <i class="fas fa-arrow-left" style="margin-right: 5px;"></i>
+                <div class="text-center mt-4">
+                    <a href="#" class="text-gray-500 hover:text-[#9f7aea] transition text-sm">
+                        <i class="fas fa-arrow-left mr-1"></i>
                         Back to Signup
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Footer Note -->
-        <p style="text-align: center; color: #999; font-size: 0.9rem; margin-top: 30px;">
-            <i class="fas fa-heart" style="color: #e04ecb;"></i>
+        <!-- Footer Note (same as sign‑in) -->
+        <p class="text-center text-gray-400 text-sm mt-8">
+            <i class="fas fa-heart text-[#9f7aea]"></i>
             Your privacy and security are our top priorities
-            <i class="fas fa-heart" style="color: #e04ecb;"></i>
+            <i class="fas fa-heart text-[#9f7aea]"></i>
         </p>
     </div>
 </div>
 
-<!-- Alpine.js Component for OTP Verification -->
+<!-- Alpine.js Component (unchanged) -->
 <script src="//unpkg.com/alpinejs" defer></script>
 <script>
     function otpVerification() {
@@ -188,7 +178,6 @@
 
             init() {
                 this.startTimer();
-                // Auto-focus first input
                 this.$nextTick(() => {
                     const firstInput = this.$refs['otpInput0'];
                     if (firstInput && firstInput[0]) {
@@ -324,14 +313,12 @@
 
                 // Simulate API call
                 setTimeout(() => {
-                    // Demo: Accept any 6-digit code or specifically "123456" for testing
                     if (this.otpCode === '123456') {
                         this.verificationStatus = {
                             type: 'success',
                             message: '✓ Phone number verified successfully! Redirecting...'
                         };
 
-                        // Simulate redirect after success
                         setTimeout(() => {
                             window.location.href = '/signup/success';
                         }, 2000);
@@ -350,7 +337,6 @@
 
                 this.resendText = 'Sending...';
 
-                // Simulate resend API call
                 setTimeout(() => {
                     this.startTimer();
                     this.verificationStatus = {
@@ -358,7 +344,6 @@
                         message: '✓ New code sent to your phone!'
                     };
 
-                    // Clear success message after 3 seconds
                     setTimeout(() => {
                         this.verificationStatus = null;
                     }, 3000);
@@ -372,97 +357,11 @@
     }
 </script>
 
-<!-- Add Font Awesome -->
+<!-- Font Awesome (if not already in layout) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<!-- Optional extra style to hide Alpine cloak -->
 <style>
-/* Global Styles */
-body, html {
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
-
-/* Responsive Design */
-@media (max-width: 900px) {
-    div[style*="max-width: 800px"] {
-        padding: 20px 15px !important;
-    }
-
-    div[style*="display: flex"][style*="gap: 10px"][style*="justify-content: space-between"] {
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-    }
-
-    input[style*="width: 60px"] {
-        width: 45px !important;
-        height: 55px !important;
-        font-size: 20px !important;
-    }
-
-    h1 {
-        font-size: 2rem !important;
-    }
-
-    [style*="border-radius: 12px"] {
-        padding: 25px 20px !important;
-    }
-}
-
-@media (max-width: 768px) {
-    div[style*="height:350px"] {
-        height: 250px !important;
-    }
-
-    div[style*="font-size:40px"] {
-        font-size: 28px !important;
-    }
-
-    input[style*="width: 60px"] {
-        width: 40px !important;
-        height: 50px !important;
-        font-size: 18px !important;
-    }
-}
-
-/* OTP input spin button removal */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-/* Hover Effects */
-input:hover {
-    border-color: #e04ecb !important;
-}
-
-/* Smooth Transitions */
-input, button {
-    transition: all 0.3s ease;
-}
-
-/* Focus States */
-input:focus {
-    outline: none;
-    border-color: #e04ecb;
-    box-shadow: 0 0 0 3px rgba(224,78,203,0.1);
-}
-
-/* Button hover effect */
-button[type="submit"]:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(224,78,203,0.4);
-}
-
-/* Link hover effect */
-a:hover {
-    color: #e04ecb !important;
-}
+    [x-cloak] { display: none !important; }
 </style>
 @endsection

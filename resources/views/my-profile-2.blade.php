@@ -1,344 +1,296 @@
 @extends('layouts.frontend')
 
 @section('content')
-
-<!-- Main Content - Profile Dashboard -->
-<div style="background: #ffffff; min-height: 100vh;">
-    <div style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
+<div class="bg-white min-h-screen py-10 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-l-6 border-[#e04ecb] pl-4">
+            Edit your profile
+        </h1>
 
         <!-- Profile Form -->
-        <form style="width: 100%;">
+        <form class="space-y-8">
+            <!-- ===== BASIC INFO CARD ===== -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                    Basic information
+                </h2>
 
-            <!-- Your name -->
-            <div style="margin-bottom: 25px;">
-                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your name</h2>
-                <input type="text" value="Sourabh wadhwa" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem;;">
-            </div>
-
-            <!-- Your introduction line -->
-            <div style="margin-bottom: 25px;">
-                 <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your introduction line</h2>
-                <textarea rows="3" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem;;">I am Sourabh Wadhwa, a 24-year-old student from Mumbai. I have always been fascinated by the world of fashion and style, and I believe that every woman should feel confident and beautiful in what she wears.</textarea>
-            </div>
-
-            <!-- Your mobile number -->
-            <div style="margin-bottom: 25px;">
-                 <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your mobile number</h2>
-                <input type="text" value="0415573077" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem;;">
-            </div>
-
-            <!-- Your profile text -->
-            <div style="margin-bottom: 25px;">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your profile text</h2>
-                <div style="color: #555; font-size: 0.95rem; margin-bottom: 10px;padding: 15px;">
-                    It is illegal in Vic & QLD to describe your sexual services in details, you also cannot refer to the term massage. In QLD you cannot advertise 'doubles'. If you are in VIC please do not forget to mention your SWA Licence number
-                </div>
-                <div style="color: #333; font-size: 0.95rem; margin-bottom: 10px;">
-                   You can use our special features for
-<a href="#" style="color:#e14ecb; text-decoration:underline; font-weight:500;">
-    my rated
-</a>
-and
-<a href="#" style="color:#e14ecb; text-decoration:underline; font-weight:500;">
-    my availability
-</a>,
-or you can type them down here.
-                </div>
-                <div style="border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; margin-bottom: 8px;">
-                    <div style="background: #f9f9f9; border-bottom: 1px solid #e0e0e0; padding: 8px 12px; display: flex; align-items: center; gap: 18px; color: #b784a7; font-size: 1.15em;">
-                        <span style="font-family: serif; font-weight: bold; font-size: 1.2em;">✎</span>
-                        <span style="font-weight: bold; font-size: 1.1em;">B</span>
-                        <span style="font-style: italic; font-size: 1.1em;">I</span>
-                        <span style="text-decoration: underline; font-size: 1.1em;">U</span>
-                        <span style="text-decoration: line-through; font-size: 1.1em;">S</span>
-                        <span style="font-size: 1em;">16 ▼</span>
-                        <span style="font-size: 1.1em;">▦</span>
-                        <span style="font-size: 1.1em;">▤</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Your name</label>
+                        <input type="text" value="Sourabh wadhwa" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
                     </div>
-                    <textarea rows="6" style="width: 100%; min-height: 180px; border: none; resize: vertical; font-size: 1.12em; color: #181818; font-weight: 700; padding: 12px 15px; background: #fff;"></textarea>
-                </div>
-            </div>
-
-            <!-- Suburb -->
-            <div style="margin-bottom: 25px;">
-                 <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Suburb <span style="font-weight: normal; color: #888; font-size: 0.9rem;">(your primary main work suburb, select it from the list while typing)</span></h2>
-                <input type="text" value="Melbourne VIC" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem;">
-            </div>
-
-            <!-- Your age group -->
-            <div style="margin-bottom: 25px;">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your age group</h2>
-                <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
-                    <option>- Select your age</option>
-                    <option>18-24</option>
-                    <option>25-30</option>
-                    <option>31-35</option>
-                    <option>36-40</option>
-                    <option>40+</option>
-                </select>
-            </div>
-
-            <!-- Hair color -->
-            <div style="margin-bottom: 25px;">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Hair color</h2>
-                <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
-                    <option>- Select your hair color</option>
-                    <option>Blonde</option>
-                    <option>Brunette</option>
-                    <option>Redhead</option>
-                    <option>Black</option>
-                    <option>Brown</option>
-                </select>
-            </div>
-
-            <!-- Hair length -->
-            <div style="margin-bottom: 25px;">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Hair length</h2>
-                <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
-                    <option>- Select your hair length</option>
-                    <option>Short</option>
-                    <option>Medium</option>
-                    <option>Long</option>
-                    <option>Very Long</option>
-                </select>
-            </div>
-
-            <!-- Ethnicity -->
-            <div style="margin-bottom: 25px;">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Ethnicity</h2>
-                <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
-                    <option>- Select your ethnicity</option>
-                    <option>Caucasian</option>
-                    <option>Asian</option>
-                    <option>Indian</option>
-                    <option>Middle Eastern</option>
-                    <option>Hispanic</option>
-                </select>
-            </div>
-
-            <!-- Body type -->
-            <div style="margin-bottom: 25px;">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Body type</h2>
-                <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
-                    <option>- Select your body type</option>
-                    <option>Slender</option>
-                    <option>Average</option>
-                    <option>Athletic</option>
-                    <option>Curvy</option>
-                    <option>Full Figured</option>
-                </select>
-            </div>
-
-            <!-- Bust size -->
-            <div style="margin-bottom: 25px;">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Bust size</h2>
-                <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
-                    <option>- Select your bust size</option>
-                    <option>A cup</option>
-                    <option>B cup</option>
-                    <option>C cup</option>
-                    <option>D cup</option>
-                    <option>DD+</option>
-                </select>
-            </div>
-
-            <!-- Your length -->
-            <div style="margin-bottom: 25px;">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 8px;">Your length</h2>
-                <select style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; color: #555; font-size: 0.95rem; background: white;">
-                    <option>- Select your length category</option>
-                    <option>Under 5'0"</option>
-                    <option>5'0" - 5'3"</option>
-                    <option>5'4" - 5'6"</option>
-                    <option>5'7" - 5'9"</option>
-                    <option>5'10" and above</option>
-                </select>
-            </div>
-
-            <!-- Select the tags that apply to you -->
-            <div style="margin-bottom: 30px;">
-                 <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Select the tags that apply to you</h2>
-                <p style="color: #666; margin-bottom: 15px; font-size: 0.95rem;">These tags will show up on your profile, and will improve your profile getting found in search.</p>
-
-                <!-- Select 1 of the following tags (optional) -->
-                <div style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #222; margin-bottom: 10px;">Select 1 of the following tags <span style="font-weight: normal; color: #888;">(optional)</span></h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">milf</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">girl next door</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">courage</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">trans</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">sympho</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">sex goddess</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">naughty housewife</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">pornstar</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">kinky lady</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">elite cuttessan</span>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Mobile number</label>
+                        <input type="text" value="0415573077" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
                     </div>
                 </div>
 
-                <!-- Select any of the tags that apply to you (optional) -->
-                <div style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #222; margin-bottom: 10px;">Select any of the tags that apply to you <span style="font-weight: normal; color: #888;">(optional)</span></h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">heterosexual</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">bisexual</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">high end trans only</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">cheap trans available</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">natural boobs</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">enhanced boobs</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">covered in tattoos</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">some tattoos</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">no tattoos</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">lingerie piercing</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">clit piercing</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">body piercings</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">long legs</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">curly hair</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">big boobs</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">round bottom</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">natural bush</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">well groomed</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">fully shaved or waxed</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">anal ok</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">no anal</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">fair skin</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">tanned skin</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">asian skin</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">dark skin</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">quickies</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">no quickies</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">non smoker</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">covid vaccinated</span>
-                    </div>
+                <div class="mt-6">
+                    <label class="block font-medium text-gray-800 mb-1">Introduction line</label>
+                    <textarea rows="2" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">I am Sourabh Wadhwa, a 24-year-old student from Mumbai...</textarea>
                 </div>
 
-                <!-- Select up to 12 tags of the following tags (optional) -->
-                <div style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #222; margin-bottom: 10px;">Select up to 12 tags of the following tags <span style="font-weight: normal; color: #888;">(optional)</span></h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">outfit requests welcome</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">lingerie</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">high heels</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">thigh high boots</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">pegging</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">pregnant</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">classy</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">love conversations</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">shower facilities</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">wicked wall</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">squirt</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">party kick</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">groupie kick</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">stripper</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">touring escort</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">published pornstar</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">model</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">sexual experience</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">french kissing</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">no kissing</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">toys</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">no rough sex</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">rough sex ok</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">spanking</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">fantasy experiences</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">school girl fantasy</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">secretory fantasy</span>
-                        <span style="display: inline-block; background: #f0f0f0; border-radius: 20px; padding: 6px 15px; font-size: 0.95rem; color: #333; border: 1px solid #ddd; cursor: pointer;">nursi</span>
+                <div class="mt-6">
+                    <label class="block font-medium text-gray-800 mb-1">Your suburb</label>
+                    <input type="text" value="Melbourne VIC" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
+                    <p class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
+                </div>
+            </div>
+
+            <!-- ===== PROFILE TEXT CARD ===== -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    Your profile text
+                </h2>
+
+                <div class="bg-purple-50 border-l-4 border-[#e04ecb] p-4 text-sm text-gray-800 mb-4">
+                    <p>It is illegal in Vic & QLD to describe your sexual services in details, you also cannot refer to the term massage. In QLD you cannot advertise 'doubles'. If you are in VIC please do not forget to mention your SWA Licence number</p>
+                </div>
+
+                <p class="text-gray-800 mb-3">
+                    You can use our special features for
+                    <a href="#" class="text-[#e04ecb] underline font-medium">my rated</a> and
+                    <a href="#" class="text-[#e04ecb] underline font-medium">my availability</a>,
+                    or you can type them down here.
+                </p>
+
+                <!-- Text editor toolbar (simplified) -->
+                <div class="flex items-center gap-4 p-2 bg-gray-100 border border-gray-400 rounded-t-lg text-gray-700">
+                    <span class="font-serif text-xl">✎</span>
+                    <span class="font-bold">B</span>
+                    <span class="italic">I</span>
+                    <span class="underline">U</span>
+                    <span class="line-through">S</span>
+                    <span>16 ▼</span>
+                    <span>▦</span>
+                    <span>▤</span>
+                </div>
+                <textarea rows="6" class="w-full px-4 py-3 border border-t-0 border-gray-400 rounded-b-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition" placeholder="Write your profile description here..."></textarea>
+            </div>
+
+            <!-- ===== STATS CARD ===== -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                    Your stats
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Age group</label>
+                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option>- Select age -</option>
+                            <option>18-24</option>
+                            <option>25-30</option>
+                            <option>31-35</option>
+                            <option>36-40</option>
+                            <option>40+</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Hair color</label>
+                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option>- Select -</option>
+                            <option>Blonde</option>
+                            <option>Brunette</option>
+                            <option>Redhead</option>
+                            <option>Black</option>
+                            <option>Brown</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Hair length</label>
+                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option>- Select -</option>
+                            <option>Short</option>
+                            <option>Medium</option>
+                            <option>Long</option>
+                            <option>Very Long</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Ethnicity</label>
+                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option>- Select -</option>
+                            <option>Caucasian</option>
+                            <option>Asian</option>
+                            <option>Indian</option>
+                            <option>Middle Eastern</option>
+                            <option>Hispanic</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Body type</label>
+                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option>- Select -</option>
+                            <option>Slender</option>
+                            <option>Average</option>
+                            <option>Athletic</option>
+                            <option>Curvy</option>
+                            <option>Full Figured</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Bust size</label>
+                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option>- Select -</option>
+                            <option>A cup</option>
+                            <option>B cup</option>
+                            <option>C cup</option>
+                            <option>D cup</option>
+                            <option>DD+</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Your length</label>
+                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option>- Select -</option>
+                            <option>Under 5'0"</option>
+                            <option>5'0" - 5'3"</option>
+                            <option>5'4" - 5'6"</option>
+                            <option>5'7" - 5'9"</option>
+                            <option>5'10" and above</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <!-- Your services -->
-            <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Your services</h2>
-                <p style="color: #222; margin-bottom: 10px; font-weight: 700;">Select any of the services below that you provide:</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Standard service (not QFC or PSE)</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">GFE</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">PSE (or very naughty girlfriend)</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Fantasy / roleplay / kinky fetishes</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Erotic body tubs</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Social, netflix or dinner dates</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Overnight services</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Fly me to you</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Submission /dom sessions</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Dominatrix /dom sessions</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Escort for couples</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Threesome bookings with another SW</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Swingers party companion</span></label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px;"> <span style="font-size: 0.95rem; color: #555;">Online services</span></label>
+            <!-- ===== TAGS CARD ===== -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                    Tags that describe you
+                </h2>
+                <p class="text-gray-600 text-sm mb-6">These tags help clients find you. Click to select.</p>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="font-medium text-gray-800 mb-3">Primary identity <span class="text-gray-500 text-sm">(select one)</span></h3>
+                        <div class="flex flex-wrap gap-2">
+                            @php
+                                $primaryTags = ['milf', 'girl next door', 'courage', 'trans', 'sympho', 'sex goddess', 'naughty housewife', 'pornstar', 'kinky lady', 'elite courtesan'];
+                            @endphp
+                            @foreach($primaryTags as $tag)
+                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition">{{ $tag }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-medium text-gray-800 mb-3">Attributes <span class="text-gray-500 text-sm">(multiple allowed)</span></h3>
+                        <div class="flex flex-wrap gap-2">
+                            @php
+                                $attrTags = ['heterosexual', 'bisexual', 'high end trans only', 'cheap trans available', 'natural boobs', 'enhanced boobs', 'covered in tattoos', 'some tattoos', 'no tattoos', 'lingerie piercing', 'clit piercing', 'body piercings', 'long legs', 'curly hair', 'big boobs', 'round bottom', 'natural bush', 'well groomed', 'fully shaved or waxed', 'anal ok', 'no anal', 'fair skin', 'tanned skin', 'asian skin', 'dark skin', 'quickies', 'no quickies', 'non smoker', 'covid vaccinated'];
+                            @endphp
+                            @foreach($attrTags as $tag)
+                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition">{{ $tag }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-medium text-gray-800 mb-3">Services & style <span class="text-gray-500 text-sm">(up to 12)</span></h3>
+                        <div class="flex flex-wrap gap-2">
+                            @php
+                                $styleTags = ['outfit requests welcome', 'lingerie', 'high heels', 'thigh high boots', 'pegging', 'pregnant', 'classy', 'love conversations', 'shower facilities', 'wicked wall', 'squirt', 'party kick', 'groupie kick', 'stripper', 'touring escort', 'published pornstar', 'model', 'sexual experience', 'french kissing', 'no kissing', 'toys', 'no rough sex', 'rough sex ok', 'spanking', 'fantasy experiences', 'school girl fantasy', 'secretary fantasy', 'nurse fantasy'];
+                            @endphp
+                            @foreach($styleTags as $tag)
+                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition">{{ $tag }}</span>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Are you available for -->
-            <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Are you available for:</h2>
-                <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="availability"> Incalls only</label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="availability"> Outcalls only</label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="availability"> Incalls and Outcalls</label>
+            <!-- ===== SERVICES CARD ===== -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    Services you provide
+                </h2>
+                <p class="text-gray-600 text-sm mb-4">Check all that apply</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    @php
+                        $services = ['Standard service', 'GFE', 'PSE (or very naughty girlfriend)', 'Fantasy / roleplay / kinky fetishes', 'Erotic body rubs', 'Social, netflix or dinner dates', 'Overnight services', 'Fly me to you', 'Submission / dom sessions', 'Dominatrix / dom sessions', 'Escort for couples', 'Threesome bookings with another SW', 'Swingers party companion', 'Online services'];
+                    @endphp
+                    @foreach($services as $service)
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 text-[#e04ecb] rounded border-gray-400 focus:ring-[#e04ecb]">
+                            <span class="text-gray-800 text-sm">{{ $service }}</span>
+                        </label>
+                    @endforeach
                 </div>
             </div>
 
-            <!-- How can people contact you? -->
-            <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">How can people contact you?</h2>
-                <p style="color: #555; margin-bottom: 10px;">Email enquiries will be sent to: s8813w@gmail.com</p>
-            </div>
+            <!-- ===== AVAILABILITY CARD ===== -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    Availability & contact
+                </h2>
 
-            <!-- Phone and Email contact form -->
-            <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Phone and Email contact form</h2>
-                <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="contact_method"> Phone only</label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="contact_method"> Email contact form only (Your phone number will not be displayed if you select this option)</label>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-2">Are you available for:</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center gap-2"><input type="radio" name="availability" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Incalls only</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="availability" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Outcalls only</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="availability" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Incalls and Outcalls</span></label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-2">How can people contact you?</label>
+                        <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: s8813w@gmail.com</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center gap-2"><input type="radio" name="contact_method" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Phone only</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="contact_method" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Email contact form only (phone hidden)</span></label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-2">Phone contact preferences</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center gap-2"><input type="radio" name="phone_contact" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Accept calls & SMS</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="phone_contact" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Accept calls only</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="phone_contact" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Accept SMS only</span></label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-2">Use time waster shield for SMS?</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2"><input type="radio" name="time_waster" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">No</span></label>
+                            <label class="flex items-center gap-2"><input type="radio" name="time_waster" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Yes</span></label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- How can people contact you by phone? -->
-            <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">How can people contact you by phone?</h2>
-                <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="phone_contact"> Accept phone calls & SMS messages</label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="phone_contact"> Accept phone calls only</label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="phone_contact"> Accept SMS only</label>
+            <!-- ===== OPTIONAL SOCIAL LINKS ===== -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                    Optional links
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Twitter handle</label>
+                        <input type="text" value="@yourtwittername" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">Website</label>
+                        <input type="text" value="https://example.com" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-gray-800 mb-1">OnlyFans username</label>
+                        <input type="text" value="@onlyfansusername" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
+                    </div>
                 </div>
             </div>
 
-            <!-- Do you want to use our time waster shield for SMS -->
-            <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 10px;">Do you want to use our time waster shield for SMS what is this?</h2>
-                <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-                    <label style="font-weight: 600; color: #555; font-size: 0.95rem;display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="time_waster"> No</label>
-                    <label style="font-weight: 600; color: #555; font-size: 0.95rem;display: flex; align-items: center; gap: 8px; cursor: pointer;font-weight: 600; color: #555; font-size: 0.95rem;"><input type="radio" name="time_waster"> Yes</label>
-                </div>
-            </div>
-
-            <!-- Optional fields -->
-
-            <div style="margin-bottom: 30px;">
-                <h2 style="font-size: 1.3rem; font-weight: 700; color: #222; margin-bottom: 15px;">Optional fields</h2>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #222; font-size: 0.95rem;">Your Twitter handle</label>
-                    <input type="text" value="@yourtwittername" style="font-weight: 600; color: #555; font-size: 0.95rem;width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px;">
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #222; font-size: 0.95rem;">Your website</label>
-                    <input type="text" value="eg. https://www.realbabes.com.au" style="font-weight: 600; color: #555; font-size: 0.95rem;width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px;">
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #222; font-size: 0.95rem;">OnlyFans username</label>
-                    <input type="text" value="@onlyfansusername" style="font-weight: 600; color: #555; font-size: 0.95rem;width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px;">
-                </div>
-            </div>
-
-            <!-- Save button -->
-            <div style="margin-top: 30px;">
-                <button type="submit" style="width: 100%; padding: 16px; background: #e04ecb; border: none; border-radius: 50px; color: white; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 10px rgba(224,78,203,0.3);">
+            <!-- ===== SAVE BUTTON ===== -->
+            <div class="pt-4">
+                <button type="submit" class="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-lg rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition focus:outline-none focus:ring-2 focus:ring-[#e04ecb] focus:ring-offset-2">
                     Save your profile
                 </button>
             </div>
@@ -347,103 +299,21 @@ or you can type them down here.
 </div>
 
 <style>
-/* Global Styles */
-body, html {
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
-
-/* Form Elements */
-input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select, textarea {
-    transition: all 0.3s ease;
-    font-size: 1rem;
-    background: #fff;
-}
-
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #e04ecb !important;
-    box-shadow: 0 0 0 3px rgba(224,78,203,0.1);
-}
-
-input[type="radio"], input[type="checkbox"] {
-    accent-color: #e04ecb;
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-/* Button Hover */
-button:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(224,78,203,0.4) !important;
-}
-
-/* Tag hover effect */
-span[style*="cursor: pointer"]:hover {
-    background: #e04ecb !important;
-    color: white !important;
-    border-color: #e04ecb !important;
-    transition: all 0.2s ease;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    div[style*="padding: 40px 20px"] {
-        padding: 20px 15px !important;
+    /* Selected state for tag pills */
+    .tag-pill.selected {
+        background-color: #e04ecb !important;
+        color: white !important;
     }
-
-    div[style*="display: flex"][style*="gap: 25px"] {
-        gap: 10px !important;
-        justify-content: center !important;
-    }
-
-    div[style*="margin-left: auto"] {
-        margin-left: 0 !important;
-        margin-top: 5px;
-    }
-
-    h2 {
-        font-size: 1.2rem !important;
-    }
-
-    div[style*="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))"] {
-        grid-template-columns: 1fr !important;
-        gap: 8px !important;
-    }
-
-    div[style*="display: flex"][style*="gap: 30px"] {
-        gap: 15px !important;
-    }
-}
-
-@media (max-width: 480px) {
-    div[style*="display: flex"][style*="gap: 25px"] {
-        flex-direction: column !important;
-        align-items: center !important;
-    }
-
-    div[style*="display: flex"][style*="gap: 30px"] {
-        flex-direction: column !important;
-        gap: 10px !important;
-    }
-
-    .navigation-menu {
-        flex-direction: column !important;
-        align-items: center !important;
-    }
-
-    span[style*="color: #999"] {
-        display: none;
-    }
-
-    button {
-        font-size: 1rem !important;
-        padding: 14px !important;
-    }
-}
 </style>
+
+<script>
+    // Simple script to toggle tag selection
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.tag-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+    });
+</script>
 @endsection

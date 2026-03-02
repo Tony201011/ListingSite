@@ -1,172 +1,90 @@
 @extends('layouts.frontend')
 
 @section('content')
-<!-- Main Content - Profile Dashboard -->
-<div style="background: #ffffff; min-height: 100vh;">
-    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+    <!-- Main Content - Profile Dashboard -->
+    <!-- Using a light gray background for the page to make the white card pop (Modern UI) -->
+    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto">
 
-        <!-- Dashboard Title -->
-        <h1 style="font-size: 2.2rem; font-weight: 700; color: #222; margin-bottom: 30px;">
-            Hotescorts dashboard
-        </h1>
+            <!-- Dashboard Title -->
+            <!-- Added a subtle text shadow and improved typography -->
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-10 tracking-tight">
+                Hotescorts dashboard
+            </h1>
 
-        <!-- Profile Setup Section - Exactly as in image -->
-        <div style="background: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <!-- Profile Setup Section Card -->
+            <!-- Changed to a borderless/shadow style common in modern Aussie sites -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-            <!-- Header Text -->
-            <p style="font-size: 1.2rem; color: #333; margin-bottom: 25px;">
-                To set up your profile please do the next three steps:
-            </p>
+                <!-- Inner Padding -->
+                <div class="p-6 sm:p-8">
 
-            <!-- Steps Table - Exactly as in image -->
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-                    <!-- Completed Row -->
-                    <tr>
-                        <td style="padding: 10px 0; width: 70%;"></td>
-                        <td style="padding: 10px 0; font-weight: 600; color: #333; text-align: right;">Completed</td>
-                    </tr>
+                    <!-- Header Text -->
+                    <p class="text-lg text-gray-600 mb-8 font-medium">
+                        To set up your profile please do the next three steps:
+                    </p>
 
-                    <!-- Step 1 - Write profile text -->
-                    <tr>
-                        <td style="padding: 12px 0; color: #333; font-size: 1.1rem;">1. Write profile text</td>
-                        <td style="padding: 12px 0; text-align: right;">
-                            <div style="width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%; display: inline-block;"></div>
-                        </td>
-                    </tr>
+                    <!-- Steps Container -->
+                    <!-- Replaced Table with Flex/Grid for better Tailwind responsiveness -->
+                    <div class="space-y-1 mb-10">
 
-                    <!-- Step 2 - Upload photos -->
-                    <tr>
-                        <td style="padding: 12px 0; color: #333; font-size: 1.1rem;">2. Upload photos</td>
-                        <td style="padding: 12px 0; text-align: right;">
-                            <div style="width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%; display: inline-block;"></div>
-                        </td>
-                    </tr>
+                        <!-- Table Header -->
+                        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</span>
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</span>
+                        </div>
 
-                    <!-- Step 3 - Verify your photos -->
-                    <tr>
-                        <td style="padding: 12px 0; color: #333; font-size: 1.1rem;">3. Verify your photos</td>
-                        <td style="padding: 12px 0; text-align: right;">
-                            <div style="width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%; display: inline-block;"></div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+                        <!-- Step 1 -->
+                        <div class="flex items-center justify-between py-4 hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out px-2 -mx-2">
+                            <div class="flex items-center">
+                                <span class="text-lg font-semibold text-pink-600 mr-4">01</span>
+                                <span class="text-gray-800 font-medium text-base">Write profile text</span>
+                            </div>
+                            <div class="ml-4">
+                                <!-- Empty Circle Icon (SVG) -->
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 bg-white"></div>
+                            </div>
+                        </div>
 
-            <!-- Profile Text Section - Exactly as in image -->
-            <div>
-                <!-- Action Buttons -->
-                <div style="display: flex; gap: 15px; justify-content: flex-start; flex-wrap: wrap;">
-                    <button style="padding: 14px 30px; background: #e04ecb; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 600; color: white; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 10px rgba(224,78,203,0.3);">
-                        Start Writing Your Profile Text
-                    </button>
+                        <!-- Step 2 -->
+                        <div class="flex items-center justify-between py-4 hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out px-2 -mx-2">
+                            <div class="flex items-center">
+                                <span class="text-lg font-semibold text-pink-600 mr-4">02</span>
+                                <span class="text-gray-800 font-medium text-base">Upload photos</span>
+                            </div>
+                            <div class="ml-4">
+                                <!-- Empty Circle Icon (SVG) -->
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 bg-white"></div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="flex items-center justify-between py-4 hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out px-2 -mx-2">
+                            <div class="flex items-center">
+                                <span class="text-lg font-semibold text-pink-600 mr-4">03</span>
+                                <span class="text-gray-800 font-medium text-base">Verify your photos</span>
+                            </div>
+                            <div class="ml-4">
+                                <!-- Empty Circle Icon (SVG) -->
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 bg-white"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button Area -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <button class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5">
+                            Start Writing Your Profile Text
+                        </button>
+
+                        <!-- Optional: Secondary link often found on these sites -->
+                        <span class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition">
+                            or skip for now
+                        </span>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<style>
-/* Global Styles */
-body, html {
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
-
-/* Button Hover Effects */
-button:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(224,78,203,0.4) !important;
-    transition: all 0.3s ease;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    div[style*="padding: 40px 20px"] {
-        padding: 20px 15px !important;
-    }
-
-    h1 {
-        font-size: 1.8rem !important;
-        margin-bottom: 20px !important;
-    }
-
-    div[style*="padding: 30px"] {
-        padding: 20px !important;
-    }
-
-    p {
-        font-size: 1rem !important;
-        margin-bottom: 20px !important;
-    }
-
-    table td {
-        font-size: 1rem !important;
-        padding: 10px 0 !important;
-    }
-
-    table td:first-child {
-        width: 70% !important;
-    }
-
-    table td:last-child {
-        width: 30% !important;
-    }
-
-    div[style*="width: 24px"] {
-        width: 22px !important;
-        height: 22px !important;
-    }
-
-    button {
-        width: 100% !important;
-        padding: 14px 20px !important;
-        font-size: 1rem !important;
-        border-radius: 50px !important;
-    }
-
-    div[style*="display: flex"][style*="justify-content: flex-start"] {
-        justify-content: center !important;
-    }
-}
-
-/* Small phones */
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.5rem !important;
-    }
-
-    table td {
-        font-size: 0.95rem !important;
-    }
-
-    table td:first-child {
-        width: 65% !important;
-    }
-
-    table td:last-child {
-        width: 35% !important;
-    }
-
-    div[style*="width: 24px"] {
-        width: 20px !important;
-        height: 20px !important;
-        border-width: 1.5px !important;
-    }
-}
-
-/* Focus States */
-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(224,78,203,0.3);
-}
-
-/* Smooth transitions */
-button {
-    transition: all 0.3s ease;
-}
-</style>
 @endsection
