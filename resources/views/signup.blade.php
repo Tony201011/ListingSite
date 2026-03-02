@@ -1,267 +1,164 @@
 @extends('layouts.frontend')
 
-
 @section('content')
-<!-- ================= TOP SIGNUP BANNER ================= -->
-<div style="width:100%; background:#b784a7;">
-    <div style="display:flex; width:100%; height:350px; overflow:hidden;">
-        <!-- LEFT IMAGE -->
-        <div style="
-            flex:1;
-            background:url('https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1200&auto=format&fit=crop') center center/cover no-repeat;
-            position:relative;">
-            <div style="position:absolute; inset:0; background:rgba(92,53,89,0.6);"></div>
-        </div>
-        <!-- CENTER LOGO TEXT -->
-        <div style="flex:1; background:#c893b8; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
-            <h2 style="margin:0; font-size:40px; font-weight:700; color:#000;">
-                hotescorts.com.au
-            </h2>
-            <span style="font-size:12px; letter-spacing:2px; color:#333;">
-                REAL WOMEN NEAR YOU
-            </span>
-        </div>
-        <!-- RIGHT IMAGE -->
-        <div style="
-            flex:1;
-            background:url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop') center center/cover no-repeat;
-            position:relative;">
-            <div style="position:absolute; inset:0; background:rgba(92,53,89,0.6);"></div>
-        </div>
+<!-- ================= HERO BANNER ================= -->
+<div class="relative overflow-hidden bg-gradient-to-r from-[#667eea] to-[#764ba2]">
+    <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop');"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">hotescorts.com.au</h1>
+        <p class="text-xl text-white/90 tracking-widest">REAL WOMEN NEAR YOU</p>
     </div>
 </div>
-<!-- ================= END BANNER ================= -->
 
 <!-- Main Content -->
-<div style="background: #ffffff; min-height: 100vh;">
-    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px 20px 20px;">
+<div class="bg-[#f8fafc] min-h-screen py-10">
+    <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
 
-        <!-- Sign up Header -->
-        <h1 style="font-size: 2.5rem; font-weight: 700; color: #222; margin-bottom: 5px; border-left: 5px solid #e04ecb; padding-left: 15px;">Sign up</h1>
-
-        <!-- Free Trial Section -->
-        <div style="margin: 25px 0 20px 0;">
-            <h2 style="font-size: 1.4rem; font-weight: 600; color: #e04ecb; margin-bottom: 15px;">Register today and get 21 days free advertising</h2>
-
-            <!-- Bullet Points - Exactly as in image -->
-            <ul style="list-style: none; padding: 0; margin: 0; color: #444; font-size: 0.95rem;">
-                <li style="margin-bottom: 10px; display: flex; gap: 10px;">
-                    <span style="color: #e04ecb; font-weight: bold;">•</span>
-                    <span>No credit card details required for signup, no obligations.</span>
-                </li>
-                <li style="margin-bottom: 10px; display: flex; gap: 10px;">
-                    <span style="color: #e04ecb; font-weight: bold;">•</span>
-                    <span>We rank first page for many searches like Sydney escorts, Melbourne escorts, Brisbane escorts, Adelaide escorts, Canberra escorts, Gold coast escorts, etc.</span>
-                </li>
-                <li style="margin-bottom: 10px; display: flex; gap: 10px;">
-                    <span style="color: #e04ecb; font-weight: bold;">•</span>
-                    <span>Unlimited photos and videos, Available NOW, Twitter promotions, touring pages, profile booster features and much more....</span>
-                </li>
-                <li style="margin-bottom: 10px; display: flex; gap: 10px;">
-                    <span style="color: #e04ecb; font-weight: bold;">•</span>
-                    <span>Advertise from $0.79 a day !!!</span>
-                </li>
-                <li style="margin-bottom: 10px; display: flex; gap: 10px;">
-                    <span style="color: #e04ecb; font-weight: bold;">•</span>
-                    <span>No charge when your profile is set to hidden.</span>
-                </li>
-                <li style="margin-bottom: 10px; display: flex; gap: 10px;">
-                    <span style="color: #e04ecb; font-weight: bold;">•</span>
-                    <span>Don't loose your profile, when not advertising you still have access to your profile.</span>
-                </li>
-            </ul>
+        <!-- Sign up Header with Steps -->
+        <div class="flex items-center justify-between flex-wrap gap-4 mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#9f7aea] pl-4">Create your free profile</h2>
+            <div class="flex items-center gap-4 bg-white px-5 py-2 rounded-full shadow-sm">
+                <span class="text-[#9f7aea] font-semibold">Step 1 of 3</span>
+                <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="w-1/3 h-full bg-[#9f7aea]"></div>
+                </div>
+            </div>
         </div>
 
-        <hr style="border: none; border-top: 2px solid #f0f0f0; margin: 25px 0;">
+        <!-- Free Trial & Benefits Card (Fixed with purple bullets and full text) -->
+        <div class="bg-white rounded-2xl p-6 md:p-8 mb-8 shadow-md border border-gray-100">
+            <div class="flex items-center gap-4 mb-5">
+                <div class="w-12 h-12 bg-[#9f7aea] rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800">21 days free advertising</h3>
+            </div>
+            <p class="text-gray-600 mb-5 text-lg">Register today and enjoy these exclusive benefits:</p>
+            <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                    <span class="text-[#9f7aea] font-bold text-xl leading-5">•</span>
+                    <span class="text-gray-700">No credit card required – zero obligations</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-[#9f7aea] font-bold text-xl leading-5">•</span>
+                    <span class="text-gray-700">First‑page rankings in major cities (Sydney, Melbourne, Brisbane, Adelaide, Canberra, Gold Coast)</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-[#9f7aea] font-bold text-xl leading-5">•</span>
+                    <span class="text-gray-700">Unlimited photos and videos, Available NOW, Twitter promotions, touring pages, profile booster features and much more…</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-[#9f7aea] font-bold text-xl leading-5">•</span>
+                    <span class="text-gray-700">Advertise from $0.79 a day !!!</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-[#9f7aea] font-bold text-xl leading-5">•</span>
+                    <span class="text-gray-700">No charge when your profile is set to hidden.</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-[#9f7aea] font-bold text-xl leading-5">•</span>
+                    <span class="text-gray-700">Don't lose your profile – when not advertising you still have access to your profile.</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Registration Form -->
-        <form style="background: #ffffff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 35px 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);" method="POST" action="#">
+        <form class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100" method="POST" action="#">
             @csrf
 
-            <!-- Email -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #333; margin-bottom: 5px;">Your email address</label>
-                <input type="email"
-                       value="s8811w@gmail.com"
-                       style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; transition: all 0.3s;"
-                       onfocus="this.style.borderColor='#e04ecb'; this.style.boxShadow='0 0 0 3px rgba(224,78,203,0.1)';"
-                       onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';"
-                       required>
+            <!-- Two-column layout for some fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Email -->
+                <div class="mb-2">
+                    <label class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
+                    <input type="email" value="s8811w@gmail.com" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#9f7aea] focus:ring-2 focus:ring-[#9f7aea]/20 transition" required>
+                </div>
+                <!-- Nickname -->
+                <div class="mb-2">
+                    <label class="block font-semibold text-gray-800 mb-1">Nickname <span class="text-red-600">*</span></label>
+                    <input type="text" placeholder="e.g. SexyBabe" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#9f7aea] focus:ring-2 focus:ring-[#9f7aea]/20 transition" required>
+                </div>
+                <!-- Password -->
+                <div class="mb-2">
+                    <label class="block font-semibold text-gray-800 mb-1">Password <span class="text-red-600">*</span></label>
+                    <input type="password" value="**********" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#9f7aea] focus:ring-2 focus:ring-[#9f7aea]/20 transition" required>
+                    <div class="text-xs text-gray-500 mt-1">8‑20 characters, letters & numbers recommended</div>
+                </div>
+                <!-- Confirm Password -->
+                <div class="mb-2">
+                    <label class="block font-semibold text-gray-800 mb-1">Confirm password <span class="text-red-600">*</span></label>
+                    <input type="password" value="**********" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#9f7aea] focus:ring-2 focus:ring-[#9f7aea]/20 transition" required>
+                </div>
             </div>
 
-            <!-- Password -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #333; margin-bottom: 5px;">Choose your password</label>
-                <input type="password"
-                       value="**********"
-                       style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
-                       onfocus="this.style.borderColor='#e04ecb'; this.style.boxShadow='0 0 0 3px rgba(224,78,203,0.1)';"
-                       onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';"
-                       required>
-                <div style="font-size: 0.85rem; color: #888; margin-top: 5px;">Your password must be 8-20 characters long. We do recommend that you use letters and numbers.</div>
-            </div>
-
-            <!-- Confirm Password -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #333; margin-bottom: 5px;">Retype your password</label>
-                <input type="password"
-                       value="**********"
-                       style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
-                       onfocus="this.style.borderColor='#e04ecb'; this.style.boxShadow='0 0 0 3px rgba(224,78,203,0.1)';"
-                       onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';"
-                       required>
-            </div>
-
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-
-            <!-- Nickname -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #333; margin-bottom: 5px;">Your preferred (nick) name</label>
-                <input type="text"
-                       style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
-                       placeholder="e.g., SexyBabe"
-                       onfocus="this.style.borderColor='#e04ecb'; this.style.boxShadow='0 0 0 3px rgba(224,78,203,0.1)';"
-                       onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';"
-                       required>
-            </div>
-
-            <!-- Mobile Number with Verification Message -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #333; margin-bottom: 5px;">Your mobile number</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <select style="width: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+            <!-- Mobile Number with styled verification -->
+            <div class="my-6">
+                <label class="block font-semibold text-gray-800 mb-1">Mobile number <span class="text-red-600">*</span></label>
+                <div class="flex gap-2.5">
+                    <select class="w-24 px-3 py-3 border-2 border-gray-200 rounded-xl bg-white focus:border-[#9f7aea] focus:ring-2 focus:ring-[#9f7aea]/20">
                         <option value="+61">🇦🇺 +61</option>
                         <option value="+64">🇳🇿 +64</option>
                         <option value="+44">🇬🇧 +44</option>
                     </select>
-                    <input type="tel"
-                           style="flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
-                           placeholder="Australian mobile number"
-                           onfocus="this.style.borderColor='#e04ecb'; this.style.boxShadow='0 0 0 3px rgba(224,78,203,0.1)';"
-                           onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';">
+                    <input type="tel" placeholder="Australian mobile" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#9f7aea] focus:ring-2 focus:ring-[#9f7aea]/20 transition">
                 </div>
-                <!-- Verification Message Box - EXACT as in image -->
-                <div style="background: #e8f0fe; border-left: 4px solid #e04ecb; border-radius: 6px; padding: 15px; font-size: 0.95rem; color: #333; margin-top: 10px;">
-                    <span style="font-weight: 600;">We verify all our babes.</span> We need this number so one of our moderators can give you a call. Remember on realbabes.com.au there only real babes ;-) <span style="font-weight: 600;">We will NEVER publish or share this phone number without your permission.</span>
-                    <div style="margin-top: 8px; color: #e04ecb; font-size: 0.9rem;">- Australian mobile number</div>
-                </div>
-            </div>
-
-            <!-- Suburb -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #333; margin-bottom: 5px;">Suburb <span style="font-weight: normal; color: #888;">(your primary main work suburb, select it from the list while typing)</span></label>
-                <input type="text"
-                       style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
-                       placeholder="Start typing your suburb..."
-                       onfocus="this.style.borderColor='#e04ecb'; this.style.boxShadow='0 0 0 3px rgba(224,78,203,0.1)';"
-                       onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';"
-                       required>
-            </div>
-
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-
-            <!-- Referral Code -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #333; margin-bottom: 5px;">Do you have a friend's referral code? <span style="font-weight: normal; color: #888;">(optional field)</span></label>
-                <input type="text"
-                       style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
-                       placeholder="Enter code if you have one"
-                       onfocus="this.style.borderColor='#e04ecb'; this.style.boxShadow='0 0 0 3px rgba(224,78,203,0.1)';"
-                       onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';">
-                <div style="font-size: 0.85rem; color: #888; margin-top: 5px;">If you don't have a referral code, leave this field blank.</div>
-            </div>
-
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-
-            <!-- Age Confirmation -->
-            <div style="margin-bottom: 20px; display: flex; align-items: center;">
-                <input type="checkbox" id="age_confirm" style="width: 18px; height: 18px; margin-right: 10px; accent-color: #e04ecb;" required>
-                <label for="age_confirm" style="font-size: 1rem; color: #333; font-weight: 500;">I confirm that I am 18+ years old</label>
-            </div>
-
-            <!-- reCAPTCHA -->
-            <div style="margin-bottom: 25px;">
-                <div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 15px; display: flex; align-items: center;">
-                    <div style="width: 28px; height: 28px; background: #e04ecb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                        <span style="color: white; font-weight: bold; font-size: 14px;">G</span>
+                <!-- Verification callout -->
+                <div class="bg-purple-50 rounded-2xl p-5 mt-4 flex gap-4 items-start">
+                    <div class="w-8 h-8 bg-[#9f7aea] rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8 10a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
                     </div>
-                    <span style="font-size: 1rem; color: #333;">I'm not a robot</span>
-                    <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-                        <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" style="width: 24px; height: 24px; opacity: 0.7;">
-                        <span style="font-size: 0.8rem; color: #999;">reCAPTCHA</span>
+                    <div>
+                        <span class="font-bold text-purple-800">We verify every babe.</span> One of our moderators will call to confirm. We <span class="font-semibold">never</span> publish or share your number without permission.
+                        <div class="mt-2 text-purple-700 text-sm">📱 Australian mobile only</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <button type="submit"
-                    style="width: 100%; background: linear-gradient(135deg, #e04ecb 0%, #c13ab0 100%); color: white; font-weight: 700; font-size: 1.3rem; padding: 16px 0; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(224,78,203,0.3);"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(224,78,203,0.4)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(224,78,203,0.3)';">
-                Yes sign me up
+            <!-- Suburb with autocomplete hint -->
+            <div class="mb-6">
+                <label class="block font-semibold text-gray-800 mb-1">Primary suburb <span class="text-red-600">*</span></label>
+                <input type="text" placeholder="Start typing your suburb..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#9f7aea] focus:ring-2 focus:ring-[#9f7aea]/20 transition" required>
+                <div class="text-xs text-gray-500 mt-1">We'll auto‑complete from our list</div>
+            </div>
+
+            <!-- Referral code & Age confirmation in one row -->
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-center mb-6">
+                <div>
+                    <label class="block font-semibold text-gray-800 mb-1">Referral code (optional)</label>
+                    <input type="text" placeholder="Enter code if you have one" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#9f7aea] focus:ring-2 focus:ring-[#9f7aea]/20 transition">
+                </div>
+                <div class="flex items-center gap-2.5 bg-gray-50 px-5 py-3 rounded-full">
+                    <input type="checkbox" id="age_confirm" class="w-5 h-5 accent-[#9f7aea]" required>
+                    <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
+                </div>
+            </div>
+
+            <!-- reCAPTCHA styled minimal version -->
+            <div class="mb-8">
+                <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-7 h-7 bg-[#9f7aea] rounded-lg flex items-center justify-center text-white font-bold">✓</div>
+                    <span class="text-gray-800">I'm not a robot</span>
+                    <div class="ml-auto flex items-center gap-2">
+                        <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" class="w-6 h-6 opacity-70">
+                        <span class="text-xs text-gray-400">reCAPTCHA</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="w-full bg-gradient-to-r from-[#9f7aea] to-[#6b46c1] text-white font-bold text-xl py-5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">
+                Yes, sign me up — it's free
             </button>
+
+            <p class="text-center mt-5 text-gray-500 text-sm">
+                By signing up, you agree to our <a href="#" class="text-[#9f7aea] underline">Terms</a> and <a href="#" class="text-[#9f7aea] underline">Privacy Policy</a>.
+            </p>
         </form>
     </div>
 </div>
-
-<style>
-/* Global Styles */
-body, html {
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
-
-/* Responsive Design */
-@media (max-width: 900px) {
-    div[style*="display: flex"][style*="max-width: 1200px"] {
-        flex-direction: column !important;
-        gap: 20px !important;
-    }
-    div[style*="padding-right: 30px"] {
-        justify-content: center !important;
-        padding-right: 0 !important;
-    }
-    div[style*="padding-left: 30px"] {
-        justify-content: center !important;
-        padding-left: 0 !important;
-    }
-    div[style*="flex: 0 0 auto"] {
-        order: -1;
-    }
-    h1 {
-        font-size: 2rem !important;
-    }
-    form {
-        padding: 20px !important;
-    }
-}
-
-/* Hover Effects */
-input:hover, select:hover {
-    border-color: #e04ecb !important;
-}
-
-/* Smooth Transitions */
-input, select, button {
-    transition: all 0.3s ease;
-}
-
-/* Focus States */
-input:focus, select:focus {
-    outline: none;
-    border-color: #e04ecb;
-    box-shadow: 0 0 0 3px rgba(224,78,203,0.1);
-}
-@media(max-width:768px){
-    div[style*="height:220px"]{
-        flex-direction:column !important;
-        height:auto !important;
-    }
-    h2{
-        font-size:24px !important;
-    }
-}
-</style>
 @endsection

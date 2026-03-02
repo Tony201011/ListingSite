@@ -115,6 +115,11 @@ Route::get('/purchase-history', function () {
 });
 
 
+Route::get('/babe-rank-read-more', function () {
+    return view('babe-rank-read-more');
+});
+
+
 Route::get('/terms-and-conditions', function () {
     $terms = TermCondition::query()
         ->where('is_active', true)
