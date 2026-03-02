@@ -94,10 +94,16 @@ Route::get('/purchase-credit', function () {
 });
 
 
+
+
 Route::get('/credit-history', function () {
     return view('credit-history');
 });
 
+
+Route::get('/credit-history-last-month', function () {
+    return view('credit-history-last-month');
+});
 
 Route::get('/after-image-upload', function () {
     return view('after-image-upload');
