@@ -65,6 +65,10 @@ Route::get('/add-photo', function () {
     return view('add-photo');
 });
 
+Route::get('/add-photo', function () {
+    return view('add-photo');
+})->name('add-photo');
+
 
 
 Route::get('/click-here-to-verify', function () {
