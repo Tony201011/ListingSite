@@ -73,6 +73,10 @@ Route::get('/my-videos', function () {
     return view('my-videos');
 });
 
+Route::get('/upload-video', function () {
+    return view('upload-video');
+})->name('upload-video');
+
 Route::get('/my-tours', function () {
     return view('my-tours');
 });
