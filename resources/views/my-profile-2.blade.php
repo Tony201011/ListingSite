@@ -18,22 +18,22 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Your name</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Your name</label>
                         <input type="text" value="Sourabh wadhwa" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Mobile number</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Mobile number</label>
                         <input type="text" value="0415573077" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
                     </div>
                 </div>
 
                 <div class="mt-6">
-                    <label class="block font-medium text-gray-800 mb-1">Introduction line</label>
+                    <label class="block font-semibold text-[#e04ecb] mb-1">Introduction line</label>
                     <textarea rows="2" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">I am Sourabh Wadhwa, a 24-year-old student from Mumbai...</textarea>
                 </div>
 
                 <div class="mt-6">
-                    <label class="block font-medium text-gray-800 mb-1">Your suburb</label>
+                    <label class="block font-semibold text-[#e04ecb] mb-1">Your suburb</label>
                     <input type="text" value="Melbourne VIC" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
                     <p class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
                 </div>
@@ -78,7 +78,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Age group</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Age group</label>
                         <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
                             <option>- Select age -</option>
                             <option>18-24</option>
@@ -89,7 +89,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Hair color</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Hair color</label>
                         <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
                             <option>- Select -</option>
                             <option>Blonde</option>
@@ -100,7 +100,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Hair length</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Hair length</label>
                         <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
                             <option>- Select -</option>
                             <option>Short</option>
@@ -110,7 +110,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Ethnicity</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Ethnicity</label>
                         <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
                             <option>- Select -</option>
                             <option>Caucasian</option>
@@ -121,7 +121,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Body type</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Body type</label>
                         <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
                             <option>- Select -</option>
                             <option>Slender</option>
@@ -132,7 +132,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Bust size</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Bust size</label>
                         <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
                             <option>- Select -</option>
                             <option>A cup</option>
@@ -143,7 +143,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Your length</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Your length</label>
                         <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
                             <option>- Select -</option>
                             <option>Under 5'0"</option>
@@ -230,7 +230,7 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block font-medium text-gray-800 mb-2">Are you available for:</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-2">Are you available for:</label>
                         <div class="flex flex-wrap gap-4">
                             <label class="flex items-center gap-2"><input type="radio" name="availability" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Incalls only</span></label>
                             <label class="flex items-center gap-2"><input type="radio" name="availability" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Outcalls only</span></label>
@@ -239,7 +239,7 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-800 mb-2">How can people contact you?</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-2">How can people contact you?</label>
                         <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: s8813w@gmail.com</p>
                         <div class="flex flex-wrap gap-4">
                             <label class="flex items-center gap-2"><input type="radio" name="contact_method" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Phone only</span></label>
@@ -248,7 +248,7 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-800 mb-2">Phone contact preferences</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-2">Phone contact preferences</label>
                         <div class="flex flex-wrap gap-4">
                             <label class="flex items-center gap-2"><input type="radio" name="phone_contact" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Accept calls & SMS</span></label>
                             <label class="flex items-center gap-2"><input type="radio" name="phone_contact" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Accept calls only</span></label>
@@ -257,7 +257,7 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-800 mb-2">Use time waster shield for SMS?</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-2">Use time waster shield for SMS?</label>
                         <div class="flex gap-4">
                             <label class="flex items-center gap-2"><input type="radio" name="time_waster" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">No</span></label>
                             <label class="flex items-center gap-2"><input type="radio" name="time_waster" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Yes</span></label>
@@ -274,15 +274,15 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Twitter handle</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Twitter handle</label>
                         <input type="text" value="@yourtwittername" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">Website</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Website</label>
                         <input type="text" value="https://example.com" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-800 mb-1">OnlyFans username</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">OnlyFans username</label>
                         <input type="text" value="@onlyfansusername" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
                     </div>
                 </div>
