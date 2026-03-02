@@ -20,10 +20,10 @@
                     <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="4" fill="#fff"/>
                     <path d="M16 32l16-16M32 32L16 16" stroke-linecap="round"/>
                 </svg>
-                <h1 class="text-6xl font-extrabold text-purple-400 mb-2">404</h1>
+                <h1 class="text-6xl font-extrabold text-pink-400 mb-2">404</h1>
                 <h2 class="text-2xl font-bold text-white mb-4">Page Not Found</h2>
                 <p class="text-gray-300 mb-8">Sorry, the page you are looking for could not be found.<br>It might have been removed, renamed, or did not exist in the first place.</p>
-                <a href="/" class="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:from-pink-500 hover:to-purple-600 transition">Go Home</a>
+                <a href="/" class="inline-block px-6 py-3 bg-gradient-to-r from-pink-600 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:from-pink-500 hover:to-pink-600 transition">Go Home</a>
             </div>
         </div>
     </div>

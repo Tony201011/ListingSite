@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="dashboard-profile-btn-row">
-                <a href="#" class="profile-btn purple-btn">View your profile & settings</a>
+                <a href="#" class="profile-btn pink-btn">View your profile & settings</a>
             </div>
         </div>
 
@@ -320,7 +320,7 @@
 .dashboard-profile-btn-row {
     text-align: right;
 }
-.profile-btn.purple-btn {
+.profile-btn.pink-btn {
     background: #e04ecb;
     color: #fff;
     font-size: 1.1rem;
@@ -331,7 +331,7 @@
     display: inline-block;
     transition: background 0.2s;
 }
-.profile-btn.purple-btn:hover {
+.profile-btn.pink-btn:hover {
     background: #d43db3;
 }
 
@@ -509,7 +509,7 @@
         padding: 16px;
     }
     .verify-btn.grey-btn,
-    .profile-btn.purple-btn {
+    .profile-btn.pink-btn {
         font-size: 1rem;
         padding: 8px 18px;
     }

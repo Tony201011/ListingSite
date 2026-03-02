@@ -21,10 +21,10 @@
                     <path d="M24 14v10" stroke-linecap="round"/>
                     <circle cx="24" cy="32" r="2" fill="currentColor"/>
                 </svg>
-                <h1 class="text-6xl font-extrabold text-purple-400 mb-2">403</h1>
+                <h1 class="text-6xl font-extrabold text-pink-400 mb-2">403</h1>
                 <h2 class="text-2xl font-bold text-white mb-4">Forbidden</h2>
                 <p class="text-gray-300 mb-8">Sorry, you don't have permission to access this page.<br>Please contact the administrator if you believe this is an error.</p>
-                <a href="/" class="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:from-pink-500 hover:to-purple-600 transition">Go Home</a>
+                <a href="/" class="inline-block px-6 py-3 bg-gradient-to-r from-pink-600 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:from-pink-500 hover:to-pink-600 transition">Go Home</a>
             </div>
         </div>
     </div>

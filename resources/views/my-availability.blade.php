@@ -1,93 +1,48 @@
 @extends('layouts.frontend')
 
 @section('content')
+    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" x-data="{ hasAvailability: false }">
+        <div class="max-w-3xl mx-auto">
 
-
-<!-- Main Content - Availability Page -->
-<div style="background: #ffffff; min-height: 100vh;">
-    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
-
-        <!-- Back to profile link -->
-        <button onclick="window.history.back()" style="background: #cfa1b8; color: white; border: none; border-radius: 8px; padding: 6px 18px; font-size: 1rem; font-weight: 500; margin-bottom: 30px; cursor: pointer;">&lt; Go back</button>
-
-        <!-- Availability Card -->
-        <div style="background: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 40px 30px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-            <!-- Icon or Emoji (optional) -->
-            <div style="font-size: 3rem; margin-bottom: 20px;">📅</div>
-
-            <!-- Main message -->
-            <h2 style="font-size: 2rem; font-weight: 600; color: #333; margin-bottom: 15px;">
-                You haven't set your availability yet
-            </h2>
-
-            <!-- Button -->
-            <button style="padding: 16px 40px; background: #e04ecb; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 600; color: white; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(224,78,203,0.3);">
-                Set your availability
+            <button
+                onclick="window.history.back()"
+                class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
+            >
+                <span class="mr-1">&lt;</span> Go back
             </button>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 sm:p-8">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">My availability</h2>
+                    <p class="text-lg text-gray-600 mb-8 font-medium">
+                        Set your weekly schedule so clients can easily see when you are available.
+                    </p>
+
+                    <div
+                        x-show="!hasAvailability"
+                        x-transition
+                        class="text-center border border-dashed border-gray-200 rounded-xl p-8 sm:p-10 bg-gray-50 mb-8"
+                    >
+                        <div class="max-w-xl mx-auto">
+                            <div class="text-5xl mb-4">📅</div>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">You haven't set your availability yet</h2>
+                            <p class="text-gray-500 mb-6">Add your available days and times to start receiving better enquiries.</p>
+
+                            <button
+                                type="button"
+                                @click="hasAvailability = true"
+                                class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                            >
+                                Set your availability
+                            </button>
+                        </div>
+                    </div>
+
+                    <div x-show="hasAvailability" x-transition class="max-w-xl mx-auto rounded-xl border border-pink-200 bg-pink-50 p-5 text-pink-700 text-center">
+                        Availability setup started. You can now add your schedule details.
+                    </div>
+                </div>
+            </div>
         </div>
-
     </div>
-</div>
-
-
-<style>
-/* Global Styles */
-body, html {
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
-
-/* Button Hover Effects */
-button:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(224,78,203,0.4) !important;
-    transition: all 0.3s ease;
-}
-
-/* Link Hover */
-a:hover {
-    color: #e04ecb !important;
-    transition: color 0.2s;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    div[style*="padding: 40px 20px"] {
-        padding: 20px 15px !important;
-    }
-
-    h2 {
-        font-size: 1.6rem !important;
-    }
-
-    button {
-        width: 100% !important;
-        padding: 14px 20px !important;
-        font-size: 1.1rem !important;
-    }
-
-    div[style*="display: flex"][style*="gap: 25px"] {
-        gap: 15px !important;
-        justify-content: center !important;
-    }
-
-    div[style*="margin-left: auto"] {
-        margin-left: 0 !important;
-    }
-}
-
-/* Small phones */
-@media (max-width: 480px) {
-    h2 {
-        font-size: 1.4rem !important;
-    }
-
-    div[style*="font-size: 3rem"] {
-        font-size: 2.5rem !important;
-    }
-}
-</style>
 @endsection

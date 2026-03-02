@@ -45,7 +45,7 @@
                     Your profile text
                 </h2>
 
-                <div class="bg-purple-50 border-l-4 border-[#e04ecb] p-4 text-sm text-gray-800 mb-4">
+                <div class="bg-pink-50 border-l-4 border-[#e04ecb] p-4 text-sm text-gray-800 mb-4">
                     <p>It is illegal in Vic & QLD to describe your sexual services in details, you also cannot refer to the term massage. In QLD you cannot advertise 'doubles'. If you are in VIC please do not forget to mention your SWA Licence number</p>
                 </div>
 

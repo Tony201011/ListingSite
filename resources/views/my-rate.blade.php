@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- ================= HERO BANNER ================= -->
-<div class="relative overflow-hidden bg-gradient-to-r from-[#667eea] to-[#764ba2]">
+<div class="relative overflow-hidden bg-gradient-to-r from-[#e04ecb] to-[#c13ab0]">
     <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop');"></div>
     <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
         <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">hotescorts.com.au</h1>
@@ -15,7 +15,7 @@
     <div class="max-w-4xl mx-auto px-5">
 
         <!-- Back button -->
-        <button onclick="window.history.back()" class="inline-flex items-center text-[#9f7aea] hover:text-[#764ba2] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer">
+        <button onclick="window.history.back()" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -24,8 +24,8 @@
 
         <!-- Page Title -->
         <div class="mb-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#9f7aea] pl-4">
-                My <span class="text-[#9f7aea]">Rates</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#e04ecb] pl-4">
+                My <span class="text-[#e04ecb]">Rates</span>
             </h2>
         </div>
 
@@ -34,7 +34,7 @@
             <p class="text-gray-700 text-lg leading-relaxed">
                 You can group your rates by the type of services you offer, for example:
                 <span class="block mt-2 text-gray-600 text-base">
-                    massages, <span class="font-semibold text-[#9f7aea]">gfe</span>, <span class="font-semibold text-[#9f7aea]">pse</span>, kink/bdsm, netflix and chill, online services, lunch / dinner dates, extended & overnight dates, fmty, etc.
+                    massages, <span class="font-semibold text-[#e04ecb]">gfe</span>, <span class="font-semibold text-[#e04ecb]">pse</span>, kink/bdsm, netflix and chill, online services, lunch / dinner dates, extended & overnight dates, fmty, etc.
                 </span>
             </p>
         </div>
@@ -77,14 +77,14 @@
                 </div>
 
                 <!-- Add Rate Button -->
-                <button x-show="!showForm" @click="showForm = true" class="bg-[#9f7aea] hover:bg-[#764ba2] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                <button x-show="!showForm" @click="showForm = true" class="bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
                     + Add rate
                 </button>
 
                 <!-- Add Rate Form -->
                 <div x-show="showForm" x-transition class="mt-8">
-                    <div class="bg-purple-50 border border-[#9f7aea] rounded-xl p-6">
-                        <div class="border-b border-[#9f7aea]/30 pb-4 mb-6">
+                    <div class="bg-pink-50 border border-[#e04ecb] rounded-xl p-6">
+                        <div class="border-b border-[#e04ecb]/30 pb-4 mb-6">
                             <span class="text-xl font-semibold text-gray-800">Add new rate</span>
                             <span class="text-gray-600 text-sm ml-3">If you don't have an incall or outcall rate, leave blank</span>
                         </div>
@@ -92,28 +92,28 @@
                         <form @submit.prevent="addRate" class="space-y-5">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div class="md:col-span-1">
-                                    <label class="block font-medium text-gray-700 mb-1">Description</label>
-                                    <input type="text" x-model="newRate.desc" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9f7aea] focus:border-transparent" placeholder="e.g. 1 hour GFE">
-                                    <p class="text-[#9f7aea] text-xs mt-1">What do I type in here?</p>
+                                    <label class="block font-semibold text-[#e04ecb] mb-1">Description</label>
+                                    <input type="text" x-model="newRate.desc" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent" placeholder="e.g. 1 hour GFE">
+                                    <p class="text-[#e04ecb] text-xs mt-1">What do I type in here?</p>
                                 </div>
                                 <div>
-                                    <label class="block font-medium text-gray-700 mb-1">Incall ($)</label>
-                                    <input type="text" x-model="newRate.incall" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9f7aea] focus:border-transparent" placeholder="250">
+                                    <label class="block font-semibold text-[#e04ecb] mb-1">Incall ($)</label>
+                                    <input type="text" x-model="newRate.incall" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent" placeholder="250">
                                 </div>
                                 <div>
-                                    <label class="block font-medium text-gray-700 mb-1">Outcall ($)</label>
-                                    <input type="text" x-model="newRate.outcall" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9f7aea] focus:border-transparent" placeholder="300">
+                                    <label class="block font-semibold text-[#e04ecb] mb-1">Outcall ($)</label>
+                                    <input type="text" x-model="newRate.outcall" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent" placeholder="300">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block font-medium text-gray-700 mb-1">Extra info <span class="text-gray-400 font-normal">(optional)</span></label>
-                                <textarea x-model="newRate.extra" rows="2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9f7aea] focus:border-transparent" placeholder="Additional details..."></textarea>
-                                <p class="text-[#9f7aea] text-xs mt-1">What do I type in here?</p>
+                                <label class="block font-semibold text-[#e04ecb] mb-1">Extra info <span class="text-gray-400 font-normal">(optional)</span></label>
+                                <textarea x-model="newRate.extra" rows="2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent" placeholder="Additional details..."></textarea>
+                                <p class="text-[#e04ecb] text-xs mt-1">What do I type in here?</p>
                             </div>
 
                             <div class="flex flex-wrap gap-3">
-                                <button type="submit" class="bg-[#9f7aea] hover:bg-[#764ba2] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition">
+                                <button type="submit" class="bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition">
                                     + Add rate
                                 </button>
                                 <button type="button" @click="showForm = false; resetForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-6 py-3 rounded-full transition">
@@ -129,7 +129,7 @@
             <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-2">Create a new group</h2>
                 <p class="text-gray-600 mb-6">If you like to create groups, use the button below to create a group for a specific service you offer.</p>
-                <button class="bg-[#9f7aea] hover:bg-[#764ba2] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                <button class="bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
                     + Create a new rates group
                 </button>
             </div>

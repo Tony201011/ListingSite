@@ -219,14 +219,14 @@ $testimonials = [
         <div class="relative max-w-7xl mx-auto px-3 sm:px-4 md:px-8 h-full flex items-center">
             <div class="text-white max-w-3xl">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-pink-600 to-pink-600 rounded-2xl flex items-center justify-center">
                         <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                         </svg>
                     </div>
                     <div>
                         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold">
-                            About <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">RealBabes</span>
+                            About <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-pink-600">RealBabes</span>
                         </h1>
                         <p class="text-xl text-gray-300 mt-2">Australia's Most Trusted Escort Directory Since 2018</p>
                     </div>
@@ -254,7 +254,7 @@ $testimonials = [
         <div class="grid md:grid-cols-2 gap-12 items-center mb-20">
             <div>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-6">
-                    Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Story</span>
+                    Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-pink-600">Story</span>
                 </h2>
                 <p class="text-gray-300 text-lg mb-6 leading-relaxed">
                     {{ $aboutContent['description'] }}
@@ -320,7 +320,7 @@ $testimonials = [
         <div class="mb-20">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4">
-                    Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Values</span>
+                    Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-pink-600">Values</span>
                 </h2>
                 <p class="text-gray-400 max-w-2xl mx-auto">
                     What makes RealBabes the most trusted platform in Australia
@@ -329,7 +329,7 @@ $testimonials = [
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach($values as $value)
-                <div class="bg-gray-800/50 backdrop-blur-lg rounded-2xl p-6 border border-gray-700 hover:border-purple-500 transition-all group">
+                <div class="bg-gray-800/50 backdrop-blur-lg rounded-2xl p-6 border border-gray-700 hover:border-pink-500 transition-all group">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">{{ $value['icon'] }}</div>
                     <h3 class="text-xl font-bold text-white mb-2">{{ $value['title'] }}</h3>
                     <p class="text-gray-400 text-sm">{{ $value['description'] }}</p>
@@ -342,7 +342,7 @@ $testimonials = [
         <div class="mb-20">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4">
-                    Meet Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Team</span>
+                    Meet Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-pink-600">Team</span>
                 </h2>
                 <p class="text-gray-400 max-w-2xl mx-auto">
                     Dedicated professionals working 24/7 to ensure your experience is exceptional
@@ -351,7 +351,7 @@ $testimonials = [
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach($teamMembers as $member)
-                <div class="bg-gray-800/50 backdrop-blur-lg rounded-2xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all group">
+                <div class="bg-gray-800/50 backdrop-blur-lg rounded-2xl overflow-hidden border border-gray-700 hover:border-pink-500 transition-all group">
                     <div class="relative h-64 overflow-hidden">
                         <img src="{{ $member['image'] }}"
                              alt="{{ $member['name'] }}"
@@ -372,7 +372,7 @@ $testimonials = [
         <div class="mb-20">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4">
-                    What Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Community Says</span>
+                    What Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-pink-600">Community Says</span>
                 </h2>
                 <p class="text-gray-400 max-w-2xl mx-auto">
                     Real feedback from real members of the RealBabes community
@@ -385,7 +385,7 @@ $testimonials = [
                     <div class="flex items-center gap-4 mb-4">
                         <img src="{{ $testimonial['image'] }}"
                              alt="{{ $testimonial['name'] }}"
-                             class="w-16 h-16 rounded-full object-cover border-2 border-purple-500">
+                             class="w-16 h-16 rounded-full object-cover border-2 border-pink-500">
                         <div>
                             <h4 class="font-bold text-white">{{ $testimonial['name'] }}</h4>
                             <p class="text-sm text-gray-400">{{ $testimonial['role'] }}</p>
@@ -405,7 +405,7 @@ $testimonials = [
         </div>
 
         <!-- CTA Section -->
-        <div class="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-3xl p-12 text-center border border-purple-500/30">
+        <div class="bg-gradient-to-r from-pink-900/50 to-pink-900/50 rounded-3xl p-12 text-center border border-pink-500/30">
             <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4">
                 Ready to <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-500">Join Us?</span>
             </h2>
@@ -413,7 +413,7 @@ $testimonials = [
                 Whether you're a babe looking to advertise or a client seeking genuine companions, RealBabes is here for you.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/signup" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-purple-600 hover:to-pink-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl transition-all transform hover:scale-105">
+                <a href="/signup" class="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl transition-all transform hover:scale-105">
                     Create Your Account
                 </a>
                 <a href="/contact" class="bg-gray-800 hover:bg-gray-700 text-white px-8 py-4 rounded-xl font-bold text-lg border border-gray-700 transition-all transform hover:scale-105">
@@ -442,7 +442,7 @@ $testimonials = [
     background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #a78bfa;
+    background: #e04ecb;
     border-radius: 20px;
 }
 

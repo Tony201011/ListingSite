@@ -192,7 +192,7 @@ $dummyTopEscorts = [
 <section class="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 min-h-screen pb-16 overflow-x-hidden">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 md:gap-8 pt-4 md:pt-8 px-3 sm:px-4 md:px-8">
         <!-- Sidebar - Collapsible on Mobile -->
-        <aside class="w-full md:w-64 bg-gradient-to-b from-purple-700 to-purple-500 rounded-2xl p-4 md:p-6 text-white shadow-xl md:sticky md:top-24 md:self-start relative overflow-hidden">
+        <aside class="w-full md:w-64 bg-gradient-to-b from-pink-700 to-pink-500 rounded-2xl p-4 md:p-6 text-white shadow-xl md:sticky md:top-24 md:self-start relative overflow-hidden">
             <div class="flex items-center justify-between md:block">
                 <h2 class="text-xl font-bold mb-3 md:mb-6 tracking-wide flex items-center gap-2">
                     <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,15 +209,15 @@ $dummyTopEscorts = [
             </div>
 
             <!-- Categories List - Collapsible on Mobile -->
-            <div class="space-y-1 text-sm md:text-base max-h-[300px] md:max-h-none overflow-y-auto md:overflow-visible scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-transparent">
-                <a href="#" class="font-bold bg-purple-400/80 text-white px-3 md:px-4 py-2 rounded flex justify-between items-center hover:bg-purple-500 transition mb-2">
+            <div class="space-y-1 text-sm md:text-base max-h-[300px] md:max-h-none overflow-y-auto md:overflow-visible scrollbar-thin scrollbar-thumb-pink-400 scrollbar-track-transparent">
+                <a href="#" class="font-bold bg-pink-400/80 text-white px-3 md:px-4 py-2 rounded flex justify-between items-center hover:bg-pink-500 transition mb-2">
                     All Live Cams
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>
                 @foreach($categories as $category)
-                    <a href="#" class="hover:text-yellow-300 transition flex justify-between items-center px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-purple-600/30">
+                    <a href="#" class="hover:text-yellow-300 transition flex justify-between items-center px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-pink-600/30">
                         {{ $category->name }}
                         <svg class="w-4 h-4 opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -438,7 +438,7 @@ $dummyTopEscorts = [
                                             <!-- Tags -->
                                             <div class="flex flex-wrap gap-0.5 xs:gap-1 sm:gap-2 mb-1 xs:mb-2 md:mb-4 overflow-x-auto pb-0.5 xs:pb-1 md:pb-0 -mx-0.5 xs:-mx-1 px-0.5 xs:px-1 md:overflow-visible md:mx-0 md:px-0">
                                                 @foreach($featured['tags'] as $tag)
-                                                <span class="bg-purple-600/80 text-white text-[8px] xs:text-[10px] sm:text-xs px-1 xs:px-1.5 sm:px-2 md:px-3 py-0.25 xs:py-0.5 sm:py-1 rounded-full border border-purple-400/30 backdrop-blur-sm whitespace-nowrap">
+                                                <span class="bg-pink-600/80 text-white text-[8px] xs:text-[10px] sm:text-xs px-1 xs:px-1.5 sm:px-2 md:px-3 py-0.25 xs:py-0.5 sm:py-1 rounded-full border border-pink-400/30 backdrop-blur-sm whitespace-nowrap">
                                                     {{ $tag }}
                                                 </span>
                                                 @endforeach
@@ -468,7 +468,7 @@ $dummyTopEscorts = [
 
                                             <!-- CTA Buttons -->
                                             <div class="flex flex-col xs:flex-row gap-1 xs:gap-2 sm:gap-3">
-                                                <button class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-purple-600 hover:to-pink-500 text-white px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-1 xs:py-1.5 sm:py-2 md:py-2.5 lg:py-3 rounded-lg font-bold text-[8px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-0.5 xs:gap-1 sm:gap-2">
+                                                <button class="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-500 text-white px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-1 xs:py-1.5 sm:py-2 md:py-2.5 lg:py-3 rounded-lg font-bold text-[8px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-0.5 xs:gap-1 sm:gap-2">
                                                     <svg class="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -631,11 +631,11 @@ $dummyTopEscorts = [
             <div class="bg-gray-900/90 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg border border-gray-800 mb-6">
                 <!-- Gender Tabs - Horizontal Scroll on Mobile -->
                 @php $activeGender = request('gender', 'female'); @endphp
-                <div class="overflow-x-auto pb-2 -mx-1 px-1 scrollbar-thin scrollbar-thumb-purple-400 mb-4">
+                <div class="overflow-x-auto pb-2 -mx-1 px-1 scrollbar-thin scrollbar-thumb-pink-400 mb-4">
                     <div class="flex gap-2 min-w-max">
                         @foreach(gender_tabs() as $tab)
                             <a href="?gender={{ $tab->slug }}"
-                               class="flex-shrink-0 px-5 sm:px-8 py-2.5 sm:py-3 rounded-lg font-bold text-xs sm:text-sm tracking-widest transition-all shadow-lg border-2 {{ $activeGender === $tab->slug ? 'bg-gray-800 text-purple-100 border-purple-400' : 'bg-gray-700 text-purple-200 hover:bg-purple-600 border-transparent' }}">
+                               class="flex-shrink-0 px-5 sm:px-8 py-2.5 sm:py-3 rounded-lg font-bold text-xs sm:text-sm tracking-widest transition-all shadow-lg border-2 {{ $activeGender === $tab->slug ? 'bg-gray-800 text-pink-100 border-pink-400' : 'bg-gray-700 text-pink-200 hover:bg-pink-600 border-transparent' }}">
                                 {{ strtoupper($tab->label) }}
                             </a>
                         @endforeach
@@ -648,8 +648,8 @@ $dummyTopEscorts = [
                         <input type="text"
                                placeholder="Search models or categories..."
                                x-model="searchQuery"
-                               class="flex-1 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-gray-400 text-sm sm:text-base" />
-                        <button class="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-5 sm:px-7 py-2.5 sm:py-3 rounded-lg font-bold shadow hover:from-pink-500 hover:to-purple-600 transition text-sm sm:text-base whitespace-nowrap">
+                               class="flex-1 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 placeholder:text-gray-400 text-sm sm:text-base" />
+                           <button class="bg-gradient-to-r from-pink-600 to-pink-500 text-white px-5 sm:px-7 py-2.5 sm:py-3 rounded-lg font-bold shadow hover:from-pink-500 hover:to-pink-600 transition text-sm sm:text-base whitespace-nowrap">
                             Search
                         </button>
                     </div>
@@ -658,27 +658,27 @@ $dummyTopEscorts = [
                     <div class="flex gap-2 items-center justify-end sm:justify-start">
                         <span class="text-gray-400 text-sm hidden sm:block">View:</span>
                         <div class="flex gap-1 bg-gray-800 rounded-lg p-1">
-                            <button @click="gridCols = 1" :class="gridCols === 1 ? 'bg-purple-500' : 'bg-gray-700 hover:bg-gray-600'"
+                            <button @click="gridCols = 1" :class="gridCols === 1 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
                                     class="p-2 rounded-lg transition shadow sm:hidden">
                                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <rect x="4" y="4" width="16" height="16" stroke-width="2"/>
                                 </svg>
                             </button>
-                            <button @click="gridCols = 2" :class="gridCols === 2 ? 'bg-purple-500' : 'bg-gray-700 hover:bg-gray-600'"
+                            <button @click="gridCols = 2" :class="gridCols === 2 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
                                     class="p-2 rounded-lg transition shadow hidden sm:block">
                                 <svg class="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/>
                                     <rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/>
                                 </svg>
                             </button>
-                            <button @click="gridCols = 3" :class="gridCols === 3 ? 'bg-purple-500' : 'bg-gray-700 hover:bg-gray-600'"
+                            <button @click="gridCols = 3" :class="gridCols === 3 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
                                     class="p-2 rounded-lg transition shadow hidden sm:block">
                                 <svg class="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <rect x="2" y="2" width="6" height="6"/><rect x="9" y="2" width="6" height="6"/><rect x="16" y="2" width="6" height="6"/>
                                     <rect x="2" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/><rect x="16" y="9" width="6" height="6"/>
                                 </svg>
                             </button>
-                            <button @click="gridCols = 4" :class="gridCols === 4 ? 'bg-purple-500' : 'bg-gray-700 hover:bg-gray-600'"
+                            <button @click="gridCols = 4" :class="gridCols === 4 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
                                     class="p-2 rounded-lg transition shadow hidden lg:block">
                                 <svg class="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <rect x="3" y="3" width="4" height="4"/><rect x="8" y="3" width="4" height="4"/>
@@ -686,7 +686,7 @@ $dummyTopEscorts = [
                                     <rect x="3" y="8" width="4" height="4"/><rect x="8" y="8" width="4" height="4"/>
                                 </svg>
                             </button>
-                            <button @click="gridCols = 5" :class="gridCols === 5 ? 'bg-purple-500' : 'bg-gray-700 hover:bg-gray-600'"
+                            <button @click="gridCols = 5" :class="gridCols === 5 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
                                     class="p-2 rounded-lg transition shadow hidden xl:block">
                                 <svg class="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <rect x="2" y="2" width="3" height="3"/><rect x="6" y="2" width="3" height="3"/><rect x="10" y="2" width="3" height="3"/><rect x="14" y="2" width="3" height="3"/><rect x="18" y="2" width="3" height="3"/>
@@ -702,7 +702,7 @@ $dummyTopEscorts = [
                 <p class="text-sm text-gray-400">
                     Showing <span class="text-white font-semibold">36</span> models
                 </p>
-                <select class="bg-gray-800 text-white text-sm rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-purple-500">
+                <select class="bg-gray-800 text-white text-sm rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-pink-500">
                     <option>Sort by: Popular</option>
                     <option>Sort by: Newest</option>
                     <option>Sort by: Online</option>
@@ -719,7 +719,7 @@ $dummyTopEscorts = [
                     'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5': gridCols === 5
                 }">
                 @for ($i = 0; $i < 36; $i++)
-                <div class="relative group rounded-xl md:rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-gray-900 to-gray-800 hover:scale-[1.02] md:hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-purple-500">
+                <div class="relative group rounded-xl md:rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-gray-900 to-gray-800 hover:scale-[1.02] md:hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-pink-500">
                     <!-- Image Container with Aspect Ratio -->
                     <div class="relative aspect-[3/4] overflow-hidden">
                         <img src="https://randomuser.me/api/portraits/women/{{ $i % 100 }}.jpg"
@@ -732,7 +732,7 @@ $dummyTopEscorts = [
 
                         <!-- Badges -->
                         <div class="absolute top-2 left-2 flex gap-1">
-                            <span class="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs px-2 py-1 rounded font-bold shadow-lg animate-pulse">
+                            <span class="bg-gradient-to-r from-pink-500 to-pink-600 text-white text-xs px-2 py-1 rounded font-bold shadow-lg animate-pulse">
                                 LIVE
                             </span>
                             <span class="bg-black/70 text-white text-xs px-2 py-1 rounded font-medium backdrop-blur-sm">
@@ -761,7 +761,7 @@ $dummyTopEscorts = [
                         <div class="text-xs text-gray-400 mt-0.5 md:mt-1 truncate">Category • Online now</div>
 
                         <div class="flex items-center gap-1 mt-1 md:mt-2 flex-wrap">
-                            <span class="bg-purple-600 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded">HD</span>
+                            <span class="bg-pink-600 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded">HD</span>
                             <span class="bg-gray-900 text-pink-400 text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded border border-pink-500/30">VIP</span>
                             <span class="text-green-400 text-[10px] ml-auto flex items-center gap-0.5">
                                 <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
@@ -782,13 +782,13 @@ $dummyTopEscorts = [
                         </svg>
                         <span class="text-xs">Filters</span>
                     </button>
-                    <button class="flex flex-col items-center text-purple-400">
+                    <button class="flex flex-col items-center text-pink-400">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         <span class="text-xs">Sort</span>
                     </button>
-                    <button class="flex flex-col items-center text-white bg-gradient-to-r from-purple-600 to-pink-500 rounded-full px-6 py-2 -mt-8 shadow-lg">
+                    <button class="flex flex-col items-center text-white bg-gradient-to-r from-pink-600 to-pink-500 rounded-full px-6 py-2 -mt-8 shadow-lg">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
@@ -805,7 +805,7 @@ $dummyTopEscorts = [
 
             <!-- Load More Button -->
             <div class="flex justify-center mt-8 md:mt-10 mb-4 md:mb-0">
-                <button class="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-500 hover:from-pink-500 hover:to-purple-600 text-white px-6 sm:px-10 py-3 md:py-4 rounded-xl font-bold text-sm sm:text-base md:text-lg shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                <button class="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white px-6 sm:px-10 py-3 md:py-4 rounded-xl font-bold text-sm sm:text-base md:text-lg shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2">
                     <span>SHOW MORE MODELS</span>
                     <svg class="w-4 h-4 md:w-5 md:h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7-7-7m14-6l-7 7-7-7"></path>
@@ -827,11 +827,11 @@ $dummyTopEscorts = [
     background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #a78bfa;
+    background: #e04ecb;
     border-radius: 20px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #c084fc;
+    background: #c13ab0;
 }
 
 /* Mobile optimizations */

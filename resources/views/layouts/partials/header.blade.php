@@ -2,17 +2,17 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <div class="flex-shrink-0 flex items-center">
-                <span class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+                <span class="text-2xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
                     HOT<span class="text-white">ESCORTS</span>
                 </span>
             </div>
 
             <div class="hidden md:flex space-x-8 text-sm font-medium">
                 @foreach(main_menu_items() as $menu)
-                    <a href="{{ $menu->url ?? '#' }}" class="hover:text-purple-400 transition flex items-center gap-1">
+                    <a href="{{ $menu->url ?? '#' }}" class="hover:text-pink-400 transition flex items-center gap-1">
                         {{ $menu->label }}
                         @if($menu->is_new)
-                            <span class="bg-purple-400 text-white text-[10px] px-2 py-0.5 rounded ml-1">NEW</span>
+                            <span class="bg-pink-400 text-white text-[10px] px-2 py-0.5 rounded ml-1">NEW</span>
                         @endif
                         @if($menu->icon)
                             <i class="{{ $menu->icon }} ml-1"></i>
@@ -23,7 +23,7 @@
 
             {{-- <div class="hidden md:flex items-center space-x-4">
                 <button @click="loginModal = true" class="text-sm border border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-800">Login</button>
-                <button @click="registerModal = true" class="text-sm bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 font-bold transition">Join Now</button>
+                <button @click="registerModal = true" class="text-sm bg-pink-600 px-4 py-2 rounded-lg hover:bg-pink-700 font-bold transition">Join Now</button>
             </div> --}}
 
 <div class="hidden md:flex items-center space-x-4">
@@ -31,7 +31,7 @@
         <!-- User is logged in (includes Filament admin users) -->
         <div class="flex items-center space-x-4">
             <!-- Dashboard button - links to Filament admin -->
-            <a href="{{ filament()->getUrl() }}" class="text-sm bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 font-bold transition">
+            <a href="{{ filament()->getUrl() }}" class="text-sm bg-pink-600 px-4 py-2 rounded-lg hover:bg-pink-700 font-bold transition">
                 Dashboard
             </a>
 
@@ -57,7 +57,7 @@
         <button @click="loginModal = true" class="text-sm border border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-800">
             Login
         </button>
-        <button @click="registerModal = true" class="text-sm bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 font-bold transition">
+        <button @click="registerModal = true" class="text-sm bg-pink-600 px-4 py-2 rounded-lg hover:bg-pink-700 font-bold transition">
             Join Now
         </button>
     @endauth
@@ -76,7 +76,7 @@
                 <a @click="mobileMenu = false" href="{{ url('/provider/content-listings') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-800">Verified</a>
                 <a @click="mobileMenu = false" href="{{ route('faq') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-800">Locations</a>
                 <a @click="mobileMenu = false" href="{{ url('/provider/login') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-800">Provider Login</a>
-                <a @click="mobileMenu = false" href="{{ url('/provider/register') }}" class="block px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 font-bold text-center mt-2">Join Now</a>
+                <a @click="mobileMenu = false" href="{{ url('/provider/register') }}" class="block px-3 py-2 rounded-lg bg-pink-600 hover:bg-pink-700 font-bold text-center mt-2">Join Now</a>
             </div>
         </div>
     </div>
@@ -89,7 +89,7 @@
         <h2 class="text-2xl font-bold text-white mb-6 text-center">Login</h2>
         <div x-data="{ tab: 'provider' }">
             <div class="flex justify-center gap-4 mb-6">
-                <button @click="tab = 'provider'" :class="tab === 'provider' ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">Provider Login</button>
+                <button @click="tab = 'provider'" :class="tab === 'provider' ? 'bg-pink-600 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">Provider Login</button>
                 <button @click="tab = 'user'" :class="tab === 'user' ? 'bg-pink-500 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">User Login</button>
             </div>
             <div x-show="tab === 'provider'">
@@ -103,7 +103,7 @@
                         <label class="block text-gray-400 mb-2">Password</label>
                         <input type="password" name="password" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
                     </div>
-                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg">Login as Provider</button>
+                    <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg">Login as Provider</button>
                 </form>
             </div>
             <div x-show="tab === 'user'">
@@ -131,7 +131,7 @@
         <h2 class="text-2xl font-bold text-white mb-6 text-center">Register</h2>
         <div x-data="{ tab: 'provider' }">
             <div class="flex justify-center gap-4 mb-6">
-                <button @click="tab = 'provider'" :class="tab === 'provider' ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">Provider Register</button>
+                <button @click="tab = 'provider'" :class="tab === 'provider' ? 'bg-pink-600 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">Provider Register</button>
                 <button @click="tab = 'user'" :class="tab === 'user' ? 'bg-pink-500 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">User Register</button>
             </div>
             <div x-show="tab === 'provider'">
@@ -229,7 +229,7 @@
                             <input type="date" name="expires_at" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg mt-4">Sign up</button>
+                    <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg mt-4">Sign up</button>
                 </form>
             </div>
             <div x-show="tab === 'user'">
