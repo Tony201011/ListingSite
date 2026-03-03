@@ -5,12 +5,26 @@
     $openingBalance = 21;
 
     $transactions = [
-        ['date' => '03 Mar 2026', 'description' => 'Profile Boost (24h)', 'type' => 'used', 'amount' => 4, 'status' => 'Completed'],
-        ['date' => '02 Mar 2026', 'description' => 'Credit Top-up (Card)', 'type' => 'received', 'amount' => 12, 'status' => 'Completed'],
-        ['date' => '02 Mar 2026', 'description' => 'Message Unlock', 'type' => 'used', 'amount' => 2, 'status' => 'Completed'],
-        ['date' => '01 Mar 2026', 'description' => 'Referral Reward', 'type' => 'received', 'amount' => 6, 'status' => 'Completed'],
-        ['date' => '01 Mar 2026', 'description' => 'Daily Visibility Fee', 'type' => 'used', 'amount' => 1, 'status' => 'Completed'],
+        ['date' => '03 Mar 2026', 'month' => '2026-03', 'description' => 'Profile Boost (24h)', 'type' => 'used', 'amount' => 4, 'status' => 'Completed'],
+        ['date' => '02 Mar 2026', 'month' => '2026-03', 'description' => 'Credit Top-up (Card)', 'type' => 'received', 'amount' => 12, 'status' => 'Completed'],
+        ['date' => '02 Mar 2026', 'month' => '2026-03', 'description' => 'Message Unlock', 'type' => 'used', 'amount' => 2, 'status' => 'Completed'],
+        ['date' => '01 Mar 2026', 'month' => '2026-03', 'description' => 'Referral Reward', 'type' => 'received', 'amount' => 6, 'status' => 'Completed'],
+        ['date' => '01 Mar 2026', 'month' => '2026-02', 'description' => 'Daily Visibility Fee', 'type' => 'used', 'amount' => 1, 'status' => 'Completed'],
     ];
+
+    $q = trim((string) request('q', ''));
+    $type = (string) request('type', 'all');
+    $month = (string) request('month', 'all');
+
+    $filteredTransactions = collect($transactions)
+        ->filter(function ($item) use ($q, $type, $month) {
+            $matchesSearch = $q === '' || str_contains(strtolower($item['date'] . ' ' . $item['description'] . ' ' . $item['status']), strtolower($q));
+            $matchesType = $type === 'all' || $item['type'] === $type;
+            $matchesMonth = $month === 'all' || $item['month'] === $month;
+
+            return $matchesSearch && $matchesType && $matchesMonth;
+        })
+        ->values();
 
     $creditsReceived = collect($transactions)->where('type', 'received')->sum('amount');
     $creditsUsed = collect($transactions)->where('type', 'used')->sum('amount');
@@ -58,24 +72,35 @@
             </div>
         </div>
 
-        <div class="mb-5 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3" aria-label="Credit history controls">
+        <form method="GET" action="{{ url('/credit-history') }}" class="mb-5 grid grid-cols-1 gap-2 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm md:grid-cols-2 xl:grid-cols-4" aria-label="Credit history controls">
             <input
                 type="text"
-                class="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none ring-0 transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 md:col-span-2 xl:col-span-1"
-                placeholder="Search by description"
+                name="q"
+                value="{{ $q }}"
+                class="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none ring-0 transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 md:col-span-2 xl:col-span-2"
+                placeholder="Search date or description..."
             />
 
-            <select class="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100" aria-label="Filter transaction type">
-                <option>All types</option>
-                <option>Credits used</option>
-                <option>Credits received</option>
+            <select name="type" class="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100" aria-label="Filter transaction type">
+                <option value="all" {{ $type === 'all' ? 'selected' : '' }}>All types</option>
+                <option value="used" {{ $type === 'used' ? 'selected' : '' }}>Credits used</option>
+                <option value="received" {{ $type === 'received' ? 'selected' : '' }}>Credits received</option>
             </select>
 
-            <select class="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100" aria-label="Filter month">
-                <option>March 2026</option>
-                <option>February 2026</option>
+            <select name="month" class="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100" aria-label="Filter month">
+                <option value="all" {{ $month === 'all' ? 'selected' : '' }}>All months</option>
+                <option value="2026-03" {{ $month === '2026-03' ? 'selected' : '' }}>March 2026</option>
+                <option value="2026-02" {{ $month === '2026-02' ? 'selected' : '' }}>February 2026</option>
             </select>
-        </div>
+
+            <div class="xl:col-span-4 flex flex-wrap items-center justify-between gap-2 pt-1">
+                <p class="text-xs text-gray-500">Showing {{ $filteredTransactions->count() }} of {{ count($transactions) }} transactions</p>
+                <div class="flex items-center gap-2">
+                    <a href="{{ url('/credit-history') }}" class="inline-flex h-10 items-center rounded-lg border border-gray-200 px-4 text-sm font-medium text-gray-600 transition hover:bg-gray-50">Reset</a>
+                    <button type="submit" class="inline-flex h-10 items-center rounded-lg bg-[#e04ecb] px-4 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">Apply filter</button>
+                </div>
+            </div>
+        </form>
 
         <div class="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
             <table class="min-w-[760px] w-full border-collapse">
@@ -89,7 +114,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($transactions as $item)
+                    @forelse($filteredTransactions as $item)
                         <tr>
                             <td class="border-b border-gray-100 px-4 py-3 text-sm text-gray-700">{{ $item['date'] }}</td>
                             <td class="border-b border-gray-100 px-4 py-3 text-sm text-gray-700">{{ $item['description'] }}</td>
@@ -99,7 +124,14 @@
                                 <span class="inline-flex items-center rounded-full border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-semibold text-[#e04ecb]">{{ $item['status'] }}</span>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-600">
+                                No transactions match your current filter.
+                                <a href="{{ url('/credit-history') }}" class="font-semibold text-[#e04ecb] hover:text-[#c13ab0] hover:underline">Clear filters</a>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
                 <tfoot>
                     <tr class="bg-gray-50">
