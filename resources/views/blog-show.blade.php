@@ -1,17 +1,8 @@
 @extends('layouts.frontend')
 
 @section('content')
-<!-- ================= HERO BANNER (same as signup) ================= -->
-<div class="relative overflow-hidden bg-gradient-to-r from-[#e04ecb] to-[#c13ab0]">
-    <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop');"></div>
-    <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">hotescorts.com.au</h1>
-        <p class="text-xl text-white/90 tracking-widest">REAL WOMEN NEAR YOU</p>
-    </div>
-</div>
-
-<div class="bg-gray-50 min-h-screen py-10">
-    <div class="max-w-3xl mx-auto px-5">
+<div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
         <div class="flex items-center justify-between text-sm mb-4">
             <a href="{{ route('blog') }}" class="text-[#e04ecb] hover:text-[#c13ab0]">&lt;&lt; Blog index</a>
             @if($nextPost)
@@ -19,8 +10,8 @@
             @endif
         </div>
 
-        <article class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm">
-            <h1 class="text-3xl md:text-4xl font-bold text-pink-600 leading-tight mb-3">{{ $post['title'] }}</h1>
+        <article class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-3">{{ $post['title'] }}</h1>
 
             <p class="text-base md:text-lg text-gray-700 mb-4">{{ $post['excerpt'] }}</p>
             <p class="text-sm text-gray-500 mb-6">Posted by {{ $post['author'] }} on {{ $post['date'] }}</p>
