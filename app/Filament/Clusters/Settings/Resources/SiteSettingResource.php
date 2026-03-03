@@ -40,7 +40,7 @@ class SiteSettingResource extends Resource
     {
         return $table->columns([
             Tables\Columns\TextColumn::make('meta_key')->label('Meta Key'),
-            Tables\Columns\TextColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
+            Tables\Columns\IconColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
             Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
             Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
         ]);

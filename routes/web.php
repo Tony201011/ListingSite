@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\FrontendPageController;
+use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\PurchaseCreditController;
 use App\Http\Controllers\SocialAuthController;
-use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -75,17 +75,7 @@ Route::get('/my-profile-1', function () {
     return view('my-profile-1');
 });
 
-
-Route::get('/my-profile-2', function () {
-    $contactEmail = SiteSetting::query()
-        ->whereNotNull('contact_email')
-        ->latest('id')
-        ->value('contact_email') ?? 's8813w@gmail.com';
-
-    return view('my-profile-2', [
-        'contactEmail' => $contactEmail,
-    ]);
-});
+Route::get('/my-profile-2', [MyProfileController::class, 'stepTwo']);
 
 
 Route::get('/my-rate', function () {
@@ -216,19 +206,13 @@ Route::get('/terms-and-conditions', [FrontendPageController::class, 'termsAndCon
 Route::get('/privacy-policy', [FrontendPageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/refund-policy', [FrontendPageController::class, 'refundPolicy'])->name('refund-policy');
 Route::get('/faq', [FrontendPageController::class, 'faq'])->name('faq');
+Route::get('/faq/load-more', [FrontendPageController::class, 'faqLoadMore'])->name('faq.load-more');
 Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('anti-spam-policy');
 
 
 
-Route::get('/contact-us', function () {
-    return view('contact-us', [
-        'contact' => 'contact-us',
-    ]);
-})->name('contact-us');
-
-Route::post('/contact-us', function () {
-    return back()->with('success', 'Your message has been sent successfully.');
-})->name('contact-us.submit');
+Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('contact-us');
+Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
 
 Route::get('/403', function () {
     abort(403);

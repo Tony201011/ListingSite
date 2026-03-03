@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\FooterText;
+use App\Models\FooterWidget;
+use App\Models\HeaderWidget;
 use App\Models\S3BucketSetting;
 use App\Models\SmtpSetting;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use SocialiteProviders\Twitter\Provider;
@@ -36,8 +40,48 @@ class AppServiceProvider extends ServiceProvider
             $event->extendSocialite('twitter-oauth-2', Provider::class);
         });
 
+        $this->shareFooterText();
         $this->configureSmtpFromDatabase();
         $this->configureStorageFromDatabase();
+    }
+
+    private function shareFooterText(): void
+    {
+        View::composer('layouts.partials.footer', function ($view): void {
+            if (! Schema::hasTable('footer_texts')) {
+                $view->with('footerText', null);
+                $view->with('footerWidget', null);
+
+                return;
+            }
+
+            $footerText = FooterText::query()
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->first();
+
+            $footerWidget = Schema::hasTable('footer_widgets')
+                ? FooterWidget::query()->where('is_active', true)->latest('updated_at')->first()
+                : null;
+
+            $view->with('footerText', $footerText);
+            $view->with('footerWidget', $footerWidget);
+        });
+
+        View::composer('layouts.partials.header', function ($view): void {
+            if (! Schema::hasTable('header_widgets')) {
+                $view->with('headerWidget', null);
+
+                return;
+            }
+
+            $headerWidget = HeaderWidget::query()
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->first();
+
+            $view->with('headerWidget', $headerWidget);
+        });
     }
 
     private function configureSmtpFromDatabase(): void

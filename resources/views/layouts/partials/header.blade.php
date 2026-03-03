@@ -1,29 +1,88 @@
 <header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md">
+    @php
+        $logoType = $headerWidget?->logo_type ?: 'text';
+        $logoPath = $headerWidget?->logo_path;
+        $logoUrl = filled($logoPath) ? \Illuminate\Support\Facades\Storage::disk('public')->url($logoPath) : null;
+        $logoMaxWidth = max((int) ($headerWidget?->logo_max_width ?? 160), 20);
+        $logoMaxHeight = max((int) ($headerWidget?->logo_max_height ?? 40), 20);
+        $logoStyle = "max-width: {$logoMaxWidth}px; max-height: {$logoMaxHeight}px;";
+        $brandPrimary = $headerWidget?->brand_primary ?: 'HOT';
+        $brandAccent = $headerWidget?->brand_accent ?: 'ESCORTS';
+
+        $topLeftItems = collect($headerWidget?->top_left_items ?? [
+            ['label' => 'Verified advertisers', 'icon' => 'fa-solid fa-shield-heart'],
+            ['label' => 'Australia-wide directory', 'icon' => 'fa-solid fa-location-dot'],
+        ])->filter(fn ($item) => filled($item['label'] ?? null))->values();
+
+        $topRightLinks = collect($headerWidget?->top_right_links ?? [
+            ['label' => 'Follow Alice', 'url' => route('blog')],
+            ['label' => 'Help', 'url' => route('faq')],
+            ['label' => 'Contact', 'url' => route('contact-us')],
+        ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
+
+        $actionLinks = collect($headerWidget?->action_links ?? [
+            ['label' => 'Pricing', 'url' => url('/membership')],
+            ['label' => 'Diamonds', 'url' => url('/purchase-credit')],
+            ['label' => 'Superboost', 'url' => url('/purchase-credit')],
+            ['label' => 'Add advertisement', 'url' => url('/signup')],
+        ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
+
+        $mainNavLinks = collect($headerWidget?->main_nav_links ?? [
+            ['label' => 'Home', 'url' => url('/')],
+            ['label' => 'Escorts', 'url' => url('/')],
+            ['label' => 'Naughty corner', 'url' => route('blog')],
+            ['label' => 'Blog', 'url' => route('blog')],
+            ['label' => 'Locations', 'url' => route('faq')],
+            ['label' => 'BDSM', 'url' => route('blog')],
+            ['label' => 'Escort reviews', 'url' => route('blog')],
+            ['label' => 'Escort announcements', 'url' => route('blog')],
+        ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
+
+        $mobileExtraLinks = collect($headerWidget?->mobile_extra_links ?? [
+            ['label' => 'Contact', 'url' => route('contact-us')],
+        ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
+
+        $showTopBar = $headerWidget?->enable_top_bar ?? true;
+        $showSearch = $headerWidget?->enable_search ?? true;
+    @endphp
+
     <!-- Top bar (with Follow Alice) -->
-    <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
-        <div class="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-4">
-                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-shield-heart text-pink-500"></i> Verified advertisers</span>
-                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot text-pink-500"></i> Australia-wide directory</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <a href="{{ route('blog') }}" class="transition hover:text-pink-400">Follow Alice</a>
-                <a href="{{ route('faq') }}" class="transition hover:text-pink-400">Help</a>
-                <a href="{{ route('contact-us') }}" class="transition hover:text-pink-400">Contact</a>
+    @if($showTopBar)
+        <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
+            <div class="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
+                <div class="flex items-center gap-4">
+                    @foreach($topLeftItems as $item)
+                        <span class="inline-flex items-center gap-2">
+                            @if(filled($item['icon'] ?? null))
+                                <i class="{{ $item['icon'] }} text-pink-500"></i>
+                            @endif
+                            {{ $item['label'] }}
+                        </span>
+                    @endforeach
+                </div>
+                <div class="flex items-center gap-4">
+                    @foreach($topRightLinks as $item)
+                        <a href="{{ $item['url'] }}" class="transition hover:text-pink-400">{{ $item['label'] }}</a>
+                    @endforeach
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <!-- Main row: logo, search, actions, auth -->
         <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 md:hidden">
             <!-- Logo (escortify) -->
             <a href="{{ url('/') }}" class="shrink-0">
-                <span class="text-xl font-bold text-white">HOT<span class="text-pink-500">ESCORTS</span></span>
+                @if($logoType === 'image' && filled($logoUrl))
+                    <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}">
+                @else
+                    <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
+                @endif
             </a>
 
             <!-- Search (unchanged) -->
-            <form action="{{ url('/provider/content-listings') }}" method="GET" class="hidden flex-1 xl:block">
+            <form action="{{ url('/provider/content-listings') }}" method="GET" class="{{ $showSearch ? 'hidden flex-1 xl:block' : 'hidden' }}">
                 <div class="mx-auto flex max-w-2xl items-center rounded-xl border border-gray-700 bg-gray-800/80 p-1.5">
                     <div class="flex min-w-0 flex-1 items-center gap-2 px-2">
                         <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
@@ -40,10 +99,9 @@
             <!-- Action links & Auth (from third image) -->
             <div class="hidden items-center space-x-4 md:flex">
                 <!-- Action links -->
-                <a href="{{ url('/membership') }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Pricing</a>
-                <a href="{{ url('/purchase-credit') }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Diamonds</a>
-                <a href="{{ url('/purchase-credit') }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Superboost</a>
-                <a href="{{ url('/signup') }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Add advertisement</a>
+                @foreach($actionLinks as $item)
+                    <a href="{{ $item['url'] }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">{{ $item['label'] }}</a>
+                @endforeach
 
                 @auth
                     <!-- User dropdown (My profile / Logoff) -->
@@ -77,16 +135,15 @@
         <!-- Second row: main navigation (from first & second images) -->
         <div class="hidden items-center gap-1 border-t border-gray-800 py-3 md:flex">
             <a href="{{ url('/') }}" class="mr-4 shrink-0">
-                <span class="text-xl font-bold text-white">HOT<span class="text-pink-500">ESCORTS</span></span>
+                @if($logoType === 'image' && filled($logoUrl))
+                    <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}">
+                @else
+                    <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
+                @endif
             </a>
-            <a href="{{ url('/') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Home</a>
-            <a href="{{ url('/') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escorts</a>
-            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Naughty corner</a>
-            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Blog</a>
-            <a href="{{ route('faq') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Locations</a>
-            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">BDSM</a>
-            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escort reviews</a>
-            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escort announcements</a>
+            @foreach($mainNavLinks as $item)
+                <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">{{ $item['label'] }}</a>
+            @endforeach
             <a href="{{ url('/signin') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">Login</a>
         </div>
 
@@ -94,17 +151,13 @@
         <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 md:hidden">
             <div class="space-y-1 text-sm">
                 <!-- Main nav links -->
-                <a @click="mobileMenu = false" href="{{ url('/') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Home</a>
-                <a @click="mobileMenu = false" href="{{ url('/') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escorts</a>
-                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Naughty corner</a>
-                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Blog</a>
-                <a @click="mobileMenu = false" href="{{ route('faq') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Locations</a>
-                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">BDSM</a>
-                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escort reviews</a>
-                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escort announcements</a>
+                @foreach($mainNavLinks as $item)
+                    <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
+                @endforeach
                 <a @click="mobileMenu = false" href="{{ url('/signin') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Login</a>
-                <!-- Static contact (optional) -->
-                <a @click="mobileMenu = false" href="{{ route('contact-us') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Contact</a>
+                @foreach($mobileExtraLinks as $item)
+                    <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
+                @endforeach
             </div>
         </div>
     </div>
