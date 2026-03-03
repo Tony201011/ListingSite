@@ -4,6 +4,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\FrontendPageController;
 use App\Http\Controllers\PurchaseCreditController;
 use App\Http\Controllers\SocialAuthController;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -76,7 +77,14 @@ Route::get('/my-profile-1', function () {
 
 
 Route::get('/my-profile-2', function () {
-    return view('my-profile-2');
+    $contactEmail = SiteSetting::query()
+        ->whereNotNull('contact_email')
+        ->latest('id')
+        ->value('contact_email') ?? 's8813w@gmail.com';
+
+    return view('my-profile-2', [
+        'contactEmail' => $contactEmail,
+    ]);
 });
 
 

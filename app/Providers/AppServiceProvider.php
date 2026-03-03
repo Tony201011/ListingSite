@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\S3BucketSetting;
 use App\Models\SmtpSetting;
+use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
@@ -26,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        FilamentView::registerRenderHook(
+            'panels::head.end',
+            fn (): string => '<style>.fi-sidebar{min-height:0!important;}.fi-body-has-topbar .fi-sidebar{max-height:calc(100dvh - 4rem)!important;}.fi-sidebar-nav{min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;scrollbar-gutter:stable;}</style>',
+        );
+
         Event::listen(function (SocialiteWasCalled $event): void {
             $event->extendSocialite('twitter-oauth-2', Provider::class);
         });

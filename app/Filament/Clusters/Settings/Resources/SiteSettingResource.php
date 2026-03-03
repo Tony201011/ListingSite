@@ -28,6 +28,11 @@ class SiteSettingResource extends Resource
             Forms\Components\Textarea::make('meta_description')->label('Meta Description'),
             Forms\Components\Toggle::make('enable_cookies')->label('Enable Cookie Consent Banner'),
             Forms\Components\Textarea::make('cookies_text')->label('Cookie Consent Text')->rows(4),
+            Forms\Components\TextInput::make('contact_email')
+                ->label('Contact Email')
+                ->email()
+                ->maxLength(255)
+                ->helperText('Shown on profile contact section for email enquiries.'),
         ]);
     }
 
@@ -36,6 +41,7 @@ class SiteSettingResource extends Resource
         return $table->columns([
             Tables\Columns\TextColumn::make('meta_key')->label('Meta Key'),
             Tables\Columns\TextColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
+            Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
             Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
         ]);
     }

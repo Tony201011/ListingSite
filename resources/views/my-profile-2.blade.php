@@ -240,7 +240,7 @@
 
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-2">How can people contact you?</label>
-                        <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: s8813w@gmail.com</p>
+                        <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: {{ $contactEmail ?? 's8813w@gmail.com' }}</p>
                         <div class="flex flex-wrap gap-4">
                             <label class="flex items-center gap-2"><input type="radio" name="contact_method" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Phone only</span></label>
                             <label class="flex items-center gap-2"><input type="radio" name="contact_method" class="w-4 h-4 text-[#e04ecb] border-gray-400"> <span class="text-gray-800">Email contact form only (phone hidden)</span></label>

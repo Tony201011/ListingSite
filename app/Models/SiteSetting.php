@@ -12,5 +12,6 @@ class SiteSetting extends Model
         'meta_description',
         'enable_cookies',
         'cookies_text',
+        'contact_email',
     ];
 }

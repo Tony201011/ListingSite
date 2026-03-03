@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* Filament sidebar: enable vertical scrolling for long navigation menus */
+.fi-sidebar-nav {
+	max-height: calc(100vh - 5rem);
+	overflow-y: auto;
+}
