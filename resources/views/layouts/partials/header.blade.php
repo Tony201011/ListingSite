@@ -1,4 +1,5 @@
 <header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md">
+    <!-- Top bar (with Follow Alice) -->
     <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
         <div class="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
             <div class="flex items-center gap-4">
@@ -6,6 +7,7 @@
                 <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot text-pink-500"></i> Australia-wide directory</span>
             </div>
             <div class="flex items-center gap-4">
+                <a href="#" class="transition hover:text-pink-400">Follow Alice</a>  <!-- from first image -->
                 <a href="{{ route('faq') }}" class="transition hover:text-pink-400">Help</a>
                 <a href="{{ route('contact-us') }}" class="transition hover:text-pink-400">Contact</a>
             </div>
@@ -13,11 +15,14 @@
     </div>
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3">
+        <!-- Main row: logo, search, actions, auth -->
+        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 md:hidden">
+            <!-- Logo (escortify) -->
             <a href="{{ url('/') }}" class="shrink-0">
-                <span class="text-2xl font-bold leading-none text-white">HOT<span class="text-pink-500">ESCORTS</span></span>
+                <span class="text-xl font-bold text-white">HOT<span class="text-pink-500">ESCORTS</span></span>
             </a>
 
+            <!-- Search (unchanged) -->
             <form action="{{ url('/provider/content-listings') }}" method="GET" class="hidden flex-1 xl:block">
                 <div class="mx-auto flex max-w-2xl items-center rounded-xl border border-gray-700 bg-gray-800/80 p-1.5">
                     <div class="flex min-w-0 flex-1 items-center gap-2 px-2">
@@ -32,226 +37,77 @@
                 </div>
             </form>
 
-            <div class="hidden items-center space-x-3 md:flex">
+            <!-- Action links & Auth (from third image) -->
+            <div class="hidden items-center space-x-4 md:flex">
+                <!-- Action links -->
+                <a href="#" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Pricing</a>
+                <a href="#" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Diamonds</a>
+                <a href="#" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Superboost</a>
+                <a href="#" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Add advertisement</a>
+
                 @auth
-                    <a href="{{ filament()->getUrl() }}" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Dashboard</a>
+                    <!-- User dropdown (My profile / Logoff) -->
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm font-medium text-gray-100 transition hover:bg-gray-700">
+                            <i class="fa-solid fa-user text-pink-500"></i>
+                            <span>Account</span>
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                        <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">My profile</a>
+                            <a href="{{ filament()->getUrl() }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Dashboard</a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Logoff</button>
+                            </form>
+                        </div>
+                    </div>
                 @else
-                    <button @click="loginModal = true" class="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-100 transition hover:bg-gray-800">Login</button>
-                    <button @click="registerModal = true" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Join Now</button>
+                    <a href="{{ url('/signin') }}" class="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-100 transition hover:bg-gray-800">Login</a>
+                    <a href="{{ url('/signup') }}" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Join Now</a>
                 @endauth
             </div>
 
+            <!-- Mobile menu button (unchanged) -->
             <button @click="mobileMenu = !mobileMenu" class="md:hidden text-gray-300 hover:text-white" aria-label="Toggle menu">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
 
+        <!-- Second row: main navigation (from first & second images) -->
         <div class="hidden items-center gap-1 border-t border-gray-800 py-3 md:flex">
-            @foreach(main_menu_items() as $menu)
-                <a href="{{ $menu->url ?? '#' }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    {{ $menu->label }}
-                    @if($menu->is_new)
-                        <span class="rounded bg-pink-600 px-1.5 py-0.5 text-[10px] font-bold text-white">NEW</span>
-                    @endif
-                    @if($menu->icon)
-                        <i class="{{ $menu->icon }} text-xs"></i>
-                    @endif
-                </a>
-            @endforeach
+            <a href="{{ url('/') }}" class="mr-4 shrink-0">
+                <span class="text-xl font-bold text-white">HOT<span class="text-pink-500">ESCORTS</span></span>
+            </a>
+            <a href="{{ url('/') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Home</a>
+            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escorts</a>
+            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Naughty corner</a>
+            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Blog</a>
+            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Locations</a>
+            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">BDSM</a>
+            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escort reviews</a>
+            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escort announcements</a>
+            <a href="{{ url('/signin') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">Login</a>
         </div>
 
+        <!-- Mobile menu (updated with all items) -->
         <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 md:hidden">
-            <form action="{{ url('/provider/content-listings') }}" method="GET" class="space-y-2">
-                <input type="text" name="q" placeholder="Search by name or keyword" class="h-10 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-white placeholder:text-gray-500 focus:border-pink-500 focus:outline-none">
-                <input type="text" name="city" placeholder="City" class="h-10 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-white placeholder:text-gray-500 focus:border-pink-500 focus:outline-none">
-                <button type="submit" class="w-full rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white">Search</button>
-            </form>
-
             <div class="space-y-1 text-sm">
-                @foreach(main_menu_items() as $menu)
-                    <a @click="mobileMenu = false" href="{{ $menu->url ?? '#' }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $menu->label }}</a>
-                @endforeach
+                <!-- Main nav links -->
+                <a @click="mobileMenu = false" href="{{ url('/') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Home</a>
+                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escorts</a>
+                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Naughty corner</a>
+                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Blog</a>
+                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Locations</a>
+                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">BDSM</a>
+                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escort reviews</a>
+                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escort announcements</a>
+                <a @click="mobileMenu = false" href="{{ url('/signin') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Login</a>
+                <!-- Static contact (optional) -->
                 <a @click="mobileMenu = false" href="{{ route('contact-us') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Contact</a>
             </div>
-
-            @guest
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button @click="loginModal = true; mobileMenu = false" class="rounded-lg border border-gray-700 px-3 py-2 text-sm font-medium text-gray-100">Login</button>
-                    <button @click="registerModal = true; mobileMenu = false" class="rounded-lg bg-pink-600 px-3 py-2 text-sm font-semibold text-white">Join Now</button>
-                </div>
-            @endguest
         </div>
     </div>
 </header>
 
-<!-- Login Modal -->
-<div x-cloak x-show="loginModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-    <div class="bg-gray-900 rounded-2xl shadow-xl w-full max-w-md p-8 relative">
-        <button @click="loginModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
-        <h2 class="text-2xl font-bold text-white mb-6 text-center">Login</h2>
-        <div x-data="{ tab: 'provider' }">
-            <div class="flex justify-center gap-4 mb-6">
-                <button @click="tab = 'provider'" :class="tab === 'provider' ? 'bg-pink-600 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">Provider Login</button>
-                <button @click="tab = 'user'" :class="tab === 'user' ? 'bg-pink-500 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">User Login</button>
-            </div>
-            <div x-show="tab === 'provider'">
-                <form method="POST" action="{{ url('/provider/login') }}">
-                    @csrf
-                    <div class="mb-4">
-                        <label class="block text-gray-400 mb-2">Email</label>
-                        <input type="email" name="email" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-gray-400 mb-2">Password</label>
-                        <input type="password" name="password" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                    </div>
-                    <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg">Login as Provider</button>
-                </form>
-            </div>
-            <div x-show="tab === 'user'">
-                <form method="POST" action="{{ url('/user/login') }}">
-                    @csrf
-                    <div class="mb-4">
-                        <label class="block text-gray-400 mb-2">Email</label>
-                        <input type="email" name="email" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-gray-400 mb-2">Password</label>
-                        <input type="password" name="password" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                    </div>
-                    <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded-lg">Login as User</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Register Modal -->
-<div x-cloak x-show="registerModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-    <div class="bg-gray-900 rounded-2xl shadow-xl w-full max-w-md p-8 relative overflow-y-auto max-h-[90vh]">
-        <button @click="registerModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
-        <h2 class="text-2xl font-bold text-white mb-6 text-center">Register</h2>
-        <div x-data="{ tab: 'provider' }">
-            <div class="flex justify-center gap-4 mb-6">
-                <button @click="tab = 'provider'" :class="tab === 'provider' ? 'bg-pink-600 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">Provider Register</button>
-                <button @click="tab = 'user'" :class="tab === 'user' ? 'bg-pink-500 text-white' : 'bg-gray-800 text-gray-400'" class="px-4 py-2 rounded-lg font-semibold transition">User Register</button>
-            </div>
-            <div x-show="tab === 'provider'">
-                <form method="POST" action="{{ url('/provider/register') }}">
-                    @csrf
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-gray-400 mb-2">Name*</label>
-                            <input type="text" name="name" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Email address*</label>
-                            <input type="email" name="email" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Password*</label>
-                            <input type="password" name="password" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Confirm password*</label>
-                            <input type="password" name="password_confirmation" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Provider Name*</label>
-                            <input type="text" name="provider_name" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Slug</label>
-                            <input type="text" name="slug" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Age</label>
-                            <input type="number" name="age" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                        <div class="col-span-2">
-                            <label class="block text-gray-400 mb-2">Description</label>
-                            <textarea name="description" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" rows="3"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Country</label>
-                            <select name="country" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                                <option value="">Select an option</option>
-                                <!-- Add country options -->
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">State</label>
-                            <select name="state" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                                <option value="">Select an option</option>
-                                <!-- Add state options -->
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">City</label>
-                            <input type="text" name="city" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Latitude</label>
-                            <input type="text" name="latitude" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Longitude</label>
-                            <input type="text" name="longitude" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Phone</label>
-                            <input type="text" name="phone" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Whatsapp</label>
-                            <input type="text" name="whatsapp" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                        <div class="flex items-center mt-6">
-                            <input type="checkbox" name="verified" id="verified" class="mr-2">
-                            <label for="verified" class="text-gray-400">Verified</label>
-                        </div>
-                        <div class="flex items-center mt-6">
-                            <input type="checkbox" name="featured" id="featured" class="mr-2">
-                            <label for="featured" class="text-gray-400">Featured</label>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Membership ID</label>
-                            <input type="text" name="membership_id" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Profile Status*</label>
-                            <select name="profile_status" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                                <option value="pending">Pending</option>
-                                <option value="active">Active</option>
-                                <option value="expired">Expired</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 mb-2">Expires At</label>
-                            <input type="date" name="expires_at" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none">
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg mt-4">Sign up</button>
-                </form>
-            </div>
-            <div x-show="tab === 'user'">
-                <form method="POST" action="{{ url('/user/register') }}">
-                    @csrf
-                    <div class="mb-4">
-                        <label class="block text-gray-400 mb-2">Email</label>
-                        <input type="email" name="email" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-400 mb-2">Password</label>
-                        <input type="password" name="password" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-gray-400 mb-2">Confirm Password</label>
-                        <input type="password" name="password_confirmation" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none" required>
-                    </div>
-                    <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded-lg">Register as User</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>

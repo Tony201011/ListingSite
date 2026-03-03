@@ -13,13 +13,13 @@
 
         <!-- Page Title -->
         <h1 style="font-size: 2.2rem; font-weight: 400; color: #222; margin-bottom: 10px;">Set your availability</h1>
-        <a href="#" style="color: #4a4a9a; font-size: 1rem; text-decoration: underline; font-weight: 400; margin-bottom: 10px; display: inline-block; margin-top: -5px;">&lt;&lt;&lt; Show me my availability</a>
+        <a href="{{ url('/my-availability') }}" style="color: #4a4a9a; font-size: 1rem; text-decoration: underline; font-weight: 400; margin-bottom: 10px; display: inline-block; margin-top: -5px;">&lt;&lt;&lt; Show me my availability</a>
 
         <!-- Instructions -->
         <div style="margin-bottom: 18px;">
             <ul style="list-style: none; padding: 0; margin: 0; color: #222; font-size: 1rem; line-height: 1.6;">
                 <li style="margin-bottom: 2px;">
-                    <span style="color: #4a4a9a; text-decoration: underline; cursor: pointer;">This 7 day schedule will <a href="#" style="color: #4a4a9a; text-decoration: underline;">repeat every week</a>.</span>
+                    <span style="color: #4a4a9a; text-decoration: underline; cursor: pointer;">This 7 day schedule will <a href="{{ url('/my-availability') }}" style="color: #4a4a9a; text-decoration: underline;">repeat every week</a>.</span>
                 </li>
                 <li style="margin-bottom: 2px; color: #444;">Uncheck the days you do not work and for the days you work set times/availability.</li>
                 <li style="margin-bottom: 2px; color: #444;">You can always overrule your schedule for specific dates.</li>

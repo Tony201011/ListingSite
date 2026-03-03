@@ -61,7 +61,7 @@
 
             {{-- FAQ Footer --}}
             <div class="mt-6 rounded-lg bg-gray-800/50 p-4 text-center border border-gray-700">
-                <p class="text-gray-400">Still have questions? <a href="#" class="text-blue-400 hover:text-blue-300 transition-colors">Contact our support team</a></p>
+                <p class="text-gray-400">Still have questions? <a href="{{ route('contact-us') }}" class="text-blue-400 hover:text-blue-300 transition-colors">Contact our support team</a></p>
             </div>
         </div>
 
@@ -222,7 +222,7 @@
                         <h3 class="text-xl font-semibold text-white">Send us a message</h3>
                     </div>
 
-                    <form action="#" method="POST" class="space-y-5">
+                    <form action="{{ route('contact-us.submit') }}" method="POST" class="space-y-5">
                         @csrf
 
                         {{-- Name Field --}}

@@ -59,7 +59,7 @@
         </div>
 
         <div class="text-right mb-6">
-            <a href="#" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition">View your profile & settings</a>
+            <a href="{{ url('/view-profile-setting') }}" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition">View your profile & settings</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -77,7 +77,7 @@
             <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">BABE RANK</h3>
                 <p class="text-3xl font-bold text-gray-900 mb-3">7 <span class="text-base font-normal text-gray-500">out of 100</span></p>
-                <a href="#" class="text-pink-600 font-medium hover:text-pink-700 text-sm">Read more about BabeRank</a>
+                <a href="{{ url('/babe-rank-read-more') }}" class="text-pink-600 font-medium hover:text-pink-700 text-sm">Read more about BabeRank</a>
                 <ul class="mt-3 text-sm text-gray-600 list-disc list-inside space-y-1">
                     <li>Set your short URL</li>
                     <li>Set your availability</li>
@@ -91,13 +91,13 @@
                 <h3 class="text-lg font-bold text-gray-800 mb-2">YOUR RATES</h3>
                 <p class="text-pink-600 font-medium text-sm mb-2">13 May 2022:</p>
                 <p class="text-sm text-gray-600 mb-4">With this feature you can easily add your rates and choose how they appear on your profile.</p>
-                <button class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition">NEW Configure your rates</button>
+                <a href="{{ url('/my-rate') }}" class="block w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition text-center">NEW Configure your rates</a>
             </div>
 
             <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">YOUR AVAILABILITY</h3>
                 <p class="text-sm text-gray-600 mb-4">You have not set your availability. This gives your BabeRank a boost of 70%.</p>
-                <button class="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Set availability</button>
+                <a href="{{ url('/set-your-availability') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Set availability</a>
             </div>
 
             <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">

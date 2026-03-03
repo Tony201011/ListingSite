@@ -73,14 +73,14 @@
 
                     <!-- Action Button Area -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <button class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5">
+                        <a href="{{ url('/my-profile-2') }}" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5">
                             Start Writing Your Profile Text
-                        </button>
+                        </a>
 
                         <!-- Optional: Secondary link often found on these sites -->
-                        <span class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition">
+                        <a href="{{ url('/after-image-upload') }}" class="text-sm text-gray-500 hover:text-gray-700 transition">
                             or skip for now
-                        </span>
+                        </a>
                     </div>
 
                 </div>

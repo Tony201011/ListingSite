@@ -23,7 +23,7 @@
     </style>
     @stack('styles')
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans" x-data="{ mobileMenu: false, loginModal: false, registerModal: false }">
+<body class="bg-gray-900 text-gray-100 font-sans" x-data="{ mobileMenu: false }">
 
     @include('layouts.partials.header')
 

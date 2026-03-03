@@ -7,7 +7,7 @@
 
         <!-- Back link -->
         <div style="margin-bottom: 20px;">
-            <a href="#" style="color: #e04ecb; text-decoration: none; font-size: 1rem;">&larr; back to dashboard</a>
+            <a href="{{ url('/after-image-upload') }}" style="color: #e04ecb; text-decoration: none; font-size: 1rem;">&larr; back to dashboard</a>
         </div>
 
         <h1 style="font-size: 2.5rem; font-weight: 700; color: #222; margin-bottom: 30px; border-left: 5px solid #e04ecb; padding-left: 15px;">

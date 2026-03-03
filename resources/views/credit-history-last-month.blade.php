@@ -8,7 +8,7 @@
         <!-- Back link and title -->
         <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; margin-bottom: 20px;">
             <h1 style="font-size: 2.2rem; font-weight: 700; color: #222; margin: 0;">Credits history</h1>
-            <a href="#" style="color: #e04ecb; text-decoration: none; font-size: 1rem;">&larr; back to dashboard</a>
+            <a href="{{ url('/after-image-upload') }}" style="color: #e04ecb; text-decoration: none; font-size: 1rem;">&larr; back to dashboard</a>
         </div>
 
         <!-- Month section -->

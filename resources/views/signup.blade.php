@@ -66,7 +66,7 @@
         </div>
 
         <!-- Registration Form -->
-        <form class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100" method="POST" action="#">
+        <form class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100" method="POST" action="{{ route('signup.submit') }}">
             @csrf
 
             <!-- Two-column layout for some fields -->
@@ -156,7 +156,7 @@
             </button>
 
             <p class="text-center mt-5 text-gray-500 text-sm">
-                By signing up, you agree to our <a href="#" class="text-[#e04ecb] underline">Terms</a> and <a href="#" class="text-[#e04ecb] underline">Privacy Policy</a>.
+                By signing up, you agree to our <a href="{{ route('terms-and-conditions') }}" class="text-[#e04ecb] underline">Terms</a> and <a href="{{ route('privacy-policy') }}" class="text-[#e04ecb] underline">Privacy Policy</a>.
             </p>
         </form>
     </div>

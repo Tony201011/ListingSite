@@ -9,7 +9,7 @@
 
         <div class="bg-red-500 text-white rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <p class="text-sm sm:text-base">Your profile is not yet verified. Verified profiles get a verified badge.</p>
-            <a href="#" class="inline-flex items-center px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-semibold transition">Verify now</a>
+            <a href="{{ url('/click-here-to-verify') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-semibold transition">Verify now</a>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6">

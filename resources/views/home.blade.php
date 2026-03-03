@@ -210,14 +210,14 @@ $dummyTopEscorts = [
 
             <!-- Categories List - Collapsible on Mobile -->
             <div class="space-y-1 text-sm md:text-base max-h-[300px] md:max-h-none overflow-y-auto md:overflow-visible scrollbar-thin scrollbar-thumb-pink-400 scrollbar-track-transparent">
-                <a href="#" class="font-bold bg-pink-400/80 text-white px-3 md:px-4 py-2 rounded flex justify-between items-center hover:bg-pink-500 transition mb-2">
+                <a href="{{ url('/') }}" class="font-bold bg-pink-400/80 text-white px-3 md:px-4 py-2 rounded flex justify-between items-center hover:bg-pink-500 transition mb-2">
                     All Live Cams
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>
                 @foreach($categories as $category)
-                    <a href="#" class="hover:text-yellow-300 transition flex justify-between items-center px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-pink-600/30">
+                    <a href="{{ url('/?category=' . urlencode($category->name)) }}" class="hover:text-yellow-300 transition flex justify-between items-center px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-pink-600/30">
                         {{ $category->name }}
                         <svg class="w-4 h-4 opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -528,7 +528,7 @@ $dummyTopEscorts = [
                     <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                         Latest Escorts from <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-500">Australia</span>
                     </h2>
-                    <a href="#" class="text-sm text-pink-400 hover:text-pink-300 flex items-center gap-1">
+                    <a href="{{ url('/') }}" class="text-sm text-pink-400 hover:text-pink-300 flex items-center gap-1">
                         View All
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>

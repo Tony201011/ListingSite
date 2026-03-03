@@ -36,7 +36,7 @@
 
         <!-- Reset Password Form Card -->
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
-            <form method="POST" action="#">
+            <form method="POST" action="{{ route('reset-password.submit') }}">
                 @csrf
 
                 <!-- Email -->
@@ -70,7 +70,7 @@
             <!-- Link to login -->
             <div class="text-center border-t border-gray-200 mt-8 pt-6">
                 <p class="text-gray-500 text-sm">
-                    <a href="#" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">
+                    <a href="{{ url('/signin') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">
                         Login Here
                     </a>
                 </p>

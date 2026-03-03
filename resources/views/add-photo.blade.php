@@ -20,7 +20,7 @@
                     <button type="button" @click="openModal()" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3 rounded-full text-white font-semibold bg-pink-600 hover:bg-pink-700 transition shadow-lg shadow-pink-600/20">
                         Click to add photos
                     </button>
-                    <a href="#" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3 rounded-full font-semibold border border-pink-300 text-pink-700 hover:bg-pink-50 transition">
+                    <a href="{{ url('/after-image-upload') }}" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3 rounded-full font-semibold border border-pink-300 text-pink-700 hover:bg-pink-50 transition">
                         Continue setting up your profile
                     </a>
                 </div>

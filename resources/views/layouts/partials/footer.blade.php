@@ -7,7 +7,7 @@
             </div>
             <div class="mt-4 flex gap-2 sm:mt-0">
                 <a href="{{ url('/membership') }}" class="inline-flex rounded-lg border border-pink-500 px-4 py-2 text-sm font-semibold text-pink-400 transition hover:bg-pink-500/10">View Plans</a>
-                <a href="{{ url('/provider/register') }}" class="inline-flex rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Create Listing</a>
+                <a href="{{ url('/signup') }}" class="inline-flex rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Create Listing</a>
             </div>
         </div>
 
@@ -23,20 +23,24 @@
             </div>
 
             <div>
-                <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">Explore</h4>
+                <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">Navigation</h4>
                 <ul class="space-y-2 text-gray-500">
-                    <li><a href="{{ url('/provider/content-listings') }}" class="transition hover:text-pink-400">All Listings</a></li>
-                    <li><a href="{{ url('/provider/content-listings') }}" class="transition hover:text-pink-400">VIP Profiles</a></li>
-                    <li><a href="{{ url('/provider/content-listings') }}" class="transition hover:text-pink-400">New This Week</a></li>
-                    <li><a href="{{ route('faq') }}" class="transition hover:text-pink-400">Cities & Locations</a></li>
+                    <li><a href="{{ url('/') }}" class="transition hover:text-pink-400">Home</a></li>
+                    <li><a href="#" class="transition hover:text-pink-400">Escorts</a></li>
+                    <li><a href="#" class="transition hover:text-pink-400">Naughty corner</a></li>
+                    <li><a href="#" class="transition hover:text-pink-400">Blog</a></li>
+                    <li><a href="#" class="transition hover:text-pink-400">Locations</a></li>
+                    <li><a href="#" class="transition hover:text-pink-400">BDSM</a></li>
+                    <li><a href="#" class="transition hover:text-pink-400">Escort reviews</a></li>
+                    <li><a href="#" class="transition hover:text-pink-400">Escort announcements</a></li>
                 </ul>
             </div>
 
             <div>
                 <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">Advertisers</h4>
                 <ul class="space-y-2 text-gray-500">
-                    <li><a href="{{ url('/provider/register') }}" class="transition hover:text-pink-400">Create Profile</a></li>
-                    <li><a href="{{ url('/provider/login') }}" class="transition hover:text-pink-400">Provider Login</a></li>
+                    <li><a href="{{ url('/signup') }}" class="transition hover:text-pink-400">Create Profile</a></li>
+                    <li><a href="{{ url('/signin') }}" class="transition hover:text-pink-400">Provider Login</a></li>
                     <li><a href="{{ url('/membership') }}" class="transition hover:text-pink-400">Membership Plans</a></li>
                     <li><a href="{{ route('refund-policy') }}" class="transition hover:text-pink-400">Pricing & Refunds</a></li>
                 </ul>
@@ -53,9 +57,9 @@
                 </ul>
 
                 <div class="mt-5 flex items-center gap-2 text-gray-400">
-                    <a href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-x-twitter"></i></a>
-                    <a href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="{{ route('contact-us') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="{{ route('contact-us') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="{{ route('contact-us') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
             </div>
         </div>

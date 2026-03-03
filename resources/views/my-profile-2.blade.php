@@ -51,8 +51,8 @@
 
                 <p class="text-gray-800 mb-3">
                     You can use our special features for
-                    <a href="#" class="text-[#e04ecb] underline font-medium">my rated</a> and
-                    <a href="#" class="text-[#e04ecb] underline font-medium">my availability</a>,
+                    <a href="{{ url('/my-rate') }}" class="text-[#e04ecb] underline font-medium">my rates</a> and
+                    <a href="{{ url('/my-availability') }}" class="text-[#e04ecb] underline font-medium">my availability</a>,
                     or you can type them down here.
                 </p>
 

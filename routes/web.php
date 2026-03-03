@@ -24,15 +24,27 @@ Route::get('/signup', function () {
     return view('signup');
 });
 
+Route::post('/signup', function () {
+    return redirect('/otp-verification')->with('success', 'Signup submitted. Please verify your mobile number.');
+})->name('signup.submit');
+
 
 Route::get('/signin', function () {
     return view('signin');
 });
 
+Route::post('/signin', function () {
+    return redirect('/after-image-upload')->with('success', 'Signed in successfully.');
+})->name('signin.submit');
+
 
 Route::get('/reset-password', function () {
     return view('reset-password');
 });
+
+Route::post('/reset-password', function () {
+    return redirect('/signin')->with('success', 'Password reset link sent to your email.');
+})->name('reset-password.submit');
 
 Route::get('/change-password', function () {
     return view('change-password');
@@ -242,6 +254,10 @@ Route::get('/contact-us', function () {
         'contact' => 'contact-us',
     ]);
 })->name('contact-us');
+
+Route::post('/contact-us', function () {
+    return back()->with('success', 'Your message has been sent successfully.');
+})->name('contact-us.submit');
 
 Route::get('/403', function () {
     abort(403);

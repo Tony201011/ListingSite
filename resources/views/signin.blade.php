@@ -29,7 +29,7 @@
 
         <!-- Login Form Card -->
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
-            <form method="POST" action="#">
+            <form method="POST" action="{{ route('signin.submit') }}">
                 @csrf
 
                 <!-- Email -->
@@ -74,11 +74,11 @@
             <div class="text-center border-t border-gray-200 mt-8 pt-6">
                 <p class="text-gray-500 text-sm mb-2">
                     Forgot your login details?
-                    <a href="#" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can reset it here</a>
+                    <a href="{{ url('/reset-password') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can reset it here</a>
                 </p>
                 <p class="text-gray-500 text-sm">
                     If you haven't signed up before,
-                    <a href="#" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can sign up here</a>
+                    <a href="{{ url('/signup') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can sign up here</a>
                 </p>
             </div>
         </div>

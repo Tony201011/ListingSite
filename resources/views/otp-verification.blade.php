@@ -54,7 +54,7 @@
                         <div class="text-xl font-semibold text-gray-800">+61 412 345 678</div>
                     </div>
                 </div>
-                <a href="#" class="text-[#e04ecb] font-medium hover:text-[#c13ab0] transition text-sm">
+                <a href="{{ url('/signup') }}" class="text-[#e04ecb] font-medium hover:text-[#c13ab0] transition text-sm">
                     Change <i class="fas fa-chevron-right text-xs ml-1"></i>
                 </a>
             </div>
@@ -145,7 +145,7 @@
                 </p>
 
                 <div class="text-center mt-4">
-                    <a href="#" class="text-gray-500 hover:text-[#e04ecb] transition text-sm">
+                    <a href="{{ url('/signup') }}" class="text-gray-500 hover:text-[#e04ecb] transition text-sm">
                         <i class="fas fa-arrow-left mr-1"></i>
                         Back to Signup
                     </a>
