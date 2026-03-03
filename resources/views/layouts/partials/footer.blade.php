@@ -26,13 +26,13 @@
                 <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">Navigation</h4>
                 <ul class="space-y-2 text-gray-500">
                     <li><a href="{{ url('/') }}" class="transition hover:text-pink-400">Home</a></li>
-                    <li><a href="#" class="transition hover:text-pink-400">Escorts</a></li>
-                    <li><a href="#" class="transition hover:text-pink-400">Naughty corner</a></li>
-                    <li><a href="#" class="transition hover:text-pink-400">Blog</a></li>
-                    <li><a href="#" class="transition hover:text-pink-400">Locations</a></li>
-                    <li><a href="#" class="transition hover:text-pink-400">BDSM</a></li>
-                    <li><a href="#" class="transition hover:text-pink-400">Escort reviews</a></li>
-                    <li><a href="#" class="transition hover:text-pink-400">Escort announcements</a></li>
+                    <li><a href="{{ url('/') }}" class="transition hover:text-pink-400">Escorts</a></li>
+                    <li><a href="{{ route('blog') }}" class="transition hover:text-pink-400">Naughty corner</a></li>
+                    <li><a href="{{ route('blog') }}" class="transition hover:text-pink-400">Blog</a></li>
+                    <li><a href="{{ route('faq') }}" class="transition hover:text-pink-400">Locations</a></li>
+                    <li><a href="{{ route('blog') }}" class="transition hover:text-pink-400">BDSM</a></li>
+                    <li><a href="{{ route('blog') }}" class="transition hover:text-pink-400">Escort reviews</a></li>
+                    <li><a href="{{ route('blog') }}" class="transition hover:text-pink-400">Escort announcements</a></li>
                 </ul>
             </div>
 

@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             DummyProviderSeeder::class,
             DummyProviderListingSeeder::class,
+            BlogPostSeeder::class,
             TermConditionSeeder::class,
             PrivacyPolicySeeder::class,
             RefundPolicySeeder::class,

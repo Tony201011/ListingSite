@@ -7,7 +7,7 @@
                 <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot text-pink-500"></i> Australia-wide directory</span>
             </div>
             <div class="flex items-center gap-4">
-                <a href="#" class="transition hover:text-pink-400">Follow Alice</a>  <!-- from first image -->
+                <a href="{{ route('blog') }}" class="transition hover:text-pink-400">Follow Alice</a>
                 <a href="{{ route('faq') }}" class="transition hover:text-pink-400">Help</a>
                 <a href="{{ route('contact-us') }}" class="transition hover:text-pink-400">Contact</a>
             </div>
@@ -40,10 +40,10 @@
             <!-- Action links & Auth (from third image) -->
             <div class="hidden items-center space-x-4 md:flex">
                 <!-- Action links -->
-                <a href="#" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Pricing</a>
-                <a href="#" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Diamonds</a>
-                <a href="#" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Superboost</a>
-                <a href="#" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Add advertisement</a>
+                <a href="{{ url('/membership') }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Pricing</a>
+                <a href="{{ url('/purchase-credit') }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Diamonds</a>
+                <a href="{{ url('/purchase-credit') }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Superboost</a>
+                <a href="{{ url('/signup') }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">Add advertisement</a>
 
                 @auth
                     <!-- User dropdown (My profile / Logoff) -->
@@ -54,7 +54,7 @@
                             <i class="fa-solid fa-chevron-down text-xs"></i>
                         </button>
                         <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">My profile</a>
+                            <a href="{{ url('/view-profile-setting') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">My profile</a>
                             <a href="{{ filament()->getUrl() }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Dashboard</a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -80,13 +80,13 @@
                 <span class="text-xl font-bold text-white">HOT<span class="text-pink-500">ESCORTS</span></span>
             </a>
             <a href="{{ url('/') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Home</a>
-            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escorts</a>
-            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Naughty corner</a>
-            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Blog</a>
-            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Locations</a>
-            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">BDSM</a>
-            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escort reviews</a>
-            <a href="#" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escort announcements</a>
+            <a href="{{ url('/') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escorts</a>
+            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Naughty corner</a>
+            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Blog</a>
+            <a href="{{ route('faq') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Locations</a>
+            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">BDSM</a>
+            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escort reviews</a>
+            <a href="{{ route('blog') }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Escort announcements</a>
             <a href="{{ url('/signin') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">Login</a>
         </div>
 
@@ -95,13 +95,13 @@
             <div class="space-y-1 text-sm">
                 <!-- Main nav links -->
                 <a @click="mobileMenu = false" href="{{ url('/') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Home</a>
-                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escorts</a>
-                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Naughty corner</a>
-                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Blog</a>
-                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Locations</a>
-                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">BDSM</a>
-                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escort reviews</a>
-                <a @click="mobileMenu = false" href="#" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escort announcements</a>
+                <a @click="mobileMenu = false" href="{{ url('/') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escorts</a>
+                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Naughty corner</a>
+                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Blog</a>
+                <a @click="mobileMenu = false" href="{{ route('faq') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Locations</a>
+                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">BDSM</a>
+                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escort reviews</a>
+                <a @click="mobileMenu = false" href="{{ route('blog') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Escort announcements</a>
                 <a @click="mobileMenu = false" href="{{ url('/signin') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Login</a>
                 <!-- Static contact (optional) -->
                 <a @click="mobileMenu = false" href="{{ route('contact-us') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Contact</a>

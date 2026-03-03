@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\RefundPolicies;
 
-use App\Filament\Clusters\Settings;
+use App\Filament\Clusters\Pages;
 use App\Filament\Resources\RefundPolicies\Pages\ManageRefundPolicies;
 use App\Models\RefundPolicy;
 use BackedEnum;
@@ -33,7 +33,7 @@ class RefundPolicyResource extends Resource
 
     protected static ?string $slug = 'refund-policy';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $cluster = Pages::class;
 
     protected static ?int $navigationSort = 6;
 

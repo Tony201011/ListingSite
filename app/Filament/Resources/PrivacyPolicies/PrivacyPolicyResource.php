@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\PrivacyPolicies;
 
-use App\Filament\Clusters\Settings;
+use App\Filament\Clusters\Pages;
 use App\Filament\Resources\PrivacyPolicies\Pages\ManagePrivacyPolicies;
 use App\Models\PrivacyPolicy;
 use BackedEnum;
@@ -33,7 +33,7 @@ class PrivacyPolicyResource extends Resource
 
     protected static ?string $slug = 'privacy-policy';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $cluster = Pages::class;
 
     protected static ?int $navigationSort = 5;
 

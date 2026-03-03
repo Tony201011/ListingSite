@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\AntiSpamPolicies;
 
-use App\Filament\Clusters\Settings;
+use App\Filament\Clusters\Pages;
 use App\Filament\Resources\AntiSpamPolicies\Pages\ManageAntiSpamPolicies;
 use App\Models\AntiSpamPolicy;
 use BackedEnum;
@@ -33,7 +33,7 @@ class AntiSpamPolicyResource extends Resource
 
     protected static ?string $slug = 'anti-spam-policy';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $cluster = Pages::class;
 
     protected static ?int $navigationSort = 8;
 

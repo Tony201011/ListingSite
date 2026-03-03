@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\TermConditions;
 
-use App\Filament\Clusters\Settings;
+use App\Filament\Clusters\Pages;
 use App\Filament\Resources\TermConditions\Pages\ManageTermConditions;
 use App\Models\TermCondition;
 use BackedEnum;
@@ -33,7 +33,7 @@ class TermConditionResource extends Resource
 
     protected static ?string $slug = 'terms-and-conditions';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $cluster = Pages::class;
 
     protected static ?int $navigationSort = 4;
 

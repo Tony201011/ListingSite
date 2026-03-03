@@ -1,16 +1,14 @@
 <?php
 
-use App\Models\AntiSpamPolicy;
-use App\Models\Faq;
-use App\Models\PrivacyPolicy;
-use App\Models\RefundPolicy;
-use App\Models\TermCondition;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\FrontendPageController;
 use App\Http\Controllers\PurchaseCreditController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProviderRegisterController;
 
 use App\Models\Category;
+
 Route::get('/', function () {
     $categories = Category::query()
         ->where('is_active', true)
@@ -23,6 +21,9 @@ Route::get('/', function () {
 Route::get('/signup', function () {
     return view('signup');
 });
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::post('/signup', function () {
     return redirect('/otp-verification')->with('success', 'Signup submitted. Please verify your mobile number.');
@@ -191,61 +192,11 @@ Route::get('/babe-rank-read-more', function () {
 });
 
 
-Route::get('/terms-and-conditions', function () {
-    $terms = TermCondition::query()
-        ->where('is_active', true)
-        ->latest('updated_at')
-        ->first();
-
-    return view('terms-and-conditions', [
-        'terms' => $terms,
-    ]);
-})->name('terms-and-conditions');
-
-Route::get('/privacy-policy', function () {
-    $policy = PrivacyPolicy::query()
-        ->where('is_active', true)
-        ->latest('updated_at')
-        ->first();
-
-    return view('privacy-policy', [
-        'policy' => $policy,
-    ]);
-})->name('privacy-policy');
-
-Route::get('/refund-policy', function () {
-    $policy = RefundPolicy::query()
-        ->where('is_active', true)
-        ->latest('updated_at')
-        ->first();
-
-    return view('refund-policy', [
-        'policy' => $policy,
-    ]);
-})->name('refund-policy');
-
-Route::get('/faq', function () {
-    $faqs = Faq::query()
-        ->where('is_active', true)
-        ->orderBy('sort_order')
-        ->orderBy('id')
-        ->get();
-
-    return view('faq', [
-        'faqs' => $faqs,
-    ]);
-})->name('faq');
-
-Route::get('/anti-spam-policy', function () {
-    $policy = AntiSpamPolicy::query()
-        ->where('is_active', true)
-        ->latest('updated_at')
-        ->first();
-
-    return view('anti-spam-policy', [
-        'policy' => $policy,
-    ]);
-})->name('anti-spam-policy');
+Route::get('/terms-and-conditions', [FrontendPageController::class, 'termsAndConditions'])->name('terms-and-conditions');
+Route::get('/privacy-policy', [FrontendPageController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/refund-policy', [FrontendPageController::class, 'refundPolicy'])->name('refund-policy');
+Route::get('/faq', [FrontendPageController::class, 'faq'])->name('faq');
+Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('anti-spam-policy');
 
 
 
