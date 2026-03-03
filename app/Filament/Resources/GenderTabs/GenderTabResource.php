@@ -2,8 +2,12 @@
 
 namespace App\Filament\Resources\GenderTabs;
 
+use App\Filament\Clusters\Categories;
 use App\Filament\Resources\GenderTabs\Pages\ManageGenderTabs;
 use App\Models\GenderTab;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -20,7 +24,13 @@ class GenderTabResource extends Resource
     protected static ?string $modelLabel = 'Gender Tab';
     protected static ?string $pluralModelLabel = 'Gender Tabs';
     protected static ?string $slug = 'gender-tabs';
+    protected static ?string $cluster = Categories::class;
     protected static ?int $navigationSort = 2;
+
+    public static function canAccess(): bool
+    {
+        return Filament::getCurrentPanel()?->getId() === 'admin';
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -41,6 +51,10 @@ class GenderTabResource extends Resource
                 TextColumn::make('slug')->sortable(),
                 TextColumn::make('sort_order')->sortable(),
                 ToggleColumn::make('is_active')->label('Active'),
+            ])
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make()->requiresConfirmation(),
             ])
             ->defaultSort('sort_order');
     }

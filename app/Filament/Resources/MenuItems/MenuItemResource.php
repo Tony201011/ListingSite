@@ -23,6 +23,12 @@ class MenuItemResource extends Resource
     protected static ?string $pluralModelLabel = 'Menu Items';
     protected static ?string $slug = 'menu-items';
     protected static ?int $navigationSort = 1;
+    protected static bool $shouldRegisterNavigation = false;
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {

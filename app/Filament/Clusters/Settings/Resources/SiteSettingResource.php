@@ -20,6 +20,12 @@ class SiteSettingResource extends Resource
     protected static ?string $navigationLabel = 'Site Settings';
     protected static ?string $cluster = Settings::class;
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static bool $shouldRegisterNavigation = false;
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {

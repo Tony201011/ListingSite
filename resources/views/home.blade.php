@@ -14,18 +14,6 @@ $categories = [
     (object)['name' => 'Recently Online'],
 ];
 
-// Define gender tabs function if it doesn't exist
-if (!function_exists('gender_tabs')) {
-    function gender_tabs() {
-        return [
-            (object)['slug' => 'female', 'label' => 'FEMALE'],
-            (object)['slug' => 'male', 'label' => 'MALE'],
-            (object)['slug' => 'trans', 'label' => 'TRANS'],
-            (object)['slug' => 'couple', 'label' => 'COUPLE'],
-        ];
-    }
-}
-
 // Dummy data for featured escorts (top performers)
 $featuredEscorts = [
     [

@@ -16,8 +16,6 @@ class Settings extends Cluster
 
     public static function getPages(): array
     {
-        return [
-            \App\Filament\Clusters\Settings\Resources\SiteSettingResource::class,
-        ];
+        return [];
     }
 }
