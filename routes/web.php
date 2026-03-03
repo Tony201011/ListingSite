@@ -4,6 +4,8 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\FrontendPageController;
 use App\Http\Controllers\PurchaseCreditController;
 use App\Http\Controllers\SocialAuthController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProviderRegisterController;
 
@@ -28,6 +30,15 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::post('/signup', function () {
     return redirect('/otp-verification')->with('success', 'Signup submitted. Please verify your mobile number.');
 })->name('signup.submit');
+
+Route::post('/logout', function (Request $request) {
+    Auth::logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/');
+})->name('logout');
 
 
 Route::get('/signin', function () {
