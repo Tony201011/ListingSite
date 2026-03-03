@@ -67,9 +67,9 @@
                 <h3 class="text-lg font-bold text-gray-800 mb-2">CREDITS</h3>
                 <p class="text-3xl font-bold text-gray-900 mb-3">21 <span class="text-base font-normal text-gray-500">credits available</span></p>
                 <div class="space-y-2">
-                    <button class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition">Purchase credits</button>
-                    <button class="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Credits history</button>
-                    <button class="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Purchase history</button>
+                    <a href="{{ url('/purchase-credit') }}" class="block w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition text-center">Purchase credits</a>
+                    <a href="{{ url('/credit-history') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Credits history</a>
+                    <a href="{{ url('/purchase-history') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Purchase history</a>
                 </div>
             </div>
 
@@ -110,6 +110,15 @@
                 <p class="text-sm text-gray-600 mb-4">Use this feature up to 4 times a day for 60 minutes.</p>
                 <button @click="onlineNow = !onlineNow" class="w-full px-4 py-2 rounded-lg transition" :class="onlineNow ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" x-text="onlineNow ? 'Enabled' : 'Online NOW'"></button>
             </div>
+
+            <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2 xl:col-span-1">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">ACCOUNT SECURITY</h3>
+                <p class="text-sm text-gray-600 mb-4">Manage your password and account access settings.</p>
+                <div class="space-y-2">
+                    <a href="{{ url('/change-password') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Change password</a>
+                    <a href="{{ url('/delete-account') }}" class="block w-full px-4 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition text-center">Delete account</a>
+                </div>
+            </div>
         </div>
 
         <div class="mt-8 bg-white rounded-xl border border-gray-100 p-5 sm:p-6">
@@ -118,6 +127,4 @@
         </div>
     </div>
 </div>
-@endsection
-
 @endsection

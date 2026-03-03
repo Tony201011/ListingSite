@@ -1,362 +1,112 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="purchase-credit-container">
-    <!-- Back link -->
-    <a href="#" class="dashboard-back-link">&larr; return to your dashboard</a>
+@php
+    $currentBalance = 21;
+    $selectedCredits = (int) old('credits', 30);
 
-    <div class="purchase-credit-content">
-        <h1 class="purchase-credit-title">Buy credits</h1>
+    $plans = [
+        ['credits' => 7, 'price' => 10],
+        ['credits' => 30, 'price' => 35],
+        ['credits' => 60, 'price' => 65],
+        ['credits' => 120, 'price' => 120],
+        ['credits' => 180, 'price' => 160],
+    ];
+@endphp
 
-        <div class="purchase-credit-desc">
-            Your current credits balance = <strong>21</strong>. When your profile is set to visible you will be charged 1 credit per day.
+<div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{ selectedPlan: {{ $selectedCredits }} }">
+    <div class="mx-auto w-full max-w-5xl">
+        <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h1 class="m-0 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">Purchase Credits</h1>
+                <p class="mt-2 text-sm text-gray-600">Choose a credit package and continue to checkout.</p>
+            </div>
+            <a href="{{ url('/dashboard') }}" class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
         </div>
 
-        <p class="purchase-credit-desc">
-            Choose how many credits you want to buy and what name you want on your invoice, then click <em>'continue to checkout'</em>.
-        </p>
-
-        <div class="purchase-credit-note">
-            <strong>All prices are in Australian dollars and including GST</strong>
+        <div class="mb-5 rounded-2xl border border-pink-100 bg-pink-50 p-4 text-sm text-gray-700 shadow-sm">
+            Your current credits balance is <span class="font-semibold text-gray-900">{{ $currentBalance }}</span>.
+            You are charged <span class="font-semibold text-gray-900">1 credit per day</span> while your profile is visible.
         </div>
 
-        <form class="purchase-credit-form">
-            <!-- Credit options -->
-            <div class="credit-options">
-                <div class="credit-option">
-                    <div class="credit-option-row">
-                        <span class="credit-radio">
-                            <input type="radio" name="credit" id="credit7" value="7">
-                        </span>
-                        <label for="credit7" class="credit-label">
-                            <strong>7 credits / $10 AUD</strong>
-                        </label>
-                        <button type="button" class="credit-select-btn" onclick="document.getElementById('credit7').checked = true;">select</button>
-                    </div>
-                </div>
-
-                <div class="credit-option">
-                    <div class="credit-option-row">
-                        <span class="credit-radio">
-                            <input type="radio" name="credit" id="credit30" value="30">
-                        </span>
-                        <label for="credit30" class="credit-label">
-                            <strong>30 credits / $35 AUD</strong>
-                        </label>
-                        <button type="button" class="credit-select-btn" onclick="document.getElementById('credit30').checked = true;">select</button>
-                    </div>
-                </div>
-
-                <div class="credit-option">
-                    <div class="credit-option-row">
-                        <span class="credit-radio">
-                            <input type="radio" name="credit" id="credit60" value="60">
-                        </span>
-                        <label for="credit60" class="credit-label">
-                            <strong>60 credits / $65 AUD</strong>
-                        </label>
-                        <button type="button" class="credit-select-btn" onclick="document.getElementById('credit60').checked = true;">select</button>
-                    </div>
-                </div>
-
-                <div class="credit-option">
-                    <div class="credit-option-row">
-                        <span class="credit-radio">
-                            <input type="radio" name="credit" id="credit120" value="120">
-                        </span>
-                        <label for="credit120" class="credit-label">
-                            <strong>120 credits / $120 AUD</strong>
-                        </label>
-                        <button type="button" class="credit-select-btn" onclick="document.getElementById('credit120').checked = true;">select</button>
-                    </div>
-                </div>
-
-                <div class="credit-option">
-                    <div class="credit-option-row">
-                        <span class="credit-radio">
-                            <input type="radio" name="credit" id="credit180" value="180">
-                        </span>
-                        <label for="credit180" class="credit-label">
-                            <strong>180 credits / $160 AUD</strong>
-                        </label>
-                        <button type="button" class="credit-select-btn" onclick="document.getElementById('credit180').checked = true;">select</button>
-                    </div>
-                </div>
+        @if(session('checkout_success'))
+            <div class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700 shadow-sm">
+                {{ session('checkout_success') }}
             </div>
+        @endif
 
-            <hr class="credit-divider">
-
-            <div class="invoice-field">
-                <label for="invoice_name" class="invoice-label">
-                    Invoice for <span class="invoice-hint">(this name appears on the invoice)</span>
-                </label>
-                <input type="text" id="invoice_name" class="invoice-input" value="Sourabh wadhwa">
+        @if($errors->any())
+            <div class="mb-5 rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm">
+                <ul class="list-disc pl-5 space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
+        @endif
 
-            <button type="submit" class="continue-btn">continue to checkout</button>
-        </form>
+        <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
+            <form action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
+                @csrf
+
+                <div class="rounded-xl border border-gray-100">
+                    @foreach($plans as $index => $plan)
+                        <label class="flex cursor-pointer items-center justify-between gap-3 px-4 py-4 {{ $index < count($plans) - 1 ? 'border-b border-gray-100' : '' }}">
+                            <div class="flex items-center gap-3">
+                                <input
+                                    type="radio"
+                                    name="credits"
+                                    value="{{ $plan['credits'] }}"
+                                    class="h-4 w-4 border-gray-300 text-[#e04ecb] focus:ring-pink-200"
+                                    @change="selectedPlan = {{ $plan['credits'] }}"
+                                    {{ $plan['credits'] === $selectedCredits ? 'checked' : '' }}
+                                >
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900">{{ $plan['credits'] }} credits</p>
+                                    <p class="text-xs text-gray-500">AUD ${{ number_format($plan['price'], 2) }} (incl. GST)</p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                @click="selectedPlan = {{ $plan['credits'] }}; $el.closest('label').querySelector('input').checked = true"
+                                class="rounded-lg border border-[#e04ecb] px-3 py-1.5 text-xs font-semibold text-[#e04ecb] transition hover:bg-pink-50"
+                            >
+                                Select
+                            </button>
+                        </label>
+                    @endforeach
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <div class="lg:col-span-2">
+                        <label for="invoice_name" class="mb-2 block text-sm font-semibold text-gray-700">
+                            Invoice Name
+                            <span class="font-normal text-gray-500">(displayed on invoice)</span>
+                        </label>
+                        <input
+                            id="invoice_name"
+                            name="invoice_name"
+                            type="text"
+                            value="{{ old('invoice_name', 'Sourabh wadhwa') }}"
+                            class="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                        >
+                    </div>
+
+                    <div class="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Selected package</p>
+                        <p class="mt-2 text-2xl font-bold text-gray-900"><span x-text="selectedPlan"></span> credits</p>
+                        <p class="mt-1 text-xs text-gray-500">Final payment is shown at checkout.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <p class="text-xs text-gray-500">All prices are in Australian Dollars (AUD) and include GST.</p>
+                    <button type="submit" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
+                        Continue to checkout
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-
-<style>
-/* General reset */
-body, html {
-    margin: 0;
-    padding: 0;
-    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-    background: #fff;
-    color: #222;
-}
-
-/* Container */
-.purchase-credit-container {
-    min-height: 100vh;
-    background: #fff;
-    padding: 20px;
-}
-
-/* Back link */
-.dashboard-back-link {
-    display: inline-block;
-    color: #e04ecb;
-    text-decoration: none;
-    font-size: 1rem;
-    font-weight: 500;
-    margin-bottom: 20px;
-    transition: color 0.2s;
-}
-.dashboard-back-link:hover {
-    color: #b33e9e;
-    text-decoration: underline;
-}
-
-/* Content */
-.purchase-credit-content {
-    max-width: 700px;
-    margin: 0 auto;
-}
-
-/* Title */
-.purchase-credit-title {
-    font-size: 2.6rem;
-    font-weight: 700;
-    margin: 0 0 20px 0;
-    color: #222;
-}
-
-/* Description */
-.purchase-credit-desc {
-    font-size: 1.1rem;
-    color: #333;
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-/* Note */
-.purchase-credit-note {
-    font-size: 1rem;
-    color: #222;
-    margin-bottom: 30px;
-}
-
-/* Credit options */
-.credit-options {
-    margin-bottom: 30px;
-}
-
-.credit-option {
-    border-bottom: 1px solid #eaeaea;
-    padding: 12px 0;
-}
-
-.credit-option:last-child {
-    border-bottom: none;
-}
-
-.credit-option-row {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.credit-radio {
-    display: flex;
-    align-items: center;
-}
-
-.credit-radio input[type="radio"] {
-    width: 20px;
-    height: 20px;
-    accent-color: #e04ecb;
-    margin: 0;
-}
-
-.credit-label {
-    flex: 1;
-    font-size: 1.2rem;
-    color: #e04ecb;
-    font-weight: 600;
-    cursor: pointer;
-    min-width: 200px; /* keeps text from wrapping too early */
-}
-
-/* Select button – exactly as in image: rectangular with slight rounding */
-.credit-select-btn {
-    background: transparent;
-    border: 2px solid #e04ecb;
-    color: #e04ecb;
-    font-size: 1rem;
-    font-weight: 600;
-    padding: 8px 24px;
-    border-radius: 6px; /* less rounded, more like image */
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-.credit-select-btn:hover {
-    background: #e04ecb;
-    color: #fff;
-}
-
-/* Divider */
-.credit-divider {
-    border: 0;
-    border-top: 2px solid #eaeaea;
-    margin: 30px 0;
-}
-
-/* Invoice field */
-.invoice-field {
-    margin-bottom: 30px;
-}
-
-.invoice-label {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #222;
-    margin-bottom: 8px;
-}
-
-.invoice-hint {
-    font-size: 0.95rem;
-    color: #888;
-    font-weight: 400;
-}
-
-.invoice-input {
-    width: 100%;
-    max-width: 500px;
-    padding: 14px 16px;
-    font-size: 1.15rem;
-    border: 2px solid #e0cbe0;
-    border-radius: 8px;
-    background: #fff;
-    color: #222;
-    transition: border 0.2s;
-    box-sizing: border-box;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
-
-.invoice-input:focus {
-    outline: none;
-    border-color: #e04ecb;
-    background: #faf7fa;
-}
-
-/* Continue button – exactly as in image */
-.continue-btn {
-    width: 220px;
-    max-width: 100%;
-    background: #e04ecb;
-    color: #fff;
-    border: none;
-    border-radius: 50px; /* pill shape as in image */
-    padding: 16px 0;
-    font-size: 1.15rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(224,78,203,0.3);
-    display: block;
-    margin: 0 auto;
-}
-
-.continue-btn:hover {
-    background: #b33e9e;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(224,78,203,0.4);
-}
-
-/* ========== RESPONSIVE ========== */
-@media (max-width: 600px) {
-    .purchase-credit-title {
-        font-size: 2rem;
-    }
-
-    .credit-label {
-        font-size: 1.1rem;
-        min-width: 0; /* allow text to shrink */
-    }
-
-    .credit-select-btn {
-        padding: 6px 18px;
-        font-size: 0.95rem;
-    }
-
-    .invoice-input,
-    .continue-btn {
-        max-width: 100%;
-    }
-
-    .continue-btn {
-        font-size: 1.2rem;
-        padding: 16px 20px;
-    }
-
-    .continue-btn {
-        width: 100%;
-        font-size: 1rem;
-        padding: 14px 0;
-    }
-}
-
-/* On very small screens, let the button move to next line naturally if needed */
-@media (max-width: 480px) {
-    .credit-option-row {
-        gap: 10px;
-    }
-
-    .credit-label {
-        font-size: 1rem;
-        flex-basis: 100%; /* forces text to take full width, button below */
-        margin-bottom: 5px;
-    }
-
-    .credit-select-btn {
-        width: 100%;
-        text-align: center;
-        padding: 10px 16px;
-    }
-
-    .continue-btn {
-        font-size: 1.1rem;
-        padding: 14px 20px;
-    }
-}
-
-@media (max-width: 360px) {
-    .purchase-credit-title {
-        font-size: 1.8rem;
-    }
-
-    .purchase-credit-desc {
-        font-size: 1rem;
-    }
-}
-</style>
-
 @endsection

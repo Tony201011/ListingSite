@@ -62,6 +62,12 @@
             <a href="{{ url('/dashboard') }}" class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
         </div>
 
+        @if(session('checkout_success'))
+            <div class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700 shadow-sm">
+                {{ session('checkout_success') }}
+            </div>
+        @endif
+
         <form method="GET" action="{{ url('/purchase-history') }}" class="mb-5 grid grid-cols-1 gap-2 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm md:grid-cols-2 xl:grid-cols-4">
             <input
                 type="text"

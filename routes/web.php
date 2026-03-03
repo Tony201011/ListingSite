@@ -5,6 +5,7 @@ use App\Models\Faq;
 use App\Models\PrivacyPolicy;
 use App\Models\RefundPolicy;
 use App\Models\TermCondition;
+use App\Http\Controllers\PurchaseCreditController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProviderRegisterController;
@@ -31,6 +32,14 @@ Route::get('/signin', function () {
 
 Route::get('/reset-password', function () {
     return view('reset-password');
+});
+
+Route::get('/change-password', function () {
+    return view('change-password');
+});
+
+Route::get('/delete-account', function () {
+    return view('delete-account');
 });
 
 
@@ -136,6 +145,8 @@ Route::get('/otp-verification', function () {
 Route::get('/purchase-credit', function () {
     return view('purchase-credit');
 });
+
+Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
 
 
 
