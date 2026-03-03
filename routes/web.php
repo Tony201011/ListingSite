@@ -25,6 +25,7 @@ Route::get('/signup', function () {
 });
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.load-more');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::post('/signup', function () {

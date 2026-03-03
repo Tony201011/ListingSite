@@ -8,8 +8,8 @@
             <p class="mt-3 text-gray-600">Updates about escorts, industry trends, profile tips, and platform features in Australia.</p>
         </div>
 
-        <div class="space-y-4" x-data="blogInfiniteScroll(@js($posts))" x-init="init()">
-            <template x-for="(post, index) in visiblePosts" :key="index">
+        <div class="space-y-4" x-data="blogInfiniteScroll({ initialPosts: @js($posts), hasMore: @js($hasMore), nextPage: @js($nextPage), endpoint: @js($lazyLoadUrl) })" x-init="init()">
+            <template x-for="(post, index) in posts" :key="post.slug + '-' + index">
                 <a :href="'/blog/' + post.slug" class="block bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:border-pink-200 transition">
                     <h2 class="text-2xl font-bold text-gray-900 mb-2" x-text="post.title"></h2>
                     <p class="text-gray-700 leading-relaxed" x-text="post.excerpt"></p>
@@ -27,21 +27,14 @@
 </div>
 
 <script>
-    function blogInfiniteScroll(posts) {
+    function blogInfiniteScroll(config) {
         return {
-            posts,
-            visibleCount: 5,
-            step: 5,
+            posts: config.initialPosts ?? [],
+            hasMore: Boolean(config.hasMore),
+            nextPage: Number(config.nextPage ?? 2),
+            endpoint: config.endpoint,
             loading: false,
             observer: null,
-
-            get visiblePosts() {
-                return this.posts.slice(0, this.visibleCount);
-            },
-
-            get hasMore() {
-                return this.visibleCount < this.posts.length;
-            },
 
             init() {
                 this.setupObserver();
@@ -72,17 +65,34 @@
                 this.observer.observe(this.$refs.sentinel);
             },
 
-            loadMore() {
+            async loadMore() {
                 if (!this.hasMore || this.loading) {
                     return;
                 }
 
                 this.loading = true;
 
-                setTimeout(() => {
-                    this.visibleCount = Math.min(this.visibleCount + this.step, this.posts.length);
+                try {
+                    const response = await fetch(`${this.endpoint}?page=${this.nextPage}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load more posts');
+                    }
+
+                    const data = await response.json();
+                    this.posts = [...this.posts, ...(data.posts ?? [])];
+                    this.hasMore = Boolean(data.hasMore);
+                    this.nextPage = Number(data.nextPage ?? (this.nextPage + 1));
+                } catch (error) {
+                    console.error(error);
+                } finally {
                     this.loading = false;
-                }, 180);
+                }
             }
         };
     }

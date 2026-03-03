@@ -3,16 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use Illuminate\Http\Request;
 
 class BlogController extends Controller
 {
+    private const PER_PAGE = 5;
+
     public function index()
     {
-        $posts = BlogPost::query()
+        $paginator = BlogPost::query()
             ->where('is_active', true)
             ->orderByDesc('published_at')
             ->orderByDesc('id')
-            ->get()
+            ->paginate(self::PER_PAGE);
+
+        $posts = collect($paginator->items())
             ->map(function (BlogPost $post) {
                 return [
                     'slug' => $post->slug,
@@ -25,7 +30,42 @@ class BlogController extends Controller
             ->values()
             ->all();
 
-        return view('blog', compact('posts'));
+        return view('blog', [
+            'posts' => $posts,
+            'hasMore' => $paginator->hasMorePages(),
+            'nextPage' => $paginator->currentPage() + 1,
+            'lazyLoadUrl' => route('blog.load-more'),
+        ]);
+    }
+
+    public function loadMore(Request $request)
+    {
+        $page = max((int) $request->query('page', 1), 1);
+
+        $paginator = BlogPost::query()
+            ->where('is_active', true)
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->paginate(self::PER_PAGE, ['*'], 'page', $page);
+
+        $posts = collect($paginator->items())
+            ->map(function (BlogPost $post) {
+                return [
+                    'slug' => $post->slug,
+                    'title' => $post->title,
+                    'excerpt' => $post->excerpt,
+                    'author' => $post->author,
+                    'date' => ($post->published_at ?? $post->created_at)?->format('j F Y'),
+                ];
+            })
+            ->values()
+            ->all();
+
+        return response()->json([
+            'posts' => $posts,
+            'hasMore' => $paginator->hasMorePages(),
+            'nextPage' => $paginator->currentPage() + 1,
+        ]);
     }
 
     public function show(string $slug)
