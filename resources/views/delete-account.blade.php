@@ -11,9 +11,6 @@
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Delete Account</h1>
             <p class="text-sm text-gray-600 mb-6">This action is permanent. Once deleted, your profile and account data cannot be recovered.</p>
 
-            <div class="rounded-xl border border-rose-100 bg-rose-50 p-4 mb-6">
-                <p class="text-sm text-rose-700">Please contact support to confirm account deletion for security verification.</p>
-            </div>
 
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('contact-us') }}" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-[#e04ecb] hover:bg-[#c13ab0] text-white text-sm font-semibold transition">Contact support</a>

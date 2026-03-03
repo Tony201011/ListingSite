@@ -62,7 +62,7 @@
                         <div class="flex items-center justify-between py-4 hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out px-2 -mx-2">
                             <div class="flex items-center">
                                 <span class="text-lg font-semibold text-pink-600 mr-4">03</span>
-                                <span class="text-gray-800 font-medium text-base">Verify your photos</span>
+                                <span class="text-gray-800 font-medium text-base">Verify your photos (optional badge)</span>
                             </div>
                             <div class="ml-4">
                                 <!-- Empty Circle Icon (SVG) -->

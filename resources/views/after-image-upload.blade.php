@@ -38,24 +38,24 @@
                     <div class="flex items-center justify-between py-4 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition">
                         <div class="flex items-center">
                             <span class="text-lg font-semibold text-pink-600 mr-4">03</span>
-                            <span class="text-gray-800 font-medium">Verify your photos</span>
+                            <span class="text-gray-800 font-medium">Verify your photos (optional)</span>
                         </div>
                         <span class="w-6 h-6 rounded-full border-2 border-gray-300 inline-block"></span>
                     </div>
                 </div>
 
                 <div class="bg-pink-50 border-l-4 border-[#e04ecb] rounded-xl p-4 text-pink-700 font-semibold text-sm sm:text-base">
-                    You are almost there, the last step is to verify your profile photos.
-                    <span class="font-bold">We do not display your profile on our website if you not verify!!</span>
+                    You can list your profile without photo verification.
+                    <span class="font-bold">If you verify photos, you receive a “Photos Verified” badge for extra trust.</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-red-500 text-white rounded-2xl p-5 sm:p-6 mb-4 shadow-sm">
-            <h2 class="text-xl font-bold mb-2 flex items-center gap-2">⚠️ VERIFICATION NEEDED</h2>
-            <p class="mb-4 text-sm sm:text-base">To get your profile displayed on Hotescorts you need to send in 2 verification photos.</p>
-            <button class="bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition">Click here to verify</button>
-            <p class="mt-4 text-sm text-white/90">Did you send in your verification photos by email or sms? You don't have to upload more photos. Just wait till we verified you.</p>
+        <div class="bg-[#e04ecb] text-white rounded-2xl p-5 sm:p-6 mb-4 shadow-sm">
+            <h2 class="text-xl font-bold mb-2 flex items-center gap-2">✅ PHOTO VERIFICATION OPTIONAL</h2>
+            <p class="mb-4 text-sm sm:text-base">Your profile can be listed with or without verification. Verify 2 photos only if you want the “Photos Verified” badge.</p>
+            <a href="{{ url('/click-here-to-verify') }}" class="inline-flex bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition">Verify photos for badge</a>
+            <p class="mt-4 text-sm text-white/90">If you already submitted photos by email or SMS, just wait for the badge review.</p>
         </div>
 
         <div class="text-right mb-6">
@@ -70,6 +70,7 @@
                     <a href="{{ url('/purchase-credit') }}" class="block w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition text-center">Purchase credits</a>
                     <a href="{{ url('/credit-history') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Credits history</a>
                     <a href="{{ url('/purchase-history') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Purchase history</a>
+                    <a href="{{ url('/membership') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Membership plans</a>
                 </div>
             </div>
 

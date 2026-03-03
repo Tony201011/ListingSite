@@ -1,86 +1,88 @@
-<nav class="bg-gray-900/95 border-b border-gray-800 sticky top-0 z-50 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
-            <div class="flex-shrink-0 flex items-center">
-                <span class="text-2xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
-                    HOT<span class="text-white">ESCORTS</span>
-                </span>
+<header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md">
+    <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
+        <div class="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-4">
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-shield-heart text-pink-500"></i> Verified advertisers</span>
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot text-pink-500"></i> Australia-wide directory</span>
             </div>
-
-            <div class="hidden md:flex space-x-8 text-sm font-medium">
-                @foreach(main_menu_items() as $menu)
-                    <a href="{{ $menu->url ?? '#' }}" class="hover:text-pink-400 transition flex items-center gap-1">
-                        {{ $menu->label }}
-                        @if($menu->is_new)
-                            <span class="bg-pink-400 text-white text-[10px] px-2 py-0.5 rounded ml-1">NEW</span>
-                        @endif
-                        @if($menu->icon)
-                            <i class="{{ $menu->icon }} ml-1"></i>
-                        @endif
-                    </a>
-                @endforeach
-            </div>
-
-            {{-- <div class="hidden md:flex items-center space-x-4">
-                <button @click="loginModal = true" class="text-sm border border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-800">Login</button>
-                <button @click="registerModal = true" class="text-sm bg-pink-600 px-4 py-2 rounded-lg hover:bg-pink-700 font-bold transition">Join Now</button>
-            </div> --}}
-
-<div class="hidden md:flex items-center space-x-4">
-    @auth
-        <!-- User is logged in (includes Filament admin users) -->
-        <div class="flex items-center space-x-4">
-            <!-- Dashboard button - links to Filament admin -->
-            <a href="{{ filament()->getUrl() }}" class="text-sm bg-pink-600 px-4 py-2 rounded-lg hover:bg-pink-700 font-bold transition">
-                Dashboard
-            </a>
-
-            {{-- <!-- Optional: Show admin indicator if user is filament admin -->
-            @if(auth()->user()->can('access filament'))
-                <span class="text-xs bg-green-600 text-white px-2 py-1 rounded">Admin</span>
-            @endif
-
-            <!-- User info -->
-            <span class="text-sm text-gray-300">{{ auth()->user()->name }}</span> --}}
-
-            <!-- Logout form using Filament's logout route -->
-            {{-- <form method="POST" action="{{ filament()->getLogoutUrl() }}">
-                @csrf
-                <button type="submit" class="text-sm border border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-800">\
-                    <span class="text-xs bg-green-600 text-white px-2 py-1 rounded">Logout</span>
-
-                </button>
-            </form> --}}
-        </div>
-    @else
-        <!-- User is not logged in -->
-        <button @click="loginModal = true" class="text-sm border border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-800">
-            Login
-        </button>
-        <button @click="registerModal = true" class="text-sm bg-pink-600 px-4 py-2 rounded-lg hover:bg-pink-700 font-bold transition">
-            Join Now
-        </button>
-    @endauth
-</div>
-
-            <div class="md:hidden flex items-center">
-                <button @click="mobileMenu = !mobileMenu" class="text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-
-        <div x-cloak x-show="mobileMenu" x-transition class="md:hidden pb-4 border-t border-gray-800">
-            <div class="pt-4 space-y-2 text-sm">
-                <a @click="mobileMenu = false" href="{{ url('/provider/content-listings') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-800">Browse All</a>
-                <a @click="mobileMenu = false" href="{{ url('/provider/content-listings') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-800">Verified</a>
-                <a @click="mobileMenu = false" href="{{ route('faq') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-800">Locations</a>
-                <a @click="mobileMenu = false" href="{{ url('/provider/login') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-800">Provider Login</a>
-                <a @click="mobileMenu = false" href="{{ url('/provider/register') }}" class="block px-3 py-2 rounded-lg bg-pink-600 hover:bg-pink-700 font-bold text-center mt-2">Join Now</a>
+            <div class="flex items-center gap-4">
+                <a href="{{ route('faq') }}" class="transition hover:text-pink-400">Help</a>
+                <a href="{{ route('contact-us') }}" class="transition hover:text-pink-400">Contact</a>
             </div>
         </div>
     </div>
-</nav>
+
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3">
+            <a href="{{ url('/') }}" class="shrink-0">
+                <span class="text-2xl font-bold leading-none text-white">HOT<span class="text-pink-500">ESCORTS</span></span>
+            </a>
+
+            <form action="{{ url('/provider/content-listings') }}" method="GET" class="hidden flex-1 xl:block">
+                <div class="mx-auto flex max-w-2xl items-center rounded-xl border border-gray-700 bg-gray-800/80 p-1.5">
+                    <div class="flex min-w-0 flex-1 items-center gap-2 px-2">
+                        <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
+                        <input type="text" name="q" placeholder="Search by name or keyword" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                    </div>
+                    <div class="hidden items-center gap-2 border-l border-gray-700 px-3 lg:flex">
+                        <i class="fa-solid fa-location-dot text-gray-500"></i>
+                        <input type="text" name="city" placeholder="City" class="w-28 border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                    </div>
+                    <button type="submit" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Search</button>
+                </div>
+            </form>
+
+            <div class="hidden items-center space-x-3 md:flex">
+                @auth
+                    <a href="{{ filament()->getUrl() }}" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Dashboard</a>
+                @else
+                    <button @click="loginModal = true" class="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-100 transition hover:bg-gray-800">Login</button>
+                    <button @click="registerModal = true" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Join Now</button>
+                @endauth
+            </div>
+
+            <button @click="mobileMenu = !mobileMenu" class="md:hidden text-gray-300 hover:text-white" aria-label="Toggle menu">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+        </div>
+
+        <div class="hidden items-center gap-1 border-t border-gray-800 py-3 md:flex">
+            @foreach(main_menu_items() as $menu)
+                <a href="{{ $menu->url ?? '#' }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    {{ $menu->label }}
+                    @if($menu->is_new)
+                        <span class="rounded bg-pink-600 px-1.5 py-0.5 text-[10px] font-bold text-white">NEW</span>
+                    @endif
+                    @if($menu->icon)
+                        <i class="{{ $menu->icon }} text-xs"></i>
+                    @endif
+                </a>
+            @endforeach
+        </div>
+
+        <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 md:hidden">
+            <form action="{{ url('/provider/content-listings') }}" method="GET" class="space-y-2">
+                <input type="text" name="q" placeholder="Search by name or keyword" class="h-10 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-white placeholder:text-gray-500 focus:border-pink-500 focus:outline-none">
+                <input type="text" name="city" placeholder="City" class="h-10 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-white placeholder:text-gray-500 focus:border-pink-500 focus:outline-none">
+                <button type="submit" class="w-full rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white">Search</button>
+            </form>
+
+            <div class="space-y-1 text-sm">
+                @foreach(main_menu_items() as $menu)
+                    <a @click="mobileMenu = false" href="{{ $menu->url ?? '#' }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $menu->label }}</a>
+                @endforeach
+                <a @click="mobileMenu = false" href="{{ route('contact-us') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Contact</a>
+            </div>
+
+            @guest
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button @click="loginModal = true; mobileMenu = false" class="rounded-lg border border-gray-700 px-3 py-2 text-sm font-medium text-gray-100">Login</button>
+                    <button @click="registerModal = true; mobileMenu = false" class="rounded-lg bg-pink-600 px-3 py-2 text-sm font-semibold text-white">Join Now</button>
+                </div>
+            @endguest
+        </div>
+    </div>
+</header>
 
 <!-- Login Modal -->
 <div x-cloak x-show="loginModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">

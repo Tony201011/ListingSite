@@ -3,7 +3,12 @@
 @section('content')
 @php
     $currentBalance = 21;
-    $selectedCredits = (int) old('credits', 30);
+    $allowedCredits = [7, 30, 60, 120, 180];
+    $selectedCredits = (int) old('credits', request('credits', 30));
+
+    if (!in_array($selectedCredits, $allowedCredits, true)) {
+        $selectedCredits = 30;
+    }
 
     $plans = [
         ['credits' => 7, 'price' => 10],

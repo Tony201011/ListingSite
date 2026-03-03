@@ -146,6 +146,10 @@ Route::get('/purchase-credit', function () {
     return view('purchase-credit');
 });
 
+Route::get('/membership', function () {
+    return view('membership');
+});
+
 Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
 
 

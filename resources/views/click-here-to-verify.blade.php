@@ -9,10 +9,10 @@
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Verify your profile photos</h1>
-            <p class="mt-3 text-gray-600">Complete this verification so your profile can be reviewed and published faster.</p>
+            <p class="mt-3 text-gray-600">Photo verification is optional. Complete it to get a “Photos Verified” badge on your profile.</p>
 
             <div class="mt-6 rounded-xl border border-pink-100 bg-pink-50 p-4">
-                <p class="text-sm font-semibold text-pink-800">Required note text</p>
+                <p class="text-sm font-semibold text-pink-800">Verification note format</p>
                 <p class="mt-1 text-pink-700 font-medium">your profile name * "Find me on Hotescorts.com.au" + today’s date</p>
             </div>
 
@@ -32,11 +32,11 @@
                 <a href="mailto:alice@hotescorts.com.au" class="text-pink-700 hover:text-pink-800 font-medium">alice@hotescorts.com.au</a>
             </p>
 
-            <p class="mt-3 text-sm font-semibold text-pink-700">Profiles without verification are not shown on the website.</p>
+            <p class="mt-3 text-sm font-semibold text-pink-700">Profiles without verification can still be listed. Verification adds a “Photos Verified” badge.</p>
 
             <div class="mt-6 flex flex-col sm:flex-row gap-3">
                 <button type="button" @click="openModal()" class="px-6 py-3 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-semibold transition">
-                    Upload verification photos
+                    Upload photos for verified badge
                 </button>
                 <button type="button" onclick="window.history.back()" class="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold transition">
                     Back
