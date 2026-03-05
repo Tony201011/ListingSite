@@ -166,7 +166,7 @@
                                 <img src="{{ $profile['image'] }}" alt="{{ $profile['name'] }}" class="view-card-image object-cover" :class="viewMode === 'list' ? 'h-56 w-full md:h-[220px] md:w-full' : 'h-44 w-full'">
                                 <div class="absolute left-2 top-2 z-10 flex gap-1 text-[10px] font-semibold">
                                     @if($profile['verified'])
-                                        <span class="rounded bg-cyan-500 px-2 py-0.5 text-white">Verified</span>
+                                        <span class="rounded bg-cyan-500 px-2 py-0.5 text-white">Photo Verified</span>
                                     @endif
                                     @if($profile['active'])
                                         <span class="rounded bg-emerald-500 px-2 py-0.5 text-white">Online</span>
