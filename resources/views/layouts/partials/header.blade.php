@@ -38,6 +38,7 @@
 
         $mainNavLinks = collect($headerWidget?->main_nav_links ?? [
             ['label' => 'Home', 'url' => url('/')],
+            ['label' => 'About us', 'url' => route('about-us')],
             ['label' => 'Escorts', 'url' => url('/')],
             ['label' => 'Naughty corner', 'url' => route('blog')],
             ['label' => 'Blog', 'url' => route('blog')],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AboutUsPage;
 use App\Models\AntiSpamPolicy;
 use App\Models\ContactUsPage;
 use App\Models\Faq;
@@ -14,6 +15,18 @@ use Illuminate\Http\Request;
 class FrontendPageController extends Controller
 {
     private const FAQ_PER_PAGE = 8;
+
+    public function aboutUs()
+    {
+        $page = AboutUsPage::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+
+        return view('about-us', [
+            'page' => $page,
+        ]);
+    }
 
     public function termsAndConditions()
     {
