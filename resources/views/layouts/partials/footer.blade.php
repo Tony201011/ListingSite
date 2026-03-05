@@ -1,6 +1,15 @@
-<footer class="border-t border-gray-800 bg-gray-950 px-4 pt-10 pb-6">
-    @php
+@php
         $brandDescription = $footerWidget?->brand_description ?? 'Australia’s independent adult directory for discovery, profile promotion, and secure advertiser management.';
+
+        $footerBackgroundColor = trim((string) ($footerWidget?->footer_background_color ?? ''));
+        $footerHeight = max((int) ($footerWidget?->footer_height ?? 0), 0);
+        $footerWidth = max((int) ($footerWidget?->footer_width ?? 0), 0);
+
+        $footerStyle = collect([
+            filled($footerBackgroundColor) ? "background-color: {$footerBackgroundColor};" : null,
+            $footerHeight > 0 ? "min-height: {$footerHeight}px;" : null,
+            $footerWidth > 0 ? "max-width: {$footerWidth}px; margin-left: auto; margin-right: auto;" : null,
+        ])->filter()->implode(' ');
 
         $badges = collect($footerWidget?->badges ?? [
             ['label' => '18+ Adults Only'],
@@ -75,7 +84,9 @@
             3 => 'max-w-5xl',
             default => 'max-w-full',
         };
-    @endphp
+@endphp
+
+<footer class="border-t border-gray-800 bg-gray-950 px-4 pt-10 pb-6" style="{{ $footerStyle }}">
 
     <div class="mx-auto max-w-7xl">
         @if($showPromoSection)

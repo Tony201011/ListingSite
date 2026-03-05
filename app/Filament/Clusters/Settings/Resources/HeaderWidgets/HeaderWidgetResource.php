@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -95,6 +96,22 @@ class HeaderWidgetResource extends Resource
                     ->visible(fn ($get) => ($get('logo_type') ?? 'text') === 'text'),
                 TextInput::make('brand_accent')->label('Brand accent')->maxLength(120)
                     ->visible(fn ($get) => ($get('logo_type') ?? 'text') === 'text'),
+                ColorPicker::make('header_background_color')
+                    ->label('Header background color')
+                    ->rgba()
+                    ->helperText('Pick the header background color.'),
+                TextInput::make('header_height')
+                    ->label('Header height (px)')
+                    ->numeric()
+                    ->minValue(40)
+                    ->maxValue(1000)
+                    ->suffix('px'),
+                TextInput::make('header_width')
+                    ->label('Header width (px)')
+                    ->numeric()
+                    ->minValue(320)
+                    ->maxValue(3840)
+                    ->suffix('px'),
                 Toggle::make('enable_top_bar')->label('Enable top bar')->default(true)->columnSpanFull(),
                 Repeater::make('top_left_items')
                     ->label('Top bar left items')

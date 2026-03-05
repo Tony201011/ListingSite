@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -57,6 +58,22 @@ class FooterWidgetResource extends Resource
                     ->rows(3)
                     ->maxLength(1000)
                     ->columnSpanFull(),
+                ColorPicker::make('footer_background_color')
+                    ->label('Footer background color')
+                    ->rgba()
+                    ->helperText('Pick the footer background color.'),
+                TextInput::make('footer_height')
+                    ->label('Footer height (px)')
+                    ->numeric()
+                    ->minValue(60)
+                    ->maxValue(2000)
+                    ->suffix('px'),
+                TextInput::make('footer_width')
+                    ->label('Footer width (px)')
+                    ->numeric()
+                    ->minValue(320)
+                    ->maxValue(3840)
+                    ->suffix('px'),
                 Toggle::make('enable_promo_section')
                     ->label('Enable promo section')
                     ->default(true)

@@ -1,11 +1,20 @@
-<header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md">
-    @php
+@php
         $logoType = $headerWidget?->logo_type ?: 'text';
         $logoPath = $headerWidget?->logo_path;
         $logoUrl = filled($logoPath) ? \Illuminate\Support\Facades\Storage::disk('public')->url($logoPath) : null;
         $logoMaxWidth = max((int) ($headerWidget?->logo_max_width ?? 160), 20);
         $logoMaxHeight = max((int) ($headerWidget?->logo_max_height ?? 40), 20);
         $logoStyle = "max-width: {$logoMaxWidth}px; max-height: {$logoMaxHeight}px;";
+        $headerBackgroundColor = trim((string) ($headerWidget?->header_background_color ?? ''));
+        $headerHeight = max((int) ($headerWidget?->header_height ?? 0), 0);
+        $headerWidth = max((int) ($headerWidget?->header_width ?? 0), 0);
+
+        $headerStyle = collect([
+            filled($headerBackgroundColor) ? "background-color: {$headerBackgroundColor};" : null,
+            $headerHeight > 0 ? "min-height: {$headerHeight}px;" : null,
+            $headerWidth > 0 ? "max-width: {$headerWidth}px; margin-left: auto; margin-right: auto;" : null,
+        ])->filter()->implode(' ');
+
         $brandPrimary = $headerWidget?->brand_primary ?: 'HOT';
         $brandAccent = $headerWidget?->brand_accent ?: 'ESCORTS';
 
@@ -44,7 +53,9 @@
 
         $showTopBar = $headerWidget?->enable_top_bar ?? true;
         $showSearch = $headerWidget?->enable_search ?? true;
-    @endphp
+@endphp
+
+<header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md" style="{{ $headerStyle }}">
 
     <!-- Top bar (with Follow Alice) -->
     @if($showTopBar)
