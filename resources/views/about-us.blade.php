@@ -14,19 +14,19 @@
         : $defaultBannerImage;
 @endphp
 
+<div class="relative overflow-hidden bg-gradient-to-r from-[#e04ecb] to-[#c13ab0]">
+    <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('{{ $bannerImage }}');"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">{{ $bannerTitle }}</h1>
+        <p class="text-xl text-white/90 tracking-widest">{{ $bannerSubtitle }}</p>
+    </div>
+</div>
+
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-5xl mx-auto">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 mb-6">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">{{ $pageTitle }}</h1>
             <p class="mt-3 text-gray-600">Learn why providers and visitors choose our platform and what makes our directory different.</p>
-
-            <div class="mt-6 relative overflow-hidden rounded-xl bg-gradient-to-r from-[#e04ecb] to-[#c13ab0]">
-                <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('{{ $bannerImage }}');"></div>
-                <div class="relative z-10 px-5 py-12 text-center">
-                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow">{{ $bannerTitle }}</h2>
-                    <p class="text-sm sm:text-base text-white/90 tracking-widest">{{ $bannerSubtitle }}</p>
-                </div>
-            </div>
         </div>
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
