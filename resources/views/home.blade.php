@@ -1,885 +1,370 @@
-@php
-// Prevent horizontal scroll on html/body at all zoom levels
-echo '<style>html,body{overflow-x:hidden!important;}</style>';
-
-// Define categories if they're not coming from the backend
-$categories = [
-    (object)['name' => 'Live Cams'],
-    (object)['name' => 'New Models'],
-    (object)['name' => 'VIP Models'],
-    (object)['name' => 'HD Channels'],
-    (object)['name' => '4K Quality'],
-    (object)['name' => 'Top Rated'],
-    (object)['name' => 'Most Viewed'],
-    (object)['name' => 'Recently Online'],
-];
-
-// Dummy data for featured escorts (top performers)
-$featuredEscorts = [
-    [
-        'name' => 'Sophia Rose',
-        'age' => 24,
-        'location' => 'New York',
-        'rating' => 4.9,
-        'views' => 1245,
-        'image' => 'https://images.unsplash.com/photo-1494790108777-467efef4493f?w=600&h=800&fit=crop',
-        'tags' => ['VIP', 'HD', 'NEW'],
-        'online' => true,
-        'country' => '🇺🇸'
-    ],
-    [
-        'name' => 'Isabella Marie',
-        'age' => 26,
-        'location' => 'Los Angeles',
-        'rating' => 4.8,
-        'views' => 987,
-        'image' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop',
-        'tags' => ['TOP', 'HD'],
-        'online' => true,
-        'country' => '🇺🇸'
-    ],
-    [
-        'name' => 'Mia Johnson',
-        'age' => 23,
-        'location' => 'Miami',
-        'rating' => 4.9,
-        'views' => 1567,
-        'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=800&fit=crop',
-        'tags' => ['VIP', '4K'],
-        'online' => false,
-        'country' => '🇺🇸'
-    ],
-    [
-        'name' => 'Emma Wilson',
-        'age' => 25,
-        'location' => 'Chicago',
-        'rating' => 4.7,
-        'views' => 876,
-        'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop',
-        'tags' => ['NEW', 'HD'],
-        'online' => true,
-        'country' => '🇺🇸'
-    ],
-    [
-        'name' => 'Olivia Brown',
-        'age' => 27,
-        'location' => 'Houston',
-        'rating' => 4.9,
-        'views' => 2134,
-        'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop',
-        'tags' => ['TOP', 'VIP'],
-        'online' => true,
-        'country' => '🇺🇸'
-    ],
-];
-
-// Dummy data for latest escorts from Australia (matching the image design)
-// $latestEscorts = [
-//     [
-//         'name' => 'Dixie Laveaux',
-//         'price' => 180,
-//         'location' => 'Bondi Junction',
-//         'type' => 'Escort',
-//         'time_ago' => '6 minutes ago',
-//         'verified' => true,
-//         'featured' => true,
-//         'image' => 'https://images.unsplash.com/photo-1494790108777-467efef4493f?w=400&h=500&fit=crop',
-//     ],
-//     [
-//         'name' => 'Queen Alexa',
-//         'price' => 500,
-//         'location' => 'Melbourne',
-//         'type' => 'Escort',
-//         'time_ago' => '6 minutes ago',
-//         'verified' => true,
-//         'featured' => true,
-//         'image' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop',
-//     ],
-//     [
-//         'name' => 'Butt Plug in my Ass',
-//         'price' => 300,
-//         'location' => 'Pennant Hills',
-//         'type' => 'Escort',
-//         'time_ago' => '7 minutes ago',
-//         'verified' => true,
-//         'featured' => true,
-//         'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=500&fit=crop',
-//     ],
-//     [
-//         'name' => 'Players of Pleasure',
-//         'price' => 250,
-//         'location' => 'Dee Why',
-//         'type' => 'Escort',
-//         'time_ago' => '8 minutes ago',
-//         'verified' => true,
-//         'featured' => true,
-//         'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop',
-//     ],
-//     [
-//         'name' => 'Naughty Kitty69',
-//         'price' => 250,
-//         'location' => 'Craigieburn',
-//         'type' => 'Escort',
-//         'time_ago' => '8 minutes ago',
-//         'verified' => true,
-//         'featured' => true,
-//         'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop',
-//     ],
-//     [
-//         'name' => 'Scarlet Rose',
-//         'price' => 350,
-//         'location' => 'Sydney',
-//         'type' => 'Escort',
-//         'time_ago' => '9 minutes ago',
-//         'verified' => true,
-//         'featured' => false,
-//         'image' => 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=500&fit=crop',
-//     ],
-//     [
-//         'name' => 'Mia Sapphire',
-//         'price' => 220,
-//         'location' => 'Brisbane',
-//         'type' => 'Escort',
-//         'time_ago' => '10 minutes ago',
-//         'verified' => false,
-//         'featured' => true,
-//         'image' => 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=500&fit=crop',
-//     ],
-//     [
-//         'name' => 'Luna Night',
-//         'price' => 280,
-//         'location' => 'Perth',
-//         'type' => 'Escort',
-//         'time_ago' => '12 minutes ago',
-//         'verified' => true,
-//         'featured' => false,
-//         'image' => 'https://images.unsplash.com/photo-1464863979621-258859e62245?w=400&h=500&fit=crop',
-//     ],
-// ];
-
-// Dummy data for top escorts grid
-$dummyTopEscorts = [
-    ['name' => 'Sophia Rose', 'age' => 24, 'location' => 'New York', 'rating' => 4.9, 'views' => 1245, 'image' => 'https://images.unsplash.com/photo-1494790108777-467efef4493f?w=400&h=500&fit=crop'],
-    ['name' => 'Isabella Marie', 'age' => 26, 'location' => 'Los Angeles', 'rating' => 4.8, 'views' => 987, 'image' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop'],
-    ['name' => 'Mia Johnson', 'age' => 23, 'location' => 'Miami', 'rating' => 4.9, 'views' => 1567, 'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=500&fit=crop'],
-    ['name' => 'Emma Wilson', 'age' => 25, 'location' => 'Chicago', 'rating' => 4.7, 'views' => 876, 'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop'],
-    ['name' => 'Olivia Brown', 'age' => 27, 'location' => 'Houston', 'rating' => 4.9, 'views' => 2134, 'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop'],
-    ['name' => 'Ava Davis', 'age' => 22, 'location' => 'Phoenix', 'rating' => 4.6, 'views' => 654, 'image' => 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=500&fit=crop'],
-    ['name' => 'Sophia Miller', 'age' => 28, 'location' => 'Philadelphia', 'rating' => 4.8, 'views' => 1432, 'image' => 'https://images.unsplash.com/photo-1513094735237-8f2714d57c13?w=400&h=500&fit=crop'],
-    ['name' => 'Isabella Garcia', 'age' => 24, 'location' => 'San Antonio', 'rating' => 4.7, 'views' => 1098, 'image' => 'https://images.unsplash.com/photo-1502323777036-f29e3972d82f?w=400&h=500&fit=crop'],
-    ['name' => 'Mia Rodriguez', 'age' => 26, 'location' => 'San Diego', 'rating' => 4.9, 'views' => 1876, 'image' => 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=500&fit=crop'],
-    ['name' => 'Emma Martinez', 'age' => 25, 'location' => 'Dallas', 'rating' => 4.8, 'views' => 1654, 'image' => 'https://images.unsplash.com/photo-1496440737103-cd596325d314?w=400&h=500&fit=crop'],
-    ['name' => 'Olivia Anderson', 'age' => 27, 'location' => 'San Jose', 'rating' => 4.7, 'views' => 1321, 'image' => 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=500&fit=crop'],
-    ['name' => 'Ava Thomas', 'age' => 23, 'location' => 'Austin', 'rating' => 4.9, 'views' => 1987, 'image' => 'https://images.unsplash.com/photo-1464863979621-258859e62245?w=400&h=500&fit=crop'],
-];
-@endphp
-
 @extends('layouts.frontend')
 
-@section('content')
-<section class="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 min-h-screen pb-16 overflow-x-hidden">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 md:gap-8 pt-4 md:pt-8 px-3 sm:px-4 md:px-8">
-        <!-- Sidebar - Collapsible on Mobile -->
-        <aside class="w-full md:w-64 bg-gradient-to-b from-pink-700 to-pink-500 rounded-2xl p-4 md:p-6 text-white shadow-xl md:sticky md:top-24 md:self-start relative overflow-hidden">
-            <div class="flex items-center justify-between md:block">
-                <h2 class="text-xl font-bold mb-3 md:mb-6 tracking-wide flex items-center gap-2">
-                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
-                    </svg>
-                    Categories
-                </h2>
-                <!-- Mobile toggle button -->
-                <button class="md:hidden text-white p-2" onclick="this.parentElement.parentElement.classList.toggle('pb-4')">
-                    <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-            </div>
+@section('title', 'Home')
 
-            <!-- Categories List - Collapsible on Mobile -->
-            <div class="space-y-1 text-sm md:text-base max-h-[300px] md:max-h-none overflow-y-auto md:overflow-visible scrollbar-thin scrollbar-thumb-pink-400 scrollbar-track-transparent">
-                <a href="{{ url('/') }}" class="font-bold bg-pink-400/80 text-white px-3 md:px-4 py-2 rounded flex justify-between items-center hover:bg-pink-500 transition mb-2">
-                    All Live Cams
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                @foreach($categories as $category)
-                    <a href="{{ url('/?category=' . urlencode($category->name)) }}" class="hover:text-yellow-300 transition flex justify-between items-center px-3 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-pink-600/30">
-                        {{ $category->name }}
-                        <svg class="w-4 h-4 opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </a>
-                @endforeach
-            </div>
-        </aside>
+@php
+    $profiles = [
+        ['name' => 'Alina', 'age' => 24, 'rate' => '$250 / hour', 'city' => 'Houston', 'height' => "5'6\"", 'service_1' => 'Incall', 'service_2' => 'Outcall', 'date' => '27/05/2024', 'description' => 'Elegant companion with refined style, warm personality and premium experience for upscale dates.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&auto=format&fit=crop'],
+        ['name' => 'Sofia', 'age' => 26, 'rate' => '$300 / hour', 'city' => 'Chicago', 'height' => "5'7\"", 'service_1' => 'Incall', 'service_2' => 'Travel', 'date' => '16/08/2024', 'description' => 'Luxury model known for classy company, confidence and unforgettable private moments.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=900&auto=format&fit=crop'],
+        ['name' => 'Mia', 'age' => 22, 'rate' => '$220 / hour', 'city' => 'Boston', 'height' => "5'5\"", 'service_1' => 'Outcall', 'service_2' => 'Dinner Date', 'date' => '30/09/2024', 'description' => 'Friendly and playful vibe with great energy, ideal for fun social and intimate meetups.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=900&auto=format&fit=crop'],
+        ['name' => 'Valentina', 'age' => 25, 'rate' => '$280 / hour', 'city' => 'New York', 'height' => "5'8\"", 'service_1' => 'Incall', 'service_2' => 'Overnight', 'date' => '15/07/2024', 'description' => 'Sophisticated beauty offering premium companionship with attention to every detail.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=900&auto=format&fit=crop'],
+        ['name' => 'Luna', 'age' => 23, 'rate' => '$200 / hour', 'city' => 'Dallas', 'height' => "5'4\"", 'service_1' => 'Outcall', 'service_2' => 'Massage', 'date' => '23/04/2024', 'description' => 'Relaxed and charming personality, great choice for smooth and discreet companionship.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop'],
+        ['name' => 'Nora', 'age' => 27, 'rate' => '$340 / hour', 'city' => 'Los Angeles', 'height' => "5'9\"", 'service_1' => 'Travel', 'service_2' => 'VIP Date', 'date' => '28/06/2024', 'description' => 'High-end escort with elite presentation and polished etiquette for premium events.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1504593811423-6dd665756598?w=900&auto=format&fit=crop'],
+        ['name' => 'Ivy', 'age' => 21, 'rate' => '$180 / hour', 'city' => 'San Jose', 'height' => "5'3\"", 'service_1' => 'Incall', 'service_2' => 'Outcall', 'date' => '19/10/2024', 'description' => 'Young, vibrant and engaging companion with a fun and positive atmosphere.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=900&auto=format&fit=crop'],
+        ['name' => 'Camila', 'age' => 24, 'rate' => '$260 / hour', 'city' => 'Phoenix', 'height' => "5'6\"", 'service_1' => 'Dinner Date', 'service_2' => 'Overnight', 'date' => '02/06/2024', 'description' => 'Stylish and romantic companion, perfect for private dinners and memorable nights.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop'],
+        ['name' => 'Elena', 'age' => 25, 'rate' => '$295 / hour', 'city' => 'Philadelphia', 'height' => "5'7\"", 'service_1' => 'Incall', 'service_2' => 'Travel', 'date' => '13/07/2024', 'description' => 'Graceful and discreet companion with premium service and elegant communication.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=900&auto=format&fit=crop'],
+    ];
 
-        <!-- Main Content -->
-        <div class="flex-1 min-w-0" x-data="{
-            gridCols: 2,
-            mobileMenuOpen: false,
-            searchQuery: '',
-            featuredCurrentSlide: 0,
-            latestCurrentSlide: 0,
-            autoplayInterval: null,
-            touchStartX: 0,
-            touchEndX: 0,
-            featuredTotalSlides: {{ count($featuredEscorts) }},
-            {{-- latestTotalSlides: {{ count($latestEscorts) }}, --}}
-            slidesPerView: 4,
+    $selectedCategoryIds = collect($selectedCategoryIds ?? [])->map(fn ($id) => (int) $id)->filter()->values();
+    $minAge = max(18, (int) ($minAge ?? 18));
+    $maxAge = min(60, (int) ($maxAge ?? 40));
+    $minPrice = max(100, (int) ($minPrice ?? 150));
+    $maxPrice = min(1000, (int) ($maxPrice ?? 400));
 
-            init() {
-                this.updateGridCols();
-                this.updateSlidesPerView();
-                window.addEventListener('resize', () => {
-                    this.updateGridCols();
-                    this.updateSlidesPerView();
-                });
-                this.startAutoplay();
-            },
+    if ($minAge > $maxAge) {
+        [$minAge, $maxAge] = [$maxAge, $minAge];
+    }
 
-            updateGridCols() {
-                if(window.innerWidth < 640) {
-                    this.gridCols = 1;
-                } else if(window.innerWidth < 768) {
-                    this.gridCols = 2;
-                } else if(window.innerWidth < 1024) {
-                    this.gridCols = 3;
-                } else {
-                    this.gridCols = 4;
-                }
-            },
+    if ($minPrice > $maxPrice) {
+        [$minPrice, $maxPrice] = [$maxPrice, $minPrice];
+    }
 
-            updateSlidesPerView() {
-                if(window.innerWidth < 640) {
-                    this.slidesPerView = 1;
-                } else if(window.innerWidth < 768) {
-                    this.slidesPerView = 2;
-                } else if(window.innerWidth < 1024) {
-                    this.slidesPerView = 3;
-                } else {
-                    this.slidesPerView = 4;
-                }
-            },
+    $allFilterCategoriesCollection = collect($allFilterCategories ?? []);
+    $categoryIds = $allFilterCategoriesCollection->pluck('id')->map(fn ($id) => (int) $id)->values();
 
-            // Featured slider functions
-            featuredNextSlide() {
-                this.featuredCurrentSlide = (this.featuredCurrentSlide + 1) % this.featuredTotalSlides;
-            },
-
-            featuredPrevSlide() {
-                this.featuredCurrentSlide = (this.featuredCurrentSlide - 1 + this.featuredTotalSlides) % this.featuredTotalSlides;
-            },
-
-            featuredGoToSlide(index) {
-                this.featuredCurrentSlide = index;
-            },
-
-            // Latest slider functions
-            latestNextSlide() {
-                this.latestCurrentSlide = (this.latestCurrentSlide + 1) % Math.ceil(this.latestTotalSlides / this.slidesPerView);
-            },
-
-            latestPrevSlide() {
-                this.latestCurrentSlide = (this.latestCurrentSlide - 1 + Math.ceil(this.latestTotalSlides / this.slidesPerView)) % Math.ceil(this.latestTotalSlides / this.slidesPerView);
-            },
-
-            latestGoToSlide(index) {
-                this.latestCurrentSlide = index;
-            },
-
-            startAutoplay() {
-                this.autoplayInterval = setInterval(() => {
-                    this.featuredNextSlide();
-                }, 5000);
-            },
-
-            stopAutoplay() {
-                clearInterval(this.autoplayInterval);
-            },
-
-            // Touch events for mobile swipe on featured slider
-            handleFeaturedTouchStart(event) {
-                this.touchStartX = event.touches[0].clientX;
-            },
-
-            handleFeaturedTouchEnd(event) {
-                this.touchEndX = event.changedTouches[0].clientX;
-                this.handleFeaturedSwipe();
-            },
-
-            handleFeaturedSwipe() {
-                const swipeThreshold = 50;
-                const difference = this.touchStartX - this.touchEndX;
-
-                if (Math.abs(difference) > swipeThreshold) {
-                    if (difference > 0) {
-                        this.featuredNextSlide();
-                    } else {
-                        this.featuredPrevSlide();
-                    }
-                }
-            },
-
-            // Touch events for mobile swipe on latest slider
-            handleLatestTouchStart(event) {
-                this.touchStartX = event.touches[0].clientX;
-            },
-
-            handleLatestTouchEnd(event) {
-                this.touchEndX = event.changedTouches[0].clientX;
-                this.handleLatestSwipe();
-            },
-
-            handleLatestSwipe() {
-                const swipeThreshold = 50;
-                const difference = this.touchStartX - this.touchEndX;
-
-                if (Math.abs(difference) > swipeThreshold) {
-                    if (difference > 0) {
-                        this.latestNextSlide();
-                    } else {
-                        this.latestPrevSlide();
-                    }
-                }
-            },
-
-            // Get total pages for latest slider
-            getLatestTotalPages() {
-                return Math.ceil(this.latestTotalSlides / this.slidesPerView);
+    $profiles = collect($profiles)
+        ->map(function ($profile, $index) use ($categoryIds) {
+            if ($categoryIds->isNotEmpty()) {
+                $profile['category_id'] = (int) $categoryIds[$index % $categoryIds->count()];
             }
-        }">
 
-            <!-- Featured Models Slider (Original) -->
-            <div class="mb-8 md:mb-10">
-                <div class="flex flex-col gap-1 md:gap-2 mb-4">
-                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-1 md:mb-2 tracking-tight leading-tight">
-                        Featured Models
-                    </h1>
-                    <p class="text-sm sm:text-base md:text-lg text-gray-400 max-w-2xl">
-                        Discover our most popular live models right now
+            return $profile;
+        })
+        ->when($selectedCategoryIds->isNotEmpty(), function ($collection) use ($selectedCategoryIds) {
+            return $collection->filter(fn ($profile) => in_array((int) ($profile['category_id'] ?? 0), $selectedCategoryIds->all(), true));
+        })
+        ->filter(function ($profile) use ($minAge, $maxAge, $minPrice, $maxPrice) {
+            $profileAge = (int) ($profile['age'] ?? 0);
+            $profilePrice = (int) preg_replace('/[^\d]/', '', (string) ($profile['rate'] ?? '0'));
+
+            return $profileAge >= $minAge
+                && $profileAge <= $maxAge
+                && $profilePrice >= $minPrice
+                && $profilePrice <= $maxPrice;
+        })
+        ->values();
+
+    $selectedCategoryNames = $allFilterCategoriesCollection
+        ->whereIn('id', $selectedCategoryIds)
+        ->pluck('name')
+        ->values();
+
+    $selectedCategoryItems = $allFilterCategoriesCollection
+        ->whereIn('id', $selectedCategoryIds)
+        ->values();
+
+    $hasAgeFilter = $minAge !== 18 || $maxAge !== 40;
+    $hasPriceFilter = $minPrice !== 150 || $maxPrice !== 400;
+@endphp
+
+@section('content')
+<div class="min-h-screen bg-gray-50 text-gray-800">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mb-4 flex items-center gap-2 text-xs text-gray-500">
+            <span>Home</span>
+            <span>›</span>
+            <span class="text-gray-700">Girls</span>
+        </div>
+
+        <div class="mb-4 flex flex-wrap items-center gap-2 text-xs">
+            <span class="text-gray-500">Showing {{ $profiles->count() }} profiles</span>
+
+            @foreach($selectedCategoryItems->take(5) as $category)
+                @php
+                    $remainingCategoryIds = collect($selectedCategoryIds)
+                        ->reject(fn ($id) => (int) $id === (int) $category['id'])
+                        ->values()
+                        ->all();
+
+                    $removeCategoryQuery = request()->except('categories');
+                    if (!empty($remainingCategoryIds)) {
+                        $removeCategoryQuery['categories'] = $remainingCategoryIds;
+                    }
+
+                    $removeCategoryUrl = url('/') . (!empty($removeCategoryQuery) ? ('?' . http_build_query($removeCategoryQuery)) : '');
+                @endphp
+                <a href="{{ $removeCategoryUrl }}" class="rounded-full bg-gray-200 px-3 py-1 text-gray-600 hover:bg-gray-300">✕ {{ $category['name'] }}</a>
+            @endforeach
+
+            @if($hasAgeFilter)
+                @php
+                    $removeAgeQuery = request()->except('min_age', 'max_age');
+                    $removeAgeUrl = url('/') . (!empty($removeAgeQuery) ? ('?' . http_build_query($removeAgeQuery)) : '');
+                @endphp
+                <a href="{{ $removeAgeUrl }}" class="rounded-full bg-gray-200 px-3 py-1 text-gray-600 hover:bg-gray-300">✕ {{ $minAge }}-{{ $maxAge }}</a>
+            @endif
+
+            @if($hasPriceFilter)
+                @php
+                    $removePriceQuery = request()->except('min_price', 'max_price');
+                    $removePriceUrl = url('/') . (!empty($removePriceQuery) ? ('?' . http_build_query($removePriceQuery)) : '');
+                @endphp
+                <a href="{{ $removePriceUrl }}" class="rounded-full bg-gray-200 px-3 py-1 text-gray-600 hover:bg-gray-300">✕ ${{ $minPrice }} - ${{ $maxPrice }}</a>
+            @endif
+
+            @if($selectedCategoryItems->isEmpty() && !$hasAgeFilter && !$hasPriceFilter)
+                <span class="rounded-full bg-gray-200 px-3 py-1 text-gray-600">All categories</span>
+            @endif
+
+            <a href="{{ url('/') }}" class="ml-auto text-gray-500 hover:text-gray-700">Clear all</a>
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-[280px_1fr]" x-data="{ viewMode: 'grid' }">
+            <aside class="rounded-xl border border-gray-200 bg-white p-4">
+                {{--
+                <h3 class="mb-3 text-sm font-semibold text-gray-900">Location and radius</h3>
+                <div class="space-y-2">
+                    <select class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600">
+                        <option>Any location</option>
+                    </select>
+                    <select class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600">
+                        <option>Any radius</option>
+                    </select>
+                </div>
+                --}}
+
+                <div class="mt-6">
+                    <h3 class="mb-3 text-sm font-semibold text-gray-900">Filters</h3>
+                    <form method="GET" action="{{ url('/') }}" class="space-y-4 text-sm text-gray-600" x-data="{ minAge: {{ $minAge }}, maxAge: {{ $maxAge }}, minPrice: {{ $minPrice }}, maxPrice: {{ $maxPrice }} }">
+                        <div>
+                            <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Age Range</label>
+                            <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
+                                <div class="mb-2 flex items-center justify-between text-xs text-gray-500">
+                                    <span>Min: <strong x-text="minAge"></strong></span>
+                                    <span>Max: <strong x-text="maxAge"></strong></span>
+                                </div>
+                                <input id="min-age" name="min_age" type="range" min="18" max="60" x-model.number="minAge" @input="if (minAge > maxAge) maxAge = minAge" class="w-full">
+                                <input id="max-age" name="max_age" type="range" min="18" max="60" x-model.number="maxAge" @input="if (maxAge < minAge) minAge = maxAge" class="mt-2 w-full">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Price Range</label>
+                            <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
+                                <div class="mb-2 flex items-center justify-between text-xs text-gray-500">
+                                    <span>Min: $<strong x-text="minPrice"></strong></span>
+                                    <span>Max: $<strong x-text="maxPrice"></strong></span>
+                                </div>
+                                <input id="min-price" name="min_price" type="range" min="100" max="1000" step="10" x-model.number="minPrice" @input="if (minPrice > maxPrice) maxPrice = minPrice" class="w-full">
+                                <input id="max-price" name="max_price" type="range" min="100" max="1000" step="10" x-model.number="maxPrice" @input="if (maxPrice < minPrice) minPrice = maxPrice" class="mt-2 w-full">
+                            </div>
+                        </div>
+
+                        @forelse(($filterGroups ?? []) as $group)
+                            <div>
+                                <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">{{ $group['label'] }}</label>
+                                @if(!empty($group['options']))
+                                    @php
+                                        $groupSelectedIds = collect($group['options'])
+                                            ->pluck('id')
+                                            ->map(fn ($id) => (string) $id)
+                                            ->intersect($selectedCategoryIds->map(fn ($id) => (string) $id))
+                                            ->values()
+                                            ->all();
+                                    @endphp
+                                    <div
+                                        class="space-y-2"
+                                        x-data="{ open: false, options: {{ \Illuminate\Support\Js::from($group['options']) }}, selected: {{ \Illuminate\Support\Js::from($groupSelectedIds) }} }"
+                                        @click.outside="open = false"
+                                        @filter-opened.window="if ($event.detail !== '{{ $group['slug'] }}') open = false"
+                                    >
+                                        <template x-for="id in selected" :key="'sel-' + id">
+                                            <input type="hidden" name="categories[]" :value="id">
+                                        </template>
+
+                                        <button
+                                            type="button"
+                                            class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-sm font-semibold text-gray-700"
+                                            @click="open = !open; if (open) $dispatch('filter-opened', '{{ $group['slug'] }}')"
+                                        >
+                                            <span class="text-gray-500" x-show="selected.length === 0">Please select...</span>
+                                            <span class="inline-flex flex-wrap items-center gap-1" x-show="selected.length > 0">
+                                                <template x-for="id in selected" :key="'chip-' + id">
+                                                    <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                                                        <span x-text="(options.find(o => String(o.id) === String(id)) || {}).name"></span>
+                                                        <button type="button" class="text-gray-500" @click.stop="selected = selected.filter(v => String(v) !== String(id))">×</button>
+                                                    </span>
+                                                </template>
+                                            </span>
+                                        </button>
+
+                                        <div x-cloak x-show="open" x-transition class="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3">
+                                            <template x-for="option in options.filter(o => !selected.includes(String(o.id)))" :key="'opt-' + option.id">
+                                                <button type="button" class="block w-full rounded px-2 py-1 text-left text-sm text-gray-700 hover:bg-gray-100" @click="selected = [...selected, String(option.id)]" x-text="option.name"></button>
+                                            </template>
+                                            <p class="text-xs text-gray-400" x-show="options.filter(o => !selected.includes(String(o.id))).length === 0">No options left.</p>
+                                        </div>
+                                    </div>
+                                @else
+                                    <span class="text-xs text-gray-400">No options.</span>
+                                @endif
+                            </div>
+                        @empty
+                            <span class="text-xs text-gray-400">No filters found.</span>
+                        @endforelse
+
+                        @if(!empty($filterGroups ?? []))
+                            <button type="submit" class="w-full rounded-lg bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+                                Apply Filters
+                            </button>
+                        @endif
+                    </form>
+                </div>
+            </aside>
+
+            <section>
+                <div class="mb-4 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-3">
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100">New girls</button>
+                        <button type="button" class="rounded-full border border-gray-900 bg-gray-100 px-4 py-1.5 text-xs font-semibold text-gray-900">All girls</button>
+                    </div>
+
+                    <div class="ml-2 flex items-center gap-1 text-xs text-gray-500">
+                        <span>Popular</span>
+                        <span>▾</span>
+                    </div>
+
+                    <div class="ml-auto flex items-center gap-3 text-xs text-gray-500">
+                        <span class="hidden sm:inline">Compare (1)</span>
+                        <button type="button" class="rounded border px-2 py-1 hover:bg-gray-100" :class="viewMode === 'list' ? 'border-gray-900 bg-gray-100 text-gray-900' : 'border-gray-300 text-gray-500'" @click="viewMode = 'list'">☰</button>
+                        <button type="button" class="rounded border px-2 py-1 hover:bg-gray-100" :class="viewMode === 'grid' ? 'border-gray-900 bg-gray-100 text-gray-900' : 'border-gray-300 text-gray-500'" @click="viewMode = 'grid'">▦</button>
+                    </div>
+                </div>
+
+                <div class="mb-4 rounded-xl border border-gray-200 bg-white p-5">
+                    <h3 class="mb-3 text-2xl font-bold text-gray-900">Enter location to search local escorts</h3>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <input
+                            type="text"
+                            placeholder="Type location & select result from list"
+                            class="w-full rounded-md border border-gray-300 px-4 py-3 text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
+                        >
+                        <button type="button" class="rounded-md bg-[#b58aac] px-8 py-3 text-lg font-medium text-white hover:bg-[#a6749b] sm:min-w-[200px]">
+                            search
+                        </button>
+                    </div>
+                    <p class="mt-4 text-2xl font-bold text-gray-900">
+                        Or
+                        <a href="#" class="text-blue-500 hover:text-blue-600">search escorts by name</a>
                     </p>
                 </div>
 
-                <!-- Featured Slider with Touch Support -->
-                <div class="relative rounded-xl md:rounded-2xl overflow-hidden bg-gray-900/50 border border-gray-800"
-                     @mouseenter="stopAutoplay()"
-                     @mouseleave="startAutoplay()"
-                     @touchstart="handleFeaturedTouchStart($event)"
-                     @touchend="handleFeaturedTouchEnd($event)">
-
-                    <!-- Slider Container -->
-                    <div class="relative overflow-hidden">
-                        <div class="flex transition-transform duration-500 ease-out"
-                             :style="{ transform: 'translateX(-' + (featuredCurrentSlide * 100) + '%)' }">
-                            @foreach($featuredEscorts as $index => $featured)
-                            <div class="w-full flex-shrink-0">
-                                <div class="relative h-[280px] xs:h-[320px] sm:h-[350px] md:h-[400px] lg:h-[450px]">
-                                    <!-- Background Image with Overlay -->
-                                    <img src="{{ $featured['image'] }}"
-                                         alt="{{ $featured['name'] }}"
-                                         class="w-full h-full object-cover object-center"
-                                         loading="lazy">
-
-                                    <!-- Gradient Overlays -->
-                                    <div class="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/70 to-transparent"></div>
-                                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent"></div>
-                                    <div class="absolute inset-0 md:hidden bg-gradient-to-t from-gray-950 via-gray-950/50 to-transparent"></div>
-
-                                    <!-- Content -->
-                                    <div class="absolute inset-0 flex items-center">
-                                        <div class="p-3 xs:p-4 sm:p-6 md:p-8 lg:p-10 max-w-2xl w-full">
-                                            <!-- Featured Badge -->
-                                            <div class="flex flex-wrap items-center gap-1 xs:gap-2 mb-1 xs:mb-2 md:mb-4">
-                                                <span class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-0.5 xs:py-1 rounded-full font-bold shadow-lg">
-                                                    ⭐ FEATURED
-                                                </span>
-                                                @if($featured['online'])
-                                                <span class="bg-green-500/20 text-green-400 text-[10px] xs:text-xs sm:text-sm px-1.5 xs:px-2 sm:px-3 py-0.5 xs:py-1 rounded-full border border-green-500/30 flex items-center gap-0.5 xs:gap-1">
-                                                    <span class="w-1 h-1 xs:w-1.5 xs:h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                                    <span class="hidden xs:inline">LIVE</span>
-                                                    <span class="xs:hidden">●</span>
-                                                </span>
-                                                @endif
-                                            </div>
-
-                                            <!-- Name and Age -->
-                                            <div class="flex items-center flex-wrap gap-0.5 xs:gap-1 sm:gap-2 mb-0.5 xs:mb-1">
-                                                <h2 class="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-white truncate max-w-[120px] xs:max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]">
-                                                    {{ $featured['name'] }}
-                                                </h2>
-                                                <span class="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-pink-400 font-light">
-                                                    {{ $featured['age'] }}
-                                                </span>
-                                                <span class="text-base xs:text-lg sm:text-xl">{{ $featured['country'] }}</span>
-                                            </div>
-
-                                            <!-- Location -->
-                                            <p class="text-gray-300 text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg mb-1 xs:mb-2 md:mb-4 flex items-center gap-0.5 xs:gap-1">
-                                                <svg class="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-pink-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                                </svg>
-                                                <span class="truncate">{{ $featured['location'] }}</span>
-                                            </p>
-
-                                            <!-- Tags -->
-                                            <div class="flex flex-wrap gap-0.5 xs:gap-1 sm:gap-2 mb-1 xs:mb-2 md:mb-4 overflow-x-auto pb-0.5 xs:pb-1 md:pb-0 -mx-0.5 xs:-mx-1 px-0.5 xs:px-1 md:overflow-visible md:mx-0 md:px-0">
-                                                @foreach($featured['tags'] as $tag)
-                                                <span class="bg-pink-600/80 text-white text-[8px] xs:text-[10px] sm:text-xs px-1 xs:px-1.5 sm:px-2 md:px-3 py-0.25 xs:py-0.5 sm:py-1 rounded-full border border-pink-400/30 backdrop-blur-sm whitespace-nowrap">
-                                                    {{ $tag }}
-                                                </span>
-                                                @endforeach
-                                            </div>
-
-                                            <!-- Rating and Views -->
-                                            <div class="flex items-center gap-1 xs:gap-2 sm:gap-4 mb-2 xs:mb-3 md:mb-6">
-                                                <div class="flex items-center gap-0.5 xs:gap-1">
-                                                    <div class="flex">
-                                                        @for($i = 0; $i < 5; $i++)
-                                                            <svg class="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 {{ $i < floor($featured['rating']) ? 'text-yellow-400' : 'text-gray-600' }}" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                            </svg>
-                                                        @endfor
-                                                    </div>
-                                                    <span class="text-white font-bold text-[8px] xs:text-[10px] sm:text-xs md:text-sm ml-0.5 xs:ml-1">{{ $featured['rating'] }}</span>
-                                                </div>
-                                                <div class="flex items-center gap-0.5 xs:gap-1 text-gray-400 text-[8px] xs:text-[10px] sm:text-xs md:text-sm">
-                                                    <svg class="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                    </svg>
-                                                    <span class="hidden xs:inline">{{ number_format($featured['views']) }} views</span>
-                                                    <span class="xs:hidden">{{ floor($featured['views']/1000) }}.{{ floor(($featured['views']%1000)/100) }}k</span>
-                                                </div>
-                                            </div>
-
-                                            <!-- CTA Buttons -->
-                                            <div class="flex flex-col xs:flex-row gap-1 xs:gap-2 sm:gap-3">
-                                                <button class="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-500 text-white px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-1 xs:py-1.5 sm:py-2 md:py-2.5 lg:py-3 rounded-lg font-bold text-[8px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-0.5 xs:gap-1 sm:gap-2">
-                                                    <svg class="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                    </svg>
-                                                    <span class="hidden xs:inline">Watch Live</span>
-                                                    <span class="xs:hidden">Live</span>
-                                                </button>
-                                                <button class="bg-gray-800/80 hover:bg-gray-700 text-white px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-1 xs:py-1.5 sm:py-2 md:py-2.5 lg:py-3 rounded-lg font-bold text-[8px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base border border-gray-700 transition-all backdrop-blur-sm flex items-center justify-center gap-0.5 xs:gap-1 sm:gap-2">
-                                                    <svg class="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                                    </svg>
-                                                    <span class="hidden xs:inline">Favorite</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- Navigation Arrows -->
-                    <button @click="featuredPrevSlide"
-                            class="hidden sm:flex absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 xs:p-2 md:p-3 transition-all backdrop-blur-sm">
-                        <svg class="w-3 h-3 xs:w-4 xs:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
-                    <button @click="featuredNextSlide"
-                            class="hidden sm:flex absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 xs:p-2 md:p-3 transition-all backdrop-blur-sm">
-                        <svg class="w-3 h-3 xs:w-4 xs:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-
-                    <!-- Slide Indicators -->
-                    <div class="absolute bottom-1 xs:bottom-2 sm:bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-1 xs:gap-1.5 sm:gap-2 md:gap-2">
-                        @foreach($featuredEscorts as $index => $featured)
-                        <button @click="featuredGoToSlide({{ $index }})"
-                                class="transition-all duration-300 touch-manipulation"
-                                :class="featuredCurrentSlide === {{ $index }} ? 'w-3 xs:w-4 sm:w-5 md:w-6 lg:w-8 h-1 xs:h-1.5 sm:h-2 bg-pink-500 rounded-full' : 'w-1 xs:w-1.5 sm:w-2 h-1 xs:h-1.5 sm:h-2 bg-white/50 hover:bg-white/80 rounded-full'">
-                        </button>
-                        @endforeach
-                    </div>
-
-                    <!-- Slide Counter -->
-                    <div class="absolute top-1 xs:top-2 right-1 xs:right-2 sm:hidden bg-black/50 backdrop-blur-sm text-white text-[8px] xs:text-xs px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-full">
-                        <span x-text="featuredCurrentSlide + 1"></span>/{{ count($featuredEscorts) }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Latest Escorts from Australia Slider (New - Matching the image design) -->
-            {{-- <div class="mb-8 md:mb-10">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-                        Latest Escorts from <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-500">Australia</span>
+                <div class="mb-4 text-center">
+                    <h2 class="text-lg font-bold tracking-wide text-gray-900">
+                        Popular
+                        <span class="uppercase"><span class="text-pink-600">Hot</span><span class="text-gray-900">escorts</span></span>
+                        100% real and genuine escorts
                     </h2>
-                    <a href="{{ url('/') }}" class="text-sm text-pink-400 hover:text-pink-300 flex items-center gap-1">
-                        View All
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
                 </div>
 
-                <!-- Latest Escorts Slider - Card Style -->
-                <div class="relative"
-                     @touchstart="handleLatestTouchStart($event)"
-                     @touchend="handleLatestTouchEnd($event)">
-
-                    <!-- Slider Container -->
-                    <div class="relative overflow-hidden">
-                        <div class="flex transition-transform duration-500 ease-out gap-3 md:gap-4"
-                             :style="{ transform: 'translateX(-' + (latestCurrentSlide * 100) + '%)' }">
-
-                            @foreach($latestEscorts as $index => $escort)
-                            <div class="w-full flex-shrink-0" :style="{ minWidth: (100 / slidesPerView) + '%' }">
-                                <div class="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-pink-500 transition-all duration-300 group">
-                                    <!-- Image Container -->
-                                    <div class="relative aspect-square overflow-hidden">
-                                        <img src="{{ $escort['image'] }}"
-                                             alt="{{ $escort['name'] }}"
-                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-
-                                        <!-- Time Badge -->
-                                        <div class="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                            <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                            {{ $escort['time_ago'] }}
-                                        </div>
-
-                                        <!-- Verification Badge -->
-                                        @if($escort['verified'])
-                                        <div class="absolute top-2 right-2 bg-blue-500/90 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812z" clip-rule="evenodd"/>
-                                            </svg>
-                                            <span>Photos Verified</span>
-                                        </div>
-                                        @endif
-
-                                        <!-- Featured Badge -->
-                                        @if($escort['featured'])
-                                        <div class="absolute bottom-2 left-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black text-xs font-bold px-2 py-1 rounded">
-                                            FEATURED
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    <!-- Content -->
-                                    <div class="p-3">
-                                        <!-- Name and Price -->
-                                        <div class="flex items-center justify-between mb-1">
-                                            <h3 class="text-white font-semibold text-sm sm:text-base truncate max-w-[120px]">
-                                                {{ $escort['name'] }}
-                                            </h3>
-                                            <span class="text-pink-400 font-bold text-sm">From${{ $escort['price'] }}</span>
-                                        </div>
-
-                                        <!-- Location and Type -->
-                                        <div class="flex items-center justify-between text-xs text-gray-400">
-                                            <span class="truncate max-w-[100px]">{{ $escort['location'] }}</span>
-                                            <span>{{ $escort['type'] }}</span>
-                                        </div>
-                                    </div>
+                <div x-cloak class="grid gap-4" :class="viewMode === 'grid' ? 'sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'">
+                    @forelse($profiles as $profile)
+                        <article class="view-card overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm" :class="viewMode === 'list' ? 'md:grid md:grid-cols-[300px_1fr]' : ''">
+                            <div class="view-card-media relative" :class="viewMode === 'list' ? 'md:h-[220px]' : ''">
+                                <img src="{{ $profile['image'] }}" alt="{{ $profile['name'] }}" class="view-card-image object-cover" :class="viewMode === 'list' ? 'h-56 w-full md:h-[220px] md:w-full' : 'h-44 w-full'">
+                                <div class="absolute left-2 top-2 z-10 flex gap-1 text-[10px] font-semibold">
+                                    @if($profile['verified'])
+                                        <span class="rounded bg-cyan-500 px-2 py-0.5 text-white">Verified</span>
+                                    @endif
+                                    @if($profile['active'])
+                                        <span class="rounded bg-emerald-500 px-2 py-0.5 text-white">Online</span>
+                                    @endif
                                 </div>
                             </div>
-                            @endforeach
+
+                            <div class="view-card-content p-3" :class="viewMode === 'list' ? 'md:flex md:flex-col md:justify-between md:px-4 md:py-3' : ''">
+                                <div class="mb-1.5 flex items-center justify-between text-[10px] text-gray-400">
+                                    <span>{{ $profile['date'] }}</span>
+                                    <span>♡  ⎘  ⤴</span>
+                                </div>
+
+                                <h3 class="text-sm font-semibold text-gray-900" :class="viewMode === 'list' ? 'md:text-[22px] md:leading-6' : ''">{{ $profile['name'] }} <span class="text-gray-400">({{ $profile['age'] }})</span></h3>
+                                <p class="mb-2 text-xl font-bold text-gray-900" :class="viewMode === 'list' ? 'md:text-3xl md:leading-8' : ''">{{ $profile['rate'] }}</p>
+                                <p class="mb-3 text-xs text-gray-500" :class="viewMode === 'list' ? 'list-desc md:text-[12px] md:leading-5' : ''">{{ $profile['description'] ?? '' }}</p>
+
+                                <div class="grid grid-cols-2 gap-2 border-t border-gray-100 pt-3 text-xs text-gray-500" :class="viewMode === 'list' ? 'md:grid-cols-4 md:gap-2 md:text-[11px]' : ''">
+                                    <span>📍 {{ $profile['city'] }}</span>
+                                    <span>📏 {{ $profile['height'] }}</span>
+                                    <span>💼 {{ $profile['service_1'] }}</span>
+                                    <span>💎 {{ $profile['service_2'] }}</span>
+                                </div>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="col-span-full rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
+                            No profiles found for selected categories.
                         </div>
-                    </div>
-
-                    <!-- Navigation Arrows - Hidden on mobile -->
-                    <button @click="latestPrevSlide"
-                            class="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full p-2 shadow-lg transition-all z-10">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
-                    <button @click="latestNextSlide"
-                            class="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full p-2 shadow-lg transition-all z-10">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-
-                    <!-- Slide Indicators for mobile -->
-                    <div class="flex md:hidden justify-center gap-1.5 mt-4">
-                        <template x-for="i in getLatestTotalPages()" :key="i">
-                            <button @click="latestGoToSlide(i-1)"
-                                    class="transition-all duration-300 touch-manipulation"
-                                    :class="latestCurrentSlide === (i-1) ? 'w-4 h-1.5 bg-pink-500 rounded-full' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80 rounded-full'">
-                            </button>
-                        </template>
-                    </div>
-                </div>
-            </div> --}}
-
-            <!-- Unified Search & Filter Bar -->
-            <div class="bg-gray-900/90 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg border border-gray-800 mb-6">
-                <!-- Gender Tabs - Horizontal Scroll on Mobile -->
-                @php $activeGender = request('gender', 'female'); @endphp
-                <div class="overflow-x-auto pb-2 -mx-1 px-1 scrollbar-thin scrollbar-thumb-pink-400 mb-4">
-                    <div class="flex gap-2 min-w-max">
-                        @foreach(gender_tabs() as $tab)
-                            <a href="?gender={{ $tab->slug }}"
-                               class="flex-shrink-0 px-5 sm:px-8 py-2.5 sm:py-3 rounded-lg font-bold text-xs sm:text-sm tracking-widest transition-all shadow-lg border-2 {{ $activeGender === $tab->slug ? 'bg-gray-800 text-pink-100 border-pink-400' : 'bg-gray-700 text-pink-200 hover:bg-pink-600 border-transparent' }}">
-                                {{ strtoupper($tab->label) }}
-                            </a>
-                        @endforeach
-                    </div>
+                    @endforelse
                 </div>
 
-                <!-- Search Bar and Grid Controls -->
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <div class="flex-1 flex gap-2">
-                        <input type="text"
-                               placeholder="Search models or categories..."
-                               x-model="searchQuery"
-                               class="flex-1 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 placeholder:text-gray-400 text-sm sm:text-base" />
-                           <button class="bg-gradient-to-r from-pink-600 to-pink-500 text-white px-5 sm:px-7 py-2.5 sm:py-3 rounded-lg font-bold shadow hover:from-pink-500 hover:to-pink-600 transition text-sm sm:text-base whitespace-nowrap">
-                            Search
-                        </button>
-                    </div>
-
-                    <!-- Grid Switcher -->
-                    <div class="flex gap-2 items-center justify-end sm:justify-start">
-                        <span class="text-gray-400 text-sm hidden sm:block">View:</span>
-                        <div class="flex gap-1 bg-gray-800 rounded-lg p-1">
-                            <button @click="gridCols = 1" :class="gridCols === 1 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
-                                    class="p-2 rounded-lg transition shadow sm:hidden">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <rect x="4" y="4" width="16" height="16" stroke-width="2"/>
-                                </svg>
-                            </button>
-                            <button @click="gridCols = 2" :class="gridCols === 2 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
-                                    class="p-2 rounded-lg transition shadow hidden sm:block">
-                                <svg class="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/>
-                                    <rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/>
-                                </svg>
-                            </button>
-                            <button @click="gridCols = 3" :class="gridCols === 3 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
-                                    class="p-2 rounded-lg transition shadow hidden sm:block">
-                                <svg class="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <rect x="2" y="2" width="6" height="6"/><rect x="9" y="2" width="6" height="6"/><rect x="16" y="2" width="6" height="6"/>
-                                    <rect x="2" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/><rect x="16" y="9" width="6" height="6"/>
-                                </svg>
-                            </button>
-                            <button @click="gridCols = 4" :class="gridCols === 4 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
-                                    class="p-2 rounded-lg transition shadow hidden lg:block">
-                                <svg class="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <rect x="3" y="3" width="4" height="4"/><rect x="8" y="3" width="4" height="4"/>
-                                    <rect x="13" y="3" width="4" height="4"/><rect x="18" y="3" width="4" height="4"/>
-                                    <rect x="3" y="8" width="4" height="4"/><rect x="8" y="8" width="4" height="4"/>
-                                </svg>
-                            </button>
-                            <button @click="gridCols = 5" :class="gridCols === 5 ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'"
-                                    class="p-2 rounded-lg transition shadow hidden xl:block">
-                                <svg class="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <rect x="2" y="2" width="3" height="3"/><rect x="6" y="2" width="3" height="3"/><rect x="10" y="2" width="3" height="3"/><rect x="14" y="2" width="3" height="3"/><rect x="18" y="2" width="3" height="3"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                <div class="mt-8 flex items-center justify-center gap-2 text-sm text-gray-600">
+                    <span class="rounded bg-gray-200 px-3 py-1">1</span>
+                    <span class="rounded px-3 py-1 hover:bg-gray-200">2</span>
+                    <span class="rounded px-3 py-1 hover:bg-gray-200">3</span>
+                    <span class="rounded px-3 py-1 hover:bg-gray-200">4</span>
+                    <span class="rounded px-3 py-1 hover:bg-gray-200">5</span>
+                    <span>...</span>
+                    <span class="rounded px-3 py-1 hover:bg-gray-200">10</span>
                 </div>
-            </div>
-
-            <!-- Results Count -->
-            <div class="flex justify-between items-center mb-4 px-1">
-                <p class="text-sm text-gray-400">
-                    Showing <span class="text-white font-semibold">36</span> models
-                </p>
-                <select class="bg-gray-800 text-white text-sm rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-pink-500">
-                    <option>Sort by: Popular</option>
-                    <option>Sort by: Newest</option>
-                    <option>Sort by: Online</option>
-                </select>
-            </div>
-
-            <!-- Model Grid - Fully Responsive -->
-            <div class="grid gap-3 sm:gap-4 md:gap-6 lg:gap-8"
-                :class="{
-                    'grid-cols-1': gridCols === 1,
-                    'grid-cols-2': gridCols === 2,
-                    'grid-cols-2 sm:grid-cols-3': gridCols === 3,
-                    'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4': gridCols === 4,
-                    'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5': gridCols === 5
-                }">
-                @for ($i = 0; $i < 36; $i++)
-                <div class="relative group rounded-xl md:rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-gray-900 to-gray-800 hover:scale-[1.02] md:hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-pink-500">
-                    <!-- Image Container with Aspect Ratio -->
-                    <div class="relative aspect-[3/4] overflow-hidden">
-                        <img src="https://randomuser.me/api/portraits/women/{{ $i % 100 }}.jpg"
-                             alt="Model"
-                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                             loading="lazy">
-
-                        <!-- Overlay Gradient -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60"></div>
-
-                        <!-- Badges -->
-                        <div class="absolute top-2 left-2 flex gap-1">
-                            <span class="bg-gradient-to-r from-pink-500 to-pink-600 text-white text-xs px-2 py-1 rounded font-bold shadow-lg animate-pulse">
-                                LIVE
-                            </span>
-                            <span class="bg-black/70 text-white text-xs px-2 py-1 rounded font-medium backdrop-blur-sm">
-                                18+
-                            </span>
-                        </div>
-
-                        <!-- Quick Action Buttons -->
-                        <div class="absolute top-2 right-2 flex gap-1 opacity-0 md:group-hover:opacity-100 transition-opacity">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white rounded-full p-1.5 md:p-2 shadow-lg transform hover:scale-110 transition">
-                                <svg class="w-3 h-3 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Model Info -->
-                    <div class="p-2 md:p-3">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="font-semibold text-white text-sm md:text-base truncate">ModelName{{ $i+1 }}</span>
-                            <span class="text-pink-400 text-xs whitespace-nowrap">({{ rand(18,35) }})</span>
-                        </div>
-
-                        <!-- Category and Tags -->
-                        <div class="text-xs text-gray-400 mt-0.5 md:mt-1 truncate">Category • Online now</div>
-
-                        <div class="flex items-center gap-1 mt-1 md:mt-2 flex-wrap">
-                            <span class="bg-pink-600 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded">HD</span>
-                            <span class="bg-gray-900 text-pink-400 text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded border border-pink-500/30">VIP</span>
-                            <span class="text-green-400 text-[10px] ml-auto flex items-center gap-0.5">
-                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                Online
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                @endfor
-            </div>
-
-            <!-- Mobile Quick Actions - Fixed Bottom Bar -->
-            <div class="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-t border-gray-800 p-3 md:hidden z-50">
-                <div class="flex justify-around items-center max-w-md mx-auto">
-                    <button class="flex flex-col items-center text-pink-400">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                        <span class="text-xs">Filters</span>
-                    </button>
-                    <button class="flex flex-col items-center text-pink-400">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        <span class="text-xs">Sort</span>
-                    </button>
-                    <button class="flex flex-col items-center text-white bg-gradient-to-r from-pink-600 to-pink-500 rounded-full px-6 py-2 -mt-8 shadow-lg">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <span class="text-xs">Search</span>
-                    </button>
-                    <button class="flex flex-col items-center text-yellow-400">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                        </svg>
-                        <span class="text-xs">Favorites</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Load More Button -->
-            <div class="flex justify-center mt-8 md:mt-10 mb-4 md:mb-0">
-                <button class="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white px-6 sm:px-10 py-3 md:py-4 rounded-xl font-bold text-sm sm:text-base md:text-lg shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2">
-                    <span>SHOW MORE MODELS</span>
-                    <svg class="w-4 h-4 md:w-5 md:h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7-7-7m14-6l-7 7-7-7"></path>
-                    </svg>
-                </button>
-            </div>
+            </section>
         </div>
     </div>
-</section>
-
-<!-- Add custom scrollbar and mobile optimization styles -->
-<style>
-/* Custom scrollbar */
-.scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #e04ecb;
-    border-radius: 20px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #c13ab0;
-}
-
-/* Mobile optimizations */
-@media (max-width: 640px) {
-    .group:hover {
-        transform: none !important;
-    }
-    .group:hover .opacity-0 {
-        opacity: 1 !important;
-    }
-}
-
-/* Extra small devices (under 380px) */
-@media (max-width: 380px) {
-    .xs\:hidden {
-        display: none;
-    }
-    .xs\:inline {
-        display: inline;
-    }
-    .xs\:flex-row {
-        flex-direction: row;
-    }
-}
-
-/* Very small devices (under 320px) */
-@media (max-width: 320px) {
-    .group .text-xs {
-        font-size: 0.65rem;
-    }
-}
-
-/* Smooth transitions and touch optimizations */
-* {
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Improve touch targets on mobile */
-button, a {
-    touch-action: manipulation;
-}
-
-/* Prevent text overflow on very small screens */
-.truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Custom breakpoint for extra small devices */
-@media (min-width: 380px) {
-    .xs\:block {
-        display: block;
-    }
-    .xs\:inline {
-        display: inline;
-    }
-    .xs\:hidden {
-        display: none;
-    }
-}
-</style>
+</div>
 @endsection
+
+@push('styles')
+<style>
+    .view-card {
+        transition: box-shadow 0.25s ease, transform 0.25s ease;
+    }
+
+    .view-card:hover {
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+    }
+
+    .view-card-media {
+        overflow: hidden;
+    }
+
+    .view-card-media::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(to top, rgba(10, 15, 28, 0.45) 0%, rgba(10, 15, 28, 0.1) 45%, rgba(10, 15, 28, 0) 100%);
+        opacity: 0.35;
+        transition: opacity 0.35s ease;
+    }
+
+    .view-card-image {
+        transition: transform 0.45s ease;
+        transform-origin: center center;
+    }
+
+    .view-card:hover .view-card-image {
+        transform: scale(1.08);
+    }
+
+    .view-card:hover .view-card-media::after {
+        opacity: 0.65;
+    }
+
+    .list-desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+@endpush
+

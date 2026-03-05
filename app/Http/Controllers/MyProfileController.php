@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 
 class MyProfileController extends Controller
 {
+    private const WEBSITE_TYPE = 'adult';
+
     public function stepTwo()
     {
         $contactEmail = SiteSetting::query()
@@ -39,6 +41,7 @@ class MyProfileController extends Controller
     {
         $parentId = Category::query()
             ->where('slug', $slug)
+            ->where('website_type', self::WEBSITE_TYPE)
             ->where('is_active', true)
             ->value('id');
 
@@ -53,6 +56,7 @@ class MyProfileController extends Controller
 
         $options = Category::query()
             ->where('parent_id', $parentId)
+            ->where('website_type', self::WEBSITE_TYPE)
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('id')
