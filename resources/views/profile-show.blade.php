@@ -42,7 +42,7 @@
                 </section>
 
                 <section class="rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
-                    <h2 class="mb-4 text-2xl font-bold text-gray-900">Gallery</h2>
+                    <h2 class="mb-4 text-2xl font-bold text-gray-900">Photo Gallery</h2>
 
                     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach(($profile['images'] ?? [$profile['image']]) as $mediaImage)
@@ -53,7 +53,7 @@
 
                 @if(!empty($profile['videos']))
                     <section class="rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
-                        <h2 class="mb-4 text-2xl font-bold text-gray-900">Videos</h2>
+                        <h2 class="mb-4 text-2xl font-bold text-gray-900">Video Gallery</h2>
                         <div class="grid gap-4 sm:grid-cols-2">
                             @foreach($profile['videos'] as $mediaVideo)
                                 <video class="h-56 w-full rounded-xl bg-black object-cover" controls preload="metadata">
