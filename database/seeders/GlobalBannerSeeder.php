@@ -15,7 +15,10 @@ class GlobalBannerSeeder extends Seeder
         GlobalBanner::updateOrCreate(
             ['page_key' => 'pricing'],
             [
+                'page_keys' => ['pricing'],
                 'banner_image_path' => null,
+                'banner_title' => 'hotescorts.com.au',
+                'banner_subtitle' => 'REAL WOMEN NEAR YOU',
                 'is_active' => true,
             ],
         );

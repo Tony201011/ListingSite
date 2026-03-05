@@ -3,13 +3,21 @@
     $currentPageKey = $currentPath === '' ? 'home' : $currentPath;
 
     $banner = \App\Models\GlobalBanner::query()
-        ->where('page_key', $currentPageKey)
+        ->where(function ($query) use ($currentPageKey) {
+            $query
+                ->whereJsonContains('page_keys', $currentPageKey)
+                ->orWhere('page_key', $currentPageKey);
+        })
         ->where('is_active', true)
         ->latest('updated_at')
         ->first();
 
     $globalBanner = \App\Models\GlobalBanner::query()
-        ->where('page_key', 'all-pages')
+        ->where(function ($query) {
+            $query
+                ->whereJsonContains('page_keys', 'all-pages')
+                ->orWhere('page_key', 'all-pages');
+        })
         ->where('is_active', true)
         ->latest('updated_at')
         ->first();
@@ -26,14 +34,17 @@
     } else {
         $bannerImage = $defaultBannerImage;
     }
+
+    $bannerTitle = $banner?->banner_title ?: ($globalBanner?->banner_title ?: 'hotescorts.com.au');
+    $bannerSubtitle = $banner?->banner_subtitle ?: ($globalBanner?->banner_subtitle ?: 'REAL WOMEN NEAR YOU');
 @endphp
 
 @if($shouldShow)
     <div class="relative overflow-hidden bg-gradient-to-r from-[#e04ecb] to-[#c13ab0]">
         <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('{{ $bannerImage }}');"></div>
         <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
-            <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">hotescorts.com.au</h1>
-            <p class="text-xl text-white/90 tracking-widest">REAL WOMEN NEAR YOU</p>
+            <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">{{ $bannerTitle }}</h1>
+            <p class="text-xl text-white/90 tracking-widest">{{ $bannerSubtitle }}</p>
         </div>
     </div>
 @endif

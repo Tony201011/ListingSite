@@ -11,6 +11,7 @@ use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -46,13 +47,39 @@ class GlobalBannerResource extends Resource
     {
         return $schema
             ->components([
-                Select::make('page_key')
-                    ->label('Page')
+                Select::make('page_keys')
+                    ->label('Pages')
+                    ->multiple()
                     ->options(self::pageOptions())
                     ->searchable()
                     ->required()
-                    ->unique(ignoreRecord: true)
-                    ->helperText('Select a specific page, or choose All Pages (Global) to apply one banner site-wide.'),
+                    ->live()
+                    ->afterStateHydrated(function ($state, ?GlobalBanner $record, callable $set): void {
+                        if (! empty($state)) {
+                            return;
+                        }
+
+                        if (! empty($record?->page_keys)) {
+                            $set('page_keys', $record->page_keys);
+
+                            return;
+                        }
+
+                        if (! empty($record?->page_key)) {
+                            $set('page_keys', [$record->page_key]);
+                        }
+                    })
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        $selected = collect((array) $state)
+                            ->filter()
+                            ->values();
+
+                        if ($selected->contains('all-pages')) {
+                            $set('page_keys', ['all-pages']);
+                        }
+                    })
+                    ->dehydrateStateUsing(fn ($state) => array_values(array_unique((array) $state)))
+                    ->helperText('Select one or more pages. Choose All Pages (Global) to apply one banner site-wide.'),
                 FileUpload::make('banner_image_path')
                     ->label('Banner Image')
                     ->disk('public')
@@ -63,6 +90,14 @@ class GlobalBannerResource extends Resource
                     ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
                     ->maxSize(4096)
                     ->required(),
+                TextInput::make('banner_title')
+                    ->label('Banner Title')
+                    ->maxLength(255)
+                    ->placeholder('hotescorts.com.au'),
+                TextInput::make('banner_subtitle')
+                    ->label('Banner Subtitle')
+                    ->maxLength(255)
+                    ->placeholder('REAL WOMEN NEAR YOU'),
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
@@ -74,13 +109,29 @@ class GlobalBannerResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('page_key')
-                    ->label('Page')
-                    ->formatStateUsing(fn (string $state): string => self::pageOptions()[$state] ?? $state)
+                TextColumn::make('page_keys')
+                    ->label('Pages')
+                    ->formatStateUsing(function ($state, GlobalBanner $record): string {
+                        $keys = collect($record->page_keys ?? [])
+                            ->filter()
+                            ->values();
+
+                        if ($keys->isEmpty() && filled($record->page_key)) {
+                            $keys = collect([$record->page_key]);
+                        }
+
+                        return $keys
+                            ->map(fn ($key) => self::pageOptions()[$key] ?? $key)
+                            ->implode(', ');
+                    })
                     ->searchable(),
                 IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean(),
+                TextColumn::make('banner_title')
+                    ->label('Title')
+                    ->placeholder('Default')
+                    ->limit(28),
                 TextColumn::make('updated_at')
                     ->label('Updated')
                     ->since()
