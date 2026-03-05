@@ -9,12 +9,10 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -53,58 +51,34 @@ class AboutUsPageResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Page Content')
-                    ->schema([
-                        TextInput::make('title')
-                            ->required()
-                            ->maxLength(255),
-                        RichEditor::make('content')
-                            ->required()
-                            ->toolbarButtons([
-                                'bold',
-                                'italic',
-                                'underline',
-                                'strike',
-                                'subscript',
-                                'superscript',
-                                'h2',
-                                'h3',
-                                'alignStart',
-                                'alignCenter',
-                                'alignEnd',
-                                'textColor',
-                                'codeBlock',
-                                'bulletList',
-                                'orderedList',
-                                'link',
-                                'blockquote',
-                                'undo',
-                                'redo',
-                            ])
-                            ->helperText('Color option is enabled. Use heading levels (H2/H3) for larger text size. Font family follows your site theme.')
-                            ->columnSpanFull(),
+                TextInput::make('title')
+                    ->required()
+                    ->maxLength(255),
+                RichEditor::make('content')
+                    ->required()
+                    ->toolbarButtons([
+                        'bold',
+                        'italic',
+                        'underline',
+                        'strike',
+                        'subscript',
+                        'superscript',
+                        'h2',
+                        'h3',
+                        'alignStart',
+                        'alignCenter',
+                        'alignEnd',
+                        'textColor',
+                        'codeBlock',
+                        'bulletList',
+                        'orderedList',
+                        'link',
+                        'blockquote',
+                        'undo',
+                        'redo',
                     ])
-                    ->columns(1),
-                Section::make('Banner Settings')
-                    ->schema([
-                        TextInput::make('banner_title')
-                            ->label('Banner title')
-                            ->maxLength(255),
-                        TextInput::make('banner_subtitle')
-                            ->label('Banner subtitle')
-                            ->maxLength(255),
-                        FileUpload::make('banner_image_path')
-                            ->label('Banner image')
-                            ->disk('public')
-                            ->directory('about-us-banners')
-                            ->image()
-                            ->imageEditor()
-                            ->visibility('public')
-                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
-                            ->maxSize(4096)
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2),
+                    ->helperText('Color option is enabled. Use heading levels (H2/H3) for larger text size. Font family follows your site theme.')
+                    ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
