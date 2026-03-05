@@ -22,7 +22,7 @@
         ->latest('updated_at')
         ->first();
 
-    $defaultEnabledPages = ['signin', 'signup', 'reset-password', 'about-us', 'pricing', 'otp-verification', 'my-rate'];
+    $defaultEnabledPages = ['signin', 'signup', 'reset-password', 'about-us', 'pricing', 'help', 'otp-verification', 'my-rate'];
     $defaultBannerImage = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop';
 
     $shouldShow = $banner || $globalBanner || in_array($currentPageKey, $defaultEnabledPages, true);

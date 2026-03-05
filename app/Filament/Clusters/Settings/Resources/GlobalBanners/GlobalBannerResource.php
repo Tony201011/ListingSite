@@ -166,6 +166,7 @@ class GlobalBannerResource extends Resource
             'my-rate' => 'My Rate',
             'about-us' => 'About Us',
             'pricing' => 'Pricing',
+            'help' => 'Help',
             'blog' => 'Blog',
             'faq' => 'FAQ',
             'contact-us' => 'Contact Us',

@@ -25,9 +25,20 @@
 
         $topRightLinks = collect($headerWidget?->top_right_links ?? [
             ['label' => 'Follow Alice', 'url' => route('blog')],
-            ['label' => 'Help', 'url' => route('faq')],
+            ['label' => 'Help', 'url' => route('help')],
             ['label' => 'Contact', 'url' => route('contact-us')],
-        ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
+        ])
+            ->map(function ($item) {
+                $label = strtolower(trim((string) ($item['label'] ?? '')));
+
+                if ($label === 'help') {
+                    $item['url'] = route('help');
+                }
+
+                return $item;
+            })
+            ->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))
+            ->values();
 
         $actionLinks = collect($headerWidget?->action_links ?? [
             ['label' => 'Pricing', 'url' => url('/pricing')],

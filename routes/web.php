@@ -26,6 +26,7 @@ Route::get('/signup', function () {
 });
 
 Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
+Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.load-more');
