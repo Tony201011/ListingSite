@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             RefundPolicySeeder::class,
             PricingPageSeeder::class,
             PricingPackageSeeder::class,
+            GlobalBannerSeeder::class,
             FaqSeeder::class,
             AntiSpamPolicySeeder::class,
             SocialLoginSettingSeeder::class,

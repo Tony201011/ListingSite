@@ -27,6 +27,8 @@
 
     @include('layouts.partials.header')
 
+    @include('layouts.partials.global-banner')
+
     @yield('content')
 
     {{-- Cookie Consent Banner (dynamic) --}}

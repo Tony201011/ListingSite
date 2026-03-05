@@ -1,15 +1,6 @@
 @extends('layouts.frontend')
 
 @section('content')
-<!-- ================= HERO BANNER ================= -->
-<div class="relative overflow-hidden bg-gradient-to-r from-[#e04ecb] to-[#c13ab0]">
-    <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop');"></div>
-    <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">hotescorts.com.au</h1>
-        <p class="text-xl text-white/90 tracking-widest">REAL WOMEN NEAR YOU</p>
-    </div>
-</div>
-
 <!-- Main Content -->
 <div class="bg-[#f8fafc] min-h-screen py-10">
     <div class="max-w-4xl mx-auto px-5">

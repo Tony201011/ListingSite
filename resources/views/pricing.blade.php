@@ -3,14 +3,6 @@
 @section('title', 'Pricing')
 
 @section('content')
-<div class="relative overflow-hidden bg-gradient-to-r from-[#e04ecb] to-[#c13ab0]">
-    <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop');"></div>
-    <div class="relative z-10 max-w-6xl mx-auto px-5 py-16 text-center">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-lg">hotescorts.com.au</h1>
-        <p class="text-xl text-white/90 tracking-widest">REAL WOMEN NEAR YOU</p>
-    </div>
-</div>
-
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-5xl mx-auto">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 mb-6">
