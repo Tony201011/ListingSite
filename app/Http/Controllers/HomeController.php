@@ -9,6 +9,20 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
+        $viewData = $this->buildFilterViewData($request);
+
+        return view('home', $viewData);
+    }
+
+    public function advancedSearch(Request $request)
+    {
+        $viewData = $this->buildFilterViewData($request);
+
+        return view('advanced-search', $viewData);
+    }
+
+    private function buildFilterViewData(Request $request): array
+    {
         $filterSlugs = [
             'hair-color',
             'hair-length',
@@ -83,7 +97,7 @@ class HomeController extends Controller
             [$minPrice, $maxPrice] = [$maxPrice, $minPrice];
         }
 
-        return view('home', compact(
+        return compact(
             'filterGroups',
             'allFilterCategories',
             'selectedCategoryIds',
@@ -91,6 +105,6 @@ class HomeController extends Controller
             'maxAge',
             'minPrice',
             'maxPrice'
-        ));
+        );
     }
 }
