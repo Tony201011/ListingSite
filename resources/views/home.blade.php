@@ -120,24 +120,27 @@
                     </div>
                 </div>
 
-                <div class="mb-4 rounded-xl border border-gray-200 bg-white p-5">
-                    <h3 class="mb-3 text-2xl font-bold text-gray-900">Enter location to search local escorts</h3>
+                <div class="mb-4 rounded-xl border border-gray-200 bg-white p-5" x-data="{ searchMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}', term: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}' }">
+                    <h3 class="mb-3 text-2xl font-bold text-gray-900" x-text="searchMode === 'username' ? 'Enter username to find escort' : 'Enter suburb to search local escorts'"></h3>
                     <form method="GET" action="{{ url('/') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
+                        <input type="hidden" name="escort_name" :value="searchMode === 'username' ? term : ''">
                         <input
                             type="text"
-                            name="location"
-                            value="{{ $locationQuery }}"
-                            placeholder="Type location & select result from list"
-                            class="w-full rounded-md border border-gray-300 px-4 py-3 text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
+                            x-model="term"
+                            :placeholder="searchMode === 'username' ? 'Enter username' : 'Enter suburb'"
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none sm:w-[340px]"
                         >
                         <button type="submit" class="rounded-md bg-[#b58aac] px-8 py-3 text-lg font-medium text-white hover:bg-[#a6749b] sm:min-w-[200px]">
-                            search
+                            Find Escort
                         </button>
+                        <button
+                            type="button"
+                            class="rounded-md bg-gray-800 px-8 py-3 text-lg font-medium text-white hover:bg-gray-700 sm:min-w-[200px]"
+                            @click="searchMode = searchMode === 'suburb' ? 'username' : 'suburb'; term = ''"
+                            x-text="searchMode === 'suburb' ? 'Search by Username' : 'Search by Suburb'"
+                        ></button>
                     </form>
-                    <p class="mt-4 text-2xl font-bold text-gray-900">
-                        Or
-                        <a href="#" class="text-blue-500 hover:text-blue-600">search escorts by name</a>
-                    </p>
                     <div class="mt-4">
                         <a href="{{ route('advanced-search') }}" class="inline-flex items-center rounded-md border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">
                             Advanced Search / Filter
