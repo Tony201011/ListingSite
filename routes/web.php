@@ -175,6 +175,8 @@ Route::get('/membership', function () {
     return view('membership');
 });
 
+Route::get('/pricing', [FrontendPageController::class, 'pricing'])->name('pricing');
+
 Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
 
 

@@ -9,6 +9,33 @@ class HeaderWidget extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::saving(function (HeaderWidget $headerWidget): void {
+            $links = collect($headerWidget->main_nav_links ?? [])
+                ->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))
+                ->values();
+
+            $hasPricingLink = $links->contains(function ($item): bool {
+                $label = strtolower(trim((string) ($item['label'] ?? '')));
+                $rawUrl = trim((string) ($item['url'] ?? ''));
+                $path = parse_url($rawUrl, PHP_URL_PATH);
+                $normalizedPath = '/' . ltrim((string) ($path ?? $rawUrl), '/');
+
+                return $label === 'pricing' || $normalizedPath === '/pricing';
+            });
+
+            if (! $hasPricingLink) {
+                $links->push([
+                    'label' => 'Pricing',
+                    'url' => url('/pricing'),
+                ]);
+            }
+
+            $headerWidget->main_nav_links = $links->all();
+        });
+    }
+
     protected $fillable = [
         'logo_type',
         'logo_path',

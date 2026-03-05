@@ -38,6 +38,8 @@ class DatabaseSeeder extends Seeder
             TermConditionSeeder::class,
             PrivacyPolicySeeder::class,
             RefundPolicySeeder::class,
+            PricingPageSeeder::class,
+            PricingPackageSeeder::class,
             FaqSeeder::class,
             AntiSpamPolicySeeder::class,
             SocialLoginSettingSeeder::class,

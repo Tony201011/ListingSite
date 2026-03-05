@@ -30,7 +30,7 @@
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
         $actionLinks = collect($headerWidget?->action_links ?? [
-            ['label' => 'Pricing', 'url' => url('/membership')],
+            ['label' => 'Pricing', 'url' => url('/pricing')],
             ['label' => 'Diamonds', 'url' => url('/purchase-credit')],
             ['label' => 'Superboost', 'url' => url('/purchase-credit')],
             ['label' => 'Add advertisement', 'url' => url('/signup')],
@@ -39,6 +39,7 @@
         $mainNavLinks = collect($headerWidget?->main_nav_links ?? [
             ['label' => 'Home', 'url' => url('/')],
             ['label' => 'About us', 'url' => route('about-us')],
+            ['label' => 'Pricing', 'url' => url('/pricing')],
             ['label' => 'Escorts', 'url' => url('/')],
             ['label' => 'Naughty corner', 'url' => route('blog')],
             ['label' => 'Blog', 'url' => route('blog')],
@@ -47,6 +48,20 @@
             ['label' => 'Escort reviews', 'url' => route('blog')],
             ['label' => 'Escort announcements', 'url' => route('blog')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
+
+        $hasPricingInMainNav = $mainNavLinks->contains(function ($item) {
+            $label = strtolower(trim((string) ($item['label'] ?? '')));
+            $url = trim((string) ($item['url'] ?? ''));
+
+            return $label === 'pricing' || $url === url('/pricing');
+        });
+
+        if (! $hasPricingInMainNav) {
+            $mainNavLinks->push([
+                'label' => 'Pricing',
+                'url' => url('/pricing'),
+            ]);
+        }
 
         $mobileExtraLinks = collect($headerWidget?->mobile_extra_links ?? [
             ['label' => 'Contact', 'url' => route('contact-us')],

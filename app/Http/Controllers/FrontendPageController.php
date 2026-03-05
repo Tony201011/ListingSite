@@ -6,6 +6,8 @@ use App\Models\AboutUsPage;
 use App\Models\AntiSpamPolicy;
 use App\Models\ContactUsPage;
 use App\Models\Faq;
+use App\Models\PricingPackage;
+use App\Models\PricingPage;
 use App\Models\PrivacyPolicy;
 use App\Models\RefundPolicy;
 use App\Models\SiteSetting;
@@ -61,6 +63,30 @@ class FrontendPageController extends Controller
 
         return view('refund-policy', [
             'policy' => $policy,
+        ]);
+    }
+
+    public function pricing()
+    {
+        $page = PricingPage::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+
+        $packages = collect();
+
+        if ($page) {
+            $packages = PricingPackage::query()
+                ->where('pricing_page_id', $page->id)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+        }
+
+        return view('pricing', [
+            'page' => $page,
+            'packages' => $packages,
         ]);
     }
 
