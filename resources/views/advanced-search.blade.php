@@ -15,7 +15,11 @@
             <h1 class="text-xl font-bold text-gray-900">Advanced Search / Filter</h1>
             <p class="mt-1 text-sm text-gray-500">Use filters and show matching profiles on home page.</p>
 
-            <form method="GET" action="{{ url('/') }}" class="mt-6 space-y-5">
+            @php
+                $selectedCategoryIds = collect($selectedCategoryIds ?? [])->map(fn ($id) => (string) $id)->values();
+            @endphp
+
+            <form method="GET" action="{{ url('/') }}" class="mt-6 space-y-4 text-sm text-gray-600" x-data="{ minAge: {{ (int) ($minAge ?? 18) }}, maxAge: {{ (int) ($maxAge ?? 40) }}, minPrice: {{ (int) ($minPrice ?? 150) }}, maxPrice: {{ (int) ($maxPrice ?? 400) }} }">
                 <div>
                     <label for="location" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Location</label>
                     <input
@@ -23,8 +27,8 @@
                         name="location"
                         type="text"
                         value="{{ request('location') }}"
-                        placeholder="Enter city or area"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
+                        placeholder="Type location & select result from list"
+                        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
                     >
                 </div>
 
@@ -35,54 +39,90 @@
                         name="escort_name"
                         type="text"
                         value="{{ request('escort_name') }}"
-                        placeholder="Optional name search"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
+                        placeholder="Search by name"
+                        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
                     >
                 </div>
 
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <label for="min_age" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Min Age</label>
-                        <input id="min_age" name="min_age" type="number" min="18" max="60" value="{{ $minAge }}" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 focus:border-pink-400 focus:outline-none">
+                <div>
+                    <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Age Range</label>
+                    <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
+                        <div class="mb-2 flex items-center justify-between text-xs text-gray-500">
+                            <span>Min: <strong x-text="minAge"></strong></span>
+                            <span>Max: <strong x-text="maxAge"></strong></span>
+                        </div>
+                        <input id="min-age" name="min_age" type="range" min="18" max="60" x-model.number="minAge" @input="if (minAge > maxAge) maxAge = minAge" class="w-full">
+                        <input id="max-age" name="max_age" type="range" min="18" max="60" x-model.number="maxAge" @input="if (maxAge < minAge) minAge = maxAge" class="mt-2 w-full">
                     </div>
-                    <div>
-                        <label for="max_age" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Max Age</label>
-                        <input id="max_age" name="max_age" type="number" min="18" max="60" value="{{ $maxAge }}" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 focus:border-pink-400 focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="min_price" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Min Price</label>
-                        <input id="min_price" name="min_price" type="number" min="100" max="1000" step="10" value="{{ $minPrice }}" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 focus:border-pink-400 focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="max_price" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Max Price</label>
-                        <input id="max_price" name="max_price" type="number" min="100" max="1000" step="10" value="{{ $maxPrice }}" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 focus:border-pink-400 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Price Range</label>
+                    <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
+                        <div class="mb-2 flex items-center justify-between text-xs text-gray-500">
+                            <span>Min: $<strong x-text="minPrice"></strong></span>
+                            <span>Max: $<strong x-text="maxPrice"></strong></span>
+                        </div>
+                        <input id="min-price" name="min_price" type="range" min="100" max="1000" step="10" x-model.number="minPrice" @input="if (minPrice > maxPrice) maxPrice = minPrice" class="w-full">
+                        <input id="max-price" name="max_price" type="range" min="100" max="1000" step="10" x-model.number="maxPrice" @input="if (maxPrice < minPrice) minPrice = maxPrice" class="mt-2 w-full">
                     </div>
                 </div>
 
                 @forelse(($filterGroups ?? []) as $group)
                     <div>
-                        <h3 class="mb-2 text-xs font-bold uppercase tracking-wide text-gray-700">{{ $group['label'] }}</h3>
-                        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach(($group['options'] ?? []) as $option)
-                                <label class="inline-flex items-center gap-2 rounded border border-gray-200 px-3 py-2 text-sm text-gray-700">
-                                    <input
-                                        type="checkbox"
-                                        name="categories[]"
-                                        value="{{ $option['id'] }}"
-                                        @checked(collect($selectedCategoryIds ?? [])->contains((int) $option['id']))
-                                        class="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
-                                    >
-                                    <span>{{ $option['name'] }}</span>
-                                </label>
-                            @endforeach
-                        </div>
+                        <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">{{ $group['label'] }}</label>
+                        @if(!empty($group['options']))
+                            @php
+                                $groupSelectedIds = collect($group['options'])
+                                    ->pluck('id')
+                                    ->map(fn ($id) => (string) $id)
+                                    ->intersect($selectedCategoryIds)
+                                    ->values()
+                                    ->all();
+                            @endphp
+                            <div
+                                class="space-y-2"
+                                x-data="{ open: false, options: {{ \Illuminate\Support\Js::from($group['options']) }}, selected: {{ \Illuminate\Support\Js::from($groupSelectedIds) }} }"
+                                @click.outside="open = false"
+                                @filter-opened.window="if ($event.detail !== '{{ $group['slug'] }}') open = false"
+                            >
+                                <template x-for="id in selected" :key="'sel-' + id">
+                                    <input type="hidden" name="categories[]" :value="id">
+                                </template>
+
+                                <button
+                                    type="button"
+                                    class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-sm font-semibold text-gray-700"
+                                    @click="open = !open; if (open) $dispatch('filter-opened', '{{ $group['slug'] }}')"
+                                >
+                                    <span class="text-gray-500" x-show="selected.length === 0">Please select...</span>
+                                    <span class="inline-flex flex-wrap items-center gap-1" x-show="selected.length > 0">
+                                        <template x-for="id in selected" :key="'chip-' + id">
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                                                <span x-text="(options.find(o => String(o.id) === String(id)) || {}).name"></span>
+                                                <button type="button" class="text-gray-500" @click.stop="selected = selected.filter(v => String(v) !== String(id))">×</button>
+                                            </span>
+                                        </template>
+                                    </span>
+                                </button>
+
+                                <div x-cloak x-show="open" x-transition class="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3">
+                                    <template x-for="option in options.filter(o => !selected.includes(String(o.id)))" :key="'opt-' + option.id">
+                                        <button type="button" class="block w-full rounded px-2 py-1 text-left text-sm text-gray-700 hover:bg-gray-100" @click="selected = [...selected, String(option.id)]" x-text="option.name"></button>
+                                    </template>
+                                    <p class="text-xs text-gray-400" x-show="options.filter(o => !selected.includes(String(o.id))).length === 0">No options left.</p>
+                                </div>
+                            </div>
+                        @else
+                            <span class="text-xs text-gray-400">No options.</span>
+                        @endif
                     </div>
                 @empty
-                    <p class="text-sm text-gray-500">No filter groups found.</p>
+                    <span class="text-xs text-gray-400">No filters found.</span>
                 @endforelse
 
                 <div class="flex flex-wrap items-center gap-3 pt-2">
-                    <button type="submit" class="rounded-md bg-gray-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-gray-800">Search</button>
+                    <button type="submit" class="rounded-md bg-gray-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-gray-800">Apply Filters</button>
                     <a href="{{ route('advanced-search') }}" class="rounded-md border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100">Reset</a>
                 </div>
             </form>
