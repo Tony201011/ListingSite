@@ -13,6 +13,7 @@ use App\Http\Controllers\ProviderRegisterController;
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
+Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
 
 Route::get('/signup', function () {
     return view('signup');

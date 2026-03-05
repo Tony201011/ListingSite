@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -19,6 +20,61 @@ class HomeController extends Controller
         $viewData = $this->buildFilterViewData($request);
 
         return view('advanced-search', $viewData);
+    }
+
+    public function showProfile(string $slug)
+    {
+        $galleryImages = [
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=900&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=900&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=900&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1504593811423-6dd665756598?w=900&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=900&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=900&auto=format&fit=crop',
+        ];
+
+        $galleryVideos = [
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+        ];
+
+        $profiles = collect($this->baseProfiles())
+            ->map(function (array $profile, int $index) use ($galleryImages, $galleryVideos) {
+                $profile['slug'] = Str::slug($profile['name']) . '-' . ($index + 1);
+
+                $profile['images'] = [
+                    $profile['image'],
+                    $galleryImages[($index + 1) % count($galleryImages)],
+                    $galleryImages[($index + 2) % count($galleryImages)],
+                ];
+
+                $profile['videos'] = [
+                    $galleryVideos[$index % count($galleryVideos)],
+                    $galleryVideos[($index + 1) % count($galleryVideos)],
+                ];
+
+                return $profile;
+            });
+
+        $profile = $profiles->firstWhere('slug', $slug);
+
+        abort_if(!$profile, 404);
+
+        $nearbyProfiles = $profiles
+            ->where('slug', '!=', $slug)
+            ->take(4)
+            ->values();
+
+        return view('profile-show', [
+            'profile' => $profile,
+            'nearbyProfiles' => $nearbyProfiles,
+        ]);
     }
 
     private function buildFilterViewData(Request $request): array
@@ -106,5 +162,20 @@ class HomeController extends Controller
             'minPrice',
             'maxPrice'
         );
+    }
+
+    private function baseProfiles(): array
+    {
+        return [
+            ['name' => 'Alina', 'age' => 24, 'rate' => '$250 / hour', 'city' => 'Houston', 'height' => "5'6\"", 'service_1' => 'Incall', 'service_2' => 'Outcall', 'date' => '27/05/2024', 'description' => 'Elegant companion with refined style, warm personality and premium experience for upscale dates.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&auto=format&fit=crop'],
+            ['name' => 'Sofia', 'age' => 26, 'rate' => '$300 / hour', 'city' => 'Chicago', 'height' => "5'7\"", 'service_1' => 'Incall', 'service_2' => 'Travel', 'date' => '16/08/2024', 'description' => 'Luxury model known for classy company, confidence and unforgettable private moments.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=900&auto=format&fit=crop'],
+            ['name' => 'Mia', 'age' => 22, 'rate' => '$220 / hour', 'city' => 'Boston', 'height' => "5'5\"", 'service_1' => 'Outcall', 'service_2' => 'Dinner Date', 'date' => '30/09/2024', 'description' => 'Friendly and playful vibe with great energy, ideal for fun social and intimate meetups.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=900&auto=format&fit=crop'],
+            ['name' => 'Valentina', 'age' => 25, 'rate' => '$280 / hour', 'city' => 'New York', 'height' => "5'8\"", 'service_1' => 'Incall', 'service_2' => 'Overnight', 'date' => '15/07/2024', 'description' => 'Sophisticated beauty offering premium companionship with attention to every detail.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=900&auto=format&fit=crop'],
+            ['name' => 'Luna', 'age' => 23, 'rate' => '$200 / hour', 'city' => 'Dallas', 'height' => "5'4\"", 'service_1' => 'Outcall', 'service_2' => 'Massage', 'date' => '23/04/2024', 'description' => 'Relaxed and charming personality, great choice for smooth and discreet companionship.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop'],
+            ['name' => 'Nora', 'age' => 27, 'rate' => '$340 / hour', 'city' => 'Los Angeles', 'height' => "5'9\"", 'service_1' => 'Travel', 'service_2' => 'VIP Date', 'date' => '28/06/2024', 'description' => 'High-end escort with elite presentation and polished etiquette for premium events.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1504593811423-6dd665756598?w=900&auto=format&fit=crop'],
+            ['name' => 'Ivy', 'age' => 21, 'rate' => '$180 / hour', 'city' => 'San Jose', 'height' => "5'3\"", 'service_1' => 'Incall', 'service_2' => 'Outcall', 'date' => '19/10/2024', 'description' => 'Young, vibrant and engaging companion with a fun and positive atmosphere.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=900&auto=format&fit=crop'],
+            ['name' => 'Camila', 'age' => 24, 'rate' => '$260 / hour', 'city' => 'Phoenix', 'height' => "5'6\"", 'service_1' => 'Dinner Date', 'service_2' => 'Overnight', 'date' => '02/06/2024', 'description' => 'Stylish and romantic companion, perfect for private dinners and memorable nights.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop'],
+            ['name' => 'Elena', 'age' => 25, 'rate' => '$295 / hour', 'city' => 'Philadelphia', 'height' => "5'7\"", 'service_1' => 'Incall', 'service_2' => 'Travel', 'date' => '13/07/2024', 'description' => 'Graceful and discreet companion with premium service and elegant communication.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=900&auto=format&fit=crop'],
+        ];
     }
 }
