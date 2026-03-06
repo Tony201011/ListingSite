@@ -93,7 +93,7 @@
                 <div class="md:col-span-2 flex flex-col gap-4 relative">
                     <!-- Previous Button (left corner) -->
                           <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
-                              class="mobile-nav-btn-wrapper md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group"
+                              class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper"
                               style="margin-left: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
                             <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
@@ -110,7 +110,7 @@
                     </div>
                         <!-- Next Button (right corner) -->
                                 <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
-                                    class="mobile-nav-btn-wrapper md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group"
+                                    class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper"
                                     style="margin-right: 0.5rem;">
                             <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
                                 <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
