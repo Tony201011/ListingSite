@@ -3,7 +3,7 @@
 @section('title', $profile['name'] . ' Profile')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 text-gray-800">
+<div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800">
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
             <a href="{{ url('/') }}" class="hover:text-gray-700">Home</a>
@@ -68,7 +68,7 @@
             ];
         @endphp
 
-        <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
             <div class="space-y-6">
                 <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
                     <div class="grid gap-4 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-5">
@@ -108,9 +108,9 @@
                                 <p><span class="font-semibold text-gray-800">Updated:</span> {{ $profile['date'] }}</p>
                             </div>
 
-                            <div class="mt-4 flex flex-wrap gap-2">
-                                <a href="tel:{{ $phoneHref }}" class="inline-flex items-center rounded-md bg-pink-600 px-3 py-2 text-xs font-semibold text-white hover:bg-pink-700">Call now</a>
-                                <a href="https://wa.me/{{ $whatsAppHref }}" target="_blank" rel="noopener" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">WhatsApp</a>
+                            <div class="mt-4 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
+                                <a href="tel:{{ $phoneHref }}" class="inline-flex w-full items-center justify-center rounded-md bg-pink-600 px-3 py-2 text-xs font-semibold text-white hover:bg-pink-700 sm:w-auto">Call now</a>
+                                <a href="https://wa.me/{{ $whatsAppHref }}" target="_blank" rel="noopener" class="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">WhatsApp</a>
                             </div>
                         </div>
                     </div>
@@ -373,7 +373,16 @@
                 <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
                     <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Price List</h2>
 
-                    <div class="overflow-hidden rounded-lg border border-gray-200">
+                    <div class="space-y-2 sm:hidden">
+                        @foreach($priceList as $priceItem)
+                            <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                <span class="text-sm text-gray-700">{{ $priceItem['label'] }}</span>
+                                <span class="text-sm font-semibold text-gray-900">{{ $priceItem['price'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="hidden overflow-x-auto rounded-lg border border-gray-200 sm:block">
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -428,7 +437,7 @@
                 <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
                     <div class="space-y-3 text-sm text-gray-700">
                         <p class="text-lg font-semibold text-gray-900"><i class="fa-solid fa-globe mr-2"></i>My website</p>
-                        <a href="#" class="text-pink-600 hover:underline">https://www.lithemassage.com/</a>
+                        <a href="#" class="break-all text-pink-600 hover:underline">https://www.lithemassage.com/</a>
                     </div>
 
                     <div class="mt-6">
@@ -448,7 +457,7 @@
 
             </div>
 
-            <aside class="space-y-4 lg:sticky lg:top-6">
+            <aside class="space-y-4 xl:sticky xl:top-6">
                 <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
                     <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">My profile</h3>
                     <div class="space-y-2 text-sm">
