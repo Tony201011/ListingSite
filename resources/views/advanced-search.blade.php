@@ -33,18 +33,6 @@
                 </div>
 
                 <div>
-                    <label for="escort_name" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Escort Name</label>
-                    <input
-                        id="escort_name"
-                        name="escort_name"
-                        type="text"
-                        value="{{ request('escort_name') }}"
-                        placeholder="Search by name"
-                        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
-                    >
-                </div>
-
-                <div>
                     <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Age Range</label>
                     <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
                         <div class="mb-2 flex items-center justify-between text-xs text-gray-500">
