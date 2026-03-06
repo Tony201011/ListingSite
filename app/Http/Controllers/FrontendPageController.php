@@ -7,6 +7,7 @@ use App\Models\AntiSpamPolicy;
 use App\Models\ContactUsPage;
 use App\Models\Faq;
 use App\Models\HelpPage;
+use App\Models\NaughtyCornerPage;
 use App\Models\PricingPackage;
 use App\Models\PricingPage;
 use App\Models\PrivacyPolicy;
@@ -99,6 +100,18 @@ class FrontendPageController extends Controller
             ->first();
 
         return view('help', [
+            'page' => $page,
+        ]);
+    }
+
+    public function naughtyCorner()
+    {
+        $page = NaughtyCornerPage::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+
+        return view('naughty-corner', [
             'page' => $page,
         ]);
     }

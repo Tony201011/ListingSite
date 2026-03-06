@@ -3,8 +3,8 @@
 @section('title', $profile['name'] . ' Profile')
 
 @section('content')
-<div class="profile-page min-h-screen overflow-x-clip bg-gray-100 text-gray-800">
-    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 text-gray-800">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
             <a href="{{ url('/') }}" class="hover:text-gray-700">Home</a>
             <span>›</span>
@@ -13,15 +13,85 @@
             <span class="text-gray-700">{{ $profile['name'] }}</span>
         </div>
 
-        <div class="grid gap-6">
+        @php
+            $primaryPhone = trim((string) ($profile['phone'] ?? $profile['whatsapp'] ?? '+61 451 442 992'));
+            $phoneHref = preg_replace('/[^0-9+]/', '', $primaryPhone);
+            $whatsAppHref = preg_replace('/[^0-9]/', '', $phoneHref);
+
+            $priceList = collect($profile['price_list'] ?? [
+                ['label' => '30 Minutes', 'price' => '$150'],
+                ['label' => '45 Minutes', 'price' => '$180'],
+                ['label' => '1 Hour', 'price' => '$200'],
+                ['label' => '2 Hours', 'price' => '$380'],
+            ])->values();
+
+            $availabilityList = collect($profile['availability_list'] ?? [
+                ['day' => 'Today', 'time' => 'Unavailable'],
+                ['day' => 'Tomorrow', 'time' => '10:00 - 21:00'],
+                ['day' => 'Sun', 'time' => '10:00 - 21:00'],
+                ['day' => 'Mon', 'time' => '10:00 - 05:00'],
+                ['day' => 'Tue', 'time' => '10:00 - 05:00'],
+                ['day' => 'Wed', 'time' => '10:00 - 05:00'],
+                ['day' => 'Thu', 'time' => 'Unavailable'],
+            ])->values();
+
+            $profileStats = [
+                ['label' => 'Age group', 'value' => '25 - 29'],
+                ['label' => 'Ethnicity', 'value' => 'Caucasian'],
+                ['label' => 'Hair color', 'value' => 'Other'],
+                ['label' => 'Hair length', 'value' => 'Short'],
+                ['label' => 'Body type', 'value' => 'Athletic'],
+                ['label' => 'Bust size', 'value' => 'Busty'],
+                ['label' => 'Length', 'value' => 'Average (164cm - 176cm)'],
+            ];
+
+            $profileTags = [
+                'nympho', 'bisexual', 'natural boobs', 'some tattoos', 'round bottom', 'fully shaved or waxed',
+                'taned skin', 'lingerie', 'love conversations', 'shower facilities', 'published pornstar / model',
+                'sensual experience', 'fantasy experiences', 'nuru'
+            ];
+
+            $contactForItems = [
+                'Incalls only',
+                'GFE bookings',
+                'PSE or very naughty bookings',
+                'Erotic body rubs',
+            ];
+
+            $sidebarFacts = [
+                ['label' => 'Ethnicity', 'value' => 'Caucasian'],
+                ['label' => 'Hair color', 'value' => 'Other'],
+                ['label' => 'Eye color', 'value' => 'Brown'],
+                ['label' => 'Body type', 'value' => 'Athletic'],
+                ['label' => 'Height', 'value' => $profile['height'] ?? '5\'6"'],
+                ['label' => 'Age', 'value' => ($profile['age'] ?? 25) . ' years'],
+            ];
+        @endphp
+
+        <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
             <div class="space-y-6">
-                <section class="rounded-xl border border-gray-200 bg-white p-4 sm:p-6">
+                <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
                     <div class="grid gap-4 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-5">
                         <img src="{{ $profile['images'][0] ?? $profile['image'] }}" alt="{{ $profile['name'] }}" class="h-44 w-full rounded-xl object-cover sm:h-48">
                         <div class="min-w-0">
-                            <div class="mb-2 flex flex-wrap items-center gap-2">
-                                <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">{{ $profile['name'] }}</h1>
+                            <div class="mb-2 inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                AVAILABLE NOW • AVAILABLE TILL 8PM
                             </div>
+                            <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-sm text-gray-500">{{ $profile['city'] }} Escorts</p>
+                                    <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">{{ strtoupper($profile['name']) }} <span class="font-medium text-gray-600">{{ strtoupper($profile['city']) }}</span></h1>
+                                    <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-pink-600">{{ $profile['service_1'] }} {{ $profile['service_2'] }} ❤️</p>
+                                </div>
+
+                                @if($primaryPhone !== '')
+                                    <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-right">
+                                        <p class="text-base font-bold text-gray-900"><i class="fa-solid fa-phone mr-1 text-sm"></i>{{ $primaryPhone }}</p>
+                                        <p class="text-xs text-gray-500">I accept SMS messages</p>
+                                    </div>
+                                @endif
+                            </div>
+
                             <p class="text-sm font-semibold text-pink-600">Independent Escort • {{ $profile['age'] }} years</p>
                             <div class="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
                                 <span class="rounded-full bg-gray-100 px-2 py-1">{{ $profile['service_1'] }}</span>
@@ -37,11 +107,25 @@
                                 <p><span class="font-semibold text-gray-800">Status:</span> {{ $profile['active'] ? 'Online now' : 'Offline' }}</p>
                                 <p><span class="font-semibold text-gray-800">Updated:</span> {{ $profile['date'] }}</p>
                             </div>
+
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <a href="tel:{{ $phoneHref }}" class="inline-flex items-center rounded-md bg-pink-600 px-3 py-2 text-xs font-semibold text-white hover:bg-pink-700">Call now</a>
+                                <a href="https://wa.me/{{ $whatsAppHref }}" target="_blank" rel="noopener" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">WhatsApp</a>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="overflow-hidden rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
+                <section class="overflow-hidden rounded-2xl border border-pink-200 bg-pink-50 p-5 shadow-sm sm:p-6">
+                    <h2 class="mb-3 text-lg font-bold text-pink-700">Personal message</h2>
+                    <div class="space-y-3 text-sm leading-6 text-gray-700">
+                        <p><span class="font-semibold text-gray-900">Last updated:</span> Thu 12 February</p>
+                        <p>I’m Working @ Lithe Massage.</p>
+                        <p>For all bookings please <span class="font-semibold underline">TEXT</span> reception with your name, desired time, duration (30mins, 45mins, 60mins), and therapist you would like to see.</p>
+                    </div>
+                </section>
+
+                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
                     <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Photo Gallery</h2>
 
                     @php
@@ -131,7 +215,7 @@
                 </section>
 
                 @if(!empty($profile['videos']))
-                    <section class="overflow-hidden rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
+                    <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
                         <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Video Gallery</h2>
 
                         <div x-data="videoGallerySlider(@js($profile['videos']))" class="relative">
@@ -224,7 +308,7 @@
                     </section>
                 @endif
 
-                <section class="overflow-hidden rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
+                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
                     <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">About</h2>
                     <p class="text-sm leading-7 text-gray-600">
                         Hi, I’m {{ $profile['name'] }}. I offer a discreet and premium companion experience focused on comfort, chemistry, and mutual respect. Whether you’re planning a social event, private dinner, or relaxed one-on-one time, I bring elegance, confidence, and warm conversation to every meeting.
@@ -256,20 +340,6 @@
                             })
                             ->filter(fn ($group) => $group['heading'] !== '' && !empty($group['items']))
                             ->values();
-
-                        $locationCategoryItems = $groupedCategoryItems
-                            ->filter(function ($group) {
-                                $heading = strtolower((string) ($group['heading'] ?? ''));
-
-                                return str($heading)->contains([
-                                    'availability',
-                                    'contact',
-                                    'phone',
-                                    'location',
-                                    'time waster',
-                                ]);
-                            })
-                            ->values();
                     @endphp
 
                     <div class="mt-6 grid gap-5 sm:grid-cols-2">
@@ -291,23 +361,106 @@
                         <div>
                             <h3 class="mb-2 text-lg font-semibold text-gray-900">Location</h3>
                             <ul class="space-y-1 text-sm text-gray-600">
-                                @if($locationCategoryItems->isNotEmpty())
-                                    <li>• <span class="font-semibold text-gray-900">City:</span> {{ $profile['city'] }}</li>
-                                    @foreach($locationCategoryItems as $group)
-                                        <li>• <span class="font-semibold text-gray-900">{{ $group['heading'] }}:</span> {{ implode(', ', $group['items']) }}</li>
-                                    @endforeach
-                                @else
-                                    <li>• {{ $profile['city'] }} central area</li>
-                                    <li>• Safe and discreet meetups</li>
-                                    <li>• Hotel visits available</li>
-                                    <li>• Travel by arrangement</li>
-                                @endif
+                                <li>• {{ $profile['city'] }} central area</li>
+                                <li>• Safe and discreet meetups</li>
+                                <li>• Hotel visits available</li>
+                                <li>• Travel by arrangement</li>
                             </ul>
                         </div>
                     </div>
                 </section>
 
+                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Price List</h2>
+
+                    <div class="overflow-hidden rounded-lg border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Service</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach($priceList as $priceItem)
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-700">{{ $priceItem['label'] }}</td>
+                                        <td class="px-4 py-3 font-semibold text-gray-900">{{ $priceItem['price'] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Availability</h2>
+
+                    <div class="grid gap-2 sm:grid-cols-2">
+                        @foreach($availabilityList as $availabilityItem)
+                            <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                <span class="text-sm font-semibold text-gray-900">{{ $availabilityItem['day'] }}</span>
+                                <span class="text-sm text-gray-600">{{ $availabilityItem['time'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+
+                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">My Stats</h2>
+
+                    <div class="space-y-2 text-sm">
+                        @foreach($profileStats as $stat)
+                            <div class="flex items-start justify-between gap-3 border-b border-gray-100 pb-2">
+                                <span class="font-semibold text-gray-700">{{ $stat['label'] }}</span>
+                                <span class="text-gray-600">{{ $stat['value'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        @foreach($profileTags as $tag)
+                            <span class="rounded-full bg-pink-100 px-2 py-1 text-xs font-semibold text-pink-700">{{ $tag }}</span>
+                        @endforeach
+                    </div>
+                </section>
+
+                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <div class="space-y-3 text-sm text-gray-700">
+                        <p class="text-lg font-semibold text-gray-900"><i class="fa-solid fa-globe mr-2"></i>My website</p>
+                        <a href="#" class="text-pink-600 hover:underline">https://www.lithemassage.com/</a>
+                    </div>
+
+                    <div class="mt-6">
+                        <h3 class="mb-2 text-lg font-bold text-gray-900">Contact me for</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            @foreach($contactForItems as $item)
+                                <li>» {{ $item }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <div class="mt-6 border-t border-gray-100 pt-4 text-xs text-gray-500">
+                        <p>Verified by Realbabes</p>
+                        <p>I am on Realbabes since June 2025</p>
+                    </div>
+                </section>
+
             </div>
+
+            <aside class="space-y-4 lg:sticky lg:top-6">
+                <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">My profile</h3>
+                    <div class="space-y-2 text-sm">
+                        @foreach($sidebarFacts as $fact)
+                            <div class="flex items-start justify-between gap-2">
+                                <span class="text-gray-500">{{ $fact['label'] }}</span>
+                                <span class="font-medium text-gray-900">{{ $fact['value'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            </aside>
 
         </div>
 
@@ -319,7 +472,7 @@
 
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach($nearbyProfiles as $nearby)
-                    <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md">
+                    <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="h-48 w-full object-cover">
                         <div class="p-3">
                             <h3 class="text-lg font-semibold text-gray-900">{{ $nearby['name'] }}</h3>
@@ -336,19 +489,6 @@
 
 @push('styles')
 <style>
-    html,
-    body {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-    }
-
-    .profile-page {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-    }
-
     .gallery-scroll {
         -webkit-overflow-scrolling: touch;
         overscroll-behavior-x: contain;

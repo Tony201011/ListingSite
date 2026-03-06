@@ -52,7 +52,7 @@
             ['label' => 'About us', 'url' => route('about-us')],
             ['label' => 'Pricing', 'url' => url('/pricing')],
             ['label' => 'Escorts', 'url' => url('/')],
-            ['label' => 'Naughty corner', 'url' => route('blog')],
+            ['label' => 'Naughty corner', 'url' => route('naughty-corner')],
             ['label' => 'Blog', 'url' => route('blog')],
             ['label' => 'Locations', 'url' => route('faq')],
             ['label' => 'BDSM', 'url' => route('blog')],

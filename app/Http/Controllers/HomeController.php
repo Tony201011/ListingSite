@@ -72,6 +72,24 @@ class HomeController extends Controller
                     ->values()
                     ->all();
 
+                $profile['phone'] = $profile['phone'] ?? sprintf('+61 4%08d', 10000000 + $index);
+                $profile['whatsapp'] = $profile['whatsapp'] ?? $profile['phone'];
+                $profile['price_list'] = $profile['price_list'] ?? [
+                    ['label' => '30 Minutes', 'price' => '$180'],
+                    ['label' => '1 Hour', 'price' => $profile['rate']],
+                    ['label' => '2 Hours', 'price' => '$500'],
+                    ['label' => 'Overnight', 'price' => 'By arrangement'],
+                ];
+                $profile['availability_list'] = $profile['availability_list'] ?? [
+                    ['day' => 'Monday', 'time' => '10:00 AM - 10:00 PM'],
+                    ['day' => 'Tuesday', 'time' => '10:00 AM - 10:00 PM'],
+                    ['day' => 'Wednesday', 'time' => '10:00 AM - 10:00 PM'],
+                    ['day' => 'Thursday', 'time' => '10:00 AM - 11:00 PM'],
+                    ['day' => 'Friday', 'time' => '10:00 AM - Late'],
+                    ['day' => 'Saturday', 'time' => '11:00 AM - Late'],
+                    ['day' => 'Sunday', 'time' => 'By appointment'],
+                ];
+
                 return $profile;
             });
 
