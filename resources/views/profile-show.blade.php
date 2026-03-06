@@ -79,20 +79,39 @@
 
         <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-8">
-                            <h1 class="text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">{{ $profile['name'] }}</h1>
-                            <div class="mt-1 text-lg text-gray-700 font-medium">{{ $profile['age'] }} - barely legal, but already dangerous.</div>
+                    <h1 class="text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">{{ $profile['name'] }}</h1>
+                    <div class="mt-1 text-lg text-gray-700 font-medium">{{ $profile['age'] }} - barely legal, but already dangerous.</div>
                 </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
 
 
                 <!-- Gallery (left, spans 2 columns) -->
-                <div class="md:col-span-2 flex flex-col gap-4">
+                <div class="md:col-span-2 flex flex-col gap-4 relative">
+                    <!-- Previous Button (left corner) -->
+                    <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}" class="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group" style="transform: translateY(-50%); margin-left: 0.5rem;">
+                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
+                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px]">
+                                <span class="flex items-center"><i class="fa-solid fa-arrow-left text-xl mr-2"></i> <span class="text-xs font-semibold">PREVIOUS</span></span>
+                                <span class="text-base font-extrabold mt-0.5">{{ $prevProfile['name'] }}</span>
+                            </button>
+                        </div>
+                    </a>
 
                     <div class="grid grid-cols-2 gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
                             <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover">
                         @endforeach
                     </div>
+                        <!-- Next Button (right corner) -->
+                        <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}" class="fixed right-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group" style="transform: translateY(-50%); margin-right: 0.5rem;">
+                            <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
+                                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px]">
+                                    <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-xl ml-2"></i></span>
+                                    <span class="text-base font-extrabold mt-0.5">{{ $nextProfile['name'] }}</span>
+                                </button>
+                            </div>
+                        </a>
                 <!-- Currently Touring Section -->
                 <div class="mb-6">
                     <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
@@ -163,6 +182,16 @@
                             </div>
                         </div>
                     </section>
+
+                                    <!-- Short Link Section -->
+                <div class="text-center mb-8 mt-8">
+                    <span class="text-lg font-medium" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
+                        Find me easily with this short link:
+                        <a href="https://realbabes.com.au/{{ $profile['slug'] }}" class="hover:underline text-blue-500" style="background: none; color: #4fa3e3;">
+                            hotescorts.com.au/{{ $profile['slug'] }}
+                        </a>
+                    </span>
+                </div>
                 </div>
                 <!-- Info/Sidebar (right) -->
                 <div class="flex flex-col gap-6">

@@ -93,9 +93,21 @@ class HomeController extends Controller
                 return $profile;
             });
 
-        $profile = $profiles->firstWhere('slug', $slug);
+        $profileIndex = $profiles->search(fn($p) => $p['slug'] === $slug);
+        abort_if($profileIndex === false, 404);
+        $profile = $profiles[$profileIndex];
 
-        abort_if(!$profile, 404);
+        // Determine previous and next profiles (circular navigation)
+        $prevIndex = $profileIndex === 0 ? $profiles->count() - 1 : $profileIndex - 1;
+        $nextIndex = $profileIndex === $profiles->count() - 1 ? 0 : $profileIndex + 1;
+        $prevProfile = [
+            'slug' => $profiles[$prevIndex]['slug'],
+            'name' => $profiles[$prevIndex]['name'],
+        ];
+        $nextProfile = [
+            'slug' => $profiles[$nextIndex]['slug'],
+            'name' => $profiles[$nextIndex]['name'],
+        ];
 
         $nearbyProfiles = $profiles
             ->where('slug', '!=', $slug)
@@ -172,6 +184,8 @@ class HomeController extends Controller
             'selectedCategoryNames' => $selectedCategoryNames,
             'selectedCategoriesByGroup' => $selectedCategoriesByGroup,
             'profileStats' => $profileStats,
+            'prevProfile' => $prevProfile,
+            'nextProfile' => $nextProfile,
         ]);
     }
 
