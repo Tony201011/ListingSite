@@ -1,4 +1,7 @@
 @extends('layouts.frontend')
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('resources/css/profile-nav-mobile.css') }}">
+@endpush
 
 @section('title', $profile['name'] . ' Profile')
 
@@ -91,7 +94,7 @@
                     <!-- Previous Button (left corner) -->
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}" class="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group" style="transform: translateY(-50%); margin-left: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px]">
+                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
                                 <span class="flex items-center"><i class="fa-solid fa-arrow-left text-xl mr-2"></i> <span class="text-xs font-semibold">PREVIOUS</span></span>
                                 <span class="text-base font-extrabold mt-0.5">{{ $prevProfile['name'] }}</span>
                             </button>
@@ -106,7 +109,7 @@
                         <!-- Next Button (right corner) -->
                         <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}" class="fixed right-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group" style="transform: translateY(-50%); margin-right: 0.5rem;">
                             <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
-                                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px]">
+                                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
                                     <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-xl ml-2"></i></span>
                                     <span class="text-base font-extrabold mt-0.5">{{ $nextProfile['name'] }}</span>
                                 </button>

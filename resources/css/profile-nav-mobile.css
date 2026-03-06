@@ -1,0 +1,14 @@
+@media (max-width: 640px) {
+  .mobile-transparent-nav-btn {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(2px);
+    color: #fff !important;
+    border: 1px solid rgba(255, 192, 203, 0.3) !important;
+    box-shadow: none !important;
+  }
+  .mobile-transparent-nav-btn span,
+  .mobile-transparent-nav-btn i {
+    color: #fff !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+}
