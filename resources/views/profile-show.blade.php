@@ -105,7 +105,7 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer">
                         @endforeach
                     </div>
                         <!-- Next Button (right corner) -->
@@ -143,11 +143,13 @@
                 </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach(array_slice($galleryImages, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-48 object-cover">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-48 object-cover gallery-img-clickable cursor-pointer">
                         @endforeach
                     </div>
 
                     <!-- Videos Section -->
+
+@include('components.gallery-modal')
                     <section class="mt-12 overflow-hidden">
                         <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <h2 class="text-2xl font-bold text-pink-600 sm:text-4xl">Videos</h2>
