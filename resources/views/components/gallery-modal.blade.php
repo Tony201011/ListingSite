@@ -1,56 +1,42 @@
-<!-- Simple Modal/Slider HTML for Gallery Images -->
-<div id="galleryModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-80">
-    <button id="closeGalleryModal" class="absolute top-4 right-4 text-white text-3xl font-bold">&times;</button>
-    <div class="relative w-full max-w-2xl mx-auto flex flex-col items-center">
-        <img id="galleryModalImg" src="" alt="Gallery Image" class="rounded-xl max-h-[80vh] object-contain">
-        <div class="flex justify-between w-full mt-4">
-            <button id="galleryPrevBtn" class="text-white text-2xl px-4 py-2">&#8592; Prev</button>
-            <button id="galleryNextBtn" class="text-white text-2xl px-4 py-2">Next &#8594;</button>
-        </div>
+<!-- Gallery Modal/Slider with Alpine.js -->
+<div x-data="galleryModal()" x-init="init()" x-show="open" @keydown.window.escape="close()" @keydown.window.arrow-right="next()" @keydown.window.arrow-left="prev()" class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-90" x-cloak style="display: none;">
+    <button @click="close()" class="absolute top-6 right-8 text-white text-4xl font-bold hover:text-pink-400 transition">&times;</button>
+    <div class="relative w-full max-w-3xl flex items-center justify-center h-[80vh]">
+        <!-- Left Arrow -->
+        <button @click="prev()" :disabled="currentIdx === 0" class="absolute left-0 top-1/2 -translate-y-1/2 text-white text-4xl px-4 py-2 bg-black bg-opacity-30 hover:bg-pink-500 hover:bg-opacity-80 rounded-full transition focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <!-- Image -->
+        <img :src="images[currentIdx]" alt="Gallery Image" class="rounded-2xl max-h-[70vh] max-w-full shadow-2xl border-4 border-white object-contain mx-20">
+        <!-- Right Arrow -->
+        <button @click="next()" :disabled="currentIdx === images.length - 1" class="absolute right-0 top-1/2 -translate-y-1/2 text-white text-4xl px-4 py-2 bg-black bg-opacity-30 hover:bg-pink-500 hover:bg-opacity-80 rounded-full transition focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </button>
     </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const images = Array.from(document.querySelectorAll('.gallery-img-clickable'));
-        const modal = document.getElementById('galleryModal');
-        const modalImg = document.getElementById('galleryModalImg');
-        const closeBtn = document.getElementById('closeGalleryModal');
-        const prevBtn = document.getElementById('galleryPrevBtn');
-        const nextBtn = document.getElementById('galleryNextBtn');
-        let currentIdx = 0;
-
-        function showModal(idx) {
-            currentIdx = idx;
-            modalImg.src = images[idx].src;
-            modal.classList.remove('hidden');
-        }
-        function hideModal() {
-            modal.classList.add('hidden');
-        }
-        function showPrev() {
-            if (currentIdx > 0) showModal(currentIdx - 1);
-        }
-        function showNext() {
-            if (currentIdx < images.length - 1) showModal(currentIdx + 1);
-        }
-        images.forEach((img, idx) => {
-            img.addEventListener('click', () => showModal(idx));
-        });
-        closeBtn.addEventListener('click', hideModal);
-        prevBtn.addEventListener('click', showPrev);
-        nextBtn.addEventListener('click', showNext);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) hideModal();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (modal.classList.contains('hidden')) return;
-            if (e.key === 'ArrowLeft') showPrev();
-            if (e.key === 'ArrowRight') showNext();
-            if (e.key === 'Escape') hideModal();
-        });
-    });
+function galleryModal() {
+    return {
+        open: false,
+        images: [],
+        currentIdx: 0,
+        init() {
+            // Collect all gallery images on the page
+            this.images = Array.from(document.querySelectorAll('.gallery-img-clickable')).map(img => img.src);
+            // Add click listeners to open modal
+            document.querySelectorAll('.gallery-img-clickable').forEach((img, idx) => {
+                img.addEventListener('click', () => {
+                    this.open = true;
+                    this.currentIdx = idx;
+                });
+            });
+        },
+        close() { this.open = false; },
+        prev() { if (this.currentIdx > 0) this.currentIdx--; },
+        next() { if (this.currentIdx < this.images.length - 1) this.currentIdx++; }
+    }
+}
 </script>
 <style>
-#galleryModal { display: none; }
-#galleryModal:not(.hidden) { display: flex; }
+[x-cloak] { display: none !important; }
 </style>
