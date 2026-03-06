@@ -93,8 +93,23 @@
                             <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover">
                         @endforeach
                     </div>
+                <!-- Currently Touring Section -->
+                <div class="mb-6">
+                    <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
+                        <div class="mb-6">
+                            <div class="flex items-center mb-2">
+                                <i class="fa-solid fa-location-dot text-pink-500 text-2xl mr-3"></i>
+                                <span class="text-2xl font-extrabold text-pink-600">Currently touring in Brisbane (QLD)</span>
+                            </div>
+                            <span class="font-bold text-lg text-gray-800">Sun 15 February - Sat 28 March</span>
+                        </div>
+                        <a href="#upcoming-tours" class="border border-pink-300 text-pink-400 px-6 py-3 rounded-md bg-transparent font-medium text-lg hover:bg-pink-50 transition block text-center smooth-scroll">
+                            See all my other tours
+                        </a>
+                    </div>
+                </div>
                 <div class="mt-8 mb-8">
-                    <h2 class="text-2xl font-semibold mb-2">About me</h2>
+                    <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
                     <hr class="mb-4">
                     <div class="text-base text-gray-900 leading-relaxed">
                         {!! nl2br(e($profile['about'] ?? $profile['description'] ?? 'No about me provided.')) !!}
@@ -109,7 +124,7 @@
                     <!-- Videos Section -->
                     <section class="mt-12 overflow-hidden">
                         <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <h2 class="text-2xl font-bold text-gray-900 sm:text-4xl">Videos</h2>
+                            <h2 class="text-2xl font-bold text-pink-600 sm:text-4xl">Videos</h2>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Dummy video URLs, replace with dynamic if available -->
@@ -121,6 +136,31 @@
                                 <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
+                        </div>
+                    </section>
+
+                    <!-- My Upcoming Tours Section (Card Style) -->
+                    <section id="upcoming-tours" class="mt-12 scroll-mt-32">
+                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
+                            <div class="flex items-center mb-1">
+                                <i class="fa-solid fa-location-dot text-pink-600 text-xl mr-2"></i>
+                                <h2 class="text-2xl font-bold text-pink-600">My upcoming tours</h2>
+                            </div>
+                            <div class="border-b border-gray-200 mb-6"></div>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <span class="font-bold text-pink-600 text-base mr-4">Brisbane QLD</span>
+                                    <span class="font-semibold text-gray-900 text-base">Sun 15 Feb - Sat 28 Mar</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="font-bold text-pink-600 text-base mr-4">South Brisbane QLD</span>
+                                    <span class="font-semibold text-gray-900 text-base">Sun 15 Feb - Sat 28 Mar</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="font-bold text-pink-600 text-base mr-4">Mackay QLD</span>
+                                    <span class="font-semibold text-gray-900 text-base">Sun 15 Feb - Sat 28 Mar</span>
+                                </div>
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -157,7 +197,7 @@
                         <div class="mt-4">
                             <span class="block text-lg font-bold mb-1 text-black">Contact</span>
                             <div class="mb-2 text-sm p-2 text-gray-700">
-                                Tell you saw advertisement in <span class="text-pink-600 font-semibold">Escortify</span>, thanks!<br>
+                                Tell you saw advertisement in <span class="text-pink-600 font-semibold">HotEscort</span>, thanks!<br>
                                 Preferred contact method: <span class="font-semibold">Whatsapp</span>
                             </div>
                             <div class="flex items-center gap-2 mt-2">
@@ -175,6 +215,24 @@
                             @else
                                 <a href="https://onlyfans.com/tessa.fox/c156" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank">https://onlyfans.com/tessa.fox/c156</a>
                             @endif
+                        </div>
+                        <!-- Social Media Links -->
+                        <div class="mt-2">
+                            <div class="flex items-center gap-2 mt-2">
+                                <i class="fa-solid fa-share-nodes text-blue-600 text-2xl"></i>
+                                <span class="text-xs font-bold text-black">SOCIAL MEDIA:</span>
+                            </div>
+                            <div class="flex gap-3 mt-2">
+                                <a href="{{ !empty($profile['facebook']) ? $profile['facebook'] : 'https://facebook.com/dummy' }}" target="_blank" class="text-blue-700 hover:underline" title="Facebook">
+                                    <i class="fab fa-facebook-square fa-2x"></i>
+                                </a>
+                                <a href="{{ !empty($profile['twitter']) ? $profile['twitter'] : 'https://twitter.com/dummy' }}" target="_blank" class="text-blue-400 hover:underline" title="Twitter">
+                                    <i class="fab fa-twitter-square fa-2x"></i>
+                                </a>
+                                <a href="{{ !empty($profile['instagram']) ? $profile['instagram'] : 'https://instagram.com/dummy' }}" target="_blank" class="text-pink-500 hover:underline" title="Instagram">
+                                    <i class="fab fa-instagram-square fa-2x"></i>
+                                </a>
+                            </div>
                         </div>
                         <div class="flex gap-4 mt-4">
                             <button class="flex items-center gap-2 border border-gray-300 bg-white rounded-xl px-6 py-3 transition hover:bg-pink-50 text-pink-700 font-semibold text-lg w-1/2 justify-center" style="border-width:2px;">
@@ -391,6 +449,11 @@
 @endsection
 
 @push('styles')
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
 <style>
     .gallery-scroll {
         -webkit-overflow-scrolling: touch;
