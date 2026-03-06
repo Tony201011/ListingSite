@@ -73,363 +73,298 @@
             ];
         @endphp
 
-        <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-            <div class="space-y-6">
-                <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
-                    <div class="grid gap-4 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-5">
-                        <img src="{{ $profile['images'][0] ?? $profile['image'] }}" alt="{{ $profile['name'] }}" class="h-44 w-full rounded-xl object-cover sm:h-48">
-                        <div class="min-w-0">
-                            <!-- Availability badge removed -->
-                            <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                    <p class="text-sm text-gray-500">{{ $profile['city'] }} Escorts</p>
-                                    <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">{{ strtoupper($profile['name']) }} <span class="font-medium text-gray-600">{{ strtoupper($profile['city']) }}</span></h1>
-                                    <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-pink-600">{{ $profile['service_1'] }} {{ $profile['service_2'] }} ❤️</p>
-                                </div>
+        @php
+            $galleryImages = $profile['images'] ?? [$profile['image'] ?? 'https://via.placeholder.com/300'];
+        @endphp
 
-                                @if($primaryPhone !== '')
-                                    <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-right">
-                                        <p class="text-base font-bold text-gray-900"><i class="fa-solid fa-phone mr-1 text-sm"></i>{{ $primaryPhone }}</p>
-                                        <p class="text-xs text-gray-500">I accept SMS messages</p>
-                                    </div>
-                                @endif
-                            </div>
+        <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-8">
+                            <h1 class="text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">{{ $profile['name'] }}</h1>
+                            <div class="mt-1 text-lg text-gray-700 font-medium">{{ $profile['age'] }} - barely legal, but already dangerous.</div>
+                </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
 
-                            <p class="text-sm font-semibold text-pink-600">Independent Escort • {{ $profile['age'] }} years</p>
-                            <div class="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
-                                <span class="rounded-full bg-gray-100 px-2 py-1">{{ $profile['service_1'] }}</span>
-                                <span class="rounded-full bg-gray-100 px-2 py-1">{{ $profile['service_2'] }}</span>
-                                <span class="rounded-full bg-gray-100 px-2 py-1">{{ $profile['city'] }}</span>
-                            </div>
 
-                            <p class="mt-4 break-words text-sm leading-6 text-gray-600">{{ $profile['description'] }}</p>
+                <!-- Gallery (left, spans 2 columns) -->
+                <div class="md:col-span-2 flex flex-col gap-4">
 
-                            <div class="mt-4 grid gap-2 text-sm text-gray-600 sm:grid-cols-2">
-                                <p><span class="font-semibold text-gray-800">Rate:</span> {{ $profile['rate'] }}</p>
-                                <p><span class="font-semibold text-gray-800">Height:</span> {{ $profile['height'] }}</p>
-                                <p><span class="font-semibold text-gray-800">Status:</span> {{ $profile['active'] ? 'Online now' : 'Offline' }}</p>
-                                <p><span class="font-semibold text-gray-800">Updated:</span> {{ $profile['date'] }}</p>
-                            </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        @foreach(array_slice($galleryImages, 0, 2) as $img)
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover">
+                        @endforeach
+                    </div>
+                <div class="mt-8 mb-8">
+                    <h2 class="text-2xl font-semibold mb-2">About me</h2>
+                    <hr class="mb-4">
+                    <div class="text-base text-gray-900 leading-relaxed">
+                        {!! nl2br(e($profile['about'] ?? $profile['description'] ?? 'No about me provided.')) !!}
+                    </div>
+                </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        @foreach(array_slice($galleryImages, 2) as $img)
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-48 object-cover">
+                        @endforeach
+                    </div>
 
-                            <div class="mt-4 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
-                                <a href="tel:{{ $phoneHref }}" class="inline-flex w-full items-center justify-center rounded-md bg-pink-600 px-3 py-2 text-xs font-semibold text-white hover:bg-pink-700 sm:w-auto">Call now</a>
-                                <a href="https://wa.me/{{ $whatsAppHref }}" target="_blank" rel="noopener" class="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto">WhatsApp</a>
-                            </div>
+                    <!-- Videos Section -->
+                    <section class="mt-12 overflow-hidden">
+                        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <h2 class="text-2xl font-bold text-gray-900 sm:text-4xl">Videos</h2>
                         </div>
-                    </div>
-                </section>
-
-                <section class="overflow-hidden rounded-2xl border border-pink-200 bg-pink-50 p-5 shadow-sm sm:p-6">
-                    <h2 class="mb-3 text-lg font-bold text-pink-700">Personal message</h2>
-                    <div class="space-y-3 text-sm leading-6 text-gray-700">
-                        <p><span class="font-semibold text-gray-900">Last updated:</span> Thu 12 February</p>
-                        <p>I’m Working @ Lithe Massage.</p>
-                        <p>For all bookings please <span class="font-semibold underline">TEXT</span> reception with your name, desired time, duration (30mins, 45mins, 60mins), and therapist you would like to see.</p>
-                    </div>
-                </section>
-
-                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-                    <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Photo Gallery</h2>
-
-                    @php
-                        $galleryImages = $profile['images'] ?? [$profile['image']];
-                    @endphp
-
-                    <div x-data="gallerySlider(@js($galleryImages))" class="relative">
-                        <button
-                            type="button"
-                            x-show="images.length > 1"
-                            class="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 text-gray-700 shadow hover:bg-white sm:px-3 sm:py-2"
-                            @click="slidePrev"
-                            aria-label="Previous images"
-                        >
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-
-                        <div
-                            x-ref="track"
-                            class="gallery-scroll flex gap-4 pb-2"
-                            :class="images.length > 1 ? 'snap-x snap-mandatory overflow-x-auto scroll-smooth' : 'overflow-x-hidden'"
-                        >
-                            <template x-for="(image, index) in images" :key="index">
-                                <button
-                                    type="button"
-                                    class="block min-w-full snap-start overflow-hidden rounded-xl sm:min-w-[calc(50%-0.5rem)] lg:min-w-[calc(33.333%-0.75rem)]"
-                                    @click="open(index)"
-                                >
-                                    <img :src="image" alt="{{ $profile['name'] }} image" class="h-52 w-full object-cover">
-                                </button>
-                            </template>
-                        </div>
-
-                        <button
-                            type="button"
-                            x-show="images.length > 1"
-                            class="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 text-gray-700 shadow hover:bg-white sm:px-3 sm:py-2"
-                            @click="slideNext"
-                            aria-label="Next images"
-                        >
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-
-                        <template x-if="isOpen">
-                            <div
-                                @keydown.escape.window="close"
-                                @keydown.arrow-right.window="isOpen && nextImage()"
-                                @keydown.arrow-left.window="isOpen && prevImage()"
-                                @click.self="close"
-                                class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4"
-                            >
-                                <div x-show="images.length > 1" class="absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-800 sm:top-4 sm:text-sm" x-text="`${currentIndex + 1} / ${images.length}`"></div>
-
-                                <button
-                                    type="button"
-                                    x-show="images.length > 1"
-                                    class="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-2 text-gray-700 sm:left-4 sm:px-3 sm:py-2"
-                                    @click="prevImage"
-                                    aria-label="Previous preview image"
-                                >
-                                    <i class="fa-solid fa-chevron-left"></i>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="absolute right-2 top-2 rounded-full bg-white p-2 text-gray-700 sm:right-4 sm:top-4 sm:px-3 sm:py-2"
-                                    @click="close"
-                                    aria-label="Close image preview"
-                                >
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
-
-                                <img :src="currentImage" alt="{{ $profile['name'] }} preview" class="max-h-[85vh] w-full max-w-[92vw] rounded-lg object-contain sm:max-h-[90vh] sm:max-w-[90vw]">
-
-                                <button
-                                    type="button"
-                                    x-show="images.length > 1"
-                                    class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-2 text-gray-700 sm:right-4 sm:px-3 sm:py-2"
-                                    @click="nextImage"
-                                    aria-label="Next preview image"
-                                >
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-                </section>
-
-                @if(!empty($profile['videos']))
-                    <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-                        <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Video Gallery</h2>
-
-                        <div x-data="videoGallerySlider(@js($profile['videos']))" class="relative">
-                            <button
-                                type="button"
-                                x-show="videos.length > 1"
-                                class="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 text-gray-700 shadow hover:bg-white sm:px-3 sm:py-2"
-                                @click="slidePrev"
-                                aria-label="Previous videos"
-                            >
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </button>
-
-                            <div
-                                x-ref="track"
-                                class="gallery-scroll flex gap-4 pb-2"
-                                :class="videos.length > 1 ? 'snap-x snap-mandatory overflow-x-auto scroll-smooth' : 'overflow-x-hidden'"
-                            >
-                                <template x-for="(video, index) in videos" :key="index">
-                                    <button
-                                        type="button"
-                                        class="relative block min-w-full snap-start overflow-hidden rounded-xl bg-black sm:min-w-[calc(50%-0.5rem)] lg:min-w-[calc(33.333%-0.75rem)]"
-                                        @click="open(index)"
-                                    >
-                                        <video class="h-56 w-full object-cover" preload="metadata" muted playsinline>
-                                            <source :src="video" type="video/mp4">
-                                        </video>
-                                        <span class="absolute inset-0 flex items-center justify-center">
-                                            <span class="rounded-full bg-black/60 px-4 py-3 text-white">
-                                                <i class="fa-solid fa-play"></i>
-                                            </span>
-                                        </span>
-                                    </button>
-                                </template>
-                            </div>
-
-                            <button
-                                type="button"
-                                x-show="videos.length > 1"
-                                class="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 text-gray-700 shadow hover:bg-white sm:px-3 sm:py-2"
-                                @click="slideNext"
-                                aria-label="Next videos"
-                            >
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </button>
-
-                            <template x-if="isOpen">
-                                <div
-                                    @keydown.escape.window="close"
-                                    @keydown.arrow-right.window="isOpen && nextVideo()"
-                                    @keydown.arrow-left.window="isOpen && prevVideo()"
-                                    @click.self="close"
-                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4"
-                                >
-                                    <div x-show="videos.length > 1" class="absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-800 sm:top-4 sm:text-sm" x-text="`${currentIndex + 1} / ${videos.length}`"></div>
-
-                                    <button
-                                        type="button"
-                                        x-show="videos.length > 1"
-                                        class="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-2 text-gray-700 sm:left-4 sm:px-3 sm:py-2"
-                                        @click="prevVideo"
-                                        aria-label="Previous preview video"
-                                    >
-                                        <i class="fa-solid fa-chevron-left"></i>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="absolute right-2 top-2 rounded-full bg-white p-2 text-gray-700 sm:right-4 sm:top-4 sm:px-3 sm:py-2"
-                                        @click="close"
-                                        aria-label="Close video preview"
-                                    >
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
-
-                                    <video x-ref="modalVideo" class="max-h-[85vh] w-full max-w-[92vw] rounded-lg bg-black sm:max-h-[90vh] sm:max-w-[90vw]" controls autoplay playsinline preload="metadata" :src="currentVideo" @ended="handleEnded"></video>
-
-                                    <button
-                                        type="button"
-                                        x-show="videos.length > 1"
-                                        class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-2 text-gray-700 sm:right-4 sm:px-3 sm:py-2"
-                                        @click="nextVideo"
-                                        aria-label="Next preview video"
-                                    >
-                                        <i class="fa-solid fa-chevron-right"></i>
-                                    </button>
-                                </div>
-                            </template>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Dummy video URLs, replace with dynamic if available -->
+                            <video controls class="rounded-xl w-full h-64 bg-black">
+                                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <video controls class="rounded-xl w-full h-64 bg-black">
+                                <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
                         </div>
                     </section>
-                @endif
-
-                <!-- Price List section moved to sidebar below My profile & stats -->
-
-
-
-                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-
-                    <div class="space-y-3 text-sm text-gray-700">
-                        <p class="text-lg font-semibold text-gray-900"><i class="fa-solid fa-globe mr-2"></i>My website</p>
-                        <a href="#" class="break-all text-pink-600 hover:underline">https://www.lithemassage.com/</a>
-                    </div>
-
-                    <div class="mt-4 flex gap-4">
-                        <a href="https://twitter.com/username" target="_blank" class="text-gray-500 hover:text-pink-600" title="Twitter">
-                            <i class="fa-brands fa-twitter fa-lg"></i>
-                        </a>
-                        <a href="https://instagram.com/username" target="_blank" class="text-gray-500 hover:text-pink-600" title="Instagram">
-                            <i class="fa-brands fa-instagram fa-lg"></i>
-                        </a>
-                        <a href="https://facebook.com/username" target="_blank" class="text-gray-500 hover:text-pink-600" title="Facebook">
-                            <i class="fa-brands fa-facebook fa-lg"></i>
-                        </a>
-                    </div>
-
-                    <div class="mt-6">
-                        <h3 class="mb-2 text-lg font-bold text-gray-900">Contact me for</h3>
-                        <ul class="space-y-2 text-sm text-gray-700">
-                            @foreach($contactForItems as $item)
-                                <li>» {{ $item }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-
-                    <div class="mt-6 border-t border-gray-100 pt-4 text-xs text-gray-500">
-                        <p>Verified by HOTESCORTS</p>
-                        <p>I am on HOTESCORTS since June 2025</p>
-                    </div>
-                </section>
-
-            </div>
-
-            <aside class="space-y-4 xl:sticky xl:top-6">
-                <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">My profile</h3>
-                    <div class="space-y-2 text-sm">
-                        @php
-                            $factLabels = collect($sidebarFacts)->pluck('label')->map(function($label) { return strtolower($label); })->toArray();
-                        @endphp
-                        @php
-                            $factLabels = collect($sidebarFacts)->pluck('label')->map(function($label) { return strtolower($label); })->toArray();
-                        @endphp
-                        @foreach($sidebarFacts as $fact)
-                            @if(strtolower($fact['label']) !== 'height')
-                                <div class="flex items-start justify-between gap-2 border-b border-gray-100 pb-2">
-                                    <span class="text-gray-500">{{ $fact['label'] }}</span>
-                                    <span class="font-medium text-gray-900">{!! $fact['value'] !!}</span>
-                                </div>
-                            @endif
-                        @endforeach
-                        @foreach($profileStats as $stat)
-                            @if(!in_array(strtolower($stat['label']), $factLabels) && strtolower($stat['label']) !== 'age group')
-                                <div class="flex items-start justify-between gap-2 border-b border-gray-100 pb-2">
-                                    <span class="text-gray-500">{{ $stat['label'] }}</span>
-                                    <span class="font-medium text-gray-900">{{ $stat['value'] }}</span>
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                    @if(!empty($profileTags))
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        @foreach($profileTags as $tag)
-                            <span class="rounded-full bg-pink-100 px-2 py-1 text-xs font-semibold text-pink-700">{{ $tag }}</span>
-                        @endforeach
-                    </div>
-                    @endif
-                </section>
-
-                <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">Price List</h3>
-                    <div class="space-y-2 sm:hidden">
-                        @foreach($priceList as $priceItem)
-                            <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                                <span class="text-sm text-gray-700">{{ $priceItem['label'] }}</span>
-                                <span class="text-sm font-semibold text-gray-900">{{ $priceItem['price'] }}</span>
+                </div>
+                <!-- Info/Sidebar (right) -->
+                <div class="flex flex-col gap-6">
+                    <div class="bg-white rounded-2xl shadow p-6 border border-gray-100 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-lg text-black">Info</span>
+                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-xs font-semibold text-blue-700"><i class="fa-solid fa-badge-check text-blue-500 mr-1"></i> PHOTOS VERIFIED</span>
+                            <span class="text-xs text-gray-500 flex items-center"><i class="fa-regular fa-clock mr-1"></i> 3 hours ago</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm mb-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-hourglass-half text-pink-600 w-5 text-center"></i>
+                                <span>Age <span class="font-bold text-gray-900 ml-1">{{ $profile['age'] ?? '19' }}</span></span>
                             </div>
-                        @endforeach
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
+                                <span>Height <span class="font-bold text-gray-900 ml-1">{{ $profile['height'] ?? '160 CM' }}</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-weight-scale text-pink-600 w-5 text-center"></i>
+                                <span>Weight <span class="font-bold text-gray-900 ml-1">{{ $profile['weight'] ?? '48 KG' }}</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-braille text-pink-600 w-5 text-center"></i>
+                                <span>Cup Size <span class="font-bold text-gray-900 ml-1">{{ $profile['breast'] ?? 'C' }}</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2 col-span-2">
+                                <i class="fa-solid fa-dollar-sign text-pink-600 w-5 text-center"></i>
+                                <span>Price 1 Hour <span class="font-bold text-gray-900 ml-1">{{ $profile['rate'] ?? '$400' }}</span></span>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="block text-lg font-bold mb-1 text-black">Contact</span>
+                            <div class="mb-2 text-sm p-2 text-gray-700">
+                                Tell you saw advertisement in <span class="text-pink-600 font-semibold">Escortify</span>, thanks!<br>
+                                Preferred contact method: <span class="font-semibold">Whatsapp</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-2">
+                                <i class="fa-solid fa-mobile-screen text-blue-600 text-2xl"></i>
+                                <span class="text-xs font-bold text-black">PHONE:</span>
+                            </div>
+                            <div class="text-2xl font-bold tracking-wide mb-2 text-black">{{ $primaryPhone ?? '61480858703' }}</div>
+                            <hr class="my-3">
+                            <div class="flex items-center gap-2 mt-2">
+                                <i class="fa-solid fa-globe text-blue-600 text-2xl"></i>
+                                <span class="text-xs font-bold text-black">WEBSITE:</span>
+                            </div>
+                            @if(!empty($profile['website']))
+                                <a href="{{ $profile['website'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank">{{ $profile['website'] }}</a>
+                            @else
+                                <a href="https://onlyfans.com/tessa.fox/c156" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank">https://onlyfans.com/tessa.fox/c156</a>
+                            @endif
+                        </div>
+                        <div class="flex gap-4 mt-4">
+                            <button class="flex items-center gap-2 border border-gray-300 bg-white rounded-xl px-6 py-3 transition hover:bg-pink-50 text-pink-700 font-semibold text-lg w-1/2 justify-center" style="border-width:2px;">
+                                <i class="fa-regular fa-heart text-2xl"></i>
+                                <span class="font-semibold">Save favourite</span>
+                            </button>
+                            <button class="flex items-center gap-2 border border-gray-300 bg-white rounded-xl px-6 py-3 transition hover:bg-pink-50 text-pink-700 font-semibold text-lg w-1/2 justify-center" style="border-width:2px;">
+                                <i class="fa-regular fa-thumbs-up text-2xl"></i>
+                                <span class="font-semibold">Like <span class="font-bold">46</span></span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="hidden overflow-x-auto rounded-lg border border-gray-200 sm:block">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Service</th>
-                                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Price</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 bg-white">
-                                @foreach($priceList as $priceItem)
+                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
+                        <h3 class="mb-2 text-lg font-bold text-pink-600 flex items-center gap-2">
+                            <i class="fa-solid fa-user-gear text-pink-500"></i> My profile
+                        </h3>
+                        <hr class="mb-4">
+                        <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-flag text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Nationality</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['nationality'] ?? 'Colombian' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-globe text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Ethnicity</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['ethnicity'] ?? 'Latina' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-palette text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Hair color</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['hair_color'] ?? 'Black' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-eye text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Eyes</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['eye_color'] ?? 'Brown' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-child-reaching text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Body type</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['body_type'] ?? 'Slim' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Height</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['height'] ?? "5'6\"" }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-braille text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Breast</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['breast'] ?? 'C' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-water text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Pubic hair</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['pubic_hair'] ?? 'Shaved' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-bed text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Place of service</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['place_of_service'] ?? 'Hotel, Private Apartment' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-people-arrows text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Meeting with</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['meeting_with'] ?? 'Men, Couples' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-comments text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Languages</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['languages'] ?? 'Spanish, English' }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-location-dot text-pink-600 w-5 text-center"></i>
+                                <div>
+                                    <span>Location</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['city'] ?? 'Houston' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
+                        <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
+                            <i class="fa-regular fa-clock text-pink-600"></i> Rates
+                        </h3>
+                        <hr class="mb-3">
+                        <div class="overflow-x-auto rounded-lg">
+                            <table class="min-w-full text-sm">
+                                <thead>
                                     <tr>
-                                        <td class="px-4 py-3 text-gray-700">{{ $priceItem['label'] }}</td>
-                                        <td class="px-4 py-3 font-semibold text-gray-900">{{ $priceItem['price'] }}</td>
+                                        <th class="px-4 py-2 text-left font-bold text-black">Time</th>
+                                        <th class="px-4 py-2 text-left font-bold text-black">Outcall</th>
+                                        <th class="px-4 py-2 text-left font-bold text-black">In-call</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-gray-100">
+                                        <td class="px-4 py-2 font-normal text-black">30 min</td>
+                                        <td class="px-4 py-2 font-bold text-black">300</td>
+                                        <td class="px-4 py-2 font-bold text-black">300</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-normal text-black">1 hour</td>
+                                        <td class="px-4 py-2 font-bold text-black">400</td>
+                                        <td class="px-4 py-2 font-bold text-black">400</td>
+                                    </tr>
+                                    <tr class="bg-gray-100">
+                                        <td class="px-4 py-2 font-normal text-black">2 hours</td>
+                                        <td class="px-4 py-2 font-bold text-black">600</td>
+                                        <td class="px-4 py-2 font-bold text-black">600</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </section>
-
-                <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">Availability</h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        @foreach($availabilityList as $availabilityItem)
-                            <div class="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-5 min-h-[90px]">
-                                <span class="text-base font-bold text-gray-900 mb-1">{{ $availabilityItem['day'] }}</span>
-                                <span class="text-sm text-gray-700 text-center whitespace-pre-line">{{ $availabilityItem['time'] }}</span>
-                            </div>
-                        @endforeach
+                                        <!-- My Availability Section -->
+                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mt-6">
+                        <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
+                            <i class="fa-regular fa-calendar-days text-pink-600"></i> My availability
+                        </h3>
+                        <hr class="mb-3">
+                        <div class="overflow-x-auto rounded-lg">
+                            <table class="min-w-full text-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2 text-left font-bold text-black">Day</th>
+                                        <th class="px-4 py-2 text-left font-bold text-black">Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-gray-100">
+                                        <td class="px-4 py-2 font-normal text-black">Monday</td>
+                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-normal text-black">Tuesday</td>
+                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
+                                    </tr>
+                                    <tr class="bg-gray-100">
+                                        <td class="px-4 py-2 font-normal text-black">Wednesday</td>
+                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-normal text-black">Thursday</td>
+                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
+                                    </tr>
+                                    <tr class="bg-gray-100">
+                                        <td class="px-4 py-2 font-normal text-black">Friday</td>
+                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-normal text-black">Saturday</td>
+                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
+                                    </tr>
+                                    <tr class="bg-gray-100">
+                                        <td class="px-4 py-2 font-normal text-black">Sunday</td>
+                                        <td class="px-4 py-2 font-bold text-black">Unavailable</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </section>
-            </aside>
 
+
+                      <button class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-700 font-semibold hover:bg-gray-50 transition"><i class="fa-regular fa-flag"></i> Report User</button>
+                </div>
+            </div>
         </div>
 
         <section class="mt-12 overflow-hidden">
@@ -474,145 +409,4 @@
 </style>
 @endpush
 
-@push('scripts')
-<script>
-    function gallerySlider(images) {
-        return {
-            images: images || [],
-            isOpen: false,
-            currentIndex: 0,
-            get currentImage() {
-                return this.images[this.currentIndex] || '';
-            },
-            open(index) {
-                this.currentIndex = index;
-                this.isOpen = true;
-                document.body.classList.add('overflow-hidden');
-            },
-            close() {
-                this.isOpen = false;
-                document.body.classList.remove('overflow-hidden');
-            },
-            nextImage() {
-                if (!this.images.length) {
-                    return;
-                }
 
-                this.currentIndex = (this.currentIndex + 1) % this.images.length;
-            },
-            prevImage() {
-                if (!this.images.length) {
-                    return;
-                }
-
-                this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-            },
-            slideNext() {
-                const track = this.$refs.track;
-                if (!track) {
-                    return;
-                }
-
-                track.scrollBy({
-                    left: Math.max(track.clientWidth * 0.9, 280),
-                    behavior: 'smooth'
-                });
-            },
-            slidePrev() {
-                const track = this.$refs.track;
-                if (!track) {
-                    return;
-                }
-
-                track.scrollBy({
-                    left: -Math.max(track.clientWidth * 0.9, 280),
-                    behavior: 'smooth'
-                });
-            }
-        };
-    }
-
-    function videoGallerySlider(videos) {
-        return {
-            videos: videos || [],
-            isOpen: false,
-            currentIndex: 0,
-            get currentVideo() {
-                return this.videos[this.currentIndex] || '';
-            },
-            open(index) {
-                this.currentIndex = index;
-                this.isOpen = true;
-                document.body.classList.add('overflow-hidden');
-            },
-            close() {
-                this.isOpen = false;
-                document.body.classList.remove('overflow-hidden');
-
-                const modalVideo = this.$refs.modalVideo;
-                if (modalVideo) {
-                    modalVideo.pause();
-                    modalVideo.currentTime = 0;
-                }
-            },
-            nextVideo() {
-                if (!this.videos.length) {
-                    return;
-                }
-
-                this.currentIndex = (this.currentIndex + 1) % this.videos.length;
-                this.playCurrentVideo();
-            },
-            prevVideo() {
-                if (!this.videos.length) {
-                    return;
-                }
-
-                this.currentIndex = (this.currentIndex - 1 + this.videos.length) % this.videos.length;
-                this.playCurrentVideo();
-            },
-            handleEnded() {
-                if (this.videos.length > 1) {
-                    this.nextVideo();
-                }
-            },
-            playCurrentVideo() {
-                this.$nextTick(() => {
-                    const modalVideo = this.$refs.modalVideo;
-                    if (!modalVideo) {
-                        return;
-                    }
-
-                    modalVideo.currentTime = 0;
-                    const playPromise = modalVideo.play();
-                    if (playPromise && typeof playPromise.catch === 'function') {
-                        playPromise.catch(() => {});
-                    }
-                });
-            },
-            slideNext() {
-                const track = this.$refs.track;
-                if (!track) {
-                    return;
-                }
-
-                track.scrollBy({
-                    left: Math.max(track.clientWidth * 0.9, 280),
-                    behavior: 'smooth'
-                });
-            },
-            slidePrev() {
-                const track = this.$refs.track;
-                if (!track) {
-                    return;
-                }
-
-                track.scrollBy({
-                    left: -Math.max(track.clientWidth * 0.9, 280),
-                    behavior: 'smooth'
-                });
-            }
-        };
-    }
-</script>
-@endpush

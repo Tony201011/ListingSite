@@ -152,11 +152,26 @@ class HomeController extends Controller
                 ->all();
         }
 
+        // Profile stats for sidebar (match Blade expectations)
+        $profileStats = [
+            ['label' => 'Age', 'value' => $profile['age'] ?? '25'],
+            ['label' => 'Height', 'value' => $profile['height'] ?? '170cm'],
+            ['label' => 'Weight', 'value' => $profile['weight'] ?? '60kg'],
+            ['label' => 'Bust', 'value' => $profile['bust'] ?? 'C'],
+            ['label' => 'Waist', 'value' => $profile['waist'] ?? '60cm'],
+            ['label' => 'Hips', 'value' => $profile['hips'] ?? '90cm'],
+            ['label' => 'Dress size', 'value' => $profile['dress_size'] ?? '8'],
+            ['label' => 'Eye color', 'value' => $profile['eye_color'] ?? 'Brown'],
+            ['label' => 'Orientation', 'value' => $profile['orientation'] ?? 'Straight'],
+            ['label' => 'Available to', 'value' => $profile['available_to'] ?? 'Men, Women, Couples'],
+        ];
+
         return view('profile-show', [
             'profile' => $profile,
             'nearbyProfiles' => $nearbyProfiles,
             'selectedCategoryNames' => $selectedCategoryNames,
             'selectedCategoriesByGroup' => $selectedCategoriesByGroup,
+            'profileStats' => $profileStats,
         ]);
     }
 
