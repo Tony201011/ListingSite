@@ -59,12 +59,17 @@
             ];
 
             $sidebarFacts = [
-                ['label' => 'Ethnicity', 'value' => 'Caucasian'],
-                ['label' => 'Hair color', 'value' => 'Other'],
-                ['label' => 'Eye color', 'value' => 'Brown'],
-                ['label' => 'Body type', 'value' => 'Athletic'],
-                ['label' => 'Height', 'value' => $profile['height'] ?? '5\'6"'],
-                ['label' => 'Age', 'value' => ($profile['age'] ?? 25) . ' years'],
+                ['label' => 'Nationality', 'value' => $profile['nationality'] ?? 'Colombia'],
+                ['label' => 'Ethnicity', 'value' => $profile['ethnicity'] ?? 'Latina'],
+                ['label' => 'Hair color', 'value' => $profile['hair_color'] ?? 'Black'],
+                ['label' => 'Eyes', 'value' => $profile['eye_color'] ?? 'Brown'],
+                ['label' => 'Body type', 'value' => $profile['body_type'] ?? 'Slim'],
+                ['label' => 'Breast', 'value' => $profile['breast'] ?? 'C'],
+                ['label' => 'Pubic hair', 'value' => $profile['pubic_hair'] ?? 'Shaved'],
+                ['label' => 'Place of service', 'value' => $profile['place_of_service'] ?? 'Hotel, Private Apartment'],
+                ['label' => 'Meeting with', 'value' => $profile['meeting_with'] ?? 'Men, Couples'],
+                ['label' => 'Languages', 'value' => $profile['languages'] ?? 'Spanish, English'],
+                ['label' => 'Location', 'value' => $profile['city'] ?? 'Sydney'],
             ];
         @endphp
 
@@ -74,9 +79,7 @@
                     <div class="grid gap-4 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-5">
                         <img src="{{ $profile['images'][0] ?? $profile['image'] }}" alt="{{ $profile['name'] }}" class="h-44 w-full rounded-xl object-cover sm:h-48">
                         <div class="min-w-0">
-                            <div class="mb-2 inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                AVAILABLE NOW • AVAILABLE TILL 8PM
-                            </div>
+                            <!-- Availability badge removed -->
                             <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                     <p class="text-sm text-gray-500">{{ $profile['city'] }} Escorts</p>
@@ -308,71 +311,84 @@
                     </section>
                 @endif
 
+                <!-- Price List section moved to sidebar below My profile & stats -->
+
+
+
                 <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-                    <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">About</h2>
-                    <p class="text-sm leading-7 text-gray-600">
-                        Hi, I’m {{ $profile['name'] }}. I offer a discreet and premium companion experience focused on comfort, chemistry, and mutual respect. Whether you’re planning a social event, private dinner, or relaxed one-on-one time, I bring elegance, confidence, and warm conversation to every meeting.
-                    </p>
 
-                    @php
-                        $serviceItems = collect([
-                            $profile['service_1'] ?? null,
-                            $profile['service_2'] ?? null,
-                        ])
-                            ->filter()
-                            ->merge(collect($selectedCategoryNames ?? []))
-                            ->map(fn ($item) => trim((string) $item))
-                            ->filter()
-                            ->unique()
-                            ->values();
+                    <div class="space-y-3 text-sm text-gray-700">
+                        <p class="text-lg font-semibold text-gray-900"><i class="fa-solid fa-globe mr-2"></i>My website</p>
+                        <a href="#" class="break-all text-pink-600 hover:underline">https://www.lithemassage.com/</a>
+                    </div>
 
-                        $groupedCategoryItems = collect($selectedCategoriesByGroup ?? [])
-                            ->map(function ($group) {
-                                return [
-                                    'heading' => trim((string) ($group['heading'] ?? '')),
-                                    'items' => collect($group['items'] ?? [])
-                                        ->map(fn ($item) => trim((string) $item))
-                                        ->filter()
-                                        ->take(2)
-                                        ->values()
-                                        ->all(),
-                                ];
-                            })
-                            ->filter(fn ($group) => $group['heading'] !== '' && !empty($group['items']))
-                            ->values();
-                    @endphp
+                    <div class="mt-4 flex gap-4">
+                        <a href="https://twitter.com/username" target="_blank" class="text-gray-500 hover:text-pink-600" title="Twitter">
+                            <i class="fa-brands fa-twitter fa-lg"></i>
+                        </a>
+                        <a href="https://instagram.com/username" target="_blank" class="text-gray-500 hover:text-pink-600" title="Instagram">
+                            <i class="fa-brands fa-instagram fa-lg"></i>
+                        </a>
+                        <a href="https://facebook.com/username" target="_blank" class="text-gray-500 hover:text-pink-600" title="Facebook">
+                            <i class="fa-brands fa-facebook fa-lg"></i>
+                        </a>
+                    </div>
 
-                    <div class="mt-6 grid gap-5 sm:grid-cols-2">
-                        <div>
-                            <h3 class="mb-2 text-lg font-semibold text-gray-900">Services</h3>
-                            <ul class="space-y-1 text-sm text-gray-600">
-                                @forelse($groupedCategoryItems as $group)
-                                    <li>• <span class="font-semibold text-gray-900">{{ $group['heading'] }}:</span> {{ implode(', ', $group['items']) }}</li>
-                                @empty
-                                    @forelse($serviceItems as $serviceItem)
-                                        <li>• {{ $serviceItem }}</li>
-                                    @empty
-                                        <li>• {{ $profile['service_1'] }}</li>
-                                        <li>• {{ $profile['service_2'] }}</li>
-                                    @endforelse
-                                @endforelse
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 class="mb-2 text-lg font-semibold text-gray-900">Location</h3>
-                            <ul class="space-y-1 text-sm text-gray-600">
-                                <li>• {{ $profile['city'] }} central area</li>
-                                <li>• Safe and discreet meetups</li>
-                                <li>• Hotel visits available</li>
-                                <li>• Travel by arrangement</li>
-                            </ul>
-                        </div>
+                    <div class="mt-6">
+                        <h3 class="mb-2 text-lg font-bold text-gray-900">Contact me for</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            @foreach($contactForItems as $item)
+                                <li>» {{ $item }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <div class="mt-6 border-t border-gray-100 pt-4 text-xs text-gray-500">
+                        <p>Verified by HOTESCORTS</p>
+                        <p>I am on HOTESCORTS since June 2025</p>
                     </div>
                 </section>
 
-                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-                    <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Price List</h2>
+            </div>
 
+            <aside class="space-y-4 xl:sticky xl:top-6">
+                <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">My profile</h3>
+                    <div class="space-y-2 text-sm">
+                        @php
+                            $factLabels = collect($sidebarFacts)->pluck('label')->map(function($label) { return strtolower($label); })->toArray();
+                        @endphp
+                        @php
+                            $factLabels = collect($sidebarFacts)->pluck('label')->map(function($label) { return strtolower($label); })->toArray();
+                        @endphp
+                        @foreach($sidebarFacts as $fact)
+                            @if(strtolower($fact['label']) !== 'height')
+                                <div class="flex items-start justify-between gap-2 border-b border-gray-100 pb-2">
+                                    <span class="text-gray-500">{{ $fact['label'] }}</span>
+                                    <span class="font-medium text-gray-900">{!! $fact['value'] !!}</span>
+                                </div>
+                            @endif
+                        @endforeach
+                        @foreach($profileStats as $stat)
+                            @if(!in_array(strtolower($stat['label']), $factLabels) && strtolower($stat['label']) !== 'age group')
+                                <div class="flex items-start justify-between gap-2 border-b border-gray-100 pb-2">
+                                    <span class="text-gray-500">{{ $stat['label'] }}</span>
+                                    <span class="font-medium text-gray-900">{{ $stat['value'] }}</span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                    @if(!empty($profileTags))
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        @foreach($profileTags as $tag)
+                            <span class="rounded-full bg-pink-100 px-2 py-1 text-xs font-semibold text-pink-700">{{ $tag }}</span>
+                        @endforeach
+                    </div>
+                    @endif
+                </section>
+
+                <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">Price List</h3>
                     <div class="space-y-2 sm:hidden">
                         @foreach($priceList as $priceItem)
                             <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
@@ -381,7 +397,6 @@
                             </div>
                         @endforeach
                     </div>
-
                     <div class="hidden overflow-x-auto rounded-lg border border-gray-200 sm:block">
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-50">
@@ -402,69 +417,13 @@
                     </div>
                 </section>
 
-                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-                    <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Availability</h2>
-
-                    <div class="grid gap-2 sm:grid-cols-2">
-                        @foreach($availabilityList as $availabilityItem)
-                            <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                                <span class="text-sm font-semibold text-gray-900">{{ $availabilityItem['day'] }}</span>
-                                <span class="text-sm text-gray-600">{{ $availabilityItem['time'] }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                </section>
-
-                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-                    <h2 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">My Stats</h2>
-
-                    <div class="space-y-2 text-sm">
-                        @foreach($profileStats as $stat)
-                            <div class="flex items-start justify-between gap-3 border-b border-gray-100 pb-2">
-                                <span class="font-semibold text-gray-700">{{ $stat['label'] }}</span>
-                                <span class="text-gray-600">{{ $stat['value'] }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        @foreach($profileTags as $tag)
-                            <span class="rounded-full bg-pink-100 px-2 py-1 text-xs font-semibold text-pink-700">{{ $tag }}</span>
-                        @endforeach
-                    </div>
-                </section>
-
-                <section class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-                    <div class="space-y-3 text-sm text-gray-700">
-                        <p class="text-lg font-semibold text-gray-900"><i class="fa-solid fa-globe mr-2"></i>My website</p>
-                        <a href="#" class="break-all text-pink-600 hover:underline">https://www.lithemassage.com/</a>
-                    </div>
-
-                    <div class="mt-6">
-                        <h3 class="mb-2 text-lg font-bold text-gray-900">Contact me for</h3>
-                        <ul class="space-y-2 text-sm text-gray-700">
-                            @foreach($contactForItems as $item)
-                                <li>» {{ $item }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-
-                    <div class="mt-6 border-t border-gray-100 pt-4 text-xs text-gray-500">
-                        <p>Verified by Realbabes</p>
-                        <p>I am on Realbabes since June 2025</p>
-                    </div>
-                </section>
-
-            </div>
-
-            <aside class="space-y-4 xl:sticky xl:top-6">
                 <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">My profile</h3>
-                    <div class="space-y-2 text-sm">
-                        @foreach($sidebarFacts as $fact)
-                            <div class="flex items-start justify-between gap-2">
-                                <span class="text-gray-500">{{ $fact['label'] }}</span>
-                                <span class="font-medium text-gray-900">{{ $fact['value'] }}</span>
+                    <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-pink-600">Availability</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        @foreach($availabilityList as $availabilityItem)
+                            <div class="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-5 min-h-[90px]">
+                                <span class="text-base font-bold text-gray-900 mb-1">{{ $availabilityItem['day'] }}</span>
+                                <span class="text-sm text-gray-700 text-center whitespace-pre-line">{{ $availabilityItem['time'] }}</span>
                             </div>
                         @endforeach
                     </div>
