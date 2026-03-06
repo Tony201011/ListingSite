@@ -164,7 +164,7 @@
                 <div x-cloak class="grid gap-4" :class="viewMode === 'grid' ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5' : 'grid-cols-1'">
                     @forelse($profiles as $profile)
                         <article class="view-card relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm" :class="viewMode === 'list' ? 'md:grid md:grid-cols-[300px_1fr]' : ''">
-                            <a href="{{ route('profile.show', $profile['slug']) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
+                            <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
                             <div class="view-card-media relative" :class="viewMode === 'list' ? 'md:h-[220px]' : ''">
                                 <img src="{{ $profile['image'] }}" alt="{{ $profile['name'] }}" class="view-card-image object-cover" :class="viewMode === 'list' ? 'h-56 w-full md:h-[220px] md:w-full' : 'h-44 w-full'">
                                 <div class="absolute left-2 top-2 z-10 flex gap-1 text-[10px] font-semibold">

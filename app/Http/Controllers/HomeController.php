@@ -22,8 +22,11 @@ class HomeController extends Controller
         return view('advanced-search', $viewData);
     }
 
-    public function showProfile(string $slug)
+    public function showProfile(Request $request, string $slug)
     {
+        $imageCount = 8;
+        $videoCount = 7;
+
         $galleryImages = [
             'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&auto=format&fit=crop',
             'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=900&auto=format&fit=crop',
@@ -37,27 +40,37 @@ class HomeController extends Controller
         ];
 
         $galleryVideos = [
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
             'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
             'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
             'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
             'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
             'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
         ];
 
         $profiles = collect($this->baseProfiles())
-            ->map(function (array $profile, int $index) use ($galleryImages, $galleryVideos) {
+            ->map(function (array $profile, int $index) use ($galleryImages, $galleryVideos, $imageCount, $videoCount) {
                 $profile['slug'] = Str::slug($profile['name']) . '-' . ($index + 1);
 
-                $profile['images'] = [
-                    $profile['image'],
-                    $galleryImages[($index + 1) % count($galleryImages)],
-                    $galleryImages[($index + 2) % count($galleryImages)],
-                ];
+                $profile['images'] = collect(range(0, max(0, $imageCount - 1)))
+                    ->map(function (int $offset) use ($profile, $galleryImages, $index) {
+                        if ($offset === 0) {
+                            return $profile['image'];
+                        }
 
-                $profile['videos'] = [
-                    $galleryVideos[$index % count($galleryVideos)],
-                    $galleryVideos[($index + 1) % count($galleryVideos)],
-                ];
+                        return $galleryImages[($index + $offset) % count($galleryImages)];
+                    })
+                    ->values()
+                    ->all();
+
+                $profile['videos'] = collect(range(0, max(0, $videoCount - 1)))
+                    ->map(fn (int $offset) => $galleryVideos[($index + $offset) % count($galleryVideos)])
+                    ->values()
+                    ->all();
 
                 return $profile;
             });
@@ -71,9 +84,61 @@ class HomeController extends Controller
             ->take(4)
             ->values();
 
+        $selectedCategoryIds = collect($request->input('categories', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->values();
+
+        $selectedCategoryNames = $selectedCategoryIds->isNotEmpty()
+            ? Category::query()
+                ->whereIn('id', $selectedCategoryIds)
+                ->orderBy('name')
+                ->pluck('name')
+                ->values()
+                ->all()
+            : [];
+
+        $selectedCategoriesByGroup = [];
+
+        if ($selectedCategoryIds->isNotEmpty()) {
+            $selectedCategories = Category::query()
+                ->whereIn('id', $selectedCategoryIds)
+                ->get(['id', 'name', 'parent_id']);
+
+            $parentNames = Category::query()
+                ->whereIn('id', $selectedCategories->pluck('parent_id')->filter()->unique())
+                ->pluck('name', 'id');
+
+            $selectedCategoriesByGroup = $selectedCategories
+                ->groupBy(fn ($category) => (int) ($category->parent_id ?? 0))
+                ->map(function ($items, $parentId) use ($parentNames) {
+                    $heading = (int) $parentId > 0
+                        ? (string) ($parentNames->get((int) $parentId) ?? 'Other')
+                        : 'Other';
+
+                    return [
+                        'heading' => $heading,
+                        'items' => $items
+                            ->pluck('name')
+                            ->filter()
+                            ->map(fn ($name) => trim((string) $name))
+                            ->unique()
+                            ->take(2)
+                            ->values()
+                            ->all(),
+                    ];
+                })
+                ->filter(fn ($group) => !empty($group['items']))
+                ->sortBy('heading')
+                ->values()
+                ->all();
+        }
+
         return view('profile-show', [
             'profile' => $profile,
             'nearbyProfiles' => $nearbyProfiles,
+            'selectedCategoryNames' => $selectedCategoryNames,
+            'selectedCategoriesByGroup' => $selectedCategoriesByGroup,
         ]);
     }
 
