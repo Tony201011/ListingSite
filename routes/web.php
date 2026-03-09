@@ -222,3 +222,5 @@ Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 Route::post('/provider/register', [ProviderRegisterController::class, 'store']);
+
+require __DIR__.'/escort-review.php';
