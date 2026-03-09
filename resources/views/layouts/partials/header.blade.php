@@ -54,10 +54,6 @@
             ['label' => 'Escorts', 'url' => url('/')],
             ['label' => 'Naughty corner', 'url' => route('naughty-corner')],
             ['label' => 'Blog', 'url' => route('blog')],
-            ['label' => 'Locations', 'url' => route('faq')],
-            ['label' => 'BDSM', 'url' => route('blog')],
-            ['label' => 'Escort reviews', 'url' => route('blog')],
-            ['label' => 'Escort announcements', 'url' => route('blog')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
         $hasPricingInMainNav = $mainNavLinks->contains(function ($item) {
@@ -180,7 +176,35 @@
                 @endif
             </a>
             @foreach($mainNavLinks as $item)
-                <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">{{ $item['label'] }}</a>
+                @if(strtolower($item['label']) === 'escorts')
+                    <div class="relative group">
+                        <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                            {{ $item['label'] }}
+                            <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+                        </a>
+                        <div class="absolute left-0 mt-2 w-64 rounded-lg bg-gray-800 py-2 shadow-lg z-50 opacity-0 group-hover:opacity-100 group-hover:visible invisible transition-opacity duration-200">
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Brisbane escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sydney escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Melbourne escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Adelaide escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Canberra escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Perth escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Darwin escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Gold Coast escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sunshine Coast escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Newcastle escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Cairns escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Tasmania escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Touring escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts directory</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Search for escorts</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts near me</a>
+                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">View all our escorts</a>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">{{ $item['label'] }}</a>
+                @endif
             @endforeach
             <a href="{{ url('/signin') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">Login</a>
         </div>
