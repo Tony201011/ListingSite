@@ -180,7 +180,53 @@ $profileTags = [
 @include('components.gallery-modal')
                     <section class="mt-12 overflow-hidden">
                         <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <h2 class="text-2xl font-bold text-pink-600 sm:text-4xl">Videos</h2>
+                            <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
+                            <hr class="mb-4">
+                            <!-- Gallery Video Link on next line -->
+                            <div class="mt-2" x-data="{ open: false, currentIdx: 0, videos: [
+                                'https://www.w3schools.com/html/mov_bbb.mp4',
+                                'https://www.w3schools.com/html/movie.mp4',
+                                'https://www.w3schools.com/html/mov_bbb.mp4',
+                                'https://www.w3schools.com/html/movie.mp4',
+                                'https://www.w3schools.com/html/mov_bbb.mp4',
+                            ] }">
+                                <button @click="open = true" class="px-4 py-1 rounded-full bg-pink-600 text-white font-bold text-base focus:outline-none hover:bg-pink-700 transition">Gallery Video</button>
+                                <!-- Gallery Video Modal -->
+                                <div x-show="open" x-cloak x-effect="open ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+                                    <!-- Top Bar: Video Counter and Actions -->
+                                    <div class="absolute top-0 left-0 w-full flex items-center justify-between px-4 py-2 bg-[#222] bg-opacity-95 z-20" style="min-height: 36px;">
+                                        <span class="text-white text-lg font-normal tracking-wide select-none" x-text="(currentIdx + 1) + ' / ' + videos.length"></span>
+                                        <div class="flex items-center gap-2">
+                                            <button class="px-3 py-1 rounded-full bg-pink-600 text-white text-base font-semibold hover:bg-pink-700 transition focus:outline-none" @click.stop="$dispatch('gallery-action', { idx: currentIdx })">Action</button>
+                                            <button @click.stop="open = false" class="text-gray-300 text-2xl font-bold hover:text-pink-500 transition focus:outline-none bg-white bg-opacity-10 rounded-full w-9 h-9 flex items-center justify-center shadow" aria-label="Close gallery">&times;</button>
+                                        </div>
+                                    </div>
+                                    <!-- Overlay for closing -->
+                                    <div class="absolute inset-0" @click="open = false"></div>
+                                    <!-- Modal Content -->
+                                    <div class="fixed inset-0 flex items-start justify-center h-full w-full z-30 shadow-2xl">
+                                        <div class="flex items-start w-full h-full pt-16">
+                                            <!-- Main Video -->
+                                            <div class="flex-1 flex items-start justify-center pl-6">
+                                                <template x-for="(vid, idx) in videos" :key="'main-' + idx">
+                                                    <video x-show="currentIdx === idx" controls class="rounded-xl max-h-[60vh] max-w-full shadow-lg border-4 border-white object-contain bg-black">
+                                                        <source :src="vid" type="video/mp4">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                </template>
+                                            </div>
+                                            <!-- Thumbnails grid on the right -->
+                                            <div class="grid grid-cols-2 gap-2 ml-6 max-h-[60vh] overflow-y-auto items-start">
+                                                <template x-for="(vid, idx) in videos" :key="idx">
+                                                    <video @click="currentIdx = idx" :class="'w-24 h-24 object-cover rounded-lg cursor-pointer border-4 transition ' + (currentIdx === idx ? 'border-pink-500' : 'border-transparent hover:border-pink-300')" :alt="'Thumbnail ' + (idx + 1)" muted>
+                                                        <source :src="vid" type="video/mp4">
+                                                    </video>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Dummy video URLs, replace with dynamic if available -->
@@ -200,7 +246,8 @@ $profileTags = [
                         <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
                             <div class="flex items-center mb-1">
                                 <i class="fa-solid fa-location-dot text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-bold text-pink-600">My upcoming tours</h2>
+                                <h2 class="text-2xl font-semibold mb-2 text-pink-600">My upcoming tours</h2>
+                                <hr class="mb-4">
                             </div>
                             <div class="border-b border-gray-200 mb-6"></div>
                             <div class="space-y-4">
@@ -225,7 +272,8 @@ $profileTags = [
                         <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
                             <div class="flex items-center mb-1">
                                 <i class="fa-solid fa-comments text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-bold text-pink-600">Contact me for</h2>
+                                <h2 class="text-2xl font-semibold mb-2 text-pink-600">Contact me for</h2>
+                                <hr class="mb-4">
                             </div>
                             <div class="border-b border-pink-300 mb-6 w-24"></div>
                             <ul class="space-y-2 list-none pl-0">
@@ -532,7 +580,8 @@ $profileTags = [
 
         <section class="mt-12 overflow-hidden">
             <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h2 class="text-2xl font-bold text-gray-900 sm:text-4xl">Nearby listings</h2>
+                <h2 class="text-2xl font-semibold mb-2 text-pink-600">Nearby listings</h2>
+                <hr class="mb-4">
                 <a href="{{ url('/') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">View all →</a>
             </div>
 
