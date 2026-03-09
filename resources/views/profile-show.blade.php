@@ -183,16 +183,16 @@ $profileTags = [
                             <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
                             <hr class="mb-4">
                             <!-- Gallery Video Link on next line -->
-                            <div class="mt-2" x-data="{ open: false, currentIdx: 0, videos: [
+                            {{-- <div class="mt-2" x-data="{ open: false, currentIdx: 0, videos: [
                                 'https://www.w3schools.com/html/mov_bbb.mp4',
                                 'https://www.w3schools.com/html/movie.mp4',
                                 'https://www.w3schools.com/html/mov_bbb.mp4',
                                 'https://www.w3schools.com/html/movie.mp4',
                                 'https://www.w3schools.com/html/mov_bbb.mp4',
-                            ] }">
-                                <button @click="open = true" class="px-4 py-1 rounded-full bg-pink-600 text-white font-bold text-base focus:outline-none hover:bg-pink-700 transition">Gallery Video</button>
+                            ] }"> --}}
+                                {{-- <button @click="open = true" class="px-4 py-1 rounded-full bg-pink-600 text-white font-bold text-base focus:outline-none hover:bg-pink-700 transition">Gallery Video</button> --}}
                                 <!-- Gallery Video Modal -->
-                                <div x-show="open" x-cloak x-effect="open ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+                                {{-- <div x-show="open" x-cloak x-effect="open ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
                                     <!-- Top Bar: Video Counter and Actions -->
                                     <div class="absolute top-0 left-0 w-full flex items-center justify-between px-4 py-2 bg-[#222] bg-opacity-95 z-20" style="min-height: 36px;">
                                         <span class="text-white text-lg font-normal tracking-wide select-none" x-text="(currentIdx + 1) + ' / ' + videos.length"></span>
@@ -212,21 +212,22 @@ $profileTags = [
                                                     <video x-show="currentIdx === idx" controls class="rounded-xl max-h-[60vh] max-w-full shadow-lg border-4 border-white object-contain bg-black">
                                                         <source :src="vid" type="video/mp4">
                                                         Your browser does not support the video tag.
-                                                    </video>
-                                                </template>
-                                            </div>
-                                            <!-- Thumbnails grid on the right -->
-                                            <div class="grid grid-cols-2 gap-2 ml-6 max-h-[60vh] overflow-y-auto items-start">
-                                                <template x-for="(vid, idx) in videos" :key="idx">
-                                                    <video @click="currentIdx = idx" :class="'w-24 h-24 object-cover rounded-lg cursor-pointer border-4 transition ' + (currentIdx === idx ? 'border-pink-500' : 'border-transparent hover:border-pink-300')" :alt="'Thumbnail ' + (idx + 1)" muted>
+                                                    <video
+                                                        :src="video.src"
+                                                        controls
+                                                        x-pauseothers
+                                                        class="rounded-xl w-full h-64 bg-black cursor-pointer object-cover border-4 border-transparent hover:border-pink-300 transition"
+                                                        @click="$dispatch('open-video-modal', { idx })"
+                                                        muted
+                                                    ></video>
                                                         <source :src="vid" type="video/mp4">
                                                     </video>
                                                 </template>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                                </div> --}}
+                            {{-- </div> --}}
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Dummy video URLs, replace with dynamic if available -->
@@ -240,6 +241,29 @@ $profileTags = [
                             </video>
                         </div>
                     </section>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('videoControl', {
+            pauseOthers(current) {
+                document.querySelectorAll('video').forEach(video => {
+                    if (video !== current) video.pause();
+                });
+            }
+        });
+    });
+</script>
+
+<script>
+    // Attach @play handler to all videos on the page (inline and in modals)
+    document.addEventListener('alpine:init', () => {
+        Alpine.directive('pauseothers', (el) => {
+            el.addEventListener('play', () => {
+                Alpine.store('videoControl').pauseOthers(el);
+            });
+        });
+    });
+</script>
 
                     <!-- My Upcoming Tours Section (Card Style) -->
                     <section id="upcoming-tours" class="mt-12 scroll-mt-32">
