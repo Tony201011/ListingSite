@@ -82,7 +82,17 @@
 
         <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-8">
-                    <h1 class="text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">{{ $profile['name'] }}</h1>
+                    <h1 class="text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">
+                        {{ $profile['name'] }}
+                    </h1>
+                    @if(!empty($profile['city']))
+                        <div class="flex items-center justify-center mt-1">
+                            <span class="text-base font-semibold text-gray-400 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-pink-400"></i>
+                                {{ $profile['city'] }}
+                            </span>
+                        </div>
+                    @endif
                     <div class="mt-1 text-lg text-gray-700 font-medium">{{ $profile['age'] }} - barely legal, but already dangerous.</div>
                 </div>
 

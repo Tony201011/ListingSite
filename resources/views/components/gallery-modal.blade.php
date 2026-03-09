@@ -1,5 +1,9 @@
 <!-- Gallery Modal/Slider with Alpine.js -->
 <div x-data="galleryModal()" x-init="init()" x-show="open" @keydown.window.escape="close()" @keydown.window.arrow-right="next()" @keydown.window.arrow-left="prev()" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90" x-cloak>
+    <!-- Top Bar: Image Counter -->
+    <div class="absolute top-0 left-0 w-full flex items-center justify-start px-4 py-2 bg-[#222] bg-opacity-95 z-20" style="min-height: 36px;">
+        <span class="text-white text-lg font-normal tracking-wide select-none" x-text="(currentIdx + 1) + ' / ' + images.length"></span>
+    </div>
     <!-- Overlay for closing -->
     <div class="absolute inset-0" @click="close()"></div>
     <!-- Modal Content -->
@@ -20,10 +24,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
             </button>
         </div>
-        <!-- Image Counter -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black bg-opacity-40 rounded-full px-4 py-1 text-sm font-semibold tracking-wide select-none">
-            <span x-text="currentIdx + 1"></span> / <span x-text="images.length"></span>
-        </div>
+        <!-- Image Counter (moved to top bar) -->
     </div>
 </div>
 <script>
