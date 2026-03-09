@@ -5,6 +5,28 @@
 
 @section('title', $profile['name'] . ' Profile')
 
+@php
+$profileTags = [
+    'sex goddess',
+    'nympho',
+    'bisexual',
+    'natural boobs',
+    'some tattoos',
+    'round bottom',
+    'fully shaved or waxed',
+    'tanned skin',
+    'lingerie',
+    'high heels',
+    'love conversations',
+    'shower facilities',
+    'published pornstar / model',
+    'sensual experience',
+    'fantasy experiences',
+    'french kissing',
+    'nuru'
+];
+@endphp
+
 @section('content')
 <div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800">
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -48,12 +70,6 @@
                 ['label' => 'Length', 'value' => 'Average (164cm - 176cm)'],
             ];
 
-            $profileTags = [
-                'nympho', 'bisexual', 'natural boobs', 'some tattoos', 'round bottom', 'fully shaved or waxed',
-                'taned skin', 'lingerie', 'love conversations', 'shower facilities', 'published pornstar / model',
-                'sensual experience', 'fantasy experiences', 'nuru'
-            ];
-
             $contactForItems = [
                 'Incalls only',
                 'GFE bookings',
@@ -75,13 +91,15 @@
                 ['label' => 'Location', 'value' => $profile['city'] ?? 'Sydney'],
             ];
         @endphp
-
         @php
             $galleryImages = $profile['images'] ?? [$profile['image'] ?? 'https://via.placeholder.com/300'];
         @endphp
 
         <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-8">
+                    <div class="inline-block mb-2 px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
+                        AVAILABLE NOW - AVAILABLE TILL 8PM
+                    </div>
                     <h1 class="text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">
                         {{ $profile['name'] }}
                     </h1>
@@ -199,6 +217,34 @@
                                     <span class="font-semibold text-gray-900 text-base">Sun 15 Feb - Sat 28 Mar</span>
                                 </div>
                             </div>
+                        </div>
+                    </section>
+
+                    <!-- Contact Me For Section (Card Style) -->
+                    <section id="contact-me-for" class="mt-12 scroll-mt-32">
+                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
+                            <div class="flex items-center mb-1">
+                                <i class="fa-solid fa-comments text-pink-600 text-xl mr-2"></i>
+                                <h2 class="text-2xl font-bold text-pink-600">Contact me for</h2>
+                            </div>
+                            <div class="border-b border-pink-300 mb-6 w-24"></div>
+                            <ul class="space-y-2 list-none pl-0">
+                                @foreach ([
+                                    'Incalls or Outcalls',
+                                    'GFE bookings',
+                                    'PSE or Very naughty bookings',
+                                    'Social, Netflix, Lunch & Dinner dates',
+                                    'Extended or Overnight bookings',
+                                    'Bookings for couples',
+                                    'Online services',
+                                    'Fly Me To You',
+                                ] as $item)
+                                    <li class="flex items-start gap-2 text-lg">
+                                        <span class="text-pink-600 text-xl mt-0.5">&raquo;</span>
+                                        <span class="text-gray-900">{{ $item }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
                         </div>
                     </section>
 
@@ -382,6 +428,17 @@
                                     <span>Location</span><br>
                                     <span class="font-bold text-gray-900">{{ $profile['city'] ?? 'Houston' }}</span>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-y-2 mt-6">
+                            <div class="flex flex-wrap gap-x-2">
+                                @foreach(array_chunk($profileTags, 2) as $row)
+                                    <div class="flex gap-x-2 mb-1">
+                                        @foreach($row as $tag)
+                                            <span class="px-4 py-1 bg-pink-600 text-white rounded-full text-base font-bold" style="line-height:1.2;">{{ $tag }}</span>
+                                        @endforeach
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
