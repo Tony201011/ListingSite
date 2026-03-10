@@ -7,13 +7,7 @@
 
         <!-- Sign up Header with Steps -->
         <div class="flex items-center justify-between flex-wrap gap-4 mb-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#e04ecb] pl-4">Create your free profile</h2>
-            <div class="flex items-center gap-4 bg-white px-5 py-2 rounded-full shadow-sm">
-                <span class="text-[#e04ecb] font-semibold">Step 1 of 3</span>
-                <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="w-1/3 h-full bg-[#e04ecb]"></div>
-                </div>
-            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 pl-4">Create your free profile</h2>
         </div>
 
         <!-- Free Trial & Benefits Card (Fixed with purple bullets and full text) -->
@@ -57,7 +51,73 @@
         </div>
 
         <!-- Registration Form -->
-        <form class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100" method="POST" action="{{ route('signup.submit') }}">
+        <form
+            x-data="{
+                email: '',
+                nickname: '',
+                password: '',
+                confirmPassword: '',
+                mobile: '',
+                suburb: '',
+                ageConfirm: false,
+                errors: {},
+                touched: { email: false, nickname: false, password: false, confirmPassword: false, mobile: false, suburb: false, ageConfirm: false },
+                validate() {
+                    // Email
+                    if (!this.email || !/^\S+@\S+\.\S+$/.test(this.email)) {
+                        this.errors.email = 'Valid email is required.';
+                    } else {
+                        delete this.errors.email;
+                    }
+                    // Nickname
+                    if (!this.nickname || this.nickname.length < 3) {
+                        this.errors.nickname = 'Nickname is required (min 3 chars).';
+                    } else {
+                        delete this.errors.nickname;
+                    }
+                    // Password
+                    if (!this.password || this.password.length < 8) {
+                        this.errors.password = 'Password must be at least 8 characters.';
+                    } else {
+                        delete this.errors.password;
+                    }
+                    // Confirm Password
+                    if (this.password !== this.confirmPassword) {
+                        this.errors.confirmPassword = 'Passwords do not match.';
+                    } else {
+                        delete this.errors.confirmPassword;
+                    }
+                    // Mobile
+                    if (!this.mobile || this.mobile.length < 8) {
+                        this.errors.mobile = 'Valid mobile number required.';
+                    } else {
+                        delete this.errors.mobile;
+                    }
+                    // Suburb
+                    if (!this.suburb) {
+                        this.errors.suburb = 'Suburb is required.';
+                    } else {
+                        delete this.errors.suburb;
+                    }
+                    // Age Confirm
+                    if (!this.ageConfirm) {
+                        this.errors.ageConfirm = 'You must confirm you are 18+';
+                    } else {
+                        delete this.errors.ageConfirm;
+                    }
+                    return Object.keys(this.errors).length === 0;
+                },
+                submitForm(e) {
+                    // Mark all fields as touched on submit
+                    Object.keys(this.touched).forEach(k => this.touched[k] = true);
+                    if (!this.validate()) {
+                        e.preventDefault();
+                    }
+                }
+            }"
+            @submit="submitForm"
+            class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100"
+            method="POST" action="{{ route('signup.submit') }}">
             @csrf
 
             <!-- Two-column layout for some fields -->
@@ -65,23 +125,31 @@
                 <!-- Email -->
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
-                    <input type="email" value="s8811w@gmail.com" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition" required>
+                    <input type="email" x-model="email" @blur="touched.email = true" @input="touched.email = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    <template x-if="touched.email && errors.email"><div class="text-xs text-red-600 mt-1" x-text="errors.email"></div></template>
+                    <template x-if="touched.email && !errors.email && email === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 </div>
                 <!-- Nickname -->
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Nickname <span class="text-red-600">*</span></label>
-                    <input type="text" placeholder="e.g. SexyBabe" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition" required>
+                    <input type="text" x-model="nickname" @blur="touched.nickname = true" @input="touched.nickname = true; validate()" placeholder="e.g. SexyBabe" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    <template x-if="touched.nickname && errors.nickname"><div class="text-xs text-red-600 mt-1" x-text="errors.nickname"></div></template>
+                    <template x-if="touched.nickname && !errors.nickname && nickname === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 </div>
                 <!-- Password -->
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Password <span class="text-red-600">*</span></label>
-                    <input type="password" value="**********" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition" required>
+                    <input type="password" x-model="password" @blur="touched.password = true" @input="touched.password = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                     <div class="text-xs text-gray-500 mt-1">8‑20 characters, letters & numbers recommended</div>
+                    <template x-if="touched.password && errors.password"><div class="text-xs text-red-600 mt-1" x-text="errors.password"></div></template>
+                    <template x-if="touched.password && !errors.password && password === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 </div>
                 <!-- Confirm Password -->
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Confirm password <span class="text-red-600">*</span></label>
-                    <input type="password" value="**********" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition" required>
+                    <input type="password" x-model="confirmPassword" @blur="touched.confirmPassword = true" @input="touched.confirmPassword = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    <template x-if="touched.confirmPassword && errors.confirmPassword"><div class="text-xs text-red-600 mt-1" x-text="errors.confirmPassword"></div></template>
+                    <template x-if="touched.confirmPassword && !errors.confirmPassword && confirmPassword === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 </div>
             </div>
 
@@ -89,13 +157,32 @@
             <div class="my-6">
                 <label class="block font-semibold text-gray-800 mb-1">Mobile number <span class="text-red-600">*</span></label>
                 <div class="flex gap-2.5">
-                    <select class="w-24 px-3 py-3 border-2 border-gray-200 rounded-xl bg-white focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20">
-                        <option value="+61">🇦🇺 +61</option>
-                        <option value="+64">🇳🇿 +64</option>
-                        <option value="+44">🇬🇧 +44</option>
+                    <select class="w-24 px-3 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-800 font-semibold opacity-100 disabled:bg-gray-100 disabled:text-gray-800 disabled:font-semibold focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20" disabled>
+                        <option value="+61" selected>🇦🇺 +61</option>
                     </select>
-                    <input type="tel" placeholder="Australian mobile" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition">
+                    <input
+                        type="tel"
+                        x-model="mobile"
+                        @blur="touched.mobile = true"
+                        @input="touched.mobile = true; validate();
+                            // Accepts 04xxxxxxxx or 614xxxxxxxx, optional spaces
+                            const ausMobile = /^(04\d{8}|614\d{8})$/;
+                            let cleaned = mobile.replace(/\D/g, '');
+                            if (cleaned.startsWith('61')) {
+                                cleaned = '0' + cleaned.slice(2);
+                            }
+                            if (!ausMobile.test(cleaned)) {
+                                errors.mobile = 'Enter a valid Australian mobile (e.g. 0412345678 or 61412345678)';
+                            } else {
+                                delete errors.mobile;
+                            }
+                        "
+                        placeholder="Australian mobile (e.g. 0412 345 678)"
+                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
+                    >
                 </div>
+                <template x-if="touched.mobile && errors.mobile"><div class="text-xs text-red-600 mt-1" x-text="errors.mobile"></div></template>
+                <template x-if="touched.mobile && !errors.mobile && mobile === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 <!-- Verification callout -->
                 <div class="bg-pink-50 rounded-2xl p-5 mt-4 flex gap-4 items-start">
                     <div class="w-8 h-8 bg-[#e04ecb] rounded-full flex items-center justify-center flex-shrink-0">
@@ -104,7 +191,8 @@
                         </svg>
                     </div>
                     <div>
-                        <span class="font-bold text-[#c13ab0]">We verify every babe.</span> One of our moderators will call to confirm. We <span class="font-semibold">never</span> publish or share your number without permission.
+                        <span class="font-bold text-[#c13ab0] text-base md:text-lg">We verify every babe.</span>
+                        <span class="text-gray-800 text-base md:text-lg font-medium block mt-1">One of our moderators will call to confirm. We <span class="font-semibold text-[#c13ab0]">never</span> publish or share your number without permission.</span>
                         <div class="mt-2 text-[#c13ab0] text-sm">📱 Australian mobile only</div>
                     </div>
                 </div>
@@ -113,8 +201,10 @@
             <!-- Suburb with autocomplete hint -->
             <div class="mb-6">
                 <label class="block font-semibold text-gray-800 mb-1">Primary suburb <span class="text-red-600">*</span></label>
-                <input type="text" placeholder="Start typing your suburb..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition" required>
+                <input type="text" x-model="suburb" @blur="touched.suburb = true" @input="touched.suburb = true; validate()" placeholder="Start typing your suburb..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                 <div class="text-xs text-gray-500 mt-1">We'll auto‑complete from our list</div>
+                <template x-if="touched.suburb && errors.suburb"><div class="text-xs text-red-600 mt-1" x-text="errors.suburb"></div></template>
+                <template x-if="touched.suburb && !errors.suburb && suburb === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
             </div>
 
             <!-- Referral code & Age confirmation in one row -->
@@ -123,23 +213,24 @@
                     <label class="block font-semibold text-gray-800 mb-1">Referral code (optional)</label>
                     <input type="text" placeholder="Enter code if you have one" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition">
                 </div>
-                <div class="flex items-center gap-2.5 bg-gray-50 px-5 py-3 rounded-full">
-                    <input type="checkbox" id="age_confirm" class="w-5 h-5 accent-[#e04ecb]" required>
-                    <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
-                </div>
+                                        <div class="flex flex-col gap-0">
+                                            <div class="flex items-center gap-2.5 bg-gray-50 px-5 py-3 rounded-full">
+                                                <input type="checkbox" id="age_confirm" x-model="ageConfirm" @change="touched.ageConfirm = true; validate()" class="w-5 h-5 accent-[#e04ecb]">
+                                                <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
+                                            </div>
+                                            <template x-if="touched.ageConfirm && errors.ageConfirm">
+                                                <div class="text-xs text-red-600 mt-1 pl-12" x-text="errors.ageConfirm"></div>
+                                            </template>
+                                        </div>
             </div>
 
-            <!-- reCAPTCHA styled minimal version -->
+            <!-- Google reCAPTCHA widget -->
             <div class="mb-8">
-                <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 flex items-center gap-4">
-                    <div class="w-7 h-7 bg-[#e04ecb] rounded-lg flex items-center justify-center text-white font-bold">✓</div>
-                    <span class="text-gray-800">I'm not a robot</span>
-                    <div class="ml-auto flex items-center gap-2">
-                        <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" class="w-6 h-6 opacity-70">
-                        <span class="text-xs text-gray-400">reCAPTCHA</span>
-                    </div>
+                <div class="flex justify-center">
+                    <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
                 </div>
             </div>
+            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
             <!-- Submit button -->
             <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">

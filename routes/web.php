@@ -10,14 +10,61 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProviderRegisterController;
+use Twilio\Rest\Client;
+
+
+Route::get('/site-password', function () {
+    return view('site-password');
+});
+
+Route::post('/site-password', function (Request $request) {
+
+    if ($request->password === '123456') {
+        $request->session()->put('site_access', true);
+        return redirect('/');
+    }
+    return back()->with('error', 'Wrong password');
+});
+
+
+
+Route::get('/send-sms', function () {
+
+    $account_sid = env('TWILIO_ACCOUNT_SID');
+    $api_sid = env('TWILIO_API_SID');
+    $api_secret = env('TWILIO_API_SECRET');
+
+    $client = new Client($api_sid, $api_secret, $account_sid);
+
+    try {
+
+        $message = $client->messages->create(
+            '+61415573077', // Your number
+            [
+                'from' => env('TWILIO_PHONE'),
+                'body' => 'Hello! This is a Twilio test SMS from Laravel.'
+            ]
+        );
+
+        return "SMS Sent Successfully. SID: " . $message->sid;
+
+    } catch (\Exception $e) {
+
+        return "Error: " . $e->getMessage();
+    }
+
+});
+
+
+
+
+
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
 
-Route::get('/signup', function () {
-    return view('signup');
-});
+Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
 
 Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
 Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
@@ -27,9 +74,7 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.load-more');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-Route::post('/signup', function () {
-    return redirect('/otp-verification')->with('success', 'Signup submitted. Please verify your mobile number.');
-})->name('signup.submit');
+Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
 
 Route::post('/logout', function (Request $request) {
     Auth::logout();
