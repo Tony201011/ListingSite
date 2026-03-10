@@ -1,4 +1,4 @@
-@extends('layouts.frontend')
+@extends('layouts.frontend-no-nav-footer')
 
 @section('content')
 <div class="bg-[#f8fafc] min-h-screen py-10">
