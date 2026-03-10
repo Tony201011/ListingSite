@@ -17,6 +17,9 @@ Route::get('/site-password', function () {
     return view('site-password');
 });
 
+
+
+
 Route::post('/site-password', function (Request $request) {
 
     if ($request->password === '123456') {
