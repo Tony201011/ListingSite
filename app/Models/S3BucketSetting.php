@@ -10,8 +10,6 @@ class S3BucketSetting extends Model
     use HasFactory;
 
     protected $fillable = [
-        'key',
-        'secret',
         'region',
         'bucket',
         'url',

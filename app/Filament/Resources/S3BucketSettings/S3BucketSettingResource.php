@@ -56,14 +56,7 @@ class S3BucketSettingResource extends Resource
                 Toggle::make('use_path_style_endpoint')
                     ->label('Use Path Style Endpoint')
                     ->default(false),
-                TextInput::make('key')
-                    ->label('Access Key ID')
-                    ->maxLength(255),
-                TextInput::make('secret')
-                    ->label('Secret Access Key')
-                    ->password()
-                    ->revealable()
-                    ->maxLength(255),
+                // Access key and secret removed from the form since they're optional
                 TextInput::make('region')
                     ->label('Region')
                     ->maxLength(255),

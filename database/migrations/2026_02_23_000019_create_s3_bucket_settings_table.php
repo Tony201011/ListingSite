@@ -10,8 +10,6 @@ return new class extends Migration
     {
         Schema::create('s3_bucket_settings', function (Blueprint $table): void {
             $table->id();
-            $table->string('key')->nullable();
-            $table->string('secret')->nullable();
             $table->string('region')->nullable();
             $table->string('bucket')->nullable();
             $table->string('url')->nullable();
