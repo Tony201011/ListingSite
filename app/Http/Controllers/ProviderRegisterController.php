@@ -28,71 +28,72 @@ class ProviderRegisterController extends Controller
     public function signup(Request $request)
     {
 
+
+
         $validated = $request->validate([
             'email' => 'required|email|unique:users,email',
             'nickname' => 'required|string|min:3|max:255',
-            'password' => 'required|string|min:8|confirmed',
-            'password_confirmation' => 'required',
-            'mobile' => ['required', 'regex:/^(04\d{8}|614\d{8})$/'],
+            'password' => 'min:8|required_with:password_confirmation|same:password_confirmation',
+            'password_confirmation' => 'min:8',
+            // Only allow +614XXXXXXXX pattern
+            'mobile' => ['required', 'regex:/^\+614\d{8}$/'],
             'suburb' => 'required|string|max:255',
             'age_confirm' => 'accepted',
-            'g-recaptcha-response' => 'required',
+           // 'g-recaptcha-response' => 'required',
             'referral_code' => 'nullable|string|max:255',
         ]);
 
-        // Manual error for confirm password field
-        if ($request->input('password') !== $request->input('password_confirmation')) {
-            return back()->withErrors(['confirmPassword' => 'Passwords do not match.'])->withInput();
+
+
+
+        // Google reCAPTCHA server-side validation (skip on localhost)
+        $isLocalhost = in_array($request->getHost(), ['127.0.0.1', 'localhost']);
+        if (!$isLocalhost) {
+            $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
+            $recaptcha = $request->input('g-recaptcha-response');
+            $recaptchaSecret = $recaptchaConfig?->secret_key;
+            $recaptchaResponse = null;
+            if ($recaptcha && $recaptchaSecret) {
+                $recaptchaResponse = json_decode(
+                    file_get_contents(
+                        'https://www.google.com/recaptcha/api/siteverify?secret=' .
+                        $recaptchaSecret .
+                        '&response=' .
+                        $recaptcha
+                    ),
+                    true
+                );
+            }
+            if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
+                return back()->withErrors([
+                    'g-recaptcha-response' => 'Google reCAPTCHA verification failed. Please try again.'
+                ])->withInput();
+            }
         }
 
-        // Google reCAPTCHA server-side validation
-        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
-
-        $recaptcha = $request->input('g-recaptcha-response');
-        $recaptchaSecret = $recaptchaConfig?->secret_key;
-
-        $recaptchaResponse = null;
-
-        if ($recaptcha && $recaptchaSecret) {
-
-            $recaptchaResponse = json_decode(
-                file_get_contents(
-                    'https://www.google.com/recaptcha/api/siteverify?secret=' .
-                    $recaptchaSecret .
-                    '&response=' .
-                    $recaptcha
-                ),
-                true
-            );
-        }
-
-        if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
-            return back()->withErrors([
-                'g-recaptcha-response' => 'Google reCAPTCHA verification failed. Please try again.'
-            ])->withInput();
-        }
 
 
         $mobile = $validated['mobile'];
+
+
+        // Only allow +614XXXXXXXX pattern (already validated above, but double check for safety)
+        $australianPattern = '/^\+61\d{9}$/';
+        if (!preg_match($australianPattern, $mobile)) {
+            return back()->withErrors(['mobile' => 'Only Australian mobile numbers in the format +614XXXXXXXX are allowed.'])->withInput();
+        }
         $otp = rand(100000, 999999);
 
         $mobile = $validated['mobile'];
 
-        if (str_starts_with($mobile, '04')) {
-                $mobile = '+61' . substr($mobile, 1);
-        }
+
 
         $twilioSetting = TwilioSetting::first();
+        $account_sid = $twilioSetting->account_sid;
+        $api_sid = $twilioSetting->api_sid;
+        $api_secret = $twilioSetting->api_secret;
 
     try {
-
-
-
-        $client = new Client(
-            $twilioSetting->account_sid,
-            $twilioSetting->api_secret,
-            $twilioSetting->api_sid
-        );
+        $client = new Client($api_sid, $api_secret, $account_sid);
 
         $client->messages->create(
             $mobile,
@@ -105,7 +106,6 @@ class ProviderRegisterController extends Controller
 
         Log::info('Twilio SMS send attempt', [
             'mobile' => $mobile,
-            'referral_code' => $validated['referral_code'] ?? null,
             'otp' => $otp
         ]);
 
@@ -128,6 +128,7 @@ class ProviderRegisterController extends Controller
             'mobile_verified' => false,
             'referral_code' => $validated['referral_code'] ?? null
         ]);
+
 
 
         Auth::login($user);

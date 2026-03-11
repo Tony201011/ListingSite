@@ -170,7 +170,7 @@
                 <label class="block font-semibold text-gray-800 mb-1">Mobile number <span class="text-red-600">*</span></label>
                 <div class="flex gap-2.5">
                     <select class="w-24 px-3 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-800 font-semibold opacity-100 disabled:bg-gray-100 disabled:text-gray-800 disabled:font-semibold focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20" disabled>
-                        <option value="+61" selected>🇦🇺 +61</option>
+                        <option value="+61" selected>🇦🇺</option>
                     </select>
                     <input
                         name="mobile"
@@ -178,19 +178,15 @@
                         x-model="mobile"
                         @blur="touched.mobile = true"
                         @input="touched.mobile = true; validate();
-                            // Accepts 04xxxxxxxx or 614xxxxxxxx, optional spaces
-                            const ausMobile = /^(04\d{8}|614\d{8})$/;
-                            let cleaned = mobile.replace(/\D/g, '');
-                            if (cleaned.startsWith('61')) {
-                                cleaned = '0' + cleaned.slice(2);
-                            }
-                            if (!ausMobile.test(cleaned)) {
-                                errors.mobile = 'Enter a valid Australian mobile (e.g. 0412345678 or 61412345678)';
+                            // Only allow +614XXXXXXXX pattern
+                            const ausMobile = /^\+61\d{9}$/;
+                            if (!ausMobile.test(mobile)) {
+                                errors.mobile = 'Only Australian mobile numbers in the format +614XXXXXXXX are allowed (e.g. +61415573077)';
                             } else {
                                 delete errors.mobile;
                             }
                         "
-                        placeholder="Australian mobile (e.g. 0412 345 678)"
+                        placeholder="Australian mobile (e.g. +61415573077)"
                         class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
                     @error('mobile')
@@ -247,12 +243,17 @@
             </div>
 
             <!-- Google reCAPTCHA widget -->
-            <div class="mb-8">
-                <div class="flex justify-center">
-                    <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
+            @php
+                $isLocalhost = request()->getHost() === '127.0.0.1' || request()->getHost() === 'localhost';
+            @endphp
+            @if(!$isLocalhost)
+                <div class="mb-8">
+                    <div class="flex justify-center">
+                        <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
+                    </div>
                 </div>
-            </div>
-            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+            @endif
 
             <!-- Submit button -->
             <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">
