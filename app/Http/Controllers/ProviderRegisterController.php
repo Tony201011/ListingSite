@@ -77,4 +77,58 @@ class ProviderRegisterController extends Controller
         return redirect('/otp-verification')
             ->with('success', 'Signup successful. Please verify your mobile number.');
     }
+
+    public function showSigninForm()
+    {
+        $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
+        return view('signin', compact('recaptchaSetting'));
+    }
+
+       public function signin(Request $request)
+    {
+
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'g-recaptcha-response' => 'required'
+        ]);
+
+        // Get recaptcha keys from DB
+        $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
+
+        if (!$recaptchaSetting) {
+            return back()->withErrors(['recaptcha' => 'Recaptcha configuration missing']);
+        }
+
+        // Verify Google reCAPTCHA
+        $response = Http::asForm()->post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            [
+                'secret' => $recaptchaSetting->secret_key,
+                'response' => $request->input('g-recaptcha-response'),
+                'remoteip' => $request->ip()
+            ]
+        );
+
+        $result = $response->json();
+
+        if (!isset($result['success']) || $result['success'] != true) {
+            return back()->withErrors(['recaptcha' => 'reCAPTCHA verification failed'])->withInput();
+        }
+
+        // Attempt login
+        if (Auth::attempt([
+            'email' => $request->email,
+            'password' => $request->password
+        ], $request->remember)) {
+
+            $request->session()->regenerate();
+
+            return redirect()->intended('/dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'Invalid email or password'
+        ])->withInput();
+    }
 }

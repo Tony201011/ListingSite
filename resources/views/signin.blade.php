@@ -26,13 +26,15 @@
                 <!-- Email -->
                 <div class="mb-6">
                     <label class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
-                    <input type="email" value="s8811w@gmail.com" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition" required>
+                    <input type="email" name="email" value="{{ old('email') }}"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base" placeholder="Enter your email" required>
                 </div>
 
                 <!-- Password -->
                 <div class="mb-5">
                     <label class="block font-semibold text-gray-800 mb-1">Password <span class="text-red-600">*</span></label>
-                    <input type="password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition" required>
+                    <input type="password" name="password"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base" placeholder="Enter your password" required>
                 </div>
 
                 <!-- Keep me logged in (styled like the age confirmation pill) -->
@@ -43,17 +45,12 @@
                     </div>
                 </div>
 
-                <!-- reCAPTCHA (same as sign-up) -->
                 <div class="mb-8">
-                    <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 flex items-center gap-4">
-                        <div class="w-7 h-7 bg-[#e04ecb] rounded-lg flex items-center justify-center text-white font-bold">✓</div>
-                        <span class="text-gray-800">I'm not a robot</span>
-                        <div class="ml-auto flex items-center gap-2">
-                            <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" class="w-6 h-6 opacity-70">
-                            <span class="text-xs text-gray-400">reCAPTCHA</span>
-                        </div>
+                    <div class="flex justify-center">
+                            <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
                     </div>
                 </div>
+                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
                 <!-- Login Button (same gradient as sign-up) -->
                 <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">

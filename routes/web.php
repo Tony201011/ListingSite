@@ -74,8 +74,18 @@ Route::get('/send-sms', function () {
 
 });
 
+Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
+Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
+Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->name('signin');
+Route::get('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
+// Route::post('/signin', function () {
+//     return redirect('/after-image-upload')->with('success', 'Signed in successfully.');
+// })->name('signin.submit');
 
 
+Route::get('/reset-password', function () {
+    return view('reset-password');
+});
 
 
 
@@ -83,7 +93,7 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
 
-Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
+
 
 Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
 Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
@@ -93,7 +103,7 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.load-more');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
+
 
 Route::post('/logout', function (Request $request) {
     Auth::logout();
@@ -105,18 +115,8 @@ Route::post('/logout', function (Request $request) {
 })->name('logout');
 
 
-Route::get('/signin', function () {
-    return view('signin');
-});
-
-Route::post('/signin', function () {
-    return redirect('/after-image-upload')->with('success', 'Signed in successfully.');
-})->name('signin.submit');
 
 
-Route::get('/reset-password', function () {
-    return view('reset-password');
-});
 
 Route::post('/reset-password', function () {
     return redirect('/signin')->with('success', 'Password reset link sent to your email.');
