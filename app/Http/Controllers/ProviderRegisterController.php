@@ -120,8 +120,12 @@ class ProviderRegisterController extends Controller
             'referral_code' => $validated['referral_code'] ?? null,
         ], now()->addMinutes(10));
 
-        // Store OTP separately
-        Cache::put($pendingKey . '_otp', $otp, now()->addMinutes(2));
+        // Store OTP and its expiration timestamp
+        $otpExpiresAt = now()->addMinutes(2);
+        Cache::put($pendingKey . '_otp', [
+            'code' => $otp,
+            'expires_at' => $otpExpiresAt->timestamp
+        ], $otpExpiresAt);
 
         // Store session flags
         Session::put('otp_required', true);
@@ -196,11 +200,14 @@ class ProviderRegisterController extends Controller
             ]);
         }
 
-        $remainingTime = Cache::ttl($pendingKey . '_otp');
-        if ($remainingTime < 0) {
-            $remainingTime = 0;
+        $otpData = Cache::get($pendingKey . '_otp');
+        $remainingTime = 0;
+        if ($otpData && isset($otpData['expires_at'])) {
+            $remainingTime = $otpData['expires_at'] - time();
+            if ($remainingTime < 0) {
+                $remainingTime = 0;
+            }
         }
-
         return view('otp-verification', [
             'userData' => (object) $pendingUser,
             'remainingTime' => $remainingTime
@@ -229,8 +236,11 @@ class ProviderRegisterController extends Controller
 
         $otp = random_int(100000, 999999);
         $otpExpirySeconds = 60;
-
-        Cache::put($pendingKey . '_otp', $otp, now()->addSeconds($otpExpirySeconds));
+        $otpExpiresAt = now()->addSeconds($otpExpirySeconds);
+        Cache::put($pendingKey . '_otp', [
+            'code' => $otp,
+            'expires_at' => $otpExpiresAt->timestamp
+        ], $otpExpiresAt);
 
         $twilioSetting = TwilioSetting::first();
 
@@ -286,16 +296,20 @@ class ProviderRegisterController extends Controller
 
         $pendingKey = session()->get('pending_signup_key');
         $pendingUser = Cache::get($pendingKey);
-        $cachedOtp = Cache::get($pendingKey . '_otp');
-
-        if (!$pendingUser || !$cachedOtp) {
+        $otpData = Cache::get($pendingKey . '_otp');
+        if (!$pendingUser || !$otpData || !isset($otpData['code'], $otpData['expires_at'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'OTP expired. Please signup again.'
             ], 422);
         }
-
-        if ((string) $request->otp !== (string) $cachedOtp) {
+        if (time() > $otpData['expires_at']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP expired. Please signup again.'
+            ], 422);
+        }
+        if ((string) $request->otp !== (string) $otpData['code']) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid OTP.'
