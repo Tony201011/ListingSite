@@ -33,6 +33,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'email',
         'role',
         'is_blocked',
+        'mobile',
+        'suburb',
+        'referral_code',    
+        'otp',
+        'otp_expires_at',
+        'mobile_verified',
         'password',
     ];
 

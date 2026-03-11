@@ -78,6 +78,8 @@ Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->na
 Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
 Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->name('signin');
 Route::post('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
+
+Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerficationForm'])->name('otp-verfication');
 // Route::post('/signin', function () {
 //     return redirect('/after-image-upload')->with('success', 'Signed in successfully.');
 // })->name('signin.submit');
@@ -222,9 +224,9 @@ Route::get('/view-profile-setting', function () {
 
 
 
-Route::get('/otp-verification', function () {
-    return view('otp-verification');
-});
+// Route::get('/otp-verification', function () {
+//     return view('otp-verification');
+// });
 
 
 Route::get('/purchase-credit', function () {
