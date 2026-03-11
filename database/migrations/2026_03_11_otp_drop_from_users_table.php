@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Cache; // <-- Import Cache
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter; // <-- For rate limiting
 
 class ProviderRegisterController extends Controller
 {
@@ -69,8 +70,25 @@ class ProviderRegisterController extends Controller
             return back()->withErrors(['mobile' => 'Only Australian mobile numbers in the format +614XXXXXXXX are allowed.'])->withInput();
         }
 
-        // Generate OTP
+        // Create user first
+        $user = User::create([
+            'name' => $validated['nickname'],
+            'email' => $validated['email'],
+            'mobile' => $mobile,
+            'password' => Hash::make($validated['password']),
+            'role' => User::ROLE_PROVIDER,
+            'mobile_verified' => false,
+            'referral_code' => $validated['referral_code'] ?? null
+        ]);
+
+        // Generate and hash OTP
         $otp = rand(100000, 999999);
+        $otpHash = Hash::make($otp);
+        $otpKey = 'otp_signup_' . $user->id; // purpose-specific key
+        Cache::put($otpKey, [
+            'hash' => $otpHash,
+            'attempts' => 0,
+        ], now()->addSeconds(120)); // 120 seconds expiry
 
         // Send SMS via Twilio
         $twilioSetting = TwilioSetting::first();
@@ -97,25 +115,10 @@ class ProviderRegisterController extends Controller
                 'referral_code' => $validated['referral_code'] ?? null,
                 'exception' => $e
             ]);
+            // Optionally delete the user or cache? Usually keep user but mark as failed.
             return back()->withErrors(['mobile' => $e->getMessage()])->withInput();
         }
 
-        // Create user (no OTP fields saved)
-        $user = User::create([
-            'name' => $validated['nickname'],
-            'email' => $validated['email'],
-            'mobile' => $mobile,
-            'password' => Hash::make($validated['password']),
-            'role' => User::ROLE_PROVIDER,
-            'mobile_verified' => false,
-            'referral_code' => $validated['referral_code'] ?? null
-        ]);
-
-        // Store OTP in cache with 120 seconds expiry
-        $otpKey = 'otp_user_' . $user->id;
-        Cache::put($otpKey, $otp, now()->addSeconds(120));
-
-        // Log the user in
         Auth::login($user);
 
         // Store session flags for OTP verification
@@ -125,6 +128,182 @@ class ProviderRegisterController extends Controller
 
         return redirect('/otp-verification')
             ->with('success', 'Signup successful. Please verify your mobile number.');
+    }
+
+    /**
+     * Show OTP verification form
+     */
+    public function otpVerficationForm()
+    {
+        if (!session()->has('otp_required')) {
+            return redirect('/');
+        }
+
+        $email = session()->get('email');
+        $phone = session()->get('phone');
+        $user = User::where('email', $email)->orWhere('mobile', $phone)->first();
+
+        if (!$user) {
+            return redirect('/signup')->withErrors(['user' => 'User not found.']);
+        }
+
+        // Get remaining time from cache
+        $otpKey = 'otp_signup_' . $user->id;
+        $remainingTime = Cache::ttl($otpKey); // seconds remaining, or negative if expired
+        if ($remainingTime < 0) {
+            $remainingTime = 0;
+        }
+
+        return view('otp-verification', compact('user', 'remainingTime'));
+    }
+
+    /**
+     * Verify OTP
+     */
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|numeric|digits:6',
+        ]);
+
+        // Ensure user is in session
+        if (!session()->has('otp_required')) {
+            return redirect('/')->withErrors(['session' => 'OTP session expired.']);
+        }
+
+        $email = session()->get('email');
+        $phone = session()->get('phone');
+        $user = User::where('email', $email)->orWhere('mobile', $phone)->first();
+
+        if (!$user) {
+            return redirect('/signup')->withErrors(['user' => 'User not found.']);
+        }
+
+        // Rate limiting: max 5 attempts per 10 minutes per user
+        $rateLimitKey = 'otp-verify:' . $user->id;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+            return back()->withErrors(['otp' => "Too many attempts. Please try again in {$seconds} seconds."]);
+        }
+        RateLimiter::hit($rateLimitKey, 600); // 10 minutes
+
+        $otpKey = 'otp_signup_' . $user->id;
+        $cached = Cache::get($otpKey);
+
+        if (!$cached) {
+            return back()->withErrors(['otp' => 'OTP has expired or is invalid.']);
+        }
+
+        // Check attempt count from cache
+        if ($cached['attempts'] >= 3) {
+            Cache::forget($otpKey); // Lock out after too many attempts
+            return back()->withErrors(['otp' => 'Too many incorrect attempts. Please request a new OTP.']);
+        }
+
+        // Verify hash
+        if (!Hash::check($request->otp, $cached['hash'])) {
+            // Increment attempts in cache
+            $cached['attempts']++;
+            Cache::put($otpKey, $cached, Cache::ttl($otpKey)); // preserve original TTL
+            return back()->withErrors(['otp' => 'Invalid OTP code.']);
+        }
+
+        // Success: mark mobile as verified, clear cache and session
+        $user->mobile_verified = true;
+        $user->save();
+
+        Cache::forget($otpKey);
+        RateLimiter::clear($rateLimitKey); // Clear rate limiter on success
+        Session::forget('otp_required');
+        Session::forget('email');
+        Session::forget('phone');
+
+        return redirect('/dashboard')->with('success', 'Mobile number verified successfully.');
+    }
+
+    /**
+     * Resend OTP
+     */
+    public function resendOtp(Request $request)
+    {
+        if (!session()->has('otp_required')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP session expired. Please signup again.'
+            ]);
+        }
+
+        $email = session()->get('email');
+        $phone = session()->get('phone');
+        $user = User::where('email', $email)
+            ->orWhere('mobile', $phone)
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.'
+            ]);
+        }
+
+        // Rate limiting: max 2 resends per 5 minutes
+        $rateLimitKey = 'otp-resend:' . $user->id;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 2)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+            return response()->json([
+                'success' => false,
+                'message' => "Too many resend attempts. Please try again in {$seconds} seconds."
+            ], 429);
+        }
+        RateLimiter::hit($rateLimitKey, 300); // 5 minutes
+
+        $otp = rand(100000, 999999);
+        $otpHash = Hash::make($otp);
+        $otpExpirySeconds = 60; // 60 seconds for resend
+        $otpKey = 'otp_signup_' . $user->id;
+
+        Cache::put($otpKey, [
+            'hash' => $otpHash,
+            'attempts' => 0,
+        ], now()->addSeconds($otpExpirySeconds));
+
+        // Send SMS via Twilio
+        $twilioSetting = TwilioSetting::first();
+        try {
+            $client = new Client(
+                $twilioSetting->api_sid,
+                $twilioSetting->api_secret,
+                $twilioSetting->account_sid
+            );
+            $client->messages->create(
+                $user->mobile,
+                [
+                    'from' => $twilioSetting->phone_number,
+                    'body' => "Your HOTESCORT verification code is: $otp"
+                ]
+            );
+
+            Log::info('Twilio SMS resend attempt', [
+                'mobile' => $user->mobile,
+                'otp' => $otp
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Twilio SMS resend error', [
+                'mobile' => $user->mobile,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to resend OTP.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP resent successfully.',
+            'timer' => $otpExpirySeconds
+        ]);
     }
 
     public function showSigninForm()
@@ -173,97 +352,5 @@ class ProviderRegisterController extends Controller
         return back()->withErrors([
             'email' => 'Invalid email or password'
         ])->withInput();
-    }
-
-    public function otpVerficationForm()
-    {
-        if (!session()->has('otp_required')) {
-            return redirect('/');
-        }
-
-        $email = session()->get('email');
-        $phone = session()->get('phone');
-        $userData = User::where('email', $email)->orWhere('mobile', $phone)->first();
-
-        if (!$userData) {
-            return redirect('/signup')->withErrors(['user' => 'User not found.']);
-        }
-
-        // Get remaining time from cache
-        $otpKey = 'otp_user_' . $userData->id;
-        $remainingTime = Cache::ttl($otpKey); // seconds remaining, or negative if expired
-        if ($remainingTime < 0) {
-            $remainingTime = 0;
-        }
-
-        return view('otp-verification', compact('userData', 'remainingTime'));
-    }
-
-    public function resendOtp(Request $request)
-    {
-        if (!session()->has('otp_required')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'OTP session expired. Please signup again.'
-            ]);
-        }
-
-        $email = session()->get('email');
-        $phone = session()->get('phone');
-        $user = User::where('email', $email)
-            ->orWhere('mobile', $phone)
-            ->first();
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found.'
-            ]);
-        }
-
-        $otp = rand(100000, 999999);
-        $otpExpirySeconds = 60; // 60 seconds for resend
-
-        // Store new OTP in cache (overwrites existing)
-        $otpKey = 'otp_user_' . $user->id;
-        Cache::put($otpKey, $otp, now()->addSeconds($otpExpirySeconds));
-
-        // Send SMS via Twilio
-        $twilioSetting = TwilioSetting::first();
-        try {
-            $client = new Client(
-                $twilioSetting->api_sid,
-                $twilioSetting->api_secret,
-                $twilioSetting->account_sid
-            );
-            $client->messages->create(
-                $user->mobile,
-                [
-                    'from' => $twilioSetting->phone_number,
-                    'body' => "Your HOTESCORT verification code is: $otp"
-                ]
-            );
-
-            Log::info('Twilio SMS resend attempt', [
-                'mobile' => $user->mobile,
-                'otp' => $otp
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Twilio SMS resend error', [
-                'mobile' => $user->mobile,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to resend OTP.'
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'OTP resent successfully.',
-            'timer' => $otpExpirySeconds
-        ]);
     }
 }
