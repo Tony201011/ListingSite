@@ -126,6 +126,9 @@
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
                     <input type="email" x-model="email" @blur="touched.email = true" @input="touched.email = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    @error('email')
+                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
+                    @enderror
                     <template x-if="touched.email && errors.email"><div class="text-xs text-red-600 mt-1" x-text="errors.email"></div></template>
                     <template x-if="touched.email && !errors.email && email === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 </div>
@@ -133,6 +136,9 @@
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Nickname <span class="text-red-600">*</span></label>
                     <input type="text" x-model="nickname" @blur="touched.nickname = true" @input="touched.nickname = true; validate()" placeholder="e.g. SexyBabe" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    @error('nickname')
+                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
+                    @enderror
                     <template x-if="touched.nickname && errors.nickname"><div class="text-xs text-red-600 mt-1" x-text="errors.nickname"></div></template>
                     <template x-if="touched.nickname && !errors.nickname && nickname === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 </div>
@@ -141,6 +147,9 @@
                     <label class="block font-semibold text-gray-800 mb-1">Password <span class="text-red-600">*</span></label>
                     <input type="password" x-model="password" @blur="touched.password = true" @input="touched.password = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                     <div class="text-xs text-gray-500 mt-1">8‑20 characters, letters & numbers recommended</div>
+                    @error('password')
+                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
+                    @enderror
                     <template x-if="touched.password && errors.password"><div class="text-xs text-red-600 mt-1" x-text="errors.password"></div></template>
                     <template x-if="touched.password && !errors.password && password === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 </div>
@@ -148,6 +157,9 @@
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Confirm password <span class="text-red-600">*</span></label>
                     <input type="password" x-model="confirmPassword" @blur="touched.confirmPassword = true" @input="touched.confirmPassword = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    @error('confirmPassword')
+                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
+                    @enderror
                     <template x-if="touched.confirmPassword && errors.confirmPassword"><div class="text-xs text-red-600 mt-1" x-text="errors.confirmPassword"></div></template>
                     <template x-if="touched.confirmPassword && !errors.confirmPassword && confirmPassword === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
                 </div>
@@ -180,6 +192,9 @@
                         placeholder="Australian mobile (e.g. 0412 345 678)"
                         class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
+                    @error('mobile')
+                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <template x-if="touched.mobile && errors.mobile"><div class="text-xs text-red-600 mt-1" x-text="errors.mobile"></div></template>
                 <template x-if="touched.mobile && !errors.mobile && mobile === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
@@ -203,6 +218,9 @@
                 <label class="block font-semibold text-gray-800 mb-1">Primary suburb <span class="text-red-600">*</span></label>
                 <input type="text" x-model="suburb" @blur="touched.suburb = true" @input="touched.suburb = true; validate()" placeholder="Start typing your suburb..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                 <div class="text-xs text-gray-500 mt-1">We'll auto‑complete from our list</div>
+                @error('suburb')
+                    <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
+                @enderror
                 <template x-if="touched.suburb && errors.suburb"><div class="text-xs text-red-600 mt-1" x-text="errors.suburb"></div></template>
                 <template x-if="touched.suburb && !errors.suburb && suburb === ''"><div class="text-xs text-red-600 mt-1">This field is required</div></template>
             </div>
@@ -218,6 +236,9 @@
                                                 <input type="checkbox" id="age_confirm" x-model="ageConfirm" @change="touched.ageConfirm = true; validate()" class="w-5 h-5 accent-[#e04ecb]">
                                                 <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
                                             </div>
+                                            @error('age_confirm')
+                                                <div class="text-xs text-red-600 mt-1 pl-12">{{ $message }}</div>
+                                            @enderror
                                             <template x-if="touched.ageConfirm && errors.ageConfirm">
                                                 <div class="text-xs text-red-600 mt-1 pl-12" x-text="errors.ageConfirm"></div>
                                             </template>

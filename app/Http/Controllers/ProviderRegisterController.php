@@ -26,6 +26,7 @@ class ProviderRegisterController extends Controller
      */
     public function signup(Request $request)
     {
+
         $validated = $request->validate([
             'email' => 'required|email|unique:users,email',
             'nickname' => 'required|string|min:3|max:255',
@@ -59,7 +60,7 @@ class ProviderRegisterController extends Controller
 
         if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
             return back()->withErrors([
-                'recaptcha' => 'Google reCAPTCHA verification failed. Please try again.'
+                'g-recaptcha-response' => 'Google reCAPTCHA verification failed. Please try again.'
             ])->withInput();
         }
 
@@ -92,7 +93,7 @@ class ProviderRegisterController extends Controller
         );
 
     } catch (\Exception $e) {
-        return back()->withErrors(['sms' => $e->getMessage()]);
+        return back()->withErrors(['mobile' => $e->getMessage()])->withInput();
     }
         $user = User::create([
             'name' => $validated['nickname'],
