@@ -125,7 +125,7 @@
                 <!-- Email -->
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
-                    <input type="email" x-model="email" @blur="touched.email = true" @input="touched.email = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    <input type="email" name='email' x-model="email" @blur="touched.email = true" @input="touched.email = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                     @error('email')
                         <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
                     @enderror
@@ -135,7 +135,7 @@
                 <!-- Nickname -->
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Nickname <span class="text-red-600">*</span></label>
-                    <input type="text" x-model="nickname" @blur="touched.nickname = true" @input="touched.nickname = true; validate()" placeholder="e.g. SexyBabe" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    <input type="text" name='nickname' x-model="nickname" @blur="touched.nickname = true" @input="touched.nickname = true; validate()" placeholder="e.g. SexyBabe" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                     @error('nickname')
                         <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
                     @enderror
@@ -145,7 +145,7 @@
                 <!-- Password -->
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Password <span class="text-red-600">*</span></label>
-                    <input type="password" x-model="password" @blur="touched.password = true" @input="touched.password = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    <input type="password" name='password' x-model="password" @blur="touched.password = true" @input="touched.password = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                     <div class="text-xs text-gray-500 mt-1">8‑20 characters, letters & numbers recommended</div>
                     @error('password')
                         <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
@@ -156,8 +156,8 @@
                 <!-- Confirm Password -->
                 <div class="mb-2">
                     <label class="block font-semibold text-gray-800 mb-1">Confirm password <span class="text-red-600">*</span></label>
-                    <input type="password" x-model="confirmPassword" @blur="touched.confirmPassword = true" @input="touched.confirmPassword = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
-                    @error('confirmPassword')
+                    <input type="password" name="password_confirmation" x-model="confirmPassword" @blur="touched.confirmPassword = true" @input="touched.confirmPassword = true; validate()" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                    @error('password_confirmation')
                         <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
                     @enderror
                     <template x-if="touched.confirmPassword && errors.confirmPassword"><div class="text-xs text-red-600 mt-1" x-text="errors.confirmPassword"></div></template>
@@ -173,6 +173,7 @@
                         <option value="+61" selected>🇦🇺 +61</option>
                     </select>
                     <input
+                        name="mobile"
                         type="tel"
                         x-model="mobile"
                         @blur="touched.mobile = true"
@@ -216,7 +217,7 @@
             <!-- Suburb with autocomplete hint -->
             <div class="mb-6">
                 <label class="block font-semibold text-gray-800 mb-1">Primary suburb <span class="text-red-600">*</span></label>
-                <input type="text" x-model="suburb" @blur="touched.suburb = true" @input="touched.suburb = true; validate()" placeholder="Start typing your suburb..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
+                <input type="text" name="suburb" x-model="suburb" @blur="touched.suburb = true" @input="touched.suburb = true; validate()" placeholder="Start typing your suburb..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                 <div class="text-xs text-gray-500 mt-1">We'll auto‑complete from our list</div>
                 @error('suburb')
                     <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
@@ -229,11 +230,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-center mb-6">
                 <div>
                     <label class="block font-semibold text-gray-800 mb-1">Referral code (optional)</label>
-                    <input type="text" placeholder="Enter code if you have one" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition">
+                    <input type="text" name="referral_code" placeholder="Enter code if you have one" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition">
                 </div>
                                         <div class="flex flex-col gap-0">
                                             <div class="flex items-center gap-2.5 bg-gray-50 px-5 py-3 rounded-full">
-                                                <input type="checkbox" id="age_confirm" x-model="ageConfirm" @change="touched.ageConfirm = true; validate()" class="w-5 h-5 accent-[#e04ecb]">
+                                                <input  name='age_confirm' type="checkbox" id="age_confirm" x-model="ageConfirm" @change="touched.ageConfirm = true; validate()" class="w-5 h-5 accent-[#e04ecb]">
                                                 <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
                                             </div>
                                             @error('age_confirm')

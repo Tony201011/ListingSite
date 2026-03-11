@@ -8,6 +8,7 @@ use App\Models\TwilioSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Twilio\Rest\Client;
 class ProviderRegisterController extends Controller
 {
@@ -31,11 +32,18 @@ class ProviderRegisterController extends Controller
             'email' => 'required|email|unique:users,email',
             'nickname' => 'required|string|min:3|max:255',
             'password' => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required',
             'mobile' => ['required', 'regex:/^(04\d{8}|614\d{8})$/'],
             'suburb' => 'required|string|max:255',
             'age_confirm' => 'accepted',
             'g-recaptcha-response' => 'required',
+            'referral_code' => 'nullable|string|max:255',
         ]);
+
+        // Manual error for confirm password field
+        if ($request->input('password') !== $request->input('password_confirmation')) {
+            return back()->withErrors(['confirmPassword' => 'Passwords do not match.'])->withInput();
+        }
 
         // Google reCAPTCHA server-side validation
         $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
@@ -78,6 +86,8 @@ class ProviderRegisterController extends Controller
 
     try {
 
+
+
         $client = new Client(
             $twilioSetting->account_sid,
             $twilioSetting->api_secret,
@@ -92,7 +102,19 @@ class ProviderRegisterController extends Controller
             ]
         );
 
+
+        Log::info('Twilio SMS send attempt', [
+            'mobile' => $mobile,
+            'referral_code' => $validated['referral_code'] ?? null,
+            'otp' => $otp
+        ]);
+
     } catch (\Exception $e) {
+        Log::error('Twilio SMS error: ' . $e->getMessage(), [
+            'mobile' => $mobile,
+            'referral_code' => $validated['referral_code'] ?? null,
+            'exception' => $e
+        ]);
         return back()->withErrors(['mobile' => $e->getMessage()])->withInput();
     }
         $user = User::create([
@@ -103,7 +125,8 @@ class ProviderRegisterController extends Controller
             'role' => User::ROLE_PROVIDER,
             'otp' => $otp,
             'otp_expires_at' => now()->addMinutes(10),
-            'mobile_verified' => false
+            'mobile_verified' => false,
+            'referral_code' => $validated['referral_code'] ?? null
         ]);
 
 
