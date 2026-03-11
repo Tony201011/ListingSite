@@ -227,7 +227,7 @@
             <!-- Google reCAPTCHA widget -->
             <div class="mb-8">
                 <div class="flex justify-center">
-                    <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
+                    <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
                 </div>
             </div>
             <script src="https://www.google.com/recaptcha/api.js" async defer></script>

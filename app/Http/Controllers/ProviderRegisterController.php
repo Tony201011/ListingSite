@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\GoogleRecaptchaSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,10 @@ class ProviderRegisterController extends Controller
      */
     public function showSignupForm()
     {
-        return view('signup');
+        $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
+
+        //dd($recaptchaSetting);
+        return view('signup', compact('recaptchaSetting'));
     }
 
     /**
@@ -33,16 +37,30 @@ class ProviderRegisterController extends Controller
         ]);
 
         // Google reCAPTCHA server-side validation
+        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
+
         $recaptcha = $request->input('g-recaptcha-response');
-        $recaptchaSecret = env('RECAPTCHA_SECRET_KEY');
+        $recaptchaSecret = $recaptchaConfig?->secret_key;
+
         $recaptchaResponse = null;
+
         if ($recaptcha && $recaptchaSecret) {
-            $recaptchaResponse = json_decode(file_get_contents(
-                'https://www.google.com/recaptcha/api/siteverify?secret=' . $recaptchaSecret . '&response=' . $recaptcha
-            ), true);
+
+            $recaptchaResponse = json_decode(
+                file_get_contents(
+                    'https://www.google.com/recaptcha/api/siteverify?secret=' .
+                    $recaptchaSecret .
+                    '&response=' .
+                    $recaptcha
+                ),
+                true
+            );
         }
+
         if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
-            return back()->withErrors(['recaptcha' => 'Google reCAPTCHA verification failed. Please try again.'])->withInput();
+            return back()->withErrors([
+                'recaptcha' => 'Google reCAPTCHA verification failed. Please try again.'
+            ])->withInput();
         }
 
         $user = User::create([
