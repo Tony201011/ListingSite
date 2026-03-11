@@ -43,12 +43,6 @@ class ProviderRegisterController extends Controller
             'referral_code' => 'nullable|string|max:255',
         ]);
 
-
-
-
-        // Google reCAPTCHA server-side validation (skip on localhost)
-        $isLocalhost = in_array($request->getHost(), ['127.0.0.1', 'localhost']);
-        if (!$isLocalhost) {
             $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
             $recaptcha = $request->input('g-recaptcha-response');
             $recaptchaSecret = $recaptchaConfig?->secret_key;
@@ -69,7 +63,7 @@ class ProviderRegisterController extends Controller
                     'g-recaptcha-response' => 'Google reCAPTCHA verification failed. Please try again.'
                 ])->withInput();
             }
-        }
+        
 
 
 

@@ -243,17 +243,14 @@
             </div>
 
             <!-- Google reCAPTCHA widget -->
-            @php
-                $isLocalhost = request()->getHost() === '127.0.0.1' || request()->getHost() === 'localhost';
-            @endphp
-            @if(!$isLocalhost)
+
                 <div class="mb-8">
                     <div class="flex justify-center">
                         <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
                     </div>
                 </div>
                 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-            @endif
+
 
             <!-- Submit button -->
             <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">
