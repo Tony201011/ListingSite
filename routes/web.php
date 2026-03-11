@@ -20,12 +20,28 @@ Route::get('/site-password', function () {
 
 
 
-Route::post('/site-password', function (Request $request) {
+use Illuminate\Support\Facades\Crypt;
+use App\Models\SiteSetting;
 
-    if ($request->password === '123456') {
+Route::post('/site-password', function (Request $request) {
+    $request->validate(['password' => 'required|string']);
+
+    // Prefer DB-configured site password (encrypted cast), fallback to env
+    $dbPassword = null;
+    if (Schema::hasTable('site_settings')) {
+        $setting = SiteSetting::query()->latest('updated_at')->first();
+        if ($setting && $setting->site_password) {
+            $dbPassword = $setting->site_password;
+        }
+    }
+
+    $expected = $dbPassword ?? env('SITE_PASSWORD');
+
+    if ($expected && hash_equals((string) $expected, (string) $request->password)) {
         $request->session()->put('site_access', true);
         return redirect('/');
     }
+
     return back()->with('error', 'Wrong password');
 });
 

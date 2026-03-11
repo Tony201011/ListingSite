@@ -12,6 +12,14 @@ class SiteSetting extends Model
         'meta_description',
         'enable_cookies',
         'cookies_text',
+        'site_password_enabled',
+        'site_password',
         'contact_email',
+    ];
+
+    protected $casts = [
+        'enable_cookies' => 'boolean',
+        'site_password_enabled' => 'boolean',
+        'site_password' => 'encrypted',
     ];
 }
