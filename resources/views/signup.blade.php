@@ -123,7 +123,7 @@
                                 @click="showPassword = !showPassword"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#e04ecb] font-semibold"
                             >
-                                <span x-text="showPassword ? 'Hide' : 'Show'"></span>
+                                
                             </button>
                         </div>
 
@@ -240,7 +240,6 @@
                             @click="showConfirmPassword = !showConfirmPassword"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#e04ecb] font-semibold"
                         >
-                            <span x-text="showConfirmPassword ? 'Hide' : 'Show'"></span>
                         </button>
                     </div>
 
