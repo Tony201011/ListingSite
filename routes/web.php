@@ -80,6 +80,8 @@ Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->na
 Route::post('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
 
 Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerficationForm'])->name('otp-verfication');
+Route::post('/verify-otp', [ProviderRegisterController::class, 'verifyOtp'])
+    ->name('verify.otp');
 // Route::post('/signin', function () {
 //     return redirect('/after-image-upload')->with('success', 'Signed in successfully.');
 // })->name('signin.submit');

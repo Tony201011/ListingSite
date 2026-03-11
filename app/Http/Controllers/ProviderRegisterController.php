@@ -186,74 +186,87 @@ class ProviderRegisterController extends Controller
         $phone = session()->get('phone');
         $userData = User::where('email', $email)->orWhere('mobile', $phone)->first();
         if ($userData->otp_expires_at) {
-        $remainingTime = now()->diffInSeconds($userData->otp_expires_at, false);
-        $remainingTime = $remainingTime > 0 ? $remainingTime : 0;
-    }
-
-         if (!$userData) {
-             return redirect('/signup')->withErrors(['user' => 'User not found.']);
+            $remainingTime = now()->diffInSeconds($userData->otp_expires_at, false);
+            $remainingTime = $remainingTime > 0 ? $remainingTime : 0;
         }
-        return view('otp-verification', compact('userData','remainingTime'));
+
+        if (!$userData) {
+            return redirect('/signup')->withErrors(['user' => 'User not found.']);
+        }
+        return view('otp-verification', compact('userData', 'remainingTime'));
     }
 
-public function resendOtp(Request $request)
-{
-    if (!session()->has('otp_required')) {
-        return redirect('/');
-    }
+    public function resendOtp(Request $request)
+    {
+        if (!session()->has('otp_required')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP session expired. Please signup again.'
+            ]);
+        }
 
-    $email = session()->get('email');
-    $phone = session()->get('phone');
+        $email = session()->get('email');
+        $phone = session()->get('phone');
 
-    $user = User::where('email', $email)
-        ->orWhere('mobile', $phone)
-        ->first();
+        $user = User::where('email', $email)
+            ->orWhere('mobile', $phone)
+            ->first();
 
-    if (!$user) {
-        return redirect('/signup')->withErrors(['user' => 'User not found.']);
-    }
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.'
+            ]);
+        }
 
-    $otp = rand(100000, 999999);
+        $otp = rand(100000, 999999);
 
-    $user->otp = $otp;
-    $user->otp_expires_at = now()->addMinutes(10);
-    $user->save();
+        // OTP expiry time
+        $otpExpirySeconds = 60;
 
-    $twilioSetting = TwilioSetting::first();
+        $user->otp = $otp;
+        $user->otp_expires_at = now()->addSeconds($otpExpirySeconds);
+        $user->save();
 
-    try {
+        $twilioSetting = TwilioSetting::first();
 
-        $client = new Client(
-            $twilioSetting->api_sid,
-            $twilioSetting->api_secret,
-            $twilioSetting->account_sid
-        );
+        try {
 
-        $client->messages->create(
-            $user->mobile,
-            [
-                'from' => $twilioSetting->phone_number,
-                'body' => "Your HOTESCORT verification code is: $otp"
-            ]
-        );
+            $client = new Client(
+                $twilioSetting->api_sid,
+                $twilioSetting->api_secret,
+                $twilioSetting->account_sid
+            );
 
-        Log::info('Twilio SMS resend attempt', [
-            'mobile' => $user->mobile,
-            'otp' => $otp
+            $client->messages->create(
+                $user->mobile,
+                [
+                    'from' => $twilioSetting->phone_number,
+                    'body' => "Your HOTESCORT verification code is: $otp"
+                ]
+            );
+
+            Log::info('Twilio SMS resend attempt', [
+                'mobile' => $user->mobile,
+                'otp' => $otp
+            ]);
+        } catch (\Exception $e) {
+
+            Log::error('Twilio SMS resend error', [
+                'mobile' => $user->mobile,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to resend OTP.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP resent successfully.',
+            'timer' => $otpExpirySeconds
         ]);
-
-    } catch (\Exception $e) {
-
-        Log::error('Twilio SMS resend error', [
-            'mobile' => $user->mobile,
-            'error' => $e->getMessage()
-        ]);
-
-        return back()->withErrors([
-            'mobile' => 'Failed to resend OTP. Please try again later.'
-        ]);
     }
-
-    return back()->with('success', 'OTP resent successfully.');
-} 
 }

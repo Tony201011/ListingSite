@@ -68,12 +68,14 @@
 
                             <span x-text="timerText"></span>
 
-                            <button type="button" @click="resendOTP" :disabled="!canResend"
-                                class="text-[#e04ecb] font-semibold disabled:opacity-50">
+                            <button type="button"
+                                    @click="resendOTP"
+                                    :disabled="!canResend"
+                                    class="bg-transparent border-0 text-[#e04ecb] font-semibold disabled:opacity-50">
 
-                                <span x-text="resendText"></span>
+                                    <span x-text="resendText"></span>
 
-                            </button>
+                                    </button>
 
                         </div>
 
@@ -110,195 +112,177 @@
     </script>
 
     <script>
-        function otpVerification() {
+function otpVerification() {
 
-            return {
+    return {
 
-                otpDigits: ['', '', '', '', '', ''],
+        otpDigits: ['', '', '', '', '', ''],
+        focusedIndex: 0,
 
-                timer: 60,
-                canResend: false,
-                resendText: 'Resend Code',
-                timerText: 'Code expires in 01:00',
+        timer: window.otpTimer || 60,
+        canResend: false,
+        resendText: 'Resend Code',
+        timerText: '',
 
-                isVerifying: false,
-                verificationStatus: null,
+        isVerifying: false,
+        verificationStatus: null,
 
+        init() {
 
-                init() {
+            this.startTimer();
 
-                    this.startTimer()
+            this.$nextTick(() => {
+                this.$refs.otpInput0.focus();
+            });
 
-                    this.$nextTick(() => {
+        },
 
-                        this.$refs.otp0.focus()
+        startTimer() {
 
-                    })
+            this.canResend = false;
 
-                },
+            const interval = setInterval(() => {
 
+                if (this.timer > 0) {
 
-                startTimer() {
+                    this.timer--;
 
-                    this.timer = window.otpTimer
-                    this.canResend = false
-                    const interval = setInterval(() => {
+                    let minutes = Math.floor(this.timer / 60);
+                    let seconds = this.timer % 60;
 
-                        if (this.timer > 0) {
+                    this.timerText =
+                        `Code expires in ${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
 
-                            this.timer--
+                } else {
 
-                            let m = Math.floor(this.timer / 60)
-                            let s = this.timer % 60
+                    this.canResend = true;
+                    this.resendText = 'Resend Code';
 
-                            this.timerText =
-                                `Code expires in ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`
-
-                        } else {
-
-                            this.canResend = true
-                            this.resendText = 'Resend Code'
-                            clearInterval(interval)
-
-                        }
-
-                    }, 1000)
-
-                },
-
-
-                handleInput(index, event) {
-
-                    if (event.target.value && index < 5) {
-
-                        this.$refs['otp' + (index + 1)].focus()
-
-                    }
-
-                },
-
-
-                get otpCode() {
-
-                    return this.otpDigits.join('')
-
-                },
-
-                get isOtpComplete() {
-
-                    return this.otpDigits.every(d => d != '')
-
-                },
-
-
-
-                verifyOTP() {
-
-                    if (!this.isOtpComplete) return
-
-                    this.isVerifying = true
-
-                    fetch("{{ route('verify.otp') }}", {
-
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content')
-                            },
-
-                            body: JSON.stringify({
-                                otp: this.otpCode
-                            })
-
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-
-                            if (data.success) {
-
-                                this.verificationStatus = {
-                                    type: 'success',
-                                    message: 'Phone verified successfully'
-                                }
-
-                                setTimeout(() => {
-                                    window.location.href = data.redirect
-                                }, 1500)
-
-                            } else {
-
-                                this.verificationStatus = {
-                                    type: 'error',
-                                    message: data.message
-                                }
-
-                                this.isVerifying = false
-
-                            }
-
-                        })
-
-                        .catch(() => {
-
-                            this.verificationStatus = {
-                                type: 'error',
-                                message: 'Server error'
-                            }
-
-                            this.isVerifying = false
-
-                        })
-
-                },
-
-
-
-                resendOTP() {
-
-                    if (!this.canResend) return
-
-                    this.resendText = 'Sending...'
-
-                    fetch("{{ route('resend.otp') }}", {
-
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content')
-                            }
-
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-
-                            if (data.success) {
-
-                                this.startTimer()
-
-                                this.verificationStatus = {
-                                    type: 'success',
-                                    message: 'OTP resent successfully'
-                                }
-
-                            } else {
-
-                                this.verificationStatus = {
-                                    type: 'error',
-                                    message: data.message
-                                }
-
-                            }
-
-                        })
+                    clearInterval(interval);
 
                 }
 
-            }
+            }, 1000);
+
+        },
+
+        get isOtpComplete() {
+            return this.otpDigits.every(d => d !== '');
+        },
+
+        get otpCode() {
+            return this.otpDigits.join('');
+        },
+
+
+        verifyOTP() {
+
+            if (!this.isOtpComplete) return;
+
+            this.isVerifying = true;
+
+            fetch("{{ route('verify.otp') }}", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN":
+                    document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+
+                body: JSON.stringify({
+                    otp: this.otpCode
+                })
+
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    this.verificationStatus = {
+                        type: 'success',
+                        message: data.message
+                    };
+
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1500);
+
+                } else {
+
+                    this.verificationStatus = {
+                        type: 'error',
+                        message: data.message
+                    };
+
+                    this.isVerifying = false;
+
+                }
+
+            });
+
+        },
+
+
+        resendOTP() {
+
+            if (!this.canResend) return;
+
+            this.resendText = "Sending...";
+
+            fetch("{{ route('resend.otp') }}", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN":
+                    document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    this.verificationStatus = {
+                        type: 'success',
+                        message: data.message
+                    };
+
+                    this.timer = data.timer || 60;
+
+                    this.startTimer();
+
+                } else {
+
+                    this.verificationStatus = {
+                        type: 'error',
+                        message: data.message
+                    };
+
+                }
+
+                this.resendText = "Resend Code";
+
+            })
+            .catch(() => {
+
+                this.verificationStatus = {
+                    type: 'error',
+                    message: 'Failed to resend OTP.'
+                };
+
+                this.resendText = "Resend Code";
+
+            });
 
         }
-    </script>
+
+    }
+}
+</script>
 @endsection
