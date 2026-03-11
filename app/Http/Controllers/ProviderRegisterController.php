@@ -216,70 +216,108 @@ class ProviderRegisterController extends Controller
 
 
     public function resendOtp(Request $request)
-    {
-        if (!session()->has('otp_required') || !session()->has('pending_signup_key')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'OTP session expired. Please signup again.'
-            ]);
-        }
+{
+    if (!Session::has('otp_required') || !Session::has('pending_signup_key')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'OTP session expired. Please signup again.'
+        ], 422);
+    }
 
-        $pendingKey = session()->get('pending_signup_key');
-        $pendingUser = Cache::get($pendingKey);
+    $pendingKey = Session::get('pending_signup_key');
+    $pendingUser = Cache::get($pendingKey);
 
-        if (!$pendingUser) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Signup session expired. Please signup again.'
-            ]);
-        }
+    if (!$pendingUser || empty($pendingUser['mobile'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Signup session expired. Please signup again.'
+        ], 422);
+    }
 
-        $otp = random_int(100000, 999999);
-        $otpExpirySeconds = 60;
-        $otpExpiresAt = now()->addSeconds($otpExpirySeconds);
+    // Prevent OTP resend spam
+    $resendLockKey = $pendingKey . '_resend_lock';
+    if (Cache::has($resendLockKey)) {
+        $remainingCooldown = (int) Cache::get($resendLockKey, 0);
+
+        return response()->json([
+            'success' => false,
+            'message' => $remainingCooldown > 0
+                ? "Please wait {$remainingCooldown} seconds before requesting another OTP."
+                : 'Please wait before requesting another OTP.'
+        ], 429);
+    }
+
+    $twilioSetting = TwilioSetting::first();
+
+    if (
+        !$twilioSetting ||
+        empty($twilioSetting->api_sid) ||
+        empty($twilioSetting->api_secret) ||
+        empty($twilioSetting->account_sid) ||
+        empty($twilioSetting->phone_number)
+    ) {
+        Log::error('Twilio configuration missing for OTP resend.');
+
+        return response()->json([
+            'success' => false,
+            'message' => 'SMS service is not configured properly.'
+        ], 500);
+    }
+
+    $otp = random_int(100000, 999999);
+    $otpExpirySeconds = 120;
+    $resendCooldownSeconds = 30;
+    $otpExpiresAt = now()->addSeconds($otpExpirySeconds);
+
+    try {
+        $client = new Client(
+            $twilioSetting->api_sid,
+            $twilioSetting->api_secret,
+            $twilioSetting->account_sid
+        );
+
+        $client->messages->create(
+            $pendingUser['mobile'],
+            [
+                'from' => $twilioSetting->phone_number,
+                'body' => "Your HOTESCORT verification code is: {$otp}"
+            ]
+        );
+
+        // Save OTP only after SMS send succeeds
         Cache::put($pendingKey . '_otp', [
-            'code' => $otp,
-            'expires_at' => $otpExpiresAt->timestamp
+            'code' => (string) $otp,
+            'expires_at' => $otpExpiresAt->timestamp,
         ], $otpExpiresAt);
 
-        $twilioSetting = TwilioSetting::first();
+        // Refresh pending signup cache lifetime
+        Cache::put($pendingKey, $pendingUser, now()->addMinutes(10));
 
-        try {
-            $client = new Client(
-                $twilioSetting->api_sid,
-                $twilioSetting->api_secret,
-                $twilioSetting->account_sid
-            );
+        // Lock resend for 30 seconds
+        Cache::put($resendLockKey, $resendCooldownSeconds, now()->addSeconds($resendCooldownSeconds));
 
-            $client->messages->create(
-                $pendingUser['mobile'],
-                [
-                    'from' => $twilioSetting->phone_number,
-                    'body' => "Your HOTESCORT verification code is: {$otp}"
-                ]
-            );
-
-            Log::info('Twilio SMS resend attempt', [
-                'mobile' => $pendingUser['mobile'],
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Twilio SMS resend error', [
-                'mobile' => $pendingUser['mobile'],
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to resend OTP.'
-            ]);
-        }
+        Log::info('Twilio SMS resend success', [
+            'mobile' => $pendingUser['mobile'],
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'OTP resent successfully.',
-            'timer' => $otpExpirySeconds
+            'timer' => $otpExpirySeconds,
+            'resend_cooldown' => $resendCooldownSeconds
         ]);
+    } catch (\Exception $e) {
+        Log::error('Twilio SMS resend error', [
+            'mobile' => $pendingUser['mobile'],
+            'error' => $e->getMessage()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to resend OTP.'
+        ], 500);
     }
+}
 
     public function verifyOtp(Request $request)
     {
