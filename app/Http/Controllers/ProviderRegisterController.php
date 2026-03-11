@@ -114,7 +114,7 @@ class ProviderRegisterController extends Controller
 
         Session::put('otp_required', true);
         Session::put('email', $validated['email']);
-        Session::put('phone', $validated['phone']);
+        Session::put('phone', $validated['mobile']);
 
         return redirect('/otp-verification')
             ->with('success', 'Signup successful. Please verify your mobile number.');
