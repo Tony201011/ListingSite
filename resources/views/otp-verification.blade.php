@@ -60,7 +60,8 @@
                         </div>
 
                         <div class="flex justify-between text-sm mb-6">
-                            <span x-text="timerText"></span>
+
+                            <span x-text="timerText" class="text-lg font-bold text-black bg-yellow-100 px-3 py-1 rounded"></span>
 
                             <button
                                 type="button"
