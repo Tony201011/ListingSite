@@ -94,26 +94,26 @@ class ProviderRegisterController extends Controller
             'g-recaptcha-response' => 'required'
         ]);
 
-        // Get recaptcha keys from DB
-        // $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
+        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
 
-        // if (!$recaptchaSetting) {
-        //     return back()->withErrors(['recaptcha' => 'Recaptcha configuration missing']);
-        // }
+        $recaptcha = $request->input('g-recaptcha-response');
+        $recaptchaSecret = $recaptchaConfig?->secret_key;
 
-        // // Verify Google reCAPTCHA
-        // $response = Http::asForm()->post(
-        //     'https://www.google.com/recaptcha/api/siteverify',
-        //     [
-        //         'secret' => $recaptchaSetting->secret_key,
-        //         'response' => $request->input('g-recaptcha-response'),
-        //         'remoteip' => $request->ip()
-        //     ]
-        // );
+        $recaptchaResponse = null;
 
-        // $result = $response->json();
+        if ($recaptcha && $recaptchaSecret) {
+            $recaptchaResponse = json_decode(
+                file_get_contents(
+                    'https://www.google.com/recaptcha/api/siteverify?secret=' .
+                    $recaptchaSecret .
+                    '&response=' .
+                    $recaptcha
+                ),
+                true
+            );
+        }
 
-        if (!isset($result['success']) || $result['success'] != true) {
+        if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
             return back()->withErrors(['recaptcha' => 'reCAPTCHA verification failed'])->withInput();
         }
 
