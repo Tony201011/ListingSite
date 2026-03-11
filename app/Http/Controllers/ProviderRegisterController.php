@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\GoogleRecaptchaSetting;
-use Illuminate\Support\Facades\Http;
+use App\Models\TwilioSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use Twilio\Rest\Client;
 class ProviderRegisterController extends Controller
 {
     /**
@@ -17,7 +17,6 @@ class ProviderRegisterController extends Controller
     public function showSignupForm()
     {
         $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
-
         //dd($recaptchaSetting);
         return view('signup', compact('recaptchaSetting'));
     }
@@ -64,14 +63,48 @@ class ProviderRegisterController extends Controller
             ])->withInput();
         }
 
+
+        $mobile = $validated['mobile'];
+        $otp = rand(100000, 999999);
+
+        $mobile = $validated['mobile'];
+
+        if (str_starts_with($mobile, '04')) {
+                $mobile = '+61' . substr($mobile, 1);
+        }
+
+        $twilioSetting = TwilioSetting::first();
+
+    try {
+
+        $client = new Client(
+            $twilioSetting->account_sid,
+            $twilioSetting->api_secret,
+            $twilioSetting->api_sid
+        );
+
+        $client->messages->create(
+            $mobile,
+            [
+                'from' => $twilioSetting->phone_number,
+                'body' => "Your HOTESCORT verification code is: $otp"
+            ]
+        );
+
+    } catch (\Exception $e) {
+        return back()->withErrors(['sms' => $e->getMessage()]);
+    }
         $user = User::create([
             'name' => $validated['nickname'],
             'email' => $validated['email'],
+            'mobile' => $mobile,
             'password' => Hash::make($validated['password']),
             'role' => User::ROLE_PROVIDER,
+            'otp' => $otp,
+            'otp_expires_at' => now()->addMinutes(10),
+            'mobile_verified' => false
         ]);
 
-        // Optional: Save extra fields like mobile, suburb into provider profile table
 
         Auth::login($user);
 
