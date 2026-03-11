@@ -39,7 +39,7 @@ class ProviderRegisterController extends Controller
             'mobile' => ['required', 'regex:/^\+614\d{8}$/'],
             'suburb' => 'required|string|max:255',
             'age_confirm' => 'accepted',
-           // 'g-recaptcha-response' => 'required',
+             'g-recaptcha-response' => 'required',
             'referral_code' => 'nullable|string|max:255',
         ]);
 
