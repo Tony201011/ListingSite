@@ -225,12 +225,38 @@
             </div>
 
             <!-- Google reCAPTCHA widget -->
-            <div class="mb-8">
-                <div class="flex justify-center">
-                    <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
-                </div>
+<div class="flex justify-center mb-8">
+
+    <div class="flex items-center justify-between w-full max-w-md bg-gray-100 border border-gray-200 rounded-xl px-5 py-4">
+
+        <!-- Left side -->
+        <div class="flex items-center gap-3">
+
+            <!-- Custom check icon -->
+            <div class="w-7 h-7 bg-[#e04ecb] rounded flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
             </div>
-            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+            <span class="text-gray-700 font-medium text-sm">
+                I'm not a robot
+            </span>
+
+        </div>
+
+        <!-- Google recaptcha -->
+        <div>
+            <div class="g-recaptcha scale-90 origin-right"
+                 data-sitekey="{{ $recaptcha->site_key ?? '' }}">
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
             <!-- Submit button -->
             <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">
