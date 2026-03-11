@@ -77,7 +77,7 @@ Route::get('/send-sms', function () {
 Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
 Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
 Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->name('signin');
-Route::get('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
+Route::post('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
 // Route::post('/signin', function () {
 //     return redirect('/after-image-upload')->with('success', 'Signed in successfully.');
 // })->name('signin.submit');

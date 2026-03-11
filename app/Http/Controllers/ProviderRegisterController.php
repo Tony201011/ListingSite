@@ -85,7 +85,7 @@ class ProviderRegisterController extends Controller
         return view('signin', compact('recaptchaSetting'));
     }
 
-       public function signin(Request $request)
+  public function signin(Request $request)
     {
 
         $request->validate([
@@ -95,23 +95,23 @@ class ProviderRegisterController extends Controller
         ]);
 
         // Get recaptcha keys from DB
-        $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
+        // $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
 
-        if (!$recaptchaSetting) {
-            return back()->withErrors(['recaptcha' => 'Recaptcha configuration missing']);
-        }
+        // if (!$recaptchaSetting) {
+        //     return back()->withErrors(['recaptcha' => 'Recaptcha configuration missing']);
+        // }
 
-        // Verify Google reCAPTCHA
-        $response = Http::asForm()->post(
-            'https://www.google.com/recaptcha/api/siteverify',
-            [
-                'secret' => $recaptchaSetting->secret_key,
-                'response' => $request->input('g-recaptcha-response'),
-                'remoteip' => $request->ip()
-            ]
-        );
+        // // Verify Google reCAPTCHA
+        // $response = Http::asForm()->post(
+        //     'https://www.google.com/recaptcha/api/siteverify',
+        //     [
+        //         'secret' => $recaptchaSetting->secret_key,
+        //         'response' => $request->input('g-recaptcha-response'),
+        //         'remoteip' => $request->ip()
+        //     ]
+        // );
 
-        $result = $response->json();
+        // $result = $response->json();
 
         if (!isset($result['success']) || $result['success'] != true) {
             return back()->withErrors(['recaptcha' => 'reCAPTCHA verification failed'])->withInput();
