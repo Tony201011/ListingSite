@@ -54,7 +54,7 @@
                                     @input="handleInput(index, $event)"
                                     @keydown.backspace="handleBackspace(index, $event)"
                                     @paste="handlePaste($event)"
-                                    class="w-12 h-12 text-center text-xl font-bold border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:outline-none"
+                                    class="w-14 h-14 text-center text-2xl font-extrabold text-black bg-white border-2 border-gray-400 rounded-xl focus:border-[#e04ecb] focus:outline-none shadow-sm"
                                 >
                             </template>
                         </div>

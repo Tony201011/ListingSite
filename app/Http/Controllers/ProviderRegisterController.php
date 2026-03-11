@@ -352,7 +352,7 @@ class ProviderRegisterController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Account created successfully.',
-            'redirect' => url('/dashboard')
+            'redirect' => url('/signin')
         ]);
     }
 
