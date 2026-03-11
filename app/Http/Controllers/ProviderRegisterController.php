@@ -32,9 +32,8 @@ class ProviderRegisterController extends Controller
         $validated = $request->validate([
             'email' => 'required|email|unique:users,email',
             'nickname' => 'required|string|min:3|max:255',
-            'password' => 'min:8|required_with:password_confirmation|same:password_confirmation',
-            'password_confirmation' => 'min:8',
-            'mobile' => ['required', 'regex:/^\+61\d{9}$/'],
+            'password' => 'required|min:8|confirmed',
+            'mobile' => ['required', 'regex:/^\+61\d{9}$/', 'unique:users,mobile'],
             'suburb' => 'required|string|max:255',
             'age_confirm' => 'accepted',
             'g-recaptcha-response' => 'required',
@@ -46,6 +45,7 @@ class ProviderRegisterController extends Controller
         $recaptcha = $request->input('g-recaptcha-response');
         $recaptchaSecret = $recaptchaConfig?->secret_key;
         $recaptchaResponse = null;
+
         if ($recaptcha && $recaptchaSecret) {
             $recaptchaResponse = json_decode(
                 file_get_contents(
@@ -57,6 +57,7 @@ class ProviderRegisterController extends Controller
                 true
             );
         }
+
         if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
             return back()->withErrors([
                 'g-recaptcha-response' => 'Google reCAPTCHA verification failed. Please try again.'
@@ -64,67 +65,70 @@ class ProviderRegisterController extends Controller
         }
 
         $mobile = $validated['mobile'];
-        $australianPattern = '/^\+61\d{9}$/';
-        if (!preg_match($australianPattern, $mobile)) {
-            return back()->withErrors(['mobile' => 'Only Australian mobile numbers in the format +614XXXXXXXX are allowed.'])->withInput();
+
+        if (!preg_match('/^\+61\d{9}$/', $mobile)) {
+            return back()->withErrors([
+                'mobile' => 'Only Australian mobile numbers in the format +614XXXXXXXX are allowed.'
+            ])->withInput();
         }
 
-        // Generate OTP
-        $otp = rand(100000, 999999);
+        $otp = random_int(100000, 999999);
 
-        // Send SMS via Twilio
         $twilioSetting = TwilioSetting::first();
-        $account_sid = $twilioSetting->account_sid;
-        $api_sid = $twilioSetting->api_sid;
-        $api_secret = $twilioSetting->api_secret;
 
         try {
-            $client = new Client($api_sid, $api_secret, $account_sid);
+            $client = new Client(
+                $twilioSetting->api_sid,
+                $twilioSetting->api_secret,
+                $twilioSetting->account_sid
+            );
+
             $client->messages->create(
                 $mobile,
                 [
                     'from' => $twilioSetting->phone_number,
-                    'body' => "Your HOTESCORT verification code is: $otp"
+                    'body' => "Your HOTESCORT verification code is: {$otp}"
                 ]
             );
+
             Log::info('Twilio SMS send attempt', [
                 'mobile' => $mobile,
-                'otp' => $otp
             ]);
         } catch (\Exception $e) {
             Log::error('Twilio SMS error: ' . $e->getMessage(), [
                 'mobile' => $mobile,
                 'referral_code' => $validated['referral_code'] ?? null,
-                'exception' => $e
             ]);
-            return back()->withErrors(['mobile' => $e->getMessage()])->withInput();
+
+            return back()->withErrors([
+                'mobile' => 'Failed to send OTP. Please try again.'
+            ])->withInput();
         }
 
-        // Create user (no OTP fields saved)
-        $user = User::create([
+        // Use a temporary cache key instead of user ID
+        $pendingKey = 'provider_signup_' . md5($validated['email'] . '|' . $validated['mobile']);
+
+        // Store signup data temporarily
+        Cache::put($pendingKey, [
             'name' => $validated['nickname'],
             'email' => $validated['email'],
-            'mobile' => $mobile,
+            'mobile' => $validated['mobile'],
             'password' => Hash::make($validated['password']),
+            'suburb' => $validated['suburb'],
             'role' => User::ROLE_PROVIDER,
             'mobile_verified' => false,
-            'referral_code' => $validated['referral_code'] ?? null
-        ]);
+            'referral_code' => $validated['referral_code'] ?? null,
+        ], now()->addMinutes(10));
 
-        // Store OTP in cache with 120 seconds expiry
-        $otpKey = 'otp_user_' . $user->id;
-        Cache::put($otpKey, $otp, now()->addSeconds(120));
+        // Store OTP separately
+        Cache::put($pendingKey . '_otp', $otp, now()->addMinutes(2));
 
-        // Log the user in
-        Auth::login($user);
-
-        // Store session flags for OTP verification
+        // Store session flags
         Session::put('otp_required', true);
-        Session::put('email', $validated['email']);
-        Session::put('phone', $validated['mobile']);
+        Session::put('pending_signup_key', $pendingKey);
 
         return redirect('/otp-verification')
-            ->with('success', 'Signup successful. Please verify your mobile number.');
+            ->with('success', 'OTP sent successfully. Please verify your mobile number.');
     }
 
     public function showSigninForm()
@@ -177,80 +181,80 @@ class ProviderRegisterController extends Controller
 
     public function otpVerficationForm()
     {
-        if (!session()->has('otp_required')) {
-            return redirect('/');
+        if (!session()->has('otp_required') || !session()->has('pending_signup_key')) {
+            return redirect('/signup')->withErrors([
+                'session' => 'OTP session expired. Please signup again.'
+            ]);
         }
 
-        $email = session()->get('email');
-        $phone = session()->get('phone');
-        $userData = User::where('email', $email)->orWhere('mobile', $phone)->first();
+        $pendingKey = session()->get('pending_signup_key');
+        $pendingUser = Cache::get($pendingKey);
 
-        if (!$userData) {
-            return redirect('/signup')->withErrors(['user' => 'User not found.']);
+        if (!$pendingUser) {
+            return redirect('/signup')->withErrors([
+                'session' => 'Signup session expired. Please signup again.'
+            ]);
         }
 
-        // Get remaining time from cache
-        $otpKey = 'otp_user_' . $userData->id;
-        $remainingTime = Cache::ttl($otpKey); // seconds remaining, or negative if expired
+        $remainingTime = Cache::ttl($pendingKey . '_otp');
         if ($remainingTime < 0) {
             $remainingTime = 0;
         }
 
-        return view('otp-verification', compact('userData', 'remainingTime'));
+        return view('otp-verification', [
+            'userData' => (object) $pendingUser,
+            'remainingTime' => $remainingTime
+        ]);
     }
+
 
     public function resendOtp(Request $request)
     {
-        if (!session()->has('otp_required')) {
+        if (!session()->has('otp_required') || !session()->has('pending_signup_key')) {
             return response()->json([
                 'success' => false,
                 'message' => 'OTP session expired. Please signup again.'
             ]);
         }
 
-        $email = session()->get('email');
-        $phone = session()->get('phone');
-        $user = User::where('email', $email)
-            ->orWhere('mobile', $phone)
-            ->first();
+        $pendingKey = session()->get('pending_signup_key');
+        $pendingUser = Cache::get($pendingKey);
 
-        if (!$user) {
+        if (!$pendingUser) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found.'
+                'message' => 'Signup session expired. Please signup again.'
             ]);
         }
 
-        $otp = rand(100000, 999999);
-        $otpExpirySeconds = 60; // 60 seconds for resend
+        $otp = random_int(100000, 999999);
+        $otpExpirySeconds = 60;
 
-        // Store new OTP in cache (overwrites existing)
-        $otpKey = 'otp_user_' . $user->id;
-        Cache::put($otpKey, $otp, now()->addSeconds($otpExpirySeconds));
+        Cache::put($pendingKey . '_otp', $otp, now()->addSeconds($otpExpirySeconds));
 
-        // Send SMS via Twilio
         $twilioSetting = TwilioSetting::first();
+
         try {
             $client = new Client(
                 $twilioSetting->api_sid,
                 $twilioSetting->api_secret,
                 $twilioSetting->account_sid
             );
+
             $client->messages->create(
-                $user->mobile,
+                $pendingUser['mobile'],
                 [
                     'from' => $twilioSetting->phone_number,
-                    'body' => "Your HOTESCORT verification code is: $otp"
+                    'body' => "Your HOTESCORT verification code is: {$otp}"
                 ]
             );
 
             Log::info('Twilio SMS resend attempt', [
-                'mobile' => $user->mobile,
-                'otp' => $otp
+                'mobile' => $pendingUser['mobile'],
             ]);
         } catch (\Exception $e) {
             Log::error('Twilio SMS resend error', [
-                'mobile' => $user->mobile,
+                'mobile' => $pendingUser['mobile'],
                 'error' => $e->getMessage()
             ]);
 
@@ -266,4 +270,77 @@ class ProviderRegisterController extends Controller
             'timer' => $otpExpirySeconds
         ]);
     }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|digits:6'
+        ]);
+
+        if (!session()->has('otp_required') || !session()->has('pending_signup_key')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP session expired. Please signup again.'
+            ], 422);
+        }
+
+        $pendingKey = session()->get('pending_signup_key');
+        $pendingUser = Cache::get($pendingKey);
+        $cachedOtp = Cache::get($pendingKey . '_otp');
+
+        if (!$pendingUser || !$cachedOtp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP expired. Please signup again.'
+            ], 422);
+        }
+
+        if ((string) $request->otp !== (string) $cachedOtp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid OTP.'
+            ], 422);
+        }
+
+        if (User::where('email', $pendingUser['email'])->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email already exists.'
+            ], 422);
+        }
+
+        if (User::where('mobile', $pendingUser['mobile'])->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mobile number already exists.'
+            ], 422);
+        }
+
+        $user = User::create([
+            'name' => $pendingUser['name'],
+            'email' => $pendingUser['email'],
+            'mobile' => $pendingUser['mobile'],
+            'password' => $pendingUser['password'],
+            'suburb' => $pendingUser['suburb'],
+            'role' => $pendingUser['role'],
+            'mobile_verified' => true,
+            'referral_code' => $pendingUser['referral_code'],
+        ]);
+
+        Cache::forget($pendingKey);
+        Cache::forget($pendingKey . '_otp');
+
+        Session::forget('otp_required');
+        Session::forget('pending_signup_key');
+
+        Auth::login($user);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Account created successfully.',
+            'redirect' => url('/dashboard')
+        ]);
+    }
+
+
 }
