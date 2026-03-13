@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\SmtpSettings\Pages;
 
 use App\Filament\Resources\SmtpSettings\SmtpSettingResource;
+use App\Filament\Resources\SmtpSettings\Widgets\MailSettingsStats;
 use App\Models\SmtpSetting;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
@@ -16,6 +19,13 @@ class ManageSmtpSettings extends ManageRecords
 {
     protected static string $resource = SmtpSettingResource::class;
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            MailSettingsStats::class,
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -23,6 +33,74 @@ class ManageSmtpSettings extends ManageRecords
                 ->label('Add Mail Setting')
                 ->createAnother(false)
                 ->visible(fn (): bool => SmtpSetting::query()->doesntExist()),
+            Action::make('statsRange')
+                ->label('Stats Range')
+                ->icon('heroicon-o-calendar-days')
+                ->modalHeading('Select Mail Stats Range')
+                ->form([
+                    Select::make('range')
+                        ->label('Range')
+                        ->options([
+                            'today' => 'Today',
+                            '7d' => 'Last 7 Days',
+                            '30d' => 'Last 30 Days',
+                            'custom' => 'Custom Date Range',
+                        ])
+                        ->default((string) session('smtp_stats_range', '30d'))
+                        ->required()
+                        ->native(false),
+                    DatePicker::make('date_from')
+                        ->label('From Date')
+                        ->default(session('smtp_stats_date_from')),
+                    DatePicker::make('date_to')
+                        ->label('To Date')
+                        ->default(session('smtp_stats_date_to')),
+                ])
+                ->action(function (array $data): void {
+                    if (($data['range'] ?? null) === 'custom') {
+                        $from = $data['date_from'] ?? null;
+                        $to = $data['date_to'] ?? null;
+
+                        if (! $from || ! $to) {
+                            Notification::make()
+                                ->title('Please select both From Date and To Date for custom range.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        if ($from > $to) {
+                            Notification::make()
+                                ->title('From Date cannot be after To Date.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        session([
+                            'smtp_stats_range' => 'custom',
+                            'smtp_stats_date_from' => $from,
+                            'smtp_stats_date_to' => $to,
+                        ]);
+
+                        Notification::make()
+                            ->title('Custom mail stats range updated.')
+                            ->success()
+                            ->send();
+
+                        return;
+                    }
+
+                    session(['smtp_stats_range' => $data['range']]);
+                    session()->forget(['smtp_stats_date_from', 'smtp_stats_date_to']);
+
+                    Notification::make()
+                        ->title('Mail stats range updated.')
+                        ->success()
+                        ->send();
+                }),
             Action::make('testMail')
                 ->label('Test Mail')
                 ->icon('heroicon-o-paper-airplane')
