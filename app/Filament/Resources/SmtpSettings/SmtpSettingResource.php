@@ -129,14 +129,11 @@ class SmtpSettingResource extends Resource
                     ->badge()
                     ->sortable(),
                 TextColumn::make('mailgun_sandbox_domain')
-                    ->label('Sandbox Domain')
-                    ->searchable(),
+                    ->label('Sandbox Domain'),
                 TextColumn::make('mailgun_live_domain')
-                    ->label('Live Domain')
-                    ->searchable(),
+                    ->label('Live Domain'),
                 TextColumn::make('mail_from_address')
-                    ->label('From Email')
-                    ->searchable(),
+                    ->label('From Email'),
                 TextColumn::make('updated_at')
                     ->label('Updated')
                     ->since()

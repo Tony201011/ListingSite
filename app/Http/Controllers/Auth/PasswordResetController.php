@@ -38,9 +38,25 @@ class PasswordResetController extends Controller
             'mailgun_secret_present' => filled(config('services.mailgun.secret')),
         ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        try {
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
+        } catch (\Throwable $e) {
+            Log::error('Password reset email transport error', [
+                'email' => $request->input('email'),
+                'mailer_default' => (string) config('mail.default', 'log'),
+                'mailgun_domain' => config('services.mailgun.domain'),
+                'mailgun_endpoint' => config('services.mailgun.endpoint'),
+                'mailgun_secret_present' => filled(config('services.mailgun.secret')),
+                'exception_class' => get_class($e),
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors([
+                'email' => 'Unable to send reset email right now. Please try again later.',
+            ])->withInput();
+        }
 
         if ($status === Password::RESET_LINK_SENT) {
             Log::info('Password reset email sent successfully', [
@@ -111,7 +127,20 @@ class PasswordResetController extends Controller
             ->first();
 
         if (! $activeMailSetting) {
+            // Fallback to latest row so reset mail can still work when admin forgot to toggle enabled.
+            $activeMailSetting = SmtpSetting::query()
+                ->latest('updated_at')
+                ->first();
+        }
+
+        if (! $activeMailSetting) {
             return null;
+        }
+
+        if (! $activeMailSetting->is_enabled) {
+            Log::warning('Password reset using latest mail setting that is disabled.', [
+                'mail_setting_id' => $activeMailSetting->id,
+            ]);
         }
 
         $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
@@ -133,9 +162,11 @@ class PasswordResetController extends Controller
 
         config([
             'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
+            'mail.mailers.mailgun.transport' => 'mailgun',
             'services.mailgun.domain' => $mailgunDomain,
             'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
             'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
+            'services.mailgun.scheme' => 'https',
             'mail.from.address' => $activeMailSetting->mail_from_address ?: config('mail.from.address'),
             'mail.from.name' => $activeMailSetting->mail_from_name ?: config('mail.from.name'),
         ]);

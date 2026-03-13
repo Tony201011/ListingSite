@@ -480,14 +480,30 @@ public function resendOtp(Request $request)
     {
         $activeMailSetting = SmtpSetting::query()
             ->where('is_enabled', true)
+            ->latest('updated_at')
             ->first();
 
-        if (!$activeMailSetting) {
+        if (! $activeMailSetting) {
+            // Fallback to latest saved row to match Test Mail behavior in admin.
+            $activeMailSetting = SmtpSetting::query()
+                ->latest('updated_at')
+                ->first();
+        }
+
+        if (! $activeMailSetting) {
             Log::error('Account created email failed: no active mail setting found.', [
                 'user_id' => $user->id,
                 'email' => $user->email,
             ]);
             return;
+        }
+
+        if (! $activeMailSetting->is_enabled) {
+            Log::warning('Account created email using latest mail setting that is disabled.', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'mail_setting_id' => $activeMailSetting->id,
+            ]);
         }
 
         $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
@@ -509,7 +525,7 @@ public function resendOtp(Request $request)
         }
 
         config([
-            'mail.default' => 'mailgun',
+            'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
             'mail.mailers.mailgun.transport' => 'mailgun',
             'services.mailgun.domain' => $mailgunDomain,
             'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
@@ -524,6 +540,8 @@ public function resendOtp(Request $request)
         Log::info('Account created email attempt', [
             'user_id' => $user->id,
             'email' => $user->email,
+            'mail_setting_id' => $activeMailSetting->id,
+            'mail_setting_enabled' => (bool) $activeMailSetting->is_enabled,
             'mailer_used' => 'mailgun',
             'mail_from_address' => config('mail.from.address'),
             'mail_from_name' => config('mail.from.name'),
