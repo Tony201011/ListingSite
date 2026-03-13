@@ -45,7 +45,29 @@
             ['label' => 'Diamonds', 'url' => url('/purchase-credit')],
             ['label' => 'Superboost', 'url' => url('/purchase-credit')],
             ['label' => 'Add advertisement', 'url' => url('/signup')],
-        ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
+        ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null));
+
+        $currentUser = auth()->user();
+        $isAuthenticated = filled($currentUser);
+        $isAdminAuthenticated = $isAuthenticated && (($currentUser->role ?? null) === \App\Models\User::ROLE_ADMIN);
+        $primaryAuthUrl = $isAdminAuthenticated ? filament()->getUrl() : url('/my-profile');
+        $primaryAuthLabel = $isAdminAuthenticated ? 'Dashboard' : 'My Profile';
+
+        if ($isAuthenticated) {
+            $actionLinks = $actionLinks->reject(function ($item): bool {
+                $label = strtolower(trim((string) ($item['label'] ?? '')));
+                $rawUrl = strtolower(trim((string) ($item['url'] ?? '')));
+                $path = strtolower((string) (parse_url($rawUrl, PHP_URL_PATH) ?: $rawUrl));
+
+                return str_contains($label, 'login')
+                    || str_contains($label, 'sign in')
+                    || str_contains($label, 'sign up')
+                    || str_contains($label, 'join')
+                    || in_array($path, ['/login', '/signin', '/signup', '/register'], true);
+            });
+        }
+
+        $actionLinks = $actionLinks->values();
 
         $mainNavLinks = collect($headerWidget?->main_nav_links ?? [
             ['label' => 'Home', 'url' => url('/')],
@@ -70,12 +92,53 @@
             ]);
         }
 
+        if ($isAuthenticated) {
+            $mainNavLinks = $mainNavLinks->reject(function ($item): bool {
+                $label = strtolower(trim((string) ($item['label'] ?? '')));
+                $rawUrl = strtolower(trim((string) ($item['url'] ?? '')));
+                $path = strtolower((string) (parse_url($rawUrl, PHP_URL_PATH) ?: $rawUrl));
+
+                return in_array($label, ['my profile', 'dashboard', 'login', 'sign in', 'sign up', 'join now'], true)
+                    || in_array($path, ['/my-profile', '/edit-profile', '/admin', '/login', '/signin', '/signup', '/register'], true);
+            })->values();
+
+            $pricingIndex = $mainNavLinks->search(function ($item): bool {
+                $label = strtolower(trim((string) ($item['label'] ?? '')));
+                $url = trim((string) ($item['url'] ?? ''));
+                $path = '/' . ltrim((string) (parse_url($url, PHP_URL_PATH) ?: $url), '/');
+
+                return $label === 'pricing' || $path === '/pricing';
+            });
+
+            $authNavItem = [
+                'label' => $primaryAuthLabel,
+                'url' => $primaryAuthUrl,
+            ];
+
+            $logoutNavItem = [
+                'label' => 'Logout',
+                'url' => '#',
+                'is_logout' => true,
+            ];
+
+            if ($pricingIndex === false) {
+                $mainNavLinks = collect([$authNavItem, $logoutNavItem])->concat($mainNavLinks)->values();
+            } else {
+                $before = $mainNavLinks->slice(0, $pricingIndex + 1);
+                $after = $mainNavLinks->slice($pricingIndex + 1);
+                $mainNavLinks = $before->concat([$authNavItem, $logoutNavItem])->concat($after)->values();
+            }
+        }
+
         $mobileExtraLinks = collect($headerWidget?->mobile_extra_links ?? [
             ['label' => 'Contact', 'url' => route('contact-us')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
         $showTopBar = $headerWidget?->enable_top_bar ?? true;
         $showSearch = $headerWidget?->enable_search ?? true;
+        $showFreeTrialCta = (bool) ($headerWidget?->show_free_trial_cta ?? true);
+        $freeTrialCtaText = trim((string) ($headerWidget?->free_trial_cta_text ?? 'Get 21 days for free'));
+        $freeTrialCtaUrl = trim((string) ($headerWidget?->free_trial_cta_url ?? url('/signup')));
 @endphp
 
 <header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md" style="{{ $headerStyle }}">
@@ -137,27 +200,10 @@
                     <a href="{{ $item['url'] }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">{{ $item['label'] }}</a>
                 @endforeach
 
-                @auth
-                    <!-- User dropdown (My profile / Logoff) -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm font-medium text-gray-100 transition hover:bg-gray-700">
-                            <i class="fa-solid fa-user text-pink-500"></i>
-                            <span>Account</span>
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
-                        </button>
-                        <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
-                            <a href="{{ url('/my-profile') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">My Profile</a>
-                            <a href="{{ filament()->getUrl() }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Dashboard</a>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Logoff</button>
-                            </form>
-                        </div>
-                    </div>
-                @else
+                @guest
                     <a href="{{ url('/signin') }}" class="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-100 transition hover:bg-gray-800">Login</a>
                     <a href="{{ url('/signup') }}" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Join Now</a>
-                @endauth
+                @endguest
             </div>
 
             <!-- Mobile menu button (unchanged) -->
@@ -176,7 +222,12 @@
                 @endif
             </a>
             @foreach($mainNavLinks as $item)
-                @if(strtolower($item['label']) === 'escorts')
+                @if(!empty($item['is_logout']))
+                    <form method="POST" action="{{ route('logout') }}" class="inline-flex">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Logout</button>
+                    </form>
+                @elseif(strtolower($item['label']) === 'escorts')
                     <div class="relative group">
                         <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
                             {{ $item['label'] }}
@@ -206,11 +257,11 @@
                     <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">{{ $item['label'] }}</a>
                 @endif
             @endforeach
-            @auth
-                <a href="{{ url('/my-profile') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">My Profile</a>
-            @else
-                <a href="{{ url('/signin') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">Login</a>
-            @endauth
+            <div class="ml-auto flex items-center gap-2">
+                @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
+                    <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
+                @endif
+            </div>
         </div>
 
         <!-- Mobile menu (updated with all items) -->
@@ -218,13 +269,21 @@
             <div class="space-y-1 text-sm">
                 <!-- Main nav links -->
                 @foreach($mainNavLinks as $item)
-                    <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
+                    @if(!empty($item['is_logout']))
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="block w-full rounded-lg px-3 py-2 text-left text-gray-200 hover:bg-gray-800">Logout</button>
+                        </form>
+                    @else
+                        <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
+                    @endif
                 @endforeach
-                @auth
-                    <a @click="mobileMenu = false" href="{{ url('/my-profile') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">My Profile</a>
-                @else
+                @guest
                     <a @click="mobileMenu = false" href="{{ url('/signin') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Login</a>
-                @endauth
+                @endguest
+                @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
+                    <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block rounded-lg px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
+                @endif
                 @foreach($mobileExtraLinks as $item)
                     <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
                 @endforeach

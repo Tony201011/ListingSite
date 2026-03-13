@@ -9,9 +9,20 @@ class HeaderWidget extends Model
 {
     use HasFactory;
 
+    private const LEGACY_ROUTE_MAP = [
+        '/my-profile-1' => '/my-profile',
+        '/my-route' => '/my-profile',
+        '/my-profile-2' => '/edit-profile',
+    ];
+
     protected static function booted(): void
     {
         static::saving(function (HeaderWidget $headerWidget): void {
+            $headerWidget->action_links = self::normalizeLegacyLinks($headerWidget->action_links);
+            $headerWidget->main_nav_links = self::normalizeLegacyLinks($headerWidget->main_nav_links);
+            $headerWidget->mobile_extra_links = self::normalizeLegacyLinks($headerWidget->mobile_extra_links);
+            $headerWidget->top_right_links = self::normalizeLegacyLinks($headerWidget->top_right_links);
+
             $links = collect($headerWidget->main_nav_links ?? [])
                 ->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))
                 ->values();
@@ -36,6 +47,33 @@ class HeaderWidget extends Model
         });
     }
 
+    private static function normalizeLegacyLinks(mixed $links): array
+    {
+        return collect($links ?? [])->map(function ($item): array {
+            if (! is_array($item)) {
+                return [];
+            }
+
+            $url = trim((string) ($item['url'] ?? ''));
+
+            if ($url === '') {
+                return $item;
+            }
+
+            $path = parse_url($url, PHP_URL_PATH);
+            $path = $path !== null ? '/' . ltrim((string) $path, '/') : '/' . ltrim($url, '/');
+
+            foreach (self::LEGACY_ROUTE_MAP as $legacyPath => $newPath) {
+                if ($path === $legacyPath) {
+                    $item['url'] = url($newPath);
+                    break;
+                }
+            }
+
+            return $item;
+        })->filter(fn ($item) => is_array($item) && ! empty($item))->values()->all();
+    }
+
     protected $fillable = [
         'logo_type',
         'logo_path',
@@ -50,6 +88,9 @@ class HeaderWidget extends Model
         'top_left_items',
         'top_right_links',
         'enable_search',
+        'show_free_trial_cta',
+        'free_trial_cta_text',
+        'free_trial_cta_url',
         'action_links',
         'main_nav_links',
         'mobile_extra_links',
@@ -70,6 +111,9 @@ class HeaderWidget extends Model
             'top_left_items' => 'array',
             'top_right_links' => 'array',
             'enable_search' => 'boolean',
+            'show_free_trial_cta' => 'boolean',
+            'free_trial_cta_text' => 'string',
+            'free_trial_cta_url' => 'string',
             'action_links' => 'array',
             'main_nav_links' => 'array',
             'mobile_extra_links' => 'array',

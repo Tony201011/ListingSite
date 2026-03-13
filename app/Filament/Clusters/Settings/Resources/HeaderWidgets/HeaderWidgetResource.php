@@ -138,6 +138,21 @@ class HeaderWidgetResource extends Resource
                     ])
                     ->columns(2)
                     ->columnSpanFull(),
+                Toggle::make('show_free_trial_cta')
+                    ->label('Show "Get 21 days for free" button')
+                    ->default(true),
+                TextInput::make('free_trial_cta_text')
+                    ->label('Free trial button text')
+                    ->default('Get 21 days for free')
+                    ->maxLength(120)
+                    ->required(fn ($get): bool => (bool) ($get('show_free_trial_cta') ?? true))
+                    ->visible(fn ($get): bool => (bool) ($get('show_free_trial_cta') ?? true)),
+                TextInput::make('free_trial_cta_url')
+                    ->label('Free trial button URL')
+                    ->default(url('/signup'))
+                    ->maxLength(255)
+                    ->required(fn ($get): bool => (bool) ($get('show_free_trial_cta') ?? true))
+                    ->visible(fn ($get): bool => (bool) ($get('show_free_trial_cta') ?? true)),
                 Repeater::make('main_nav_links')
                     ->label('Main navigation links')
                     ->schema([
