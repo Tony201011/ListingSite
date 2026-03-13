@@ -24,6 +24,8 @@ class ProviderRegisterController extends Controller
      */
     public function showSignupForm()
     {
+        Log::info('Logging is enabled!');
+        Log::error('This is an error message.');
         $recaptchaSetting = $this->getActiveRecaptchaSetting();
         $shouldUseRecaptcha = $this->shouldUseRecaptcha($recaptchaSetting);
 
@@ -87,37 +89,65 @@ class ProviderRegisterController extends Controller
             ])->withInput();
         }
 
-        $otp = random_int(100000, 999999);
-
         $twilioSetting = TwilioSetting::first();
+        $otp = random_int(100000, 999999);
+        $isDummyOtpMode = false;
 
-        try {
-            $client = new Client(
-                $twilioSetting->api_sid,
-                $twilioSetting->api_secret,
-                $twilioSetting->account_sid
-            );
+        if ($twilioSetting && $this->isDummyMobile($mobile, $twilioSetting)) {
+            $isDummyOtpMode = true;
+            $otp = (int) ($twilioSetting->dummy_otp ?: $otp);
 
-            $client->messages->create(
-                $mobile,
-                [
-                    'from' => $twilioSetting->phone_number,
-                    'body' => "Your HOTESCORT verification code is: {$otp}"
-                ]
-            );
-
-            Log::info('Twilio SMS send attempt', [
+            Log::info('Dummy mobile OTP mode used on signup', [
                 'mobile' => $mobile,
+                'dummy_mobile_number' => $twilioSetting->dummy_mobile_number,
             ]);
-        } catch (\Exception $e) {
-            Log::error('Twilio SMS error: ' . $e->getMessage(), [
-                'mobile' => $mobile,
-                'referral_code' => $validated['referral_code'] ?? null,
-            ]);
+        }
 
-            return back()->withErrors([
-                'mobile' => 'Failed to send OTP. Please try again.'
-            ])->withInput();
+        if (! $isDummyOtpMode) {
+            if (
+                ! $twilioSetting ||
+                empty($twilioSetting->api_sid) ||
+                empty($twilioSetting->api_secret) ||
+                empty($twilioSetting->account_sid) ||
+                empty($twilioSetting->phone_number)
+            ) {
+                Log::error('Twilio configuration missing for signup OTP send.', [
+                    'mobile' => $mobile,
+                ]);
+
+                return back()->withErrors([
+                    'mobile' => 'SMS service is not configured properly.'
+                ])->withInput();
+            }
+
+            try {
+                $client = new Client(
+                    $twilioSetting->api_sid,
+                    $twilioSetting->api_secret,
+                    $twilioSetting->account_sid
+                );
+
+                $client->messages->create(
+                    $mobile,
+                    [
+                        'from' => $twilioSetting->phone_number,
+                        'body' => "Your HOTESCORT verification code is: {$otp}"
+                    ]
+                );
+
+                Log::info('Twilio SMS send attempt', [
+                    'mobile' => $mobile,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Twilio SMS error: ' . $e->getMessage(), [
+                    'mobile' => $mobile,
+                    'referral_code' => $validated['referral_code'] ?? null,
+                ]);
+
+                return back()->withErrors([
+                    'mobile' => 'Failed to send OTP. Please try again.'
+                ])->withInput();
+            }
         }
 
         // Use a temporary cache key instead of user ID
@@ -295,6 +325,30 @@ public function resendOtp(Request $request)
     $resendCooldownSeconds = 30;
     $otpExpiresAt = now()->addSeconds($otpExpirySeconds);
 
+    if ($this->isDummyMobile($pendingUser['mobile'], $twilioSetting)) {
+        $otp = (int) ($twilioSetting->dummy_otp ?: $otp);
+
+        Cache::put($pendingKey . '_otp', [
+            'code' => (string) $otp,
+            'expires_at' => $otpExpiresAt->timestamp,
+        ], $otpExpiresAt);
+
+        Cache::put($pendingKey, $pendingUser, now()->addMinutes(10));
+        Cache::put($resendLockKey, $resendCooldownSeconds, now()->addSeconds($resendCooldownSeconds));
+
+        Log::info('Dummy mobile OTP mode used on resend', [
+            'mobile' => $pendingUser['mobile'],
+            'dummy_mobile_number' => $twilioSetting->dummy_mobile_number,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP resent successfully.',
+            'timer' => $otpExpirySeconds,
+            'resend_cooldown' => $resendCooldownSeconds
+        ]);
+    }
+
     try {
         $client = new Client(
             $twilioSetting->api_sid,
@@ -423,93 +477,106 @@ public function resendOtp(Request $request)
     }
 
     private function sendAccountCreatedEmail(User $user): void
-{
-    $activeMailSetting = SmtpSetting::query()
-        ->where('is_enabled', true)
-        ->first();
+    {
+        $activeMailSetting = SmtpSetting::query()
+            ->where('is_enabled', true)
+            ->first();
 
-    if (!$activeMailSetting) {
-        Log::error('Account created email failed: no active mail setting found.', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-        ]);
-        return;
-    }
-
-    $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
-    $liveDomain = $activeMailSetting->mailgun_live_domain;
-
-    $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
-        ? $sandboxDomain
-        : ($liveDomain ?: $sandboxDomain);
-
-    $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
-
-    if (filled($mailgunDomain)) {
-        $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
-    }
-
-    if (filled($mailgunEndpoint)) {
-        $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
-            ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
-    }
-
-    config([
-        'mail.default' => 'mailgun',
-        'mail.mailers.mailgun.transport' => 'mailgun',
-        'services.mailgun.domain' => $mailgunDomain,
-        'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
-        'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
-        'services.mailgun.scheme' => 'https',
-        'mail.from.address' => $activeMailSetting->mail_from_address ?: 'postmaster@' . $mailgunDomain,
-        'mail.from.name' => $activeMailSetting->mail_from_name ?: config('app.name'),
-    ]);
-
-    app('mail.manager')->forgetMailers();
-
-    Log::info('Account created email attempt', [
-        'user_id' => $user->id,
-        'email' => $user->email,
-        'mailer_used' => 'mailgun',
-        'mail_from_address' => config('mail.from.address'),
-        'mail_from_name' => config('mail.from.name'),
-        'mailgun_domain' => config('services.mailgun.domain'),
-        'mailgun_endpoint' => config('services.mailgun.endpoint'),
-        'mailgun_secret_present' => filled(config('services.mailgun.secret')),
-    ]);
-
-    try {
-        Mail::mailer('mailgun')->send(
-            'emails.account-created',
-            [
-                'name' => $user->name,
+        if (!$activeMailSetting) {
+            Log::error('Account created email failed: no active mail setting found.', [
+                'user_id' => $user->id,
                 'email' => $user->email,
-                'signinUrl' => url('/signin'),
-            ],
-            function ($message) use ($user): void {
-                $message->to($user->email)
-                    ->subject('Your account has been created');
-            }
-        );
+            ]);
+            return;
+        }
 
-        Log::info('Account created email sent successfully', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'mailer_used' => 'mailgun',
+        $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
+        $liveDomain = $activeMailSetting->mailgun_live_domain;
+
+        $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
+            ? $sandboxDomain
+            : ($liveDomain ?: $sandboxDomain);
+
+        $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
+
+        if (filled($mailgunDomain)) {
+            $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
+        }
+
+        if (filled($mailgunEndpoint)) {
+            $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
+                ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
+        }
+
+        config([
+            'mail.default' => 'mailgun',
+            'mail.mailers.mailgun.transport' => 'mailgun',
+            'services.mailgun.domain' => $mailgunDomain,
+            'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
+            'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
+            'services.mailgun.scheme' => 'https',
+            'mail.from.address' => $activeMailSetting->mail_from_address ?: 'postmaster@' . $mailgunDomain,
+            'mail.from.name' => $activeMailSetting->mail_from_name ?: config('app.name'),
         ]);
-    } catch (\Throwable $e) {
-        Log::error('Account created email failed', [
+
+        app('mail.manager')->forgetMailers();
+
+        Log::info('Account created email attempt', [
             'user_id' => $user->id,
             'email' => $user->email,
             'mailer_used' => 'mailgun',
+            'mail_from_address' => config('mail.from.address'),
+            'mail_from_name' => config('mail.from.name'),
             'mailgun_domain' => config('services.mailgun.domain'),
             'mailgun_endpoint' => config('services.mailgun.endpoint'),
-            'exception_class' => get_class($e),
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
+            'mailgun_secret_present' => filled(config('services.mailgun.secret')),
         ]);
+
+        try {
+            Mail::mailer('mailgun')->send(
+                'emails.account-created',
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'signinUrl' => url('/signin'),
+                ],
+                function ($message) use ($user): void {
+                    $message->to($user->email)
+                        ->subject('Your account has been created');
+                }
+            );
+
+            Log::info('Account created email sent successfully', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'mailer_used' => 'mailgun',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Account created email failed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'mailer_used' => 'mailgun',
+                'mailgun_domain' => config('services.mailgun.domain'),
+                'mailgun_endpoint' => config('services.mailgun.endpoint'),
+                'exception_class' => get_class($e),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
-}
+
+    private function isDummyMobile(?string $mobile, ?TwilioSetting $twilioSetting): bool
+    {
+        if (! $twilioSetting || ! $twilioSetting->dummy_mode_enabled) {
+            return false;
+        }
+
+        if (blank($twilioSetting->dummy_mobile_number) || blank($twilioSetting->dummy_otp)) {
+            return false;
+        }
+
+        return trim((string) $mobile) === trim((string) $twilioSetting->dummy_mobile_number);
+    }
 
     private function getActiveRecaptchaSetting(): ?GoogleRecaptchaSetting
     {

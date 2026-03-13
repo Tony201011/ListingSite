@@ -11,5 +11,15 @@ class TwilioSetting extends Model
         'api_sid',
         'api_secret',
         'phone_number',
+        'dummy_mode_enabled',
+        'dummy_mobile_number',
+        'dummy_otp',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'dummy_mode_enabled' => 'boolean',
+        ];
+    }
 }
