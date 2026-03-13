@@ -15,23 +15,17 @@ class TwilioSettingsTable
     {
         return $table
             ->columns([
-                TextColumn::make('account_sid')
-                    ->searchable(),
-                TextColumn::make('api_sid')
-                    ->searchable(),
-                TextColumn::make('api_secret')
-                    ->searchable(),
-                TextColumn::make('phone_number')
-                    ->searchable(),
+                TextColumn::make('account_sid'),
+                TextColumn::make('api_sid'),
+                TextColumn::make('api_secret'),
+                TextColumn::make('phone_number'),
                 IconColumn::make('dummy_mode_enabled')
                     ->label('Dummy OTP')
                     ->boolean(),
                 TextColumn::make('dummy_mobile_number')
-                    ->label('Dummy Number')
-                    ->searchable(),
+                    ->label('Dummy Number'),
                 TextColumn::make('dummy_otp')
-                    ->label('Dummy OTP Code')
-                    ->searchable(),
+                    ->label('Dummy OTP Code'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
