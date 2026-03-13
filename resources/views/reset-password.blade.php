@@ -16,7 +16,7 @@
         <!-- Header -->
         <div class="mb-8">
             <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#e04ecb] pl-4">
-                Reset your password
+                Reset Your Password
             </h2>
         </div>
 
@@ -42,18 +42,18 @@
                     <input type="email"
                            name="email"
                            value="{{ old('email') }}"
-                           placeholder="Enter your email address"
-                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-gray-50 focus:bg-white"
+                           placeholder="Enter your email"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base"
                            required>
                     @error('email')
-                        <p class="text-xs text-red-600 mt-2">{{ $message }}</p>
+                        <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <!-- Reset Password Button -->
                 <button type="submit"
                         class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">
-                    Reset password
+                    Reset Password
                 </button>
             </form>
 
@@ -61,7 +61,7 @@
             <div class="text-center border-t border-gray-200 mt-8 pt-6">
                 <p class="text-gray-500 text-sm">
                     <a href="{{ url('/signin') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">
-                        Login Here
+                        login here
                     </a>
                 </p>
             </div>

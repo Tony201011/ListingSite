@@ -78,34 +78,34 @@ Route::get('/send-sms', function () {
 
 });
 
-Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
-Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
-Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->name('signin');
-Route::post('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
+Route::middleware('guest')->group(function (): void {
+    Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
+    Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
+    Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->name('signin');
+    Route::post('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
 
-Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerficationForm'])->name('otp-verfication');
-Route::post('/verify-otp', [ProviderRegisterController::class, 'verifyOtp'])
-    ->name('verify.otp');
+    Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerficationForm'])->name('otp-verfication');
+    Route::post('/verify-otp', [ProviderRegisterController::class, 'verifyOtp'])
+        ->name('verify.otp');
 
-Route::post('/resend-otp', [ProviderRegisterController::class, 'resendOtp'])->name('resend.otp');
+    Route::post('/resend-otp', [ProviderRegisterController::class, 'resendOtp'])->name('resend.otp');
+
+    Route::get('/reset-password', [PasswordResetController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+
+    Route::post('/reset-password', [PasswordResetController::class, 'sendResetLinkEmail'])
+        ->middleware('throttle:5,1')
+        ->name('reset-password.submit');
+
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    Route::post('/reset-password/update', [PasswordResetController::class, 'reset'])
+        ->name('password.update');
+});
 // Route::post('/signin', function () {
 //     return redirect('/after-image-upload')->with('success', 'Signed in successfully.');
 // })->name('signin.submit');
-
-
-Route::get('/reset-password', [PasswordResetController::class, 'showLinkRequestForm'])
-    ->name('password.request');
-
-Route::post('/reset-password', [PasswordResetController::class, 'sendResetLinkEmail'])
-    ->middleware('throttle:5,1')
-    ->name('reset-password.submit');
-
-Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])
-    ->name('password.reset');
-
-Route::post('/reset-password/update', [PasswordResetController::class, 'reset'])
-    ->name('password.update');
-
 
 
 Route::get('/', [HomeController::class, 'index']);
@@ -148,11 +148,13 @@ Route::get('/delete-account', function () {
 
 //after sign in page profile pagge when user not fill any informatiom
 
-Route::get('/my-profile-1', function () {
+Route::get('/my-profile', function () {
     return view('my-profile-1');
-});
+})->middleware('auth');
 
-Route::get('/my-profile-2', [MyProfileController::class, 'stepTwo']);
+Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])
+    ->middleware('auth')
+    ->name('edit-profile');
 
 
 Route::get('/my-rate', function () {

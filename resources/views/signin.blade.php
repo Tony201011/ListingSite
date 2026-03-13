@@ -20,6 +20,18 @@
 
         <!-- Login Form Card -->
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
+            @if (session('success'))
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 text-sm">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 text-sm">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
                     <ul class="list-disc pl-5 text-sm">

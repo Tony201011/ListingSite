@@ -146,7 +146,7 @@
                             <i class="fa-solid fa-chevron-down text-xs"></i>
                         </button>
                         <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
-                            <a href="{{ url('/view-profile-setting') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">My profile</a>
+                            <a href="{{ url('/my-profile') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">My Profile</a>
                             <a href="{{ filament()->getUrl() }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Dashboard</a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -206,7 +206,11 @@
                     <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">{{ $item['label'] }}</a>
                 @endif
             @endforeach
-            <a href="{{ url('/signin') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">Login</a>
+            @auth
+                <a href="{{ url('/my-profile') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">My Profile</a>
+            @else
+                <a href="{{ url('/signin') }}" class="ml-auto inline-flex items-center rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-white">Login</a>
+            @endauth
         </div>
 
         <!-- Mobile menu (updated with all items) -->
@@ -216,7 +220,11 @@
                 @foreach($mainNavLinks as $item)
                     <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
                 @endforeach
-                <a @click="mobileMenu = false" href="{{ url('/signin') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Login</a>
+                @auth
+                    <a @click="mobileMenu = false" href="{{ url('/my-profile') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">My Profile</a>
+                @else
+                    <a @click="mobileMenu = false" href="{{ url('/signin') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Login</a>
+                @endauth
                 @foreach($mobileExtraLinks as $item)
                     <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
                 @endforeach

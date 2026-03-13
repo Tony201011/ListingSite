@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -91,19 +92,25 @@ class PasswordResetController extends Controller
             'password' => ['required', 'confirmed', PasswordRule::min(8)],
         ]);
 
+        $resetUser = null;
+
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, string $password): void {
+            function ($user, string $password) use (&$resetUser): void {
                 $user->forceFill([
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
                 ])->save();
+
+                $resetUser = $user;
 
                 event(new PasswordReset($user));
             }
         );
 
         if ($status === Password::PASSWORD_RESET) {
+            $this->sendPasswordResetSuccessEmail($resetUser);
+
             Log::info('Password reset successful', [
                 'email' => $request->input('email'),
             ]);
@@ -116,7 +123,40 @@ class PasswordResetController extends Controller
             'status' => $status,
         ]);
 
-        return back()->withErrors(['email' => [__($status)]])->withInput($request->only('email'));
+        return back()
+            ->with('error', __($status))
+            ->withErrors(['email' => [__($status)]])
+            ->withInput($request->only('email'));
+    }
+
+    private function sendPasswordResetSuccessEmail(mixed $user): void
+    {
+        if (! $user || blank($user->email ?? null)) {
+            return;
+        }
+
+        $this->applyDatabaseMailConfiguration();
+
+        try {
+            Mail::send('emails.password-reset-success', [
+                'name' => $user->name ?? 'User',
+                'email' => $user->email,
+                'signinUrl' => route('signin'),
+            ], function ($message) use ($user): void {
+                $message->to($user->email, $user->name ?? null)
+                    ->subject('Your password was changed successfully');
+            });
+
+            Log::info('Password reset success email sent', [
+                'email' => $user->email,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to send password reset success email', [
+                'email' => $user->email,
+                'exception_class' => get_class($e),
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function applyDatabaseMailConfiguration(): ?SmtpSetting

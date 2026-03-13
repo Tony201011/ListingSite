@@ -126,14 +126,6 @@
                                 
                             </button>
                         </div>
-
-                        <button
-                            type="button"
-                            @click="generatePassword()"
-                            class="px-4 py-3 rounded-xl bg-[#fdf0fb] text-[#c13ab0] font-semibold border border-[#f3c4ea] hover:bg-[#fae3f6] transition"
-                        >
-                            Generate
-                        </button>
                     </div>
 
                     <div class="mt-2">
@@ -158,6 +150,14 @@
                     <div class="text-xs text-gray-500 mt-2">
                         Tap Generate for a strong password suggestion
                     </div>
+
+                    <button
+                        type="button"
+                        @click="generatePassword()"
+                        class="mt-2 px-4 py-2 rounded-xl bg-[#fdf0fb] text-[#c13ab0] font-semibold border border-[#f3c4ea] hover:bg-[#fae3f6] transition"
+                    >
+                        Generate
+                    </button>
 
                     @error('password')
                         <div class="text-xs text-red-600 mt-1">{{ $message }}</div>

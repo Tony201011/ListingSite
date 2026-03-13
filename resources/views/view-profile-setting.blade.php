@@ -16,7 +16,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
                 @php
                     $actions = [
-                        ['label' => 'Edit profile', 'url' => url('/my-profile-2')],
+                        ['label' => 'Edit profile', 'url' => route('edit-profile')],
                         ['label' => 'Hide profile', 'url' => url('/hide-profile')],
                         ['label' => 'Photos', 'url' => url('/photos')],
                         ['label' => 'Add photos', 'url' => url('/add-photo')],
