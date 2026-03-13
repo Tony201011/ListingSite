@@ -5,9 +5,9 @@ namespace App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages;
 use App\Filament\Clusters\Settings\Resources\SiteSettingResource;
 use App\Models\SiteSetting;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Resources\Pages\ManageRecords;
 
-class ListSiteSettings extends ListRecords
+class ManageSiteSettings extends ManageRecords
 {
     protected static string $resource = SiteSettingResource::class;
 
@@ -15,6 +15,8 @@ class ListSiteSettings extends ListRecords
     {
         return [
             CreateAction::make()
+                ->label('Add Site Setting')
+                ->createAnother(false)
                 ->visible(fn (): bool => SiteSetting::query()->doesntExist()),
         ];
     }

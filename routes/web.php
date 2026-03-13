@@ -17,7 +17,7 @@ use Twilio\Rest\Client;
 
 Route::get('/site-password', function () {
     return view('site-password');
-});
+})->name('site-password.form');
 
 
 
@@ -40,12 +40,14 @@ Route::post('/site-password', function (Request $request) {
     $expected = $dbPassword ?? env('SITE_PASSWORD');
 
     if ($expected && hash_equals((string) $expected, (string) $request->password)) {
+        $request->session()->regenerate();
         $request->session()->put('site_access', true);
-        return redirect('/');
+
+        return redirect()->intended('/');
     }
 
     return back()->with('error', 'Wrong password');
-});
+})->name('site-password.submit');
 
 
 

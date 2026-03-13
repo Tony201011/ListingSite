@@ -5,10 +5,7 @@ namespace App\Filament\Clusters\Settings\Resources;
 use App\Filament\Clusters\Settings;
 use App\Models\SiteSetting;
 use Filament\Resources\Resource;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Facades\Filament;
@@ -27,6 +24,11 @@ class SiteSettingResource extends Resource
     public static function canAccess(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
+    }
+
+    public static function canCreate(): bool
+    {
+        return SiteSetting::query()->doesntExist();
     }
 
     public static function form(Schema $schema): Schema
@@ -52,22 +54,23 @@ class SiteSettingResource extends Resource
 
     public static function table(Tables\Table $table): Tables\Table
     {
-        return $table->columns([
-            Tables\Columns\TextColumn::make('meta_key')->label('Meta Key'),
-            Tables\Columns\IconColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
-            Tables\Columns\IconColumn::make('site_password_enabled')->label('Site Password')->boolean(),
-            Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
-            Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
-        ]);
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('meta_key')->label('Meta Key'),
+                Tables\Columns\IconColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
+                Tables\Columns\IconColumn::make('site_password_enabled')->label('Site Password')->boolean(),
+                Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
+                Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => \App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ListSiteSettings::route('/'),
-            'edit' => \App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\EditSiteSetting::route('/{record}/edit'),
-            'view' => \App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ViewSiteSetting::route('/{record}'),
-            'create' => \App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\CreateSiteSetting::route('/create'),
+            'index' => \App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ManageSiteSettings::route('/'),
         ];
     }
 }
