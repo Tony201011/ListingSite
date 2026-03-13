@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\BrandedResetPasswordNotification;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -100,5 +101,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function providerProfile(): HasOne
     {
         return $this->hasOne(ProviderProfile::class);
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new BrandedResetPasswordNotification($token));
     }
 }

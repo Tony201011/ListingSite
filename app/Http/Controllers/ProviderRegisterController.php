@@ -482,8 +482,13 @@ class ProviderRegisterController extends Controller
         ]);
 
         try {
-            $sentMessage = Mail::mailer($mailerToUse)->raw(
-                "Hi {$user->name},\n\nYour account has been created successfully.\n\nThanks,\nHotEscort",
+            $sentMessage = Mail::mailer($mailerToUse)->send(
+                'emails.account-created',
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'signinUrl' => url('/signin'),
+                ],
                 function ($message) use ($user): void {
                     $message->to($user->email)
                         ->subject('Your account has been created');
@@ -494,7 +499,7 @@ class ProviderRegisterController extends Controller
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'mailer_used' => $mailerToUse,
-                'message_id' => method_exists($sentMessage, 'getMessageId') ? $sentMessage->getMessageId() : null,
+                'message_id' => is_object($sentMessage) && method_exists($sentMessage, 'getMessageId') ? $sentMessage->getMessageId() : null,
             ]);
         } catch (\Throwable $e) {
             Log::error('Account created email failed', [
