@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\GoogleRecaptchaSetting;
+use App\Models\SmtpSetting;
 use App\Models\TwilioSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -410,18 +411,7 @@ class ProviderRegisterController extends Controller
             'referral_code' => $pendingUser['referral_code'],
         ]);
 
-        try {
-            Mail::raw("Hi {$user->name},\n\nYour account has been created successfully.\n\nThanks,\nHotEscort", function ($message) use ($user): void {
-                $message->to($user->email)
-                    ->subject('Your account has been created');
-            });
-        } catch (\Throwable $e) {
-            Log::warning('Account created email failed', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->sendAccountCreatedEmail($user);
 
         Cache::forget($pendingKey);
         Cache::forget($pendingKey . '_otp');
@@ -436,6 +426,96 @@ class ProviderRegisterController extends Controller
             'message' => 'Account created successfully.',
             'redirect' => url('/signin')
         ]);
+    }
+
+    private function sendAccountCreatedEmail(User $user): void
+    {
+        $activeMailSetting = SmtpSetting::query()
+            ->where('is_enabled', true)
+            ->latest('updated_at')
+            ->first();
+
+        if ($activeMailSetting) {
+            $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
+            $liveDomain = $activeMailSetting->mailgun_live_domain;
+            $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
+                ? $sandboxDomain
+                : ($liveDomain ?: $sandboxDomain);
+
+            $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
+
+            if (filled($mailgunDomain)) {
+                $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
+            }
+
+            if (filled($mailgunEndpoint)) {
+                $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
+                    ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
+            }
+
+            config([
+                'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
+                'services.mailgun.domain' => $mailgunDomain,
+                'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
+                'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
+                'mail.from.address' => $activeMailSetting->mail_from_address ?: config('mail.from.address'),
+                'mail.from.name' => $activeMailSetting->mail_from_name ?: config('mail.from.name'),
+            ]);
+
+            app('mail.manager')->forgetMailers();
+        }
+
+        $defaultMailer = (string) config('mail.default', 'log');
+        $hasMailgunCredentials = filled(config('services.mailgun.domain'))
+            && filled(config('services.mailgun.secret'));
+
+        // If default mailer is log/array but Mailgun creds exist, use mailgun for actual delivery.
+        $mailerToUse = in_array($defaultMailer, ['log', 'array'], true) && $hasMailgunCredentials
+            ? 'mailgun'
+            : $defaultMailer;
+
+        Log::info('Account created email attempt', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'db_mail_setting_found' => (bool) $activeMailSetting,
+            'mailer_default' => $defaultMailer,
+            'mailer_used' => $mailerToUse,
+            'mail_from_address' => config('mail.from.address'),
+            'mail_from_name' => config('mail.from.name'),
+            'mailgun_domain' => config('services.mailgun.domain'),
+            'mailgun_endpoint' => config('services.mailgun.endpoint'),
+            'mailgun_secret_present' => filled(config('services.mailgun.secret')),
+            'app_env' => app()->environment(),
+        ]);
+
+        try {
+            $sentMessage = Mail::mailer($mailerToUse)->raw(
+                "Hi {$user->name},\n\nYour account has been created successfully.\n\nThanks,\nHotEscort",
+                function ($message) use ($user): void {
+                    $message->to($user->email)
+                        ->subject('Your account has been created');
+                }
+            );
+
+            Log::info('Account created email sent successfully', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'mailer_used' => $mailerToUse,
+                'message_id' => method_exists($sentMessage, 'getMessageId') ? $sentMessage->getMessageId() : null,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Account created email failed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'mailer_default' => $defaultMailer,
+                'mailer_used' => $mailerToUse,
+                'mailgun_domain' => config('services.mailgun.domain'),
+                'mailgun_endpoint' => config('services.mailgun.endpoint'),
+                'mailgun_secret_present' => filled(config('services.mailgun.secret')),
+                'exception_class' => get_class($e),
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
 
