@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\SmtpSetting;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -23,9 +25,34 @@ class PasswordResetController extends Controller
             'email' => ['required', 'email'],
         ]);
 
+        $activeMailSetting = $this->applyDatabaseMailConfiguration();
+
+        Log::info('Password reset email attempt', [
+            'email' => $request->input('email'),
+            'db_mail_setting_found' => (bool) $activeMailSetting,
+            'mailer_default' => (string) config('mail.default', 'log'),
+            'mail_from_address' => config('mail.from.address'),
+            'mail_from_name' => config('mail.from.name'),
+            'mailgun_domain' => config('services.mailgun.domain'),
+            'mailgun_endpoint' => config('services.mailgun.endpoint'),
+            'mailgun_secret_present' => filled(config('services.mailgun.secret')),
+        ]);
+
         $status = Password::sendResetLink(
             $request->only('email')
         );
+
+        if ($status === Password::RESET_LINK_SENT) {
+            Log::info('Password reset email sent successfully', [
+                'email' => $request->input('email'),
+                'status' => $status,
+            ]);
+        } else {
+            Log::warning('Password reset email not sent', [
+                'email' => $request->input('email'),
+                'status' => $status,
+            ]);
+        }
 
         return $status === Password::RESET_LINK_SENT
             ? back()->with('success', __($status))
@@ -61,9 +88,60 @@ class PasswordResetController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
+            Log::info('Password reset successful', [
+                'email' => $request->input('email'),
+            ]);
+
             return redirect()->route('signin')->with('success', 'Password reset successful. Please sign in.');
         }
 
+        Log::warning('Password reset failed', [
+            'email' => $request->input('email'),
+            'status' => $status,
+        ]);
+
         return back()->withErrors(['email' => [__($status)]])->withInput($request->only('email'));
+    }
+
+    private function applyDatabaseMailConfiguration(): ?SmtpSetting
+    {
+        $activeMailSetting = SmtpSetting::query()
+            ->where('is_enabled', true)
+            ->latest('updated_at')
+            ->first();
+
+        if (! $activeMailSetting) {
+            return null;
+        }
+
+        $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
+        $liveDomain = $activeMailSetting->mailgun_live_domain;
+        $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
+            ? $sandboxDomain
+            : ($liveDomain ?: $sandboxDomain);
+
+        $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
+
+        if (filled($mailgunDomain)) {
+            $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
+        }
+
+        if (filled($mailgunEndpoint)) {
+            $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
+                ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
+        }
+
+        config([
+            'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
+            'services.mailgun.domain' => $mailgunDomain,
+            'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
+            'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
+            'mail.from.address' => $activeMailSetting->mail_from_address ?: config('mail.from.address'),
+            'mail.from.name' => $activeMailSetting->mail_from_name ?: config('mail.from.name'),
+        ]);
+
+        app('mail.manager')->forgetMailers();
+
+        return $activeMailSetting;
     }
 }

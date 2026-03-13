@@ -432,7 +432,6 @@ class ProviderRegisterController extends Controller
     {
         $activeMailSetting = SmtpSetting::query()
             ->where('is_enabled', true)
-            ->latest('updated_at')
             ->first();
 
         if ($activeMailSetting) {
