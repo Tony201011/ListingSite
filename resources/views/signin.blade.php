@@ -20,6 +20,16 @@
 
         <!-- Login Form Card -->
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
+            @if ($errors->any())
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+                    <ul class="list-disc pl-5 text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('signin.submit') }}">
                 @csrf
 
@@ -28,6 +38,9 @@
                     <label class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
                     <input type="email" name="email" value="{{ old('email') }}"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base" placeholder="Enter your email" required>
+                    @error('email')
+                        <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Password -->
@@ -35,22 +48,30 @@
                     <label class="block font-semibold text-gray-800 mb-1">Password <span class="text-red-600">*</span></label>
                     <input type="password" name="password"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base" placeholder="Enter your password" required>
+                    @error('password')
+                        <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Keep me logged in (styled like the age confirmation pill) -->
                 <div class="mb-6">
                     <div class="inline-flex items-center gap-2.5 bg-gray-50 px-5 py-3 rounded-full">
-                        <input type="checkbox" id="keep_logged_in" class="w-5 h-5 accent-[#e04ecb]">
+                        <input type="checkbox" id="keep_logged_in" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="w-5 h-5 accent-[#e04ecb]">
                         <label for="keep_logged_in" class="font-semibold text-gray-800">Keep me logged in on this device</label>
                     </div>
                 </div>
 
-                <div class="mb-8">
-                    <div class="flex justify-center">
-                            <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
+                @if ($shouldUseRecaptcha ?? false)
+                    <div class="mb-8">
+                        <div class="flex justify-center">
+                                <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
+                        </div>
+                        @error('g-recaptcha-response')
+                            <p class="text-red-600 text-sm mt-2 text-center">{{ $message }}</p>
+                        @enderror
                     </div>
-                </div>
-                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                @endif
 
                 <!-- Login Button (same gradient as sign-up) -->
                 <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">

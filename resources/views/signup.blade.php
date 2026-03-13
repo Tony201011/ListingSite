@@ -354,14 +354,16 @@
                 </div>
             </div>
 
-            <div class="mb-8">
-                <div class="flex justify-center">
-                    <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
+            @if ($shouldUseRecaptcha ?? false)
+                <div class="mb-8">
+                    <div class="flex justify-center">
+                        <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
+                    </div>
+                    @error('g-recaptcha-response')
+                        <div class="text-xs text-red-600 mt-3 text-center">{{ $message }}</div>
+                    @enderror
                 </div>
-                @error('g-recaptcha-response')
-                    <div class="text-xs text-red-600 mt-3 text-center">{{ $message }}</div>
-                @enderror
-            </div>
+            @endif
 
             <button
                 type="submit"
@@ -380,7 +382,9 @@
     </div>
 </div>
 
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+@if ($shouldUseRecaptcha ?? false)
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+@endif
 <script src="//unpkg.com/alpinejs" defer></script>
 
 <script>

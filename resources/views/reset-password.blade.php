@@ -27,6 +27,12 @@
 
         <!-- Reset Password Form Card -->
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
+            @if (session('success'))
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 text-sm">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('reset-password.submit') }}">
                 @csrf
 
@@ -34,21 +40,14 @@
                 <div class="mb-6">
                     <label class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
                     <input type="email"
+                           name="email"
+                           value="{{ old('email') }}"
                            placeholder="Enter your email address"
                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-gray-50 focus:bg-white"
                            required>
-                </div>
-
-                <!-- reCAPTCHA (same as sign‑in) -->
-                <div class="mb-8">
-                    <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 flex items-center gap-4">
-                        <div class="w-7 h-7 bg-[#e04ecb] rounded-lg flex items-center justify-center text-white font-bold">✓</div>
-                        <span class="text-gray-800">I'm not a robot</span>
-                        <div class="ml-auto flex items-center gap-2">
-                            <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" class="w-6 h-6 opacity-70">
-                            <span class="text-xs text-gray-400">reCAPTCHA</span>
-                        </div>
-                    </div>
+                    @error('email')
+                        <p class="text-xs text-red-600 mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Reset Password Button -->

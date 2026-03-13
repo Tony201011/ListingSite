@@ -6,8 +6,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\PurchaseCreditController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProviderRegisterController;
 use Twilio\Rest\Client;
@@ -89,9 +91,18 @@ Route::post('/resend-otp', [ProviderRegisterController::class, 'resendOtp'])->na
 // })->name('signin.submit');
 
 
-Route::get('/reset-password', function () {
-    return view('reset-password');
-});
+Route::get('/reset-password', [PasswordResetController::class, 'showLinkRequestForm'])
+    ->name('password.request');
+
+Route::post('/reset-password', [PasswordResetController::class, 'sendResetLinkEmail'])
+    ->middleware('throttle:5,1')
+    ->name('reset-password.submit');
+
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])
+    ->name('password.reset');
+
+Route::post('/reset-password/update', [PasswordResetController::class, 'reset'])
+    ->name('password.update');
 
 
 
@@ -123,10 +134,6 @@ Route::post('/logout', function (Request $request) {
 
 
 
-
-Route::post('/reset-password', function () {
-    return redirect('/signin')->with('success', 'Password reset link sent to your email.');
-})->name('reset-password.submit');
 
 Route::get('/change-password', function () {
     return view('change-password');

@@ -22,7 +22,11 @@ class ProviderRegisterController extends Controller
     public function showSignupForm()
     {
         $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
-        return view('signup', compact('recaptchaSetting'));
+        $shouldUseRecaptcha = !app()->environment(['local', 'testing'])
+            && filled($recaptchaSetting?->site_key)
+            && filled($recaptchaSetting?->secret_key);
+
+        return view('signup', compact('recaptchaSetting', 'shouldUseRecaptcha'));
     }
 
     /**
@@ -30,39 +34,50 @@ class ProviderRegisterController extends Controller
      */
     public function signup(Request $request)
     {
-        $validated = $request->validate([
+        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
+        $shouldUseRecaptcha = !app()->environment(['local', 'testing'])
+            && filled($recaptchaConfig?->site_key)
+            && filled($recaptchaConfig?->secret_key);
+
+        $rules = [
             'email' => 'required|email|unique:users,email',
             'nickname' => 'required|string|min:3|max:255',
             'password' => 'required|min:8|confirmed',
             'mobile' => ['required', 'regex:/^\+61\d{9}$/', 'unique:users,mobile'],
             'suburb' => 'required|string|max:255',
             'age_confirm' => 'accepted',
-            'g-recaptcha-response' => 'required',
             'referral_code' => 'nullable|string|max:255',
-        ]);
+        ];
 
-        // reCAPTCHA verification
-        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
-        $recaptcha = $request->input('g-recaptcha-response');
-        $recaptchaSecret = $recaptchaConfig?->secret_key;
-        $recaptchaResponse = null;
-
-        if ($recaptcha && $recaptchaSecret) {
-            $recaptchaResponse = json_decode(
-                file_get_contents(
-                    'https://www.google.com/recaptcha/api/siteverify?secret=' .
-                        $recaptchaSecret .
-                        '&response=' .
-                        $recaptcha
-                ),
-                true
-            );
+        if ($shouldUseRecaptcha) {
+            $rules['g-recaptcha-response'] = 'required';
         }
 
-        if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
-            return back()->withErrors([
-                'g-recaptcha-response' => 'Google reCAPTCHA verification failed. Please try again.'
-            ])->withInput();
+        $validated = $request->validate($rules);
+
+        // reCAPTCHA verification
+        if ($shouldUseRecaptcha) {
+            $recaptcha = $request->input('g-recaptcha-response');
+            $recaptchaSecret = $recaptchaConfig?->secret_key;
+            $recaptchaResponse = null;
+
+            if ($recaptcha && $recaptchaSecret) {
+                $recaptchaResponse = json_decode(
+                    file_get_contents(
+                        'https://www.google.com/recaptcha/api/siteverify?secret=' .
+                            $recaptchaSecret .
+                            '&response=' .
+                            $recaptcha
+                    ),
+                    true
+                );
+            }
+
+            if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
+                return back()->withErrors([
+                    'g-recaptcha-response' => 'Google reCAPTCHA verification failed. Please try again.'
+                ])->withInput();
+            }
         }
 
         $mobile = $validated['mobile'];
@@ -139,42 +154,57 @@ class ProviderRegisterController extends Controller
     public function showSigninForm()
     {
         $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
-        return view('signin', compact('recaptchaSetting'));
+        $shouldUseRecaptcha = !app()->environment(['local', 'testing'])
+            && filled($recaptchaSetting?->site_key)
+            && filled($recaptchaSetting?->secret_key);
+
+        return view('signin', compact('recaptchaSetting', 'shouldUseRecaptcha'));
     }
 
     public function signin(Request $request)
     {
-        $request->validate([
+        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
+        $shouldUseRecaptcha = !app()->environment(['local', 'testing'])
+            && filled($recaptchaConfig?->site_key)
+            && filled($recaptchaConfig?->secret_key);
+
+        $rules = [
             'email' => 'required|email',
             'password' => 'required',
-            'g-recaptcha-response' => 'required'
-        ]);
+        ];
 
-        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
-        $recaptcha = $request->input('g-recaptcha-response');
-        $recaptchaSecret = $recaptchaConfig?->secret_key;
-        $recaptchaResponse = null;
-
-        if ($recaptcha && $recaptchaSecret) {
-            $recaptchaResponse = json_decode(
-                file_get_contents(
-                    'https://www.google.com/recaptcha/api/siteverify?secret=' .
-                        $recaptchaSecret .
-                        '&response=' .
-                        $recaptcha
-                ),
-                true
-            );
+        if ($shouldUseRecaptcha) {
+            $rules['g-recaptcha-response'] = 'required';
         }
 
-        if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
-            return back()->withErrors(['recaptcha' => 'reCAPTCHA verification failed'])->withInput();
+        $request->validate($rules);
+
+        if ($shouldUseRecaptcha) {
+            $recaptcha = $request->input('g-recaptcha-response');
+            $recaptchaSecret = $recaptchaConfig?->secret_key;
+            $recaptchaResponse = null;
+
+            if ($recaptcha && $recaptchaSecret) {
+                $recaptchaResponse = json_decode(
+                    file_get_contents(
+                        'https://www.google.com/recaptcha/api/siteverify?secret=' .
+                            $recaptchaSecret .
+                            '&response=' .
+                            $recaptcha
+                    ),
+                    true
+                );
+            }
+
+            if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
+                return back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed'])->withInput();
+            }
         }
 
         if (Auth::attempt([
             'email' => $request->email,
             'password' => $request->password
-        ], $request->remember)) {
+        ], $request->boolean('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended('/dashboard');
         }
