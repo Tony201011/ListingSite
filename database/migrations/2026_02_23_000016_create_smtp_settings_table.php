@@ -10,14 +10,12 @@ return new class extends Migration
     {
         Schema::create('smtp_settings', function (Blueprint $table): void {
             $table->id();
-            $table->string('mailer')->default('smtp');
-            $table->string('host');
-            $table->unsignedInteger('port')->default(587);
-            $table->string('encryption')->nullable();
-            $table->string('username')->nullable();
-            $table->string('password')->nullable();
-            $table->string('from_address');
-            $table->string('from_name')->nullable();
+            $table->string('mail_mailer')->default('mailgun');
+            $table->string('mailgun_domain')->nullable();
+            $table->text('mailgun_secret')->nullable();
+            $table->string('mailgun_endpoint')->default('api.mailgun.net');
+            $table->string('mail_from_address')->nullable();
+            $table->string('mail_from_name')->nullable();
             $table->boolean('is_enabled')->default(false);
             $table->timestamps();
         });

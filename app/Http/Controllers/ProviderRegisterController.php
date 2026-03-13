@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache; // <-- Import Cache
@@ -378,6 +379,19 @@ class ProviderRegisterController extends Controller
             'mobile_verified' => true,
             'referral_code' => $pendingUser['referral_code'],
         ]);
+
+        try {
+            Mail::raw("Hi {$user->name},\n\nYour account has been created successfully.\n\nThanks,\nHotEscort", function ($message) use ($user): void {
+                $message->to($user->email)
+                    ->subject('Your account has been created');
+            });
+        } catch (\Throwable $e) {
+            Log::warning('Account created email failed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         Cache::forget($pendingKey);
         Cache::forget($pendingKey . '_otp');

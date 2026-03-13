@@ -10,21 +10,18 @@ class SmtpSetting extends Model
     use HasFactory;
 
     protected $fillable = [
-        'mailer',
-        'host',
-        'port',
-        'encryption',
-        'username',
-        'password',
-        'from_address',
-        'from_name',
+        'mail_mailer',
+        'mailgun_domain',
+        'mailgun_secret',
+        'mailgun_endpoint',
+        'mail_from_address',
+        'mail_from_name',
         'is_enabled',
     ];
 
     protected function casts(): array
     {
         return [
-            'port' => 'integer',
             'is_enabled' => 'boolean',
         ];
     }

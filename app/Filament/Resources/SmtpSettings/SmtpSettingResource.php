@@ -25,11 +25,11 @@ class SmtpSettingResource extends Resource
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedEnvelope;
 
-    protected static ?string $navigationLabel = 'SMTP Settings';
+    protected static ?string $navigationLabel = 'Mail Settings';
 
-    protected static ?string $modelLabel = 'SMTP Setting';
+    protected static ?string $modelLabel = 'Mail Setting';
 
-    protected static ?string $pluralModelLabel = 'SMTP Settings';
+    protected static ?string $pluralModelLabel = 'Mail Settings';
 
     protected static ?string $slug = 'smtp-settings';
 
@@ -54,43 +54,35 @@ class SmtpSettingResource extends Resource
                 Toggle::make('is_enabled')
                     ->label('Enabled')
                     ->default(false),
-                Select::make('mailer')
+                Select::make('mail_mailer')
                     ->options([
-                        'smtp' => 'SMTP',
+                        'mailgun' => 'Mailgun',
                     ])
                     ->required()
-                    ->default('smtp')
+                    ->default('mailgun')
                     ->native(false),
-                TextInput::make('host')
-                    ->label('SMTP Host')
+                TextInput::make('mailgun_domain')
+                    ->label('Mailgun Domain')
+                    ->placeholder('mail.hotescort.com.au')
                     ->required()
                     ->maxLength(255),
-                TextInput::make('port')
-                    ->label('SMTP Port')
-                    ->numeric()
-                    ->required()
-                    ->default(587),
-                Select::make('encryption')
-                    ->options([
-                        'tls' => 'TLS',
-                        'ssl' => 'SSL',
-                    ])
-                    ->native(false)
-                    ->nullable(),
-                TextInput::make('username')
-                    ->label('SMTP Username')
-                    ->maxLength(255),
-                TextInput::make('password')
-                    ->label('SMTP Password')
+                TextInput::make('mailgun_secret')
+                    ->label('Mailgun Secret')
                     ->password()
                     ->revealable()
+                    ->required()
                     ->maxLength(255),
-                TextInput::make('from_address')
+                TextInput::make('mailgun_endpoint')
+                    ->label('Mailgun Endpoint')
+                    ->default('api.mailgun.net')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('mail_from_address')
                     ->label('From Email')
                     ->email()
                     ->required()
                     ->maxLength(255),
-                TextInput::make('from_name')
+                TextInput::make('mail_from_name')
                     ->label('From Name')
                     ->maxLength(255)
                     ->required(),
@@ -105,13 +97,14 @@ class SmtpSettingResource extends Resource
                 IconColumn::make('is_enabled')
                     ->label('Enabled')
                     ->boolean(),
-                TextColumn::make('host')
-                    ->label('Host')
-                    ->searchable(),
-                TextColumn::make('port')
-                    ->label('Port')
+                TextColumn::make('mail_mailer')
+                    ->label('Mailer')
+                    ->badge()
                     ->sortable(),
-                TextColumn::make('from_address')
+                TextColumn::make('mailgun_domain')
+                    ->label('Domain')
+                    ->searchable(),
+                TextColumn::make('mail_from_address')
                     ->label('From Email')
                     ->searchable(),
                 TextColumn::make('updated_at')
@@ -125,8 +118,8 @@ class SmtpSettingResource extends Resource
             ])
             ->defaultSort('updated_at', 'desc')
             ->striped()
-            ->emptyStateHeading('No SMTP settings added yet')
-            ->emptyStateDescription('Admin can add SMTP credentials for outgoing emails.');
+                ->emptyStateHeading('No mail settings added yet')
+                ->emptyStateDescription('Admin can add Mailgun credentials for outgoing emails.');
     }
 
     public static function getPages(): array

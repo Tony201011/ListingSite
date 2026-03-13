@@ -15,7 +15,7 @@ class ManageSmtpSettings extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->label('Add SMTP Setting')
+                ->label('Add Mail Setting')
                 ->createAnother(false)
                 ->visible(fn (): bool => SmtpSetting::query()->doesntExist()),
         ];

@@ -99,14 +99,12 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
-        Config::set('mail.default', $setting->mailer ?: 'smtp');
-        Config::set('mail.mailers.smtp.host', $setting->host);
-        Config::set('mail.mailers.smtp.port', $setting->port);
-        Config::set('mail.mailers.smtp.encryption', $setting->encryption ?: null);
-        Config::set('mail.mailers.smtp.username', $setting->username ?: null);
-        Config::set('mail.mailers.smtp.password', $setting->password ?: null);
-        Config::set('mail.from.address', $setting->from_address);
-        Config::set('mail.from.name', $setting->from_name ?: config('app.name'));
+        Config::set('mail.default', $setting->mail_mailer ?: 'mailgun');
+        Config::set('services.mailgun.domain', $setting->mailgun_domain ?: env('MAILGUN_DOMAIN'));
+        Config::set('services.mailgun.secret', $setting->mailgun_secret ?: env('MAILGUN_SECRET'));
+        Config::set('services.mailgun.endpoint', $setting->mailgun_endpoint ?: env('MAILGUN_ENDPOINT', 'api.mailgun.net'));
+        Config::set('mail.from.address', $setting->mail_from_address ?: env('MAIL_FROM_ADDRESS'));
+        Config::set('mail.from.name', $setting->mail_from_name ?: env('MAIL_FROM_NAME', config('app.name')));
 
         app('mail.manager')->forgetMailers();
     }
