@@ -20,12 +20,10 @@ class GoogleRecaptchaSettingsTable
 
                 TextColumn::make('domain')
                     ->label('Domain')
-                    ->searchable()
                     ->limit(40),
 
                 TextColumn::make('site_key')
                     ->label('Site Key')
-                    ->searchable()
                     ->limit(40),
 
                 TextColumn::make('secret_key')
