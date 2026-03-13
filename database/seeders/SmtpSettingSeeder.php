@@ -17,6 +17,9 @@ class SmtpSettingSeeder extends Seeder
             [
                 'mail_mailer' => 'mailgun',
                 'mailgun_domain' => env('MAILGUN_DOMAIN', 'sandbox4b4ea9f5c65b430492a08fe893705064.mailgun.org'),
+                'mailgun_sandbox_domain' => env('MAILGUN_SANDBOX_DOMAIN', env('MAILGUN_DOMAIN', 'sandbox4b4ea9f5c65b430492a08fe893705064.mailgun.org')),
+                'mailgun_live_domain' => env('MAILGUN_LIVE_DOMAIN', 'mail.hotescort.com.au'),
+                'use_mailgun_sandbox' => (bool) env('MAILGUN_USE_SANDBOX', true),
                 'mailgun_secret' => env('MAILGUN_SECRET'),
                 'mailgun_endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
                 'mail_from_address' => env('MAIL_FROM_ADDRESS', 'no-reply@mail.hotescort.com.au'),

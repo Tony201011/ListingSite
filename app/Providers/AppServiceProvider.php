@@ -99,7 +99,11 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
-        $mailgunDomain = $setting->mailgun_domain ?: env('MAILGUN_DOMAIN');
+        $sandboxDomain = $setting->mailgun_sandbox_domain ?: $setting->mailgun_domain;
+        $liveDomain = $setting->mailgun_live_domain;
+        $mailgunDomain = $setting->use_mailgun_sandbox
+            ? ($sandboxDomain ?: env('MAILGUN_DOMAIN'))
+            : ($liveDomain ?: $sandboxDomain ?: env('MAILGUN_DOMAIN'));
         $mailgunEndpoint = $setting->mailgun_endpoint ?: env('MAILGUN_ENDPOINT', 'api.mailgun.net');
 
         if (filled($mailgunDomain)) {

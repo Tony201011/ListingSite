@@ -12,6 +12,9 @@ class SmtpSetting extends Model
     protected $fillable = [
         'mail_mailer',
         'mailgun_domain',
+        'mailgun_sandbox_domain',
+        'mailgun_live_domain',
+        'use_mailgun_sandbox',
         'mailgun_secret',
         'mailgun_endpoint',
         'mail_from_address',
@@ -23,6 +26,7 @@ class SmtpSetting extends Model
     {
         return [
             'is_enabled' => 'boolean',
+            'use_mailgun_sandbox' => 'boolean',
         ];
     }
 }

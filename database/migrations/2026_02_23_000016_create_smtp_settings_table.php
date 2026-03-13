@@ -12,6 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('mail_mailer')->default('mailgun');
             $table->string('mailgun_domain')->nullable();
+            $table->string('mailgun_sandbox_domain')->nullable();
+            $table->string('mailgun_live_domain')->nullable();
+            $table->boolean('use_mailgun_sandbox')->default(true);
             $table->text('mailgun_secret')->nullable();
             $table->string('mailgun_endpoint')->default('api.mailgun.net');
             $table->string('mail_from_address')->nullable();

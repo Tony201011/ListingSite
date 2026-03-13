@@ -54,6 +54,10 @@ class SmtpSettingResource extends Resource
                 Toggle::make('is_enabled')
                     ->label('Enabled')
                     ->default(false),
+                Toggle::make('use_mailgun_sandbox')
+                    ->label('Use Sandbox Domain')
+                    ->helperText('Enable to send emails via sandbox domain. Disable to use live domain.')
+                    ->default(true),
                 Select::make('mail_mailer')
                     ->options([
                         'mailgun' => 'Mailgun',
@@ -61,10 +65,19 @@ class SmtpSettingResource extends Resource
                     ->required()
                     ->default('mailgun')
                     ->native(false),
-                TextInput::make('mailgun_domain')
-                    ->label('Mailgun Domain')
+                TextInput::make('mailgun_sandbox_domain')
+                    ->label('Sandbox Domain')
                     ->placeholder('sandboxxxxx.mailgun.org')
-                    ->helperText('Use the domain from Mailgun, e.g. sandboxxxxx.mailgun.org')
+                    ->helperText('Client sandbox domain from Mailgun.')
+                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
+                        ? preg_replace('#^https?://#i', '', rtrim(trim($state), '/'))
+                        : $state)
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('mailgun_live_domain')
+                    ->label('Live Domain')
+                    ->placeholder('mail.hotescort.com.au')
+                    ->helperText('Production/live Mailgun domain.')
                     ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
                         ? preg_replace('#^https?://#i', '', rtrim(trim($state), '/'))
                         : $state)
@@ -108,12 +121,18 @@ class SmtpSettingResource extends Resource
                 IconColumn::make('is_enabled')
                     ->label('Enabled')
                     ->boolean(),
+                IconColumn::make('use_mailgun_sandbox')
+                    ->label('Sandbox')
+                    ->boolean(),
                 TextColumn::make('mail_mailer')
                     ->label('Mailer')
                     ->badge()
                     ->sortable(),
-                TextColumn::make('mailgun_domain')
-                    ->label('Domain')
+                TextColumn::make('mailgun_sandbox_domain')
+                    ->label('Sandbox Domain')
+                    ->searchable(),
+                TextColumn::make('mailgun_live_domain')
+                    ->label('Live Domain')
                     ->searchable(),
                 TextColumn::make('mail_from_address')
                     ->label('From Email')
