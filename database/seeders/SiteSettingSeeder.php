@@ -13,6 +13,7 @@ class SiteSettingSeeder extends Seeder
             'meta_key' => 'test,example',
             'meta_description' => 'Test meta description.',
             'enable_cookies' => true,
+            'captcha_enabled' => true,
             'cookies_text' => 'We use cookies for analytics and personalization.'
         ]);
     }

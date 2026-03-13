@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\GoogleRecaptchaSetting;
+use App\Models\SiteSetting;
 use App\Models\SmtpSetting;
 use App\Models\TwilioSetting;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache; // <-- Import Cache
+use Illuminate\Support\Facades\Schema;
 
 class ProviderRegisterController extends Controller
 {
@@ -22,10 +24,8 @@ class ProviderRegisterController extends Controller
      */
     public function showSignupForm()
     {
-        $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
-        $shouldUseRecaptcha = !app()->environment(['local', 'testing'])
-            && filled($recaptchaSetting?->site_key)
-            && filled($recaptchaSetting?->secret_key);
+        $recaptchaSetting = $this->getActiveRecaptchaSetting();
+        $shouldUseRecaptcha = $this->shouldUseRecaptcha($recaptchaSetting);
 
         return view('signup', compact('recaptchaSetting', 'shouldUseRecaptcha'));
     }
@@ -35,10 +35,8 @@ class ProviderRegisterController extends Controller
      */
     public function signup(Request $request)
     {
-        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
-        $shouldUseRecaptcha = !app()->environment(['local', 'testing'])
-            && filled($recaptchaConfig?->site_key)
-            && filled($recaptchaConfig?->secret_key);
+        $recaptchaConfig = $this->getActiveRecaptchaSetting();
+        $shouldUseRecaptcha = $this->shouldUseRecaptcha($recaptchaConfig);
 
         $rules = [
             'email' => 'required|email|unique:users,email',
@@ -154,20 +152,16 @@ class ProviderRegisterController extends Controller
 
     public function showSigninForm()
     {
-        $recaptchaSetting = GoogleRecaptchaSetting::where('is_active', 1)->first();
-        $shouldUseRecaptcha = !app()->environment(['local', 'testing'])
-            && filled($recaptchaSetting?->site_key)
-            && filled($recaptchaSetting?->secret_key);
+        $recaptchaSetting = $this->getActiveRecaptchaSetting();
+        $shouldUseRecaptcha = $this->shouldUseRecaptcha($recaptchaSetting);
 
         return view('signin', compact('recaptchaSetting', 'shouldUseRecaptcha'));
     }
 
     public function signin(Request $request)
     {
-        $recaptchaConfig = GoogleRecaptchaSetting::where('is_active', 1)->first();
-        $shouldUseRecaptcha = !app()->environment(['local', 'testing'])
-            && filled($recaptchaConfig?->site_key)
-            && filled($recaptchaConfig?->secret_key);
+        $recaptchaConfig = $this->getActiveRecaptchaSetting();
+        $shouldUseRecaptcha = $this->shouldUseRecaptcha($recaptchaConfig);
 
         $rules = [
             'email' => 'required|email',
@@ -515,6 +509,32 @@ class ProviderRegisterController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    private function getActiveRecaptchaSetting(): ?GoogleRecaptchaSetting
+    {
+        return GoogleRecaptchaSetting::where('is_active', 1)->first();
+    }
+
+    private function shouldUseRecaptcha(?GoogleRecaptchaSetting $recaptchaSetting): bool
+    {
+        if (! $this->isCaptchaEnabledInSiteSettings()) {
+            return false;
+        }
+
+        return filled($recaptchaSetting?->site_key)
+            && filled($recaptchaSetting?->secret_key);
+    }
+
+    private function isCaptchaEnabledInSiteSettings(): bool
+    {
+        if (! Schema::hasTable('site_settings')) {
+            return true;
+        }
+
+        $siteSetting = SiteSetting::query()->latest('updated_at')->first();
+
+        return $siteSetting?->captcha_enabled ?? true;
     }
 
 

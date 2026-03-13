@@ -37,6 +37,10 @@ class SiteSettingResource extends Resource
             Forms\Components\TextInput::make('meta_key')->label('Meta Key'),
             Forms\Components\Textarea::make('meta_description')->label('Meta Description'),
             Forms\Components\Toggle::make('enable_cookies')->label('Enable Cookie Consent Banner'),
+            Forms\Components\Toggle::make('captcha_enabled')
+                ->label('Enable reCAPTCHA')
+                ->default(true)
+                ->helperText('When enabled, reCAPTCHA is shown on sign up and sign in pages.'),
             Forms\Components\Textarea::make('cookies_text')->label('Cookie Consent Text')->rows(4),
             Forms\Components\Toggle::make('site_password_enabled')->label('Enable Site Password')->helperText('When enabled, visitors must enter the site password to access the site.'),
             Forms\Components\TextInput::make('site_password')
@@ -58,6 +62,7 @@ class SiteSettingResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('meta_key')->label('Meta Key'),
                 Tables\Columns\IconColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
+                Tables\Columns\IconColumn::make('captcha_enabled')->label('Captcha')->boolean(),
                 Tables\Columns\IconColumn::make('site_password_enabled')->label('Site Password')->boolean(),
                 Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
                 Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),

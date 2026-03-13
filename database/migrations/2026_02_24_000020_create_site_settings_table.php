@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('meta_key')->nullable();
             $table->text('meta_description')->nullable();
             $table->boolean('enable_cookies')->default(true);
+            $table->boolean('captcha_enabled')->default(true);
             $table->text('cookies_text')->nullable();
             $table->timestamps();
         });
