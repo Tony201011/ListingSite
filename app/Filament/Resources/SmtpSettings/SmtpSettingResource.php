@@ -63,17 +63,28 @@ class SmtpSettingResource extends Resource
                     ->native(false),
                 TextInput::make('mailgun_domain')
                     ->label('Mailgun Domain')
-                    ->placeholder('mail.hotescort.com.au')
+                    ->placeholder('sandboxxxxx.mailgun.org')
+                    ->helperText('Use the domain from Mailgun, e.g. sandboxxxxx.mailgun.org')
+                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
+                        ? preg_replace('#^https?://#i', '', rtrim(trim($state), '/'))
+                        : $state)
                     ->required()
                     ->maxLength(255),
                 TextInput::make('mailgun_secret')
                     ->label('Mailgun Secret')
                     ->password()
                     ->revealable()
+                    ->helperText('Paste your Mailgun API key here.')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(512),
                 TextInput::make('mailgun_endpoint')
                     ->label('Mailgun Endpoint')
+                    ->placeholder('api.mailgun.net')
+                    ->helperText('If you have Base URL https://api.mailgun.net, enter api.mailgun.net')
+                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state)
+                        ? (parse_url(trim($state), PHP_URL_HOST)
+                            ?: preg_replace('#^https?://#i', '', rtrim(trim($state), '/')))
+                        : $state)
                     ->default('api.mailgun.net')
                     ->required()
                     ->maxLength(255),

@@ -13,16 +13,15 @@ class SmtpSettingSeeder extends Seeder
     public function run(): void
     {
         SmtpSetting::query()->updateOrCreate(
-            ['mailer' => 'smtp'],
+            ['id' => 1],
             [
-                'host' => 'smtp.mailtrap.io',
-                'port' => 587,
-                'encryption' => 'tls',
-                'username' => null,
-                'password' => null,
-                'from_address' => 'hello@example.com',
-                'from_name' => config('app.name', 'Laravel'),
-                'is_enabled' => false,
+                'mail_mailer' => 'mailgun',
+                'mailgun_domain' => env('MAILGUN_DOMAIN', 'sandbox4b4ea9f5c65b430492a08fe893705064.mailgun.org'),
+                'mailgun_secret' => env('MAILGUN_SECRET'),
+                'mailgun_endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+                'mail_from_address' => env('MAIL_FROM_ADDRESS', 'no-reply@mail.hotescort.com.au'),
+                'mail_from_name' => env('MAIL_FROM_NAME', config('app.name', 'HotEscort')),
+                'is_enabled' => true,
             ],
         );
     }

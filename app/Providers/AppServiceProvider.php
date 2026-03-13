@@ -99,10 +99,22 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
+        $mailgunDomain = $setting->mailgun_domain ?: env('MAILGUN_DOMAIN');
+        $mailgunEndpoint = $setting->mailgun_endpoint ?: env('MAILGUN_ENDPOINT', 'api.mailgun.net');
+
+        if (filled($mailgunDomain)) {
+            $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
+        }
+
+        if (filled($mailgunEndpoint)) {
+            $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
+                ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
+        }
+
         Config::set('mail.default', $setting->mail_mailer ?: 'mailgun');
-        Config::set('services.mailgun.domain', $setting->mailgun_domain ?: env('MAILGUN_DOMAIN'));
+        Config::set('services.mailgun.domain', $mailgunDomain);
         Config::set('services.mailgun.secret', $setting->mailgun_secret ?: env('MAILGUN_SECRET'));
-        Config::set('services.mailgun.endpoint', $setting->mailgun_endpoint ?: env('MAILGUN_ENDPOINT', 'api.mailgun.net'));
+        Config::set('services.mailgun.endpoint', $mailgunEndpoint ?: 'api.mailgun.net');
         Config::set('mail.from.address', $setting->mail_from_address ?: env('MAIL_FROM_ADDRESS'));
         Config::set('mail.from.name', $setting->mail_from_name ?: env('MAIL_FROM_NAME', config('app.name')));
 
