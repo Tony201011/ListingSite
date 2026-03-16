@@ -113,4 +113,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         $this->notify(new BrandedResetPasswordNotification($token));
     }
+
+    public function rateGroups()
+    {
+        return $this->hasMany(RateGroup::class);
+    }
 }

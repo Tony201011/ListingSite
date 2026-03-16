@@ -175,6 +175,10 @@ Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])
     ->name('my-rate.update')
     ->middleware('auth');
 
+    Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store')->middleware('auth');
+    Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update')->middleware('auth');
+    Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy')->middleware('auth');
+
 Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
     ->name('my-availability')
     ->middleware('auth');

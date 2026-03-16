@@ -104,13 +104,13 @@
                             <div>
                                 <label class="block font-semibold text-[#e04ecb] mb-1">Description</label>
                                 <input type="text" x-model="form.desc"
-                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent"
+                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent text-gray-900"
                                     :class="{ 'border-red-500': validationErrors.desc, 'border-gray-300': !validationErrors.desc }"
                                     placeholder="e.g. 1 hour GFE">
                                 <template x-if="validationErrors.desc">
                                     <p class="text-red-500 text-xs mt-1" x-text="validationErrors.desc"></p>
                                 </template>
-                                <p class="text-[#e04ecb] text-xs mt-1">What do I type in here?</p>
+                                <p class="text-pink-700 text-xs mt-1">What do I type in here?</p>
                             </div>
 
                             <!-- Incall & Outcall -->
@@ -118,7 +118,7 @@
                                 <div>
                                     <label class="block font-semibold text-[#e04ecb] mb-1">Incall ($)</label>
                                     <input type="text" x-model="form.incall"
-                                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent"
+                                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent text-gray-900"
                                         :class="{ 'border-red-500': validationErrors.incall, 'border-gray-300': !validationErrors.incall }"
                                         placeholder="250">
                                     <template x-if="validationErrors.incall">
@@ -128,7 +128,7 @@
                                 <div>
                                     <label class="block font-semibold text-[#e04ecb] mb-1">Outcall ($)</label>
                                     <input type="text" x-model="form.outcall"
-                                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent"
+                                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent text-gray-900"
                                         :class="{ 'border-red-500': validationErrors.outcall, 'border-gray-300': !validationErrors.outcall }"
                                         placeholder="300">
                                     <template x-if="validationErrors.outcall">
@@ -141,13 +141,13 @@
                             <div>
                                 <label class="block font-semibold text-[#e04ecb] mb-1">Extra info <span class="text-gray-400 font-normal">(optional)</span></label>
                                 <textarea x-model="form.extra" rows="2"
-                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent"
+                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent text-gray-900"
                                     :class="{ 'border-red-500': validationErrors.extra, 'border-gray-300': !validationErrors.extra }"
                                     placeholder="Additional details..."></textarea>
                                 <template x-if="validationErrors.extra">
                                     <p class="text-red-500 text-xs mt-1" x-text="validationErrors.extra"></p>
                                 </template>
-                                <p class="text-[#e04ecb] text-xs mt-1">What do I type in here?</p>
+                                <p class="text-pink-700 text-xs mt-1">What do I type in here?</p>
                             </div>
 
                             <!-- Form Buttons -->
@@ -231,35 +231,34 @@
             },
 
             validateForm() {
-                    this.clearValidationErrors();
-                    let isValid = true;
+                this.clearValidationErrors();
+                let isValid = true;
 
-                    // Description required
-                    if (!this.form.desc || !this.form.desc.trim()) {
-                        this.validationErrors.desc = 'Description is required.';
-                        isValid = false;
-                    }
+                // Description required
+                if (!this.form.desc || !this.form.desc.trim()) {
+                    this.validationErrors.desc = 'Description is required.';
+                    isValid = false;
+                }
 
-                    // Incall required
-                    if (!this.form.incall || !this.form.incall.trim()) {
-                        this.validationErrors.incall = 'Incall rate is required.';
-                        isValid = false;
-                    }
+                // Incall required
+                if (!this.form.incall || !this.form.incall.trim()) {
+                    this.validationErrors.incall = 'Incall rate is required.';
+                    isValid = false;
+                }
 
-                    // Outcall required
-                    if (!this.form.outcall || !this.form.outcall.trim()) {
-                        this.validationErrors.outcall = 'Outcall rate is required.';
-                        isValid = false;
-                    }
+                // Outcall required
+                if (!this.form.outcall || !this.form.outcall.trim()) {
+                    this.validationErrors.outcall = 'Outcall rate is required.';
+                    isValid = false;
+                }
 
-                    return isValid;
+                return isValid;
             },
 
             clearValidationErrors() {
                 this.validationErrors = { desc: '', incall: '', outcall: '', extra: '' };
             },
 
-            // Map Laravel validation errors to our validationErrors object
             handleServerErrors(errors) {
                 this.clearValidationErrors();
                 if (errors.description) {
