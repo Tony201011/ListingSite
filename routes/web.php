@@ -8,6 +8,7 @@ use App\Http\Controllers\PurchaseCreditController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\MyRateController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
@@ -156,10 +157,9 @@ Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])
     ->middleware('auth')
     ->name('edit-profile');
 
-
-Route::get('/my-rate', function () {
-    return view('my-rate');
-});
+Route::get('/my-rate', [MyRateController::class, 'index'])
+    ->name('my-rate')
+    ->middleware('auth');
 
 
 
