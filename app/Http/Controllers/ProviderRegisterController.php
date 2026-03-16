@@ -629,4 +629,87 @@ class ProviderRegisterController extends Controller
     {
         return preg_replace('/^0/', '+61', $mobile);
     }
+
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/signin');
+    }
+
+    public function changePassword(Request $request)
+    {
+         return view('change-password');
+    }
+
+    public function deleteAccount(Request $request)
+    {
+         return view('delete-account');
+    }
+
+    public function shortUrl(Request $request)
+    {
+         return view('short-url');
+    }
+
+    public function onlineNow(Request $request)
+    {
+         return view('online-now');
+    }
+
+    public function availableNow(Request $request)
+    {
+         return view('available-now');
+    }
+
+    public function setForget(Request $request){
+
+         return view('set-forget');
+
+    }
+
+    public function myBabeRank(Request $request){
+
+         return view('my-babe-rank');
+
+     }
+
+     public function profileMessage(Request $request){
+
+         return view('profile-message');
+
+     }
+
+     public function hideProfile(Request $request){
+
+         return view('hide-profile');
+
+     }
+
+     public function clickHereToVerify(Request $request){
+
+         return view('click-here-to-verify');
+
+     }
+
+     public function viewProfileSetting(Request $request){
+
+         return view('view-profile-setting');
+
+     }
+
+     public function afterImageUpload(Request $request){
+
+         return view('after-image-upload');
+
+     }
+
+     public function babeRank(Request $request){
+
+         return view('babe-rank-read-more');
+
+     }
 }

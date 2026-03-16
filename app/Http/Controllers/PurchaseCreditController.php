@@ -8,6 +8,12 @@ use Illuminate\Validation\Rule;
 
 class PurchaseCreditController extends Controller
 {
+
+    public function purchaseCredit(Request $request)
+    {
+        return view('purchase-credit');
+    }
+
     public function checkout(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -27,5 +33,20 @@ class PurchaseCreditController extends Controller
         $selectedPrice = $prices[$selectedCredits] ?? 0;
 
         return redirect('/purchase-history')->with('checkout_success', "Checkout started for {$selectedCredits} credits (AUD $" . number_format($selectedPrice, 2) . ") under invoice name '{$validated['invoice_name']}'.");
+    }
+
+    public function creditHistory(Request $request)
+    {
+        return view('credit-history');
+    }
+
+    public function creditHistoryLastMonth(Request $request)
+    {
+        return view('credit-history-last-month');
+    }
+
+    public function purchaseHistory(Request $request)
+    {
+        return view('purchase-history');
     }
 }

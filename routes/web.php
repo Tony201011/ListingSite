@@ -31,6 +31,67 @@ Route::get('/site-password', function () {
 use Illuminate\Support\Facades\Crypt;
 use App\Models\SiteSetting;
 
+
+/** frontend pages */
+
+
+Route::get('/terms-and-conditions', [FrontendPageController::class, 'termsAndConditions'])->name('terms-and-conditions');
+Route::get('/privacy-policy', [FrontendPageController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/refund-policy', [FrontendPageController::class, 'refundPolicy'])->name('refund-policy');
+Route::get('/faq', [FrontendPageController::class, 'faq'])->name('faq');
+Route::get('/faq/load-more', [FrontendPageController::class, 'faqLoadMore'])->name('faq.load-more');
+Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('anti-spam-policy');
+
+
+
+Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('contact-us');
+Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
+
+
+Route::get('/', [HomeController::class, 'index']);
+Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
+Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
+
+
+Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
+Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
+Route::get('/naughty-corner', [FrontendPageController::class, 'naughtyCorner'])->name('naughty-corner');
+
+Route::get('/membership', [FrontendPageController::class, 'membership'])->name('membership');
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+
+Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.load-more');
+
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+Route::get('/pricing', [FrontendPageController::class, 'pricing'])->name('pricing');
+
+Route::get('/403', function () {
+    abort(403);
+});
+
+
+
+/** frontend page end */
+
+
+/** auth routes start */
+
+Route::post('/logout', function (Request $request) {
+    Auth::logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/');
+})->name('logout');
+
+/** auth routes end */
+
+
+/** site password start */
+
 Route::post('/site-password', function (Request $request) {
     $request->validate(['password' => 'required|string']);
 
@@ -56,33 +117,9 @@ Route::post('/site-password', function (Request $request) {
 })->name('site-password.submit');
 
 
+/**site password end */
 
-Route::get('/send-sms', function () {
 
-    $account_sid = env('TWILIO_ACCOUNT_SID');
-    $api_sid = env('TWILIO_API_SID');
-    $api_secret = env('TWILIO_API_SECRET');
-
-    $client = new Client($api_sid, $api_secret, $account_sid);
-
-    try {
-
-        $message = $client->messages->create(
-            '+61415573077', // Your number
-            [
-                'from' => env('TWILIO_PHONE'),
-                'body' => 'Hello! This is a Twilio test SMS from Laravel.'
-            ]
-        );
-
-        return "SMS Sent Successfully. SID: " . $message->sid;
-
-    } catch (\Exception $e) {
-
-        return "Error: " . $e->getMessage();
-    }
-
-});
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
@@ -109,50 +146,9 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/reset-password/update', [PasswordResetController::class, 'reset'])
         ->name('password.update');
 });
-// Route::post('/signin', function () {
-//     return redirect('/after-image-upload')->with('success', 'Signed in successfully.');
-// })->name('signin.submit');
 
 
-Route::get('/', [HomeController::class, 'index']);
-Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
-Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
-
-
-
-Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
-Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
-Route::get('/naughty-corner', [FrontendPageController::class, 'naughtyCorner'])->name('naughty-corner');
-
-Route::get('/blog', [BlogController::class, 'index'])->name('blog');
-Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.load-more');
-Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
-
-
-
-Route::post('/logout', function (Request $request) {
-    Auth::logout();
-
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-
-    return redirect('/');
-})->name('logout');
-
-
-
-
-
-Route::get('/change-password', function () {
-    return view('change-password');
-});
-
-Route::get('/delete-account', function () {
-    return view('delete-account');
-});
-
-
-//after sign in page profile pagge when user not fill any informatiom
+// auth controller routes
 
 Route::get('/my-profile', function () {
     return view('my-profile-1');
@@ -165,139 +161,104 @@ Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])
 Route::get('/my-rate', [MyRateController::class, 'index'])
     ->name('my-rate')
     ->middleware('auth');
-
-
-
 Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
     ->name('my-availability')
     ->middleware('auth');
-
-
 Route::get('/set-your-availability', [SetYourAvailabilityController::class, 'index'])
     ->name('set-your-availability')
     ->middleware('auth');
-
-
 Route::get('/add-photo', [PhotoController::class, 'index'])
     ->name('add-photo')
     ->middleware('auth');
-
 Route::get('/photos', [PhotoController::class, 'getPhotos'])
     ->name('photos')
     ->middleware('auth');
-
 Route::get('/my-videos', [MyVideosController::class, 'index'])
     ->name('my-videos')
     ->middleware('auth');
-
-
 Route::get('/upload-video', [MyVideosController::class, 'uploadVideo'])
     ->name('upload-video')
     ->middleware('auth');
-
 
 Route::get('/my-tours', [MyToursController::class, 'index'])
     ->name('my-tours')
     ->middleware('auth');
 
+Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password')->middleware('auth');
+
+Route::get('/delete-account', [ProviderRegisterController::class, 'deleteAccount'])->name('delete-account')->middleware('auth');
+
+Route::get('/short-url', [ProviderRegisterController::class, 'shortUrl'])->name('short-url')->middleware('auth');
 
 
-Route::get('/short-url', function () {
-    return view('short-url');
-});
-
-Route::get('/online-now', function () {
-    return view('online-now');
-});
-
-Route::get('/available-now', function () {
-    return view('available-now');
-});
-
-Route::get('/set-and-forget', function () {
-    return view('set-and-forget');
-});
-
-Route::get('/my-babe-rank', function () {
-    return view('my-babe-rank');
-});
-
-Route::get('/profile-message', function () {
-    return view('profile-message');
-});
-
-Route::get('/hide-profile', function () {
-    return view('hide-profile');
-});
+Route::get('/online-now', [ProviderRegisterController::class, 'onlineNow'])->name('online-now')->middleware('auth');
 
 
 
-Route::get('/click-here-to-verify', function () {
-    return view('click-here-to-verify');
-});
-
-
-Route::get('/view-profile-setting', function () {
-    return view('view-profile-setting');
-});
-Route::get('/purchase-credit', function () {
-    return view('purchase-credit');
-});
-
-Route::get('/membership', function () {
-    return view('membership');
-});
-
-Route::get('/pricing', [FrontendPageController::class, 'pricing'])->name('pricing');
-
-Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
+Route::get('/available-now', [ProviderRegisterController::class, 'availableNow'])->name('available-now')->middleware('auth');
 
 
 
 
-Route::get('/credit-history', function () {
-    return view('credit-history');
-});
 
+Route::get('/set-forget', [ProviderRegisterController::class, 'setForget'])->name('set-forget')->middleware('auth');
 
-Route::get('/credit-history-last-month', function () {
-    return view('credit-history-last-month');
-});
+Route::get('/my-babe-rank', [ProviderRegisterController::class, 'myBabeRank'])->name('my-babe-rank')->middleware('auth');
 
-Route::get('/after-image-upload', function () {
-    return view('after-image-upload');
-});
+Route::get('/profile-message', [ProviderRegisterController::class, 'profileMessage'])->name('profile-message')->middleware('auth');
 
+Route::get('/hide-profile', [ProviderRegisterController::class, 'hideProfile'])->name('hide-profile')->middleware('auth');
 
-Route::get('/purchase-history', function () {
-    return view('purchase-history');
-});
+Route::get('/click-here-to-verify', [ProviderRegisterController::class, 'clickHereToVerify'])->name('click-here-to-verify')->middleware('auth');
 
-
-Route::get('/babe-rank-read-more', function () {
-    return view('babe-rank-read-more');
-});
-
-
-Route::get('/terms-and-conditions', [FrontendPageController::class, 'termsAndConditions'])->name('terms-and-conditions');
-Route::get('/privacy-policy', [FrontendPageController::class, 'privacyPolicy'])->name('privacy-policy');
-Route::get('/refund-policy', [FrontendPageController::class, 'refundPolicy'])->name('refund-policy');
-Route::get('/faq', [FrontendPageController::class, 'faq'])->name('faq');
-Route::get('/faq/load-more', [FrontendPageController::class, 'faqLoadMore'])->name('faq.load-more');
-Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('anti-spam-policy');
+Route::get('/view-profile-setting', [ProviderRegisterController::class, 'viewProfileSetting'])->name('view-profile-setting')->middleware('auth');
 
 
 
-Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('contact-us');
-Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
 
-Route::get('/403', function () {
-    abort(403);
-});
 
+Route::get('/after-image-upload', [ProviderRegisterController::class, 'afterImageUpload'])->name('after-image-upload')->middleware('auth');
+
+
+Route::get('/babe-rank', [ProviderRegisterController::class, 'babeRank'])->name('babe-rank')->middleware('auth');
+
+
+
+
+
+
+
+Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit')->middleware('auth');
+
+
+Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout')->middleware('auth');
+
+
+Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history')->middleware('auth');
+
+
+
+
+
+
+Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month')->middleware('auth');
+
+
+Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month')->middleware('auth');
+
+
+
+Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history')->middleware('auth');
+
+
+
+
+
+
+
+// social auth routes  enabled providers: google, facebook, apple (if needed, add more in SocialAuthController and config/services.php) when admin enables in settings
 Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
-Route::post('/provider/register', [ProviderRegisterController::class, 'store']);
 
 require __DIR__.'/escort-review.php';
