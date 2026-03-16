@@ -27,9 +27,9 @@ class TwilioSettingForm
                 TextInput::make('dummy_mobile_number')
                     ->label('Dummy Australian Mobile Number')
                     ->placeholder('+61400000000')
-                    ->helperText('Must be in +614XXXXXXXX format.')
-                    ->regex('/^\+61\d{9}$/')
-                    ->maxLength(20),
+                    ->helperText('Must be in +614XXXXXXXX or 04XXXXXXXX format.')
+                    ->regex('/^(?:\+614|04)\d{8}$/')
+                    ->maxLength(12),
                 TextInput::make('dummy_otp')
                     ->label('Dummy OTP')
                     ->placeholder('123456')
