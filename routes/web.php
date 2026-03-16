@@ -9,10 +9,15 @@ use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\MyRateController;
+use App\Http\Controllers\MyVideosController;
+use App\Http\Controllers\MyToursController;
+use App\Http\Controllers\MyAvailabilityController;
+use App\Http\Controllers\PhotoController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProviderRegisterController;
+use App\Http\Controllers\SetYourAvailabilityController;
 use Twilio\Rest\Client;
 
 
@@ -163,34 +168,39 @@ Route::get('/my-rate', [MyRateController::class, 'index'])
 
 
 
-Route::get('/my-availability', function () {
-    return view('my-availability');
-});
+Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
+    ->name('my-availability')
+    ->middleware('auth');
 
 
-Route::get('/set-your-availability', function () {
-    return view('set-your-availability');
-});
+Route::get('/set-your-availability', [SetYourAvailabilityController::class, 'index'])
+    ->name('set-your-availability')
+    ->middleware('auth');
 
-Route::get('/add-photo', function () {
-    return view('add-photo');
-})->name('add-photo');
 
-Route::get('/photos', function () {
-    return view('photos');
-});
+Route::get('/add-photo', [PhotoController::class, 'index'])
+    ->name('add-photo')
+    ->middleware('auth');
 
-Route::get('/my-videos', function () {
-    return view('my-videos');
-});
+Route::get('/photos', [PhotoController::class, 'getPhotos'])
+    ->name('photos')
+    ->middleware('auth');
 
-Route::get('/upload-video', function () {
-    return view('upload-video');
-})->name('upload-video');
+Route::get('/my-videos', [MyVideosController::class, 'index'])
+    ->name('my-videos')
+    ->middleware('auth');
 
-Route::get('/my-tours', function () {
-    return view('my-tours');
-});
+
+Route::get('/upload-video', [MyVideosController::class, 'uploadVideo'])
+    ->name('upload-video')
+    ->middleware('auth');
+
+
+Route::get('/my-tours', [MyToursController::class, 'index'])
+    ->name('my-tours')
+    ->middleware('auth');
+
+
 
 Route::get('/short-url', function () {
     return view('short-url');
@@ -230,20 +240,6 @@ Route::get('/click-here-to-verify', function () {
 Route::get('/view-profile-setting', function () {
     return view('view-profile-setting');
 });
-
-
-
-
-
-
-
-
-
-// Route::get('/otp-verification', function () {
-//     return view('otp-verification');
-// });
-
-
 Route::get('/purchase-credit', function () {
     return view('purchase-credit');
 });
