@@ -123,7 +123,7 @@
                                 @click="showPassword = !showPassword"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#e04ecb] font-semibold"
                             >
-                                
+
                             </button>
                         </div>
                     </div>
@@ -269,7 +269,7 @@
                         @blur="touched.mobile = true"
                         @input="touched.mobile = true; validateMobile(); validate();"
                         value="{{ old('mobile') }}"
-                        placeholder="Australian mobile (e.g. +61415573077)"
+                        placeholder="Australian mobile (e.g. 04XXXXXXXX)"
                         class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
                 </div>
@@ -463,11 +463,11 @@
             },
 
             validateMobile() {
-                const ausMobile = /^\+61\d{9}$/;
+                const ausMobile = /^04\d{8}$/; // Australian mobile: starts with 04, followed by 8 digits
                 if (!this.mobile) {
                     this.errors.mobile = 'Mobile number is required.';
                 } else if (!ausMobile.test(this.mobile)) {
-                    this.errors.mobile = 'Only Australian mobile numbers in the format +614XXXXXXXX are allowed (e.g. +61415573077)';
+                    this.errors.mobile = 'Only Australian mobile numbers in the format 04XXXXXXXX are allowed (e.g. 0412345678)';
                 } else {
                     delete this.errors.mobile;
                 }
