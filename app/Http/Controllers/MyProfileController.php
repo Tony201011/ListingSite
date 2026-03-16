@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class MyProfileController extends Controller
 {
@@ -12,13 +16,38 @@ class MyProfileController extends Controller
 
     public function stepTwo()
     {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        $profile = $user?->providerProfile;
+
         $contactEmail = SiteSetting::query()
             ->whereNotNull('contact_email')
             ->latest('id')
             ->value('contact_email') ?? 's8813w@gmail.com';
 
+        $selected = [
+            'age_group' => $profile?->age_group_id,
+            'hair_color' => $profile?->hair_color_id,
+            'hair_length' => $profile?->hair_length_id,
+            'ethnicity' => $profile?->ethnicity_id,
+            'body_type' => $profile?->body_type_id,
+            'bust_size' => $profile?->bust_size_id,
+            'your_length' => $profile?->your_length_id,
+            'availability' => $profile?->availability,
+            'contact_method' => $profile?->contact_method,
+            'phone_contact' => $profile?->phone_contact_preference,
+            'time_waster' => $profile?->time_waster_shield,
+            'primary_identity' => $profile?->primary_identity ?? [],
+            'attributes' => $profile?->attributes ?? [],
+            'services_style' => $profile?->services_style ?? [],
+            'services_provided' => $profile?->services_provided ?? [],
+        ];
+
         return view('my-profile-2', [
+            'user' => $user,
+            'profile' => $profile,
             'contactEmail' => $contactEmail,
+            'selected' => $selected,
             'ageGroupOptions' => $this->getCategoryOptions('age-group'),
             'hairColorOptions' => $this->getCategoryOptions('hair-color'),
             'hairLengthOptions' => $this->getCategoryOptions('hair-length'),
@@ -36,6 +65,94 @@ class MyProfileController extends Controller
             'timeWasterOptions' => $this->getCategoryOptions('time-waster-shield'),
         ]);
     }
+
+    public function save(Request $request)
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if (! $user) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'mobile' => 'required|string|max:30',
+            'suburb' => 'required|string|max:255',
+            'introduction_line' => 'required|string',
+            'profile_text' => 'required|string',
+
+            'age_group' => 'required|exists:categories,id',
+            'hair_color' => 'required|exists:categories,id',
+            'hair_length' => 'required|exists:categories,id',
+            'ethnicity' => 'required|exists:categories,id',
+            'body_type' => 'required|exists:categories,id',
+            'bust_size' => 'required|exists:categories,id',
+            'your_length' => 'required|exists:categories,id',
+
+            'availability' => 'required|string|max:100',
+            'contact_method' => 'required|string|max:100',
+            'phone_contact' => 'required|string|max:100',
+            'time_waster' => 'required|string|max:100',
+
+            'primary_identity' => 'required|array|min:1',
+            'primary_identity.*' => 'string',
+            'attributes' => 'required|array|min:1',
+            'attributes.*' => 'string',
+            'services_style' => 'required|array|max:12|min:1',
+            'services_style.*' => 'string',
+            'services_provided' => 'required|array|min:1',
+            'services_provided.*' => 'string',
+
+            'twitter_handle' => 'nullable|string|max:255',
+            'website' => 'nullable|url|max:255',
+            'onlyfans_username' => 'nullable|string|max:255',
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'mobile' => $validated['mobile'] ?? null,
+            'suburb' => $validated['suburb'] ?? null,
+        ]);
+
+        $profile = $user->providerProfile()->firstOrNew(['user_id' => $user->id]);
+
+        // Ensure required columns are set on insert (name + slug are non-nullable)
+        $profile->name = $validated['name'] ?? $user->name;
+        if (! $profile->slug) {
+            $profile->slug = $this->generateUniqueSlug($profile->name);
+        }
+
+        $profile->fill([
+            'introduction_line' => $validated['introduction_line'] ?? null,
+            'profile_text' => $validated['profile_text'] ?? null,
+            'primary_identity' => $validated['primary_identity'] ?? [],
+            'attributes' => $validated['attributes'] ?? [],
+            'services_style' => $validated['services_style'] ?? [],
+            'services_provided' => $validated['services_provided'] ?? [],
+            'age_group_id' => $validated['age_group'] ?? null,
+            'hair_color_id' => $validated['hair_color'] ?? null,
+            'hair_length_id' => $validated['hair_length'] ?? null,
+            'ethnicity_id' => $validated['ethnicity'] ?? null,
+            'body_type_id' => $validated['body_type'] ?? null,
+            'bust_size_id' => $validated['bust_size'] ?? null,
+            'your_length_id' => $validated['your_length'] ?? null,
+            'availability' => $validated['availability'] ?? null,
+            'contact_method' => $validated['contact_method'] ?? null,
+            'phone_contact_preference' => $validated['phone_contact'] ?? null,
+            'time_waster_shield' => $validated['time_waster'] ?? null,
+            'twitter_handle' => $validated['twitter_handle'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'onlyfans_username' => $validated['onlyfans_username'] ?? null,
+        ]);
+        $profile->save();
+
+        if ($request->wantsJson()) {
+            return response()->json(["success" => true, "message" => "Profile updated successfully."], 200);
+        }
+
+        return redirect()->route('edit-profile')->with('success', 'Profile updated successfully.');
+    }
+
 
     private function getCategoryOptions(string $slug): array
     {
@@ -60,7 +177,7 @@ class MyProfileController extends Controller
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->pluck('name')
+            ->pluck('name', 'id')
             ->all();
 
         if (empty($options)) {
@@ -72,5 +189,19 @@ class MyProfileController extends Controller
         }
 
         return $options;
+    }
+
+    private function generateUniqueSlug(string $name): string
+    {
+        $base = Str::slug($name) ?: 'profile';
+        $slug = $base;
+        $counter = 1;
+
+        while (ProviderProfile::where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }

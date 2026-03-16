@@ -158,6 +158,10 @@ Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])
     ->middleware('auth')
     ->name('edit-profile');
 
+Route::post('/edit-profile', [MyProfileController::class, 'save'])
+    ->middleware('auth')
+    ->name('edit-profile.save');
+
 Route::get('/my-rate', [MyRateController::class, 'index'])
     ->name('my-rate')
     ->middleware('auth');

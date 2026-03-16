@@ -1,49 +1,273 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="bg-white min-h-screen py-10 px-4">
+<div class="bg-white min-h-screen py-10 px-4"
+     x-data="{
+        // Basic info
+        name: @js(old('name', $user->name ?? '')),
+        mobile: @js(old('mobile', $user->mobile ?? '')),
+        introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
+        suburb: @js(old('suburb', $user->suburb ?? '')),
+        profile_text: @js(old('profile_text', $profile->profile_text ?? '')),
+
+        // Stats selects
+        age_group: @js(old('age_group', $selected['age_group'] ?? '')),
+        hair_color: @js(old('hair_color', $selected['hair_color'] ?? '')),
+        hair_length: @js(old('hair_length', $selected['hair_length'] ?? '')),
+        ethnicity: @js(old('ethnicity', $selected['ethnicity'] ?? '')),
+        body_type: @js(old('body_type', $selected['body_type'] ?? '')),
+        bust_size: @js(old('bust_size', $selected['bust_size'] ?? '')),
+        your_length: @js(old('your_length', $selected['your_length'] ?? '')),
+
+        // Tags
+        primaryIdentity: @js(old('primary_identity', $selected['primary_identity'] ?? [])),
+        attributes: @js(old('attributes', $selected['attributes'] ?? [])),
+        servicesStyle: @js(old('services_style', $selected['services_style'] ?? [])),
+
+        // Services provided
+        services_provided: @js(old('services_provided', $selected['services_provided'] ?? [])),
+
+        // Availability radios
+        availability: @js(old('availability', $selected['availability'] ?? '')),
+        contact_method: @js(old('contact_method', $selected['contact_method'] ?? '')),
+        phone_contact: @js(old('phone_contact', $selected['phone_contact'] ?? '')),
+        time_waster: @js(old('time_waster', $selected['time_waster'] ?? '')),
+
+        // Social links
+        twitter_handle: @js(old('twitter_handle', $profile->twitter_handle ?? '')),
+        website: @js(old('website', $profile->website ?? '')),
+        onlyfans_username: @js(old('onlyfans_username', $profile->onlyfans_username ?? '')),
+
+        // UI state
+        submitting: false,
+        errors: @js($errors->all()),
+
+        // Methods
+        toggleTag(group, tag, event) {
+            if (group === 'primaryIdentity') {
+                this.primaryIdentity = [tag];
+            } else if (group === 'attributes') {
+                if (this.attributes.includes(tag)) {
+                    this.attributes = this.attributes.filter(t => t !== tag);
+                } else {
+                    this.attributes.push(tag);
+                }
+            } else if (group === 'servicesStyle') {
+                if (this.servicesStyle.includes(tag)) {
+                    this.servicesStyle = this.servicesStyle.filter(t => t !== tag);
+                } else if (this.servicesStyle.length < 12) {
+                    this.servicesStyle.push(tag);
+                } else {
+                    const el = event.currentTarget;
+                    el.classList.add('shake');
+                    setTimeout(() => el.classList.remove('shake'), 300);
+                }
+            }
+        },
+
+        toggleService(service) {
+            if (this.services_provided.includes(service)) {
+                this.services_provided = this.services_provided.filter(s => s !== service);
+            } else {
+                this.services_provided.push(service);
+            }
+        },
+
+        validate() {
+            let errors = [];
+            if (!this.name.trim()) errors.push('Name is required.');
+            if (!this.mobile.trim()) errors.push('Mobile number is required.');
+            if (!this.suburb.trim()) errors.push('Suburb is required.');
+            if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
+            if (!this.profile_text.trim()) errors.push('Profile text is required.');
+            if (!this.age_group) errors.push('Age group is required.');
+            if (!this.hair_color) errors.push('Hair color is required.');
+            if (!this.hair_length) errors.push('Hair length is required.');
+            if (!this.ethnicity) errors.push('Ethnicity is required.');
+            if (!this.body_type) errors.push('Body type is required.');
+            if (!this.bust_size) errors.push('Bust size is required.');
+            if (!this.your_length) errors.push('Your length is required.');
+            if (this.primaryIdentity.length === 0) errors.push('Primary identity is required.');
+            if (this.attributes.length === 0) errors.push('Attributes are required.');
+            if (this.servicesStyle.length === 0) errors.push('Services & style are required.');
+            if (this.services_provided.length === 0) errors.push('Services provided are required.');
+            if (!this.availability) errors.push('Availability is required.');
+            if (!this.contact_method) errors.push('Contact method is required.');
+            if (!this.phone_contact) errors.push('Phone contact preference is required.');
+            if (!this.time_waster) errors.push('Time waster shield preference is required.');
+            return errors;
+        },
+
+        async submitForm() {
+            this.errors = this.validate();
+
+            if (this.errors.length > 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation errors',
+                    html: `<ul style='text-align:left; margin:0; padding-left:1.2rem;'>${this.errors.map(e => `<li>${e}</li>`).join('')}</ul>`
+                });
+                return;
+            }
+
+            this.submitting = true;
+
+            const formData = new FormData();
+            formData.append('name', this.name);
+            formData.append('mobile', this.mobile);
+            formData.append('introduction_line', this.introduction_line);
+            formData.append('suburb', this.suburb);
+            formData.append('profile_text', this.profile_text);
+            formData.append('age_group', this.age_group);
+            formData.append('hair_color', this.hair_color);
+            formData.append('hair_length', this.hair_length);
+            formData.append('ethnicity', this.ethnicity);
+            formData.append('body_type', this.body_type);
+            formData.append('bust_size', this.bust_size);
+            formData.append('your_length', this.your_length);
+
+            this.primaryIdentity.forEach(tag => formData.append('primary_identity[]', tag));
+            this.attributes.forEach(tag => formData.append('attributes[]', tag));
+            this.servicesStyle.forEach(tag => formData.append('services_style[]', tag));
+            this.services_provided.forEach(service => formData.append('services_provided[]', service));
+
+            formData.append('availability', this.availability);
+            formData.append('contact_method', this.contact_method);
+            formData.append('phone_contact', this.phone_contact);
+            formData.append('time_waster', this.time_waster);
+
+            formData.append('twitter_handle', this.twitter_handle);
+            formData.append('website', this.website);
+            formData.append('onlyfans_username', this.onlyfans_username);
+
+            formData.append('_token', @js(csrf_token()));
+
+            try {
+                const response = await fetch(@js(url()->current()), {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                let data = {};
+                const contentType = response.headers.get('content-type') || '';
+
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    data = { message: text };
+                }
+
+                if (response.ok) {
+                    this.errors = [];
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Saved',
+                        text: data.message || 'Profile updated successfully.',
+                        timer: 2500,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                } else if (response.status === 422) {
+                    const messages = Object.values(data.errors || {}).flat();
+                    this.errors = messages.length ? messages : ['Validation failed.'];
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation errors',
+                        html: `<ul style='text-align:left; margin:0; padding-left:1.2rem;'>${this.errors.map(m => `<li>${m}</li>`).join('')}</ul>`
+                    });
+                } else {
+                    this.errors = [data.message || 'Unable to save profile. Please try again later.'];
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Unable to save profile. Please try again later.'
+                    });
+                }
+            } catch (error) {
+                this.errors = ['Unable to save profile. Please check your connection and try again.'];
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to save profile. Please check your connection and try again.'
+                });
+            } finally {
+                this.submitting = false;
+            }
+        }
+     }"
+>
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-l-6 border-[#e04ecb] pl-4">
             Edit your profile
         </h1>
 
+        <button onclick="window.history.back()" type="button" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer">
+            <span class="mr-1">&lt;</span> back
+        </button>
+
         <!-- Profile Form -->
-        <form class="space-y-8">
+        <form method="POST" @submit.prevent="submitForm" id="editProfileForm" class="space-y-8">
+            @csrf
+
+            <!-- Display server-side errors if any -->
+            @if ($errors->any())
+                <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
+                    <p class="font-semibold">Please fix the following errors:</p>
+                    <ul class="mt-2 list-disc list-inside text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <template x-if="errors.length > 0">
+                <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
+                    <p class="font-semibold">Please fix the following errors:</p>
+                    <ul class="mt-2 list-disc list-inside text-sm">
+                        <template x-for="(error, index) in errors" :key="index">
+                            <li x-text="error"></li>
+                        </template>
+                    </ul>
+                </div>
+            </template>
+
             <!-- ===== BASIC INFO CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-6">
-                    Basic information
-                </h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Basic information</h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Your name</label>
-                        <input type="text" value="Sourabh wadhwa" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
+                        <input name="name" type="text" x-model="name" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Mobile number</label>
-                        <input type="text" value="0415573077" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
+                        <input name="mobile" type="text" x-model="mobile" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
                     </div>
                 </div>
 
                 <div class="mt-6">
                     <label class="block font-semibold text-[#e04ecb] mb-1">Introduction line</label>
-                    <textarea rows="2" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">I am Sourabh Wadhwa, a 24-year-old student from Mumbai...</textarea>
+                    <textarea name="introduction_line" x-model="introduction_line" rows="2" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"></textarea>
                 </div>
 
                 <div class="mt-6">
                     <label class="block font-semibold text-[#e04ecb] mb-1">Your suburb</label>
-                    <input type="text" value="Melbourne VIC" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
+                    <input name="suburb" type="text" x-model="suburb" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
                     <p class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
                 </div>
             </div>
 
             <!-- ===== PROFILE TEXT CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                    Your profile text
-                </h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Your profile text</h2>
 
                 <div class="bg-pink-50 border-l-4 border-[#e04ecb] p-4 text-sm text-gray-800 mb-4">
                     <p>It is illegal in Vic & QLD to describe your sexual services in details, you also cannot refer to the term massage. In QLD you cannot advertise 'doubles'. If you are in VIC please do not forget to mention your SWA Licence number</p>
@@ -67,76 +291,74 @@
                     <span>▦</span>
                     <span>▤</span>
                 </div>
-                <textarea rows="6" class="w-full px-4 py-3 border border-t-0 border-gray-400 rounded-b-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition" placeholder="Write your profile description here..."></textarea>
+                <textarea name="profile_text" x-model="profile_text" rows="6" class="w-full px-4 py-3 border border-t-0 border-gray-400 rounded-b-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition" placeholder="Write your profile description here..."></textarea>
             </div>
 
             <!-- ===== STATS CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-6">
-                    Your stats
-                </h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Your stats</h2>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Age group</label>
-                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option>- Select age -</option>
-                            @foreach(($ageGroupOptions ?? []) as $option)
-                                <option>{{ $option }}</option>
+                        <select name="age_group" x-model="age_group" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option value="">- Select age -</option>
+                            @foreach($ageGroupOptions ?? [] as $id => $label)
+                                <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Hair color</label>
-                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option>- Select -</option>
-                            @foreach(($hairColorOptions ?? []) as $option)
-                                <option>{{ $option }}</option>
+                        <select name="hair_color" x-model="hair_color" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option value="">- Select -</option>
+                            @foreach($hairColorOptions ?? [] as $id => $label)
+                                <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Hair length</label>
-                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option>- Select -</option>
-                            @foreach(($hairLengthOptions ?? []) as $option)
-                                <option>{{ $option }}</option>
+                        <select name="hair_length" x-model="hair_length" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option value="">- Select -</option>
+                            @foreach($hairLengthOptions ?? [] as $id => $label)
+                                <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Ethnicity</label>
-                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option>- Select -</option>
-                            @foreach(($ethnicityOptions ?? []) as $option)
-                                <option>{{ $option }}</option>
+                        <select name="ethnicity" x-model="ethnicity" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option value="">- Select -</option>
+                            @foreach($ethnicityOptions ?? [] as $id => $label)
+                                <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Body type</label>
-                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option>- Select -</option>
-                            @foreach(($bodyTypeOptions ?? []) as $option)
-                                <option>{{ $option }}</option>
+                        <select name="body_type" x-model="body_type" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option value="">- Select -</option>
+                            @foreach($bodyTypeOptions ?? [] as $id => $label)
+                                <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Bust size</label>
-                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option>- Select -</option>
-                            @foreach(($bustSizeOptions ?? []) as $option)
-                                <option>{{ $option }}</option>
+                        <select name="bust_size" x-model="bust_size" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option value="">- Select -</option>
+                            @foreach($bustSizeOptions ?? [] as $id => $label)
+                                <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Your length</label>
-                        <select class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option>- Select -</option>
-                            @foreach(($yourLengthOptions ?? []) as $option)
-                                <option>{{ $option }}</option>
+                        <select name="your_length" x-model="your_length" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                            <option value="">- Select -</option>
+                            @foreach($yourLengthOptions ?? [] as $id => $label)
+                                <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -145,35 +367,48 @@
 
             <!-- ===== TAGS CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">
-                    Tags that describe you
-                </h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">Tags that describe you</h2>
                 <p class="text-gray-600 text-sm mb-6">These tags help clients find you. Click to select.</p>
 
                 <div class="space-y-6">
+                    <!-- Primary identity -->
                     <div>
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Primary identity <span class="text-[#e04ecb] text-sm">(select one)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach($primaryTags as $tag)
-                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition">{{ $tag }}</span>
+                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition"
+                                      :class="{ 'selected': primaryIdentity.includes(@js($tag)) }"
+                                      @click="toggleTag('primaryIdentity', @js($tag), $event)">
+                                    {{ $tag }}
+                                </span>
                             @endforeach
                         </div>
                     </div>
 
+                    <!-- Attributes -->
                     <div>
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Attributes <span class="text-[#e04ecb] text-sm">(multiple allowed)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach($attrTags as $tag)
-                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition">{{ $tag }}</span>
+                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition"
+                                      :class="{ 'selected': attributes.includes(@js($tag)) }"
+                                      @click="toggleTag('attributes', @js($tag), $event)">
+                                    {{ $tag }}
+                                </span>
                             @endforeach
                         </div>
                     </div>
 
+                    <!-- Services & style -->
                     <div>
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Services & style <span class="text-[#e04ecb] text-sm">(up to 12)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach($styleTags as $tag)
-                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition">{{ $tag }}</span>
+                                <span class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition"
+                                      :class="{ 'selected': servicesStyle.includes(@js($tag)) }"
+                                      @click="toggleTag('servicesStyle', @js($tag), $event)">
+                                    {{ $tag }}
+                                </span>
                             @endforeach
                         </div>
                     </div>
@@ -182,15 +417,18 @@
 
             <!-- ===== SERVICES CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                    Services you provide
-                </h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Services you provide</h2>
                 <p class="text-gray-600 text-sm mb-4">Check all that apply</p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     @foreach($services as $service)
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" class="w-5 h-5 text-[#e04ecb] rounded border-gray-400 focus:ring-[#e04ecb]">
+                            <input type="checkbox"
+                                   name="services_provided[]"
+                                   value="{{ $service }}"
+                                   class="w-5 h-5 text-[#e04ecb] rounded border-gray-400 focus:ring-[#e04ecb]"
+                                   :checked="services_provided.includes(@js($service))"
+                                   @change="toggleService(@js($service))">
                             <span class="text-gray-800 text-sm">{{ $service }}</span>
                         </label>
                     @endforeach
@@ -199,17 +437,15 @@
 
             <!-- ===== AVAILABILITY CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                    Availability & contact
-                </h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Availability & contact</h2>
 
                 <div class="space-y-4">
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-2">Are you available for:</label>
                         <div class="flex flex-wrap gap-4">
-                            @foreach(($availabilityOptions ?? []) as $option)
+                            @foreach($availabilityOptions ?? [] as $option)
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="availability" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400">
+                                    <input type="radio" name="availability" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400" x-model="availability">
                                     <span class="text-gray-800">{{ $option }}</span>
                                 </label>
                             @endforeach
@@ -220,9 +456,9 @@
                         <label class="block font-semibold text-[#e04ecb] mb-2">How can people contact you?</label>
                         <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: {{ $contactEmail ?? 's8813w@gmail.com' }}</p>
                         <div class="flex flex-wrap gap-4">
-                            @foreach(($contactMethodOptions ?? []) as $option)
+                            @foreach($contactMethodOptions ?? [] as $option)
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="contact_method" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400">
+                                    <input type="radio" name="contact_method" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400" x-model="contact_method">
                                     <span class="text-gray-800">{{ $option }}</span>
                                 </label>
                             @endforeach
@@ -232,9 +468,9 @@
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-2">Phone contact preferences</label>
                         <div class="flex flex-wrap gap-4">
-                            @foreach(($phoneContactOptions ?? []) as $option)
+                            @foreach($phoneContactOptions ?? [] as $option)
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="phone_contact" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400">
+                                    <input type="radio" name="phone_contact" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400" x-model="phone_contact">
                                     <span class="text-gray-800">{{ $option }}</span>
                                 </label>
                             @endforeach
@@ -244,9 +480,9 @@
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-2">Use time waster shield for SMS?</label>
                         <div class="flex gap-4">
-                            @foreach(($timeWasterOptions ?? []) as $option)
+                            @foreach($timeWasterOptions ?? [] as $option)
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="time_waster" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400">
+                                    <input type="radio" name="time_waster" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400" x-model="time_waster">
                                     <span class="text-gray-800">{{ $option }}</span>
                                 </label>
                             @endforeach
@@ -257,30 +493,31 @@
 
             <!-- ===== OPTIONAL SOCIAL LINKS ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">
-                    Optional links
-                </h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Optional links</h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Twitter handle</label>
-                        <input type="text" value="@yourtwittername" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
+                        <input name="twitter_handle" type="text" x-model="twitter_handle" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Website</label>
-                        <input type="text" value="https://example.com" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
+                        <input name="website" type="text" x-model="website" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">OnlyFans username</label>
-                        <input type="text" value="@onlyfansusername" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
+                        <input name="onlyfans_username" type="text" x-model="onlyfans_username" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
                     </div>
                 </div>
             </div>
 
             <!-- ===== SAVE BUTTON ===== -->
             <div class="pt-4">
-                <button type="submit" class="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-lg rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition focus:outline-none focus:ring-2 focus:ring-[#e04ecb] focus:ring-offset-2">
-                    Save your profile
+                <button type="submit"
+                        :disabled="submitting"
+                        class="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-lg rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition focus:outline-none focus:ring-2 focus:ring-[#e04ecb] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="!submitting">Save your profile</span>
+                    <span x-show="submitting">Saving...</span>
                 </button>
             </div>
         </form>
@@ -288,21 +525,23 @@
 </div>
 
 <style>
-    /* Selected state for tag pills */
     .tag-pill.selected {
         background-color: #e04ecb !important;
         color: white !important;
     }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-3px); }
+        75% { transform: translateX(3px); }
+    }
+
+    .shake {
+        animation: shake 0.3s ease-in-out;
+    }
 </style>
 
-<script>
-    // Simple script to toggle tag selection
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.tag-pill').forEach(pill => {
-            pill.addEventListener('click', function() {
-                this.classList.toggle('selected');
-            });
-        });
-    });
-</script>
+<!-- Include Alpine.js and SweetAlert2 -->
+<script src="https://unpkg.com/alpinejs" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
