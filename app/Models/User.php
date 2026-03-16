@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Rate;
 use App\Notifications\BrandedResetPasswordNotification;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
@@ -36,7 +37,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'is_blocked',
         'mobile',
         'suburb',
-        'referral_code',    
+        'referral_code',
         'otp',
         'otp_expires_at',
         'mobile_verified',
@@ -96,6 +97,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function providerListings(): HasMany
     {
         return $this->hasMany(ProviderListing::class);
+    }
+
+    public function rates(): HasMany
+    {
+        return $this->hasMany(Rate::class);
     }
 
     public function providerProfile(): HasOne

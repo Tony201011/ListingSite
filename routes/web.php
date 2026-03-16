@@ -165,6 +165,16 @@ Route::post('/edit-profile', [MyProfileController::class, 'save'])
 Route::get('/my-rate', [MyRateController::class, 'index'])
     ->name('my-rate')
     ->middleware('auth');
+Route::post('/my-rate', [MyRateController::class, 'store'])
+    ->name('my-rate.store')
+    ->middleware('auth');
+Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])
+    ->name('my-rate.destroy')
+    ->middleware('auth');
+Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])
+    ->name('my-rate.update')
+    ->middleware('auth');
+
 Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
     ->name('my-availability')
     ->middleware('auth');
