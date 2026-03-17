@@ -56,7 +56,7 @@ function availableToggle() {
             const newStatus = !this.enabled ? 'online' : 'offline';
 
             try {
-                const response = await fetch('{{ route("available.update") }}', {
+                const response = await fetch('{{ route('onlineUpdateStatus') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

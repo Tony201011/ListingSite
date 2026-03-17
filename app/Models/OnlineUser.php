@@ -35,10 +35,4 @@ class OnlineUser extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-        // Optional scope
-    public function scopeOnline($query)
-    {
-        return $query->where('status', 'online');
-    }
 }
