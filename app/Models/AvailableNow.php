@@ -43,11 +43,4 @@ class AvailableNow extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Scope a query to only include online users.
-     */
-    public function scopeOnline($query)
-    {
-        return $query->where('status', 'online');
-    }
 }

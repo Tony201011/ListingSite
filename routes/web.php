@@ -220,7 +220,8 @@ Route::post('/online-status', [ProviderRegisterController::class, 'onlineUpdateS
 
 
 Route::get('/available-now', [ProviderRegisterController::class, 'availableNow'])->name('available-now')->middleware('auth');
-Route::post('/available-status', [ProviderRegisterController::class, 'availableUpdateStatus'])->name('available.update')->middleware('auth');
+
+Route::post('/available-status', [ProviderRegisterController::class, 'availableUpdateStatus'])->name('availableUpdateStatus')->middleware('auth');
 
 
 
