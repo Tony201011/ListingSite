@@ -232,9 +232,12 @@ Route::get('/set-forget', [ProviderRegisterController::class, 'setForget'])->nam
 Route::get('/my-babe-rank', [ProviderRegisterController::class, 'myBabeRank'])->name('my-babe-rank')->middleware('auth');
 
 Route::get('/profile-message', [ProviderRegisterController::class, 'profileMessage'])->name('profile-message')->middleware('auth');
+
 Route::post('/profile-message', [ProviderRegisterController::class, 'storeProfileMessage'])->name('storeProfileMessage')->middleware('auth');
 
-Route::get('/hide-profile', [ProviderRegisterController::class, 'hideProfile'])->name('hide-profile')->middleware('auth');
+Route::get('/hide-show-profile', [ProviderRegisterController::class, 'hideShowProfile'])->name('hide-show-profile')->middleware('auth');
+
+Route::post('/hide-show-profile', [ProviderRegisterController::class, 'updateHideShowProfile'])->name('update-hide-show-profile')->middleware('auth');
 
 Route::get('/click-here-to-verify', [ProviderRegisterController::class, 'clickHereToVerify'])->name('click-here-to-verify')->middleware('auth');
 

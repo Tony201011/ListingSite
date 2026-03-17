@@ -10,6 +10,7 @@ use App\Models\TwilioSetting;
 use App\Models\ProfileMessage;
 use App\Models\OnlineUser;
 use App\Models\AvailableNow;
+use App\Models\HideShowProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -767,6 +768,46 @@ class ProviderRegisterController extends Controller
             ]);
         }
 
+        public function hideShowProfile(Request $request)
+            {
+                $user = Auth::user();
+                $status = false; // default offline
+                if ($user) {
+                        $available = HideShowProfile::where('user_id', $user->id)->first();
+                        $status = $available && $available->status === 'show';
+                    }
+                return view('hide-show-profile', compact('status'));
+            }
+
+        public function updateHideShowProfile(Request $request)
+            {
+                $request->validate([
+                    'status' => 'required|in:show,hide',
+                ]);
+
+                $user = Auth::user();
+
+                if (!$user) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'User not authenticated.',
+                    ], 401);
+                }
+
+                $available = HideShowProfile::updateOrCreate(
+                    ['user_id' => $user->id],
+                    ['status' => $request->status]
+                );
+
+                return response()->json([
+                    'success' => true,
+                    'status' => $available->status,
+                    'message' => $request->status === 'show'
+                        ? 'Your profile is now visible'
+                        : 'Your profile is now hidden',
+                ]);
+            }
+
     public function setForget(Request $request){
 
          return view('set-forget');
@@ -786,45 +827,39 @@ class ProviderRegisterController extends Controller
 
      }
 
-        public function storeProfileMessage(Request $request)
-    {
-        $request->validate([
-            'message' => 'required|string|max:1000',
-        ]);
+    public function storeProfileMessage(Request $request)
+        {
+            $request->validate([
+                'message' => 'required|string|max:1000',
+            ]);
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        if (! $user) {
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated.',
+                ], 401);
+            }
+
+            $profileMessage = $user->profileMessage;
+
+            if ($profileMessage) {
+                $profileMessage->update([
+                    'message' => $request->input('message'),
+                ]);
+            } else {
+                /** @var \App\Models\User $user */
+                $user->profileMessage()->create([
+                    'message' => $request->input('message'),
+                ]);
+            }
+
             return response()->json([
-                'success' => false,
-                'message' => 'User not authenticated.',
-            ], 401);
-        }
-
-        $profileMessage = $user->profileMessage;
-
-        if ($profileMessage) {
-            $profileMessage->update([
-                'message' => $request->input('message'),
-            ]);
-        } else {
-             /** @var \App\Models\User $user */
-            $user->profileMessage()->create([
-                'message' => $request->input('message'),
+                'success' => true,
+                'message' => 'Profile message saved successfully.',
             ]);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Profile message saved successfully.',
-        ]);
-    }
-
-     public function hideProfile(Request $request){
-
-         return view('hide-profile');
-
-     }
 
      public function clickHereToVerify(Request $request){
 
