@@ -215,6 +215,7 @@ Route::get('/short-url', [ProviderRegisterController::class, 'shortUrl'])->name(
 
 
 Route::get('/online-now', [ProviderRegisterController::class, 'onlineNow'])->name('online-now')->middleware('auth');
+Route::post('/online-status', [ProviderRegisterController::class, 'onlineUpdateStatus'])->name('onlineUpdateStatus')->middleware('auth');
 
 
 

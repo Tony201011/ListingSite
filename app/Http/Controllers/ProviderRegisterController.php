@@ -8,6 +8,7 @@ use App\Models\SiteSetting;
 use App\Models\SmtpSetting;
 use App\Models\TwilioSetting;
 use App\Models\ProfileMessage;
+use App\Models\OnlineUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -681,10 +682,46 @@ class ProviderRegisterController extends Controller
     {
          return view('short-url');
     }
-
     public function onlineNow(Request $request)
     {
-         return view('online-now');
+        $user = Auth::user();
+        $onlineStatus = false; // default offline
+
+        if ($user) {
+            $onlineUser = OnlineUser::where('user_id', $user->id)->first();
+            $onlineStatus = $onlineUser && $onlineUser->online === 'online';
+        }
+
+        return view('online-now', compact('onlineStatus'));
+    }
+
+    public function onlineUpdateStatus(Request $request)
+    {
+        $request->validate([
+            'online' => 'required|in:online,offline',
+        ]);
+
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated.',
+            ], 401);
+        }
+
+        $onlineUser = OnlineUser::updateOrCreate(
+            ['user_id' => $user->id],
+            ['online' => $request->online]
+        );
+
+        return response()->json([
+            'success' => true,
+            'status' => $onlineUser->online, // return the new status
+            'message' => $request->online === 'online'
+                ? 'You are now visible as online'
+                : 'You are now offline',
+        ]);
     }
 
     public function availableNow(Request $request)
