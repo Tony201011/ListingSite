@@ -14,6 +14,44 @@ class MyProfileController extends Controller
 {
     private const WEBSITE_TYPE = 'adult';
 
+    public function myProfile()
+    {
+            /** @var \App\Models\User|null $user */
+             $user = Auth::user();
+            $profile = $user?->providerProfile;
+
+            // Determine if step one is completed
+            $stepOneCompleted = false;
+            if ($profile) {
+                $requiredFieldsFilled =
+                    !empty($profile->introduction_line) &&
+                    !empty($profile->profile_text) &&
+                    !is_null($profile->age_group_id) &&
+                    !is_null($profile->hair_color_id) &&
+                    !is_null($profile->hair_length_id) &&
+                    !is_null($profile->ethnicity_id) &&
+                    !is_null($profile->body_type_id) &&
+                    !is_null($profile->bust_size_id) &&
+                    !is_null($profile->your_length_id) &&
+                    !empty($profile->availability) &&
+                    !empty($profile->contact_method) &&
+                    !empty($profile->phone_contact_preference) &&
+                    !empty($profile->time_waster_shield) &&
+                    !empty($profile->primary_identity) &&      // JSON array
+                    !empty($profile->attributes) &&             // JSON array
+                    !empty($profile->services_style) &&         // JSON array
+                    !empty($profile->services_provided);        // JSON array
+
+                $stepOneCompleted = $requiredFieldsFilled;
+            }
+
+            return view('my-profile-1', [
+                'user' => $user,
+                'profile' => $profile,
+                'stepOneCompleted' => $stepOneCompleted,   // pass to the view
+            ]);
+    }
+
     public function stepTwo()
     {
         /** @var \App\Models\User|null $user */

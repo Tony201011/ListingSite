@@ -33,7 +33,6 @@
                             <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</span>
                             <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</span>
                         </div>
-
                         <!-- Step 1 -->
                         <div class="flex items-center justify-between py-4 hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out px-2 -mx-2">
                             <div class="flex items-center">
@@ -41,11 +40,18 @@
                                 <span class="text-gray-800 font-medium text-base">Write profile text</span>
                             </div>
                             <div class="ml-4">
-                                <!-- Empty Circle Icon (SVG) -->
-                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 bg-white"></div>
+                                @if($stepOneCompleted)
+                                    <!-- Green checkmark icon -->
+                                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="white"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                @else
+                                    <!-- Empty circle -->
+                                    <div class="w-6 h-6 rounded-full border-2 border-gray-300 bg-white"></div>
+                                @endif
                             </div>
                         </div>
-
                         <!-- Step 2 -->
                         <div class="flex items-center justify-between py-4 hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out px-2 -mx-2">
                             <div class="flex items-center">
@@ -72,15 +78,23 @@
                     </div>
 
                     <!-- Action Button Area -->
+                    <!-- Action Button Area -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <a href="{{ route('edit-profile') }}" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5">
-                            Start Writing Your Profile Text
-                        </a>
-
-                        <!-- Optional: Secondary link often found on these sites -->
-                        <a href="{{ url('/after-image-upload') }}" class="text-sm text-gray-500 hover:text-gray-700 transition">
-                            or skip for now
-                        </a>
+                        @if($stepOneCompleted)
+                            <a href="{{ route('upload-photos') }}" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5">
+                                Upload Photo
+                            </a>
+                            <a href="{{ route('edit-profile') }}" class="text-sm text-gray-500 hover:text-gray-700 transition">
+                                or edit your profile text
+                            </a>
+                        @else
+                            <a href="{{ route('edit-profile') }}" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5">
+                                Start Writing Your Profile Text
+                            </a>
+                            <a href="{{ url('/after-image-upload') }}" class="text-sm text-gray-500 hover:text-gray-700 transition">
+                                or skip for now
+                            </a>
+                        @endif
                     </div>
 
                 </div>

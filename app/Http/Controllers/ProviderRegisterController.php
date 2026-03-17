@@ -7,6 +7,7 @@ use App\Models\GoogleRecaptchaSetting;
 use App\Models\SiteSetting;
 use App\Models\SmtpSetting;
 use App\Models\TwilioSetting;
+use App\Models\ProfileMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rules\Password;
 
 class ProviderRegisterController extends Controller
 {
@@ -645,6 +647,31 @@ class ProviderRegisterController extends Controller
          return view('change-password');
     }
 
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', function ($attribute, $value, $fail) {
+                /** @var \App\Models\User $user */
+                $user = Auth::user();
+                if (!Hash::check($value, $user->password)) {
+                    $fail('The current password is incorrect.');
+                }
+            }],
+            'new_password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your password has been changed successfully.'
+        ]);
+    }
+
     public function deleteAccount(Request $request)
     {
          return view('delete-account');
@@ -679,9 +706,44 @@ class ProviderRegisterController extends Controller
 
      public function profileMessage(Request $request){
 
-         return view('profile-message');
+         $message = Auth::user()->profileMessage;
+         return view('profile-message', compact('message'));
 
      }
+
+        public function storeProfileMessage(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $user = Auth::user();
+
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated.',
+            ], 401);
+        }
+
+        $profileMessage = $user->profileMessage;
+
+        if ($profileMessage) {
+            $profileMessage->update([
+                'message' => $request->input('message'),
+            ]);
+        } else {
+             /** @var \App\Models\User $user */
+            $user->profileMessage()->create([
+                'message' => $request->input('message'),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile message saved successfully.',
+        ]);
+    }
 
      public function hideProfile(Request $request){
 

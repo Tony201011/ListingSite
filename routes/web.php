@@ -148,11 +148,12 @@ Route::middleware('guest')->group(function (): void {
 });
 
 
-// auth controller routes
 
-Route::get('/my-profile', function () {
-    return view('my-profile-1');
-})->middleware('auth');
+Route::get('/my-profile', [MyProfileController::class, 'myProfile'])
+    ->middleware('auth')
+    ->name('my-profile-1');
+
+
 
 Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])
     ->middleware('auth')
@@ -185,8 +186,8 @@ Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
 Route::get('/set-your-availability', [SetYourAvailabilityController::class, 'index'])
     ->name('set-your-availability')
     ->middleware('auth');
-Route::get('/add-photo', [PhotoController::class, 'index'])
-    ->name('add-photo')
+Route::get('/upload-photos', [PhotoController::class, 'index'])
+    ->name('upload-photos')
     ->middleware('auth');
 Route::get('/photos', [PhotoController::class, 'getPhotos'])
     ->name('photos')
@@ -203,6 +204,10 @@ Route::get('/my-tours', [MyToursController::class, 'index'])
     ->middleware('auth');
 
 Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password')->middleware('auth');
+
+Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])
+    ->name('change-password.update')
+    ->middleware('auth');
 
 Route::get('/delete-account', [ProviderRegisterController::class, 'deleteAccount'])->name('delete-account')->middleware('auth');
 
@@ -224,6 +229,7 @@ Route::get('/set-forget', [ProviderRegisterController::class, 'setForget'])->nam
 Route::get('/my-babe-rank', [ProviderRegisterController::class, 'myBabeRank'])->name('my-babe-rank')->middleware('auth');
 
 Route::get('/profile-message', [ProviderRegisterController::class, 'profileMessage'])->name('profile-message')->middleware('auth');
+Route::post('/profile-message', [ProviderRegisterController::class, 'storeProfileMessage'])->name('storeProfileMessage')->middleware('auth');
 
 Route::get('/hide-profile', [ProviderRegisterController::class, 'hideProfile'])->name('hide-profile')->middleware('auth');
 

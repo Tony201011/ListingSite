@@ -3,6 +3,10 @@
 namespace App\Models;
 
 use App\Models\Rate;
+use App\Models\RateGroup;
+use App\Models\ProviderListing;
+use App\Models\ProviderProfile;
+use App\Models\ProfileMessage;
 use App\Notifications\BrandedResetPasswordNotification;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
@@ -117,5 +121,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function rateGroups()
     {
         return $this->hasMany(RateGroup::class);
+    }
+
+    public function profileMessage()
+    {
+         return $this->hasOne(\App\Models\ProfileMessage::class);
+
     }
 }
