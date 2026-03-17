@@ -19,7 +19,7 @@
                 class="px-5 py-2.5 rounded-lg font-semibold transition flex items-center justify-center gap-2 w-full sm:w-auto"
                 :class="enabled ? 'bg-pink-600 text-white hover:bg-pink-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
             >
-                <span x-show="!loading" x-text="enabled ? 'Online now enabled' : 'Enable online now'"></span>
+                <span x-show="!loading" x-text="enabled ? 'Online Now Enabled' : 'Enable Online Now'"></span>
                 <span x-show="loading" class="flex items-center gap-2">
                     <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
