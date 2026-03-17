@@ -5,9 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OnlineUser extends Model
+class AvailableNow extends Model
 {
     use HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'available_nows';
 
     /**
      * The attributes that are mass assignable.
@@ -25,18 +32,20 @@ class OnlineUser extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'status' => 'string', // Since it's an ENUM column, we treat it as string
+        'status' => 'string', // Since it's an ENUM, we treat it as string
     ];
 
     /**
-     * Get the user that owns this online status.
+     * Get the user that owns this available now record.
      */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-        // Optional scope
+    /**
+     * Scope a query to only include online users.
+     */
     public function scopeOnline($query)
     {
         return $query->where('status', 'online');

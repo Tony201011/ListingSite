@@ -9,6 +9,7 @@ use App\Models\SmtpSetting;
 use App\Models\TwilioSetting;
 use App\Models\ProfileMessage;
 use App\Models\OnlineUser;
+use App\Models\AvailableNow;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -689,7 +690,7 @@ class ProviderRegisterController extends Controller
 
         if ($user) {
             $onlineUser = OnlineUser::where('user_id', $user->id)->first();
-            $onlineStatus = $onlineUser && $onlineUser->online === 'online';
+            $onlineStatus = $onlineUser && $onlineUser->status === 'online';
         }
 
         return view('online-now', compact('onlineStatus'));
@@ -698,7 +699,7 @@ class ProviderRegisterController extends Controller
     public function onlineUpdateStatus(Request $request)
     {
         $request->validate([
-            'online' => 'required|in:online,offline',
+            'status' => 'required|in:online,offline',
         ]);
 
         $user = Auth::user();
@@ -712,22 +713,59 @@ class ProviderRegisterController extends Controller
 
         $onlineUser = OnlineUser::updateOrCreate(
             ['user_id' => $user->id],
-            ['online' => $request->online]
+            ['status' => $request->status]
         );
 
         return response()->json([
             'success' => true,
-            'status' => $onlineUser->online, // return the new status
-            'message' => $request->online === 'online'
+            'status' => $onlineUser->status, // return the new status
+            'message' => $request->status === 'online'
                 ? 'You are now visible as online'
                 : 'You are now offline',
         ]);
     }
 
-    public function availableNow(Request $request)
-    {
-         return view('available-now');
-    }
+        public function availableNow(Request $request)
+        {
+            $user = Auth::user();
+            $status = false; // default offline
+
+            if ($user) {
+                $available = AvailableNow::where('user_id', $user->id)->first();
+                $status = $available && $available->status === 'online';
+            }
+
+            return view('available-now', compact('status'));
+        }
+
+        public function availableUpdateStatus(Request $request)
+        {
+            $request->validate([
+                'status' => 'required|in:online,offline',
+            ]);
+
+            $user = Auth::user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated.',
+                ], 401);
+            }
+
+            $available = AvailableNow::updateOrCreate(
+                ['user_id' => $user->id],
+                ['status' => $request->status]
+            );
+
+            return response()->json([
+                'success' => true,
+                'status' => $available->status,
+                'message' => $request->status === 'online'
+                    ? 'You are now available for enquiries'
+                    : 'You are now unavailable',
+            ]);
+        }
 
     public function setForget(Request $request){
 
