@@ -11,6 +11,7 @@ use App\Models\ProfileMessage;
 use App\Models\OnlineUser;
 use App\Models\AvailableNow;
 use App\Models\HideShowProfile;
+use App\Models\ShortUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Str;
 
 class ProviderRegisterController extends Controller
 {
@@ -680,14 +682,73 @@ class ProviderRegisterController extends Controller
          return view('delete-account');
     }
 
+
+
     public function shortUrl(Request $request)
     {
-         return view('short-url');
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect('/signin');
+        }
+
+        // Check if user already has a short URL
+        $shortUrlRecord = ShortUrl::where('user_id', $user->id)->first();
+
+        if (!$shortUrlRecord) {
+            // Generate a unique slug: md5 of name + id (or any unique combination)
+            $slug = md5($user->name . $user->id); // e.g., 5d41402abc4b2a76b9719d911017c592
+            // Optionally truncate or make it more readable, but md5 is fine for uniqueness
+
+            // Ensure uniqueness (though md5 collision is extremely unlikely)
+            while (ShortUrl::where('short_url', $slug)->exists()) {
+                // If by some miracle collision, append a random number
+                $slug = md5($user->name . $user->id . rand(1, 9999));
+            }
+
+            $shortUrlRecord = ShortUrl::create([
+                'user_id' => $user->id,
+                'short_url' => $slug,
+            ]);
+        }
+
+        $slug = $shortUrlRecord->short_url;
+
+        return view('short-url', compact('slug'));
     }
+
+    public function updateShortUrl(Request $request)
+    {
+
+        $user = Auth::user();
+
+        $user_id = $user->id;
+
+
+        $request->validate([
+            'slug' => 'required|alpha_dash|unique:short_urls,short_url,' . $user_id . ',user_id',
+            // alpha_dash allows letters, numbers, dashes, underscores – adjust as needed
+        ]);
+
+
+
+        ShortUrl::updateOrCreate(
+            ['user_id' => $user->id],
+            ['short_url' => $request->slug]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Short URL updated successfully.',
+            'slug' => $request->slug,
+        ]);
+    }
+
+
+
     public function onlineNow(Request $request)
     {
         $user = Auth::user();
-        $onlineStatus = false; // default offline
 
         if ($user) {
             $onlineUser = OnlineUser::where('user_id', $user->id)->first();

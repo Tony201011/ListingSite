@@ -213,6 +213,8 @@ Route::get('/delete-account', [ProviderRegisterController::class, 'deleteAccount
 
 Route::get('/short-url', [ProviderRegisterController::class, 'shortUrl'])->name('short-url')->middleware('auth');
 
+Route::post('/short-url/update', [ProviderRegisterController::class, 'updateShortUrl'])->name('short-url-update')->middleware('auth');
+
 
 Route::get('/online-now', [ProviderRegisterController::class, 'onlineNow'])->name('online-now')->middleware('auth');
 Route::post('/online-status', [ProviderRegisterController::class, 'onlineUpdateStatus'])->name('onlineUpdateStatus')->middleware('auth');
