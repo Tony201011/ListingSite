@@ -22,6 +22,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Actions\DeleteAction; // <-- Import DeleteAction
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -334,14 +335,25 @@ class UserResource extends Resource
                                 ->to($record->email)
                                 ->subject('Provider Account Reactivated');
                         });
-                            })
-                            ->icon('heroicon-o-lock-open'),
+                    })
+                    ->icon('heroicon-o-lock-open'),
+                    Action::make('delete')
+                        ->label('Delete')
+                        ->color('danger')
+                        ->icon('heroicon-o-trash') // correct icon
+                        ->requiresConfirmation()
+                        ->modalHeading('Delete provider')
+                        ->modalDescription('Are you sure you want to delete this provider? This will soft-delete the user, and they will no longer appear in listings.')
+                        ->action(function (User $record): void {
+                            $record->delete();
+                        })
+                        ->successNotificationTitle('Provider deleted'),
             ])
-                        ->toolbarActions([])
-                        ->defaultSort('created_at', 'desc')
-                        ->striped()
-                        ->emptyStateHeading('No providers yet')
-                        ->emptyStateDescription('Create your first provider to start managing accounts here.');
+            ->toolbarActions([])
+            ->defaultSort('created_at', 'desc')
+            ->striped()
+            ->emptyStateHeading('No providers yet')
+            ->emptyStateDescription('Create your first provider to start managing accounts here.');
     }
 
     public static function getPages(): array
