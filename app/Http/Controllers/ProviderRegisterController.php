@@ -688,6 +688,11 @@ class ProviderRegisterController extends Controller
     {
         $user = Auth::user();
 
+        $siteSetting = SiteSetting::query()->latest('updated_at')->first();
+
+      //  dd($siteSetting);
+        $siteSetting = $siteSetting?->short_url ?? false;
+
         if (!$user) {
             return redirect('/signin');
         }
@@ -714,7 +719,7 @@ class ProviderRegisterController extends Controller
 
         $slug = $shortUrlRecord->short_url;
 
-        return view('short-url', compact('slug'));
+        return view('short-url', compact('slug', 'siteSetting'));
     }
 
     public function updateShortUrl(Request $request)

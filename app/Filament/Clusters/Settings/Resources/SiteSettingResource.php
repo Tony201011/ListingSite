@@ -43,6 +43,9 @@ class SiteSettingResource extends Resource
                 ->helperText('When enabled, reCAPTCHA is shown on sign up and sign in pages.'),
             Forms\Components\Textarea::make('cookies_text')->label('Cookie Consent Text')->rows(4),
             Forms\Components\Toggle::make('site_password_enabled')->label('Enable Site Password')->helperText('When enabled, visitors must enter the site password to access the site.'),
+
+            Forms\Components\Toggle::make('short_url')->label('Enable Short URLs')->helperText('When enabled, the site will use short URLs for all links.'),
+
             Forms\Components\TextInput::make('site_password')
                 ->label('Site Password')
                 ->password()
@@ -64,6 +67,7 @@ class SiteSettingResource extends Resource
                 Tables\Columns\IconColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
                 Tables\Columns\IconColumn::make('captcha_enabled')->label('Captcha')->boolean(),
                 Tables\Columns\IconColumn::make('site_password_enabled')->label('Site Password')->boolean(),
+                Tables\Columns\IconColumn::make('short_url')->label('Short URL')->boolean(),
                 Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
                 Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
             ])

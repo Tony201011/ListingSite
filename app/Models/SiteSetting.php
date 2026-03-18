@@ -16,6 +16,7 @@ class SiteSetting extends Model
         'site_password_enabled',
         'site_password',
         'contact_email',
+        'short_url',      // new field for short URL feature
     ];
 
     protected $casts = [
@@ -23,5 +24,6 @@ class SiteSetting extends Model
         'captcha_enabled' => 'boolean',
         'site_password_enabled' => 'boolean',
         'site_password' => 'encrypted',
+        'short_url' => 'boolean',
     ];
 }
