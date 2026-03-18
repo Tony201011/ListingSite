@@ -241,10 +241,6 @@ class ProviderRegisterController extends Controller
             ])->withInput();
         }
 
-
-
-
-
         if (Auth::attempt([
             'email' => $request->email,
             'password' => $request->password
