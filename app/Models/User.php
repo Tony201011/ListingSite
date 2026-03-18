@@ -128,4 +128,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
          return $this->hasOne(\App\Models\ProfileMessage::class);
 
     }
+
+    public function tours()
+    {
+        return $this->hasMany(Tour::class);
+    }
 }

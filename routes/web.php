@@ -199,9 +199,13 @@ Route::get('/upload-video', [MyVideosController::class, 'uploadVideo'])
     ->name('upload-video')
     ->middleware('auth');
 
-Route::get('/my-tours', [MyToursController::class, 'index'])
-    ->name('my-tours')
-    ->middleware('auth');
+Route::middleware('auth')->group(function () {
+    Route::get('/my-tours', [MyToursController::class, 'index'])->name('my-tours');
+    Route::post('/my-tours', [MyToursController::class, 'store'])->name('my-tours.store');
+    Route::put('/my-tours/{tour}', [MyToursController::class, 'update'])->name('my-tours.update');
+    Route::delete('/my-tours/{tour}', [MyToursController::class, 'destroy'])->name('my-tours.destroy');
+    Route::get('/search-cities', [MyToursController::class, 'search'])->name('search-cities');
+});
 
 Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password')->middleware('auth');
 
