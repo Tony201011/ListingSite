@@ -448,12 +448,12 @@ class ProviderRegisterController extends Controller
             ], 422);
         }
 
-        if (User::where('mobile', $pendingUser['mobile'])->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Mobile number already exists.'
-            ], 422);
-        }
+        // if (User::where('mobile', $pendingUser['mobile'])->exists()) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Mobile number already exists.'
+        //     ], 422);
+        // }
 
         $user = User::create([
             'name' => $pendingUser['name'],
