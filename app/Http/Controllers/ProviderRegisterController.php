@@ -230,12 +230,27 @@ class ProviderRegisterController extends Controller
             }
         }
 
+        $email = $request->email;
+
+        $user = User::where('email', $email)->first();
+
+        $isBlocked = $user?->is_blocked;
+
+        if ($isBlocked) {
+            return back()->withErrors(['Your account has been blocked.'
+            ])->withInput();
+        }
+
+
+
+
+
         if (Auth::attempt([
             'email' => $request->email,
             'password' => $request->password
         ], $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+            return redirect()->intended('/my-profile');
         }
 
         return back()->withErrors([
