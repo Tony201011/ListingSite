@@ -139,4 +139,19 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         {
             return $this->hasMany(\App\Models\Availability::class);
         }
+        /**
+     * Get all profile images for the user.
+     */
+    public function profileImages(): HasMany
+    {
+        return $this->hasMany(ProfileImage::class);
+    }
+
+    /**
+     * Get the primary profile image (where is_primary = true).
+     */
+    public function primaryProfileImage(): HasOne
+    {
+        return $this->hasOne(ProfileImage::class)->where('is_primary', true);
+    }
 }
