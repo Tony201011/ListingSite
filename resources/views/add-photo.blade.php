@@ -50,29 +50,47 @@
                         <input x-ref="fileInput" type="file" multiple class="hidden" @change="handleFileSelect($event)">
                     </div>
 
-                    <template x-if="selectedFiles.length > 0">
+                    <!-- Thumbnail grid for selected files (including captured photos) -->
+                    <template x-if="filePreviews.length > 0">
                         <div class="mt-4 bg-white border border-gray-200 rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-sm font-semibold text-gray-700">Selected files (<span x-text="selectedFiles.length"></span>)</p>
-                                <button
-                                    type="button"
-                                    @click="clearSelectedFiles()"
-                                    class="text-xs font-semibold text-red-600 hover:text-red-700"
-                                >
-                                    Delete all
-                                </button>
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-sm font-semibold text-gray-700">Selected (<span x-text="filePreviews.length"></span>)</p>
+                                <div class="flex items-center gap-2">
+                                    <!-- Upload button -->
+                                    <button
+                                        type="button"
+                                        @click="uploadFiles()"
+                                        :disabled="uploading"
+                                        class="text-xs font-semibold px-3 py-1.5 rounded-full bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                    >
+                                        <svg x-show="!uploading" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                        </svg>
+                                        <svg x-show="uploading" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                        <span x-text="uploading ? 'Uploading...' : 'Upload ' + filePreviews.length + ' file' + (filePreviews.length > 1 ? 's' : '')"></span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="clearSelectedFiles()"
+                                        class="text-xs font-semibold text-red-600 hover:text-red-700"
+                                    >
+                                        Delete all
+                                    </button>
+                                </div>
                             </div>
-                            <div class="space-y-2 max-h-40 overflow-y-auto">
-                                <template x-for="(file, index) in selectedFiles" :key="file.name + file.size + index">
-                                    <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2">
-                                        <p class="text-sm text-gray-600 truncate" x-text="file.name"></p>
+                            <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-1">
+                                <template x-for="(preview, index) in filePreviews" :key="preview">
+                                    <div class="relative group aspect-square rounded-lg border border-gray-200 overflow-hidden bg-gray-100 cursor-pointer" @click="openSlider(index)">
+                                        <img :src="preview" :alt="'Preview ' + (index+1)" class="w-full h-full object-cover">
                                         <button
                                             type="button"
-                                            @click="removeSelectedFile(index)"
-                                            class="h-6 w-6 shrink-0 inline-flex items-center justify-center rounded-full bg-white/95 border border-red-200 text-red-600 hover:bg-red-50 transition"
-                                            aria-label="Delete selected photo"
+                                            @click.stop="removeSelectedFile(index)"
+                                            class="absolute top-1 right-1 h-6 w-6 rounded-full bg-white/90 border border-red-200 text-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                                            aria-label="Delete photo"
                                         >
-                                            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                                             </svg>
                                         </button>
@@ -91,29 +109,22 @@
                             <button type="button" @click="startCamera()" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-pink-100 text-pink-700 font-medium hover:bg-pink-200 transition">Start camera</button>
                             <button type="button" @click="capturePhoto()" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-pink-600 text-white font-medium hover:bg-pink-700 transition">Capture</button>
                         </div>
-
-                        <template x-if="capturedImage">
-                            <div class="mt-4">
-                                <p class="text-sm font-semibold text-gray-700 mb-2">Captured preview</p>
-                                <div class="relative inline-block">
-                                    <button
-                                        type="button"
-                                        @click="clearCapturedPhoto()"
-                                        class="absolute top-1.5 right-1.5 z-10 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white/95 border border-red-200 text-red-600 hover:bg-red-50 transition"
-                                        aria-label="Delete captured photo"
-                                    >
-                                        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                    <img :src="capturedImage" alt="Captured photo" class="w-28 h-28 object-cover rounded-lg border-2 border-pink-300">
-                                </div>
-                            </div>
-                        </template>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Slider/Lightbox Modal -->
+    <div x-show="sliderOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4" @keydown.escape="closeSlider()" @keydown.left="prevSlide()" @keydown.right="nextSlide()" tabindex="0" x-trap.noscroll="sliderOpen">
+        <button type="button" @click="closeSlider()" class="absolute top-4 right-4 text-white/80 hover:text-white text-4xl leading-none z-10">&times;</button>
+
+        <button type="button" @click="prevSlide()" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/80 hover:text-white text-5xl leading-none z-10" :class="{ 'opacity-50 cursor-not-allowed': filePreviews.length <= 1 }">&lsaquo;</button>
+        <button type="button" @click="nextSlide()" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/80 hover:text-white text-5xl leading-none z-10" :class="{ 'opacity-50 cursor-not-allowed': filePreviews.length <= 1 }">&rsaquo;</button>
+
+        <template x-if="filePreviews.length > 0">
+            <img :src="filePreviews[sliderIndex]" class="max-h-full max-w-full object-contain rounded-lg" :alt="'Slide ' + (sliderIndex + 1)">
+        </template>
     </div>
 </div>
 
@@ -123,9 +134,12 @@
             isModalOpen: false,
             activeTab: 'files',
             isDragging: false,
-            selectedFiles: [],
-            capturedImage: '',
+            selectedFiles: [],      // array of File objects (uploaded + captured)
+            filePreviews: [],       // array of object URLs corresponding to selectedFiles
             stream: null,
+            uploading: false,       // upload in progress
+            sliderOpen: false,      // slider visibility
+            sliderIndex: 0,         // current slide index
 
             openModal() {
                 this.isModalOpen = true;
@@ -149,24 +163,65 @@
                 this.$refs.fileInput.click();
             },
 
-            handleFileSelect(event) {
-                this.selectedFiles = Array.from(event.target.files || []);
+            // Check if a file already exists in selectedFiles (by name, size, lastModified)
+            isFileDuplicate(newFile, existingFiles) {
+                return existingFiles.some(existingFile =>
+                    existingFile.name === newFile.name &&
+                    existingFile.size === newFile.size &&
+                    existingFile.lastModified === newFile.lastModified
+                );
             },
 
+            // Handle file selection via browse button (append only unique)
+            handleFileSelect(event) {
+                const newFiles = Array.from(event.target.files || []);
+                // Filter out duplicates
+                const uniqueNewFiles = newFiles.filter(file =>
+                    !this.isFileDuplicate(file, this.selectedFiles)
+                );
+
+                // Append unique files
+                this.selectedFiles.push(...uniqueNewFiles);
+                uniqueNewFiles.forEach(file => {
+                    this.filePreviews.push(URL.createObjectURL(file));
+                });
+
+                // Clear input so the same file can be selected again later (if removed)
+                this.$refs.fileInput.value = '';
+            },
+
+            // Handle dropped files (append only unique)
             handleDrop(event) {
                 this.isDragging = false;
-                this.selectedFiles = Array.from(event.dataTransfer.files || []);
+                const newFiles = Array.from(event.dataTransfer.files || []);
+                // Filter out duplicates
+                const uniqueNewFiles = newFiles.filter(file =>
+                    !this.isFileDuplicate(file, this.selectedFiles)
+                );
+
+                this.selectedFiles.push(...uniqueNewFiles);
+                uniqueNewFiles.forEach(file => {
+                    this.filePreviews.push(URL.createObjectURL(file));
+                });
             },
 
+            // Remove a specific file by index
             removeSelectedFile(index) {
+                // Revoke the object URL to free memory
+                URL.revokeObjectURL(this.filePreviews[index]);
+                this.filePreviews.splice(index, 1);
                 this.selectedFiles.splice(index, 1);
 
+                // If no files left, clear the input (optional)
                 if (!this.selectedFiles.length && this.$refs.fileInput) {
                     this.$refs.fileInput.value = '';
                 }
             },
 
+            // Remove all files and revoke all URLs
             clearSelectedFiles() {
+                this.filePreviews.forEach(url => URL.revokeObjectURL(url));
+                this.filePreviews = [];
                 this.selectedFiles = [];
 
                 if (this.$refs.fileInput) {
@@ -174,11 +229,9 @@
                 }
             },
 
+            // Camera methods
             async startCamera() {
-                if (this.stream) {
-                    return;
-                }
-
+                if (this.stream) return;
                 try {
                     this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     this.$refs.video.srcObject = this.stream;
@@ -192,31 +245,108 @@
                     this.stream.getTracks().forEach(track => track.stop());
                     this.stream = null;
                 }
-
                 if (this.$refs.video) {
                     this.$refs.video.srcObject = null;
                 }
             },
 
+            // Capture a photo from the camera and add it to the list
             capturePhoto() {
-                const videoElement = this.$refs.video;
-                const canvasElement = this.$refs.canvas;
+                const video = this.$refs.video;
+                const canvas = this.$refs.canvas;
+                if (!video || !canvas || !video.videoWidth) return;
 
-                if (!videoElement || !canvasElement || !videoElement.videoWidth) {
-                    return;
-                }
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                canvasElement.width = videoElement.videoWidth;
-                canvasElement.height = videoElement.videoHeight;
-                const context = canvasElement.getContext('2d');
-                context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-                this.capturedImage = canvasElement.toDataURL('image/png');
+                const dataURL = canvas.toDataURL('image/png');
+                // Convert data URL to a File object (always unique due to timestamp)
+                const file = this.dataURLtoFile(dataURL, `capture_${Date.now()}.png`);
+
+                // Append to the existing lists (no duplicate check needed because filename includes timestamp)
+                this.selectedFiles.push(file);
+                this.filePreviews.push(URL.createObjectURL(file));
             },
 
-            clearCapturedPhoto() {
-                this.capturedImage = '';
+            // Helper: convert data URL to File object
+            dataURLtoFile(dataurl, filename) {
+                let arr = dataurl.split(',');
+                let mime = arr[0].match(/:(.*?);/)[1];
+                let bstr = atob(arr[1]);
+                let n = bstr.length;
+                let u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new File([u8arr], filename, { type: mime });
+            },
+
+            // Upload all selected files to the server
+            async uploadFiles() {
+                if (this.selectedFiles.length === 0 || this.uploading) return;
+
+                this.uploading = true;
+
+                // Prepare FormData
+                const formData = new FormData();
+                this.selectedFiles.forEach((file, index) => {
+                    formData.append(`photos[${index}]`, file);
+                });
+
+                // Add CSRF token for Laravel
+                formData.append('_token', '{{ csrf_token() }}');
+
+                try {
+                    const response = await fetch('/upload-photos', { // Change this URL to your endpoint
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest' // Optional, but good for Laravel
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // Success – you can choose to clear the selection or keep it
+                        // this.clearSelectedFiles(); // Uncomment to clear after upload
+                        alert('Upload successful!');
+                        // Optionally close the modal
+                        // this.closeModal();
+                    } else {
+                        alert('Upload failed: ' + (result.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    alert('Network error: ' + error.message);
+                } finally {
+                    this.uploading = false;
+                }
+            },
+
+            // Slider methods
+            openSlider(index) {
+                this.sliderIndex = index;
+                this.sliderOpen = true;
+            },
+
+            closeSlider() {
+                this.sliderOpen = false;
+            },
+
+            nextSlide() {
+                if (this.filePreviews.length > 1) {
+                    this.sliderIndex = (this.sliderIndex + 1) % this.filePreviews.length;
+                }
+            },
+
+            prevSlide() {
+                if (this.filePreviews.length > 1) {
+                    this.sliderIndex = (this.sliderIndex - 1 + this.filePreviews.length) % this.filePreviews.length;
+                }
             }
-        }
+        };
     }
 </script>
 @endsection

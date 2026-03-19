@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProviderRegisterController;
+use Illuminate\Support\Facades\Crypt;
+use App\Models\SiteSetting;
 use Twilio\Rest\Client;
 
 
@@ -27,8 +29,6 @@ Route::get('/site-password', function () {
 
 
 
-use Illuminate\Support\Facades\Crypt;
-use App\Models\SiteSetting;
 
 
 /** frontend pages */
@@ -146,63 +146,19 @@ Route::middleware('guest')->group(function (): void {
         ->name('password.update');
 });
 
-
-
-Route::get('/my-profile', [MyProfileController::class, 'myProfile'])
-    ->middleware('auth')
-    ->name('my-profile-1');
-
-
-
-Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])
-    ->middleware('auth')
-    ->name('edit-profile');
-
-Route::post('/edit-profile', [MyProfileController::class, 'save'])
-    ->middleware('auth')
-    ->name('edit-profile.save');
-
-Route::get('/my-rate', [MyRateController::class, 'index'])
-    ->name('my-rate')
-    ->middleware('auth');
-Route::post('/my-rate', [MyRateController::class, 'store'])
-    ->name('my-rate.store')
-    ->middleware('auth');
-Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])
-    ->name('my-rate.destroy')
-    ->middleware('auth');
-Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])
-    ->name('my-rate.update')
-    ->middleware('auth');
-
-    Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store')->middleware('auth');
-    Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update')->middleware('auth');
-    Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy')->middleware('auth');
-
-// Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
-//     ->name('my-availability')
-//     ->middleware('auth');
-
-// Route::get('/set-your-availability', [SetYourAvailabilityController::class, 'index'])
-//     ->name('set-your-availability')
-//     ->middleware('auth');
-
-Route::get('/upload-photos', [PhotoController::class, 'index'])
-    ->name('upload-photos')
-    ->middleware('auth');
-
-Route::get('/photos', [PhotoController::class, 'getPhotos'])
-    ->name('photos')
-    ->middleware('auth');
-
-Route::get('/my-videos', [MyVideosController::class, 'index'])
-    ->name('my-videos')
-    ->middleware('auth');
-Route::get('/upload-video', [MyVideosController::class, 'uploadVideo'])
-    ->name('upload-video')
-    ->middleware('auth');
-
 Route::middleware('auth')->group(function () {
+    Route::get('/add-photos', [PhotoController::class, 'index'])
+        ->name('add-photos');
+
+    Route::get('/photos', [PhotoController::class, 'getPhotos'])
+        ->name('photos');
+
+    Route::get('/my-videos', [MyVideosController::class, 'index'])
+        ->name('my-videos');
+
+    Route::get('/upload-video', [MyVideosController::class, 'uploadVideo'])
+        ->name('upload-video');
+
     Route::get('/my-tours', [MyToursController::class, 'index'])->name('my-tours');
     Route::post('/my-tours', [MyToursController::class, 'store'])->name('my-tours.store');
     Route::put('/my-tours/{tour}', [MyToursController::class, 'update'])->name('my-tours.update');
@@ -211,13 +167,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
     Route::post('/set-availability', [AvailabilityController::class, 'update'])->name('availability.update');
     Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
-});
+    Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
+    Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])
+    ->name('change-password.update');
+    Route::get('/my-profile', [MyProfileController::class, 'myProfile'])
+    ->name('my-profile-1');
+    Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])
+    ->name('edit-profile');
+    Route::post('/edit-profile', [MyProfileController::class, 'save'])
+    ->name('edit-profile.save');
+    Route::get('/my-rate', [MyRateController::class, 'index'])
+    ->name('my-rate');
+    Route::post('/my-rate', [MyRateController::class, 'store'])
+    ->name('my-rate.store');
+    Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])
+    ->name('my-rate.destroy');
+    Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])
+    ->name('my-rate.update');
+    Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store');
+    Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update');
+    Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
+    });
 
-Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password')->middleware('auth');
 
-Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])
-    ->name('change-password.update')
-    ->middleware('auth');
 
 Route::get('/delete-account', [ProviderRegisterController::class, 'deleteAccount'])->name('delete-account')->middleware('auth');
 
@@ -234,15 +206,8 @@ Route::post('/online-status', [ProviderRegisterController::class, 'onlineUpdateS
 Route::get('/available-now', [ProviderRegisterController::class, 'availableNow'])->name('available-now')->middleware('auth');
 
 Route::post('/available-status', [ProviderRegisterController::class, 'availableUpdateStatus'])->name('availableUpdateStatus')->middleware('auth');
-
-
-
-
-
 Route::get('/set-forget', [ProviderRegisterController::class, 'setForget'])->name('set-forget')->middleware('auth');
-
 Route::get('/my-babe-rank', [ProviderRegisterController::class, 'myBabeRank'])->name('my-babe-rank')->middleware('auth');
-
 Route::get('/profile-message', [ProviderRegisterController::class, 'profileMessage'])->name('profile-message')->middleware('auth');
 
 Route::post('/profile-message', [ProviderRegisterController::class, 'storeProfileMessage'])->name('storeProfileMessage')->middleware('auth');
