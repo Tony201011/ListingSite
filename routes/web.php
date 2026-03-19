@@ -183,15 +183,19 @@ Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])
 Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
     ->name('my-availability')
     ->middleware('auth');
+
 Route::get('/set-your-availability', [SetYourAvailabilityController::class, 'index'])
     ->name('set-your-availability')
     ->middleware('auth');
+
 Route::get('/upload-photos', [PhotoController::class, 'index'])
     ->name('upload-photos')
     ->middleware('auth');
+
 Route::get('/photos', [PhotoController::class, 'getPhotos'])
     ->name('photos')
     ->middleware('auth');
+
 Route::get('/my-videos', [MyVideosController::class, 'index'])
     ->name('my-videos')
     ->middleware('auth');
