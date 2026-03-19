@@ -11,13 +11,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\MyRateController;
 use App\Http\Controllers\MyVideosController;
 use App\Http\Controllers\MyToursController;
-use App\Http\Controllers\MyAvailabilityController;
+use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\PhotoController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProviderRegisterController;
-use App\Http\Controllers\SetYourAvailabilityController;
 use Twilio\Rest\Client;
 
 
@@ -180,13 +179,13 @@ Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])
     Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update')->middleware('auth');
     Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy')->middleware('auth');
 
-Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
-    ->name('my-availability')
-    ->middleware('auth');
+// Route::get('/my-availability', [MyAvailabilityController::class, 'index'])
+//     ->name('my-availability')
+//     ->middleware('auth');
 
-Route::get('/set-your-availability', [SetYourAvailabilityController::class, 'index'])
-    ->name('set-your-availability')
-    ->middleware('auth');
+// Route::get('/set-your-availability', [SetYourAvailabilityController::class, 'index'])
+//     ->name('set-your-availability')
+//     ->middleware('auth');
 
 Route::get('/upload-photos', [PhotoController::class, 'index'])
     ->name('upload-photos')
@@ -209,6 +208,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/my-tours/{tour}', [MyToursController::class, 'update'])->name('my-tours.update');
     Route::delete('/my-tours/{tour}', [MyToursController::class, 'destroy'])->name('my-tours.destroy');
     Route::get('/search-cities', [MyToursController::class, 'search'])->name('search-cities');
+    Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
+    Route::post('/set-availability', [AvailabilityController::class, 'update'])->name('availability.update');
+    Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
 });
 
 Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password')->middleware('auth');

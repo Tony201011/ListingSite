@@ -1,179 +1,252 @@
 @extends('layouts.frontend')
 
 @section('content')
+<div
+    class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+    x-data="availabilityForm()"
+    x-init="init()"
+>
+    <div class="max-w-4xl mx-auto">
 
+        <button
+            onclick="window.history.back()"
+            class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
+        >
+            <span class="mr-1">&lt;</span> Go back
+        </button>
 
-<!-- Main Content - Set Availability Page -->
-<div style="background: #ffffff; min-height: 100vh;">
-    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Set your availability</h2>
+                <p class="text-lg text-gray-600 mb-6 font-medium">
+                    Set your weekly schedule so clients can easily see when you are available.
+                </p>
 
+                <a
+                    href="{{ route('availability.show') }}"
+                    class="inline-block text-[#e04ecb] hover:text-[#c13ab0] underline text-sm font-medium mb-6"
+                >
+                    &lt;&lt;&lt; Show me my availability
+                </a>
 
-
-        <button onclick="window.history.back()" style="background: #cfa1b8; color: white; border: none; border-radius: 8px; padding: 6px 18px; font-size: 1rem; font-weight: 500; margin-bottom: 30px; cursor: pointer;">&lt; back to profile</button>
-
-        <!-- Page Title -->
-        <h1 style="font-size: 2.2rem; font-weight: 400; color: #222; margin-bottom: 10px;">Set your availability</h1>
-        <a href="{{ url('/my-availability') }}" style="color: #4a4a9a; font-size: 1rem; text-decoration: underline; font-weight: 400; margin-bottom: 10px; display: inline-block; margin-top: -5px;">&lt;&lt;&lt; Show me my availability</a>
-
-        <!-- Instructions -->
-        <div style="margin-bottom: 18px;">
-            <ul style="list-style: none; padding: 0; margin: 0; color: #222; font-size: 1rem; line-height: 1.6;">
-                <li style="margin-bottom: 2px;">
-                    <span style="color: #4a4a9a; text-decoration: underline; cursor: pointer;">This 7 day schedule will <a href="{{ url('/my-availability') }}" style="color: #4a4a9a; text-decoration: underline;">repeat every week</a>.</span>
-                </li>
-                <li style="margin-bottom: 2px; color: #444;">Uncheck the days you do not work and for the days you work set times/availability.</li>
-                <li style="margin-bottom: 2px; color: #444;">You can always overrule your schedule for specific dates.</li>
-            </ul>
-        </div>
-
-        <!-- Availability Form (stacked, card style) -->
-        <form style="margin-bottom: 30px;">
-            @php
-                $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            @endphp
-            @foreach($days as $day)
-            <div style="border-bottom: 1px solid #e0e0e0; padding: 18px 0 10px 0; display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap;">
-                <div style="min-width: 120px; display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" checked style="accent-color: #e04ecb; width: 18px; height: 18px;">
-                    <span style="font-size: 1.1rem; color: #222; font-weight: 500;">{{ $day }}</span>
+                <div class="mb-8 rounded-xl bg-gray-50 border border-gray-100 p-5">
+                    <ul class="list-disc pl-5 text-sm sm:text-base text-gray-700 space-y-2">
+                        <li>
+                            This 7 day schedule will
+                            <a href="{{ route('availability.show') }}" class="text-[#e04ecb] underline hover:text-[#c13ab0]">
+                                repeat every week
+                            </a>.
+                        </li>
+                        <li>Uncheck the days you do not work and for the days you work set times and availability.</li>
+                        <li>You can always overrule your schedule for specific dates.</li>
+                    </ul>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <select style="padding: 7px 18px 7px 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; color: #444; min-width: 80px;">
-                        <option>FROM</option>
-                        <option>8:00</option>
-                        <option>9:00</option>
-                        <option>10:00</option>
-                        <option>11:00</option>
-                        <option>12:00</option>
-                        <option>13:00</option>
-                        <option>14:00</option>
-                        <option>15:00</option>
-                        <option>16:00</option>
-                        <option>17:00</option>
-                        <option>18:00</option>
-                        <option>19:00</option>
-                        <option>20:00</option>
-                    </select>
-                    <span style="color: #888; font-size: 1rem;">TO</span>
-                    <select style="padding: 7px 18px 7px 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; color: #444; min-width: 80px;">
-                        <option>TILL</option>
-                        <option>9:00</option>
-                        <option>10:00</option>
-                        <option>11:00</option>
-                        <option>12:00</option>
-                        <option>13:00</option>
-                        <option>14:00</option>
-                        <option>15:00</option>
-                        <option>16:00</option>
-                        <option>17:00</option>
-                        <option>18:00</option>
-                        <option>19:00</option>
-                        <option>20:00</option>
-                        <option>21:00</option>
-                        <option>22:00</option>
-                        <option>23:00</option>
-                    </select>
-                </div>
-                <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
-                    <label style="display: flex; align-items: center; gap: 4px; font-size: 1rem; color: #222;">
-                        <input type="checkbox" style="accent-color: #e04ecb; width: 16px; height: 16px;"> Till late
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 4px; font-size: 1rem; color: #222;">
-                        <input type="checkbox" style="accent-color: #e04ecb; width: 16px; height: 16px;"> All day
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 4px; font-size: 1rem; color: #222;">
-                        <input type="checkbox" style="accent-color: #e04ecb; width: 16px; height: 16px;"> By appointment
-                    </label>
-                </div>
+
+                <div
+                    x-show="successMessage"
+                    x-transition
+                    class="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-700"
+                    x-text="successMessage"
+                ></div>
+
+                <div
+                    x-show="errorMessage"
+                    x-transition
+                    class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+                    x-text="errorMessage"
+                ></div>
+
+                <form @submit.prevent="submitForm" class="space-y-5">
+                    @csrf
+
+                    @foreach($days as $day)
+                        @php
+                            $item = $saved[$day] ?? null;
+                        @endphp
+
+                        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                            <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+
+                                <div class="min-w-[140px]">
+                                    <label class="inline-flex items-center gap-3">
+                                        <input
+                                            type="checkbox"
+                                            x-model="form['{{ $day }}'].enabled"
+                                            class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                        >
+                                        <span class="text-lg font-semibold text-gray-900">{{ $day }}</span>
+                                    </label>
+                                </div>
+
+                                <div class="flex-1 space-y-4">
+                                    <div class="flex flex-col sm:flex-row gap-4">
+                                        <div class="w-full sm:w-48">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">From</label>
+                                            <select
+                                                x-model="form['{{ $day }}'].from"
+                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day"
+                                                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 focus:border-pink-500 focus:ring-pink-500 disabled:bg-gray-100 disabled:text-gray-400"
+                                            >
+                                                <option value="">FROM</option>
+                                                @for($i = 0; $i <= 23; $i++)
+                                                    @php $time = str_pad($i, 2, '0', STR_PAD_LEFT) . ':00'; @endphp
+                                                    <option value="{{ $time }}">{{ $time }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+
+                                        <div class="w-full sm:w-48">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Till</label>
+                                            <select
+                                                x-model="form['{{ $day }}'].to"
+                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day"
+                                                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 focus:border-pink-500 focus:ring-pink-500 disabled:bg-gray-100 disabled:text-gray-400"
+                                            >
+                                                <option value="">TILL</option>
+                                                @for($i = 0; $i <= 23; $i++)
+                                                    @php $time = str_pad($i, 2, '0', STR_PAD_LEFT) . ':00'; @endphp
+                                                    <option value="{{ $time }}">{{ $time }}</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4">
+                                        <label class="inline-flex items-center gap-2 text-gray-700">
+                                            <input
+                                                type="checkbox"
+                                                x-model="form['{{ $day }}'].till_late"
+                                                :disabled="!form['{{ $day }}'].enabled"
+                                                class="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                            >
+                                            <span>Till late</span>
+                                        </label>
+
+                                        <label class="inline-flex items-center gap-2 text-gray-700">
+                                            <input
+                                                type="checkbox"
+                                                x-model="form['{{ $day }}'].all_day"
+                                                :disabled="!form['{{ $day }}'].enabled"
+                                                @change="handleAllDay('{{ $day }}')"
+                                                class="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                            >
+                                            <span>All day</span>
+                                        </label>
+
+                                        <label class="inline-flex items-center gap-2 text-gray-700">
+                                            <input
+                                                type="checkbox"
+                                                x-model="form['{{ $day }}'].by_appointment"
+                                                :disabled="!form['{{ $day }}'].enabled"
+                                                class="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                            >
+                                            <span>By appointment</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <div class="pt-4 flex justify-center">
+                        <button
+                            type="submit"
+                            :disabled="loading"
+                            class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            <span x-show="!loading">Update your availability</span>
+                            <span x-show="loading">Saving...</span>
+                        </button>
+                    </div>
+                </form>
             </div>
-            @endforeach
-        </form>
-
-        <!-- Update Button -->
-        <div style="display: flex; justify-content: center; margin-top: 30px;">
-            <button style="padding: 16px 40px; background: #e04ecb; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: 600; color: white; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(224,78,203,0.3);">update your availability</button>
         </div>
-
     </div>
 </div>
 
+<script>
+    function availabilityForm() {
+        return {
+            loading: false,
+            successMessage: '',
+            errorMessage: '',
+            form: {
+                @foreach($days as $day)
+                    '{{ $day }}': {
+                        enabled: {{ old("availability.$day.enabled", $saved[$day]?->enabled ?? 1) ? 'true' : 'false' }},
+                        from: @json(old("availability.$day.from", $saved[$day]?->from_time ?? '')),
+                        to: @json(old("availability.$day.to", $saved[$day]?->to_time ?? '')),
+                        till_late: {{ old("availability.$day.till_late", $saved[$day]?->till_late ?? 0) ? 'true' : 'false' }},
+                        all_day: {{ old("availability.$day.all_day", $saved[$day]?->all_day ?? 0) ? 'true' : 'false' }},
+                        by_appointment: {{ old("availability.$day.by_appointment", $saved[$day]?->by_appointment ?? 0) ? 'true' : 'false' }},
+                    },
+                @endforeach
+            },
 
+            init() {
+                Object.keys(this.form).forEach(day => {
+                    if (this.form[day].all_day) {
+                        this.form[day].from = '';
+                        this.form[day].to = '';
+                    }
+                });
+            },
 
-<style>
-/* Global Styles */
-body, html {
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
+            handleAllDay(day) {
+                if (this.form[day].all_day) {
+                    this.form[day].from = '';
+                    this.form[day].to = '';
+                }
+            },
 
-/* Button Hover Effects */
-button:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(224,78,203,0.4) !important;
-    transition: all 0.3s ease;
-}
+            buildPayload() {
+                const availability = {};
 
-/* Link Hover */
-a:hover {
-    color: #e04ecb !important;
-    transition: color 0.2s;
-}
+                Object.keys(this.form).forEach(day => {
+                    availability[day] = {
+                        enabled: this.form[day].enabled ? 1 : 0,
+                        from: this.form[day].from,
+                        to: this.form[day].to,
+                        till_late: this.form[day].till_late ? 1 : 0,
+                        all_day: this.form[day].all_day ? 1 : 0,
+                        by_appointment: this.form[day].by_appointment ? 1 : 0,
+                    };
+                });
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    div[style*="padding: 40px 20px"] {
-        padding: 20px 15px !important;
+                return { availability };
+            },
+
+            async submitForm() {
+                this.loading = true;
+                this.successMessage = '';
+                this.errorMessage = '';
+
+                try {
+                    const response = await fetch('{{ route('availability.update') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(this.buildPayload())
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Something went wrong while saving availability.');
+                    }
+
+                    this.successMessage = data.message || 'Availability updated successfully.';
+                } catch (error) {
+                    this.errorMessage = error.message || 'Unable to save availability.';
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
     }
-
-    h1 {
-        font-size: 1.8rem !important;
-    }
-
-    ul li {
-        font-size: 0.9rem !important;
-    }
-
-    table, thead, tbody, tr, td, th {
-        font-size: 0.9rem;
-    }
-
-    td div[style*="gap: 15px"] {
-        gap: 8px !important;
-        flex-direction: column;
-    }
-
-    button {
-        width: 100% !important;
-        padding: 14px 20px !important;
-        font-size: 1.1rem !important;
-    }
-
-    div[style*="display: flex"][style*="gap: 25px"] {
-        gap: 15px !important;
-        justify-content: center !important;
-    }
-
-    div[style*="margin-left: auto"] {
-        margin-left: 0 !important;
-    }
-}
-
-/* Small phones */
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.5rem !important;
-    }
-
-    td {
-        padding: 8px !important;
-    }
-
-    input {
-        font-size: 0.85rem;
-    }
-}
-</style>
+</script>
 @endsection

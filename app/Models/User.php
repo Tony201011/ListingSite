@@ -134,4 +134,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         return $this->hasMany(Tour::class);
     }
+
+    public function availabilities()
+        {
+            return $this->hasMany(\App\Models\Availability::class);
+        }
 }
