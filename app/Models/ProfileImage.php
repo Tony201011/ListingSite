@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,30 +10,17 @@ class ProfileImage extends Model
 {
     use SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'user_id',
         'image_path',
         'thumbnail_path',
-        'is_primary',           // added
+        'is_primary',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected $casts = [
-        'is_primary' => 'boolean',   // cast to boolean
+        'is_primary' => 'boolean',
     ];
 
-    /**
-     * Get the user that owns the profile image.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

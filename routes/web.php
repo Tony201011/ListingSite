@@ -20,20 +20,16 @@ use App\Http\Controllers\ProviderRegisterController;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\SiteSetting;
 use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Storage;
 
 
 Route::get('/site-password', function () {
+
     return view('site-password');
 })->name('site-password.form');
 
 
-
-
-
-
 /** frontend pages */
-
-
 Route::get('/terms-and-conditions', [FrontendPageController::class, 'termsAndConditions'])->name('terms-and-conditions');
 Route::get('/privacy-policy', [FrontendPageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/refund-policy', [FrontendPageController::class, 'refundPolicy'])->name('refund-policy');
@@ -150,11 +146,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/add-photos', [PhotoController::class, 'index'])
         ->name('add-photos');
 
-    Route::get('/photos', [PhotoController::class, 'getPhotos'])
-        ->name('photos');
+    Route::get('/add-photo', [PhotoController::class, 'index'])->name('photos.index');
+    Route::get('/photos', [PhotoController::class, 'getPhotos'])->name('photos.list');
+    Route::post('/upload-photos', [PhotoController::class, 'uploadPhotos'])->name('photos.upload');
 
-    Route::get('/my-videos', [MyVideosController::class, 'index'])
-        ->name('my-videos');
+    Route::post('/photos/{photo}/set-cover', [PhotoController::class, 'setCover'])->name('photos.setCover');
+    Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
 
     Route::get('/upload-video', [MyVideosController::class, 'uploadVideo'])
         ->name('upload-video');

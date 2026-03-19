@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" x-data="addPhotoPage()">
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"  x-data="addPhotoPage">
     <div class="max-w-4xl mx-auto">
         <button onclick="window.history.back()" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer">
             <span class="mr-1">&lt;</span> back to profile
@@ -47,7 +47,7 @@
                         <p class="text-lg font-semibold text-gray-700">Drag & drop files here</p>
                         <p class="text-sm text-gray-500 mt-1 mb-5">JPG, PNG, WEBP supported</p>
                         <button type="button" @click="openFilePicker()" class="inline-flex items-center px-6 py-2.5 rounded-lg text-white font-medium bg-pink-600 hover:bg-pink-700 transition">Browse files</button>
-                        <input x-ref="fileInput" type="file" multiple class="hidden" @change="handleFileSelect($event)">
+                        <input x-ref="fileInput" type="file" multiple accept="image/*" class="hidden" @change="handleFileSelect($event)">
                     </div>
 
                     <!-- Thumbnail grid for selected files (including captured photos) -->
@@ -127,226 +127,210 @@
         </template>
     </div>
 </div>
-
 <script>
-    function addPhotoPage() {
-        return {
-            isModalOpen: false,
-            activeTab: 'files',
-            isDragging: false,
-            selectedFiles: [],      // array of File objects (uploaded + captured)
-            filePreviews: [],       // array of object URLs corresponding to selectedFiles
-            stream: null,
-            uploading: false,       // upload in progress
-            sliderOpen: false,      // slider visibility
-            sliderIndex: 0,         // current slide index
+document.addEventListener('alpine:init', () => {
+    Alpine.data('addPhotoPage', () => ({
+        isModalOpen: false,
+        activeTab: 'files',
+        isDragging: false,
+        selectedFiles: [],
+        filePreviews: [],
+        stream: null,
+        uploading: false,
+        sliderOpen: false,
+        sliderIndex: 0,
 
-            openModal() {
-                this.isModalOpen = true;
-            },
+        openModal() {
+            this.isModalOpen = true;
+        },
 
-            closeModal() {
-                this.isModalOpen = false;
+        closeModal() {
+            this.isModalOpen = false;
+            this.stopCamera();
+        },
+
+        switchTab(tab) {
+            this.activeTab = tab;
+
+            if (tab === 'camera') {
+                this.startCamera();
+            } else {
                 this.stopCamera();
-            },
+            }
+        },
 
-            switchTab(tab) {
-                this.activeTab = tab;
-                if (tab === 'camera') {
-                    this.startCamera();
-                } else {
-                    this.stopCamera();
-                }
-            },
+        openFilePicker() {
+            this.$refs.fileInput.click();
+        },
 
-            openFilePicker() {
-                this.$refs.fileInput.click();
-            },
+        isFileDuplicate(newFile) {
+            return this.selectedFiles.some(existingFile =>
+                existingFile.name === newFile.name &&
+                existingFile.size === newFile.size &&
+                existingFile.lastModified === newFile.lastModified
+            );
+        },
 
-            // Check if a file already exists in selectedFiles (by name, size, lastModified)
-            isFileDuplicate(newFile, existingFiles) {
-                return existingFiles.some(existingFile =>
-                    existingFile.name === newFile.name &&
-                    existingFile.size === newFile.size &&
-                    existingFile.lastModified === newFile.lastModified
-                );
-            },
+        handleFileSelect(event) {
+            const files = Array.from(event.target.files || []);
+            const uniqueFiles = files.filter(file => !this.isFileDuplicate(file));
 
-            // Handle file selection via browse button (append only unique)
-            handleFileSelect(event) {
-                const newFiles = Array.from(event.target.files || []);
-                // Filter out duplicates
-                const uniqueNewFiles = newFiles.filter(file =>
-                    !this.isFileDuplicate(file, this.selectedFiles)
-                );
-
-                // Append unique files
-                this.selectedFiles.push(...uniqueNewFiles);
-                uniqueNewFiles.forEach(file => {
-                    this.filePreviews.push(URL.createObjectURL(file));
-                });
-
-                // Clear input so the same file can be selected again later (if removed)
-                this.$refs.fileInput.value = '';
-            },
-
-            // Handle dropped files (append only unique)
-            handleDrop(event) {
-                this.isDragging = false;
-                const newFiles = Array.from(event.dataTransfer.files || []);
-                // Filter out duplicates
-                const uniqueNewFiles = newFiles.filter(file =>
-                    !this.isFileDuplicate(file, this.selectedFiles)
-                );
-
-                this.selectedFiles.push(...uniqueNewFiles);
-                uniqueNewFiles.forEach(file => {
-                    this.filePreviews.push(URL.createObjectURL(file));
-                });
-            },
-
-            // Remove a specific file by index
-            removeSelectedFile(index) {
-                // Revoke the object URL to free memory
-                URL.revokeObjectURL(this.filePreviews[index]);
-                this.filePreviews.splice(index, 1);
-                this.selectedFiles.splice(index, 1);
-
-                // If no files left, clear the input (optional)
-                if (!this.selectedFiles.length && this.$refs.fileInput) {
-                    this.$refs.fileInput.value = '';
-                }
-            },
-
-            // Remove all files and revoke all URLs
-            clearSelectedFiles() {
-                this.filePreviews.forEach(url => URL.revokeObjectURL(url));
-                this.filePreviews = [];
-                this.selectedFiles = [];
-
-                if (this.$refs.fileInput) {
-                    this.$refs.fileInput.value = '';
-                }
-            },
-
-            // Camera methods
-            async startCamera() {
-                if (this.stream) return;
-                try {
-                    this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    this.$refs.video.srcObject = this.stream;
-                } catch (error) {
-                    alert('Camera access denied or not available.');
-                }
-            },
-
-            stopCamera() {
-                if (this.stream) {
-                    this.stream.getTracks().forEach(track => track.stop());
-                    this.stream = null;
-                }
-                if (this.$refs.video) {
-                    this.$refs.video.srcObject = null;
-                }
-            },
-
-            // Capture a photo from the camera and add it to the list
-            capturePhoto() {
-                const video = this.$refs.video;
-                const canvas = this.$refs.canvas;
-                if (!video || !canvas || !video.videoWidth) return;
-
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const context = canvas.getContext('2d');
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                const dataURL = canvas.toDataURL('image/png');
-                // Convert data URL to a File object (always unique due to timestamp)
-                const file = this.dataURLtoFile(dataURL, `capture_${Date.now()}.png`);
-
-                // Append to the existing lists (no duplicate check needed because filename includes timestamp)
+            uniqueFiles.forEach(file => {
                 this.selectedFiles.push(file);
                 this.filePreviews.push(URL.createObjectURL(file));
-            },
+            });
 
-            // Helper: convert data URL to File object
-            dataURLtoFile(dataurl, filename) {
-                let arr = dataurl.split(',');
-                let mime = arr[0].match(/:(.*?);/)[1];
-                let bstr = atob(arr[1]);
-                let n = bstr.length;
-                let u8arr = new Uint8Array(n);
-                while (n--) {
-                    u8arr[n] = bstr.charCodeAt(n);
-                }
-                return new File([u8arr], filename, { type: mime });
-            },
+            this.$refs.fileInput.value = '';
+        },
 
-            // Upload all selected files to the server
-            async uploadFiles() {
-                if (this.selectedFiles.length === 0 || this.uploading) return;
+        handleDrop(event) {
+            this.isDragging = false;
 
-                this.uploading = true;
+            const files = Array.from(event.dataTransfer.files || []);
+            const uniqueFiles = files.filter(file => !this.isFileDuplicate(file));
 
-                // Prepare FormData
-                const formData = new FormData();
-                this.selectedFiles.forEach((file, index) => {
-                    formData.append(`photos[${index}]`, file);
+            uniqueFiles.forEach(file => {
+                this.selectedFiles.push(file);
+                this.filePreviews.push(URL.createObjectURL(file));
+            });
+        },
+
+        removeSelectedFile(index) {
+            URL.revokeObjectURL(this.filePreviews[index]);
+            this.filePreviews.splice(index, 1);
+            this.selectedFiles.splice(index, 1);
+
+            if (!this.selectedFiles.length && this.$refs.fileInput) {
+                this.$refs.fileInput.value = '';
+            }
+        },
+
+        clearSelectedFiles() {
+            this.filePreviews.forEach(url => URL.revokeObjectURL(url));
+            this.filePreviews = [];
+            this.selectedFiles = [];
+
+            if (this.$refs.fileInput) {
+                this.$refs.fileInput.value = '';
+            }
+        },
+
+        async startCamera() {
+            if (this.stream) return;
+
+            try {
+                this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                this.$refs.video.srcObject = this.stream;
+            } catch (error) {
+                alert('Camera access denied or not available.');
+            }
+        },
+
+        stopCamera() {
+            if (this.stream) {
+                this.stream.getTracks().forEach(track => track.stop());
+                this.stream = null;
+            }
+
+            if (this.$refs.video) {
+                this.$refs.video.srcObject = null;
+            }
+        },
+
+        capturePhoto() {
+            const video = this.$refs.video;
+            const canvas = this.$refs.canvas;
+
+            if (!video || !canvas || !video.videoWidth) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataURL = canvas.toDataURL('image/png');
+            const file = this.dataURLtoFile(dataURL, `capture_${Date.now()}.png`);
+
+            this.selectedFiles.push(file);
+            this.filePreviews.push(URL.createObjectURL(file));
+        },
+
+        dataURLtoFile(dataurl, filename) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+
+            return new File([u8arr], filename, { type: mime });
+        },
+
+        async uploadFiles() {
+            if (!this.selectedFiles.length || this.uploading) return;
+
+            this.uploading = true;
+
+            const formData = new FormData();
+
+            this.selectedFiles.forEach((file, index) => {
+                formData.append(`photos[${index}]`, file);
+            });
+
+            formData.append('_token', '{{ csrf_token() }}');
+
+            try {
+                const response = await fetch('{{ route('photos.upload') }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
                 });
 
-                // Add CSRF token for Laravel
-                formData.append('_token', '{{ csrf_token() }}');
+                const result = await response.json();
 
-                try {
-                    const response = await fetch('/upload-photos', { // Change this URL to your endpoint
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest' // Optional, but good for Laravel
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok) {
-                        // Success – you can choose to clear the selection or keep it
-                        // this.clearSelectedFiles(); // Uncomment to clear after upload
-                        alert('Upload successful!');
-                        // Optionally close the modal
-                        // this.closeModal();
-                    } else {
-                        alert('Upload failed: ' + (result.message || 'Unknown error'));
-                    }
-                } catch (error) {
-                    alert('Network error: ' + error.message);
-                } finally {
-                    this.uploading = false;
+                if (!response.ok) {
+                    throw new Error(result.message || 'Upload failed.');
                 }
-            },
 
-            // Slider methods
-            openSlider(index) {
-                this.sliderIndex = index;
-                this.sliderOpen = true;
-            },
+                alert(result.message || 'Upload successful!');
+                this.clearSelectedFiles();
+                this.closeModal();
 
-            closeSlider() {
-                this.sliderOpen = false;
-            },
-
-            nextSlide() {
-                if (this.filePreviews.length > 1) {
-                    this.sliderIndex = (this.sliderIndex + 1) % this.filePreviews.length;
-                }
-            },
-
-            prevSlide() {
-                if (this.filePreviews.length > 1) {
-                    this.sliderIndex = (this.sliderIndex - 1 + this.filePreviews.length) % this.filePreviews.length;
-                }
+            } catch (error) {
+                alert(error.message || 'Something went wrong.');
+            } finally {
+                this.uploading = false;
             }
-        };
-    }
+        },
+
+        openSlider(index) {
+            this.sliderIndex = index;
+            this.sliderOpen = true;
+        },
+
+        closeSlider() {
+            this.sliderOpen = false;
+        },
+
+        nextSlide() {
+            if (this.filePreviews.length > 1) {
+                this.sliderIndex = (this.sliderIndex + 1) % this.filePreviews.length;
+            }
+        },
+
+        prevSlide() {
+            if (this.filePreviews.length > 1) {
+                this.sliderIndex = (this.sliderIndex - 1 + this.filePreviews.length) % this.filePreviews.length;
+            }
+        }
+    }));
+});
 </script>
 @endsection
