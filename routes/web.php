@@ -13,6 +13,7 @@ use App\Http\Controllers\MyVideosController;
 use App\Http\Controllers\MyToursController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\SuburbController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,9 @@ Route::get('/faq', [FrontendPageController::class, 'faq'])->name('faq');
 Route::get('/faq/load-more', [FrontendPageController::class, 'faqLoadMore'])->name('faq.load-more');
 Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('anti-spam-policy');
 
+
+Route::get('api/suburbs/search', [SuburbController::class, 'search'])
+    ->name('api.suburbs.search');
 
 
 Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('contact-us');

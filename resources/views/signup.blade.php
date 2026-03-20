@@ -123,7 +123,7 @@
                                 @click="showPassword = !showPassword"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#e04ecb] font-semibold"
                             >
-
+                                {{-- eye icon --}}
                             </button>
                         </div>
                     </div>
@@ -279,7 +279,7 @@
                 @enderror
                 <template x-if="touched.mobile && errors.mobile">
                     <div class="text-xs text-red-600 mt-1" x-text="errors.mobile"></div>
-                </template>
+                    </template>
 
                 <div class="bg-pink-50 rounded-2xl p-5 mt-4 flex gap-4 items-start">
                     <div class="w-8 h-8 bg-[#e04ecb] rounded-full flex items-center justify-center flex-shrink-0">
@@ -297,24 +297,56 @@
                 </div>
             </div>
 
-            <div class="mb-6">
+            <div class="mb-6 relative">
                 <label class="block font-semibold text-gray-800 mb-1">
                     Primary suburb <span class="text-red-600">*</span>
                 </label>
+
                 <input
                     type="text"
                     name="suburb"
                     x-model="suburb"
-                    @blur="touched.suburb = true"
-                    @input="touched.suburb = true; validate()"
+                    @input="handleSuburbInput()"
+                    @blur="handleSuburbBlur()"
+                    @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
                     value="{{ old('suburb') }}"
                     placeholder="Start typing your suburb..."
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
+                    autocomplete="off"
                 >
+
+                <div
+                    x-show="showResults && searchResults.length > 0"
+                    x-cloak
+                    x-transition
+                    class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                    style="display: none;"
+                >
+                    <template x-for="(item, index) in searchResults" :key="`${item.suburb}-${item.state}-${item.postcode}-${index}`">
+                        <div
+                            @mousedown.prevent="selectSuburb(item)"
+                            class="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-800"
+                        >
+                            <span x-text="`${item.suburb}, ${item.state} ${item.postcode}`"></span>
+                        </div>
+                    </template>
+                </div>
+
+                <div
+                    x-show="showResults && searching"
+                    x-cloak
+                    class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500"
+                    style="display: none;"
+                >
+                    Searching...
+                </div>
+
                 <div class="text-xs text-gray-500 mt-1">We'll auto-complete from our list</div>
+
                 @error('suburb')
                     <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
                 @enderror
+
                 <template x-if="touched.suburb && errors.suburb">
                     <div class="text-xs text-red-600 mt-1" x-text="errors.suburb"></div>
                 </template>
@@ -397,11 +429,19 @@
             mobile: @js(old('mobile', '')),
             suburb: @js(old('suburb', '')),
             ageConfirm: {{ old('age_confirm') ? 'true' : 'false' }},
+
             showPassword: false,
             showConfirmPassword: false,
             showPasswordPopup: false,
             generatedPassword: '',
             copied: false,
+
+            searchResults: [],
+            showResults: false,
+            searching: false,
+            debounceTimer: null,
+            suburbSelected: false,
+
             errors: {},
             touched: {
                 email: false,
@@ -463,7 +503,7 @@
             },
 
             validateMobile() {
-                const ausMobile = /^04\d{8}$/; // Australian mobile: starts with 04, followed by 8 digits
+                const ausMobile = /^04\d{8}$/;
                 if (!this.mobile) {
                     this.errors.mobile = 'Mobile number is required.';
                 } else if (!ausMobile.test(this.mobile)) {
@@ -474,8 +514,10 @@
             },
 
             validateSuburb() {
-                if (!this.suburb) {
+                if (!this.suburb || this.suburb.trim() === '') {
                     this.errors.suburb = 'Suburb is required.';
+                } else if (!this.suburbSelected) {
+                    this.errors.suburb = 'Please choose a location from the dropdown list, which appears while typing.';
                 } else {
                     delete this.errors.suburb;
                 }
@@ -497,7 +539,6 @@
                 this.validateMobile();
                 this.validateSuburb();
                 this.validateAgeConfirm();
-
                 return Object.keys(this.errors).length === 0;
             },
 
@@ -525,11 +566,7 @@
                     password += all[Math.floor(Math.random() * all.length)];
                 }
 
-                this.generatedPassword = password
-                    .split('')
-                    .sort(() => Math.random() - 0.5)
-                    .join('');
-
+                this.generatedPassword = password.split('').sort(() => Math.random() - 0.5).join('');
                 this.copied = false;
                 this.showPasswordPopup = true;
             },
@@ -556,7 +593,6 @@
 
             get passwordStrength() {
                 let score = 0;
-
                 if (this.password.length >= 8) score++;
                 if (/[A-Z]/.test(this.password)) score++;
                 if (/[a-z]/.test(this.password)) score++;
@@ -566,16 +602,67 @@
                 if (!this.password) {
                     return { text: '', color: '', width: '0%' };
                 }
-
-                if (score <= 2) {
-                    return { text: 'Weak', color: 'bg-red-500', width: '33%' };
-                }
-
-                if (score <= 4) {
-                    return { text: 'Medium', color: 'bg-yellow-500', width: '66%' };
-                }
-
+                if (score <= 2) return { text: 'Weak', color: 'bg-red-500', width: '33%' };
+                if (score <= 4) return { text: 'Medium', color: 'bg-yellow-500', width: '66%' };
                 return { text: 'Strong', color: 'bg-green-500', width: '100%' };
+            },
+
+            handleSuburbInput() {
+                this.touched.suburb = true;
+                this.suburbSelected = false;
+                this.validateSuburb();
+                this.searchSuburbs();
+            },
+
+            handleSuburbBlur() {
+                setTimeout(() => {
+                    this.showResults = false;
+                    this.touched.suburb = true;
+                    this.validateSuburb();
+                }, 200);
+            },
+
+            searchSuburbs() {
+                if (!this.suburb || this.suburb.trim().length < 2) {
+                    this.searchResults = [];
+                    this.showResults = false;
+                    return;
+                }
+
+                clearTimeout(this.debounceTimer);
+
+                this.debounceTimer = setTimeout(() => {
+                    this.searching = true;
+
+                    fetch(`/api/suburbs/search?q=${encodeURIComponent(this.suburb.trim())}`)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error('Failed to fetch suburbs');
+                            }
+                            return res.json();
+                        })
+                        .then(data => {
+                            this.searchResults = Array.isArray(data) ? data : [];
+                            this.showResults = this.searchResults.length > 0;
+                        })
+                        .catch(error => {
+                            console.error('Suburb search error:', error);
+                            this.searchResults = [];
+                            this.showResults = false;
+                        })
+                        .finally(() => {
+                            this.searching = false;
+                        });
+                }, 300);
+            },
+
+            selectSuburb(item) {
+                this.suburb = `${item.suburb}, ${item.state} ${item.postcode}`;
+                this.suburbSelected = true;
+                this.showResults = false;
+                this.searchResults = [];
+                this.touched.suburb = true;
+                this.validateSuburb();
             }
         }
     }
