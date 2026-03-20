@@ -4,7 +4,8 @@
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8" x-data="videoGallery()">
     <div class="max-w-4xl mx-auto">
         <a href="{{ url('/view-profile-setting') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4">
-            <span class="mr-1">&lt;</span> Back to profile settings</a>
+            <span class="mr-1">&lt;</span> Back to profile settings
+        </a>
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">My videos</h1>
@@ -14,6 +15,7 @@
                 Upload video
             </a>
 
+            <!-- Success message -->
             <div
                 x-show="successMessage"
                 x-transition
@@ -25,6 +27,7 @@
                 </div>
             </div>
 
+            <!-- Error message -->
             <div
                 x-show="errorMessage"
                 x-transition
@@ -41,7 +44,7 @@
                     <div class="relative rounded-xl border border-gray-200 overflow-hidden bg-white">
                         <button
                             type="button"
-                            @click="removeVideo(video.id)"
+                            @click="askRemove(video.id)"
                             class="absolute top-1.5 right-1.5 z-10 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white/95 border border-red-200 text-red-600 hover:bg-red-50 transition"
                             :disabled="loading"
                             aria-label="Delete video"
@@ -57,6 +60,34 @@
 
                         <div class="p-3 flex items-center justify-between">
                             <span class="text-sm font-medium text-gray-700" x-text="video.original_name || ('Video #' + video.id)"></span>
+                        </div>
+
+                        <!-- Delete confirm box -->
+                        <div
+                            x-show="confirmDeleteId === video.id"
+                            x-transition
+                            class="mx-3 mb-3 rounded-lg border border-red-200 bg-red-50 p-3"
+                        >
+                            <p class="text-xs text-red-700 mb-2">Are you sure you want to delete this video?</p>
+                            <div class="flex gap-2">
+                                <button
+                                    type="button"
+                                    @click="removeVideo(video.id)"
+                                    class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700"
+                                    :disabled="loading"
+                                >
+                                    Yes, delete
+                                </button>
+
+                                <button
+                                    type="button"
+                                    @click="confirmDeleteId = null"
+                                    class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                    :disabled="loading"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -75,6 +106,7 @@ document.addEventListener('alpine:init', () => {
         loading: false,
         successMessage: '',
         errorMessage: '',
+        confirmDeleteId: null,
 
         videos: @js($videos->map(fn ($video) => [
             'id' => $video->id,
@@ -86,6 +118,11 @@ document.addEventListener('alpine:init', () => {
         clearMessages() {
             this.successMessage = '';
             this.errorMessage = '';
+        },
+
+        askRemove(id) {
+            this.clearMessages();
+            this.confirmDeleteId = this.confirmDeleteId === id ? null : id;
         },
 
         async removeVideo(id) {
@@ -111,6 +148,7 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.videos = this.videos.filter(video => video.id !== id);
+                this.confirmDeleteId = null;
                 this.successMessage = result.message || 'Video deleted successfully.';
             } catch (error) {
                 this.errorMessage = error.message || 'Something went wrong.';
