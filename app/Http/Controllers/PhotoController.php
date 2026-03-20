@@ -21,6 +21,8 @@ class PhotoController extends Controller
             ->latest()
             ->get();
 
+      // dd($photos->toArray());
+
         return view('photos', compact('photos'));
     }
 

@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileImage extends Model
 {
@@ -20,6 +22,29 @@ class ProfileImage extends Model
     protected $casts = [
         'is_primary' => 'boolean',
     ];
+
+    protected $appends = [
+        'image_url',
+        'thumbnail_url',
+    ];
+
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->image_path
+                ? Storage::disk('s3')->url($this->image_path)
+                : null
+        );
+    }
+
+    protected function thumbnailUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->thumbnail_path
+                ? Storage::disk('s3')->url($this->thumbnail_path)
+                : null
+        );
+    }
 
     public function user(): BelongsTo
     {

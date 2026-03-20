@@ -159,8 +159,8 @@
                 'id' => $photo->id,
                 'image_path' => $photo->image_path,
                 'thumbnail_path' => $photo->thumbnail_path,
-                'image_url' => \Illuminate\Support\Facades\Storage::disk('s3')->url($photo->image_path),
-                'thumbnail_url' => \Illuminate\Support\Facades\Storage::disk('s3')->url($photo->thumbnail_path),
+                'image_url' => $photo->image_url,
+                'thumbnail_url' => $photo->thumbnail_url,
                 'is_primary' => (bool) ($photo->is_primary ?? false),
             ])->values()),
 
