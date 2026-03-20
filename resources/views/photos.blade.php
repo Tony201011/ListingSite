@@ -53,7 +53,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" x-show="photos.length">
-                <template x-for="photo in photos" :key="photo.id">
+                <template x-for="(photo, index) in photos" :key="photo.id">
                     <div class="relative rounded-xl border border-gray-200 overflow-hidden bg-white">
                         <button
                             type="button"
@@ -67,11 +67,14 @@
                             </svg>
                         </button>
 
-                        <div class="aspect-[3/4] bg-gray-100 overflow-hidden">
+                        <div
+                            class="aspect-[3/4] bg-gray-100 overflow-hidden cursor-pointer"
+                            @click="openSlider(index)"
+                        >
                             <img
                                 :src="photo.thumbnail_url"
                                 :alt="'Photo ' + photo.id"
-                                class="w-full h-full object-cover"
+                                class="w-full h-full object-cover hover:scale-105 transition duration-300"
                             >
                         </div>
 
@@ -97,13 +100,13 @@
                                     <span x-text="photo.is_primary ? 'Cover photo' : 'Set as cover'"></span>
                                 </button>
 
-                                <a
-                                    :href="photo.image_url"
-                                    target="_blank"
+                                <button
+                                    type="button"
+                                    @click="openSlider(index)"
                                     class="px-3 py-2 text-xs font-semibold rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
                                 >
                                     View
-                                </a>
+                                </button>
                             </div>
 
                             <!-- Delete confirm box -->
@@ -145,6 +148,65 @@
             </div>
         </div>
     </div>
+
+    <!-- Slider / Lightbox Modal -->
+    <div
+        x-show="sliderOpen"
+        x-cloak
+        x-transition.opacity
+        class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+        @click.self="closeSlider()"
+        @keydown.escape.window="closeSlider()"
+        @keydown.left.window="prevSlide()"
+        @keydown.right.window="nextSlide()"
+        x-trap.noscroll="sliderOpen"
+    >
+        <button
+            type="button"
+            @click="closeSlider()"
+            class="absolute top-4 right-4 text-white/80 hover:text-white text-4xl leading-none z-10"
+        >
+            &times;
+        </button>
+
+        <button
+            type="button"
+            @click="prevSlide()"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white text-5xl leading-none z-10"
+            :class="{ 'opacity-50 cursor-not-allowed': photos.length <= 1 }"
+        >
+            &lsaquo;
+        </button>
+
+        <button
+            type="button"
+            @click="nextSlide()"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white text-5xl leading-none z-10"
+            :class="{ 'opacity-50 cursor-not-allowed': photos.length <= 1 }"
+        >
+            &rsaquo;
+        </button>
+
+        <template x-if="photos.length > 0 && photos[sliderIndex]">
+            <div class="max-w-5xl w-full flex flex-col items-center">
+                <img
+                    :src="photos[sliderIndex].image_url"
+                    :alt="'Photo ' + photos[sliderIndex].id"
+                    class="max-h-[85vh] max-w-full object-contain rounded-lg"
+                >
+
+                <div class="mt-4 text-white text-sm sm:text-base font-medium">
+                    <span x-text="'Photo #' + photos[sliderIndex].id"></span>
+                    <span
+                        x-show="photos[sliderIndex].is_primary"
+                        class="ml-2 px-2 py-1 rounded-full text-xs bg-pink-600 text-white"
+                    >
+                        Cover photo
+                    </span>
+                </div>
+            </div>
+        </template>
+    </div>
 </div>
 
 <script>
@@ -154,6 +216,9 @@
             successMessage: '',
             errorMessage: '',
             confirmDeleteId: null,
+
+            sliderOpen: false,
+            sliderIndex: 0,
 
             photos: @js($photos->map(fn ($photo) => [
                 'id' => $photo->id,
@@ -171,6 +236,27 @@
 
             get coverPhoto() {
                 return this.photos.find(photo => photo.is_primary) || null;
+            },
+
+            openSlider(index) {
+                this.sliderIndex = index;
+                this.sliderOpen = true;
+            },
+
+            closeSlider() {
+                this.sliderOpen = false;
+            },
+
+            nextSlide() {
+                if (this.photos.length > 1) {
+                    this.sliderIndex = (this.sliderIndex + 1) % this.photos.length;
+                }
+            },
+
+            prevSlide() {
+                if (this.photos.length > 1) {
+                    this.sliderIndex = (this.sliderIndex - 1 + this.photos.length) % this.photos.length;
+                }
             },
 
             askRemove(id) {
@@ -238,11 +324,23 @@
                         throw new Error(result.message || 'Failed to delete photo.');
                     }
 
+                    const deletedIndex = this.photos.findIndex(photo => photo.id === id);
+
                     this.photos = this.photos.filter(photo => photo.id !== id);
                     this.confirmDeleteId = null;
 
                     if (!this.photos.some(photo => photo.is_primary) && this.photos.length > 0) {
                         this.photos[0].is_primary = true;
+                    }
+
+                    if (this.sliderOpen) {
+                        if (!this.photos.length) {
+                            this.closeSlider();
+                        } else if (this.sliderIndex >= this.photos.length) {
+                            this.sliderIndex = this.photos.length - 1;
+                        } else if (deletedIndex !== -1 && this.sliderIndex > deletedIndex) {
+                            this.sliderIndex--;
+                        }
                     }
 
                     this.successMessage = result.message || 'Photo deleted successfully.';
