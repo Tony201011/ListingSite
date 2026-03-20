@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Laravel\Facades\Image;
 
 class PhotoController extends Controller
 {
@@ -34,57 +33,57 @@ class PhotoController extends Controller
 
         $user = Auth::user();
 
-        if (! $user) {
+        if (!$user) {
             return response()->json([
                 'message' => 'Unauthenticated.'
             ], 401);
         }
-        $username = Str::slug($user->name.$user->id ?? 'user-' . $user->id);
+
+        $disk = Storage::disk('s3');
+
+        $baseName = $user->name ?: 'user';
+        $username = Str::slug($baseName) . $user->id;
+
         $uploadedPhotos = [];
 
-        foreach ($request->file('photos') as $photo) {
-            $hasPrimary = ProfileImage::where('user_id', $user->id)->where('is_primary', true)->exists();
-            $isPrimary = ! $hasPrimary && empty($uploadedPhotos);
-            $extension = strtolower($photo->getClientOriginalExtension()) ?: 'jpg';
+        foreach ($request->file('photos') as $index => $photo) {
+            $hasPrimary = ProfileImage::where('user_id', $user->id)
+                ->where('is_primary', true)
+                ->exists();
+
+            $isPrimary = !$hasPrimary && $index === 0;
+
+            $extension = strtolower($photo->getClientOriginalExtension() ?: 'jpg');
             $fileName = 'profile_' . $user->id . '_' . Str::uuid() . '.' . $extension;
 
             $imagePath = "images/{$username}/{$fileName}";
-            $thumbnailPath = "thumbnails/{$username}/{$fileName}";
 
-            // Save original image
-            Storage::disk('s3')->putFileAs(
+            $disk->putFileAs(
                 "images/{$username}",
                 $photo,
                 $fileName,
-                ['visibility' => 'public']
+                [
+                    'visibility' => 'public',
+                    'ContentType' => $photo->getMimeType(),
+                ]
             );
-
-            // Create fixed-size thumbnail
-            // $thumbnail = Image::read($photo->getRealPath())
-            //     ->cover(400, 400)   // all thumbnails same size
-            //     ->toJpeg(85);
-
-            // Storage::disk('s3')->put(
-            //     $thumbnailPath,
-            //     (string) $thumbnail,
-            //     ['visibility' => 'public', 'ContentType' => 'image/jpeg']
-            // );
 
             $profileImage = ProfileImage::create([
                 'user_id' => $user->id,
                 'image_path' => $imagePath,
                 'thumbnail_path' => $imagePath,
-                'is_primary' => false,
+                'is_primary' => $isPrimary,
             ]);
+
+            $imageUrl = $disk->url($profileImage->image_path);
 
             $uploadedPhotos[] = [
                 'id' => $profileImage->id,
                 'image_path' => $profileImage->image_path,
                 'thumbnail_path' => $profileImage->thumbnail_path,
-                'image_url' => Storage::disk('s3')->url($profileImage->image_path),
-                'thumbnail_url' => Storage::disk('s3')->url($profileImage->image_path),
-                //'thumbnail_url' => Storage::disk('s3')->url($profileImage->thumbnail_path),
-                'is_primary' =>$isPrimary,
+                'image_url' => $imageUrl,
+                'thumbnail_url' => $imageUrl,
+                'is_primary' => $profileImage->is_primary,
             ];
         }
 
@@ -95,62 +94,66 @@ class PhotoController extends Controller
     }
 
     public function setCover(ProfileImage $photo)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    if (! $user || $photo->user_id !== $user->id) {
-        return response()->json([
-            'message' => 'Unauthorized.'
-        ], 403);
-    }
-
-    ProfileImage::where('user_id', $user->id)->update([
-        'is_primary' => false
-    ]);
-
-    $photo->update([
-        'is_primary' => true
-    ]);
-
-    return response()->json([
-        'message' => 'Cover photo updated successfully.'
-    ]);
-}
-
-public function destroy(ProfileImage $photo)
-{
-    $user = Auth::user();
-
-    if (! $user || $photo->user_id !== $user->id) {
-        return response()->json([
-            'message' => 'Unauthorized.'
-        ], 403);
-    }
-
-    if ($photo->image_path && Storage::disk('s3')->exists($photo->image_path)) {
-        Storage::disk('s3')->delete($photo->image_path);
-    }
-
-    if ($photo->thumbnail_path && Storage::disk('s3')->exists($photo->thumbnail_path)) {
-        Storage::disk('s3')->delete($photo->thumbnail_path);
-    }
-
-    $wasPrimary = $photo->is_primary;
-
-    $photo->delete();
-
-    if ($wasPrimary) {
-        $nextPhoto = ProfileImage::where('user_id', $user->id)->latest()->first();
-
-        if ($nextPhoto) {
-            $nextPhoto->update([
-                'is_primary' => true
-            ]);
+        if (!$user || $photo->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
         }
+
+        ProfileImage::where('user_id', $user->id)->update([
+            'is_primary' => false
+        ]);
+
+        $photo->update([
+            'is_primary' => true
+        ]);
+
+        return response()->json([
+            'message' => 'Cover photo updated successfully.'
+        ]);
     }
 
-    return response()->json([
-        'message' => 'Photo deleted successfully.'
-    ]);
-}
+    public function destroy(ProfileImage $photo)
+    {
+        $user = Auth::user();
+
+        if (!$user || $photo->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        $disk = Storage::disk('s3');
+
+        if ($photo->image_path) {
+            $disk->delete($photo->image_path);
+        }
+
+        if ($photo->thumbnail_path && $photo->thumbnail_path !== $photo->image_path) {
+            $disk->delete($photo->thumbnail_path);
+        }
+
+        $wasPrimary = $photo->is_primary;
+
+        $photo->delete();
+
+        if ($wasPrimary) {
+            $nextPhoto = ProfileImage::where('user_id', $user->id)
+                ->latest()
+                ->first();
+
+            if ($nextPhoto) {
+                $nextPhoto->update([
+                    'is_primary' => true
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Photo deleted successfully.'
+        ]);
+    }
 }
