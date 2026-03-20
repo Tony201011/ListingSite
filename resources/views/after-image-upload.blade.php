@@ -97,7 +97,7 @@
             <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">YOUR AVAILABILITY</h3>
                 <p class="text-sm text-gray-600 mb-4">You have not set your availability. This gives your BabeRank a boost of 70%.</p>
-                <a href="{{ url('/set-your-availability') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Set availability</a>
+                <a href="{{ url('/my-availability') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Set availability</a>
             </div>
 
             <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProfileImage;
-use App\Models\ProfileVideo;
+use App\Models\UserVideo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +58,7 @@ class AccountController extends Controller
             }
 
             // Delete profile videos from storage
-            $videos = ProfileVideo::where('user_id', $user->id)->get();
+            $videos = UserVideo::where('user_id', $user->id)->get();
 
             foreach ($videos as $video) {
                 if ($video->video_path) {
@@ -68,7 +68,7 @@ class AccountController extends Controller
 
             // Delete database rows for uploaded media
             ProfileImage::where('user_id', $user->id)->delete();
-            ProfileVideo::where('user_id', $user->id)->delete();
+            UserVideo::where('user_id', $user->id)->delete();
 
             /*
             |--------------------------------------------------------------------------
@@ -94,7 +94,7 @@ class AccountController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect('/')->with('success', 'Your account has been deleted successfully.');
+            return redirect('/signin')->with('success', 'Your account has been deleted successfully.');
         } catch (Throwable $e) {
             DB::rollBack();
 
