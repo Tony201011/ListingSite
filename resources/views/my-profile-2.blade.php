@@ -38,6 +38,13 @@
         website: @js(old('website', $profile->website ?? '')),
         onlyfans_username: @js(old('onlyfans_username', $profile->onlyfans_username ?? '')),
 
+        // Suburb autocomplete state
+        searchResults: [],
+        showResults: false,
+        searching: false,
+        debounceTimer: null,
+        suburbSelected: {{ old('suburb', $user->suburb ?? '') ? 'true' : 'false' }},
+
         // UI state
         submitting: false,
         errors: @js($errors->all()),
@@ -73,11 +80,67 @@
             }
         },
 
+        handleSuburbInput() {
+            this.suburbSelected = false;
+            this.searchSuburbs();
+        },
+
+        handleSuburbBlur() {
+            setTimeout(() => {
+                this.showResults = false;
+            }, 200);
+        },
+
+        searchSuburbs() {
+            if (!this.suburb || this.suburb.trim().length < 2) {
+                this.searchResults = [];
+                this.showResults = false;
+                return;
+            }
+
+            clearTimeout(this.debounceTimer);
+
+            this.debounceTimer = setTimeout(() => {
+                this.searching = true;
+
+                fetch(`/api/suburbs/search?q=${encodeURIComponent(this.suburb.trim())}`)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Failed to fetch suburbs');
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        this.searchResults = Array.isArray(data) ? data : [];
+                        this.showResults = this.searchResults.length > 0;
+                    })
+                    .catch(error => {
+                        console.error('Suburb search error:', error);
+                        this.searchResults = [];
+                        this.showResults = false;
+                    })
+                    .finally(() => {
+                        this.searching = false;
+                    });
+            }, 300);
+        },
+
+        selectSuburb(item) {
+            this.suburb = `${item.suburb}, ${item.state} ${item.postcode}`;
+            this.suburbSelected = true;
+            this.showResults = false;
+            this.searchResults = [];
+        },
+
         validate() {
             let errors = [];
             if (!this.name.trim()) errors.push('Name is required.');
             if (!this.mobile.trim()) errors.push('Mobile number is required.');
-            if (!this.suburb.trim()) errors.push('Suburb is required.');
+            if (!this.suburb.trim()) {
+                errors.push('Suburb is required.');
+            } else if (!this.suburbSelected) {
+                errors.push('Please choose a location from the dropdown list, which appears while typing.');
+            }
             if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
             if (!this.profile_text.trim()) errors.push('Profile text is required.');
             if (!this.age_group) errors.push('Age group is required.');
@@ -202,7 +265,6 @@
      }"
 >
     <div class="max-w-4xl mx-auto">
-        <!-- Header -->
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-l-6 border-[#e04ecb] pl-4">
             Edit your profile
         </h1>
@@ -211,11 +273,9 @@
             <span class="mr-1">&lt;</span> back
         </button>
 
-        <!-- Profile Form -->
         <form method="POST" @submit.prevent="submitForm" id="editProfileForm" class="space-y-8">
             @csrf
 
-            <!-- Display server-side errors if any -->
             @if ($errors->any())
                 <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
                     <p class="font-semibold">Please fix the following errors:</p>
@@ -238,7 +298,6 @@
                 </div>
             </template>
 
-            <!-- ===== BASIC INFO CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-6">Basic information</h2>
 
@@ -258,14 +317,50 @@
                     <textarea name="introduction_line" x-model="introduction_line" rows="2" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"></textarea>
                 </div>
 
-                <div class="mt-6">
+                <div class="mt-6 relative">
                     <label class="block font-semibold text-[#e04ecb] mb-1">Your suburb</label>
-                    <input name="suburb" type="text" x-model="suburb" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
+                    <input
+                        name="suburb"
+                        type="text"
+                        x-model="suburb"
+                        @input="handleSuburbInput()"
+                        @blur="handleSuburbBlur()"
+                        @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
+                        autocomplete="off"
+                        placeholder="Start typing your suburb..."
+                        class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                    >
+
+                    <div
+                        x-show="showResults && searchResults.length > 0"
+                        x-cloak
+                        x-transition
+                        class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                        style="display: none;"
+                    >
+                        <template x-for="(item, index) in searchResults" :key="`${item.suburb}-${item.state}-${item.postcode}-${index}`">
+                            <div
+                                @mousedown.prevent="selectSuburb(item)"
+                                class="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-800"
+                            >
+                                <span x-text="`${item.suburb}, ${item.state} ${item.postcode}`"></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div
+                        x-show="showResults && searching"
+                        x-cloak
+                        class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500"
+                        style="display: none;"
+                    >
+                        Searching...
+                    </div>
+
                     <p class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
                 </div>
             </div>
 
-            <!-- ===== PROFILE TEXT CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Your profile text</h2>
 
@@ -280,7 +375,6 @@
                     or you can type them down here.
                 </p>
 
-                <!-- Text editor toolbar (simplified) -->
                 <div class="flex items-center gap-4 p-2 bg-gray-100 border border-gray-400 rounded-t-lg text-gray-700">
                     <span class="font-serif text-xl">✎</span>
                     <span class="font-bold">B</span>
@@ -294,7 +388,6 @@
                 <textarea name="profile_text" x-model="profile_text" rows="6" class="w-full px-4 py-3 border border-t-0 border-gray-400 rounded-b-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition" placeholder="Write your profile description here..."></textarea>
             </div>
 
-            <!-- ===== STATS CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-6">Your stats</h2>
 
@@ -365,13 +458,11 @@
                 </div>
             </div>
 
-            <!-- ===== TAGS CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-2">Tags that describe you</h2>
                 <p class="text-gray-600 text-sm mb-6">These tags help clients find you. Click to select.</p>
 
                 <div class="space-y-6">
-                    <!-- Primary identity -->
                     <div>
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Primary identity <span class="text-[#e04ecb] text-sm">(select one)</span></h3>
                         <div class="flex flex-wrap gap-2">
@@ -385,7 +476,6 @@
                         </div>
                     </div>
 
-                    <!-- Attributes -->
                     <div>
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Attributes <span class="text-[#e04ecb] text-sm">(multiple allowed)</span></h3>
                         <div class="flex flex-wrap gap-2">
@@ -399,7 +489,6 @@
                         </div>
                     </div>
 
-                    <!-- Services & style -->
                     <div>
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Services & style <span class="text-[#e04ecb] text-sm">(up to 12)</span></h3>
                         <div class="flex flex-wrap gap-2">
@@ -415,7 +504,6 @@
                 </div>
             </div>
 
-            <!-- ===== SERVICES CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Services you provide</h2>
                 <p class="text-gray-600 text-sm mb-4">Check all that apply</p>
@@ -435,7 +523,6 @@
                 </div>
             </div>
 
-            <!-- ===== AVAILABILITY CARD ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Availability & contact</h2>
 
@@ -491,7 +578,6 @@
                 </div>
             </div>
 
-            <!-- ===== OPTIONAL SOCIAL LINKS ===== -->
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Optional links</h2>
 
@@ -511,7 +597,6 @@
                 </div>
             </div>
 
-            <!-- ===== SAVE BUTTON ===== -->
             <div class="pt-4">
                 <button type="submit"
                         :disabled="submitting"
@@ -525,6 +610,8 @@
 </div>
 
 <style>
+    [x-cloak] { display: none !important; }
+
     .tag-pill.selected {
         background-color: #e04ecb !important;
         color: white !important;
@@ -541,7 +628,6 @@
     }
 </style>
 
-<!-- Include Alpine.js and SweetAlert2 -->
 <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
