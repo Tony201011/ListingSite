@@ -151,7 +151,7 @@ Route::middleware('auth')->group(function () {
         ->name('add-photos');
 
     Route::get('/add-photo', [PhotoController::class, 'index'])->name('photos.index');
-    Route::get('/photos', [PhotoController::class, 'getPhotos'])->name('photos.list');
+    Route::get('/photos', [PhotoController::class, 'getPhotos'])->name('photos');
     Route::post('/upload-photos', [PhotoController::class, 'uploadPhotos'])->name('photos.upload');
 
     Route::post('/photos/{photo}/set-cover', [PhotoController::class, 'setCover'])->name('photos.setCover');

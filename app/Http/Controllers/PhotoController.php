@@ -90,8 +90,6 @@ class PhotoController extends Controller
                     'id' => $profileImage->id,
                     'image_path' => $profileImage->image_path,
                     'thumbnail_path' => $profileImage->thumbnail_path,
-                    'image_url' => $imageUrl,
-                    'thumbnail_url' => $imageUrl,
                     'is_primary' => $profileImage->is_primary,
                 ];
             }
