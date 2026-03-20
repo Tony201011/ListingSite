@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Laravel\Facades\Image;
 use Throwable;
 
 class PhotoController extends Controller
@@ -44,7 +45,6 @@ class PhotoController extends Controller
             }
 
             $disk = Storage::disk('s3');
-
             $baseName = $user->name ?: 'user';
             $username = Str::slug($baseName) . $user->id;
 
@@ -57,14 +57,20 @@ class PhotoController extends Controller
 
                 $isPrimary = !$hasPrimary && $index === 0;
 
-                $extension = strtolower($photo->getClientOriginalExtension() ?: 'jpg');
-                $fileName = 'profile_' . $user->id . '_' . Str::uuid() . '.' . $extension;
-                $imagePath = "images/{$username}/{$fileName}";
+                $originalExtension = strtolower($photo->getClientOriginalExtension() ?: 'jpg');
+                $baseFileName = 'profile_' . $user->id . '_' . Str::uuid();
 
+                $imageFileName = $baseFileName . '.' . $originalExtension;
+                $thumbFileName = $baseFileName . '_thumb.jpg';
+
+                $imagePath = "images/{$username}/{$imageFileName}";
+                $thumbnailPath = "thumbnails/{$username}/{$thumbFileName}";
+
+                // Upload original image
                 $uploaded = $disk->putFileAs(
                     "images/{$username}",
                     $photo,
-                    $fileName,
+                    $imageFileName,
                     [
                         'visibility' => 'public',
                         'ContentType' => $photo->getMimeType(),
@@ -73,23 +79,43 @@ class PhotoController extends Controller
 
                 if (!$uploaded) {
                     return response()->json([
-                        'message' => 'Failed to upload image to storage.',
+                        'message' => 'Failed to upload original image to storage.',
+                    ], 500);
+                }
+
+                // Create thumbnail (square crop)
+                $thumbnail = Image::read($photo->getRealPath())
+                    ->cover(400, 400)
+                    ->toJpeg(85);
+
+                $thumbUploaded = $disk->put(
+                    $thumbnailPath,
+                    (string) $thumbnail,
+                    [
+                        'visibility' => 'public',
+                        'ContentType' => 'image/jpeg',
+                    ]
+                );
+
+                if (!$thumbUploaded) {
+                    return response()->json([
+                        'message' => 'Failed to upload thumbnail to storage.',
                     ], 500);
                 }
 
                 $profileImage = ProfileImage::create([
                     'user_id' => $user->id,
                     'image_path' => $imagePath,
-                    'thumbnail_path' => $imagePath,
+                    'thumbnail_path' => $thumbnailPath,
                     'is_primary' => $isPrimary,
                 ]);
-
-                $imageUrl = $disk->url($profileImage->image_path);
 
                 $uploadedPhotos[] = [
                     'id' => $profileImage->id,
                     'image_path' => $profileImage->image_path,
                     'thumbnail_path' => $profileImage->thumbnail_path,
+                    'image_url' => $disk->url($profileImage->image_path),
+                    'thumbnail_url' => $disk->url($profileImage->thumbnail_path),
                     'is_primary' => $profileImage->is_primary,
                 ];
             }
@@ -112,7 +138,9 @@ class PhotoController extends Controller
 
             return response()->json([
                 'message' => 'Upload failed.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Something went wrong while uploading photos.',
+                'error' => config('app.debug')
+                    ? $e->getMessage()
+                    : 'Something went wrong while uploading photos.',
             ], 500);
         }
     }
@@ -156,7 +184,7 @@ class PhotoController extends Controller
             $disk->delete($photo->image_path);
         }
 
-        if ($photo->thumbnail_path && $photo->thumbnail_path !== $photo->image_path) {
+        if ($photo->thumbnail_path) {
             $disk->delete($photo->thumbnail_path);
         }
 
