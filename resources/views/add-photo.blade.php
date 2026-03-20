@@ -372,7 +372,7 @@ document.addEventListener('alpine:init', () => {
 
                 setTimeout(() => {
                     this.closeModal();
-                    window.location.href = '{{ route('photos.list') }}';
+                    window.location.href = '{{ route('photos') }}';
                 }, 1200);
 
             } catch (error) {
