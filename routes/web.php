@@ -14,11 +14,12 @@ use App\Http\Controllers\MyToursController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\SuburbController;
+use App\Http\Controllers\ProviderRegisterController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\PhotoVerificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProviderRegisterController;
-use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\SiteSetting;
 use Twilio\Rest\Client;
@@ -191,8 +192,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store');
     Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update');
     Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
-       Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
+    Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
     Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
+
+     Route::get('/click-here-to-verify', [PhotoVerificationController::class, 'index'])->name('verify.photos');
+    Route::post('/verify-profile-photos/upload', [PhotoVerificationController::class, 'upload'])->name('verify.photos.upload');
+
     });
 
 
@@ -230,7 +235,7 @@ Route::get('/view-profile-setting', [ProviderRegisterController::class, 'viewPro
 
 
 
-Route::get('/after-image-upload', [ProviderRegisterController::class, 'afterImageUpload'])->name('after-image-upload')->middleware('auth');
+
 
 
 Route::get('/babe-rank', [ProviderRegisterController::class, 'babeRank'])->name('babe-rank')->middleware('auth');

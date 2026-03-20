@@ -42,29 +42,29 @@ class AccountController extends Controller
         DB::beginTransaction();
 
         try {
-            $disk = Storage::disk('s3');
+            // $disk = Storage::disk('s3');
 
-            // Delete profile images from storage
-            $images = ProfileImage::where('user_id', $user->id)->get();
+            // // Delete profile images from storage
+            // $images = ProfileImage::where('user_id', $user->id)->get();
 
-            foreach ($images as $image) {
-                if ($image->image_path) {
-                    $disk->delete($image->image_path);
-                }
+            // foreach ($images as $image) {
+            //     if ($image->image_path) {
+            //         $disk->delete($image->image_path);
+            //     }
 
-                if ($image->thumbnail_path) {
-                    $disk->delete($image->thumbnail_path);
-                }
-            }
+            //     if ($image->thumbnail_path) {
+            //         $disk->delete($image->thumbnail_path);
+            //     }
+            // }
 
             // Delete profile videos from storage
             $videos = UserVideo::where('user_id', $user->id)->get();
 
-            foreach ($videos as $video) {
-                if ($video->video_path) {
-                    $disk->delete($video->video_path);
-                }
-            }
+            // foreach ($videos as $video) {
+            //     if ($video->video_path) {
+            //         $disk->delete($video->video_path);
+            //     }
+            // }
 
             // Delete database rows for uploaded media
             ProfileImage::where('user_id', $user->id)->delete();
