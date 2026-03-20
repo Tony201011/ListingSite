@@ -82,7 +82,8 @@ class PhotoController extends Controller
                 'image_path' => $profileImage->image_path,
                 'thumbnail_path' => $profileImage->thumbnail_path,
                 'image_url' => Storage::disk('s3')->url($profileImage->image_path),
-                'thumbnail_url' => Storage::disk('s3')->url($profileImage->thumbnail_path),
+                'thumbnail_url' => Storage::disk('s3')->url($profileImage->image_path),
+                //'thumbnail_url' => Storage::disk('s3')->url($profileImage->thumbnail_path),
                 'is_primary' =>$isPrimary,
             ];
         }
