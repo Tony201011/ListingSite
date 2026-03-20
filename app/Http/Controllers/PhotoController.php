@@ -60,20 +60,20 @@ class PhotoController extends Controller
             );
 
             // Create fixed-size thumbnail
-            $thumbnail = Image::read($photo->getRealPath())
-                ->cover(400, 400)   // all thumbnails same size
-                ->toJpeg(85);
+            // $thumbnail = Image::read($photo->getRealPath())
+            //     ->cover(400, 400)   // all thumbnails same size
+            //     ->toJpeg(85);
 
-            Storage::disk('s3')->put(
-                $thumbnailPath,
-                (string) $thumbnail,
-                ['visibility' => 'public', 'ContentType' => 'image/jpeg']
-            );
+            // Storage::disk('s3')->put(
+            //     $thumbnailPath,
+            //     (string) $thumbnail,
+            //     ['visibility' => 'public', 'ContentType' => 'image/jpeg']
+            // );
 
             $profileImage = ProfileImage::create([
                 'user_id' => $user->id,
                 'image_path' => $imagePath,
-                'thumbnail_path' => $thumbnailPath,
+                'thumbnail_path' => $imagePath,
                 'is_primary' => false,
             ]);
 

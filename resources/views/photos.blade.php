@@ -18,6 +18,31 @@
                 </a>
             </div>
 
+            <!-- Success message -->
+            <div
+                x-show="successMessage"
+                x-transition
+                class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+            >
+                <div class="flex items-start justify-between gap-3">
+                    <p x-text="successMessage"></p>
+                    <button type="button" @click="successMessage = ''" class="text-green-700 hover:text-green-900 font-bold">&times;</button>
+                </div>
+            </div>
+
+            <!-- Error message -->
+            <div
+                x-show="errorMessage"
+                x-transition
+                class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            >
+                <div class="flex items-start justify-between gap-3">
+                    <p class="whitespace-pre-line" x-text="errorMessage"></p>
+                    <button type="button" @click="errorMessage = ''" class="text-red-700 hover:text-red-900 font-bold">&times;</button>
+                </div>
+            </div>
+
+            <!-- Cover photo info -->
             <div
                 class="mb-5 rounded-lg border border-pink-100 bg-pink-50 px-4 py-3 text-sm text-pink-800"
                 x-show="coverPhoto"
@@ -32,8 +57,9 @@
                     <div class="relative rounded-xl border border-gray-200 overflow-hidden bg-white">
                         <button
                             type="button"
-                            @click="removePhoto(photo.id)"
+                            @click="askRemove(photo.id)"
                             class="absolute top-1.5 right-1.5 z-10 h-8 w-8 inline-flex items-center justify-center rounded-full bg-white/95 border border-red-200 text-red-600 hover:bg-red-50 transition"
+                            :disabled="loading"
                             aria-label="Delete photo"
                         >
                             <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -68,7 +94,7 @@
                                     class="w-full px-3 py-2 text-xs font-semibold rounded-lg border border-pink-200 text-pink-700 hover:bg-pink-50 transition disabled:opacity-50"
                                     :disabled="photo.is_primary || loading"
                                 >
-                                    Set as cover
+                                    <span x-text="photo.is_primary ? 'Cover photo' : 'Set as cover'"></span>
                                 </button>
 
                                 <a
@@ -78,6 +104,33 @@
                                 >
                                     View
                                 </a>
+                            </div>
+
+                            <!-- Delete confirm box -->
+                            <div
+                                x-show="confirmDeleteId === photo.id"
+                                x-transition
+                                class="rounded-lg border border-red-200 bg-red-50 p-3"
+                            >
+                                <p class="text-xs text-red-700 mb-2">Are you sure you want to delete this photo?</p>
+                                <div class="flex gap-2">
+                                    <button
+                                        type="button"
+                                        @click="removePhoto(photo.id)"
+                                        class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700"
+                                        :disabled="loading"
+                                    >
+                                        Yes, delete
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="confirmDeleteId = null"
+                                        class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                        :disabled="loading"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -98,26 +151,38 @@
     function photoGallery() {
         return {
             loading: false,
-            photos: @json(
-                $photos->map(function ($photo) {
-                    return [
-                        'id' => $photo->id,
-                        'image_path' => $photo->image_path,
-                        'thumbnail_path' => $photo->thumbnail_path,
-                        'image_url' => \Illuminate\Support\Facades\Storage::disk('s3')->url($photo->image_path),
-                        'thumbnail_url' => \Illuminate\Support\Facades\Storage::disk('s3')->url($photo->thumbnail_path),
-                        'is_primary' => (bool) $photo->is_primary,
-                    ];
-                })
-            ),
+            successMessage: '',
+            errorMessage: '',
+            confirmDeleteId: null,
+
+            photos: @js($photos->map(fn ($photo) => [
+                'id' => $photo->id,
+                'image_path' => $photo->image_path,
+                'thumbnail_path' => $photo->thumbnail_path,
+                'image_url' => \Illuminate\Support\Facades\Storage::disk('s3')->url($photo->image_path),
+                'thumbnail_url' => \Illuminate\Support\Facades\Storage::disk('s3')->url($photo->thumbnail_path),
+                'is_primary' => (bool) ($photo->is_primary ?? false),
+            ])->values()),
+
+            clearMessages() {
+                this.successMessage = '';
+                this.errorMessage = '';
+            },
 
             get coverPhoto() {
                 return this.photos.find(photo => photo.is_primary) || null;
             },
 
+            askRemove(id) {
+                this.clearMessages();
+                this.confirmDeleteId = this.confirmDeleteId === id ? null : id;
+            },
+
             async setCover(id) {
                 if (this.loading) return;
 
+                this.clearMessages();
+                this.confirmDeleteId = null;
                 this.loading = true;
 
                 try {
@@ -143,8 +208,9 @@
                         is_primary: photo.id === id
                     }));
 
+                    this.successMessage = result.message || 'Cover photo updated successfully.';
                 } catch (error) {
-                    alert(error.message || 'Something went wrong.');
+                    this.errorMessage = error.message || 'Something went wrong.';
                 } finally {
                     this.loading = false;
                 }
@@ -153,10 +219,7 @@
             async removePhoto(id) {
                 if (this.loading) return;
 
-                if (!confirm('Are you sure you want to delete this photo?')) {
-                    return;
-                }
-
+                this.clearMessages();
                 this.loading = true;
 
                 try {
@@ -176,13 +239,15 @@
                     }
 
                     this.photos = this.photos.filter(photo => photo.id !== id);
+                    this.confirmDeleteId = null;
 
                     if (!this.photos.some(photo => photo.is_primary) && this.photos.length > 0) {
                         this.photos[0].is_primary = true;
                     }
 
+                    this.successMessage = result.message || 'Photo deleted successfully.';
                 } catch (error) {
-                    alert(error.message || 'Something went wrong.');
+                    this.errorMessage = error.message || 'Something went wrong.';
                 } finally {
                     this.loading = false;
                 }

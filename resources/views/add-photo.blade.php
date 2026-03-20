@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"  x-data="addPhotoPage">
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" x-data="addPhotoPage">
     <div class="max-w-4xl mx-auto">
         <button onclick="window.history.back()" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer">
             <span class="mr-1">&lt;</span> back to profile
@@ -41,22 +41,52 @@
             </div>
 
             <div class="p-4 sm:p-6 bg-gray-50">
+                <!-- Success message -->
+                <div
+                    x-show="successMessage"
+                    x-transition
+                    class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+                >
+                    <div class="flex items-start justify-between gap-3">
+                        <p x-text="successMessage"></p>
+                        <button type="button" @click="successMessage = ''" class="text-green-700 hover:text-green-900 font-bold">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Error message -->
+                <div
+                    x-show="errorMessage"
+                    x-transition
+                    class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                >
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="space-y-1">
+                            <p class="font-semibold">Upload failed</p>
+                            <p class="whitespace-pre-line" x-text="errorMessage"></p>
+                        </div>
+                        <button type="button" @click="errorMessage = ''" class="text-red-700 hover:text-red-900 font-bold">&times;</button>
+                    </div>
+                </div>
+
                 <div x-show="activeTab === 'files'" x-transition>
                     <div class="border-2 border-dashed rounded-xl p-8 sm:p-10 text-center transition" :class="isDragging ? 'border-pink-400 bg-pink-50' : 'border-gray-300 bg-white'" @dragenter.prevent="isDragging = true" @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop($event)">
                         <div class="text-5xl mb-4">📁</div>
                         <p class="text-lg font-semibold text-gray-700">Drag & drop files here</p>
                         <p class="text-sm text-gray-500 mt-1 mb-5">JPG, PNG, WEBP supported</p>
-                        <button type="button" @click="openFilePicker()" class="inline-flex items-center px-6 py-2.5 rounded-lg text-white font-medium bg-pink-600 hover:bg-pink-700 transition">Browse files</button>
+                        <button type="button" @click="openFilePicker()" class="inline-flex items-center px-6 py-2.5 rounded-lg text-white font-medium bg-pink-600 hover:bg-pink-700 transition">
+                            Browse files
+                        </button>
                         <input x-ref="fileInput" type="file" multiple accept="image/*" class="hidden" @change="handleFileSelect($event)">
                     </div>
 
-                    <!-- Thumbnail grid for selected files (including captured photos) -->
                     <template x-if="filePreviews.length > 0">
                         <div class="mt-4 bg-white border border-gray-200 rounded-xl p-4">
                             <div class="flex items-center justify-between mb-3">
-                                <p class="text-sm font-semibold text-gray-700">Selected (<span x-text="filePreviews.length"></span>)</p>
+                                <p class="text-sm font-semibold text-gray-700">
+                                    Selected (<span x-text="filePreviews.length"></span>)
+                                </p>
+
                                 <div class="flex items-center gap-2">
-                                    <!-- Upload button -->
                                     <button
                                         type="button"
                                         @click="uploadFiles()"
@@ -71,6 +101,7 @@
                                         </svg>
                                         <span x-text="uploading ? 'Uploading...' : 'Upload ' + filePreviews.length + ' file' + (filePreviews.length > 1 ? 's' : '')"></span>
                                     </button>
+
                                     <button
                                         type="button"
                                         @click="clearSelectedFiles()"
@@ -80,6 +111,7 @@
                                     </button>
                                 </div>
                             </div>
+
                             <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-1">
                                 <template x-for="(preview, index) in filePreviews" :key="preview">
                                     <div class="relative group aspect-square rounded-lg border border-gray-200 overflow-hidden bg-gray-100 cursor-pointer" @click="openSlider(index)">
@@ -106,8 +138,12 @@
                         <video x-ref="video" autoplay playsinline class="w-full max-h-72 rounded-lg bg-gray-200"></video>
                         <canvas x-ref="canvas" class="hidden"></canvas>
                         <div class="mt-4 flex flex-col sm:flex-row gap-3">
-                            <button type="button" @click="startCamera()" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-pink-100 text-pink-700 font-medium hover:bg-pink-200 transition">Start camera</button>
-                            <button type="button" @click="capturePhoto()" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-pink-600 text-white font-medium hover:bg-pink-700 transition">Capture</button>
+                            <button type="button" @click="startCamera()" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-pink-100 text-pink-700 font-medium hover:bg-pink-200 transition">
+                                Start camera
+                            </button>
+                            <button type="button" @click="capturePhoto()" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-pink-600 text-white font-medium hover:bg-pink-700 transition">
+                                Capture
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -127,6 +163,7 @@
         </template>
     </div>
 </div>
+
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('addPhotoPage', () => ({
@@ -139,9 +176,17 @@ document.addEventListener('alpine:init', () => {
         uploading: false,
         sliderOpen: false,
         sliderIndex: 0,
+        successMessage: '',
+        errorMessage: '',
+
+        clearMessages() {
+            this.successMessage = '';
+            this.errorMessage = '';
+        },
 
         openModal() {
             this.isModalOpen = true;
+            this.clearMessages();
         },
 
         closeModal() {
@@ -172,6 +217,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         handleFileSelect(event) {
+            this.clearMessages();
+
             const files = Array.from(event.target.files || []);
             const uniqueFiles = files.filter(file => !this.isFileDuplicate(file));
 
@@ -184,6 +231,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         handleDrop(event) {
+            this.clearMessages();
             this.isDragging = false;
 
             const files = Array.from(event.dataTransfer.files || []);
@@ -216,13 +264,15 @@ document.addEventListener('alpine:init', () => {
         },
 
         async startCamera() {
+            this.clearMessages();
+
             if (this.stream) return;
 
             try {
                 this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 this.$refs.video.srcObject = this.stream;
             } catch (error) {
-                alert('Camera access denied or not available.');
+                this.errorMessage = 'Camera access denied or not available.';
             }
         },
 
@@ -238,10 +288,15 @@ document.addEventListener('alpine:init', () => {
         },
 
         capturePhoto() {
+            this.clearMessages();
+
             const video = this.$refs.video;
             const canvas = this.$refs.canvas;
 
-            if (!video || !canvas || !video.videoWidth) return;
+            if (!video || !canvas || !video.videoWidth) {
+                this.errorMessage = 'Camera is not ready yet.';
+                return;
+            }
 
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -254,6 +309,7 @@ document.addEventListener('alpine:init', () => {
 
             this.selectedFiles.push(file);
             this.filePreviews.push(URL.createObjectURL(file));
+            this.successMessage = 'Photo captured successfully.';
         },
 
         dataURLtoFile(dataurl, filename) {
@@ -271,7 +327,14 @@ document.addEventListener('alpine:init', () => {
         },
 
         async uploadFiles() {
-            if (!this.selectedFiles.length || this.uploading) return;
+            this.clearMessages();
+
+            if (!this.selectedFiles.length) {
+                this.errorMessage = 'Please select at least one image.';
+                return;
+            }
+
+            if (this.uploading) return;
 
             this.uploading = true;
 
@@ -296,15 +359,24 @@ document.addEventListener('alpine:init', () => {
                 const result = await response.json();
 
                 if (!response.ok) {
+                    if (result.errors) {
+                        const allErrors = Object.values(result.errors).flat().join('\n');
+                        throw new Error(allErrors);
+                    }
+
                     throw new Error(result.message || 'Upload failed.');
                 }
 
-                alert(result.message || 'Upload successful!');
+                this.successMessage = result.message || 'Upload successful!';
                 this.clearSelectedFiles();
-                this.closeModal();
+
+                setTimeout(() => {
+                    this.closeModal();
+                    window.location.href = '{{ route('photos.list') }}';
+                }, 1200);
 
             } catch (error) {
-                alert(error.message || 'Something went wrong.');
+                this.errorMessage = error.message || 'Something went wrong.';
             } finally {
                 this.uploading = false;
             }
