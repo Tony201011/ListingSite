@@ -157,8 +157,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/photos/{photo}/set-cover', [PhotoController::class, 'setCover'])->name('photos.setCover');
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
 
-    Route::get('/upload-video', [MyVideosController::class, 'uploadVideo'])
-        ->name('upload-video');
+    Route::get('/upload-video', [MyVideosController::class, 'index'])->name('upload-video');
+    Route::get('/my-videos', [MyVideosController::class, 'getVideos'])->name('my-videos');
+    Route::post('/videos/upload', [MyVideosController::class, 'uploadVideos'])->name('videos.upload');
+    Route::delete('/videos/{video}', [MyVideosController::class, 'destroy'])->name('videos.destroy');
 
     Route::get('/my-tours', [MyToursController::class, 'index'])->name('my-tours');
     Route::post('/my-tours', [MyToursController::class, 'store'])->name('my-tours.store');
