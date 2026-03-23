@@ -151,7 +151,7 @@
                                 <img
                                     src="{{ $verificationPhotos[1]['url'] }}"
                                     alt="Uploaded verification photo 2"
-                                    class="w-full h-56 object-cover rounded-lg border-2 border-pink-300 mb-3"
+                                    class="w-full h-100 object-cover rounded-lg border-2 border-pink-300 mb-3"
                                 >
 
                                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">

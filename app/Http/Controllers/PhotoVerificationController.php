@@ -83,6 +83,7 @@ public function index()
                     ->whereNull('deleted_at')
                      ->count();
 
+
                 if($countVerfication >= 2){
                     return response()->json([
                         'message' => 'You have upload the maximum number of 2 verification photos. Please contact support for further assistance.',
@@ -198,7 +199,7 @@ public function index()
             ->toArray();
 
         if (count($updatedPhotos) !== count($photos)) {
-            $verification->photos = $updatedPhotos;
+            $verification->deleted_at = now();
             $verification->save();
 
             return response()->json([
