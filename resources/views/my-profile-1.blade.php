@@ -61,18 +61,33 @@
                             <span class="text-lg font-semibold text-pink-600 mr-4">03</span>
                             <span class="text-gray-800 font-medium">Verify your photos (optional)</span>
                         </div>
-                        <span class="w-6 h-6 rounded-full border-2 border-gray-300 inline-block"></span>
+
+                        @if($stepPhotoVerificationCompleted)
+                            <span class="text-green-500 text-2xl leading-none">✓</span>
+                        @else
+                            <span class="w-6 h-6 rounded-full border-2 border-gray-300 inline-block"></span>
+                        @endif
                     </div>
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     @if($stepOneCompleted && $stepTwoCompleted)
-                        <a
-                            href="{{ url('/click-here-to-verify') }}"
-                            class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5"
-                        >
-                            Verified Badges
-                        </a>
+
+                        @if($stepPhotoVerificationCompleted)
+                            <a
+                                href="{{ url('/click-here-to-verify') }}"
+                                class="text-sm text-gray-500 hover:text-gray-700 transition"
+                            >
+                                edit your verified photos
+                            </a>
+                        @else
+                            <a
+                                href="{{ url('/click-here-to-verify') }}"
+                                class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                            >
+                                Verified Photos Badges
+                            </a>
+                        @endif
 
                         <a
                             href="{{ route('edit-profile') }}"
@@ -118,7 +133,7 @@
                             or manage photos
                         </a>
 
-                    @else
+                    @elseif(!$stepOneCompleted && !$stepTwoCompleted && !$stepPhotoVerificationCompleted)
                         <a
                             href="{{ route('edit-profile') }}"
                             class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5"
@@ -139,18 +154,32 @@
 
         @if($stepOneCompleted && $stepTwoCompleted)
             <div class="bg-[#e04ecb] text-white rounded-2xl p-5 sm:p-6 mb-4 shadow-sm">
-                <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
-                    ✅ PHOTO VERIFICATION OPTIONAL
-                </h2>
+                @if(!$stepPhotoVerificationCompleted)
+                    <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+                        ✅ PHOTO VERIFICATION OPTIONAL
+                    </h2>
+                @endif
+
                 <p class="mb-4 text-sm sm:text-base">
                     Your profile can be listed with or without verification. Verify 2 photos only if you want the “Photos Verified” badge.
                 </p>
-                <a
-                    href="{{ url('/click-here-to-verify') }}"
-                    class="inline-flex bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition"
-                >
-                    Verify photos for badge
-                </a>
+
+                @if($stepPhotoVerificationCompleted)
+                    <a
+                        href="{{ url('/click-here-to-verify') }}"
+                        class="inline-flex bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition"
+                    >
+                        Edit photos for badge
+                    </a>
+                @else
+                    <a
+                        href="{{ url('/click-here-to-verify') }}"
+                        class="inline-flex bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition"
+                    >
+                        Verify photos for badge
+                    </a>
+                @endif
+
                 <p class="mt-4 text-sm text-white/90">
                     If you already submitted photos by email or SMS, just wait for the badge review.
                 </p>

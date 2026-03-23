@@ -47,15 +47,16 @@ class MyProfileController extends Controller
             }
 
             $stepTwoCompleted = false;
-
-             $stepTwoCompleted = $user?->profileImages()->whereNull('deleted_at')->count() > 0 && $stepTwoCompleted = true;
-             //dd($stepTwoCompleted);
-
+            $stepPhotoVerificationCompleted =false;
+            $stepTwoCompleted = $user?->profileImages()->whereNull('deleted_at')->count() > 0 && $stepTwoCompleted = true;
+            $stepPhotoVerificationCompleted = $user?->photoVerification()->where('status', 'approved')->whereNull('deleted_at')->count() > 0 && $stepPhotoVerificationCompleted = true;
+           // dd($stepPhotoVerificationCompleted);
             return view('my-profile-1', [
                 'user' => $user,
                 'profile' => $profile,
                 'stepOneCompleted' => $stepOneCompleted,   // pass to the <view>
                 'stepTwoCompleted' => $stepTwoCompleted,   // pass to the <view>
+                'stepPhotoVerificationCompleted' => $stepPhotoVerificationCompleted,   // pass to the <view>
             ]);
     }
 
