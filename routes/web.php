@@ -176,7 +176,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])
     ->name('change-password.update');
     Route::get('/my-profile', [MyProfileController::class, 'myProfile'])
-    ->name('my-profile-1');
+    ->name('my-profile');
     Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])
     ->name('edit-profile');
     Route::post('/edit-profile', [MyProfileController::class, 'save'])

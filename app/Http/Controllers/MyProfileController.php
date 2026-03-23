@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\ProviderProfile;
+use App\Models\ProfileImage;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,10 +46,16 @@ class MyProfileController extends Controller
                 $stepOneCompleted = $requiredFieldsFilled;
             }
 
+            $stepTwoCompleted = false;
+
+             $stepTwoCompleted = $user?->profileImages()->whereNull('deleted_at')->count() > 0 && $stepTwoCompleted = true;
+             //dd($stepTwoCompleted);
+
             return view('my-profile-1', [
                 'user' => $user,
                 'profile' => $profile,
-                'stepOneCompleted' => $stepOneCompleted,   // pass to the view
+                'stepOneCompleted' => $stepOneCompleted,   // pass to the <view>
+                'stepTwoCompleted' => $stepTwoCompleted,   // pass to the <view>
             ]);
     }
 
