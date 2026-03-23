@@ -30,26 +30,34 @@ class SitePassword
             return $next($request);
         }
 
-        // Force protection ON whenever a site password exists (DB or env),
-        // regardless of the admin toggle.
-        $protectionEnabled = false;
+        // Defaults
         $configuredPassword = null;
+        $configurationEnabled = false;
 
         if (Schema::hasTable('site_settings')) {
             $setting = SiteSetting::query()->latest('updated_at')->first();
 
             if ($setting) {
                 $configuredPassword = $setting->site_password ?: null;
+                $configurationEnabled = (bool) $setting->site_password_enabled;
             }
         }
 
-        if (! filled($configuredPassword)) {
-            $configuredPassword = env('SITE_PASSWORD');
+        // Fallback to env only if DB password is not configured
+        if (blank($configuredPassword)) {
+            $envPassword = env('SITE_PASSWORD');
+            $envEnabled = filter_var(env('SITE_PASSWORD_ENABLED', false), FILTER_VALIDATE_BOOL);
+
+            if ($envEnabled && filled($envPassword)) {
+                $configuredPassword = $envPassword;
+                $configurationEnabled = true;
+            }
         }
 
-        if (filled($configuredPassword)) {
-            $protectionEnabled = true;
-        }
+        // Protection is enabled only when both are true:
+        // - password exists
+        // - feature is enabled
+        $protectionEnabled = $configurationEnabled && filled($configuredPassword);
 
         if ($protectionEnabled && $request->session()->get('site_access') !== true) {
             return redirect()->guest('/site-password');
