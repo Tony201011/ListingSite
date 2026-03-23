@@ -938,11 +938,7 @@ class ProviderRegisterController extends Controller
             ]);
         }
 
-     public function clickHereToVerify(Request $request){
 
-         return view('click-here-to-verify');
-
-     }
 
      public function viewProfileSetting(Request $request){
 

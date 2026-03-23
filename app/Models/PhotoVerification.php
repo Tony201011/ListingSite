@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class PhotoVerification extends Model
 {
@@ -22,10 +23,28 @@ class PhotoVerification extends Model
         'submitted_at' => 'datetime',
     ];
 
-
     protected $appends = [
-        'photo_urls'
+        'photo_url',
     ];
+
+    protected function photoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (empty($this->photos) || !is_array($this->photos)) {
+                    return null;
+                }
+
+                $firstPhoto = $this->photos[0] ?? null;
+
+                if (!$firstPhoto || !is_array($firstPhoto)) {
+                    return null;
+                }
+
+                return $firstPhoto['url'] ?? null;
+            }
+        );
+    }
 
     public function user()
     {

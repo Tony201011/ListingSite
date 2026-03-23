@@ -13,17 +13,57 @@ use Throwable;
 
 class PhotoVerificationController extends Controller
 {
-    public function index()
-    {
-        $latestVerification = PhotoVerification::where('user_id', Auth::id())
-            ->latest()
-            ->first();
 
-        return view('verify-profile-photos', compact('latestVerification'));
+public function index()
+{
+    /** @var \App\Models\User|null $user */
+    $user = Auth::user();
+
+    $latestVerification = null;
+    $lastTwoPhotos = [];
+
+    if ($user) {
+        $latestVerifications = $user->photoVerification()
+            ->whereNull('deleted_at')
+            ->latest('created_at')
+            ->take(2)
+            ->get();
+
+        if ($latestVerifications->isNotEmpty()) {
+            $latestVerification = $latestVerifications->first();
+
+          //  dd($latestVerification);
+            $lastTwoPhotos = $latestVerifications
+                ->map(function ($verification) {
+                    $photos = is_array($verification->photos)
+                        ? $verification->photos
+                        : json_decode($verification->photos, true);
+
+                    return collect($photos)->map(function ($photo) use ($verification) {
+                        $photo['status'] = $verification->status;
+                        $photo['admin_note'] = $verification->admin_note;
+                        return $photo;
+                    });
+                })
+                ->flatten(1)
+                ->take(2)
+                ->values()
+                ->toArray();
+        }
     }
+
+    return view('click-here-to-verify', compact(
+        'latestVerification',
+        'lastTwoPhotos'
+    ));
+}
+
 
     public function upload(Request $request): JsonResponse
     {
+
+
+
         try {
             $request->validate([
                 'photos' => ['required', 'array', 'min:1', 'max:5'],
@@ -37,6 +77,17 @@ class PhotoVerificationController extends Controller
                     'message' => 'Unauthenticated.',
                 ], 401);
             }
+
+             /** @var \App\Models\User|null $user */
+             $countVerfication = $user->photoVerification()
+                    ->whereNull('deleted_at')
+                     ->count();
+
+                if($countVerfication >= 2){
+                    return response()->json([
+                        'message' => 'You have upload the maximum number of 2 verification photos. Please contact support for further assistance.',
+                    ], 403);
+                }
 
             $disk = Storage::disk('s3');
             $baseName = $user->name ?: 'user';
@@ -108,4 +159,56 @@ class PhotoVerificationController extends Controller
             ], 500);
         }
     }
+
+    public function deletePhoto(Request $request)
+{
+    /** @var \App\Models\User|null $user */
+    $user = Auth::user();
+
+    if (!$user) {
+        return response()->json([
+            'message' => 'Unauthorized.'
+        ], 401);
+    }
+
+    $request->validate([
+        'path' => ['required', 'string'],
+    ]);
+
+    $path = $request->path;
+
+    $verifications = $user->photoVerification()
+        ->whereNull('deleted_at')
+        ->get();
+
+    foreach ($verifications as $verification) {
+        $photos = is_array($verification->photos)
+            ? $verification->photos
+            : json_decode($verification->photos, true);
+
+        if (!is_array($photos)) {
+            $photos = [];
+        }
+
+        $updatedPhotos = collect($photos)
+            ->reject(function ($photo) use ($path) {
+                return isset($photo['path']) && $photo['path'] === $path;
+            })
+            ->values()
+            ->toArray();
+
+        if (count($updatedPhotos) !== count($photos)) {
+            $verification->photos = $updatedPhotos;
+            $verification->save();
+
+            return response()->json([
+                'message' => 'Photo deleted successfully.'
+            ]);
+        }
+    }
+
+    return response()->json([
+        'message' => 'Photo not found.'
+    ], 404);
+}
 }

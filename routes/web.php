@@ -196,7 +196,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
 
      Route::get('/click-here-to-verify', [PhotoVerificationController::class, 'index'])->name('verify.photos');
-    Route::post('/verify-profile-photos/upload', [PhotoVerificationController::class, 'upload'])->name('verify.photos.upload');
+    Route::post('/verify-profile-photos/upload', [PhotoVerificationController::class, 'upload'])->name('photo-verification.upload');
+    Route::post('/photo-verification/delete-photo', [PhotoVerificationController::class, 'deletePhoto'])
+    ->name('photo-verification.delete-photo');
 
     });
 
@@ -227,7 +229,7 @@ Route::get('/hide-show-profile', [ProviderRegisterController::class, 'hideShowPr
 
 Route::post('/hide-show-profile', [ProviderRegisterController::class, 'updateHideShowProfile'])->name('update-hide-show-profile')->middleware('auth');
 
-Route::get('/click-here-to-verify', [ProviderRegisterController::class, 'clickHereToVerify'])->name('click-here-to-verify')->middleware('auth');
+//Route::get('/click-here-to-verify', [ProviderRegisterController::class, 'clickHereToVerify'])->name('click-here-to-verify')->middleware('auth');
 
 Route::get('/view-profile-setting', [ProviderRegisterController::class, 'viewProfileSetting'])->name('view-profile-setting')->middleware('auth');
 
