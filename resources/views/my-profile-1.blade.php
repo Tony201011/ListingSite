@@ -298,54 +298,6 @@
             </button>
         </div>
 
-        <!-- Social Share -->
-        <!-- Social Share -->
-<div class="flex gap-2 mb-3">
-    <!-- WhatsApp -->
-    <a href="https://wa.me/?text={{ urlencode($referralLink) }}"
-       target="_blank"
-       class="flex-1 text-center px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100">
-         WhatsApp
-    </a>
-
-    <!-- Facebook -->
-    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($referralLink) }}"
-       target="_blank"
-       class="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
-         Facebook
-    </a>
-
-    <!-- Twitter (X) -->
-    <a href="https://twitter.com/intent/tweet?url={{ urlencode($referralLink) }}"
-       target="_blank"
-       class="flex-1 text-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-         Twitter
-    </a>
-</div>
-
-<!-- Social Profile Links -->
-<div class="flex gap-2">
-    <!-- Instagram -->
-    <a href="https://instagram.com/yourprofile"
-       target="_blank"
-       class="flex-1 text-center px-3 py-2 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100">
-        Instagram
-    </a>
-
-    <!-- LinkedIn -->
-    <a href="https://linkedin.com/in/yourprofile"
-       target="_blank"
-       class="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-800 rounded-lg hover:bg-blue-100">
-        LinkedIn
-    </a>
-
-    <!-- YouTube -->
-    <a href="https://youtube.com/@yourchannel"
-       target="_blank"
-       class="flex-1 text-center px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100">
-        YouTube
-    </a>
-</div>
 
         <!-- View Referrals -->
         <a href="{{ url('/referrals') }}"
