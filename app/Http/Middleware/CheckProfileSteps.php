@@ -48,9 +48,6 @@ class CheckProfileSteps
                 ->route('my-profile')
                 ->with('error', 'Please complete your profile first.');
         }
-
-       // dd($stepTwoCompleted);
-
         if (! $stepTwoCompleted) {
             return redirect()
                 ->route('my-profile')

@@ -299,7 +299,7 @@
     </p>
 
     @php
-        $referralCode = $user->referral_code ?? 'dsgfdgfdgfdgfdg';
+        $referralCode = $profile->account_user_referral_code ?? 'dsgfdgfdgfdgfdg';
         $referralLink = url('/register?ref=' . $referralCode);
     @endphp
 

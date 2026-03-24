@@ -46,6 +46,9 @@ class MyProfileController extends Controller
                 $stepOneCompleted = $requiredFieldsFilled;
             }
 
+           // dd($profile);
+
+
             $stepTwoCompleted = false;
             $stepPhotoVerificationCompleted =false;
             $stepTwoCompleted = $user?->profileImages()->whereNull('deleted_at')->count() > 0 && $stepTwoCompleted = true;
@@ -161,6 +164,8 @@ class MyProfileController extends Controller
 
         $profile = $user->providerProfile()->firstOrNew(['user_id' => $user->id]);
 
+        $account_user_referral_code = Str::substr(md5($user->id . $user->email), 0, 10);
+
         // Ensure required columns are set on insert (name + slug are non-nullable)
         $profile->name = $validated['name'] ?? $user->name;
         if (! $profile->slug) {
@@ -188,6 +193,7 @@ class MyProfileController extends Controller
             'twitter_handle' => $validated['twitter_handle'] ?? null,
             'website' => $validated['website'] ?? null,
             'onlyfans_username' => $validated['onlyfans_username'] ?? null,
+            'account_user_referral_code' => $account_user_referral_code ?? null,
         ]);
         $profile->save();
 

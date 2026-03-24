@@ -158,6 +158,7 @@ class ProviderRegisterController extends Controller
         // Use a temporary cache key instead of user ID
         $pendingKey = 'provider_signup_' . md5($validated['email'] . '|' . $validated['mobile']);
 
+
         // Store signup data temporarily
         Cache::put($pendingKey, [
             'name' => $validated['nickname'],
@@ -168,6 +169,7 @@ class ProviderRegisterController extends Controller
             'role' => User::ROLE_PROVIDER,
             'mobile_verified' => false,
             'referral_code' => $validated['referral_code'] ?? null,
+            'account_user_referral_code' => $validated['account_user_referral_code'] ?? null
         ], now()->addMinutes(10));
 
         // Store OTP and its expiration timestamp
