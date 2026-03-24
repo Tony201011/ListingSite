@@ -807,7 +807,20 @@ class ProviderRegisterController extends Controller
     }
 
     public function referrals(Request $request)
-    {     return view('referrals');
+    {
+
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if (! $user) {
+            abort(403);
+        }
+        $profile = $user->providerProfile;
+        $referralLink = $profile?->account_user_referral_code;
+        $referralCount = User::where('referral_code', $referralLink)->count();
+        //dd($referralCount);
+
+        return view('referrals',compact('referralLink','referralCount'));
+
 
     }
 
