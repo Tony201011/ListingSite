@@ -803,6 +803,11 @@ class ProviderRegisterController extends Controller
         ]);
     }
 
+    public function referrals(Request $request)
+    {     return view('referrals');
+
+    }
+
         public function availableNow(Request $request)
         {
             $user = Auth::user();

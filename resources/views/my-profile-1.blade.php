@@ -273,17 +273,99 @@
                         x-text="onlineNow ? 'Enabled' : 'Online NOW'"
                     ></button>
                 </div>
-
                 <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2 xl:col-span-1">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">ACCOUNT SECURITY</h3>
-                    <p class="text-sm text-gray-600 mb-4">
-                        Manage your password and account access settings.
-                    </p>
-                    <div class="space-y-2">
-                        <a href="{{ url('/change-password') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Change password</a>
-                        <a href="{{ url('/delete-account') }}" class="block w-full px-4 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition text-center">Delete account</a>
+    <h3 class="text-lg font-bold text-gray-800 mb-2">Referral Code</h3>
+    <p class="text-sm text-gray-600 mb-4">
+        Share your referral code with friends and earn rewards.
+    </p>
+
+    @php
+        $referralCode = $user->referral_code ?? 'dsgfdgfdgfdgfdg';
+        $referralLink = url('/register?ref=' . $referralCode);
+    @endphp
+
+    <div class="space-y-3">
+        <!-- Code + Copy -->
+        <div class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-lg">
+            <span id="referralCode" class="text-gray-800 font-medium">{{ $referralCode }}</span>
+            <button
+                id="copyBtn"
+                type="button"
+                onclick="copyReferralCode()"
+                class="text-sm text-blue-600 hover:underline"
+            >
+                Copy
+            </button>
+        </div>
+
+        <!-- Social Share -->
+        <!-- Social Share -->
+<div class="flex gap-2 mb-3">
+    <!-- WhatsApp -->
+    <a href="https://wa.me/?text={{ urlencode($referralLink) }}"
+       target="_blank"
+       class="flex-1 text-center px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100">
+         WhatsApp
+    </a>
+
+    <!-- Facebook -->
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($referralLink) }}"
+       target="_blank"
+       class="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
+         Facebook
+    </a>
+
+    <!-- Twitter (X) -->
+    <a href="https://twitter.com/intent/tweet?url={{ urlencode($referralLink) }}"
+       target="_blank"
+       class="flex-1 text-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+         Twitter
+    </a>
+</div>
+
+<!-- Social Profile Links -->
+<div class="flex gap-2">
+    <!-- Instagram -->
+    <a href="https://instagram.com/yourprofile"
+       target="_blank"
+       class="flex-1 text-center px-3 py-2 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100">
+        Instagram
+    </a>
+
+    <!-- LinkedIn -->
+    <a href="https://linkedin.com/in/yourprofile"
+       target="_blank"
+       class="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-800 rounded-lg hover:bg-blue-100">
+        LinkedIn
+    </a>
+
+    <!-- YouTube -->
+    <a href="https://youtube.com/@yourchannel"
+       target="_blank"
+       class="flex-1 text-center px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100">
+        YouTube
+    </a>
+</div>
+
+        <!-- View Referrals -->
+        <a href="{{ url('/referrals') }}"
+           class="block w-full px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-center">
+            View Referrals
+            </a>
+        </div>
+    </div>
+
+
+         <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2 xl:col-span-1">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">ACCOUNT SECURITY</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Manage your password and account access settings.
+                        </p>
+                        <div class="space-y-2">
+                            <a href="{{ url('/change-password') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Change password</a>
+                            <a href="{{ url('/delete-account') }}" class="block w-full px-4 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition text-center">Delete account</a>
+                        </div>
                     </div>
-                </div>
             </div>
 
             <div class="mt-8 bg-white rounded-xl border border-gray-100 p-5 sm:p-6">
@@ -297,4 +379,20 @@
         @endif
     </div>
 </div>
+
+<script>
+function copyReferralCode() {
+    const code = document.getElementById('referralCode').innerText;
+    const btn = document.getElementById('copyBtn');
+
+    navigator.clipboard.writeText(code).then(() => {
+        btn.innerText = 'Copied';
+        setTimeout(() => {
+            btn.innerText = 'Copy';
+        }, 2000);
+    }).catch(() => {
+        alert('Copy failed');
+    });
+}
+</script>
 @endsection
