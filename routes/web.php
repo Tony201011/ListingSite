@@ -119,86 +119,68 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/add-photos', [PhotoController::class, 'index'])->name('add-photos');
 
+    Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
+    Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])->name('edit-profile');
+    Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
+    Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
+    Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
+    Route::get('/add-photos', [PhotoController::class, 'index'])->name('add-photos');
     Route::get('/add-photo', [PhotoController::class, 'index'])->name('photos.index');
     Route::get('/photos', [PhotoController::class, 'getPhotos'])->name('photos');
     Route::post('/upload-photos', [PhotoController::class, 'uploadPhotos'])->name('photos.upload');
     Route::post('/photos/{photo}/set-cover', [PhotoController::class, 'setCover'])->name('photos.setCover');
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
-
-    Route::get('/upload-video', [MyVideosController::class, 'index'])->name('upload-video');
-    Route::get('/my-videos', [MyVideosController::class, 'getVideos'])->name('my-videos');
-    Route::post('/videos/upload', [MyVideosController::class, 'uploadVideos'])->name('videos.upload');
-    Route::delete('/videos/{video}', [MyVideosController::class, 'destroy'])->name('videos.destroy');
-
-    Route::get('/my-tours', [MyToursController::class, 'index'])->name('my-tours');
-    Route::post('/my-tours', [MyToursController::class, 'store'])->name('my-tours.store');
-    Route::put('/my-tours/{tour}', [MyToursController::class, 'update'])->name('my-tours.update');
-    Route::delete('/my-tours/{tour}', [MyToursController::class, 'destroy'])->name('my-tours.destroy');
-    Route::get('/search-cities', [MyToursController::class, 'search'])->name('search-cities');
-
-    Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
-    Route::post('/set-availability', [AvailabilityController::class, 'update'])->name('availability.update');
-    Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
-
     Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
     Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');
 
-    Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
-    Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])->name('edit-profile');
-    Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
+    Route::middleware(['profile.steps'])->group(function () {
+        Route::get('/upload-video', [MyVideosController::class, 'index'])->name('upload-video');
+        Route::get('/my-videos', [MyVideosController::class, 'getVideos'])->name('my-videos');
+        Route::post('/videos/upload', [MyVideosController::class, 'uploadVideos'])->name('videos.upload');
+        Route::delete('/videos/{video}', [MyVideosController::class, 'destroy'])->name('videos.destroy');
+        Route::get('/my-tours', [MyToursController::class, 'index'])->name('my-tours');
+        Route::post('/my-tours', [MyToursController::class, 'store'])->name('my-tours.store');
+        Route::put('/my-tours/{tour}', [MyToursController::class, 'update'])->name('my-tours.update');
+        Route::delete('/my-tours/{tour}', [MyToursController::class, 'destroy'])->name('my-tours.destroy');
+        Route::get('/search-cities', [MyToursController::class, 'search'])->name('search-cities');
+        Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
+        Route::post('/set-availability', [AvailabilityController::class, 'update'])->name('availability.update');
+        Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
 
-    Route::get('/my-rate', [MyRateController::class, 'index'])->name('my-rate');
-    Route::post('/my-rate', [MyRateController::class, 'store'])->name('my-rate.store');
-    Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])->name('my-rate.destroy');
-    Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])->name('my-rate.update');
-    Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store');
-    Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update');
-    Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
-
-    Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
-    Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
-
-    Route::get('/click-here-to-verify', [PhotoVerificationController::class, 'index'])->name('verify.photos');
-    Route::post('/verify-profile-photos/upload', [PhotoVerificationController::class, 'upload'])->name('photo-verification.upload');
-    Route::post('/photo-verification/delete-photo', [PhotoVerificationController::class, 'deletePhoto'])->name('photo-verification.delete-photo');
-
-    Route::post('/booking-enquiry', [BookingController::class, 'send'])->name('booking.enquiry');
-
-    Route::get('/short-url', [ProviderRegisterController::class, 'shortUrl'])->name('short-url');
-    Route::post('/short-url/update', [ProviderRegisterController::class, 'updateShortUrl'])->name('short-url-update');
-
-    Route::get('/referrals', [ProviderRegisterController::class, 'referrals'])->name('referrals');
-    Route::get('/online-now', [ProviderRegisterController::class, 'onlineNow'])->name('online-now');
-    Route::post('/online-status', [ProviderRegisterController::class, 'onlineUpdateStatus'])->name('onlineUpdateStatus');
-
-    Route::get('/available-now', [ProviderRegisterController::class, 'availableNow'])->name('available-now');
-    Route::post('/available-status', [ProviderRegisterController::class, 'availableUpdateStatus'])->name('availableUpdateStatus');
-
-    Route::get('/set-and-forget', [ProviderRegisterController::class, 'setForget'])->name('set-and-forget');
-
-    Route::get('/my-babe-rank', [ProviderRegisterController::class, 'myBabeRank'])->name('my-babe-rank');
-
-    Route::get('/profile-message', [ProviderRegisterController::class, 'profileMessage'])->name('profile-message');
-    Route::post('/profile-message', [ProviderRegisterController::class, 'storeProfileMessage'])->name('storeProfileMessage');
-
-    Route::get('/hide-show-profile', [ProviderRegisterController::class, 'hideShowProfile'])->name('hide-show-profile');
-    Route::post('/hide-show-profile', [ProviderRegisterController::class, 'updateHideShowProfile'])->name('update-hide-show-profile');
-
-    Route::get('/view-profile-setting', [ProviderRegisterController::class, 'viewProfileSetting'])->name('view-profile-setting');
-
-    Route::get('/babe-rank', [ProviderRegisterController::class, 'babeRank'])->name('babe-rank');
-
-    Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
-    Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
-
-    Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
-    Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
-
-    Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
+        Route::get('/my-rate', [MyRateController::class, 'index'])->name('my-rate');
+        Route::post('/my-rate', [MyRateController::class, 'store'])->name('my-rate.store');
+        Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])->name('my-rate.destroy');
+        Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])->name('my-rate.update');
+        Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store');
+        Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update');
+        Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
+        Route::get('/click-here-to-verify', [PhotoVerificationController::class, 'index'])->name('verify.photos');
+        Route::post('/verify-profile-photos/upload', [PhotoVerificationController::class, 'upload'])->name('photo-verification.upload');
+        Route::post('/photo-verification/delete-photo', [PhotoVerificationController::class, 'deletePhoto'])->name('photo-verification.delete-photo');
+        Route::post('/booking-enquiry', [BookingController::class, 'send'])->name('booking.enquiry');
+        Route::get('/short-url', [ProviderRegisterController::class, 'shortUrl'])->name('short-url');
+        Route::post('/short-url/update', [ProviderRegisterController::class, 'updateShortUrl'])->name('short-url-update');
+        Route::get('/referrals', [ProviderRegisterController::class, 'referrals'])->name('referrals');
+        Route::get('/online-now', [ProviderRegisterController::class, 'onlineNow'])->name('online-now');
+        Route::post('/online-status', [ProviderRegisterController::class, 'onlineUpdateStatus'])->name('onlineUpdateStatus');
+        Route::get('/available-now', [ProviderRegisterController::class, 'availableNow'])->name('available-now');
+        Route::post('/available-status', [ProviderRegisterController::class, 'availableUpdateStatus'])->name('availableUpdateStatus');
+        Route::get('/set-and-forget', [ProviderRegisterController::class, 'setForget'])->name('set-and-forget');
+        Route::get('/my-babe-rank', [ProviderRegisterController::class, 'myBabeRank'])->name('my-babe-rank');
+        Route::get('/profile-message', [ProviderRegisterController::class, 'profileMessage'])->name('profile-message');
+        Route::post('/profile-message', [ProviderRegisterController::class, 'storeProfileMessage'])->name('storeProfileMessage');
+        Route::get('/hide-show-profile', [ProviderRegisterController::class, 'hideShowProfile'])->name('hide-show-profile');
+        Route::post('/hide-show-profile', [ProviderRegisterController::class, 'updateHideShowProfile'])->name('update-hide-show-profile');
+        Route::get('/view-profile-setting', [ProviderRegisterController::class, 'viewProfileSetting'])->name('view-profile-setting');
+        Route::get('/babe-rank', [ProviderRegisterController::class, 'babeRank'])->name('babe-rank');
+        Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
+        Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
+        Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
+        Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
+        Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
 });
-
+});
 /** social auth routes */
 Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
