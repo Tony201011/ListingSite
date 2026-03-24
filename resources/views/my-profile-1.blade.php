@@ -20,6 +20,25 @@
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
             <div class="p-6 sm:p-8">
+                <div x-data="{ showError: true }">
+                @if(session('error'))
+                    <div
+                        x-show="showError"
+                        x-transition
+                        class="mb-4 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium"
+                    >
+                        <span>{{ session('error') }}</span>
+
+                        <button
+                            type="button"
+                            @click="showError = false"
+                            class="text-red-500 hover:text-red-700 text-lg leading-none"
+                        >
+                            &times;
+                        </button>
+                    </div>
+                @endif
+        </div>
                 <p class="text-lg text-gray-600 mb-6 font-medium">
                     To set up your profile please do the next three steps:
                 </p>

@@ -133,8 +133,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
     Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
     Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');
-
     Route::middleware(['profile.steps'])->group(function () {
+
         Route::get('/upload-video', [MyVideosController::class, 'index'])->name('upload-video');
         Route::get('/my-videos', [MyVideosController::class, 'getVideos'])->name('my-videos');
         Route::post('/videos/upload', [MyVideosController::class, 'uploadVideos'])->name('videos.upload');
@@ -147,7 +147,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
         Route::post('/set-availability', [AvailabilityController::class, 'update'])->name('availability.update');
         Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
-
         Route::get('/my-rate', [MyRateController::class, 'index'])->name('my-rate');
         Route::post('/my-rate', [MyRateController::class, 'store'])->name('my-rate.store');
         Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])->name('my-rate.destroy');
@@ -179,8 +178,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
         Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
         Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
-});
-});
+        });
+    });
 /** social auth routes */
 Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
