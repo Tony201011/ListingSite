@@ -47,6 +47,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'otp_expires_at',
         'mobile_verified',
         'password',
+        'account_status',
+        'hold_reason'
     ];
 
     /**
@@ -70,6 +72,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             'email_verified_at' => 'datetime',
             'is_blocked' => 'boolean',
             'password' => 'hashed',
+            'deleted_at' => 'datetime',
+            'scheduled_purge_at' => 'datetime',
+            'anonymized_at' => 'datetime',
         ];
     }
 

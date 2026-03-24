@@ -133,6 +133,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
     Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
     Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');
+
     Route::middleware(['profile.steps'])->group(function () {
 
         Route::get('/upload-video', [MyVideosController::class, 'index'])->name('upload-video');
