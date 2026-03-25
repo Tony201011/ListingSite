@@ -342,11 +342,22 @@
                             Manage your password and account access settings.
                         </p>
                         <div class="space-y-2">
+                                @auth
+                                    @if (!auth()->user()->hasVerifiedEmail())
+                                        <form method="POST" action="{{ route('verification.send') }}">
+                                            @csrf
+                                            <button type="submit"
+                                                class="block w-full px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-center">
+                                                Verify email
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endauth
                             <a href="{{ url('/change-password') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Change password</a>
                             <a href="{{ url('/delete-account') }}" class="block w-full px-4 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition text-center">Delete account</a>
                         </div>
                     </div>
-            </div>
+         </div>
 
             <div class="mt-8 bg-white rounded-xl border border-gray-100 p-5 sm:p-6">
                 <p class="text-gray-700 font-medium mb-2">

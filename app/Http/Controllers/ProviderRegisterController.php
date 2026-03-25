@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class ProviderRegisterController extends Controller
@@ -220,40 +222,52 @@ class ProviderRegisterController extends Controller
                 $recaptchaResponse = json_decode(
                     file_get_contents(
                         'https://www.google.com/recaptcha/api/siteverify?secret=' .
-                            $recaptchaSecret .
-                            '&response=' .
-                            $recaptcha
+                        $recaptchaSecret .
+                        '&response=' .
+                        $recaptcha
                     ),
                     true
                 );
             }
 
-            if (!$recaptchaResponse || empty($recaptchaResponse['success'])) {
-                return back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed'])->withInput();
+            if (! $recaptchaResponse || empty($recaptchaResponse['success'])) {
+                return back()
+                    ->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed'])
+                    ->withInput();
             }
         }
 
-        $email = $request->email;
+        $user = User::where('email', $request->email)->first();
 
-        $user = User::where('email', $email)->first();
+        if (! $user) {
+            return back()->withErrors([
+                'email' => 'Invalid email or password',
+            ])->withInput();
+        }
 
-        $isBlocked = $user?->is_blocked;
+        if ($user->is_blocked) {
+            return back()->withErrors([
+                'email' => 'Your account has been blocked.',
+            ])->withInput();
+        }
 
-        if ($isBlocked) {
-            return back()->withErrors(['Your account has been blocked.'
+        if (! $user->hasVerifiedEmail()) {
+            return back()->withErrors([
+                'email' => 'Please verify your email address before signing in.',
             ])->withInput();
         }
 
         if (Auth::attempt([
             'email' => $request->email,
-            'password' => $request->password
+            'password' => $request->password,
         ], $request->boolean('remember'))) {
             $request->session()->regenerate();
+
             return redirect()->intended('/my-profile');
         }
 
         return back()->withErrors([
-            'email' => 'Invalid email or password'
+            'email' => 'Invalid email or password',
         ])->withInput();
     }
 
@@ -498,111 +512,165 @@ class ProviderRegisterController extends Controller
     }
 
     private function sendAccountCreatedEmail(User $user): void
-    {
-        $activeMailSetting = SmtpSetting::query()
-            ->where('is_enabled', true)
-            ->latest('updated_at')
-            ->first();
-
-        if (! $activeMailSetting) {
-            // Fallback to latest saved row to match Test Mail behavior in admin.
+        {
             $activeMailSetting = SmtpSetting::query()
+                ->where('is_enabled', true)
                 ->latest('updated_at')
                 ->first();
-        }
 
-        if (! $activeMailSetting) {
-            Log::error('Account created email failed: no active mail setting found.', [
-                'user_id' => $user->id,
-                'email' => $user->email,
+            if (! $activeMailSetting) {
+                // Fallback to latest saved row to match Test Mail behavior in admin.
+                $activeMailSetting = SmtpSetting::query()
+                    ->latest('updated_at')
+                    ->first();
+            }
+
+            if (! $activeMailSetting) {
+                Log::error('Signup emails failed: no active mail setting found.', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                ]);
+                return;
+            }
+
+            if (! $activeMailSetting->is_enabled) {
+                Log::warning('Signup emails using latest mail setting that is disabled.', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'mail_setting_id' => $activeMailSetting->id,
+                ]);
+            }
+
+            $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
+            $liveDomain = $activeMailSetting->mailgun_live_domain;
+
+            $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
+                ? $sandboxDomain
+                : ($liveDomain ?: $sandboxDomain);
+
+            $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
+
+            if (filled($mailgunDomain)) {
+                $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
+            }
+
+            if (filled($mailgunEndpoint)) {
+                $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
+                    ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
+            }
+
+            $fromAddress = $activeMailSetting->mail_from_address;
+            if (! filled($fromAddress) && filled($mailgunDomain)) {
+                $fromAddress = 'postmaster@' . $mailgunDomain;
+            }
+
+            config([
+                'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
+                'mail.mailers.mailgun.transport' => 'mailgun',
+                'services.mailgun.domain' => $mailgunDomain,
+                'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
+                'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
+                'services.mailgun.scheme' => 'https',
+                'mail.from.address' => $fromAddress ?: config('mail.from.address'),
+                'mail.from.name' => $activeMailSetting->mail_from_name ?: config('app.name'),
             ]);
-            return;
-        }
 
-        if (! $activeMailSetting->is_enabled) {
-            Log::warning('Account created email using latest mail setting that is disabled.', [
+            app('mail.manager')->forgetMailers();
+
+            Log::info('Signup email configuration prepared', [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'mail_setting_id' => $activeMailSetting->id,
-            ]);
-        }
-
-        $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
-        $liveDomain = $activeMailSetting->mailgun_live_domain;
-
-        $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
-            ? $sandboxDomain
-            : ($liveDomain ?: $sandboxDomain);
-
-        $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
-
-        if (filled($mailgunDomain)) {
-            $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
-        }
-
-        if (filled($mailgunEndpoint)) {
-            $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
-                ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
-        }
-
-        config([
-            'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
-            'mail.mailers.mailgun.transport' => 'mailgun',
-            'services.mailgun.domain' => $mailgunDomain,
-            'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
-            'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
-            'services.mailgun.scheme' => 'https',
-            'mail.from.address' => $activeMailSetting->mail_from_address ?: 'postmaster@' . $mailgunDomain,
-            'mail.from.name' => $activeMailSetting->mail_from_name ?: config('app.name'),
-        ]);
-
-        app('mail.manager')->forgetMailers();
-
-        Log::info('Account created email attempt', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'mail_setting_id' => $activeMailSetting->id,
-            'mail_setting_enabled' => (bool) $activeMailSetting->is_enabled,
-            'mailer_used' => 'mailgun',
-            'mail_from_address' => config('mail.from.address'),
-            'mail_from_name' => config('mail.from.name'),
-            'mailgun_domain' => config('services.mailgun.domain'),
-            'mailgun_endpoint' => config('services.mailgun.endpoint'),
-            'mailgun_secret_present' => filled(config('services.mailgun.secret')),
-        ]);
-
-        try {
-            Mail::mailer('mailgun')->send(
-                'emails.account-created',
-                [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'signinUrl' => url('/signin'),
-                ],
-                function ($message) use ($user): void {
-                    $message->to($user->email)
-                        ->subject('Your account has been created');
-                }
-            );
-
-            Log::info('Account created email sent successfully', [
-                'user_id' => $user->id,
-                'email' => $user->email,
+                'mail_setting_enabled' => (bool) $activeMailSetting->is_enabled,
                 'mailer_used' => 'mailgun',
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Account created email failed', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'mailer_used' => 'mailgun',
+                'mail_from_address' => config('mail.from.address'),
+                'mail_from_name' => config('mail.from.name'),
                 'mailgun_domain' => config('services.mailgun.domain'),
                 'mailgun_endpoint' => config('services.mailgun.endpoint'),
-                'exception_class' => get_class($e),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'mailgun_secret_present' => filled(config('services.mailgun.secret')),
             ]);
+
+            $verificationUrl = URL::temporarySignedRoute(
+                'verification.verify',
+                Carbon::now()->addMinutes(60),
+                [
+                    'id' => $user->id,
+                    'hash' => sha1($user->getEmailForVerification()),
+                ]
+            );
+
+            Log::info('Verification URL generated', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'verification_url_generated' => filled($verificationUrl),
+            ]);
+
+            // 1) Send verification email
+            try {
+                Mail::mailer('mailgun')->send(
+                    'emails.verify-email',
+                    [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'verificationUrl' => $verificationUrl,
+                    ],
+                    function ($message) use ($user): void {
+                        $message->to($user->email)
+                            ->subject('Verify Your Email Address');
+                    }
+                );
+
+                Log::info('Verification email sent successfully', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'mailer_used' => 'mailgun',
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Verification email failed', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'mailer_used' => 'mailgun',
+                    'mailgun_domain' => config('services.mailgun.domain'),
+                    'mailgun_endpoint' => config('services.mailgun.endpoint'),
+                    'exception_class' => get_class($e),
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+
+            // 2) Send account created email
+            try {
+                Mail::mailer('mailgun')->send(
+                    'emails.account-created',
+                    [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'signinUrl' => url('/signin'),
+                    ],
+                    function ($message) use ($user): void {
+                        $message->to($user->email)
+                            ->subject('Your account has been created');
+                    }
+                );
+
+                Log::info('Account created email sent successfully', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'mailer_used' => 'mailgun',
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Account created email failed', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'mailer_used' => 'mailgun',
+                    'mailgun_domain' => config('services.mailgun.domain'),
+                    'mailgun_endpoint' => config('services.mailgun.endpoint'),
+                    'exception_class' => get_class($e),
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
         }
-    }
 
     private function isDummyMobile(?string $mobile, ?TwilioSetting $twilioSetting): bool
     {

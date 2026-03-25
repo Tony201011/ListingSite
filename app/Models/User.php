@@ -1,14 +1,13 @@
 <?php
 
 namespace App\Models;
-
 use App\Models\Rate;
 use App\Models\RateGroup;
 use App\Models\ProviderListing;
 use App\Models\ProviderProfile;
 use App\Models\ProfileMessage;
 use App\Notifications\BrandedResetPasswordNotification;
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
@@ -17,23 +16,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\SoftDeletes; // <-- import trait
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User extends Authenticatable implements FilamentUser, HasAvatar
+class User extends Authenticatable implements MustVerifyEmail, FilamentUser, HasAvatar
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes; // <-- use trait
+    use HasFactory, Notifiable, SoftDeletes;
 
     public const ROLE_ADMIN = 'admin';
-
     public const ROLE_PROVIDER = 'provider';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'profile_image',
@@ -48,33 +39,26 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'mobile_verified',
         'password',
         'account_status',
-        'hold_reason'
+        'hold_reason',
+        'email_verified_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'is_blocked' => 'boolean',
+            'mobile_verified' => 'boolean',
             'password' => 'hashed',
             'deleted_at' => 'datetime',
             'scheduled_purge_at' => 'datetime',
             'anonymized_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
         ];
     }
 
@@ -124,42 +108,36 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         $this->notify(new BrandedResetPasswordNotification($token));
     }
 
-    public function rateGroups()
+    public function rateGroups(): HasMany
     {
         return $this->hasMany(RateGroup::class);
     }
 
-    public function profileMessage()
+    public function profileMessage(): HasOne
     {
-         return $this->hasOne(\App\Models\ProfileMessage::class);
-
+        return $this->hasOne(ProfileMessage::class);
     }
 
-    public function tours()
+    public function tours(): HasMany
     {
         return $this->hasMany(Tour::class);
     }
 
-    public function availabilities()
-        {
-            return $this->hasMany(\App\Models\Availability::class);
-        }
-        /**
-     * Get all profile images for the user.
-     */
+    public function availabilities(): HasMany
+    {
+        return $this->hasMany(\App\Models\Availability::class);
+    }
+
     public function profileImages(): HasMany
     {
         return $this->hasMany(ProfileImage::class);
     }
 
-    public function photoVerification()
+    public function photoVerification(): HasMany
     {
         return $this->hasMany(PhotoVerification::class);
     }
 
-    /**
-     * Get the primary profile image (where is_primary = true).
-     */
     public function primaryProfileImage(): HasOne
     {
         return $this->hasOne(ProfileImage::class)->where('is_primary', true);

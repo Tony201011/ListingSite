@@ -19,6 +19,7 @@ use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\SuburbController;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -26,6 +27,23 @@ use Illuminate\Support\Facades\Schema;
 Route::get('/site-password', function () {
     return view('site-password');
 })->name('site-password.form');
+
+
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect('/my-profile')->with('success', 'Email verified successfully.');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('success', 'Verification link sent again.');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 
 Route::redirect('/login', '/');
