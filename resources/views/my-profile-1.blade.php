@@ -281,50 +281,54 @@
 
                 <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                     <h3 class="text-lg font-bold text-gray-800 mb-2">ONLINE NOW</h3>
+
                     <p class="text-sm text-gray-600 mb-4">
                         Use this feature up to 4 times a day for 60 minutes.
                     </p>
+
                     <button
                         type="button"
-                        x-on:click="onlineNow = !onlineNow"
-                        class="w-full px-4 py-2 rounded-lg transition"
-                        :class="onlineNow ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                        x-text="onlineNow ? 'Enabled' : 'Online NOW'"
-                    ></button>
+                        @click="window.location.href='{{ route('online-now') }}'"
+                        class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition"
+                    >
+                        Online NOW
+                    </button>
                 </div>
+
+
                 <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2 xl:col-span-1">
-    <h3 class="text-lg font-bold text-gray-800 mb-2">Referral Code</h3>
-    <p class="text-sm text-gray-600 mb-4">
-        Share your referral code with friends and earn rewards.
-    </p>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Referral Code</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Share your referral code with friends and earn rewards.
+                    </p>
 
-    @php
-        $referralCode = $profile->account_user_referral_code ?? 'dsgfdgfdgfdgfdg';
-        $referralLink = url('/register?ref=' . $referralCode);
-    @endphp
+                    @php
+                        $referralCode = $profile->account_user_referral_code ?? 'dsgfdgfdgfdgfdg';
+                        $referralLink = url('/register?ref=' . $referralCode);
+                    @endphp
 
-    <div class="space-y-3">
-        <!-- Code + Copy -->
-        <div class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-lg">
-            <span id="referralCode" class="text-gray-800 font-medium">{{ $referralCode }}</span>
-            <button
-                id="copyBtn"
-                type="button"
-                onclick="copyReferralCode()"
-                class="text-sm text-blue-600 hover:underline"
-            >
-                Copy
-            </button>
-        </div>
+                <div class="space-y-3">
+                    <!-- Code + Copy -->
+                    <div class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-lg">
+                        <span id="referralCode" class="text-gray-800 font-medium">{{ $referralCode }}</span>
+                        <button
+                            id="copyBtn"
+                            type="button"
+                            onclick="copyReferralCode()"
+                            class="text-sm text-blue-600 hover:underline"
+                        >
+                            Copy
+                        </button>
+                    </div>
 
 
-        <!-- View Referrals -->
-        <a href="{{ url('/referrals') }}"
-           class="block w-full px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-center">
-            View Referrals
-            </a>
-        </div>
-    </div>
+                    <!-- View Referrals -->
+                    <a href="{{ url('/referrals') }}"
+                    class="block w-full px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-center">
+                        View Referrals
+                        </a>
+                    </div>
+                </div>
 
 
          <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2 xl:col-span-1">
