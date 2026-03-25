@@ -118,6 +118,8 @@ class MyProfileController extends Controller
     {
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
+
+
         if (! $user) {
             abort(403);
         }
@@ -128,7 +130,6 @@ class MyProfileController extends Controller
             'suburb' => 'required|string|max:255',
             'introduction_line' => 'required|string',
             'profile_text' => 'required|string',
-
             'age_group' => 'required|exists:categories,id',
             'hair_color' => 'required|exists:categories,id',
             'hair_length' => 'required|exists:categories,id',
@@ -136,12 +137,10 @@ class MyProfileController extends Controller
             'body_type' => 'required|exists:categories,id',
             'bust_size' => 'required|exists:categories,id',
             'your_length' => 'required|exists:categories,id',
-
             'availability' => 'required|string|max:100',
             'contact_method' => 'required|string|max:100',
             'phone_contact' => 'required|string|max:100',
             'time_waster' => 'required|string|max:100',
-
             'primary_identity' => 'required|array|min:1',
             'primary_identity.*' => 'string',
             'attributes' => 'required|array|min:1',
@@ -150,7 +149,6 @@ class MyProfileController extends Controller
             'services_style.*' => 'string',
             'services_provided' => 'required|array|min:1',
             'services_provided.*' => 'string',
-
             'twitter_handle' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
             'onlyfans_username' => 'nullable|string|max:255',
