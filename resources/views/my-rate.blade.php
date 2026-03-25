@@ -165,14 +165,14 @@
                 </div>
             </div>
 
-            <!-- Create a new group Section (placeholder) -->
+            {{-- <!-- Create a new group Section (placeholder) -->
             <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-2">Create a new group</h2>
                 <p class="text-gray-600 mb-6">If you like to create groups, use the button below to create a group for a specific service you offer.</p>
                 <button class="bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
                     + Create a new rates group
                 </button>
-            </div>
+            </div> --}}
         </div>
     </div>
 </div>

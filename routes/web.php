@@ -27,6 +27,9 @@ Route::get('/site-password', function () {
     return view('site-password');
 })->name('site-password.form');
 
+
+Route::redirect('/login', '/');
+
 /** frontend pages */
 Route::get('/terms-and-conditions', [FrontendPageController::class, 'termsAndConditions'])->name('terms-and-conditions');
 Route::get('/privacy-policy', [FrontendPageController::class, 'privacyPolicy'])->name('privacy-policy');
@@ -182,8 +185,8 @@ Route::middleware('auth')->group(function () {
         });
     });
 /** social auth routes */
-Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
-Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
-Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
+// Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
+// Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
+// Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 
 require __DIR__ . '/escort-review.php';
