@@ -260,9 +260,14 @@
                     <p class="text-sm text-gray-600 mb-4">
                         You have not set your availability. This gives your BabeRank a boost of 70%.
                     </p>
-                    <a href="{{ url('/my-availability') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">
-                        Set availability
-                    </a>
+                    <button
+                        type="button"
+                        @click="window.location.href='{{ route('availability.show') }}'"
+                        class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition"
+                    >
+                       Set availability
+                    </button>
+
                 </div>
 
                 <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
@@ -272,11 +277,11 @@
                     </p>
                     <button
                         type="button"
-                        x-on:click="availableNow = !availableNow"
-                        class="w-full px-4 py-2 rounded-lg transition"
-                        :class="availableNow ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                        x-text="availableNow ? 'Enabled' : 'Available NOW'"
-                    ></button>
+                        @click="window.location.href='{{ route('available-now') }}'"
+                        class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition"
+                    >
+                       Set Available Now
+                    </button>
                 </div>
 
                 <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
@@ -291,7 +296,7 @@
                         @click="window.location.href='{{ route('online-now') }}'"
                         class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition"
                     >
-                        Online NOW
+                        Set Online NOW
                     </button>
                 </div>
 
