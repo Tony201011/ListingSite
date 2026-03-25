@@ -9,38 +9,44 @@ class AvailableNow extends Model
 {
     use HasFactory;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'available_nows';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'status',
+        'usage_date',
+        'usage_count',
+        'available_started_at',
+        'available_expires_at',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'status' => 'string', // Since it's an ENUM, we treat it as string
+        'status' => 'string',
+        'usage_date' => 'date',
+        'available_started_at' => 'datetime',
+        'available_expires_at' => 'datetime',
     ];
 
-    /**
-     * Get the user that owns this available now record.
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    public function isCurrentlyAvailable(): bool
+    {
+        return $this->status === 'online'
+            && $this->available_expires_at
+            && now()->lt($this->available_expires_at);
+    }
+
+    public function resetDailyUsageIfNeeded(): void
+    {
+        if (! $this->usage_date || ! $this->usage_date->isToday()) {
+            $this->usage_date = today();
+            $this->usage_count = 0;
+            $this->status = 'offline';
+            $this->available_started_at = null;
+            $this->available_expires_at = null;
+        }
+    }
 }
