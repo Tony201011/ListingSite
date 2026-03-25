@@ -6,17 +6,27 @@ use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\FrontendPageController;
+use App\Http\Controllers\ShowHideProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\MyRateController;
 use App\Http\Controllers\MyToursController;
 use App\Http\Controllers\MyVideosController;
+use App\Http\Controllers\OnlineController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\PhotoVerificationController;
 use App\Http\Controllers\ProviderRegisterController;
 use App\Http\Controllers\PurchaseCreditController;
+use App\Http\Controllers\AvailableController;
+use App\Http\Controllers\BabeRankController;
+use App\Http\Controllers\ForgetController;
+use App\Http\Controllers\ProfileMessageController;
+use App\Http\Controllers\ProfileSettingController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\SuburbController;
+use App\Http\Controllers\UrlController;
+use App\Http\Controllers\ReferralsController;
+use App\Models\HideShowProfile;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -27,7 +37,6 @@ use Illuminate\Support\Facades\Schema;
 Route::get('/site-password', function () {
     return view('site-password');
 })->name('site-password.form');
-
 
 Route::get('/email/verify', function () {
     return view('auth.verify-email');
@@ -44,7 +53,6 @@ Route::post('/email/verification-notification', function (Request $request) {
 
     return back()->with('success', 'Verification link sent again.');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-
 
 Route::redirect('/login', '/');
 
@@ -140,7 +148,6 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function () {
-
     Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
     Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])->name('edit-profile');
     Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
@@ -156,19 +163,29 @@ Route::middleware('auth')->group(function () {
     Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');
 
     Route::middleware(['profile.steps'])->group(function () {
-
+        /**** video route start here */
         Route::get('/upload-video', [MyVideosController::class, 'index'])->name('upload-video');
         Route::get('/my-videos', [MyVideosController::class, 'getVideos'])->name('my-videos');
         Route::post('/videos/upload', [MyVideosController::class, 'uploadVideos'])->name('videos.upload');
         Route::delete('/videos/{video}', [MyVideosController::class, 'destroy'])->name('videos.destroy');
+        /**** video route end here */
+
+        /*** tour route start here */
         Route::get('/my-tours', [MyToursController::class, 'index'])->name('my-tours');
         Route::post('/my-tours', [MyToursController::class, 'store'])->name('my-tours.store');
         Route::put('/my-tours/{tour}', [MyToursController::class, 'update'])->name('my-tours.update');
         Route::delete('/my-tours/{tour}', [MyToursController::class, 'destroy'])->name('my-tours.destroy');
         Route::get('/search-cities', [MyToursController::class, 'search'])->name('search-cities');
+        /*** tour route end here */
+
+
+        /*** availability route start here */
         Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
         Route::post('/set-availability', [AvailabilityController::class, 'update'])->name('availability.update');
         Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
+        /*** availability route end here */
+
+        /************* rate route start here */
         Route::get('/my-rate', [MyRateController::class, 'index'])->name('my-rate');
         Route::post('/my-rate', [MyRateController::class, 'store'])->name('my-rate.store');
         Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])->name('my-rate.destroy');
@@ -176,32 +193,68 @@ Route::middleware('auth')->group(function () {
         Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store');
         Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update');
         Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
+        /************* rate route end here */
+
+        /*** photo route start here */
         Route::get('/click-here-to-verify', [PhotoVerificationController::class, 'index'])->name('verify.photos');
         Route::post('/verify-profile-photos/upload', [PhotoVerificationController::class, 'upload'])->name('photo-verification.upload');
         Route::post('/photo-verification/delete-photo', [PhotoVerificationController::class, 'deletePhoto'])->name('photo-verification.delete-photo');
+        /****** photo route end here */
+
         Route::post('/booking-enquiry', [BookingController::class, 'send'])->name('booking.enquiry');
-        Route::get('/short-url', [ProviderRegisterController::class, 'shortUrl'])->name('short-url');
-        Route::post('/short-url/update', [ProviderRegisterController::class, 'updateShortUrl'])->name('short-url-update');
-        Route::get('/referrals', [ProviderRegisterController::class, 'referrals'])->name('referrals');
-        Route::get('/online-now', [ProviderRegisterController::class, 'onlineNow'])->name('online-now');
-        Route::post('/online-status', [ProviderRegisterController::class, 'onlineUpdateStatus'])->name('onlineUpdateStatus');
-        Route::get('/available-now', [ProviderRegisterController::class, 'availableNow'])->name('available-now');
-        Route::post('/available-status', [ProviderRegisterController::class, 'availableUpdateStatus'])->name('availableUpdateStatus');
-        Route::get('/set-and-forget', [ProviderRegisterController::class, 'setForget'])->name('set-and-forget');
-        Route::get('/my-babe-rank', [ProviderRegisterController::class, 'myBabeRank'])->name('my-babe-rank');
-        Route::get('/profile-message', [ProviderRegisterController::class, 'profileMessage'])->name('profile-message');
-        Route::post('/profile-message', [ProviderRegisterController::class, 'storeProfileMessage'])->name('storeProfileMessage');
-        Route::get('/hide-show-profile', [ProviderRegisterController::class, 'hideShowProfile'])->name('hide-show-profile');
-        Route::post('/hide-show-profile', [ProviderRegisterController::class, 'updateHideShowProfile'])->name('update-hide-show-profile');
-        Route::get('/view-profile-setting', [ProviderRegisterController::class, 'viewProfileSetting'])->name('view-profile-setting');
-        Route::get('/babe-rank', [ProviderRegisterController::class, 'babeRank'])->name('babe-rank');
+
+        /********** short url start */
+        Route::get('/short-url', [UrlController::class, 'shortUrl'])->name('short-url');
+        Route::post('/short-url/update', [UrlController::class, 'updateShortUrl'])->name('short-url-update');
+        /********* short url end */
+
+        /***** referrals route start here */
+        Route::get('/referrals', [ReferralsController::class, 'referrals'])->name('referrals');
+        /***** referrals route end here */
+
+        /***** Online route start here */
+        Route::get('/online-now', [OnlineController::class, 'onlineNow'])->name('online-now');
+        Route::post('/online-status', [OnlineController::class, 'onlineUpdateStatus'])->name('onlineUpdateStatus');
+        /****** Online route end here */
+
+        /***** Online available start here */
+        Route::get('/available-now', [AvailableController::class, 'availableNow'])->name('available-now');
+        Route::post('/available-status', [AvailableController::class, 'availableUpdateStatus'])->name('availableUpdateStatus');
+        /***** Online available end here */
+
+        /*** forget end here */
+        Route::get('/set-and-forget', [ForgetController::class, 'setForget'])->name('set-and-forget');
+        /*** forget end here */
+
+        /**** babe rank start here */
+        Route::get('/my-babe-rank', [BabeRankController::class, 'myBabeRank'])->name('my-babe-rank');
+        Route::get('/babe-rank', [BabeRankController::class, 'babeRank'])->name('babe-rank');
+        /**** babe rank end here */
+
+        /**** profile message route start here */
+        Route::get('/profile-message', [ProfileMessageController::class, 'profileMessage'])->name('profile-message');
+        Route::post('/profile-message', [ProfileMessageController::class, 'storeProfileMessage'])->name('storeProfileMessage');
+        /**** profile message route end here */
+
+        /**** hide show profile start here */
+        Route::get('/hide-show-profile', [ShowHideProfileController::class, 'hideShowProfile'])->name('hide-show-profile');
+        Route::post('/hide-show-profile', [ShowHideProfileController::class, 'updateHideShowProfile'])->name('update-hide-show-profile');
+        /*** hide show profile end here */
+
+        /********** profile route start here */
+        Route::get('/view-profile-setting', [ProfileSettingController::class, 'viewProfileSetting'])->name('view-profile-setting');
+        /********** profile route end here */
+
+        /*** credit route start here */
         Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
         Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
         Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
         Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
         Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
-        });
+        /*** credit route end here */
     });
+});
+
 /** social auth routes */
 // Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
 // Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
