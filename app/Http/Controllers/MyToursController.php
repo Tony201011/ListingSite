@@ -2,43 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DeleteTour;
+use App\Actions\GetMyToursPageData;
+use App\Actions\SearchTourCities;
+use App\Actions\StoreTour;
+use App\Actions\UpdateTour;
 use App\Http\Requests\SearchTourCityRequest;
 use App\Http\Requests\StoreTourRequest;
 use App\Http\Requests\UpdateTourRequest;
 use App\Models\Tour;
-use App\Models\TourCity;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class MyToursController extends Controller
 {
+    public function __construct(
+        private GetMyToursPageData $getMyToursPageData,
+        private StoreTour $storeTour,
+        private UpdateTour $updateTour,
+        private DeleteTour $deleteTour,
+        private SearchTourCities $searchTourCities
+    ) {
+    }
+
     /**
      * Display the tours management page with existing tours.
      */
-    public function index()
+    public function index(): View
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        $tours = $user
-            ? $user->tours()->orderBy('from')->get()
-            : collect();
-
-        return view('my-tours', compact('tours'));
+        return view('my-tours', $this->getMyToursPageData->execute(Auth::user()));
     }
 
     /**
      * Store a newly created tour.
      */
-    public function store(StoreTourRequest $request)
+    public function store(StoreTourRequest $request): JsonResponse
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        if (! $user) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $tour = $user->tours()->create($request->validated());
+        $tour = $this->storeTour->execute(
+            Auth::user(),
+            $request->validated()
+        );
 
         return response()->json([
             'message' => 'Tour created successfully.',
@@ -49,13 +53,13 @@ class MyToursController extends Controller
     /**
      * Update the specified tour.
      */
-    public function update(UpdateTourRequest $request, Tour $tour)
+    public function update(UpdateTourRequest $request, Tour $tour): JsonResponse
     {
-        if ($tour->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $tour->update($request->validated());
+        $tour = $this->updateTour->execute(
+            Auth::user(),
+            $tour,
+            $request->validated()
+        );
 
         return response()->json([
             'message' => 'Tour updated successfully.',
@@ -66,36 +70,21 @@ class MyToursController extends Controller
     /**
      * Remove the specified tour (soft delete).
      */
-    public function destroy(Tour $tour)
+    public function destroy(Tour $tour): JsonResponse
     {
-        if ($tour->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $tour->delete();
+        $this->deleteTour->execute(Auth::user(), $tour);
 
         return response()->json([
             'message' => 'Tour deleted successfully.',
         ]);
     }
 
-    public function search(SearchTourCityRequest $request)
+    public function search(SearchTourCityRequest $request): JsonResponse
     {
-        $query = $request->validated('q');
-
-        if (! $query || strlen($query) < 2) {
-            return response()->json([]);
-        }
-
-        $cities = TourCity::where('name', 'like', $query . '%')
-            ->orderBy('name')
-            ->get(['name', 'state']);
-
-        return response()->json(
-            $cities->map(fn ($city) => [
-                'name' => $city->name,
-                'adminName1' => $city->state,
-            ])
+        $cities = $this->searchTourCities->execute(
+            $request->validated('q')
         );
+
+        return response()->json($cities);
     }
 }

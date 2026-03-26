@@ -1,14 +1,17 @@
 <?php
-
 namespace App\Http\Controllers;
-
+use App\Actions\DeleteUserAccount;
 use App\Http\Requests\DeleteAccountRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class AccountController extends Controller
 {
+    public function __construct(
+        private DeleteUserAccount $deleteUserAccount
+    ) {
+    }
+
     public function deleteAccountPage()
     {
         return view('delete-account');
@@ -23,18 +26,7 @@ class AccountController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($user) {
-                $user->account_status = 'soft_deleted';
-                $user->scheduled_purge_at = now()->addDays(30); // change to 60/90 if needed
-                $user->setRememberToken(null);
-                $user->save();
-
-                if (method_exists($user, 'tokens')) {
-                    $user->tokens()->delete();
-                }
-
-                $user->delete(); // soft delete only
-            });
+            $this->deleteUserAccount->execute($user);
 
             Auth::logout();
             $request->session()->invalidate();

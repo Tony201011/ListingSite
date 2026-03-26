@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Actions;
+
+use App\Models\Availability;
+use Illuminate\Support\Facades\DB;
+
+class UpdateUserAvailability
+{
+    protected array $days = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+    ];
+
+    public function execute(int $userId, array $availabilityData): void
+    {
+        DB::transaction(function () use ($userId, $availabilityData) {
+            foreach ($this->days as $day) {
+                $dayData = $availabilityData[$day] ?? [];
+
+                $payload = $this->buildPayload($dayData);
+
+                Availability::updateOrCreate(
+                    [
+                        'user_id' => $userId,
+                        'day' => $day,
+                    ],
+                    $payload
+                );
+            }
+        });
+    }
+
+    protected function buildPayload(array $dayData): array
+    {
+        $enabled = ! empty($dayData['enabled']);
+        $allDay = ! empty($dayData['all_day']);
+        $tillLate = ! empty($dayData['till_late']);
+        $byAppointment = ! empty($dayData['by_appointment']);
+
+        $fromTime = $dayData['from'] ?? null;
+        $toTime = $dayData['to'] ?? null;
+
+        if (! $enabled) {
+            $fromTime = null;
+            $toTime = null;
+            $allDay = false;
+            $tillLate = false;
+            $byAppointment = false;
+        }
+
+        if ($allDay) {
+            $fromTime = null;
+            $toTime = null;
+        }
+
+        return [
+            'enabled' => $enabled,
+            'from_time' => $fromTime,
+            'to_time' => $toTime,
+            'till_late' => $tillLate,
+            'all_day' => $allDay,
+            'by_appointment' => $byAppointment,
+        ];
+    }
+}

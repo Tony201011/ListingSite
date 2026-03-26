@@ -2,212 +2,107 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\GetAboutUsPageData;
+use App\Actions\GetAntiSpamPolicyPageData;
+use App\Actions\GetContactUsPageData;
+use App\Actions\GetFaqPageData;
+use App\Actions\GetFrontendSimplePage;
 use App\Http\Requests\FaqLoadMoreRequest;
 use App\Http\Requests\SubmitContactUsRequest;
-use App\Models\AboutUsPage;
-use App\Models\AntiSpamPolicy;
-use App\Models\ContactUsPage;
-use App\Models\Faq;
-use App\Models\HelpPage;
-use App\Models\NaughtyCornerPage;
-use App\Models\PricingPackage;
-use App\Models\PricingPage;
-use App\Models\PrivacyPolicy;
-use App\Models\RefundPolicy;
-use App\Models\SiteSetting;
-use App\Models\TermCondition;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class FrontendPageController extends Controller
 {
-    private const FAQ_PER_PAGE = 8;
-
-    public function aboutUs()
-    {
-        $page = AboutUsPage::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
-        return view('about-us', [
-            'page' => $page,
-        ]);
+    public function __construct(
+        private GetAboutUsPageData $getAboutUsPageData,
+        private GetFrontendSimplePage $getFrontendSimplePage,
+        private GetFaqPageData $getFaqPageData,
+        private GetAntiSpamPolicyPageData $getAntiSpamPolicyPageData,
+        private GetContactUsPageData $getContactUsPageData
+    ) {
     }
 
-    public function termsAndConditions()
+    public function aboutUs(): View
     {
-        $terms = TermCondition::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
+        return view('about-us', $this->getAboutUsPageData->execute());
+    }
 
+    public function termsAndConditions(): View
+    {
         return view('terms-and-conditions', [
-            'terms' => $terms,
+            'terms' => $this->getFrontendSimplePage->termCondition(),
         ]);
     }
 
-    public function privacyPolicy()
+    public function privacyPolicy(): View
     {
-        $policy = PrivacyPolicy::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
         return view('privacy-policy', [
-            'policy' => $policy,
+            'policy' => $this->getFrontendSimplePage->privacyPolicy(),
         ]);
     }
 
-    public function refundPolicy()
+    public function refundPolicy(): View
     {
-        $policy = RefundPolicy::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
         return view('refund-policy', [
-            'policy' => $policy,
+            'policy' => $this->getFrontendSimplePage->refundPolicy(),
         ]);
     }
 
-    public function pricing()
+    public function pricing(): View
     {
-        $page = PricingPage::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
-        $packages = collect();
-
-        if ($page) {
-            $packages = PricingPackage::query()
-                ->where('pricing_page_id', $page->id)
-                ->where('is_active', true)
-                ->orderBy('sort_order')
-                ->orderBy('id')
-                ->get();
-        }
-
-        return view('pricing', [
-            'page' => $page,
-            'packages' => $packages,
-        ]);
+        return view('pricing', $this->getFrontendSimplePage->pricing());
     }
 
-    public function help()
+    public function help(): View
     {
-        $page = HelpPage::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
         return view('help', [
-            'page' => $page,
+            'page' => $this->getFrontendSimplePage->help(),
         ]);
     }
 
-    public function naughtyCorner()
+    public function naughtyCorner(): View
     {
-        $page = NaughtyCornerPage::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
         return view('naughty-corner', [
-            'page' => $page,
+            'page' => $this->getFrontendSimplePage->naughtyCorner(),
         ]);
     }
 
-    public function faq()
+    public function faq(): View
     {
-        $paginator = Faq::query()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->paginate(self::FAQ_PER_PAGE);
-
-        $faqs = collect($paginator->items())
-            ->map(function (Faq $faq) {
-                return [
-                    'id' => $faq->id,
-                    'question' => $faq->question,
-                    'answer' => (string) $faq->answer,
-                ];
-            })
-            ->values()
-            ->all();
-
-        return view('faq', [
-            'faqs' => $faqs,
-            'hasMore' => $paginator->hasMorePages(),
-            'nextPage' => $paginator->currentPage() + 1,
-            'lazyLoadUrl' => route('faq.load-more'),
-        ]);
+        return view('faq', $this->getFaqPageData->execute());
     }
 
-    public function faqLoadMore(FaqLoadMoreRequest $request)
+    public function faqLoadMore(FaqLoadMoreRequest $request): JsonResponse
     {
-        $page = (int) $request->validated('page', 1);
-
-        $paginator = Faq::query()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->paginate(self::FAQ_PER_PAGE, ['*'], 'page', $page);
-
-        $faqs = collect($paginator->items())
-            ->map(function (Faq $faq) {
-                return [
-                    'id' => $faq->id,
-                    'question' => $faq->question,
-                    'answer' => (string) $faq->answer,
-                ];
-            })
-            ->values()
-            ->all();
+        $data = $this->getFaqPageData->execute(
+            (int) $request->validated('page', 1)
+        );
 
         return response()->json([
-            'faqs' => $faqs,
-            'hasMore' => $paginator->hasMorePages(),
-            'nextPage' => $paginator->currentPage() + 1,
+            'faqs' => $data['faqs'],
+            'hasMore' => $data['hasMore'],
+            'nextPage' => $data['nextPage'],
         ]);
     }
 
-    public function antiSpamPolicy()
+    public function antiSpamPolicy(): View
     {
-        $policy = AntiSpamPolicy::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
-        return view('anti-spam-policy', [
-            'policy' => $policy,
-        ]);
+        return view('anti-spam-policy', $this->getAntiSpamPolicyPageData->execute());
     }
 
-    public function contactUs()
+    public function contactUs(): View
     {
-        $contactPage = ContactUsPage::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
-        $siteContactEmail = SiteSetting::query()
-            ->whereNotNull('contact_email')
-            ->latest('id')
-            ->value('contact_email');
-
-        return view('contact-us', [
-            'contactPage' => $contactPage,
-            'contactEmail' => $contactPage?->support_email ?: ($siteContactEmail ?? 'support@hotescorts.com.au'),
-        ]);
+        return view('contact-us', $this->getContactUsPageData->execute());
     }
 
-    public function submitContactUs(SubmitContactUsRequest $request)
+    public function submitContactUs(SubmitContactUsRequest $request): RedirectResponse
     {
         return back()->with('success', 'Your message has been sent successfully.');
     }
 
-    public function membership()
+    public function membership(): View
     {
         return view('membership');
     }

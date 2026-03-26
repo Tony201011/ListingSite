@@ -2,35 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\GetEscortReviewPage;
+use App\Actions\UpdateEscortReviewPage;
 use App\Http\Requests\UpdateEscortReviewRequest;
-use App\Models\EscortReviewPage;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class EscortReviewController extends Controller
 {
-    public function show()
+    public function __construct(
+        private GetEscortReviewPage $getEscortReviewPage,
+        private UpdateEscortReviewPage $updateEscortReviewPage
+    ) {
+    }
+
+    public function show(): View
     {
-        $escortReviewPage = EscortReviewPage::first();
+        $escortReviewPage = $this->getEscortReviewPage->execute();
 
         return view('escort-review', compact('escortReviewPage'));
     }
 
-    public function edit()
+    public function edit(): View
     {
-        $escortReviewPage = EscortReviewPage::first();
+        $escortReviewPage = $this->getEscortReviewPage->execute();
 
         return view('admin.escort-review-edit', compact('escortReviewPage'));
     }
 
-    public function update(UpdateEscortReviewRequest $request)
+    public function update(UpdateEscortReviewRequest $request): RedirectResponse
     {
-        $escortReviewPage = EscortReviewPage::first();
-
-        if (! $escortReviewPage) {
-            $escortReviewPage = new EscortReviewPage();
-        }
-
-        $escortReviewPage->content = $request->validated('content');
-        $escortReviewPage->save();
+        $this->updateEscortReviewPage->execute(
+            $request->validated('content')
+        );
 
         return redirect()
             ->route('admin.escort-review.edit')

@@ -2,103 +2,80 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DeleteRate;
+use App\Actions\DeleteRateGroup;
+use App\Actions\GetMyRatePageData;
+use App\Actions\StoreRate;
+use App\Actions\UpdateRate;
+use App\Actions\UpdateRateGroup;
 use App\Http\Requests\StoreRateRequest;
 use App\Http\Requests\UpdateRateGroupRequest;
 use App\Http\Requests\UpdateRateRequest;
 use App\Models\Rate;
 use App\Models\RateGroup;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class MyRateController extends Controller
 {
-    public function index()
-    {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        $rates = $user
-            ? $user->rates()->orderByDesc('created_at')->get()
-            : collect();
-
-        $groups = collect([
-            (object) ['id' => 1, 'name' => 'Group A'],
-            (object) ['id' => 2, 'name' => 'Group B'],
-            (object) ['id' => 3, 'name' => 'Group C'],
-        ]);
-
-        return view('my-rate', [
-            'rates' => $rates,
-            'groups' => $groups,
-        ]);
+    public function __construct(
+        private GetMyRatePageData $getMyRatePageData,
+        private StoreRate $storeRate,
+        private UpdateRate $updateRate,
+        private DeleteRate $deleteRate,
+        private UpdateRateGroup $updateRateGroup,
+        private DeleteRateGroup $deleteRateGroup
+    ) {
     }
 
-    public function store(StoreRateRequest $request)
+    public function index(): View
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
+        return view('my-rate', $this->getMyRatePageData->execute(Auth::user()));
+    }
 
-        if (! $user) {
-            abort(403);
-        }
-
-        $rate = $user->rates()->create($request->validated());
+    public function store(StoreRateRequest $request): JsonResponse
+    {
+        $rate = $this->storeRate->execute(
+            Auth::user(),
+            $request->validated()
+        );
 
         return response()->json($rate, 201);
     }
 
-    public function update(UpdateRateRequest $request, Rate $rate)
+    public function update(UpdateRateRequest $request, Rate $rate): JsonResponse
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        if (! $user || $rate->user_id !== $user->id) {
-            abort(403);
-        }
-
-        $rate->update($request->validated());
+        $rate = $this->updateRate->execute(
+            Auth::user(),
+            $rate,
+            $request->validated()
+        );
 
         return response()->json($rate);
     }
 
-    public function destroy(Rate $rate)
+    public function destroy(Rate $rate): JsonResponse
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        if (! $user || $rate->user_id !== $user->id) {
-            abort(403);
-        }
-
-        $rate->delete();
+        $this->deleteRate->execute(Auth::user(), $rate);
 
         return response()->json(['success' => true]);
     }
 
-    public function updateGroup(UpdateRateGroupRequest $request, RateGroup $group)
+    public function updateGroup(UpdateRateGroupRequest $request, RateGroup $group): JsonResponse
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        if (! $user || $group->user_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized.'], 403);
-        }
-
-        $group->update($request->validated());
+        $group = $this->updateRateGroup->execute(
+            Auth::user(),
+            $group,
+            $request->validated()
+        );
 
         return response()->json($group);
     }
 
-    public function destroyGroup(RateGroup $group)
+    public function destroyGroup(RateGroup $group): JsonResponse
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        if (! $user || $group->user_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized.'], 403);
-        }
-
-        $group->rates()->update(['group_id' => null]);
-        $group->delete();
+        $this->deleteRateGroup->execute(Auth::user(), $group);
 
         return response()->json(['success' => true]);
     }

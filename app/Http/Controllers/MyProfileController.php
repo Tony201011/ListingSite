@@ -2,171 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\GetMyProfilePageData;
+use App\Actions\GetMyProfileStepTwoData;
+use App\Actions\SaveMyProfile;
 use App\Http\Requests\SaveMyProfileRequest;
-use App\Models\Category;
-use App\Models\ProviderProfile;
-use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class MyProfileController extends Controller
 {
-    private const WEBSITE_TYPE = 'adult';
-
-    public function myProfile()
-    {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-        $profile = $user?->providerProfile;
-
-        $stepOneCompleted = false;
-
-        if ($profile) {
-            $requiredFieldsFilled =
-                ! empty($profile->introduction_line) &&
-                ! empty($profile->profile_text) &&
-                ! is_null($profile->age_group_id) &&
-                ! is_null($profile->hair_color_id) &&
-                ! is_null($profile->hair_length_id) &&
-                ! is_null($profile->ethnicity_id) &&
-                ! is_null($profile->body_type_id) &&
-                ! is_null($profile->bust_size_id) &&
-                ! is_null($profile->your_length_id) &&
-                ! empty($profile->availability) &&
-                ! empty($profile->contact_method) &&
-                ! empty($profile->phone_contact_preference) &&
-                ! empty($profile->time_waster_shield) &&
-                ! empty($profile->primary_identity) &&
-                ! empty($profile->attributes) &&
-                ! empty($profile->services_style) &&
-                ! empty($profile->services_provided);
-
-            $stepOneCompleted = $requiredFieldsFilled;
-        }
-
-        $stepTwoCompleted = false;
-        $stepPhotoVerificationCompleted = false;
-
-        $stepTwoCompleted = $user?->profileImages()->whereNull('deleted_at')->count() > 0;
-        $stepPhotoVerificationCompleted = $user?->photoVerification()
-            ->where('status', 'approved')
-            ->whereNull('deleted_at')
-            ->count() > 1;
-
-        return view('my-profile-1', [
-            'user' => $user,
-            'profile' => $profile,
-            'stepOneCompleted' => $stepOneCompleted,
-            'stepTwoCompleted' => $stepTwoCompleted,
-            'stepPhotoVerificationCompleted' => $stepPhotoVerificationCompleted,
-        ]);
+    public function __construct(
+        private GetMyProfilePageData $getMyProfilePageData,
+        private GetMyProfileStepTwoData $getMyProfileStepTwoData,
+        private SaveMyProfile $saveMyProfile
+    ) {
     }
 
-    public function stepTwo()
+    public function myProfile(): View
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-        $profile = $user?->providerProfile;
-
-        $contactEmail = SiteSetting::query()
-            ->whereNotNull('contact_email')
-            ->latest('id')
-            ->value('contact_email') ?? 's8813w@gmail.com';
-
-        $selected = [
-            'age_group' => $profile?->age_group_id,
-            'hair_color' => $profile?->hair_color_id,
-            'hair_length' => $profile?->hair_length_id,
-            'ethnicity' => $profile?->ethnicity_id,
-            'body_type' => $profile?->body_type_id,
-            'bust_size' => $profile?->bust_size_id,
-            'your_length' => $profile?->your_length_id,
-            'availability' => $profile?->availability,
-            'contact_method' => $profile?->contact_method,
-            'phone_contact' => $profile?->phone_contact_preference,
-            'time_waster' => $profile?->time_waster_shield,
-            'primary_identity' => $profile?->primary_identity ?? [],
-            'attributes' => $profile?->attributes ?? [],
-            'services_style' => $profile?->services_style ?? [],
-            'services_provided' => $profile?->services_provided ?? [],
-        ];
-
-        return view('my-profile-2', [
-            'user' => $user,
-            'profile' => $profile,
-            'contactEmail' => $contactEmail,
-            'selected' => $selected,
-            'ageGroupOptions' => $this->getCategoryOptions('age-group'),
-            'hairColorOptions' => $this->getCategoryOptions('hair-color'),
-            'hairLengthOptions' => $this->getCategoryOptions('hair-length'),
-            'ethnicityOptions' => $this->getCategoryOptions('ethnicity'),
-            'bodyTypeOptions' => $this->getCategoryOptions('body-type'),
-            'bustSizeOptions' => $this->getCategoryOptions('bust-size'),
-            'yourLengthOptions' => $this->getCategoryOptions('your-length'),
-            'primaryTags' => $this->getCategoryOptions('primary-identity'),
-            'attrTags' => $this->getCategoryOptions('attributes'),
-            'styleTags' => $this->getCategoryOptions('services-style'),
-            'services' => $this->getCategoryOptions('services-you-provide'),
-            'availabilityOptions' => $this->getCategoryOptions('availability'),
-            'contactMethodOptions' => $this->getCategoryOptions('contact-method'),
-            'phoneContactOptions' => $this->getCategoryOptions('phone-contact-preferences'),
-            'timeWasterOptions' => $this->getCategoryOptions('time-waster-shield'),
-        ]);
+        return view('my-profile-1', $this->getMyProfilePageData->execute(Auth::user()));
     }
 
-    public function save(SaveMyProfileRequest $request)
+    public function stepTwo(): View
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
+        return view('my-profile-2', $this->getMyProfileStepTwoData->execute(Auth::user()));
+    }
 
-        if (! $user) {
-            abort(403);
-        }
-
-        $validated = $request->validated();
-
-        $user->update([
-            'name' => $validated['name'],
-            'mobile' => $validated['mobile'] ?? null,
-            'suburb' => $validated['suburb'] ?? null,
-        ]);
-
-        $profile = $user->providerProfile()->firstOrNew(['user_id' => $user->id]);
-
-        $accountUserReferralCode = Str::substr(md5($user->id . $user->email), 0, 10);
-
-        $profile->name = $validated['name'] ?? $user->name;
-
-        if (! $profile->slug) {
-            $profile->slug = $this->generateUniqueSlug($profile->name);
-        }
-
-        $profile->fill([
-            'introduction_line' => $validated['introduction_line'] ?? null,
-            'profile_text' => $validated['profile_text'] ?? null,
-            'primary_identity' => $validated['primary_identity'] ?? [],
-            'attributes' => $validated['attributes'] ?? [],
-            'services_style' => $validated['services_style'] ?? [],
-            'services_provided' => $validated['services_provided'] ?? [],
-            'age_group_id' => $validated['age_group'] ?? null,
-            'hair_color_id' => $validated['hair_color'] ?? null,
-            'hair_length_id' => $validated['hair_length'] ?? null,
-            'ethnicity_id' => $validated['ethnicity'] ?? null,
-            'body_type_id' => $validated['body_type'] ?? null,
-            'bust_size_id' => $validated['bust_size'] ?? null,
-            'your_length_id' => $validated['your_length'] ?? null,
-            'availability' => $validated['availability'] ?? null,
-            'contact_method' => $validated['contact_method'] ?? null,
-            'phone_contact_preference' => $validated['phone_contact'] ?? null,
-            'time_waster_shield' => $validated['time_waster'] ?? null,
-            'twitter_handle' => $validated['twitter_handle'] ?? null,
-            'website' => $validated['website'] ?? null,
-            'onlyfans_username' => $validated['onlyfans_username'] ?? null,
-            'account_user_referral_code' => $accountUserReferralCode,
-        ]);
-
-        $profile->save();
+    public function save(SaveMyProfileRequest $request): JsonResponse|RedirectResponse
+    {
+        $this->saveMyProfile->execute(
+            Auth::user(),
+            $request->validated()
+        );
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -178,56 +47,5 @@ class MyProfileController extends Controller
         return redirect()
             ->route('edit-profile')
             ->with('success', 'Profile updated successfully.');
-    }
-
-    private function getCategoryOptions(string $slug): array
-    {
-        $parentId = Category::query()
-            ->where('slug', $slug)
-            ->where('website_type', self::WEBSITE_TYPE)
-            ->where('is_active', true)
-            ->value('id');
-
-        if (! $parentId) {
-            Log::warning('Profile category parent slug not found or inactive.', [
-                'slug' => $slug,
-                'route' => request()->path(),
-            ]);
-
-            return [];
-        }
-
-        $options = Category::query()
-            ->where('parent_id', $parentId)
-            ->where('website_type', self::WEBSITE_TYPE)
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->pluck('name', 'id')
-            ->all();
-
-        if (empty($options)) {
-            Log::warning('Profile category options are empty for active parent.', [
-                'slug' => $slug,
-                'parent_id' => $parentId,
-                'route' => request()->path(),
-            ]);
-        }
-
-        return $options;
-    }
-
-    private function generateUniqueSlug(string $name): string
-    {
-        $base = Str::slug($name) ?: 'profile';
-        $slug = $base;
-        $counter = 1;
-
-        while (ProviderProfile::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $counter;
-            $counter++;
-        }
-
-        return $slug;
     }
 }
