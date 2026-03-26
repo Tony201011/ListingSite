@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FaqLoadMoreRequest;
+use App\Http\Requests\SubmitContactUsRequest;
 use App\Models\AboutUsPage;
 use App\Models\AntiSpamPolicy;
 use App\Models\ContactUsPage;
@@ -14,7 +16,6 @@ use App\Models\PrivacyPolicy;
 use App\Models\RefundPolicy;
 use App\Models\SiteSetting;
 use App\Models\TermCondition;
-use Illuminate\Http\Request;
 
 class FrontendPageController extends Controller
 {
@@ -143,9 +144,9 @@ class FrontendPageController extends Controller
         ]);
     }
 
-    public function faqLoadMore(Request $request)
+    public function faqLoadMore(FaqLoadMoreRequest $request)
     {
-        $page = max((int) $request->query('page', 1), 1);
+        $page = (int) $request->validated('page', 1);
 
         $paginator = Faq::query()
             ->where('is_active', true)
@@ -201,40 +202,8 @@ class FrontendPageController extends Controller
         ]);
     }
 
-    public function submitContactUs(Request $request)
+    public function submitContactUs(SubmitContactUsRequest $request)
     {
-        $contactPage = ContactUsPage::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
-
-        $enableName = $contactPage?->enable_name_field ?? true;
-        $enableEmail = $contactPage?->enable_email_field ?? true;
-        $enableSubject = $contactPage?->enable_subject_field ?? true;
-        $enableMessage = $contactPage?->enable_message_field ?? true;
-
-        $rules = [];
-
-        if ($enableName) {
-            $rules['name'] = ['required', 'string', 'max:100'];
-        }
-
-        if ($enableEmail) {
-            $rules['email'] = ['required', 'email', 'max:190'];
-        }
-
-        if ($enableSubject) {
-            $rules['subject'] = ['required', 'string', 'max:190'];
-        }
-
-        if ($enableMessage) {
-            $rules['message'] = ['required', 'string', 'max:3000'];
-        }
-
-        if (! empty($rules)) {
-            $request->validate($rules);
-        }
-
         return back()->with('success', 'Your message has been sent successfully.');
     }
 

@@ -2,22 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReferralsController extends Controller
 {
-    public function referrals(Request $request)
+    public function referrals()
     {
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
+
         if (! $user) {
             abort(403);
         }
+
         $profile = $user->providerProfile;
+
         $referralLink = $profile?->account_user_referral_code;
-        $referralCount = User::where('referral_code', $referralLink)->count();
+
+        $referralCount = $referralLink
+            ? User::query()
+                ->where('referral_code', $referralLink)
+                ->count()
+            : 0;
 
         return view('referrals', compact('referralLink', 'referralCount'));
     }

@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\DeleteAccountRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Throwable;
 
 class AccountController extends Controller
@@ -15,25 +14,12 @@ class AccountController extends Controller
         return view('delete-account');
     }
 
-    public function destroy(Request $request)
+    public function destroy(DeleteAccountRequest $request)
     {
-        $request->validate([
-            'password' => ['required'],
-            'confirmation_text' => ['required', 'in:DELETE'],
-        ], [
-            'confirmation_text.in' => 'You must type DELETE exactly to confirm account deletion.',
-        ]);
-
         $user = $request->user();
 
         if (! $user) {
             return redirect()->route('login')->with('error', 'Unauthenticated.');
-        }
-
-        if (! Hash::check($request->password, $user->password)) {
-            return back()->withErrors([
-                'password' => 'The password you entered is incorrect.',
-            ])->withInput();
         }
 
         try {
@@ -61,9 +47,12 @@ class AccountController extends Controller
         } catch (Throwable $e) {
             report($e);
 
-            return back()->with('error', config('app.debug')
-                ? $e->getMessage()
-                : 'Something went wrong while deleting your account.');
+            return back()->with(
+                'error',
+                config('app.debug')
+                    ? $e->getMessage()
+                    : 'Something went wrong while deleting your account.'
+            );
         }
     }
 }

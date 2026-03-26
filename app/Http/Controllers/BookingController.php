@@ -2,27 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SendBookingEnquiryRequest;
 use App\Models\BookingEnquiry;
 use App\Models\SmtpSetting;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class BookingController extends Controller
 {
-    public function send(Request $request)
+    public function send(SendBookingEnquiryRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:50',
-            'datetime' => 'nullable|string|max:255',
-            'services' => 'nullable|string|max:255',
-            'duration' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'message' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $enquiry = BookingEnquiry::create([
             'name' => $validated['name'] ?? null,
@@ -89,6 +80,11 @@ class BookingController extends Controller
                 ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
         }
 
+        $fromAddress = $activeMailSetting->mail_from_address;
+        if (! filled($fromAddress) && filled($mailgunDomain)) {
+            $fromAddress = 'postmaster@' . $mailgunDomain;
+        }
+
         config([
             'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
             'mail.mailers.mailgun.transport' => 'mailgun',
@@ -96,7 +92,7 @@ class BookingController extends Controller
             'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
             'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
             'services.mailgun.scheme' => 'https',
-            'mail.from.address' => $activeMailSetting->mail_from_address ?: 'postmaster@' . $mailgunDomain,
+            'mail.from.address' => $fromAddress ?: config('mail.from.address'),
             'mail.from.name' => $activeMailSetting->mail_from_name ?: config('app.name'),
         ]);
 

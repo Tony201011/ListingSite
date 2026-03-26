@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DeletePhotoVerificationPhotoRequest;
+use App\Http\Requests\UploadPhotoVerificationRequest;
 use App\Models\PhotoVerification;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -13,84 +15,79 @@ use Throwable;
 
 class PhotoVerificationController extends Controller
 {
+    public function index()
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
-public function index()
-{
-    /** @var \App\Models\User|null $user */
-    $user = Auth::user();
+        $latestVerification = null;
+        $lastTwoPhotos = [];
 
-    $latestVerification = null;
-    $lastTwoPhotos = [];
-
-    if ($user) {
-        $latestVerifications = $user->photoVerification()
-            ->whereNull('deleted_at')
-            ->latest('created_at')
-            ->take(2)
-            ->get();
-
-        if ($latestVerifications->isNotEmpty()) {
-            $latestVerification = $latestVerifications->first();
-
-          //  dd($latestVerification);
-            $lastTwoPhotos = $latestVerifications
-                ->map(function ($verification) {
-                    $photos = is_array($verification->photos)
-                        ? $verification->photos
-                        : json_decode($verification->photos, true);
-
-                    return collect($photos)->map(function ($photo) use ($verification) {
-                        $photo['status'] = $verification->status;
-                        $photo['admin_note'] = $verification->admin_note;
-                        return $photo;
-                    });
-                })
-                ->flatten(1)
+        if ($user) {
+            $latestVerifications = $user->photoVerification()
+                ->whereNull('deleted_at')
+                ->latest('created_at')
                 ->take(2)
-                ->values()
-                ->toArray();
+                ->get();
+
+            if ($latestVerifications->isNotEmpty()) {
+                $latestVerification = $latestVerifications->first();
+
+                $lastTwoPhotos = $latestVerifications
+                    ->map(function ($verification) {
+                        $photos = is_array($verification->photos)
+                            ? $verification->photos
+                            : json_decode($verification->photos, true);
+
+                        if (! is_array($photos)) {
+                            $photos = [];
+                        }
+
+                        return collect($photos)->map(function ($photo) use ($verification) {
+                            $photo['status'] = $verification->status;
+                            $photo['admin_note'] = $verification->admin_note;
+
+                            return $photo;
+                        });
+                    })
+                    ->flatten(1)
+                    ->take(2)
+                    ->values()
+                    ->toArray();
+            }
         }
+
+        return view('click-here-to-verify', compact(
+            'latestVerification',
+            'lastTwoPhotos'
+        ));
     }
 
-    return view('click-here-to-verify', compact(
-        'latestVerification',
-        'lastTwoPhotos'
-    ));
-}
-
-
-    public function upload(Request $request): JsonResponse
+    public function upload(UploadPhotoVerificationRequest $request): JsonResponse
     {
-
-
-
         try {
-            $request->validate([
-                'photos' => ['required', 'array', 'min:1', 'max:5'],
-                'photos.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
-            ]);
-
+            /** @var \App\Models\User|null $user */
             $user = Auth::user();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'message' => 'Unauthenticated.',
                 ], 401);
             }
 
-             /** @var \App\Models\User|null $user */
-             $countVerfication = $user->photoVerification()
-                    ->whereNull('deleted_at')
-                     ->count();
+            $countVerification = $user->photoVerification()
+                ->whereNull('deleted_at')
+                ->count();
 
+            if ($countVerification >= 2) {
+                return response()->json([
+                    'message' => 'You have upload the maximum number of 2 verification photos. Please contact support for further assistance.',
+                ], 403);
+            }
 
-                if($countVerfication >= 2){
-                    return response()->json([
-                        'message' => 'You have upload the maximum number of 2 verification photos. Please contact support for further assistance.',
-                    ], 403);
-                }
-
+            /** @var FilesystemAdapter $disk */
             $disk = Storage::disk('s3');
+
             $baseName = $user->name ?: 'user';
             $username = Str::slug($baseName) . $user->id;
 
@@ -111,7 +108,7 @@ public function index()
                     ]
                 );
 
-                if (!$uploaded) {
+                if (! $uploaded) {
                     return response()->json([
                         'message' => 'Failed to upload one of the verification photos.',
                     ], 500);
@@ -140,11 +137,6 @@ public function index()
                     'photos' => $verification->photos,
                 ],
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $e->errors(),
-            ], 422);
         } catch (Throwable $e) {
             Log::error('Photo verification upload failed', [
                 'message' => $e->getMessage(),
@@ -161,55 +153,51 @@ public function index()
         }
     }
 
-    public function deletePhoto(Request $request)
-{
-    /** @var \App\Models\User|null $user */
-    $user = Auth::user();
+    public function deletePhoto(DeletePhotoVerificationPhotoRequest $request): JsonResponse
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
-    if (!$user) {
-        return response()->json([
-            'message' => 'Unauthorized.'
-        ], 401);
-    }
-
-    $request->validate([
-        'path' => ['required', 'string'],
-    ]);
-
-    $path = $request->path;
-
-    $verifications = $user->photoVerification()
-        ->whereNull('deleted_at')
-        ->get();
-
-    foreach ($verifications as $verification) {
-        $photos = is_array($verification->photos)
-            ? $verification->photos
-            : json_decode($verification->photos, true);
-
-        if (!is_array($photos)) {
-            $photos = [];
-        }
-
-        $updatedPhotos = collect($photos)
-            ->reject(function ($photo) use ($path) {
-                return isset($photo['path']) && $photo['path'] === $path;
-            })
-            ->values()
-            ->toArray();
-
-        if (count($updatedPhotos) !== count($photos)) {
-            $verification->deleted_at = now();
-            $verification->save();
-
+        if (! $user) {
             return response()->json([
-                'message' => 'Photo deleted successfully.'
-            ]);
+                'message' => 'Unauthorized.',
+            ], 401);
         }
-    }
 
-    return response()->json([
-        'message' => 'Photo not found.'
-    ], 404);
-}
+        $path = $request->validated('path');
+
+        $verifications = $user->photoVerification()
+            ->whereNull('deleted_at')
+            ->get();
+
+        foreach ($verifications as $verification) {
+            $photos = is_array($verification->photos)
+                ? $verification->photos
+                : json_decode($verification->photos, true);
+
+            if (! is_array($photos)) {
+                $photos = [];
+            }
+
+            $updatedPhotos = collect($photos)
+                ->reject(function ($photo) use ($path) {
+                    return isset($photo['path']) && $photo['path'] === $path;
+                })
+                ->values()
+                ->toArray();
+
+            if (count($updatedPhotos) !== count($photos)) {
+                $verification->deleted_at = now();
+                $verification->save();
+
+                return response()->json([
+                    'message' => 'Photo deleted successfully.',
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Photo not found.',
+        ], 404);
+    }
 }

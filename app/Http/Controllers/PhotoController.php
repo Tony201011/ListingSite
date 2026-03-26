@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UploadPhotosRequest;
 use App\Models\ProfileImage;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -14,12 +15,12 @@ use Throwable;
 
 class PhotoController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         return view('add-photo');
     }
 
-    public function getPhotos(Request $request)
+    public function getPhotos()
     {
         $photos = ProfileImage::where('user_id', Auth::id())
             ->latest()
@@ -28,23 +29,21 @@ class PhotoController extends Controller
         return view('photos', compact('photos'));
     }
 
-    public function uploadPhotos(Request $request): JsonResponse
+    public function uploadPhotos(UploadPhotosRequest $request): JsonResponse
     {
         try {
-            $request->validate([
-                'photos' => ['required', 'array', 'min:1'],
-                'photos.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
-            ]);
-
+            /** @var \App\Models\User|null $user */
             $user = Auth::user();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'message' => 'Unauthenticated.',
                 ], 401);
             }
 
+            /** @var FilesystemAdapter $disk */
             $disk = Storage::disk('s3');
+
             $baseName = $user->name ?: 'user';
             $username = Str::slug($baseName) . $user->id;
 
@@ -55,7 +54,7 @@ class PhotoController extends Controller
                     ->where('is_primary', true)
                     ->exists();
 
-                $isPrimary = !$hasPrimary && $index === 0;
+                $isPrimary = ! $hasPrimary && $index === 0;
 
                 $originalExtension = strtolower($photo->getClientOriginalExtension() ?: 'jpg');
                 $baseFileName = 'profile_' . $user->id . '_' . Str::uuid();
@@ -66,7 +65,6 @@ class PhotoController extends Controller
                 $imagePath = "images/{$username}/{$imageFileName}";
                 $thumbnailPath = "thumbnails/{$username}/{$thumbFileName}";
 
-                // Upload original image
                 $uploaded = $disk->putFileAs(
                     "images/{$username}",
                     $photo,
@@ -77,13 +75,12 @@ class PhotoController extends Controller
                     ]
                 );
 
-                if (!$uploaded) {
+                if (! $uploaded) {
                     return response()->json([
                         'message' => 'Failed to upload original image to storage.',
                     ], 500);
                 }
 
-                // Create thumbnail (square crop)
                 $thumbnail = Image::read($photo->getRealPath())
                     ->cover(400, 400)
                     ->toJpeg(85);
@@ -97,7 +94,7 @@ class PhotoController extends Controller
                     ]
                 );
 
-                if (!$thumbUploaded) {
+                if (! $thumbUploaded) {
                     return response()->json([
                         'message' => 'Failed to upload thumbnail to storage.',
                     ], 500);
@@ -124,11 +121,6 @@ class PhotoController extends Controller
                 'message' => 'Photos uploaded successfully.',
                 'photos' => $uploadedPhotos,
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $e->errors(),
-            ], 422);
         } catch (Throwable $e) {
             Log::error('Photo upload failed', [
                 'message' => $e->getMessage(),
@@ -147,9 +139,10 @@ class PhotoController extends Controller
 
     public function setCover(ProfileImage $photo): JsonResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
-        if (!$user || $photo->user_id !== $user->id) {
+        if (! $user || $photo->user_id !== $user->id) {
             return response()->json([
                 'message' => 'Unauthorized.',
             ], 403);
@@ -170,14 +163,16 @@ class PhotoController extends Controller
 
     public function destroy(ProfileImage $photo): JsonResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
-        if (!$user || $photo->user_id !== $user->id) {
+        if (! $user || $photo->user_id !== $user->id) {
             return response()->json([
                 'message' => 'Unauthorized.',
             ], 403);
         }
 
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
 
         if ($photo->image_path) {

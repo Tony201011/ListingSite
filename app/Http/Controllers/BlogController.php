@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoadMoreBlogPostsRequest;
 use App\Models\BlogPost;
-use Illuminate\Http\Request;
 
 class BlogController extends Controller
 {
@@ -38,9 +38,9 @@ class BlogController extends Controller
         ]);
     }
 
-    public function loadMore(Request $request)
+    public function loadMore(LoadMoreBlogPostsRequest $request)
     {
-        $page = max((int) $request->query('page', 1), 1);
+        $page = (int) $request->validated('page', 1);
 
         $paginator = BlogPost::query()
             ->where('is_active', true)

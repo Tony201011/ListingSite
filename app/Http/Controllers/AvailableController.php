@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateAvailableStatusRequest;
 use App\Models\AvailableNow;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AvailableController extends Controller
 {
-    public function availableNow(Request $request)
+    public function availableNow()
     {
         $user = Auth::user();
         $status = false;
@@ -47,13 +47,9 @@ class AvailableController extends Controller
         return view('available-now', compact('status', 'remainingUses', 'expiresAt'));
     }
 
-    public function availableUpdateStatus(Request $request)
+    public function availableUpdateStatus(UpdateAvailableStatusRequest $request)
     {
-        $request->validate([
-            'status' => 'required|in:online,offline',
-        ]);
-
-        $user = Auth::user();
+        $user = $request->user();
 
         if (! $user) {
             return response()->json([

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UploadVideosRequest;
 use App\Models\UserVideo;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -13,12 +13,12 @@ use Throwable;
 
 class MyVideosController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         return view('upload-video');
     }
 
-    public function getVideos(Request $request)
+    public function getVideos()
     {
         $videos = UserVideo::where('user_id', Auth::id())
             ->latest()
@@ -27,17 +27,13 @@ class MyVideosController extends Controller
         return view('my-videos', compact('videos'));
     }
 
-    public function uploadVideos(Request $request): JsonResponse
+    public function uploadVideos(UploadVideosRequest $request): JsonResponse
     {
         try {
-            $request->validate([
-                'videos' => ['required', 'array', 'min:1'],
-                'videos.*' => ['required', 'file', 'mimes:mp4,mov,avi,wmv,webm,mkv', 'max:102400'],
-            ]);
-
+            /** @var \App\Models\User|null $user */
             $user = Auth::user();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'message' => 'Unauthenticated.',
                 ], 401);
@@ -65,7 +61,7 @@ class MyVideosController extends Controller
                     ]
                 );
 
-                if (!$uploaded) {
+                if (! $uploaded) {
                     return response()->json([
                         'message' => 'Failed to upload one of the videos to storage.',
                     ], 500);
@@ -90,11 +86,6 @@ class MyVideosController extends Controller
                 'message' => 'Videos uploaded successfully.',
                 'videos' => $uploadedVideos,
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $e->errors(),
-            ], 422);
         } catch (Throwable $e) {
             Log::error('Multiple video upload failed', [
                 'message' => $e->getMessage(),
@@ -113,9 +104,10 @@ class MyVideosController extends Controller
 
     public function destroy(UserVideo $video): JsonResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
-        if (!$user || $video->user_id !== $user->id) {
+        if (! $user || $video->user_id !== $user->id) {
             return response()->json([
                 'message' => 'Unauthorized.',
             ], 403);

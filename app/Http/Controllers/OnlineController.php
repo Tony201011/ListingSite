@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateOnlineStatusRequest;
 use App\Models\OnlineUser;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
 class OnlineController extends Controller
 {
-    public function onlineNow(Request $request)
+    public function onlineNow()
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
+
         $onlineStatus = false;
         $remainingUses = 4;
+        $expiresAt = null;
 
         if ($user) {
             $onlineUser = OnlineUser::firstOrCreate(
@@ -40,18 +43,15 @@ class OnlineController extends Controller
 
             $onlineStatus = $onlineUser->isCurrentlyOnline();
             $remainingUses = max(0, 4 - $onlineUser->usage_count);
-            $expiresAt = optional($onlineUser->online_expires_at)->toIso8601String();
+            $expiresAt = optional($onlineUser->online_expires_at)?->toIso8601String();
         }
 
         return view('online-now', compact('onlineStatus', 'remainingUses', 'expiresAt'));
     }
 
-    public function onlineUpdateStatus(Request $request)
+    public function onlineUpdateStatus(UpdateOnlineStatusRequest $request)
     {
-        $request->validate([
-            'status' => 'required|in:online,offline',
-        ]);
-
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         if (! $user) {
@@ -81,7 +81,7 @@ class OnlineController extends Controller
             $onlineUser->online_expires_at = null;
         }
 
-        if ($request->status === 'online') {
+        if ($request->validated('status') === 'online') {
             if ($onlineUser->isCurrentlyOnline()) {
                 return response()->json([
                     'status' => 'online',
@@ -110,7 +110,7 @@ class OnlineController extends Controller
                 'status' => 'online',
                 'message' => 'Online Now enabled for 60 minutes.',
                 'remaining_uses' => max(0, 4 - $onlineUser->usage_count),
-                'expires_at' => optional($onlineUser->online_expires_at)->toIso8601String(),
+                'expires_at' => optional($onlineUser->online_expires_at)?->toIso8601String(),
             ]);
         }
 

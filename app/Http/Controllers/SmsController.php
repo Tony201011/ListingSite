@@ -2,38 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SendSmsRequest;
 use App\Services\TwilioService;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class SmsController extends Controller
 {
-    protected $twilio;
+    protected TwilioService $twilio;
 
     public function __construct(TwilioService $twilio)
     {
         $this->twilio = $twilio;
     }
 
-    public function send(Request $request)
+    public function send(SendSmsRequest $request): JsonResponse
     {
-        // $request->validate([
-        //     'phone' => 'required|string',
-        //     'message' => 'required|string',
-        // ]);
-
-        $phone =' +919988380772';
-        $message = 'Hello from twillow test message!';
+        $phone = $request->validated('phone');
+        $text = $request->validated('message');
 
         try {
-            $message = $this->twilio->sendSms($phone, $message);
+            $response = $this->twilio->sendSms($phone, $text);
+
             return response()->json([
                 'success' => true,
-                'sid' => $message->sid,
+                'sid' => $response->sid,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => config('app.debug')
+                    ? $e->getMessage()
+                    : 'Failed to send SMS.',
             ], 500);
         }
     }

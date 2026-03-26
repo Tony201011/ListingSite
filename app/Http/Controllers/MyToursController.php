@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchTourCityRequest;
+use App\Http\Requests\StoreTourRequest;
+use App\Http\Requests\UpdateTourRequest;
 use App\Models\Tour;
-use Illuminate\Http\Request;
 use App\Models\TourCity;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,54 +16,50 @@ class MyToursController extends Controller
      */
     public function index()
     {
-        $tours = Auth::user()->tours()->orderBy('from')->get();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        $tours = $user
+            ? $user->tours()->orderBy('from')->get()
+            : collect();
+
         return view('my-tours', compact('tours'));
     }
 
     /**
      * Store a newly created tour.
      */
-    public function store(Request $request)
+    public function store(StoreTourRequest $request)
     {
-        $validated = $request->validate([
-            'city'        => 'required|string|max:255',
-            'from'        => 'required|date|after_or_equal:now',
-            'to'          => 'required|date|after:from',
-            'description' => 'nullable|string',
-            'enabled'     => 'boolean',
-        ]);
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
-        $tour = Auth::user()->tours()->create($validated);
+        if (! $user) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $tour = $user->tours()->create($request->validated());
 
         return response()->json([
             'message' => 'Tour created successfully.',
-            'tour'    => $tour,
+            'tour' => $tour,
         ], 201);
     }
 
     /**
      * Update the specified tour.
      */
-    public function update(Request $request, Tour $tour)
+    public function update(UpdateTourRequest $request, Tour $tour)
     {
-        // Ensure the authenticated user owns this tour
         if ($tour->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
 
-        $validated = $request->validate([
-            'city'        => 'required|string|max:255',
-            'from'        => 'required|date|after_or_equal:now',
-            'to'          => 'required|date|after:from',
-            'description' => 'nullable|string',
-            'enabled'     => 'boolean',
-        ]);
-
-        $tour->update($validated);
+        $tour->update($request->validated());
 
         return response()->json([
             'message' => 'Tour updated successfully.',
-            'tour'    => $tour,
+            'tour' => $tour,
         ]);
     }
 
@@ -81,11 +79,11 @@ class MyToursController extends Controller
         ]);
     }
 
-     public function search(Request $request)
+    public function search(SearchTourCityRequest $request)
     {
-        $query = $request->get('q');
+        $query = $request->validated('q');
 
-        if (!$query || strlen($query) < 2) {
+        if (! $query || strlen($query) < 2) {
             return response()->json([]);
         }
 
@@ -93,9 +91,11 @@ class MyToursController extends Controller
             ->orderBy('name')
             ->get(['name', 'state']);
 
-        return response()->json($cities->map(fn($city) => [
-            'name'       => $city->name,
-            'adminName1' => $city->state,
-        ]));
+        return response()->json(
+            $cities->map(fn ($city) => [
+                'name' => $city->name,
+                'adminName1' => $city->state,
+            ])
+        );
     }
 }

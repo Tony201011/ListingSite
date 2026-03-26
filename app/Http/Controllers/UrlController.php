@@ -1,41 +1,41 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\SiteSetting;
+
+use App\Http\Requests\UpdateShortUrlRequest;
 use App\Models\ShortUrl;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
 class UrlController extends Controller
 {
-    public function shortUrl(Request $request)
+    public function shortUrl()
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
-        $siteSetting = SiteSetting::query()->latest('updated_at')->first();
+        $siteSetting = SiteSetting::query()
+            ->latest('updated_at')
+            ->value('short_url');
 
-      //  dd($siteSetting);
-        $siteSetting = $siteSetting?->short_url ?? false;
+        $siteSetting = $siteSetting ?? false;
 
-        if (!$user) {
+        if (! $user) {
             return redirect('/signin');
         }
 
-        // Check if user already has a short URL
-        $shortUrlRecord = ShortUrl::where('user_id', $user->id)->first();
+        $shortUrlRecord = ShortUrl::query()
+            ->where('user_id', $user->id)
+            ->first();
 
-        if (!$shortUrlRecord) {
-            // Generate a unique slug: md5 of name + id (or any unique combination)
-            $slug = md5($user->name . $user->id); // e.g., 5d41402abc4b2a76b9719d911017c592
-            // Optionally truncate or make it more readable, but md5 is fine for uniqueness
+        if (! $shortUrlRecord) {
+            $slug = md5($user->name . $user->id);
 
-            // Ensure uniqueness (though md5 collision is extremely unlikely)
-            while (ShortUrl::where('short_url', $slug)->exists()) {
-                // If by some miracle collision, append a random number
+            while (ShortUrl::query()->where('short_url', $slug)->exists()) {
                 $slug = md5($user->name . $user->id . rand(1, 9999));
             }
 
-            $shortUrlRecord = ShortUrl::create([
+            $shortUrlRecord = ShortUrl::query()->create([
                 'user_id' => $user->id,
                 'short_url' => $slug,
             ]);
@@ -46,30 +46,29 @@ class UrlController extends Controller
         return view('short-url', compact('slug', 'siteSetting'));
     }
 
-    public function updateShortUrl(Request $request)
+    public function updateShortUrl(UpdateShortUrlRequest $request)
     {
-
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
-        $user_id = $user->id;
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated.',
+            ], 401);
+        }
 
+        $slug = $request->validated('slug');
 
-        $request->validate([
-            'slug' => 'required|alpha_dash|unique:short_urls,short_url,' . $user_id . ',user_id',
-            // alpha_dash allows letters, numbers, dashes, underscores – adjust as needed
-        ]);
-
-
-
-        ShortUrl::updateOrCreate(
+        ShortUrl::query()->updateOrCreate(
             ['user_id' => $user->id],
-            ['short_url' => $request->slug]
+            ['short_url' => $slug]
         );
 
         return response()->json([
             'success' => true,
             'message' => 'Short URL updated successfully.',
-            'slug' => $request->slug,
+            'slug' => $slug,
         ]);
     }
 }

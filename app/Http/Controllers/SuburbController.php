@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SuburbSearchRequest;
 use App\Models\Postcode;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class SuburbController extends Controller
 {
-    public function search(Request $request)
+    public function search(SuburbSearchRequest $request): JsonResponse
     {
-        $query = trim($request->get('q', ''));
+        $query = $request->validated('q');
 
         if (strlen($query) < 2) {
             return response()->json([]);

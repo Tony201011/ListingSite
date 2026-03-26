@@ -6,7 +6,6 @@ use App\Models\SocialAccount;
 use App\Models\SocialLoginSetting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -38,21 +37,18 @@ class SocialAuthController extends Controller
     public function redirect(string $provider): RedirectResponse
     {
         $setting = $this->getProviderSettingOrFail($provider);
-
         $driver = $this->driverMap[$provider] ?? null;
 
         abort_unless(filled($driver), 404);
 
         $this->configureProvider($provider, $setting);
 
-        return Socialite::driver($driver)
-            ->redirect();
+        return Socialite::driver($driver)->redirect();
     }
 
-    public function callback(Request $request, string $provider): RedirectResponse
+    public function callback(string $provider): RedirectResponse
     {
         $setting = $this->getProviderSettingOrFail($provider);
-
         $driver = $this->driverMap[$provider] ?? null;
 
         abort_unless(filled($driver), 404);
@@ -67,17 +63,18 @@ class SocialAuthController extends Controller
             ->first();
 
         if ($account) {
-            Auth::login($account->user, remember: true);
+            Auth::login($account->user, true);
 
             return redirect()->intended('/');
         }
 
         $email = $socialUser->getEmail();
-
         $user = null;
 
         if (filled($email)) {
-            $user = User::query()->where('email', $email)->first();
+            $user = User::query()
+                ->where('email', $email)
+                ->first();
         }
 
         if (! $user) {
@@ -104,12 +101,14 @@ class SocialAuthController extends Controller
                 'provider_email' => $socialUser->getEmail(),
                 'access_token' => $socialUser->token,
                 'refresh_token' => $socialUser->refreshToken,
-                'token_expires_at' => filled($socialUser->expiresIn) ? now()->addSeconds((int) $socialUser->expiresIn) : null,
+                'token_expires_at' => filled($socialUser->expiresIn)
+                    ? now()->addSeconds((int) $socialUser->expiresIn)
+                    : null,
                 'avatar' => $socialUser->getAvatar(),
-            ],
+            ]
         );
 
-        Auth::login($user, remember: true);
+        Auth::login($user, true);
 
         return redirect()->intended('/');
     }
@@ -124,8 +123,11 @@ class SocialAuthController extends Controller
             ->first();
 
         abort_unless(
-            $setting && filled($setting->client_id) && filled($setting->client_secret) && filled($setting->redirect_url),
-            404,
+            $setting &&
+            filled($setting->client_id) &&
+            filled($setting->client_secret) &&
+            filled($setting->redirect_url),
+            404
         );
 
         return $setting;

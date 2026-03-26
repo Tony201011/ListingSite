@@ -2,24 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CheckoutPurchaseCreditRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class PurchaseCreditController extends Controller
 {
-
-    public function purchaseCredit(Request $request)
+    public function purchaseCredit()
     {
         return view('purchase-credit');
     }
 
-    public function checkout(Request $request): RedirectResponse
+    public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'credits' => ['required', 'integer', Rule::in([7, 30, 60, 120, 180])],
-            'invoice_name' => ['required', 'string', 'max:120'],
-        ]);
+        $validated = $request->validated();
 
         $prices = [
             7 => 10,
@@ -32,20 +27,25 @@ class PurchaseCreditController extends Controller
         $selectedCredits = (int) $validated['credits'];
         $selectedPrice = $prices[$selectedCredits] ?? 0;
 
-        return redirect('/purchase-history')->with('checkout_success', "Checkout started for {$selectedCredits} credits (AUD $" . number_format($selectedPrice, 2) . ") under invoice name '{$validated['invoice_name']}'.");
+        return redirect('/purchase-history')->with(
+            'checkout_success',
+            "Checkout started for {$selectedCredits} credits (AUD $" .
+            number_format($selectedPrice, 2) .
+            ") under invoice name '{$validated['invoice_name']}'."
+        );
     }
 
-    public function creditHistory(Request $request)
+    public function creditHistory()
     {
         return view('credit-history');
     }
 
-    public function creditHistoryLastMonth(Request $request)
+    public function creditHistoryLastMonth()
     {
         return view('credit-history-last-month');
     }
 
-    public function purchaseHistory(Request $request)
+    public function purchaseHistory()
     {
         return view('purchase-history');
     }

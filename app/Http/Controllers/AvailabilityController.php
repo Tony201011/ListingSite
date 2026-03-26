@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateAvailabilityRequest;
 use App\Models\Availability;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class AvailabilityController extends Controller
 {
@@ -31,47 +30,22 @@ class AvailabilityController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(UpdateAvailabilityRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'availability' => ['nullable', 'array'],
-            'availability.*.enabled' => ['nullable'],
-            'availability.*.from' => ['nullable', 'date_format:H:i'],
-            'availability.*.to' => ['nullable', 'date_format:H:i'],
-            'availability.*.till_late' => ['nullable'],
-            'availability.*.all_day' => ['nullable'],
-            'availability.*.by_appointment' => ['nullable'],
-        ]);
-
-        if ($validator->fails()) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Validation failed.',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $availabilityData = $request->input('availability', []);
+        $availabilityData = $request->validated()['availability'] ?? [];
 
         foreach ($this->days as $day) {
             $dayData = $availabilityData[$day] ?? [];
 
-            $enabled = !empty($dayData['enabled']);
-            $allDay = !empty($dayData['all_day']);
-            $tillLate = !empty($dayData['till_late']);
-            $byAppointment = !empty($dayData['by_appointment']);
+            $enabled = ! empty($dayData['enabled']);
+            $allDay = ! empty($dayData['all_day']);
+            $tillLate = ! empty($dayData['till_late']);
+            $byAppointment = ! empty($dayData['by_appointment']);
 
             $fromTime = $dayData['from'] ?? null;
             $toTime = $dayData['to'] ?? null;
 
-            if (!$enabled) {
+            if (! $enabled) {
                 $fromTime = null;
                 $toTime = null;
                 $allDay = false;
@@ -120,7 +94,8 @@ class AvailabilityController extends Controller
             ")
             ->get();
 
-            $availabilityCount = Availability::where('user_id', Auth::id())->count();
-            return view('my-availability', compact('availabilities','availabilityCount'));
+        $availabilityCount = Availability::where('user_id', Auth::id())->count();
+
+        return view('my-availability', compact('availabilities', 'availabilityCount'));
     }
 }

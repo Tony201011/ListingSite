@@ -2,28 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdvancedSearchRequest;
+use App\Http\Requests\HomeIndexRequest;
+use App\Http\Requests\ShowProfileRequest;
 use App\Models\Category;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
-    public function index(Request $request)
+    public function index(HomeIndexRequest $request)
     {
-        $viewData = $this->buildFilterViewData($request);
+        $viewData = $this->buildFilterViewData($request->validated());
 
         return view('home', $viewData);
     }
 
-    public function advancedSearch(Request $request)
+    public function advancedSearch(AdvancedSearchRequest $request)
     {
-        $viewData = $this->buildFilterViewData($request);
+        $viewData = $this->buildFilterViewData($request->validated());
 
         return view('advanced-search', $viewData);
     }
 
-    public function showProfile(Request $request, string $slug)
+    public function showProfile(ShowProfileRequest $request, string $slug)
     {
+        $validated = $request->validated();
+
         $imageCount = 8;
         $videoCount = 7;
 
@@ -93,17 +97,19 @@ class HomeController extends Controller
                 return $profile;
             });
 
-        $profileIndex = $profiles->search(fn($p) => $p['slug'] === $slug);
+        $profileIndex = $profiles->search(fn ($p) => $p['slug'] === $slug);
         abort_if($profileIndex === false, 404);
+
         $profile = $profiles[$profileIndex];
 
-        // Determine previous and next profiles (circular navigation)
         $prevIndex = $profileIndex === 0 ? $profiles->count() - 1 : $profileIndex - 1;
         $nextIndex = $profileIndex === $profiles->count() - 1 ? 0 : $profileIndex + 1;
+
         $prevProfile = [
             'slug' => $profiles[$prevIndex]['slug'],
             'name' => $profiles[$prevIndex]['name'],
         ];
+
         $nextProfile = [
             'slug' => $profiles[$nextIndex]['slug'],
             'name' => $profiles[$nextIndex]['name'],
@@ -114,7 +120,7 @@ class HomeController extends Controller
             ->take(4)
             ->values();
 
-        $selectedCategoryIds = collect($request->input('categories', []))
+        $selectedCategoryIds = collect($validated['categories'] ?? [])
             ->map(fn ($id) => (int) $id)
             ->filter()
             ->values();
@@ -158,13 +164,12 @@ class HomeController extends Controller
                             ->all(),
                     ];
                 })
-                ->filter(fn ($group) => !empty($group['items']))
+                ->filter(fn ($group) => ! empty($group['items']))
                 ->sortBy('heading')
                 ->values()
                 ->all();
         }
 
-        // Profile stats for sidebar (match Blade expectations)
         $profileStats = [
             ['label' => 'Age', 'value' => $profile['age'] ?? '25'],
             ['label' => 'Height', 'value' => $profile['height'] ?? '170cm'],
@@ -189,7 +194,7 @@ class HomeController extends Controller
         ]);
     }
 
-    private function buildFilterViewData(Request $request): array
+    private function buildFilterViewData(array $validated): array
     {
         $filterSlugs = [
             'hair-color',
@@ -246,16 +251,16 @@ class HomeController extends Controller
             ->values()
             ->all();
 
-        $selectedCategoryIds = collect($request->input('categories', []))
+        $selectedCategoryIds = collect($validated['categories'] ?? [])
             ->map(fn ($id) => (int) $id)
             ->filter()
             ->values()
             ->all();
 
-        $minAge = (int) $request->integer('min_age', 18);
-        $maxAge = (int) $request->integer('max_age', 40);
-        $minPrice = (int) $request->integer('min_price', 150);
-        $maxPrice = (int) $request->integer('max_price', 400);
+        $minAge = (int) ($validated['min_age'] ?? 18);
+        $maxAge = (int) ($validated['max_age'] ?? 40);
+        $minPrice = (int) ($validated['min_price'] ?? 150);
+        $maxPrice = (int) ($validated['max_price'] ?? 400);
 
         if ($minAge > $maxAge) {
             [$minAge, $maxAge] = [$maxAge, $minAge];

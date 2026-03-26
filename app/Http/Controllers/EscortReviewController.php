@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\UpdateEscortReviewRequest;
 use App\Models\EscortReviewPage;
 
 class EscortReviewController extends Controller
@@ -10,22 +10,30 @@ class EscortReviewController extends Controller
     public function show()
     {
         $escortReviewPage = EscortReviewPage::first();
+
         return view('escort-review', compact('escortReviewPage'));
     }
 
-    // Admin edit form
     public function edit()
     {
         $escortReviewPage = EscortReviewPage::first();
+
         return view('admin.escort-review-edit', compact('escortReviewPage'));
     }
 
-    // Admin update
-    public function update(Request $request)
+    public function update(UpdateEscortReviewRequest $request)
     {
         $escortReviewPage = EscortReviewPage::first();
-        $escortReviewPage->content = $request->input('content');
+
+        if (! $escortReviewPage) {
+            $escortReviewPage = new EscortReviewPage();
+        }
+
+        $escortReviewPage->content = $request->validated('content');
         $escortReviewPage->save();
-        return redirect()->route('admin.escort-review.edit')->with('success', 'Escort review page updated.');
+
+        return redirect()
+            ->route('admin.escort-review.edit')
+            ->with('success', 'Escort review page updated.');
     }
 }
