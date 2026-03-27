@@ -1,92 +1,15 @@
-{{-- @extends('layouts.frontend')
+@extends('layouts.frontend')
 
 @section('content')
-<div
-    class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8"
-    x-data="uploadVideoPage({
-        uploadUrl: @js(route('videos.upload')),
-        redirectUrl: @js(route('my-videos')),
-        csrfToken: @js(csrf_token())
-    })"
->
+<div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8" x-data="uploadVideoPage()">
     <div class="max-w-4xl mx-auto">
-        <a href="{{ route('my-videos') }}"
-           class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4">
+        <a href="{{ route('my-videos') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4">
             <span class="mr-1">&lt;</span> Back to my videos
         </a>
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Upload videos</h1>
-            <p class="text-gray-600 mb-6">MP4/MOV up to 100MB.</p>
-
-            <div
-                class="border-2 border-dashed border-pink-200 p-6 text-center"
-                :class="isDragging ? 'bg-pink-100' : ''"
-                @dragenter.prevent="isDragging = true"
-                @dragover.prevent="isDragging = true"
-                @dragleave.prevent="isDragging = false"
-                @drop.prevent="handleDrop($event)"
-            >
-                <input x-ref="input" type="file" multiple class="hidden"
-                       @change="handleFiles($event)">
-
-                <button @click="$refs.input.click()" class="bg-pink-600 text-white px-5 py-2 rounded">
-                    Choose videos
-                </button>
-
-                <div class="mt-4" x-show="videos.length">
-                    <p><span x-text="videos.length"></span> videos selected</p>
-
-                    <button @click="uploadVideos()" class="bg-green-600 text-white px-4 py-2 mt-2">
-                        Upload
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('profile/js/upload-video.js') }}"></script>
-@endpush --}}
-
-
-
-
-
-
-
-
-@extends('layouts.frontend')
-
-@section('content')
-<div
-    class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8"
-    x-data="uploadVideoPage({
-        uploadUrl: @js(route('videos.upload')),
-        redirectUrl: @js(route('my-videos')),
-        csrfToken: @js(csrf_token())
-    })"
->
-    <div class="max-w-4xl mx-auto">
-        <a
-            href="{{ route('my-videos') }}"
-            class="inline-flex items-center gap-2 text-pink-600 hover:text-pink-700 text-sm font-medium mb-4"
-        >
-            <span>&larr;</span>
-            <span>Back to my videos</span>
-        </a>
-
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                Upload videos
-            </h1>
-
-            <p class="text-gray-600 mb-6">
-                Add short clips for your profile. MP4/MOV up to 100MB each.
-            </p>
+            <p class="text-gray-600 mb-6">Add short clips for your profile. MP4/MOV up to 100MB each.</p>
 
             <!-- Success message -->
             <div
@@ -96,13 +19,7 @@
             >
                 <div class="flex items-start justify-between gap-3">
                     <p x-text="successMessage"></p>
-                    <button
-                        type="button"
-                        @click="successMessage = ''"
-                        class="text-green-700 hover:text-green-900 font-bold"
-                    >
-                        &times;
-                    </button>
+                    <button type="button" @click="successMessage = ''" class="text-green-700 hover:text-green-900 font-bold">&times;</button>
                 </div>
             </div>
 
@@ -114,18 +31,12 @@
             >
                 <div class="flex items-start justify-between gap-3">
                     <p class="whitespace-pre-line" x-text="errorMessage"></p>
-                    <button
-                        type="button"
-                        @click="errorMessage = ''"
-                        class="text-red-700 hover:text-red-900 font-bold"
-                    >
-                        &times;
-                    </button>
+                    <button type="button" @click="errorMessage = ''" class="text-red-700 hover:text-red-900 font-bold">&times;</button>
                 </div>
             </div>
 
             <div
-                class="rounded-xl border-2 border-dashed border-pink-200 bg-pink-50/50 p-6 text-center transition"
+                class="rounded-xl border-2 border-dashed border-pink-200 bg-pink-50/50 p-6 text-center"
                 :class="isDragging ? 'border-pink-400 bg-pink-100/60' : ''"
                 @dragenter.prevent="isDragging = true"
                 @dragover.prevent="isDragging = true"
@@ -146,7 +57,6 @@
                         <p class="text-sm text-gray-600 mb-4">
                             Drag & drop multiple videos here or click to choose files.
                         </p>
-
                         <button
                             type="button"
                             @click="$refs.videoInput.click()"
@@ -198,11 +108,7 @@
                                         </svg>
                                     </button>
 
-                                    <video
-                                        :src="video.previewUrl"
-                                        controls
-                                        class="w-full aspect-video object-cover bg-black"
-                                    ></video>
+                                    <video :src="video.previewUrl" controls class="w-full aspect-video object-cover bg-black"></video>
 
                                     <div class="p-3 text-left">
                                         <p class="text-sm font-medium text-gray-700 break-all" x-text="video.name"></p>
@@ -230,24 +136,161 @@
                     type="button"
                     @click="uploadVideos()"
                     :disabled="uploading || !selectedVideos.length"
-                    class="px-5 py-2.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-5 py-2.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-semibold transition disabled:opacity-50"
                 >
                     <span x-text="uploading ? 'Uploading...' : 'Upload now'"></span>
                 </button>
 
-                <a
-                    href="{{ route('my-videos') }}"
-                    class="px-5 py-2.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold transition"
-                >
+                <a href="{{ route('my-videos') }}" class="px-5 py-2.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold transition">
                     Cancel
                 </a>
             </div>
         </div>
     </div>
 </div>
-@endsection
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('profile/js/upload-video.js') }}"></script>
-@endpush
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('uploadVideoPage', () => ({
+        selectedVideos: [],
+        uploading: false,
+        successMessage: '',
+        errorMessage: '',
+        isDragging: false,
+
+        clearMessages() {
+            this.successMessage = '';
+            this.errorMessage = '';
+        },
+
+        formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        },
+
+        isDuplicate(file) {
+            return this.selectedVideos.some(video =>
+                video.name === file.name &&
+                video.size === file.size &&
+                video.lastModified === file.lastModified
+            );
+        },
+
+        addFiles(files) {
+            const incomingFiles = Array.from(files || []);
+
+            incomingFiles.forEach(file => {
+                if (this.isDuplicate(file)) return;
+
+                this.selectedVideos.push({
+                    key: `${file.name}-${file.size}-${file.lastModified}-${Math.random()}`,
+                    file: file,
+                    name: file.name,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                    previewUrl: URL.createObjectURL(file),
+                });
+            });
+
+            if (this.$refs.videoInput) {
+                this.$refs.videoInput.value = '';
+            }
+        },
+
+        handleVideoChange(event) {
+            this.clearMessages();
+            this.addFiles(event.target.files);
+        },
+
+        handleDrop(event) {
+            this.clearMessages();
+            this.isDragging = false;
+            this.addFiles(event.dataTransfer.files);
+        },
+
+        removeSelectedVideo(index) {
+            if (this.selectedVideos[index]?.previewUrl) {
+                URL.revokeObjectURL(this.selectedVideos[index].previewUrl);
+            }
+
+            this.selectedVideos.splice(index, 1);
+
+            if (!this.selectedVideos.length && this.$refs.videoInput) {
+                this.$refs.videoInput.value = '';
+            }
+        },
+
+        clearSelection() {
+            this.selectedVideos.forEach(video => {
+                if (video.previewUrl) {
+                    URL.revokeObjectURL(video.previewUrl);
+                }
+            });
+
+            this.selectedVideos = [];
+
+            if (this.$refs.videoInput) {
+                this.$refs.videoInput.value = '';
+            }
+        },
+
+        async uploadVideos() {
+            this.clearMessages();
+
+            if (!this.selectedVideos.length) {
+                this.errorMessage = 'Please select at least one video.';
+                return;
+            }
+
+            if (this.uploading) return;
+
+            this.uploading = true;
+
+            const formData = new FormData();
+
+            this.selectedVideos.forEach((video, index) => {
+                formData.append(`videos[${index}]`, video.file);
+            });
+
+            formData.append('_token', '{{ csrf_token() }}');
+
+            try {
+                const response = await fetch('{{ route('videos.upload') }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (result.errors) {
+                        const allErrors = Object.values(result.errors).flat().join('\n');
+                        throw new Error(allErrors);
+                    }
+
+                    throw new Error(result.message || 'Upload failed.');
+                }
+
+                this.successMessage = result.message || 'Videos uploaded successfully.';
+                this.clearSelection();
+
+                setTimeout(() => {
+                    window.location.href = '{{ route('my-videos') }}';
+                }, 1200);
+
+            } catch (error) {
+                this.errorMessage = error.message || 'Something went wrong.';
+            } finally {
+                this.uploading = false;
+            }
+        }
+    }));
+});
+</script>
+@endsection
