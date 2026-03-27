@@ -2,7 +2,7 @@
 
 @section('content')
 <div
-    class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+    class="min-h-screen bg-gray-50 py-10 sm:py-12 px-4 sm:px-6 lg:px-8"
     x-data="availabilityForm({
         initialForm: @js(collect($days)->mapWithKeys(fn ($day) => [
             $day => [
@@ -18,72 +18,151 @@
         csrfToken: @js(csrf_token())
     })"
 >
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-5xl mx-auto">
 
         <button
+            type="button"
             onclick="window.history.back()"
-            class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
+            class="inline-flex items-center gap-2 text-sm font-medium text-pink-600 hover:text-pink-700 transition mb-6"
         >
-            <span class="mr-1">&lt;</span> Go back
+            <span>&larr;</span>
+            <span>Go back</span>
         </button>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-6 sm:p-8">
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Set your availability</h2>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 sm:p-8 lg:p-10">
 
-                <p class="text-lg text-gray-600 mb-6 font-medium">
-                    Set your weekly schedule so clients can easily see when you are available.
-                </p>
+                <div class="mb-8">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">
+                        Set your availability
+                    </h2>
+                    <p class="mt-3 text-base sm:text-lg text-gray-600 leading-7">
+                        Set your weekly schedule so clients can easily see when you are available.
+                    </p>
+                </div>
 
-                <div class="mb-8 rounded-xl bg-gray-50 border border-gray-100 p-5">
-                    <ul class="list-disc pl-5 text-gray-700 space-y-2">
+                <div class="mb-8 rounded-xl bg-gray-50 border border-gray-200 p-5">
+                    <ul class="list-disc pl-5 space-y-2 text-sm sm:text-base text-gray-700">
                         <li>This schedule repeats every week.</li>
                         <li>Uncheck days you do not work.</li>
-                        <li>You can override for specific dates.</li>
+                        <li>You can override availability for specific dates later.</li>
                     </ul>
                 </div>
 
                 <form @submit.prevent="submitForm" class="space-y-5">
 
                     @foreach($days as $day)
-                        <div class="rounded-2xl border border-gray-200 p-5">
-                            <label class="flex items-center gap-3 mb-3">
-                                <input type="checkbox" x-model="form['{{ $day }}'].enabled">
-                                <span class="font-semibold">{{ $day }}</span>
-                            </label>
+                        <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+                            <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 
-                            <div class="flex gap-4 mb-3">
-                                <select x-model="form['{{ $day }}'].from">
-                                    <option value="">From</option>
-                                    @for($i=0;$i<=23;$i++)
-                                        <option>{{ str_pad($i,2,'0',STR_PAD_LEFT) }}:00</option>
-                                    @endfor
-                                </select>
+                                <div class="lg:w-48">
+                                    <label class="inline-flex items-center gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            x-model="form['{{ $day }}'].enabled"
+                                            class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                        >
+                                        <span class="text-base sm:text-lg font-semibold text-gray-900">
+                                            {{ $day }}
+                                        </span>
+                                    </label>
+                                    <p class="mt-2 text-sm text-gray-500">
+                                        Toggle this day on or off.
+                                    </p>
+                                </div>
 
-                                <select x-model="form['{{ $day }}'].to">
-                                    <option value="">To</option>
-                                    @for($i=0;$i<=23;$i++)
-                                        <option>{{ str_pad($i,2,'0',STR_PAD_LEFT) }}:00</option>
-                                    @endfor
-                                </select>
-                            </div>
+                                <div class="flex-1 space-y-4">
+                                    <div
+                                        class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                                        :class="{ 'opacity-50 pointer-events-none': !form['{{ $day }}'].enabled }"
+                                    >
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                From
+                                            </label>
+                                            <select
+                                                x-model="form['{{ $day }}'].from"
+                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day"
+                                                class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 disabled:text-gray-400"
+                                            >
+                                                <option value="">Select start time</option>
+                                                @for($i = 0; $i <= 23; $i++)
+                                                    <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:00">
+                                                        {{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:00
+                                                    </option>
+                                                @endfor
+                                            </select>
+                                        </div>
 
-                            <div class="flex gap-4">
-                                <label><input type="checkbox" x-model="form['{{ $day }}'].all_day" @change="handleAllDay('{{ $day }}')"> All day</label>
-                                <label><input type="checkbox" x-model="form['{{ $day }}'].till_late"> Till late</label>
-                                <label><input type="checkbox" x-model="form['{{ $day }}'].by_appointment"> Appointment</label>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                To
+                                            </label>
+                                            <select
+                                                x-model="form['{{ $day }}'].to"
+                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day"
+                                                class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 disabled:text-gray-400"
+                                            >
+                                                <option value="">Select end time</option>
+                                                @for($i = 0; $i <= 23; $i++)
+                                                    <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:00">
+                                                        {{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:00
+                                                    </option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="grid grid-cols-1 sm:grid-cols-3 gap-3"
+                                        :class="{ 'opacity-50 pointer-events-none': !form['{{ $day }}'].enabled }"
+                                    >
+                                        <label class="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer hover:bg-gray-50">
+                                            <input
+                                                type="checkbox"
+                                                x-model="form['{{ $day }}'].all_day"
+                                                @change="handleAllDay('{{ $day }}')"
+                                                :disabled="!form['{{ $day }}'].enabled"
+                                                class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                            >
+                                            <span class="text-sm font-medium text-gray-700">All day</span>
+                                        </label>
+
+                                        <label class="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer hover:bg-gray-50">
+                                            <input
+                                                type="checkbox"
+                                                x-model="form['{{ $day }}'].till_late"
+                                                :disabled="!form['{{ $day }}'].enabled"
+                                                class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                            >
+                                            <span class="text-sm font-medium text-gray-700">Till late</span>
+                                        </label>
+
+                                        <label class="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 cursor-pointer hover:bg-gray-50">
+                                            <input
+                                                type="checkbox"
+                                                x-model="form['{{ $day }}'].by_appointment"
+                                                :disabled="!form['{{ $day }}'].enabled"
+                                                class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                            >
+                                            <span class="text-sm font-medium text-gray-700">By appointment</span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     @endforeach
 
-                    <button
-                        type="submit"
-                        :disabled="loading"
-                        class="px-6 py-3 bg-pink-600 text-white rounded-lg"
-                    >
-                        <span x-show="!loading">Save</span>
-                        <span x-show="loading">Saving...</span>
-                    </button>
+                    <div class="pt-4">
+                        <button
+                            type="submit"
+                            :disabled="loading"
+                            class="inline-flex items-center justify-center rounded-xl bg-pink-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            <span x-show="!loading">Save availability</span>
+                            <span x-show="loading">Saving...</span>
+                        </button>
+                    </div>
                 </form>
 
             </div>
@@ -93,6 +172,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/availability-form.js') }}"></script>
 @endpush
