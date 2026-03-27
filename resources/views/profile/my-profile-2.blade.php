@@ -1,45 +1,269 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div
-    class="bg-white min-h-screen py-10 px-4"
-    x-data="editProfilePage({
-        initial: @js([
-            'name' => old('name', $user->name ?? ''),
-            'mobile' => old('mobile', $user->mobile ?? ''),
-            'introduction_line' => old('introduction_line', $profile->introduction_line ?? ''),
-            'suburb' => old('suburb', $user->suburb ?? ''),
-            'profile_text' => old('profile_text', $profile->profile_text ?? ''),
+<div class="bg-white min-h-screen py-10 px-4"
+     x-data="{
+        // Basic info
+        name: @js(old('name', $user->name ?? '')),
+        mobile: @js(old('mobile', $user->mobile ?? '')),
+        introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
+        suburb: @js(old('suburb', $user->suburb ?? '')),
+        profile_text: @js(old('profile_text', $profile->profile_text ?? '')),
 
-            'age_group' => old('age_group', $selected['age_group'] ?? ''),
-            'hair_color' => old('hair_color', $selected['hair_color'] ?? ''),
-            'hair_length' => old('hair_length', $selected['hair_length'] ?? ''),
-            'ethnicity' => old('ethnicity', $selected['ethnicity'] ?? ''),
-            'body_type' => old('body_type', $selected['body_type'] ?? ''),
-            'bust_size' => old('bust_size', $selected['bust_size'] ?? ''),
-            'your_length' => old('your_length', $selected['your_length'] ?? ''),
+        // Stats selects
+        age_group: @js(old('age_group', $selected['age_group'] ?? '')),
+        hair_color: @js(old('hair_color', $selected['hair_color'] ?? '')),
+        hair_length: @js(old('hair_length', $selected['hair_length'] ?? '')),
+        ethnicity: @js(old('ethnicity', $selected['ethnicity'] ?? '')),
+        body_type: @js(old('body_type', $selected['body_type'] ?? '')),
+        bust_size: @js(old('bust_size', $selected['bust_size'] ?? '')),
+        your_length: @js(old('your_length', $selected['your_length'] ?? '')),
 
-            'primaryIdentity' => old('primary_identity', $selected['primary_identity'] ?? []),
-            'attributes' => old('attributes', $selected['attributes'] ?? []),
-            'servicesStyle' => old('services_style', $selected['services_style'] ?? []),
-            'services_provided' => old('services_provided', $selected['services_provided'] ?? []),
+        // Tags
+        primaryIdentity: @js(old('primary_identity', $selected['primary_identity'] ?? [])),
+        attributes: @js(old('attributes', $selected['attributes'] ?? [])),
+        servicesStyle: @js(old('services_style', $selected['services_style'] ?? [])),
 
-            'availability' => old('availability', $selected['availability'] ?? ''),
-            'contact_method' => old('contact_method', $selected['contact_method'] ?? ''),
-            'phone_contact' => old('phone_contact', $selected['phone_contact'] ?? ''),
-            'time_waster' => old('time_waster', $selected['time_waster'] ?? ''),
+        // Services provided
+        services_provided: @js(old('services_provided', $selected['services_provided'] ?? [])),
 
-            'twitter_handle' => old('twitter_handle', $profile->twitter_handle ?? ''),
-            'website' => old('website', $profile->website ?? ''),
-            'onlyfans_username' => old('onlyfans_username', $profile->onlyfans_username ?? ''),
+        // Availability radios
+        availability: @js(old('availability', $selected['availability'] ?? '')),
+        contact_method: @js(old('contact_method', $selected['contact_method'] ?? '')),
+        phone_contact: @js(old('phone_contact', $selected['phone_contact'] ?? '')),
+        time_waster: @js(old('time_waster', $selected['time_waster'] ?? '')),
 
-            'suburbSelected' => old('suburb', $user->suburb ?? '') ? true : false,
-        ]),
-        submitUrl: @js(url()->current()),
-        csrfToken: @js(csrf_token())
-    })"
+        // Social links
+        twitter_handle: @js(old('twitter_handle', $profile->twitter_handle ?? '')),
+        website: @js(old('website', $profile->website ?? '')),
+        onlyfans_username: @js(old('onlyfans_username', $profile->onlyfans_username ?? '')),
+
+        // Suburb autocomplete state
+        searchResults: [],
+        showResults: false,
+        searching: false,
+        debounceTimer: null,
+        suburbSelected: {{ old('suburb', $user->suburb ?? '') ? 'true' : 'false' }},
+
+        // UI state
+        submitting: false,
+        errors: @js($errors->all()),
+
+        // Methods
+        toggleTag(group, tag, event) {
+            if (group === 'primaryIdentity') {
+                this.primaryIdentity = [tag];
+            } else if (group === 'attributes') {
+                if (this.attributes.includes(tag)) {
+                    this.attributes = this.attributes.filter(t => t !== tag);
+                } else {
+                    this.attributes.push(tag);
+                }
+            } else if (group === 'servicesStyle') {
+                if (this.servicesStyle.includes(tag)) {
+                    this.servicesStyle = this.servicesStyle.filter(t => t !== tag);
+                } else if (this.servicesStyle.length < 12) {
+                    this.servicesStyle.push(tag);
+                } else {
+                    const el = event.currentTarget;
+                    el.classList.add('shake');
+                    setTimeout(() => el.classList.remove('shake'), 300);
+                }
+            }
+        },
+
+        toggleService(service) {
+            if (this.services_provided.includes(service)) {
+                this.services_provided = this.services_provided.filter(s => s !== service);
+            } else {
+                this.services_provided.push(service);
+            }
+        },
+
+        handleSuburbInput() {
+            this.suburbSelected = false;
+            this.searchSuburbs();
+        },
+
+        handleSuburbBlur() {
+            setTimeout(() => {
+                this.showResults = false;
+            }, 200);
+        },
+
+        searchSuburbs() {
+            if (!this.suburb || this.suburb.trim().length < 2) {
+                this.searchResults = [];
+                this.showResults = false;
+                return;
+            }
+
+            clearTimeout(this.debounceTimer);
+
+            this.debounceTimer = setTimeout(() => {
+                this.searching = true;
+
+                fetch(`/api/suburbs/search?q=${encodeURIComponent(this.suburb.trim())}`)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Failed to fetch suburbs');
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        this.searchResults = Array.isArray(data) ? data : [];
+                        this.showResults = this.searchResults.length > 0;
+                    })
+                    .catch(error => {
+                        console.error('Suburb search error:', error);
+                        this.searchResults = [];
+                        this.showResults = false;
+                    })
+                    .finally(() => {
+                        this.searching = false;
+                    });
+            }, 300);
+        },
+
+        selectSuburb(item) {
+            this.suburb = `${item.suburb}, ${item.state} ${item.postcode}`;
+            this.suburbSelected = true;
+            this.showResults = false;
+            this.searchResults = [];
+        },
+
+        validate() {
+            let errors = [];
+            if (!this.name.trim()) errors.push('Name is required.');
+            if (!this.mobile.trim()) errors.push('Mobile number is required.');
+            if (!this.suburb.trim()) {
+                errors.push('Suburb is required.');
+            } else if (!this.suburbSelected) {
+                errors.push('Please choose a location from the dropdown list, which appears while typing.');
+            }
+            if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
+            if (!this.profile_text.trim()) errors.push('Profile text is required.');
+            if (!this.age_group) errors.push('Age group is required.');
+            if (!this.hair_color) errors.push('Hair color is required.');
+            if (!this.hair_length) errors.push('Hair length is required.');
+            if (!this.ethnicity) errors.push('Ethnicity is required.');
+            if (!this.body_type) errors.push('Body type is required.');
+            if (!this.bust_size) errors.push('Bust size is required.');
+            if (!this.your_length) errors.push('Your length is required.');
+            if (this.primaryIdentity.length === 0) errors.push('Primary identity is required.');
+            if (this.attributes.length === 0) errors.push('Attributes are required.');
+            if (this.servicesStyle.length === 0) errors.push('Services & style are required.');
+            if (this.services_provided.length === 0) errors.push('Services provided are required.');
+            if (!this.availability) errors.push('Availability is required.');
+            if (!this.contact_method) errors.push('Contact method is required.');
+            if (!this.phone_contact) errors.push('Phone contact preference is required.');
+            if (!this.time_waster) errors.push('Time waster shield preference is required.');
+            return errors;
+        },
+
+        async submitForm() {
+            this.errors = this.validate();
+
+            if (this.errors.length > 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation errors',
+                    html: `<ul style='text-align:left; margin:0; padding-left:1.2rem;'>${this.errors.map(e => `<li>${e}</li>`).join('')}</ul>`
+                });
+                return;
+            }
+
+            this.submitting = true;
+
+            const formData = new FormData();
+            formData.append('name', this.name);
+            formData.append('mobile', this.mobile);
+            formData.append('introduction_line', this.introduction_line);
+            formData.append('suburb', this.suburb);
+            formData.append('profile_text', this.profile_text);
+            formData.append('age_group', this.age_group);
+            formData.append('hair_color', this.hair_color);
+            formData.append('hair_length', this.hair_length);
+            formData.append('ethnicity', this.ethnicity);
+            formData.append('body_type', this.body_type);
+            formData.append('bust_size', this.bust_size);
+            formData.append('your_length', this.your_length);
+
+            this.primaryIdentity.forEach(tag => formData.append('primary_identity[]', tag));
+            this.attributes.forEach(tag => formData.append('attributes[]', tag));
+            this.servicesStyle.forEach(tag => formData.append('services_style[]', tag));
+            this.services_provided.forEach(service => formData.append('services_provided[]', service));
+
+            formData.append('availability', this.availability);
+            formData.append('contact_method', this.contact_method);
+            formData.append('phone_contact', this.phone_contact);
+            formData.append('time_waster', this.time_waster);
+
+            formData.append('twitter_handle', this.twitter_handle);
+            formData.append('website', this.website);
+            formData.append('onlyfans_username', this.onlyfans_username);
+
+            formData.append('_token', @js(csrf_token()));
+
+            try {
+                const response = await fetch(@js(url()->current()), {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                let data = {};
+                const contentType = response.headers.get('content-type') || '';
+
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    data = { message: text };
+                }
+
+                if (response.ok) {
+                    this.errors = [];
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Saved',
+                        text: data.message || 'Profile updated successfully.',
+                        timer: 2500,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                } else if (response.status === 422) {
+                    const messages = Object.values(data.errors || {}).flat();
+                    this.errors = messages.length ? messages : ['Validation failed.'];
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation errors',
+                        html: `<ul style='text-align:left; margin:0; padding-left:1.2rem;'>${this.errors.map(m => `<li>${m}</li>`).join('')}</ul>`
+                    });
+                } else {
+                    this.errors = [data.message || 'Unable to save profile. Please try again later.'];
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Unable to save profile. Please try again later.'
+                    });
+                }
+            } catch (error) {
+                this.errors = ['Unable to save profile. Please check your connection and try again.'];
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to save profile. Please check your connection and try again.'
+                });
+            } finally {
+                this.submitting = false;
+            }
+        }
+     }"
 >
-
     <div class="max-w-4xl mx-auto">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-l-6 border-[#e04ecb] pl-4">
             Edit your profile
@@ -383,11 +607,27 @@
             </div>
         </form>
     </div>
-
 </div>
 
-@push('scripts')
+<style>
+    [x-cloak] { display: none !important; }
+
+    .tag-pill.selected {
+        background-color: #e04ecb !important;
+        color: white !important;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-3px); }
+        75% { transform: translateX(3px); }
+    }
+
+    .shake {
+        animation: shake 0.3s ease-in-out;
+    }
+</style>
+
+<script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('profile/js/edit-profile.js') }}"></script>
-@endpush
 @endsection

@@ -25,7 +25,7 @@ class MyProfileController extends Controller
         return view('profile.my-profile-1', $this->getMyProfilePageData->execute(Auth::user()));
     }
 
-    public function stepTwo(): View
+    public function editProfie(): View
     {
         return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute(Auth::user()));
     }

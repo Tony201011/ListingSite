@@ -127,7 +127,7 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function () {
     Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
-    Route::get('/edit-profile', [MyProfileController::class, 'stepTwo'])->name('edit-profile');
+    Route::get('/edit-profile', [MyProfileController::class, 'editProfie'])->name('edit-profile');
     Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
     Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
     Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
