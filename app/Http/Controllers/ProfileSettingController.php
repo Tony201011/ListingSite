@@ -16,7 +16,7 @@ class ProfileSettingController extends Controller
     public function viewProfileSetting(): View
     {
         return view(
-            'view-profile-setting',
+            'profie.view-profile-setting',
             $this->getProfileSettingPageData->execute(auth::user())
         );
     }

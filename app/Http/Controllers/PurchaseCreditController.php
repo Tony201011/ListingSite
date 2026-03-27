@@ -9,7 +9,7 @@ class PurchaseCreditController extends Controller
 {
     public function purchaseCredit()
     {
-        return view('purchase-credit');
+        return view('subscription.purchase-credit');
     }
 
     public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse
@@ -37,16 +37,16 @@ class PurchaseCreditController extends Controller
 
     public function creditHistory()
     {
-        return view('credit-history');
+        return view('subscription.credit-history');
     }
 
     public function creditHistoryLastMonth()
     {
-        return view('credit-history-last-month');
+        return view('subscription.credit-history-last-month');
     }
 
     public function purchaseHistory()
     {
-        return view('purchase-history');
+        return view('subscription.purchase-history');
     }
 }

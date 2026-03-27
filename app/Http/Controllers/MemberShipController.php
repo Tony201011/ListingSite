@@ -10,6 +10,6 @@ class MemberShipController extends Controller
     //
     public function membership(): View
     {
-        return view('membership');
+        return view('subscription.membership');
     }
 }

@@ -22,13 +22,11 @@ use App\Http\Controllers\BabeRankController;
 use App\Http\Controllers\ForgetController;
 use App\Http\Controllers\ProfileMessageController;
 use App\Http\Controllers\ProfileSettingController;
-use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\SuburbController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\SitePasswordController;
 use App\Http\Controllers\UrlController;
 use App\Http\Controllers\ReferralsController;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;

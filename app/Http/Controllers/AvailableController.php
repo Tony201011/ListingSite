@@ -20,7 +20,7 @@ class AvailableController extends Controller
     {
         $data = $this->getAvailableNowState->execute(auth()->user());
 
-        return view('available-now', $data);
+        return view('profile.available-now', $data);
     }
 
     public function availableUpdateStatus(UpdateAvailableStatusRequest $request): JsonResponse
