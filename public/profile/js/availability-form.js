@@ -5,12 +5,127 @@ document.addEventListener('alpine:init', () => {
         csrfToken: config.csrfToken,
 
         loading: false,
+        errors: {},
+
+        init() {
+            this.setupWatchers();
+        },
+
+        setupWatchers() {
+            Object.keys(this.form).forEach(day => {
+                this.$watch(`form.${day}.from`, () => {
+                    this.clearFieldError(day, 'from');
+                    this.validateDay(day);
+                });
+
+                this.$watch(`form.${day}.to`, () => {
+                    this.clearFieldError(day, 'to');
+                    this.validateDay(day);
+                });
+
+                this.$watch(`form.${day}.enabled`, (value) => {
+                    if (!value) {
+                        this.clearDayErrors(day);
+                    } else {
+                        this.validateDay(day);
+                    }
+                });
+
+                this.$watch(`form.${day}.all_day`, (value) => {
+                    if (value) {
+                        this.form[day].from = '';
+                        this.form[day].to = '';
+                        this.clearFieldError(day, 'from');
+                        this.clearFieldError(day, 'to');
+                    } else {
+                        this.validateDay(day);
+                    }
+                });
+            });
+        },
 
         handleAllDay(day) {
             if (this.form[day].all_day) {
                 this.form[day].from = '';
                 this.form[day].to = '';
+                this.clearFieldError(day, 'from');
+                this.clearFieldError(day, 'to');
+            } else {
+                this.validateDay(day);
             }
+        },
+
+        getFieldError(day, field) {
+            return this.errors?.[day]?.[field]?.[0] || '';
+        },
+
+        setFieldError(day, field, message) {
+            if (!this.errors[day]) {
+                this.errors[day] = {};
+            }
+
+            this.errors[day][field] = [message];
+        },
+
+        clearFieldError(day, field) {
+            if (this.errors[day] && this.errors[day][field]) {
+                delete this.errors[day][field];
+
+                if (Object.keys(this.errors[day]).length === 0) {
+                    delete this.errors[day];
+                }
+            }
+        },
+
+        clearDayErrors(day) {
+            if (this.errors[day]) {
+                delete this.errors[day];
+            }
+        },
+
+        validateDay(day) {
+            const item = this.form[day];
+
+            this.clearFieldError(day, 'from');
+            this.clearFieldError(day, 'to');
+
+            if (!item.enabled) {
+                return true;
+            }
+
+            if (item.all_day || item.by_appointment) {
+                return true;
+            }
+
+            if (!item.from && item.to) {
+                this.setFieldError(day, 'from', `Please select a start time for ${day}.`);
+                return false;
+            }
+
+            if (item.from && !item.to) {
+                this.setFieldError(day, 'to', `Please select an end time for ${day}.`);
+                return false;
+            }
+
+            if (item.from && item.to && item.to <= item.from) {
+                this.setFieldError(day, 'to', `The to time must be later than the from time for ${day}.`);
+                return false;
+            }
+
+            return true;
+        },
+
+        validateForm() {
+            let isValid = true;
+
+            Object.keys(this.form).forEach(day => {
+                const valid = this.validateDay(day);
+                if (!valid) {
+                    isValid = false;
+                }
+            });
+
+            return isValid;
         },
 
         buildPayload() {
@@ -19,8 +134,8 @@ document.addEventListener('alpine:init', () => {
             Object.keys(this.form).forEach(day => {
                 availability[day] = {
                     enabled: this.form[day].enabled ? 1 : 0,
-                    from: this.form[day].from,
-                    to: this.form[day].to,
+                    from: this.form[day].from || '',
+                    to: this.form[day].to || '',
                     till_late: this.form[day].till_late ? 1 : 0,
                     all_day: this.form[day].all_day ? 1 : 0,
                     by_appointment: this.form[day].by_appointment ? 1 : 0,
@@ -30,7 +145,35 @@ document.addEventListener('alpine:init', () => {
             return { availability };
         },
 
+        mapBackendErrors(serverErrors = {}) {
+            this.errors = {};
+
+            Object.keys(serverErrors).forEach(key => {
+                const match = key.match(/^availability\.(.+?)\.(.+)$/);
+
+                if (match) {
+                    const day = match[1];
+                    const field = match[2];
+
+                    if (!this.errors[day]) {
+                        this.errors[day] = {};
+                    }
+
+                    this.errors[day][field] = serverErrors[key];
+                }
+            });
+        },
+
         async submitForm() {
+            this.errors = {};
+
+            const isValid = this.validateForm();
+
+            if (!isValid) {
+                this.error('Please fix the highlighted errors before saving.');
+                return;
+            }
+
             this.loading = true;
 
             try {
@@ -47,13 +190,18 @@ document.addEventListener('alpine:init', () => {
                 const data = await response.json();
 
                 if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.mapBackendErrors(data.errors);
+                        this.error('Please fix the highlighted errors before saving.');
+                        return;
+                    }
+
                     throw new Error(data.message || 'Error saving');
                 }
 
                 this.toast(data.message || 'Saved successfully');
-
             } catch (error) {
-                this.error(error.message);
+                this.error(error.message || 'Something went wrong.');
             } finally {
                 this.loading = false;
             }

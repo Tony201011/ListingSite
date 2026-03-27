@@ -19,7 +19,6 @@
     })"
 >
     <div class="max-w-5xl mx-auto">
-
         <button
             type="button"
             onclick="window.history.back()"
@@ -31,7 +30,6 @@
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-6 sm:p-8 lg:p-10">
-
                 <div class="mb-8">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">
                         Set your availability
@@ -50,11 +48,9 @@
                 </div>
 
                 <form @submit.prevent="submitForm" class="space-y-5">
-
                     @foreach($days as $day)
                         <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
                             <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-
                                 <div class="lg:w-48">
                                     <label class="inline-flex items-center gap-3 cursor-pointer">
                                         <input
@@ -66,6 +62,7 @@
                                             {{ $day }}
                                         </span>
                                     </label>
+
                                     <p class="mt-2 text-sm text-gray-500">
                                         Toggle this day on or off.
                                     </p>
@@ -82,8 +79,9 @@
                                             </label>
                                             <select
                                                 x-model="form['{{ $day }}'].from"
-                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day"
-                                                class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 disabled:text-gray-400"
+                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day || form['{{ $day }}'].by_appointment"
+                                                :class="getFieldError('{{ $day }}', 'from') ? 'border-red-500 ring-2 ring-red-100' : 'border-gray-300'"
+                                                class="w-full rounded-xl bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 disabled:text-gray-400"
                                             >
                                                 <option value="">Select start time</option>
                                                 @for($i = 0; $i <= 23; $i++)
@@ -92,6 +90,12 @@
                                                     </option>
                                                 @endfor
                                             </select>
+
+                                            <p
+                                                x-show="getFieldError('{{ $day }}', 'from')"
+                                                x-text="getFieldError('{{ $day }}', 'from')"
+                                                class="mt-2 text-sm text-red-600"
+                                            ></p>
                                         </div>
 
                                         <div>
@@ -100,8 +104,9 @@
                                             </label>
                                             <select
                                                 x-model="form['{{ $day }}'].to"
-                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day"
-                                                class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 disabled:text-gray-400"
+                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day || form['{{ $day }}'].by_appointment"
+                                                :class="getFieldError('{{ $day }}', 'to') ? 'border-red-500 ring-2 ring-red-100' : 'border-gray-300'"
+                                                class="w-full rounded-xl bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 disabled:text-gray-400"
                                             >
                                                 <option value="">Select end time</option>
                                                 @for($i = 0; $i <= 23; $i++)
@@ -110,6 +115,12 @@
                                                     </option>
                                                 @endfor
                                             </select>
+
+                                            <p
+                                                x-show="getFieldError('{{ $day }}', 'to')"
+                                                x-text="getFieldError('{{ $day }}', 'to')"
+                                                class="mt-2 text-sm text-red-600"
+                                            ></p>
                                         </div>
                                     </div>
 
@@ -148,6 +159,20 @@
                                             <span class="text-sm font-medium text-gray-700">By appointment</span>
                                         </label>
                                     </div>
+
+                                    <p
+                                        x-show="form['{{ $day }}'].all_day"
+                                        class="text-sm text-green-600"
+                                    >
+                                        This day is marked as available all day.
+                                    </p>
+
+                                    <p
+                                        x-show="form['{{ $day }}'].by_appointment"
+                                        class="text-sm text-blue-600"
+                                    >
+                                        This day is available by appointment only.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -164,7 +189,6 @@
                         </button>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
@@ -172,7 +196,6 @@
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/availability-form.js') }}"></script>
 @endpush
