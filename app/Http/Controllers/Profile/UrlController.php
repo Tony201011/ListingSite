@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Profile;
+use App\Http\Controllers\Controller;
 
 use App\Actions\GetShortUrlPageData;
 use App\Actions\UpdateUserShortUrl;

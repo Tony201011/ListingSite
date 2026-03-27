@@ -1,5 +1,7 @@
 <?php
-namespace App\Http\Controllers;
+
+namespace App\Http\Controllers\Profile;
+use App\Http\Controllers\Controller;
 use App\Actions\DeleteUserAccount;
 use App\Http\Requests\DeleteAccountRequest;
 use Illuminate\Support\Facades\Auth;

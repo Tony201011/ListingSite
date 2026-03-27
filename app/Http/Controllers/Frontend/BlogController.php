@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Frontend;
+use App\Http\Controllers\Controller;
 use App\Actions\GetBlogIndexData;
 use App\Actions\GetBlogPostData;
 use App\Http\Requests\LoadMoreBlogPostsRequest;

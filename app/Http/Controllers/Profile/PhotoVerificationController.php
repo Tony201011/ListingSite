@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Profile;
+use App\Http\Controllers\Controller;
 use App\Actions\DeletePhotoVerificationPhoto;
 use App\Actions\GetPhotoVerificationPageData;
 use App\Actions\UploadPhotoVerificationPhotos;

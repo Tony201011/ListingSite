@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Profile;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Actions\GetAvailableNowState;
 use App\Actions\UpdateAvailableNowStatus;
 use App\Http\Requests\UpdateAvailableStatusRequest;
@@ -18,7 +19,7 @@ class AvailableController extends Controller
 
     public function availableNow(): View
     {
-        $data = $this->getAvailableNowState->execute(auth()->user());
+        $data = $this->getAvailableNowState->execute(auth::user());
 
         return view('profile.available-now', $data);
     }

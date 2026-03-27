@@ -1,34 +1,49 @@
 <?php
 
-use App\Http\Controllers\AccountController;
+/**frontend controller start*** */
+use App\Http\Controllers\Frontend\FrontendPageController;
+use App\Http\Controllers\Frontend\BlogController;
+use App\Http\Controllers\Frontend\HomeController;
+/**frontend controller end*** */
+
+/*******auth Controllers start */
 use App\Http\Controllers\Auth\PasswordResetController;
-use App\Http\Controllers\AvailabilityController;
-use App\Http\Controllers\BlogController;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\FrontendPageController;
-use App\Http\Controllers\ShowHideProfileController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\MyProfileController;
-use App\Http\Controllers\MyRateController;
-use App\Http\Controllers\MyToursController;
-use App\Http\Controllers\MyVideosController;
-use App\Http\Controllers\OnlineController;
-use App\Http\Controllers\PhotoController;
-use App\Http\Controllers\PhotoVerificationController;
-use App\Http\Controllers\ProviderRegisterController;
-use App\Http\Controllers\PurchaseCreditController;
-use App\Http\Controllers\AvailableController;
-use App\Http\Controllers\BabeRankController;
-use App\Http\Controllers\ForgetController;
-use App\Http\Controllers\ProfileMessageController;
-use App\Http\Controllers\ProfileSettingController;
-use App\Http\Controllers\SuburbController;
-use App\Http\Controllers\EmailVerificationController;
-use App\Http\Controllers\SitePasswordController;
-use App\Http\Controllers\UrlController;
-use App\Http\Controllers\ReferralsController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\ProviderRegisterController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\AuthController;
+/*******auth Controllers end */
+
+/***profile Controllers start*/
+use App\Http\Controllers\Profile\AccountController;
+use App\Http\Controllers\Profile\MyProfileController;
+use App\Http\Controllers\Profile\MyRateController;
+use App\Http\Controllers\Profile\MyToursController;
+use App\Http\Controllers\Profile\MyVideosController;
+use App\Http\Controllers\Profile\OnlineController;
+use App\Http\Controllers\Profile\PhotoController;
+use App\Http\Controllers\Profile\PhotoVerificationController;
+use App\Http\Controllers\Profile\AvailabilityController;
+use App\Http\Controllers\Profile\BookingController;
+use App\Http\Controllers\Profile\ShowHideProfileController;
+use App\Http\Controllers\Profile\ReferralsController;
+use App\Http\Controllers\Profile\AvailableController;
+use App\Http\Controllers\Profile\ProfileMessageController;
+use App\Http\Controllers\Profile\BabeRankController;
+use App\Http\Controllers\Profile\ForgetController;
+use App\Http\Controllers\Profile\ProfileSettingController;
+use App\Http\Controllers\Profile\SuburbController;
+use App\Http\Controllers\Profile\UrlController;
+/***profile Controllers start*/
+
+/**subscription controller start */
+use App\Http\Controllers\Subscription\PurchaseCreditController;
+use App\Http\Controllers\Subscription\MemberShipController;
+/**subscription controller end */
+
+/*******site access controller start here  */
+use App\Http\Controllers\SiteAccess\SitePasswordController;
+/*******site access controller end here  */
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/site-password', [SitePasswordController::class, 'showForm'])
@@ -86,14 +101,8 @@ Route::get('/403', function () {
 /** frontend pages end */
 
 /** auth routes start */
-Route::post('/logout', function (Request $request) {
-    Auth::logout();
-
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-
-    return redirect('/');
-})->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
 /** auth routes end */
 
 Route::middleware('guest')->group(function (): void {
@@ -154,7 +163,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
         /*** availability route end here */
 
-        /************* rate route start here */
+        /************* rate and group route start here */
         Route::get('/my-rate', [MyRateController::class, 'index'])->name('my-rate');
         Route::post('/my-rate', [MyRateController::class, 'store'])->name('my-rate.store');
         Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])->name('my-rate.destroy');
@@ -162,7 +171,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store');
         Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update');
         Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
-        /************* rate route end here */
+        /************* rate and group route end here */
 
         /*** photo route start here */
         Route::get('/click-here-to-verify', [PhotoVerificationController::class, 'index'])->name('verify.photos');
@@ -220,6 +229,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
         Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
         Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
+        Route::get('/membership', [MemberShipController::class, 'membership'])->name('membership');
         /*** credit route end here */
     });
 });

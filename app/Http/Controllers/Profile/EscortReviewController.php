@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Profile;
+use App\Http\Controllers\Controller;
 use App\Actions\GetEscortReviewPage;
 use App\Actions\UpdateEscortReviewPage;
 use App\Http\Requests\UpdateEscortReviewRequest;

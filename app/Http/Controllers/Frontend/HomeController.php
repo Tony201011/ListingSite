@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Frontend;
+use App\Http\Controllers\Controller;
 use App\Actions\BuildProfileFilterViewData;
 use App\Actions\GetProfileShowData;
 use App\Http\Requests\AdvancedSearchRequest;

@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Subscription;
+use App\Http\Controllers\Controller;
 
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
 use Illuminate\Http\RedirectResponse;
