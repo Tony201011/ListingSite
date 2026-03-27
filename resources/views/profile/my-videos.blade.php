@@ -1,7 +1,16 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8" x-data="videoGallery()">
+<div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8" x-data="videoGallery({
+    videos: @js($videos->map(fn ($video) => [
+        'id' => $video->id,
+        'video_path' => $video->video_path,
+        'video_url' => $video->video_url,
+        'original_name' => $video->original_name,
+    ])->values()),
+    deleteUrl: @js(url('/videos/__ID__')),
+    csrfToken: @js(csrf_token())
+})">
     <div class="max-w-4xl mx-auto">
         <a href="{{ url('/view-profile-setting') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4">
             <span class="mr-1">&lt;</span> Back to profile settings
@@ -100,63 +109,8 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('videoGallery', () => ({
-        loading: false,
-        successMessage: '',
-        errorMessage: '',
-        confirmDeleteId: null,
-
-        videos: @js($videos->map(fn ($video) => [
-            'id' => $video->id,
-            'video_path' => $video->video_path,
-            'video_url' => $video->video_url,
-            'original_name' => $video->original_name,
-        ])->values()),
-
-        clearMessages() {
-            this.successMessage = '';
-            this.errorMessage = '';
-        },
-
-        askRemove(id) {
-            this.clearMessages();
-            this.confirmDeleteId = this.confirmDeleteId === id ? null : id;
-        },
-
-        async removeVideo(id) {
-            if (this.loading) return;
-
-            this.clearMessages();
-            this.loading = true;
-
-            try {
-                const response = await fetch(`/videos/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json',
-                    }
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.message || 'Failed to delete video.');
-                }
-
-                this.videos = this.videos.filter(video => video.id !== id);
-                this.confirmDeleteId = null;
-                this.successMessage = result.message || 'Video deleted successfully.';
-            } catch (error) {
-                this.errorMessage = error.message || 'Something went wrong.';
-            } finally {
-                this.loading = false;
-            }
-        }
-    }));
-});
-</script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('profile/js/video-gallery.js') }}"></script>
+@endpush
 @endsection

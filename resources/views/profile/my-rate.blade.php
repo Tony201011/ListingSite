@@ -41,7 +41,16 @@
         @endphp
 
         <!-- Alpine Component -->
-        <div x-data="ratesManager({{ json_encode($ratesArray) }})" x-init="init()" class="space-y-8">
+        <div
+            x-data="ratesManager({
+                rates: @js($ratesArray),
+                storeUrl: @js(route('my-rate.store')),
+                updateUrl: @js(route('my-rate.update', ['rate' => '__ID__'])),
+                deleteUrl: @js(route('my-rate.destroy', ['rate' => '__ID__'])),
+                csrfToken: @js(csrf_token())
+            })"
+            class="space-y-8"
+        >
             <!-- Rates List -->
             <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100">
                 <div class="flex items-baseline flex-wrap gap-2 mb-2">
@@ -182,225 +191,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-
-<script>
-    function ratesManager(initialRates = []) {
-        return {
-            rates: initialRates,
-            showForm: false,
-            isSubmitting: false,
-            editingId: null,
-            form: {
-                desc: '',
-                incall: '',
-                outcall: '',
-                extra: ''
-            },
-            validationErrors: {
-                desc: '',
-                incall: '',
-                outcall: '',
-                extra: ''
-            },
-
-            init() {},
-
-            openFormForAdd() {
-                this.resetForm();
-                this.editingId = null;
-                this.showForm = true;
-            },
-
-            editRate(rate) {
-                this.form = {
-                    desc: rate.desc,
-                    incall: rate.incall,
-                    outcall: rate.outcall,
-                    extra: rate.extra
-                };
-                this.editingId = rate.id;
-                this.showForm = true;
-                this.clearValidationErrors();
-            },
-
-            cancelForm() {
-                this.showForm = false;
-                this.resetForm();
-                this.editingId = null;
-                this.clearValidationErrors();
-            },
-
-            validateForm() {
-                this.clearValidationErrors();
-                let isValid = true;
-
-                // Description required
-                if (!this.form.desc || !this.form.desc.trim()) {
-                    this.validationErrors.desc = 'Description is required.';
-                    isValid = false;
-                }
-
-                // Incall required
-                if (!this.form.incall || !this.form.incall.trim()) {
-                    this.validationErrors.incall = 'Incall rate is required.';
-                    isValid = false;
-                }
-
-                // Outcall required
-                if (!this.form.outcall || !this.form.outcall.trim()) {
-                    this.validationErrors.outcall = 'Outcall rate is required.';
-                    isValid = false;
-                }
-
-                return isValid;
-            },
-
-            clearValidationErrors() {
-                this.validationErrors = { desc: '', incall: '', outcall: '', extra: '' };
-            },
-
-            handleServerErrors(errors) {
-                this.clearValidationErrors();
-                if (errors.description) {
-                    this.validationErrors.desc = errors.description[0];
-                }
-                if (errors.incall) {
-                    this.validationErrors.incall = errors.incall[0];
-                }
-                if (errors.outcall) {
-                    this.validationErrors.outcall = errors.outcall[0];
-                }
-                if (errors.extra) {
-                    this.validationErrors.extra = errors.extra[0];
-                }
-            },
-
-            async saveRate() {
-                // Client-side validation
-                if (!this.validateForm()) {
-                    return;
-                }
-
-                this.isSubmitting = true;
-                try {
-                    const payload = {
-                        description: this.form.desc.trim(),
-                        incall: this.form.incall.trim() || null,
-                        outcall: this.form.outcall.trim() || null,
-                        extra: this.form.extra.trim() || null
-                    };
-
-                    let url, method;
-                    if (this.editingId) {
-                        // Update
-                        url = '{{ route("my-rate.update", ["rate" => "REPLACE"]) }}'.replace('REPLACE', this.editingId);
-                        method = 'PUT';
-                    } else {
-                        // Create
-                        url = '{{ route("my-rate.store") }}';
-                        method = 'POST';
-                    }
-
-                    const response = await fetch(url, {
-                        method: method,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify(payload)
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        // If validation error (422)
-                        if (response.status === 422 && data.errors) {
-                            this.handleServerErrors(data.errors);
-                            throw new Error('Validation failed');
-                        } else {
-                            throw new Error(data.message || 'Failed to save rate');
-                        }
-                    }
-
-                    // Success
-                    if (this.editingId) {
-                        // Update in array
-                        const index = this.rates.findIndex(r => r.id === this.editingId);
-                        if (index !== -1) {
-                            this.rates[index] = {
-                                id: data.id,
-                                desc: data.description,
-                                incall: data.incall,
-                                outcall: data.outcall,
-                                extra: data.extra
-                            };
-                        }
-                        Swal.fire('Updated!', 'Rate has been updated.', 'success');
-                    } else {
-                        // Add new
-                        this.rates.push({
-                            id: data.id,
-                            desc: data.description,
-                            incall: data.incall,
-                            outcall: data.outcall,
-                            extra: data.extra
-                        });
-                        Swal.fire('Added!', 'Rate has been added.', 'success');
-                    }
-
-                    this.cancelForm();
-                } catch (error) {
-                    console.error('Error saving rate:', error);
-                    if (error.message !== 'Validation failed') {
-                        Swal.fire('Error', 'Failed to save rate. Please try again.', 'error');
-                    }
-                } finally {
-                    this.isSubmitting = false;
-                }
-            },
-
-            confirmDelete(rateId, index) {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e04ecb',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        this.deleteRate(rateId, index);
-                    }
-                });
-            },
-
-            async deleteRate(rateId, index) {
-                try {
-                    const url = '{{ route("my-rate.destroy", ["rate" => "REPLACE"]) }}'.replace('REPLACE', rateId);
-                    const response = await fetch(url, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    });
-
-                    if (!response.ok) throw new Error('Failed to delete rate');
-
-                    this.rates.splice(index, 1);
-                    Swal.fire('Deleted!', 'Rate has been deleted.', 'success');
-                } catch (error) {
-                    console.error('Error deleting rate:', error);
-                    Swal.fire('Error', 'Failed to delete rate. Please try again.', 'error');
-                }
-            },
-
-            resetForm() {
-                this.form = { desc: '', incall: '', outcall: '', extra: '' };
-                this.editingId = null;
-                this.clearValidationErrors();
-            }
-        }
-    }
-</script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('profile/js/rates-manager.js') }}"></script>
+@endpush
 @endsection

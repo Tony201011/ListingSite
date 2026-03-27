@@ -3,7 +3,19 @@
 @section('content')
 <div
     class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8"
-    x-data="photoGallery()"
+    x-data="photoGallery({
+            photos: @js($photos->map(fn ($photo) => [
+                'id' => $photo->id,
+                'image_path' => $photo->image_path,
+                'thumbnail_path' => $photo->thumbnail_path,
+                'image_url' => $photo->image_url,
+                'thumbnail_url' => $photo->thumbnail_url,
+                'is_primary' => (bool) ($photo->is_primary ?? false),
+            ])->values()),
+            setCoverUrl: @js(url('/photos/__ID__/set-cover')),
+            deleteUrl: @js(url('/photos/__ID__')),
+            csrfToken: @js(csrf_token())
+        })"
 >
     <div class="max-w-5xl mx-auto">
         <a href="{{ url('/view-profile-setting') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4">
@@ -110,7 +122,7 @@
                             </div>
 
                             <!-- Delete confirm box -->
-                            <div
+                            {{-- <div
                                 x-show="confirmDeleteId === photo.id"
                                 x-transition
                                 class="rounded-lg border border-red-200 bg-red-50 p-3"
@@ -134,7 +146,7 @@
                                         Cancel
                                     </button>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </template>
@@ -208,149 +220,8 @@
         </template>
     </div>
 </div>
-
-<script>
-    function photoGallery() {
-        return {
-            loading: false,
-            successMessage: '',
-            errorMessage: '',
-            confirmDeleteId: null,
-
-            sliderOpen: false,
-            sliderIndex: 0,
-
-            photos: @js($photos->map(fn ($photo) => [
-                'id' => $photo->id,
-                'image_path' => $photo->image_path,
-                'thumbnail_path' => $photo->thumbnail_path,
-                'image_url' => $photo->image_url,
-                'thumbnail_url' => $photo->thumbnail_url,
-                'is_primary' => (bool) ($photo->is_primary ?? false),
-            ])->values()),
-
-            clearMessages() {
-                this.successMessage = '';
-                this.errorMessage = '';
-            },
-
-            get coverPhoto() {
-                return this.photos.find(photo => photo.is_primary) || null;
-            },
-
-            openSlider(index) {
-                this.sliderIndex = index;
-                this.sliderOpen = true;
-            },
-
-            closeSlider() {
-                this.sliderOpen = false;
-            },
-
-            nextSlide() {
-                if (this.photos.length > 1) {
-                    this.sliderIndex = (this.sliderIndex + 1) % this.photos.length;
-                }
-            },
-
-            prevSlide() {
-                if (this.photos.length > 1) {
-                    this.sliderIndex = (this.sliderIndex - 1 + this.photos.length) % this.photos.length;
-                }
-            },
-
-            askRemove(id) {
-                this.clearMessages();
-                this.confirmDeleteId = this.confirmDeleteId === id ? null : id;
-            },
-
-            async setCover(id) {
-                if (this.loading) return;
-
-                this.clearMessages();
-                this.confirmDeleteId = null;
-                this.loading = true;
-
-                try {
-                    const response = await fetch(`/photos/${id}/set-cover`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                        },
-                        body: JSON.stringify({})
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(result.message || 'Failed to set cover photo.');
-                    }
-
-                    this.photos = this.photos.map(photo => ({
-                        ...photo,
-                        is_primary: photo.id === id
-                    }));
-
-                    this.successMessage = result.message || 'Cover photo updated successfully.';
-                } catch (error) {
-                    this.errorMessage = error.message || 'Something went wrong.';
-                } finally {
-                    this.loading = false;
-                }
-            },
-
-            async removePhoto(id) {
-                if (this.loading) return;
-
-                this.clearMessages();
-                this.loading = true;
-
-                try {
-                    const response = await fetch(`/photos/${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(result.message || 'Failed to delete photo.');
-                    }
-
-                    const deletedIndex = this.photos.findIndex(photo => photo.id === id);
-
-                    this.photos = this.photos.filter(photo => photo.id !== id);
-                    this.confirmDeleteId = null;
-
-                    if (!this.photos.some(photo => photo.is_primary) && this.photos.length > 0) {
-                        this.photos[0].is_primary = true;
-                    }
-
-                    if (this.sliderOpen) {
-                        if (!this.photos.length) {
-                            this.closeSlider();
-                        } else if (this.sliderIndex >= this.photos.length) {
-                            this.sliderIndex = this.photos.length - 1;
-                        } else if (deletedIndex !== -1 && this.sliderIndex > deletedIndex) {
-                            this.sliderIndex--;
-                        }
-                    }
-
-                    this.successMessage = result.message || 'Photo deleted successfully.';
-                } catch (error) {
-                    this.errorMessage = error.message || 'Something went wrong.';
-                } finally {
-                    this.loading = false;
-                }
-            }
-        }
-    }
-</script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('profile/js/photo-gallery.js') }}"></script>
+@endpush
 @endsection

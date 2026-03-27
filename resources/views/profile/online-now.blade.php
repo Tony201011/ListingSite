@@ -4,13 +4,12 @@
 <div
     class="min-h-screen bg-gradient-to-b from-pink-50 via-white to-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="onlineNowToggle({
-        initialStatus: {{ $onlineStatus ? 'true' : 'false' }},
-        initialRemainingUses: {{ $remainingUses }},
-        initialExpiresAt: @js($expiresAt ?? null),
-        updateUrl: '{{ route('onlineUpdateStatus') }}',
-        csrfToken: '{{ csrf_token() }}'
+    initialStatus: @js((bool) $onlineStatus),
+    initialRemainingUses: @js($remainingUses),
+    initialExpiresAt: @js($expiresAt ?? null),
+    updateUrl: @js(route('onlineUpdateStatus')),
+    csrfToken: @js(csrf_token())
     })"
-    x-init="init()"
 >
     <div class="mx-auto max-w-3xl">
         <a
@@ -122,124 +121,8 @@
 </div>
 
 @push('scripts')
-<script>
-    function onlineNowToggle({
-        initialStatus = false,
-        initialRemainingUses = 0,
-        initialExpiresAt = null,
-        updateUrl = '',
-        csrfToken = ''
-    }) {
-        return {
-            enabled: initialStatus,
-            remainingUses: initialRemainingUses,
-            expiresAt: initialExpiresAt,
-            loading: false,
-            message: '',
-            messageType: 'success',
-            countdown: '60:00',
-            timer: null,
-
-            init() {
-                if (this.enabled && this.expiresAt) {
-                    this.startTimer();
-                }
-            },
-
-            startTimer() {
-                this.stopTimer();
-                this.updateCountdown();
-
-                this.timer = setInterval(() => {
-                    this.updateCountdown();
-                }, 1000);
-            },
-
-            stopTimer() {
-                if (this.timer) {
-                    clearInterval(this.timer);
-                    this.timer = null;
-                }
-            },
-
-            updateCountdown() {
-                if (!this.expiresAt) {
-                    this.countdown = '00:00';
-                    return;
-                }
-
-                const now = new Date().getTime();
-                const expiry = new Date(this.expiresAt).getTime();
-                const diff = expiry - now;
-
-                if (diff <= 0) {
-                    this.enabled = false;
-                    this.expiresAt = null;
-                    this.countdown = '00:00';
-                    this.stopTimer();
-                    this.message = 'Your 60-minute online session has ended.';
-                    this.messageType = 'success';
-                    return;
-                }
-
-                const totalSeconds = Math.floor(diff / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const seconds = totalSeconds % 60;
-
-                this.countdown =
-                    String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
-            },
-
-            async toggleStatus() {
-                this.loading = true;
-                this.message = '';
-
-                const newStatus = this.enabled ? 'offline' : 'online';
-
-                try {
-                    const response = await fetch(updateUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            status: newStatus
-                        }),
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(data.message || 'Something went wrong.');
-                    }
-
-                    this.enabled = data.status === 'online';
-                    this.remainingUses = data.remaining_uses ?? this.remainingUses;
-                    this.expiresAt = data.expires_at ?? null;
-                    this.message = data.message || 'Status updated successfully.';
-                    this.messageType = 'success';
-
-                    if (this.enabled && this.expiresAt) {
-                        this.startTimer();
-                    } else {
-                        this.stopTimer();
-                        this.countdown = '00:00';
-                    }
-
-                    setTimeout(() => {
-                        this.message = '';
-                    }, 3000);
-                } catch (error) {
-                    this.message = error.message || 'Something went wrong.';
-                    this.messageType = 'error';
-                } finally {
-                    this.loading = false;
-                }
-            }
-        };
-    }
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('profile/js/online-now-toggle.js') }}"></script>
 @endpush
+
 @endsection

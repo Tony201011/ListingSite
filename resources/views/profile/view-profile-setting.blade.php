@@ -3,23 +3,24 @@
 @section('content')
 <div
     class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8"
-    x-data="profileSettingPage(
-        {{ $errors->any() || session('success') || session('error') ? 'true' : 'false' }},
-        @js(collect($profileImage ?? [])->map(fn ($image, $index) => [
+    x-data="profileSettingPage({
+        bookingOpen: @js($errors->any() || session('success') || session('error')),
+        photos: @js(collect($profileImage ?? [])->map(fn ($image, $index) => [
             'id' => $image['id'] ?? $index + 1,
             'thumbnail_url' => $image['thumbnail_url'] ?? '',
             'image_url' => $image['image_url'] ?? ($image['thumbnail_url'] ?? ''),
             'is_primary' => (bool) ($image['is_primary'] ?? false),
         ])->values()),
-        @js(collect($videos ?? [])->map(fn ($video, $index) => [
+        videos: @js(collect($videos ?? [])->map(fn ($video, $index) => [
             'id' => $video['id'] ?? $index + 1,
             'video_url' => $video['video_url'] ?? '',
             'original_name' => $video['original_name'] ?? ('Video ' . ($index + 1)),
         ])->values())
-    )"
+    })"
 >
     <div class="max-w-6xl mx-auto">
         <button
+            type="button"
             onclick="window.history.back()"
             class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer"
         >
@@ -133,7 +134,7 @@
                                 ->filter()
                                 ->flatMap(function ($item) {
                                     if (is_array($item)) {
-                                        return $item; // already array
+                                        return $item;
                                     }
 
                                     if (is_string($item)) {
@@ -187,7 +188,7 @@
                         <div>
                             <p class="text-sm text-gray-500">Phone</p>
                             <p class="text-2xl font-bold text-gray-900 leading-tight">
-                                  {{ $userInfo['user']?->mobile ?? ($userInfo['user']?->mobile ?? '') }}
+                                {{ $userInfo['user']?->mobile ?? ($userInfo['user']?->mobile ?? '') }}
                             </p>
                             <p class="text-sm text-gray-500 mt-1">I accept phone calls & SMS</p>
                         </div>
@@ -591,88 +592,8 @@
         </template>
     </div>
 </div>
-
-<script>
-    function profileSettingPage(initialBookingOpen = false, initialPhotos = [], initialVideos = []) {
-        return {
-            bookingOpen: initialBookingOpen,
-            sliderOpen: false,
-            sliderIndex: 0,
-            videoOpen: false,
-            videoIndex: 0,
-
-            photos: Array.isArray(initialPhotos)
-                ? initialPhotos.filter(photo => photo.thumbnail_url || photo.image_url)
-                : [],
-
-            videos: Array.isArray(initialVideos)
-                ? initialVideos.filter(video => video.video_url)
-                : [],
-
-            get visiblePhotos() {
-                return this.photos.slice(0, 2);
-            },
-
-            get remainingPhotoCount() {
-                return this.photos.length > 2 ? this.photos.length - 2 : 0;
-            },
-
-            get visibleVideos() {
-                return this.videos.slice(0, 2);
-            },
-
-            get remainingVideoCount() {
-                return this.videos.length > 2 ? this.videos.length - 2 : 0;
-            },
-
-            openSlider(index = 0) {
-                if (!this.photos.length) return;
-                this.sliderIndex = index;
-                this.sliderOpen = true;
-                document.body.classList.add('overflow-hidden');
-            },
-
-            closeSlider() {
-                this.sliderOpen = false;
-                if (!this.videoOpen) {
-                    document.body.classList.remove('overflow-hidden');
-                }
-            },
-
-            nextSlide() {
-                if (this.photos.length <= 1) return;
-                this.sliderIndex = (this.sliderIndex + 1) % this.photos.length;
-            },
-
-            prevSlide() {
-                if (this.photos.length <= 1) return;
-                this.sliderIndex = (this.sliderIndex - 1 + this.photos.length) % this.photos.length;
-            },
-
-            openVideo(index = 0) {
-                if (!this.videos.length) return;
-                this.videoIndex = index;
-                this.videoOpen = true;
-                document.body.classList.add('overflow-hidden');
-            },
-
-            closeVideo() {
-                this.videoOpen = false;
-                if (!this.sliderOpen) {
-                    document.body.classList.remove('overflow-hidden');
-                }
-            },
-
-            nextVideo() {
-                if (this.videos.length <= 1) return;
-                this.videoIndex = (this.videoIndex + 1) % this.videos.length;
-            },
-
-            prevVideo() {
-                if (this.videos.length <= 1) return;
-                this.videoIndex = (this.videoIndex - 1 + this.videos.length) % this.videos.length;
-            }
-        };
-    }
-</script>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('profile/js/profile-setting.js') }}"></script>
+@endpush

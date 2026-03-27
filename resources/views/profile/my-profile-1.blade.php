@@ -2,107 +2,108 @@
 
 @section('content')
 <div
-    class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8"
+    class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="{ availableNow: false, onlineNow: false }"
 >
-    <div class="max-w-6xl mx-auto">
+    <div class="mx-auto max-w-6xl">
         <button
             type="button"
             onclick="window.history.back()"
-            class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer"
+            class="mb-4 inline-flex cursor-pointer items-center border-0 bg-transparent text-sm font-medium text-[#e04ecb] transition-colors hover:text-[#c13ab0]"
         >
             <span class="mr-1">&lt;</span> back
         </button>
 
-        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 tracking-tight">
+        <h1 class="mb-8 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Hotescorts dashboard
         </h1>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+        <div class="mb-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
             <div class="p-6 sm:p-8">
                 <div x-data="{ showError: true }">
-                @if(session('error'))
-                    <div
-                        x-show="showError"
-                        x-transition
-                        class="mb-4 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium"
-                    >
-                        <span>{{ session('error') }}</span>
-
-                        <button
-                            type="button"
-                            @click="showError = false"
-                            class="text-red-500 hover:text-red-700 text-lg leading-none"
+                    @if(session('error'))
+                        <div
+                            x-show="showError"
+                            x-transition
+                            class="mb-4 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
                         >
-                            &times;
-                        </button>
-                    </div>
-                @endif
-        </div>
-                <p class="text-lg text-gray-600 mb-6 font-medium">
+                            <span>{{ session('error') }}</span>
+
+                            <button
+                                type="button"
+                                @click="showError = false"
+                                class="text-lg leading-none text-red-500 hover:text-red-700"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    @endif
+                </div>
+
+                <p class="mb-6 text-lg font-medium text-gray-600">
                     To set up your profile please do the next three steps:
                 </p>
 
-                <div class="space-y-1 mb-6">
-                    <div class="flex items-center justify-between py-3 border-b border-gray-200">
-                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</span>
-                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Completed</span>
+                <div class="mb-6 space-y-1">
+                    <div class="flex items-center justify-between border-b border-gray-200 py-3">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Action</span>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Completed</span>
                     </div>
 
-                    <div class="flex items-center justify-between py-4 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition">
+                    <div class="-mx-2 flex items-center justify-between rounded-lg px-2 py-4 transition hover:bg-gray-50">
                         <div class="flex items-center">
-                            <span class="text-lg font-semibold text-pink-600 mr-4">01</span>
-                            <span class="text-gray-800 font-medium">Write profile text</span>
+                            <span class="mr-4 text-lg font-semibold text-pink-600">01</span>
+                            <span class="font-medium text-gray-800">Write profile text</span>
                         </div>
 
                         @if($stepOneCompleted)
-                            <span class="text-green-500 text-2xl leading-none">✓</span>
+                            <span class="text-2xl leading-none text-green-500">✓</span>
                         @else
-                            <span class="w-6 h-6 rounded-full border-2 border-gray-300 inline-block"></span>
+                            <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
                         @endif
                     </div>
 
-                    <div class="flex items-center justify-between py-4 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition">
+                    <div class="-mx-2 flex items-center justify-between rounded-lg px-2 py-4 transition hover:bg-gray-50">
                         <div class="flex items-center">
-                            <span class="text-lg font-semibold text-pink-600 mr-4">02</span>
-                            <span class="text-gray-800 font-medium">Upload photos</span>
+                            <span class="mr-4 text-lg font-semibold text-pink-600">02</span>
+                            <span class="font-medium text-gray-800">Upload photos</span>
                         </div>
 
                         @if($stepTwoCompleted)
-                            <span class="text-green-500 text-2xl leading-none">✓</span>
+                            <span class="text-2xl leading-none text-green-500">✓</span>
                         @else
-                            <span class="w-6 h-6 rounded-full border-2 border-gray-300 inline-block"></span>
+                            <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
                         @endif
                     </div>
 
-                    <div class="flex items-center justify-between py-4 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition">
+                    <div class="-mx-2 flex items-center justify-between rounded-lg px-2 py-4 transition hover:bg-gray-50">
                         <div class="flex items-center">
-                            <span class="text-lg font-semibold text-pink-600 mr-4">03</span>
-                            <span class="text-gray-800 font-medium">Verify your photos (optional)</span>
+                            <span class="mr-4 text-lg font-semibold text-pink-600">03</span>
+                            <span class="font-medium text-gray-800">Verify your photos (optional)</span>
                         </div>
 
                         @if($stepPhotoVerificationCompleted)
-                            <span class="text-green-500 text-2xl leading-none">✓</span>
+                            <span class="text-2xl leading-none text-green-500">✓</span>
                         @else
-                            <span class="w-6 h-6 rounded-full border-2 border-gray-300 inline-block"></span>
+                            <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
                         @endif
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                     @if($stepOneCompleted && $stepTwoCompleted)
 
                         @if($stepPhotoVerificationCompleted)
                             <a
                                 href="{{ url('/click-here-to-verify') }}"
-                                class="text-sm text-gray-500 hover:text-gray-700 transition"
+                                class="text-sm text-gray-500 transition hover:text-gray-700"
                             >
                                 edit your verified photos
                             </a>
                         @else
                             <a
                                 href="{{ url('/click-here-to-verify') }}"
-                                class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                                class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
                             >
                                 Verified Photos Badges
                             </a>
@@ -110,14 +111,14 @@
 
                         <a
                             href="{{ route('edit-profile') }}"
-                            class="text-sm text-gray-500 hover:text-gray-700 transition"
+                            class="text-sm text-gray-500 transition hover:text-gray-700"
                         >
                             or edit your profile text
                         </a>
 
                         <a
                             href="{{ route('photos') }}"
-                            class="text-sm text-gray-500 hover:text-gray-700 transition"
+                            class="text-sm text-gray-500 transition hover:text-gray-700"
                         >
                             or upload more photos
                         </a>
@@ -125,14 +126,14 @@
                     @elseif($stepOneCompleted)
                         <a
                             href="{{ route('photos') }}"
-                            class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                            class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
                         >
                             Upload photos
                         </a>
 
                         <a
                             href="{{ route('edit-profile') }}"
-                            class="text-sm text-gray-500 hover:text-gray-700 transition"
+                            class="text-sm text-gray-500 transition hover:text-gray-700"
                         >
                             or edit your profile text
                         </a>
@@ -140,14 +141,14 @@
                     @elseif($stepTwoCompleted)
                         <a
                             href="{{ route('edit-profile') }}"
-                            class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                            class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
                         >
                             Complete profile text
                         </a>
 
                         <a
                             href="{{ route('photos') }}"
-                            class="text-sm text-gray-500 hover:text-gray-700 transition"
+                            class="text-sm text-gray-500 transition hover:text-gray-700"
                         >
                             or manage photos
                         </a>
@@ -155,14 +156,14 @@
                     @elseif(!$stepOneCompleted && !$stepTwoCompleted && !$stepPhotoVerificationCompleted)
                         <a
                             href="{{ route('edit-profile') }}"
-                            class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg shadow-pink-600/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                            class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
                         >
                             Write profile text
                         </a>
                     @endif
                 </div>
 
-                <div class="mt-6 bg-pink-50 border-l-4 border-[#e04ecb] rounded-xl p-4 text-pink-700 font-semibold text-sm sm:text-base">
+                <div class="mt-6 rounded-xl border-l-4 border-[#e04ecb] bg-pink-50 p-4 text-sm font-semibold text-pink-700 sm:text-base">
                     You can list your profile without photo verification.
                     <span class="font-bold">
                         If you verify photos, you receive a “Photos Verified” badge for extra trust.
@@ -172,9 +173,9 @@
         </div>
 
         @if($stepOneCompleted && $stepTwoCompleted)
-            <div class="bg-[#e04ecb] text-white rounded-2xl p-5 sm:p-6 mb-4 shadow-sm">
+            <div class="mb-4 rounded-2xl bg-[#e04ecb] p-5 text-white shadow-sm sm:p-6">
                 @if(!$stepPhotoVerificationCompleted)
-                    <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+                    <h2 class="mb-2 flex items-center gap-2 text-xl font-bold">
                         ✅ PHOTO VERIFICATION OPTIONAL
                     </h2>
                 @endif
@@ -186,14 +187,14 @@
                 @if($stepPhotoVerificationCompleted)
                     <a
                         href="{{ url('/click-here-to-verify') }}"
-                        class="inline-flex bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition"
+                        class="inline-flex rounded-lg bg-white px-5 py-2 font-medium text-gray-700 transition hover:bg-pink-50"
                     >
                         Edit photos for badge
                     </a>
                 @else
                     <a
                         href="{{ url('/click-here-to-verify') }}"
-                        class="inline-flex bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition"
+                        class="inline-flex rounded-lg bg-white px-5 py-2 font-medium text-gray-700 transition hover:bg-pink-50"
                     >
                         Verify photos for badge
                     </a>
@@ -204,38 +205,38 @@
                 </p>
             </div>
 
-            <div class="text-right mb-6">
+            <div class="mb-6 text-right">
                 <a
                     href="{{ url('/view-profile-setting') }}"
-                    class="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition"
+                    class="inline-flex items-center justify-center rounded-full bg-pink-600 px-6 py-2.5 font-semibold text-white transition hover:bg-pink-700"
                 >
                     View your profile & settings
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">CREDITS</h3>
-                    <p class="text-3xl font-bold text-gray-900 mb-3">
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">CREDITS</h3>
+                    <p class="mb-3 text-3xl font-bold text-gray-900">
                         21 <span class="text-base font-normal text-gray-500">credits available</span>
                     </p>
                     <div class="space-y-2">
-                        <a href="{{ url('/purchase-credit') }}" class="block w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition text-center">Purchase credits</a>
-                        <a href="{{ url('/credit-history') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Credits history</a>
-                        <a href="{{ url('/purchase-history') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Purchase history</a>
-                        <a href="{{ url('/membership') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Membership plans</a>
+                        <a href="{{ url('/purchase-credit') }}" class="block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">Purchase credits</a>
+                        <a href="{{ url('/credit-history') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Credits history</a>
+                        <a href="{{ url('/purchase-history') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Purchase history</a>
+                        <a href="{{ url('/membership') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Membership plans</a>
                     </div>
                 </div>
 
-                <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">BABE RANK</h3>
-                    <p class="text-3xl font-bold text-gray-900 mb-3">
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">BABE RANK</h3>
+                    <p class="mb-3 text-3xl font-bold text-gray-900">
                         7 <span class="text-base font-normal text-gray-500">out of 100</span>
                     </p>
-                    <a href="{{ url('/babe-rank-read-more') }}" class="text-pink-600 font-medium hover:text-pink-700 text-sm">
+                    <a href="{{ url('/babe-rank-read-more') }}" class="text-sm font-medium text-pink-600 hover:text-pink-700">
                         Read more about BabeRank
                     </a>
-                    <ul class="mt-3 text-sm text-gray-600 list-disc list-inside space-y-1">
+                    <ul class="mt-3 list-inside list-disc space-y-1 text-sm text-gray-600">
                         <li>Set your short URL</li>
                         <li>Set your availability</li>
                         <li>Upload new photos</li>
@@ -244,66 +245,64 @@
                     </ul>
                 </div>
 
-                <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">YOUR RATES</h3>
-                    <p class="text-pink-600 font-medium text-sm mb-2">13 May 2022:</p>
-                    <p class="text-sm text-gray-600 mb-4">
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">YOUR RATES</h3>
+                    <p class="mb-2 text-sm font-medium text-pink-600">13 May 2022:</p>
+                    <p class="mb-4 text-sm text-gray-600">
                         With this feature you can easily add your rates and choose how they appear on your profile.
                     </p>
-                    <a href="{{ url('/my-rate') }}" class="block w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition text-center">
+                    <a href="{{ url('/my-rate') }}" class="block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">
                         NEW Configure your rates
                     </a>
                 </div>
 
-                <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">YOUR AVAILABILITY</h3>
-                    <p class="text-sm text-gray-600 mb-4">
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">YOUR AVAILABILITY</h3>
+                    <p class="mb-4 text-sm text-gray-600">
                         You have not set your availability. This gives your BabeRank a boost of 70%.
                     </p>
                     <button
                         type="button"
                         @click="window.location.href='{{ route('availability.show') }}'"
-                        class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition"
+                        class="w-full rounded-lg bg-pink-600 px-4 py-2 text-white transition hover:bg-pink-700"
                     >
-                       Set availability
+                        Set availability
                     </button>
-
                 </div>
 
-                <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">AVAILABLE NOW</h3>
-                    <p class="text-sm text-gray-600 mb-4">
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">AVAILABLE NOW</h3>
+                    <p class="mb-4 text-sm text-gray-600">
                         Promote your availability twice a day for two hours.
                     </p>
                     <button
                         type="button"
                         @click="window.location.href='{{ route('available-now') }}'"
-                        class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition"
+                        class="w-full rounded-lg bg-pink-600 px-4 py-2 text-white transition hover:bg-pink-700"
                     >
-                       Set Available Now
+                        Set Available Now
                     </button>
                 </div>
 
-                <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">ONLINE NOW</h3>
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">ONLINE NOW</h3>
 
-                    <p class="text-sm text-gray-600 mb-4">
+                    <p class="mb-4 text-sm text-gray-600">
                         Use this feature up to 4 times a day for 60 minutes.
                     </p>
 
                     <button
                         type="button"
                         @click="window.location.href='{{ route('online-now') }}'"
-                        class="w-full px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition"
+                        class="w-full rounded-lg bg-pink-600 px-4 py-2 text-white transition hover:bg-pink-700"
                     >
                         Set Online NOW
                     </button>
                 </div>
 
-
-                <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2 xl:col-span-1">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">Referral Code</h3>
-                    <p class="text-sm text-gray-600 mb-4">
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">Referral Code</h3>
+                    <p class="mb-4 text-sm text-gray-600">
                         Share your referral code with friends and earn rewards.
                     </p>
 
@@ -312,78 +311,80 @@
                         $referralLink = url('/register?ref=' . $referralCode);
                     @endphp
 
-                <div class="space-y-3">
-                    <!-- Code + Copy -->
-                    <div class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-lg">
-                        <span id="referralCode" class="text-gray-800 font-medium">{{ $referralCode }}</span>
+                    <div
+                        class="space-y-3"
+                        x-data="referralCopy({
+                            code: @js($referralCode),
+                            link: @js($referralLink)
+                        })"
+                    >
+                        <div class="flex items-center justify-between rounded-lg bg-gray-100 px-4 py-2">
+                            <span class="font-medium text-gray-800" x-text="code"></span>
+                            <button
+                                type="button"
+                                @click="copyCode()"
+                                class="text-sm text-blue-600 hover:underline"
+                                x-text="buttonText"
+                            ></button>
+                        </div>
+
                         <button
-                            id="copyBtn"
                             type="button"
-                            onclick="copyReferralCode()"
-                            class="text-sm text-blue-600 hover:underline"
+                            @click="copyLink()"
+                            class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200"
                         >
-                            Copy
+                            Copy Referral Link
                         </button>
-                    </div>
 
-
-                    <!-- View Referrals -->
-                    <a href="{{ url('/referrals') }}"
-                    class="block w-full px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-center">
-                        View Referrals
+                        <a
+                            href="{{ url('/referrals') }}"
+                            class="block w-full rounded-lg bg-blue-50 px-4 py-2 text-center text-blue-700 transition hover:bg-blue-100"
+                        >
+                            View Referrals
                         </a>
                     </div>
                 </div>
 
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">ACCOUNT SECURITY</h3>
+                    <p class="mb-4 text-sm text-gray-600">
+                        Manage your password and account access settings.
+                    </p>
+                    <div class="space-y-2">
+                        @auth
+                            @if (!auth()->user()->hasVerifiedEmail())
+                                <form method="POST" action="{{ route('verification.send') }}">
+                                    @csrf
+                                    <button
+                                        type="submit"
+                                        class="block w-full rounded-lg bg-blue-50 px-4 py-2 text-center text-blue-700 transition hover:bg-blue-100"
+                                    >
+                                        Verify email
+                                    </button>
+                                </form>
+                            @endif
+                        @endauth
 
-         <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2 xl:col-span-1">
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">ACCOUNT SECURITY</h3>
-                        <p class="text-sm text-gray-600 mb-4">
-                            Manage your password and account access settings.
-                        </p>
-                        <div class="space-y-2">
-                                @auth
-                                    @if (!auth()->user()->hasVerifiedEmail())
-                                        <form method="POST" action="{{ route('verification.send') }}">
-                                            @csrf
-                                            <button type="submit"
-                                                class="block w-full px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-center">
-                                                Verify email
-                                            </button>
-                                        </form>
-                                    @endif
-                                @endauth
-                            <a href="{{ url('/change-password') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Change password</a>
-                            <a href="{{ url('/delete-account') }}" class="block w-full px-4 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition text-center">Delete account</a>
-                        </div>
+                        <a href="{{ url('/change-password') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change password</a>
+                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
                     </div>
-         </div>
+                </div>
+            </div>
 
-            <div class="mt-8 bg-white rounded-xl border border-gray-100 p-5 sm:p-6">
-                <p class="text-gray-700 font-medium mb-2">
+            <div class="mt-8 rounded-xl border border-gray-100 bg-white p-5 sm:p-6">
+                <p class="mb-2 font-medium text-gray-700">
                     You can be found on Hotescorts with the following URLs
                 </p>
-                <p class="text-pink-600 font-semibold break-all">
+                <p class="break-all font-semibold text-pink-600">
                     Hotescorts.com.au/escorts/vic/melbourne/sourabh-wadhwa
                 </p>
             </div>
         @endif
     </div>
 </div>
-
-<script>
-function copyReferralCode() {
-    const code = document.getElementById('referralCode').innerText;
-    const btn = document.getElementById('copyBtn');
-
-    navigator.clipboard.writeText(code).then(() => {
-        btn.innerText = 'Copied';
-        setTimeout(() => {
-            btn.innerText = 'Copy';
-        }, 2000);
-    }).catch(() => {
-        alert('Copy failed');
-    });
-}
-</script>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('profile/js/referral-copy.js') }}"></script>
+@endpush
