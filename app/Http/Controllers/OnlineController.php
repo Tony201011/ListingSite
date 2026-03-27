@@ -21,7 +21,7 @@ class OnlineController extends Controller
     {
         $data = $this->getOnlineNowState->execute(auth::user());
 
-        return view('online-now', $data);
+        return view('profile.online-now', $data);
     }
 
     public function onlineUpdateStatus(UpdateOnlineStatusRequest $request): JsonResponse

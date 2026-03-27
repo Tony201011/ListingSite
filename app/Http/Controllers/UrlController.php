@@ -26,7 +26,7 @@ class UrlController extends Controller
             return redirect($result['redirect']);
         }
 
-        return view('short-url', $result);
+        return view('profile.short-url', $result);
     }
 
     public function updateShortUrl(UpdateShortUrlRequest $request): JsonResponse

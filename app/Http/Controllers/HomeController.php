@@ -21,14 +21,14 @@ class HomeController extends Controller
     {
         $viewData = $this->buildProfileFilterViewData->execute($request->validated());
 
-        return view('home', $viewData);
+        return view('frontend.home', $viewData);
     }
 
     public function advancedSearch(AdvancedSearchRequest $request): View
     {
         $viewData = $this->buildProfileFilterViewData->execute($request->validated());
 
-        return view('advanced-search', $viewData);
+        return view('frontend.advanced-search', $viewData);
     }
 
     public function showProfile(ShowProfileRequest $request, string $slug): View
@@ -38,6 +38,6 @@ class HomeController extends Controller
             $request->validated()
         );
 
-        return view('profile-show', $viewData);
+        return view('frontend.profile-show', $viewData);
     }
 }

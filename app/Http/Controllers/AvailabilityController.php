@@ -22,7 +22,7 @@ class AvailabilityController extends Controller
     {
         $saved = $this->getUserAvailability->forEdit(Auth::id());
 
-        return view('set-your-availability', [
+        return view('profile.set-your-availability', [
             'days' => $this->getUserAvailability->days(),
             'saved' => $saved,
         ]);
@@ -51,6 +51,6 @@ class AvailabilityController extends Controller
     {
         $data = $this->getUserAvailability->forShow(Auth::id());
 
-        return view('my-availability', $data);
+        return view('profile.my-availability', $data);
     }
 }

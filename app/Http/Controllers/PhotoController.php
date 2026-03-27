@@ -25,12 +25,12 @@ class PhotoController extends Controller
 
     public function index(): View
     {
-        return view('add-photo');
+        return view('profile.add-photo');
     }
 
     public function getPhotos(): View
     {
-        return view('photos', $this->getUserPhotos->execute(Auth::id()));
+        return view('profile.photos', $this->getUserPhotos->execute(Auth::id()));
     }
 
     public function uploadPhotos(UploadPhotosRequest $request): JsonResponse

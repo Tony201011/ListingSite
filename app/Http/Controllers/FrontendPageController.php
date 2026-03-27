@@ -26,52 +26,52 @@ class FrontendPageController extends Controller
 
     public function aboutUs(): View
     {
-        return view('about-us', $this->getAboutUsPageData->execute());
+        return view('frontend.about-us', $this->getAboutUsPageData->execute());
     }
 
     public function termsAndConditions(): View
     {
-        return view('terms-and-conditions', [
+        return view('frontend.terms-and-conditions', [
             'terms' => $this->getFrontendSimplePage->termCondition(),
         ]);
     }
 
     public function privacyPolicy(): View
     {
-        return view('privacy-policy', [
+        return view('frontend.privacy-policy', [
             'policy' => $this->getFrontendSimplePage->privacyPolicy(),
         ]);
     }
 
     public function refundPolicy(): View
     {
-        return view('refund-policy', [
+        return view('frontend.refund-policy', [
             'policy' => $this->getFrontendSimplePage->refundPolicy(),
         ]);
     }
 
     public function pricing(): View
     {
-        return view('pricing', $this->getFrontendSimplePage->pricing());
+        return view('frontend.pricing', $this->getFrontendSimplePage->pricing());
     }
 
     public function help(): View
     {
-        return view('help', [
+        return view('frontend.help', [
             'page' => $this->getFrontendSimplePage->help(),
         ]);
     }
 
     public function naughtyCorner(): View
     {
-        return view('naughty-corner', [
+        return view('frontend.naughty-corner', [
             'page' => $this->getFrontendSimplePage->naughtyCorner(),
         ]);
     }
 
     public function faq(): View
     {
-        return view('faq', $this->getFaqPageData->execute());
+        return view('frontend.faq', $this->getFaqPageData->execute());
     }
 
     public function faqLoadMore(FaqLoadMoreRequest $request): JsonResponse
@@ -89,12 +89,12 @@ class FrontendPageController extends Controller
 
     public function antiSpamPolicy(): View
     {
-        return view('anti-spam-policy', $this->getAntiSpamPolicyPageData->execute());
+        return view('frontend.anti-spam-policy', $this->getAntiSpamPolicyPageData->execute());
     }
 
     public function contactUs(): View
     {
-        return view('contact-us', $this->getContactUsPageData->execute());
+        return view('frontend.contact-us', $this->getContactUsPageData->execute());
     }
 
     public function submitContactUs(SubmitContactUsRequest $request): RedirectResponse
@@ -102,8 +102,5 @@ class FrontendPageController extends Controller
         return back()->with('success', 'Your message has been sent successfully.');
     }
 
-    public function membership(): View
-    {
-        return view('membership');
-    }
+
 }

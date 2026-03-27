@@ -20,7 +20,7 @@ class ShowHideProfileController extends Controller
     public function hideShowProfile(): View
     {
         return view(
-            'hide-show-profile',
+            'profile.hide-show',
             $this->getShowHideProfileState->execute(Auth::user())
         );
     }

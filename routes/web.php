@@ -24,35 +24,33 @@ use App\Http\Controllers\ProfileMessageController;
 use App\Http\Controllers\ProfileSettingController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\SuburbController;
+use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\SitePasswordController;
 use App\Http\Controllers\UrlController;
 use App\Http\Controllers\ReferralsController;
-use App\Models\HideShowProfile;
-use App\Models\SiteSetting;
+
 use Illuminate\Http\Request;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 
-Route::get('/site-password', function () {
-    return view('site-password');
-})->name('site-password.form');
+Route::get('/site-password', [SitePasswordController::class, 'showForm'])
+    ->name('site-password.form');
 
-Route::get('/email/verify', function () {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
+Route::post('/site-password', [SitePasswordController::class, 'submit'])
+    ->name('site-password.submit');
 
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
+Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
+    ->middleware('auth')
+    ->name('verification.notice');
 
-    return redirect('/my-profile')->with('success', 'Email verified successfully.');
-})->middleware(['auth', 'signed'])->name('verification.verify');
 
-Route::post('/email/verification-notification', function (Request $request) {
-    $request->user()->sendEmailVerificationNotification();
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware(['auth', 'signed'])
+    ->name('verification.verify');
 
-    return back()->with('success', 'Verification link sent again.');
-})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.send');
 
 Route::redirect('/login', '/');
 
@@ -99,33 +97,6 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 /** auth routes end */
-
-/** site password start */
-Route::post('/site-password', function (Request $request) {
-    $request->validate(['password' => 'required|string']);
-
-    $dbPassword = null;
-
-    if (Schema::hasTable('site_settings')) {
-        $setting = SiteSetting::query()->latest('updated_at')->first();
-
-        if ($setting && $setting->site_password) {
-            $dbPassword = $setting->site_password;
-        }
-    }
-
-    $expected = $dbPassword ?? env('SITE_PASSWORD');
-
-    if ($expected && hash_equals((string) $expected, (string) $request->password)) {
-        $request->session()->regenerate();
-        $request->session()->put('site_access', true);
-
-        return redirect()->intended('/');
-    }
-
-    return back()->with('error', 'Wrong password');
-})->name('site-password.submit');
-/** site password end */
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
@@ -255,9 +226,5 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-/** social auth routes */
-// Route::get('/login', [SocialAuthController::class, 'showLogin'])->name('login');
-// Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
-// Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 
 require __DIR__ . '/escort-review.php';

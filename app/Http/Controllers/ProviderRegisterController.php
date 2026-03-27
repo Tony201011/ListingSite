@@ -35,7 +35,7 @@ class ProviderRegisterController extends Controller
 
     public function showSignupForm(): View
     {
-        return view('signup', $this->buildAuthPageData->execute());
+        return view('auth.signup', $this->buildAuthPageData->execute());
     }
 
     public function signup(ProviderSignupRequest $request): RedirectResponse
@@ -45,7 +45,7 @@ class ProviderRegisterController extends Controller
 
     public function showSigninForm(): View
     {
-        return view('signin', $this->buildAuthPageData->execute());
+        return view('auth.signin', $this->buildAuthPageData->execute());
     }
 
     public function signin(ProviderSigninRequest $request): RedirectResponse
@@ -61,7 +61,7 @@ class ProviderRegisterController extends Controller
             return redirect($result['redirect'])->withErrors($result['errors']);
         }
 
-        return view('otp-verification', $result);
+        return view('auth.otp-verification', $result);
     }
 
     public function resendOtp(): JsonResponse
@@ -85,7 +85,7 @@ class ProviderRegisterController extends Controller
 
     public function changePassword(): View
     {
-        return view('change-password');
+        return view('auth.change-password');
     }
 
     public function updatePassword(UpdatePasswordRequest $request): JsonResponse
@@ -100,6 +100,6 @@ class ProviderRegisterController extends Controller
 
     public function deleteAccount(): View
     {
-        return view('delete-account');
+        return view('auth.delete-account');
     }
 }

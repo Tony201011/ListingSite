@@ -18,7 +18,7 @@ class PasswordResetController extends Controller
 {
     public function showLinkRequestForm()
     {
-        return view('reset-password');
+        return view('auth.reset-password');
     }
 
     public function sendResetLinkEmail(Request $request)
@@ -63,7 +63,7 @@ class PasswordResetController extends Controller
 
     public function showResetForm(Request $request, string $token)
     {
-        return view('reset-password-form', [
+        return view('auth.reset-password-form', [
             'token' => $token,
             'email' => $request->query('email', ''),
         ]);

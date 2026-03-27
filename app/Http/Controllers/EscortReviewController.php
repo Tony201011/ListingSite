@@ -20,14 +20,14 @@ class EscortReviewController extends Controller
     {
         $escortReviewPage = $this->getEscortReviewPage->execute();
 
-        return view('escort-review', compact('escortReviewPage'));
+        return view('profile.escort-review', compact('escortReviewPage'));
     }
 
     public function edit(): View
     {
         $escortReviewPage = $this->getEscortReviewPage->execute();
 
-        return view('admin.escort-review-edit', compact('escortReviewPage'));
+        return view('profile.escort-review-edit', compact('escortReviewPage'));
     }
 
     public function update(UpdateEscortReviewRequest $request): RedirectResponse

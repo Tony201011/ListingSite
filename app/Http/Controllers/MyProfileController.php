@@ -22,12 +22,12 @@ class MyProfileController extends Controller
 
     public function myProfile(): View
     {
-        return view('my-profile-1', $this->getMyProfilePageData->execute(Auth::user()));
+        return view('frontend.my-profile-1', $this->getMyProfilePageData->execute(Auth::user()));
     }
 
     public function stepTwo(): View
     {
-        return view('my-profile-2', $this->getMyProfileStepTwoData->execute(Auth::user()));
+        return view('frontend.my-profile-2', $this->getMyProfileStepTwoData->execute(Auth::user()));
     }
 
     public function save(SaveMyProfileRequest $request): JsonResponse|RedirectResponse

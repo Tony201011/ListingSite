@@ -31,7 +31,7 @@ class MyRateController extends Controller
 
     public function index(): View
     {
-        return view('my-rate', $this->getMyRatePageData->execute(Auth::user()));
+        return view('profile.my-rate', $this->getMyRatePageData->execute(Auth::user()));
     }
 
     public function store(StoreRateRequest $request): JsonResponse

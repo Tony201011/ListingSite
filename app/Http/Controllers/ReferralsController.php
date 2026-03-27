@@ -15,6 +15,6 @@ class ReferralsController extends Controller
 
     public function referrals(): View
     {
-        return view('referrals', $this->getReferralPageData->execute(Auth::user()));
+        return view('profile.referrals', $this->getReferralPageData->execute(Auth::user()));
     }
 }

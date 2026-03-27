@@ -31,7 +31,7 @@ class MyToursController extends Controller
      */
     public function index(): View
     {
-        return view('my-tours', $this->getMyToursPageData->execute(Auth::user()));
+        return view('profile.my-tours', $this->getMyToursPageData->execute(Auth::user()));
     }
 
     /**

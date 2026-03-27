@@ -20,7 +20,7 @@ class BlogController extends Controller
     {
         $data = $this->getBlogIndexData->execute();
 
-        return view('blog', $data);
+        return view('frontend.blog', $data);
     }
 
     public function loadMore(LoadMoreBlogPostsRequest $request): JsonResponse
@@ -40,6 +40,6 @@ class BlogController extends Controller
     {
         $data = $this->getBlogPostData->execute($slug);
 
-        return view('blog-show', $data);
+        return view('frontend.blog-show', $data);
     }
 }

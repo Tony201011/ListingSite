@@ -23,12 +23,12 @@ class MyVideosController extends Controller
 
     public function index(): View
     {
-        return view('upload-video');
+        return view('profile.upload-video');
     }
 
     public function getVideos(): View
     {
-        return view('my-videos', $this->getUserVideos->execute(Auth::id()));
+        return view('profile.my-videos', $this->getUserVideos->execute(Auth::id()));
     }
 
     public function uploadVideos(UploadVideosRequest $request): JsonResponse
