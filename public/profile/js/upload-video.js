@@ -1,83 +1,183 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('uploadVideoPage', (config = {}) => ({
-        videos: [],
+
+        selectedVideos: [],
         uploading: false,
+        successMessage: '',
+        errorMessage: '',
         isDragging: false,
 
-        uploadUrl: config.uploadUrl,
-        redirectUrl: config.redirectUrl,
-        csrfToken: config.csrfToken,
+        uploadUrl: config.uploadUrl || '',
+        redirectUrl: config.redirectUrl || '',
+        csrfToken: config.csrfToken || '',
 
-        handleFiles(event) {
+        clearMessages() {
+            this.successMessage = '';
+            this.errorMessage = '';
+        },
+
+        // ✅ Toast helpers
+        toastSuccess(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: message,
+                showConfirmButton: false,
+                timer: 1800
+            });
+        },
+
+        toastError(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: message,
+                showConfirmButton: false,
+                timer: 2500
+            });
+        },
+
+        formatFileSize(bytes) {
+            if (bytes < 1024) return `${bytes} B`;
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+            if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+            return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+        },
+
+        isDuplicate(file) {
+            return this.selectedVideos.some(video =>
+                video.name === file.name &&
+                video.size === file.size &&
+                video.lastModified === file.lastModified
+            );
+        },
+
+        addFiles(files) {
+            const incomingFiles = Array.from(files || []);
+
+            incomingFiles.forEach(file => {
+                if (this.isDuplicate(file)) {
+                    this.toastError(`"${file.name}" is already selected`);
+                    return;
+                }
+
+                this.selectedVideos.push({
+                    key: `${file.name}-${file.size}-${file.lastModified}-${Math.random()}`,
+                    file: file,
+                    name: file.name,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                    previewUrl: URL.createObjectURL(file),
+                });
+            });
+
+            if (this.$refs.videoInput) {
+                this.$refs.videoInput.value = '';
+            }
+        },
+
+        handleVideoChange(event) {
+            this.clearMessages();
             this.addFiles(event.target.files);
         },
 
         handleDrop(event) {
+            this.clearMessages();
             this.isDragging = false;
             this.addFiles(event.dataTransfer.files);
         },
 
-        addFiles(files) {
-            Array.from(files).forEach(file => {
-                this.videos.push(file);
+        removeSelectedVideo(index) {
+            const selectedVideo = this.selectedVideos[index];
+
+            if (selectedVideo?.previewUrl) {
+                URL.revokeObjectURL(selectedVideo.previewUrl);
+            }
+
+            this.selectedVideos.splice(index, 1);
+
+            this.toastSuccess('Video removed');
+
+            if (!this.selectedVideos.length && this.$refs.videoInput) {
+                this.$refs.videoInput.value = '';
+            }
+        },
+
+        clearSelection() {
+            this.selectedVideos.forEach(video => {
+                if (video.previewUrl) {
+                    URL.revokeObjectURL(video.previewUrl);
+                }
             });
+
+            this.selectedVideos = [];
+
+            this.toastSuccess('All videos cleared');
+
+            if (this.$refs.videoInput) {
+                this.$refs.videoInput.value = '';
+            }
         },
 
         async uploadVideos() {
-            if (!this.videos.length) {
-                return this.error('Select videos first');
+            this.clearMessages();
+
+            if (!this.selectedVideos.length) {
+                this.toastError('Please select at least one video.');
+                return;
             }
+
+            if (this.uploading) return;
 
             this.uploading = true;
 
             const formData = new FormData();
 
-            this.videos.forEach((file, i) => {
-                formData.append(`videos[${i}]`, file);
+            this.selectedVideos.forEach((video, index) => {
+                formData.append(`videos[${index}]`, video.file);
             });
 
             formData.append('_token', this.csrfToken);
 
             try {
-                const res = await fetch(this.uploadUrl, {
+                const response = await fetch(this.uploadUrl, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
                 });
 
-                const data = await res.json();
+                const result = await response.json();
 
-                if (!res.ok) throw new Error(data.message);
+                if (!response.ok) {
+                    if (result.errors) {
+                        const msg = Object.values(result.errors).flat().join('\n');
+                        this.toastError(msg);
+                        return;
+                    }
 
-                this.toast('Uploaded successfully');
+                    this.toastError(result.message || 'Upload failed.');
+                    return;
+                }
+
+                this.toastSuccess(result.message || 'Videos uploaded successfully.');
+
+                this.clearSelection();
 
                 setTimeout(() => {
                     window.location.href = this.redirectUrl;
-                }, 1000);
+                }, 1200);
 
-            } catch (e) {
-                this.error(e.message);
+            } catch (error) {
+                this.toastError(error.message || 'Something went wrong.');
             } finally {
                 this.uploading = false;
             }
-        },
-
-        toast(msg) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: msg,
-                timer: 1500,
-                showConfirmButton: false
-            });
-        },
-
-        error(msg) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: msg
-            });
         }
+
     }));
 });
