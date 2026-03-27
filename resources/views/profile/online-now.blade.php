@@ -13,7 +13,7 @@
 >
     <div class="mx-auto max-w-3xl">
         <a
-            href="{{ url('/view-profile-setting') }}"
+            href="{{ url('/profile-setting') }}"
             class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-pink-600 transition hover:text-pink-700"
         >
             <span>&larr;</span>

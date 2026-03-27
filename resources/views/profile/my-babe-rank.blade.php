@@ -3,7 +3,7 @@
 @section('content')
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
-        <a href="{{ url('/view-profile-setting') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4"><span class="mr-1">&lt;</span> Back to profile settings</a>
+        <a href="{{ url('/profile-setting') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4"><span class="mr-1">&lt;</span> Back to profile settings</a>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">My Babe Rank</h1>
             <p class="text-gray-600 mb-6">Track your current performance and top actions to improve ranking.</p>

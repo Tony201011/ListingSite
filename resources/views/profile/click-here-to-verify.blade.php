@@ -23,7 +23,7 @@
 >
     <div class="mx-auto max-w-5xl space-y-6">
         <a
-            href="{{ url('/view-profile-setting') }}"
+            href="{{ url('/profile-setting') }}"
             class="inline-flex items-center text-sm font-medium text-[#e04ecb] hover:text-[#c13ab0]"
         >
             <span class="mr-1">&lt;</span>

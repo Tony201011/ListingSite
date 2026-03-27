@@ -220,7 +220,7 @@ Route::middleware('auth')->group(function () {
         /*** hide show profile end here */
 
         /********** profile route start here */
-        Route::get('/view-profile-setting', [ProfileSettingController::class, 'viewProfileSetting'])->name('view-profile-setting');
+        Route::get('/profile-setting', [ProfileSettingController::class, 'viewProfileSetting'])->name('profile-setting');
         /********** profile route end here */
 
         /*** credit route start here */

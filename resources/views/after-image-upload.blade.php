@@ -59,7 +59,7 @@
         </div>
 
         <div class="text-right mb-6">
-            <a href="{{ url('/view-profile-setting') }}" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition">View your profile & settings</a>
+            <a href="{{ url('/profile-setting') }}" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition">View your profile & settings</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">

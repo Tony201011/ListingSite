@@ -207,7 +207,7 @@
 
             <div class="mb-6 text-right">
                 <a
-                    href="{{ url('/view-profile-setting') }}"
+                    href="{{ url('/profile-setting') }}"
                     class="inline-flex items-center justify-center rounded-full bg-pink-600 px-6 py-2.5 font-semibold text-white transition hover:bg-pink-700"
                 >
                     View your profile & settings

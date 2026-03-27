@@ -18,7 +18,7 @@
         })"
 >
     <div class="max-w-5xl mx-auto">
-        <a href="{{ url('/view-profile-setting') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4">
+        <a href="{{ url('/profile-setting') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4">
             <span class="mr-1">&lt;</span> Back to profile settings
         </a>
 

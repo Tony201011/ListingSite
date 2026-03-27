@@ -71,7 +71,7 @@
 >
     <div class="mx-auto max-w-4xl">
         <a
-            href="{{ url('/view-profile-setting') }}"
+            href="{{ url('/profile-setting') }}"
             class="mb-4 inline-flex items-center text-sm font-medium text-[#e04ecb] hover:text-[#c13ab0]"
         >
             <span class="mr-1">&lt;</span>
