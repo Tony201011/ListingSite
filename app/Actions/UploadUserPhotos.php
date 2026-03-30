@@ -4,132 +4,71 @@ namespace App\Actions;
 
 use App\Models\ProfileImage;
 use App\Models\User;
-use Illuminate\Filesystem\FilesystemAdapter;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use App\Services\UserPhotoStorageService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Intervention\Image\Laravel\Facades\Image;
 use Throwable;
 
 class UploadUserPhotos
 {
+    public function __construct(
+        private UserPhotoStorageService $photoStorageService
+    ) {}
+
     public function execute(?User $user, array $photos): array
     {
         if (! $user) {
-            return [
-                'status' => 401,
-                'data' => [
-                    'message' => 'Unauthenticated.',
-                ],
-            ];
+            return $this->errorResponse('Unauthenticated.', 401);
         }
 
-        /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
-
-        $baseName = $user->name ?: 'user';
-        $username = Str::slug($baseName) . $user->id;
+        $username = $this->buildUsername($user);
 
         $uploadedPhotos = [];
+        $hasPrimary = ProfileImage::where('user_id', $user->id)
+            ->where('is_primary', true)
+            ->exists();
 
-        foreach ($photos as $index => $photo) {
-            if (! $photo instanceof UploadedFile) {
+        foreach ($photos as $photo) {
+            if (! $photo) {
                 continue;
             }
 
-            $hasPrimary = ProfileImage::where('user_id', $user->id)
-                ->where('is_primary', true)
-                ->exists();
-
-            $isPrimary = ! $hasPrimary && $index === 0;
-
-            $originalExtension = strtolower($photo->getClientOriginalExtension() ?: 'jpg');
-            $baseFileName = 'profile_' . $user->id . '_' . Str::uuid();
-
-            $imageFileName = $baseFileName . '.' . $originalExtension;
-            $thumbFileName = $baseFileName . '_thumb.jpg';
-
-            $imagePath = "images/{$username}/{$imageFileName}";
-            $thumbnailPath = "thumbnails/{$username}/{$thumbFileName}";
-
-            $uploadedImagePath = null;
-            $uploadedThumbnailPath = null;
-
             try {
-                $uploaded = $disk->putFileAs(
-                    "images/{$username}",
-                    $photo,
-                    $imageFileName,
-                    [
-                        'visibility' => 'public',
-                        'ContentType' => $photo->getMimeType(),
-                    ]
+                $storedPhoto = $this->photoStorageService->store(
+                    user: $user,
+                    photo: $photo,
+                    username: $username
                 );
-
-                if (! $uploaded) {
-                    return [
-                        'status' => 500,
-                        'data' => [
-                            'message' => 'Failed to upload original image to storage.',
-                        ],
-                    ];
-                }
-
-                $uploadedImagePath = $imagePath;
-
-                $thumbnail = Image::read($photo->getRealPath())
-                    ->cover(400, 400)
-                    ->toJpeg(85);
-
-                $thumbUploaded = $disk->put(
-                    $thumbnailPath,
-                    (string) $thumbnail,
-                    [
-                        'visibility' => 'public',
-                        'ContentType' => 'image/jpeg',
-                    ]
-                );
-
-                if (! $thumbUploaded) {
-                    if ($uploadedImagePath) {
-                        $disk->delete($uploadedImagePath);
-                    }
-
-                    return [
-                        'status' => 500,
-                        'data' => [
-                            'message' => 'Failed to upload thumbnail to storage.',
-                        ],
-                    ];
-                }
-
-                $uploadedThumbnailPath = $thumbnailPath;
 
                 $profileImage = ProfileImage::create([
                     'user_id' => $user->id,
-                    'image_path' => $imagePath,
-                    'thumbnail_path' => $thumbnailPath,
-                    'is_primary' => $isPrimary,
+                    'image_path' => $storedPhoto['image_path'],
+                    'thumbnail_path' => $storedPhoto['thumbnail_path'],
+                    'is_primary' => ! $hasPrimary,
                 ]);
+
+                if (! $hasPrimary) {
+                    $hasPrimary = true;
+                }
 
                 $uploadedPhotos[] = [
                     'id' => $profileImage->id,
                     'image_path' => $profileImage->image_path,
                     'thumbnail_path' => $profileImage->thumbnail_path,
-                    'image_url' => $disk->url($profileImage->image_path),
-                    'thumbnail_url' => $disk->url($profileImage->thumbnail_path),
+                    'image_url' => $storedPhoto['image_url'],
+                    'thumbnail_url' => $storedPhoto['thumbnail_url'],
                     'is_primary' => $profileImage->is_primary,
                 ];
             } catch (Throwable $e) {
-                if ($uploadedImagePath) {
-                    $disk->delete($uploadedImagePath);
-                }
+                Log::error('Photo upload failed.', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
 
-                if ($uploadedThumbnailPath) {
-                    $disk->delete($uploadedThumbnailPath);
-                }
-
-                throw $e;
+                return $this->errorResponse(
+                    'Failed to upload one or more photos.',
+                    500
+                );
             }
         }
 
@@ -138,6 +77,28 @@ class UploadUserPhotos
             'data' => [
                 'message' => 'Photos uploaded successfully.',
                 'photos' => $uploadedPhotos,
+            ],
+        ];
+    }
+
+    private function buildUsername(User $user): string
+    {
+        $baseName = trim((string) ($user->name ?: 'user'));
+        $slug = Str::slug($baseName);
+
+        if ($slug === '') {
+            $slug = 'user';
+        }
+
+        return $slug . $user->id;
+    }
+
+    private function errorResponse(string $message, int $status): array
+    {
+        return [
+            'status' => $status,
+            'data' => [
+                'message' => $message,
             ],
         ];
     }
