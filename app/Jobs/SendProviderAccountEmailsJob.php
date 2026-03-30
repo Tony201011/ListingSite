@@ -28,68 +28,32 @@ class SendProviderAccountEmailsJob implements ShouldQueue
     public function handle(): void
     {
         $user = User::find($this->userId);
-        $activeMailSetting = SmtpSetting::find($this->mailSettingId);
+        $setting = SmtpSetting::find($this->mailSettingId);
 
         if (! $user) {
-            Log::error('Queued signup emails failed: user not found.', [
+            Log::error('Signup email job failed: user not found', [
                 'user_id' => $this->userId,
             ]);
-
             return;
         }
 
-        if (! $activeMailSetting) {
-            Log::error('Queued signup emails failed: mail setting not found.', [
+        if (! $setting) {
+            Log::error('Signup email job failed: SMTP setting not found', [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'mail_setting_id' => $this->mailSettingId,
             ]);
-
             return;
         }
 
-        if (! $activeMailSetting->is_enabled) {
-            Log::warning('Signup emails using queued mail setting that is disabled.', [
+        if (! $setting->is_enabled) {
+            Log::warning('SMTP setting is disabled but used in job', [
                 'user_id' => $user->id,
-                'email' => $user->email,
-                'mail_setting_id' => $activeMailSetting->id,
+                'mail_setting_id' => $setting->id,
             ]);
         }
 
-        $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
-        $liveDomain = $activeMailSetting->mailgun_live_domain;
-
-        $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
-            ? $sandboxDomain
-            : ($liveDomain ?: $sandboxDomain);
-
-        $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
-
-        if (filled($mailgunDomain)) {
-            $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
-        }
-
-        if (filled($mailgunEndpoint)) {
-            $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
-                ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
-        }
-
-        $fromAddress = $activeMailSetting->mail_from_address;
-
-        if (! filled($fromAddress) && filled($mailgunDomain)) {
-            $fromAddress = 'postmaster@' . $mailgunDomain;
-        }
-
-        config([
-            'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
-            'mail.mailers.mailgun.transport' => 'mailgun',
-            'services.mailgun.domain' => $mailgunDomain,
-            'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
-            'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
-            'services.mailgun.scheme' => 'https',
-            'mail.from.address' => $fromAddress ?: config('mail.from.address'),
-            'mail.from.name' => $activeMailSetting->mail_from_name ?: config('app.name'),
-        ]);
+        $this->configureMailgun($setting);
 
         app('mail.manager')->forgetMailers();
 
@@ -102,6 +66,52 @@ class SendProviderAccountEmailsJob implements ShouldQueue
             ]
         );
 
+        $this->sendVerificationEmail($user, $verificationUrl);
+        $this->sendAccountCreatedEmail($user);
+    }
+
+    private function configureMailgun(SmtpSetting $setting): void
+    {
+        $sandboxDomain = $setting->mailgun_sandbox_domain ?: $setting->mailgun_domain;
+        $liveDomain = $setting->mailgun_live_domain;
+
+        $domain = $setting->use_mailgun_sandbox
+            ? $sandboxDomain
+            : ($liveDomain ?: $sandboxDomain);
+
+        $endpoint = $setting->mailgun_endpoint ?: 'api.mailgun.net';
+
+        // Clean domain
+        if (filled($domain)) {
+            $domain = preg_replace('#^https?://#i', '', rtrim(trim($domain), '/'));
+        }
+
+        // Clean endpoint
+        if (filled($endpoint)) {
+            $endpoint = parse_url($endpoint, PHP_URL_HOST)
+                ?: preg_replace('#^https?://#i', '', rtrim(trim($endpoint), '/'));
+        }
+
+        $fromAddress = $setting->mail_from_address;
+
+        if (! $fromAddress && $domain) {
+            $fromAddress = 'postmaster@' . $domain;
+        }
+
+        config([
+            'mail.default' => $setting->mail_mailer ?: 'mailgun',
+            'mail.mailers.mailgun.transport' => 'mailgun',
+            'services.mailgun.domain' => $domain,
+            'services.mailgun.secret' => $setting->mailgun_secret,
+            'services.mailgun.endpoint' => $endpoint ?: 'api.mailgun.net',
+            'services.mailgun.scheme' => 'https',
+            'mail.from.address' => $fromAddress ?: config('mail.from.address'),
+            'mail.from.name' => $setting->mail_from_name ?: config('app.name'),
+        ]);
+    }
+
+    private function sendVerificationEmail(User $user, string $verificationUrl): void
+    {
         try {
             Mail::mailer('mailgun')->send(
                 'emails.verify-email',
@@ -122,7 +132,10 @@ class SendProviderAccountEmailsJob implements ShouldQueue
                 'error' => $e->getMessage(),
             ]);
         }
+    }
 
+    private function sendAccountCreatedEmail(User $user): void
+    {
         try {
             Mail::mailer('mailgun')->send(
                 'emails.account-created',
