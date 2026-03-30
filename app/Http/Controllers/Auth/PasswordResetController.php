@@ -3,44 +3,38 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\SendPasswordResetLinkRequest;
 use App\Jobs\SendPasswordResetLinkJob;
 use App\Jobs\SendPasswordResetSuccessEmailJob;
-use App\Models\SmtpSetting;
+use App\Services\Mail\ActiveMailSettingService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class PasswordResetController extends Controller
 {
+    public function __construct(
+        private ActiveMailSettingService $mailSettingService
+    ) {
+    }
+
     public function showLinkRequestForm()
     {
         return view('auth.reset-password');
     }
 
-    public function sendResetLinkEmail(Request $request)
+    public function sendResetLinkEmail(SendPasswordResetLinkRequest $request)
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
-
-        $activeMailSetting = SmtpSetting::query()
-            ->where('is_enabled', true)
-            ->latest('updated_at')
-            ->first();
-
-        if (! $activeMailSetting) {
-            $activeMailSetting = SmtpSetting::query()
-                ->latest('updated_at')
-                ->first();
-        }
+        $email = $request->validated('email');
+        $activeMailSetting = $this->mailSettingService->getActiveOrLatest();
 
         if (! $activeMailSetting) {
             Log::error('Password reset email queue failed: no mail setting found.', [
-                'email' => $request->input('email'),
+                'email' => $email,
             ]);
 
             return back()->withErrors([
@@ -48,17 +42,17 @@ class PasswordResetController extends Controller
             ])->withInput();
         }
 
-        SendPasswordResetLinkJob::dispatch(
-            $request->input('email'),
-            $activeMailSetting->id
-        );
+        SendPasswordResetLinkJob::dispatch($email, $activeMailSetting->id);
 
         Log::info('Password reset email queued', [
-            'email' => $request->input('email'),
+            'email' => $email,
             'mail_setting_id' => $activeMailSetting->id,
         ]);
 
-        return back()->with('success', 'If your email exists in our system, a password reset link has been queued.');
+        return back()->with(
+            'success',
+            'If your email exists in our system, a password reset link has been queued.'
+        );
     }
 
     public function showResetForm(Request $request, string $token)
@@ -69,18 +63,18 @@ class PasswordResetController extends Controller
         ]);
     }
 
-    public function reset(Request $request)
+    public function reset(ResetPasswordRequest $request)
     {
-        $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', PasswordRule::min(8)],
-        ]);
-
+        $validated = $request->validated();
         $resetUser = null;
 
         $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
+            [
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+                'password_confirmation' => $validated['password_confirmation'],
+                'token' => $validated['token'],
+            ],
             function ($user, string $password) use (&$resetUser): void {
                 $user->forceFill([
                     'password' => Hash::make($password),
@@ -95,16 +89,7 @@ class PasswordResetController extends Controller
 
         if ($status === Password::PASSWORD_RESET) {
             if ($resetUser) {
-                $activeMailSetting = SmtpSetting::query()
-                    ->where('is_enabled', true)
-                    ->latest('updated_at')
-                    ->first();
-
-                if (! $activeMailSetting) {
-                    $activeMailSetting = SmtpSetting::query()
-                        ->latest('updated_at')
-                        ->first();
-                }
+                $activeMailSetting = $this->mailSettingService->getActiveOrLatest();
 
                 if ($activeMailSetting) {
                     SendPasswordResetSuccessEmailJob::dispatch(
@@ -124,20 +109,24 @@ class PasswordResetController extends Controller
             }
 
             Log::info('Password reset successful', [
-                'email' => $request->input('email'),
+                'email' => $validated['email'],
             ]);
 
-            return redirect()->route('signin')->with('success', 'Password reset successful. Please sign in.');
+            return redirect()
+                ->route('signin')
+                ->with('success', 'Password reset successful. Please sign in.');
         }
 
         Log::warning('Password reset failed', [
-            'email' => $request->input('email'),
+            'email' => $validated['email'],
             'status' => $status,
         ]);
 
         return back()
             ->with('error', __($status))
             ->withErrors(['email' => [__($status)]])
-            ->withInput($request->only('email'));
+            ->withInput([
+                'email' => $validated['email'],
+            ]);
     }
 }
