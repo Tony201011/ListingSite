@@ -64,14 +64,17 @@ class ProviderSignupRequest extends FormRequest
             }
 
             try {
-                $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-                    'secret' => $secret,
-                    'response' => $recaptcha,
-                ]);
+                $response = Http::asForm()
+                    ->timeout(5)
+                    ->retry(2, 200)
+                    ->post('https://www.google.com/recaptcha/api/siteverify', [
+                        'secret' => $secret,
+                        'response' => $recaptcha,
+                    ]);
 
                 $result = $response->json();
 
-                if (! $response->successful() || empty($result['success'])) {
+                if (! $response->successful() || ! data_get($result, 'success', false)) {
                     $validator->errors()->add(
                         'g-recaptcha-response',
                         'Google reCAPTCHA verification failed. Please try again.'
