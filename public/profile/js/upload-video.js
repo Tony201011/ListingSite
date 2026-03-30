@@ -1,5 +1,8 @@
-document.addEventListener('alpine:init', () => {
-    Alpine.data('uploadVideoPage', (config = {}) => ({
+function uploadVideoPage(config) {
+    return {
+        uploadUrl: config.uploadUrl,
+        redirectUrl: config.redirectUrl,
+        csrfToken: config.csrfToken,
 
         selectedVideos: [],
         uploading: false,
@@ -7,43 +10,16 @@ document.addEventListener('alpine:init', () => {
         errorMessage: '',
         isDragging: false,
 
-        uploadUrl: config.uploadUrl || '',
-        redirectUrl: config.redirectUrl || '',
-        csrfToken: config.csrfToken || '',
-
         clearMessages() {
             this.successMessage = '';
             this.errorMessage = '';
         },
 
-        // ✅ Toast helpers
-        toastSuccess(message) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: message,
-                showConfirmButton: false,
-                timer: 1800
-            });
-        },
-
-        toastError(message) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'error',
-                title: message,
-                showConfirmButton: false,
-                timer: 2500
-            });
-        },
-
         formatFileSize(bytes) {
-            if (bytes < 1024) return `${bytes} B`;
-            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-            if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-            return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
         },
 
         isDuplicate(file) {
@@ -58,10 +34,7 @@ document.addEventListener('alpine:init', () => {
             const incomingFiles = Array.from(files || []);
 
             incomingFiles.forEach(file => {
-                if (this.isDuplicate(file)) {
-                    this.toastError(`"${file.name}" is already selected`);
-                    return;
-                }
+                if (this.isDuplicate(file)) return;
 
                 this.selectedVideos.push({
                     key: `${file.name}-${file.size}-${file.lastModified}-${Math.random()}`,
@@ -90,15 +63,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         removeSelectedVideo(index) {
-            const selectedVideo = this.selectedVideos[index];
-
-            if (selectedVideo?.previewUrl) {
-                URL.revokeObjectURL(selectedVideo.previewUrl);
+            if (this.selectedVideos[index] && this.selectedVideos[index].previewUrl) {
+                URL.revokeObjectURL(this.selectedVideos[index].previewUrl);
             }
 
             this.selectedVideos.splice(index, 1);
-
-            this.toastSuccess('Video removed');
 
             if (!this.selectedVideos.length && this.$refs.videoInput) {
                 this.$refs.videoInput.value = '';
@@ -114,8 +83,6 @@ document.addEventListener('alpine:init', () => {
 
             this.selectedVideos = [];
 
-            this.toastSuccess('All videos cleared');
-
             if (this.$refs.videoInput) {
                 this.$refs.videoInput.value = '';
             }
@@ -125,7 +92,7 @@ document.addEventListener('alpine:init', () => {
             this.clearMessages();
 
             if (!this.selectedVideos.length) {
-                this.toastError('Please select at least one video.');
+                this.errorMessage = 'Please select at least one video.';
                 return;
             }
 
@@ -155,17 +122,14 @@ document.addEventListener('alpine:init', () => {
 
                 if (!response.ok) {
                     if (result.errors) {
-                        const msg = Object.values(result.errors).flat().join('\n');
-                        this.toastError(msg);
-                        return;
+                        const allErrors = Object.values(result.errors).flat().join('\n');
+                        throw new Error(allErrors);
                     }
 
-                    this.toastError(result.message || 'Upload failed.');
-                    return;
+                    throw new Error(result.message || 'Upload failed.');
                 }
 
-                this.toastSuccess(result.message || 'Videos uploaded successfully.');
-
+                this.successMessage = result.message || 'Videos uploaded successfully.';
                 this.clearSelection();
 
                 setTimeout(() => {
@@ -173,11 +137,10 @@ document.addEventListener('alpine:init', () => {
                 }, 1200);
 
             } catch (error) {
-                this.toastError(error.message || 'Something went wrong.');
+                this.errorMessage = error.message || 'Something went wrong.';
             } finally {
                 this.uploading = false;
             }
         }
-
-    }));
-});
+    };
+}
