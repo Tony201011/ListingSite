@@ -1,15 +1,11 @@
 <?php
 
 namespace App\Actions\Auth;
-
-use App\Models\TwilioSetting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-
 class SignupProvider
 {
     public function __construct(
@@ -23,6 +19,8 @@ class SignupProvider
         $pendingKey = 'provider_signup_' . md5($validated['email'] . '|' . $validated['mobile']);
 
         $sendResult = $this->sendProviderOtp->execute($mobile);
+        $maskMobile = $this->maskMobile($mobile);
+
 
         if (! $sendResult['success']) {
             return back()->withErrors([
@@ -36,6 +34,7 @@ class SignupProvider
             'mobile' => $validated['mobile'],
             'password' => Hash::make($validated['password']),
             'suburb' => $validated['suburb'],
+            'maskMobile' => $maskMobile,
             'role' => User::ROLE_PROVIDER,
             'mobile_verified' => false,
             'referral_code' => $validated['referral_code'] ?? null,
@@ -43,7 +42,7 @@ class SignupProvider
         ], now()->addMinutes(10));
 
         Cache::put($pendingKey . '_otp', [
-            'code' => (string) $sendResult['otp'],
+            'code' => Hash::make((string) $sendResult['otp']),
             'expires_at' => $sendResult['expires_at']->timestamp,
         ], $sendResult['expires_at']);
 
@@ -53,4 +52,17 @@ class SignupProvider
         return redirect('/otp-verification')
             ->with('success', 'OTP sent successfully. Please verify your mobile number.');
     }
+
+    private function maskMobile(string $mobile): string
+    {
+        $length = strlen($mobile);
+
+        if ($length <= 4) {
+            return str_repeat('*', $length);
+        }
+
+        return str_repeat('*', $length - 4) . substr($mobile, -4);
+    }
+
+
 }

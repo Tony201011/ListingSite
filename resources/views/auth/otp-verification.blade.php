@@ -32,7 +32,7 @@
                 <div>
                     <div class="text-sm text-gray-500">Verifying number</div>
                     <div class="text-xl font-semibold text-gray-800">
-                        {{ $userData->mobile ?? '' }}
+                        {{ $userData->maskMobile ?? '' }}
                     </div>
                 </div>
 

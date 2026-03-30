@@ -5,6 +5,7 @@ namespace App\Actions\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
 class VerifyProviderSignupOtp
@@ -50,7 +51,8 @@ class VerifyProviderSignupOtp
             ];
         }
 
-        if ((string) $otp !== (string) $otpData['code']) {
+
+        if (! isset($otpData['code']) || ! Hash::check((string) $otp, $otpData['code'])) {
             return [
                 'status' => 422,
                 'data' => [
@@ -59,6 +61,8 @@ class VerifyProviderSignupOtp
                 ],
             ];
         }
+
+
 
         if (User::query()->where('email', $pendingUser['email'])->exists()) {
             return [

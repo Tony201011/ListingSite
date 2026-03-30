@@ -1,11 +1,9 @@
 <?php
 
 namespace App\Actions\Auth;
-
 use App\Models\TwilioSetting;
 use Illuminate\Support\Facades\Log;
 use Twilio\Rest\Client;
-
 class SendProviderOtp
 {
     public function execute(string $mobile): array

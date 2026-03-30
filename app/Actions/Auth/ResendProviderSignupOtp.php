@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Actions\Auth;
-
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -70,7 +70,7 @@ class ResendProviderSignupOtp
         $resendCooldownSeconds = 30;
 
         Cache::put($pendingKey . '_otp', [
-            'code' => (string) $sendResult['otp'],
+            'code' => Hash::make((string) $sendResult['otp']),
             'expires_at' => $sendResult['expires_at']->timestamp,
         ], $sendResult['expires_at']);
 
