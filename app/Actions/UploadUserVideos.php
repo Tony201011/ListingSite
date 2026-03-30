@@ -4,28 +4,25 @@ namespace App\Actions;
 
 use App\Models\User;
 use App\Models\UserVideo;
+use App\Services\UserVideoStorageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class UploadUserVideos
 {
+    public function __construct(
+        private UserVideoStorageService $videoStorageService
+    ) {}
+
     public function execute(?User $user, array $videos): array
     {
         if (! $user) {
-            return [
-                'status' => 401,
-                'data' => [
-                    'message' => 'Unauthenticated.',
-                ],
-            ];
+            return $this->errorResponse('Unauthenticated.', 401);
         }
 
-        $disk = Storage::disk('s3');
-        $baseName = $user->name ?: 'user';
-        $username = Str::slug($baseName) . $user->id;
-
+        $username = $this->buildUsername($user);
         $uploadedVideos = [];
 
         foreach ($videos as $video) {
@@ -33,49 +30,38 @@ class UploadUserVideos
                 continue;
             }
 
-            $originalExtension = strtolower($video->getClientOriginalExtension() ?: 'mp4');
-            $baseFileName = 'profile_video_' . $user->id . '_' . Str::uuid();
-            $videoFileName = $baseFileName . '.' . $originalExtension;
-            $videoPath = "videos/{$username}/{$videoFileName}";
+            try {
+                $storedVideo = $this->videoStorageService->store(
+                    user: $user,
+                    video: $video,
+                    username: $username
+                );
 
-            $uploaded = $disk->putFileAs(
-                "videos/{$username}",
-                $video,
-                $videoFileName,
-                [
-                    'visibility' => 'public',
-                    'ContentType' => $video->getMimeType(),
-                ]
-            );
-
-            if (! $uploaded) {
-                Log::error('Video upload failed while storing to disk.', [
+                $userVideo = UserVideo::create([
                     'user_id' => $user->id,
+                    'video_path' => $storedVideo['video_path'],
                     'original_name' => $video->getClientOriginalName(),
-                    'target_path' => $videoPath,
                 ]);
 
-                return [
-                    'status' => 500,
-                    'data' => [
-                        'message' => 'Failed to upload one of the videos to storage.',
-                    ],
+                $uploadedVideos[] = [
+                    'id' => $userVideo->id,
+                    'video_path' => $userVideo->video_path,
+                    'video_url' => $storedVideo['video_url'],
+                    'original_name' => $userVideo->original_name,
+                    'created_at' => $userVideo->created_at,
                 ];
+            } catch (Throwable $e) {
+                Log::error('Video upload failed.', [
+                    'user_id' => $user->id,
+                    'original_name' => $video->getClientOriginalName(),
+                    'error' => $e->getMessage(),
+                ]);
+
+                return $this->errorResponse(
+                    'Failed to upload one or more videos.',
+                    500
+                );
             }
-
-            $profileVideo = UserVideo::create([
-                'user_id' => $user->id,
-                'video_path' => $videoPath,
-                'original_name' => $video->getClientOriginalName(),
-            ]);
-
-            $uploadedVideos[] = [
-                'id' => $profileVideo->id,
-                'video_path' => $profileVideo->video_path,
-                'video_url' => $disk->url($profileVideo->video_path),
-                'original_name' => $profileVideo->original_name,
-                'created_at' => $profileVideo->created_at,
-            ];
         }
 
         return [
@@ -83,6 +69,28 @@ class UploadUserVideos
             'data' => [
                 'message' => 'Videos uploaded successfully.',
                 'videos' => $uploadedVideos,
+            ],
+        ];
+    }
+
+    private function buildUsername(User $user): string
+    {
+        $baseName = trim((string) ($user->name ?: 'user'));
+        $slug = Str::slug($baseName);
+
+        if ($slug === '') {
+            $slug = 'user';
+        }
+
+        return $slug . $user->id;
+    }
+
+    private function errorResponse(string $message, int $status): array
+    {
+        return [
+            'status' => $status,
+            'data' => [
+                'message' => $message,
             ],
         ];
     }
