@@ -61,7 +61,7 @@ class SendProviderAccountEmailsJob implements ShouldQueue
             'verification.verify',
             Carbon::now()->addMinutes(60),
             [
-                'id' => $user->id,
+
                 'hash' => sha1($user->getEmailForVerification()),
             ]
         );
