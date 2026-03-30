@@ -106,15 +106,15 @@ Route::post('/logout', [AuthController::class, 'logout'])
 /** auth routes end */
 
 Route::middleware('guest')->group(function (): void {
-    Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->name('signup');
+    Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->middleware('throttle:5,1')->name('signup');
     Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
 
     Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->name('signin');
     Route::post('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
 
     Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerficationForm'])->name('otp-verfication');
-    Route::post('/verify-otp', [ProviderRegisterController::class, 'verifyOtp'])->name('verify.otp');
-    Route::post('/resend-otp', [ProviderRegisterController::class, 'resendOtp'])->name('resend.otp');
+    Route::post('/verify-otp', [ProviderRegisterController::class, 'verifyOtp'])->middleware('throttle:5,1')->name('verify.otp');
+    Route::post('/resend-otp', [ProviderRegisterController::class, 'resendOtp'])->middleware('throttle:5,1')->name('resend.otp');
 
     Route::get('/reset-password', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('/reset-password', [PasswordResetController::class, 'sendResetLinkEmail'])
