@@ -59,4 +59,11 @@ return [
         'redirect' => env('TWITTER_REDIRECT_URI'),
     ],
 
+    'twilio' => [
+        'account_sid' => env('TWILIO_ACCOUNT_SID'),
+        'api_sid' => env('TWILIO_API_SID'),
+        'api_secret' => env('TWILIO_API_SECRET'),
+        'phone' => env('TWILIO_PHONE'),
+    ],
+
 ];
