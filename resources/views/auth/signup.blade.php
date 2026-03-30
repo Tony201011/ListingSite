@@ -50,7 +50,13 @@
         </div>
 
         <form
-            x-data="signupForm()"
+            x-data="signupForm({
+                email: @js(old('email', '')),
+                nickname: @js(old('nickname', '')),
+                mobile: @js(old('mobile', '')),
+                suburb: @js(old('suburb', '')),
+                ageConfirm: @js((bool) old('age_confirm'))
+            })"
             @submit="submitForm"
             class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100"
             method="POST"
@@ -68,8 +74,7 @@
                         name="email"
                         x-model="email"
                         @blur="touched.email = true"
-                        @input="touched.email = true; validate()"
-                        value="{{ old('email') }}"
+                        @input="touched.email = true; validateEmail()"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
                     @error('email')
@@ -89,8 +94,7 @@
                         name="nickname"
                         x-model="nickname"
                         @blur="touched.nickname = true"
-                        @input="touched.nickname = true; validate()"
-                        value="{{ old('nickname') }}"
+                        @input="touched.nickname = true; validateNickname()"
                         placeholder="e.g. SexyBabe"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
@@ -114,16 +118,25 @@
                                 name="password"
                                 x-model="password"
                                 @blur="touched.password = true"
-                                @input="touched.password = true; validate()"
+                                @input="touched.password = true; validatePassword(); validateConfirmPassword()"
                                 class="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                             >
 
                             <button
                                 type="button"
                                 @click="showPassword = !showPassword"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#e04ecb] font-semibold"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#e04ecb]"
+                                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                :title="showPassword ? 'Hide password' : 'Show password'"
                             >
-                                {{-- eye icon --}}
+                                <svg x-show="!showPassword" x-cloak xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
+                                </svg>
+                                <svg x-show="showPassword" x-cloak xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.252-3.592M6.223 6.223A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.969 9.969 0 01-4.132 5.411M15 12a3 3 0 00-4.243-2.829M9.88 9.88A3 3 0 0014.12 14.12" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -153,7 +166,7 @@
 
                     <button
                         type="button"
-                        @click="generatePassword()"
+                        @click="generatePasswordPopup()"
                         class="mt-2 px-4 py-2 rounded-xl bg-[#fdf0fb] text-[#c13ab0] font-semibold border border-[#f3c4ea] hover:bg-[#fae3f6] transition"
                     >
                         Generate
@@ -168,10 +181,10 @@
 
                     <div
                         x-show="showPasswordPopup"
+                        x-cloak
                         x-transition
                         @click.away="showPasswordPopup = false"
                         class="absolute z-20 mt-3 w-full bg-white border border-gray-200 rounded-2xl shadow-xl p-4"
-                        style="display: none;"
                     >
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div>
@@ -183,7 +196,7 @@
                                 @click="showPasswordPopup = false"
                                 class="text-gray-400 hover:text-gray-600 text-xl leading-none"
                             >
-                                ×
+                                &times;
                             </button>
                         </div>
 
@@ -195,7 +208,7 @@
                         <div class="flex flex-wrap gap-2">
                             <button
                                 type="button"
-                                @click="generatePassword()"
+                                @click="generatePasswordPopup()"
                                 class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
                             >
                                 Regenerate
@@ -231,15 +244,25 @@
                             name="password_confirmation"
                             x-model="confirmPassword"
                             @blur="touched.confirmPassword = true"
-                            @input="touched.confirmPassword = true; validate()"
+                            @input="touched.confirmPassword = true; validateConfirmPassword()"
                             class="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                         >
 
                         <button
                             type="button"
                             @click="showConfirmPassword = !showConfirmPassword"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#e04ecb] font-semibold"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-[#e04ecb]"
+                            :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
+                            :title="showConfirmPassword ? 'Hide password' : 'Show password'"
                         >
+                            <svg x-show="!showConfirmPassword" x-cloak xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
+                            </svg>
+                            <svg x-show="showConfirmPassword" x-cloak xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.252-3.592M6.223 6.223A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.969 9.969 0 01-4.132 5.411M15 12a3 3 0 00-4.243-2.829M9.88 9.88A3 3 0 0014.12 14.12" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />
+                            </svg>
                         </button>
                     </div>
 
@@ -267,8 +290,7 @@
                         type="tel"
                         x-model="mobile"
                         @blur="touched.mobile = true"
-                        @input="touched.mobile = true; validateMobile(); validate();"
-                        value="{{ old('mobile') }}"
+                        @input="touched.mobile = true; validateMobile()"
                         placeholder="Australian mobile (e.g. 04XXXXXXXX)"
                         class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
@@ -279,7 +301,7 @@
                 @enderror
                 <template x-if="touched.mobile && errors.mobile">
                     <div class="text-xs text-red-600 mt-1" x-text="errors.mobile"></div>
-                    </template>
+                </template>
 
                 <div class="bg-pink-50 rounded-2xl p-5 mt-4 flex gap-4 items-start">
                     <div class="w-8 h-8 bg-[#e04ecb] rounded-full flex items-center justify-center flex-shrink-0">
@@ -306,10 +328,9 @@
                     type="text"
                     name="suburb"
                     x-model="suburb"
-                    @input="handleSuburbInput()"
+                    @input="touched.suburb = true; handleSuburbInput()"
                     @blur="handleSuburbBlur()"
                     @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
-                    value="{{ old('suburb') }}"
                     placeholder="Start typing your suburb..."
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     autocomplete="off"
@@ -320,7 +341,6 @@
                     x-cloak
                     x-transition
                     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
-                    style="display: none;"
                 >
                     <template x-for="(item, index) in searchResults" :key="`${item.suburb}-${item.state}-${item.postcode}-${index}`">
                         <div
@@ -336,7 +356,6 @@
                     x-show="showResults && searching"
                     x-cloak
                     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500"
-                    style="display: none;"
                 >
                     Searching...
                 </div>
@@ -371,7 +390,7 @@
                             type="checkbox"
                             id="age_confirm"
                             x-model="ageConfirm"
-                            @change="touched.ageConfirm = true; validate()"
+                            @change="touched.ageConfirm = true; validateAgeConfirm()"
                             class="w-5 h-5 accent-[#e04ecb]"
                             {{ old('age_confirm') ? 'checked' : '' }}
                         >
@@ -417,254 +436,13 @@
 @if ($shouldUseRecaptcha ?? false)
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 @endif
-<script src="//unpkg.com/alpinejs" defer></script>
 
-<script>
-    function signupForm() {
-        return {
-            email: @js(old('email', '')),
-            nickname: @js(old('nickname', '')),
-            password: '',
-            confirmPassword: '',
-            mobile: @js(old('mobile', '')),
-            suburb: @js(old('suburb', '')),
-            ageConfirm: {{ old('age_confirm') ? 'true' : 'false' }},
+@push('scripts')
+    <script src="{{ asset('auth/js/password-tools.js') }}"></script>
+    <script src="{{ asset('auth/js/signup.js') }}"></script>
+@endpush
 
-            showPassword: false,
-            showConfirmPassword: false,
-            showPasswordPopup: false,
-            generatedPassword: '',
-            copied: false,
-
-            searchResults: [],
-            showResults: false,
-            searching: false,
-            debounceTimer: null,
-            suburbSelected: false,
-
-            errors: {},
-            touched: {
-                email: false,
-                nickname: false,
-                password: false,
-                confirmPassword: false,
-                mobile: false,
-                suburb: false,
-                ageConfirm: false
-            },
-
-            validateEmail() {
-                if (!this.email || !/^\S+@\S+\.\S+$/.test(this.email)) {
-                    this.errors.email = 'Valid email is required.';
-                } else {
-                    delete this.errors.email;
-                }
-            },
-
-            validateNickname() {
-                if (!this.nickname || this.nickname.length < 3) {
-                    this.errors.nickname = 'Nickname is required (min 3 chars).';
-                } else {
-                    delete this.errors.nickname;
-                }
-            },
-
-            validatePassword() {
-                if (!this.password) {
-                    this.errors.password = 'Password is required.';
-                    return;
-                }
-
-                if (this.password.length < 8) {
-                    this.errors.password = 'Password must be at least 8 characters.';
-                    return;
-                }
-
-                const hasUpper = /[A-Z]/.test(this.password);
-                const hasLower = /[a-z]/.test(this.password);
-                const hasNumber = /[0-9]/.test(this.password);
-                const hasSymbol = /[^A-Za-z0-9]/.test(this.password);
-
-                if (!(hasUpper && hasLower && hasNumber && hasSymbol)) {
-                    this.errors.password = 'Use uppercase, lowercase, number and symbol for a stronger password.';
-                } else {
-                    delete this.errors.password;
-                }
-            },
-
-            validateConfirmPassword() {
-                if (!this.confirmPassword) {
-                    this.errors.confirmPassword = 'Please confirm your password.';
-                } else if (this.password !== this.confirmPassword) {
-                    this.errors.confirmPassword = 'Passwords do not match.';
-                } else {
-                    delete this.errors.confirmPassword;
-                }
-            },
-
-            validateMobile() {
-                const ausMobile = /^04\d{8}$/;
-                if (!this.mobile) {
-                    this.errors.mobile = 'Mobile number is required.';
-                } else if (!ausMobile.test(this.mobile)) {
-                    this.errors.mobile = 'Only Australian mobile numbers in the format 04XXXXXXXX are allowed (e.g. 0412345678)';
-                } else {
-                    delete this.errors.mobile;
-                }
-            },
-
-            validateSuburb() {
-                if (!this.suburb || this.suburb.trim() === '') {
-                    this.errors.suburb = 'Suburb is required.';
-                } else if (!this.suburbSelected) {
-                    this.errors.suburb = 'Please choose a location from the dropdown list, which appears while typing.';
-                } else {
-                    delete this.errors.suburb;
-                }
-            },
-
-            validateAgeConfirm() {
-                if (!this.ageConfirm) {
-                    this.errors.ageConfirm = 'You must confirm you are 18+';
-                } else {
-                    delete this.errors.ageConfirm;
-                }
-            },
-
-            validate() {
-                this.validateEmail();
-                this.validateNickname();
-                this.validatePassword();
-                this.validateConfirmPassword();
-                this.validateMobile();
-                this.validateSuburb();
-                this.validateAgeConfirm();
-                return Object.keys(this.errors).length === 0;
-            },
-
-            submitForm(e) {
-                Object.keys(this.touched).forEach(key => this.touched[key] = true);
-                if (!this.validate()) {
-                    e.preventDefault();
-                }
-            },
-
-            generatePassword(length = 16) {
-                const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                const lower = 'abcdefghijklmnopqrstuvwxyz';
-                const numbers = '0123456789';
-                const symbols = '!@#$%^&*()-_=+[]{}?';
-                const all = upper + lower + numbers + symbols;
-
-                let password = '';
-                password += upper[Math.floor(Math.random() * upper.length)];
-                password += lower[Math.floor(Math.random() * lower.length)];
-                password += numbers[Math.floor(Math.random() * numbers.length)];
-                password += symbols[Math.floor(Math.random() * symbols.length)];
-
-                for (let i = password.length; i < length; i++) {
-                    password += all[Math.floor(Math.random() * all.length)];
-                }
-
-                this.generatedPassword = password.split('').sort(() => Math.random() - 0.5).join('');
-                this.copied = false;
-                this.showPasswordPopup = true;
-            },
-
-            useGeneratedPassword() {
-                this.password = this.generatedPassword;
-                this.confirmPassword = this.generatedPassword;
-                this.touched.password = true;
-                this.touched.confirmPassword = true;
-                this.validatePassword();
-                this.validateConfirmPassword();
-                this.showPasswordPopup = false;
-            },
-
-            async copyGeneratedPassword() {
-                try {
-                    await navigator.clipboard.writeText(this.generatedPassword);
-                    this.copied = true;
-                    setTimeout(() => this.copied = false, 1500);
-                } catch (e) {
-                    this.copied = false;
-                }
-            },
-
-            get passwordStrength() {
-                let score = 0;
-                if (this.password.length >= 8) score++;
-                if (/[A-Z]/.test(this.password)) score++;
-                if (/[a-z]/.test(this.password)) score++;
-                if (/[0-9]/.test(this.password)) score++;
-                if (/[^A-Za-z0-9]/.test(this.password)) score++;
-
-                if (!this.password) {
-                    return { text: '', color: '', width: '0%' };
-                }
-                if (score <= 2) return { text: 'Weak', color: 'bg-red-500', width: '33%' };
-                if (score <= 4) return { text: 'Medium', color: 'bg-yellow-500', width: '66%' };
-                return { text: 'Strong', color: 'bg-green-500', width: '100%' };
-            },
-
-            handleSuburbInput() {
-                this.touched.suburb = true;
-                this.suburbSelected = false;
-                this.validateSuburb();
-                this.searchSuburbs();
-            },
-
-            handleSuburbBlur() {
-                setTimeout(() => {
-                    this.showResults = false;
-                    this.touched.suburb = true;
-                    this.validateSuburb();
-                }, 200);
-            },
-
-            searchSuburbs() {
-                if (!this.suburb || this.suburb.trim().length < 2) {
-                    this.searchResults = [];
-                    this.showResults = false;
-                    return;
-                }
-
-                clearTimeout(this.debounceTimer);
-
-                this.debounceTimer = setTimeout(() => {
-                    this.searching = true;
-
-                    fetch(`/api/suburbs/search?q=${encodeURIComponent(this.suburb.trim())}`)
-                        .then(res => {
-                            if (!res.ok) {
-                                throw new Error('Failed to fetch suburbs');
-                            }
-                            return res.json();
-                        })
-                        .then(data => {
-                            this.searchResults = Array.isArray(data) ? data : [];
-                            this.showResults = this.searchResults.length > 0;
-                        })
-                        .catch(error => {
-                            console.error('Suburb search error:', error);
-                            this.searchResults = [];
-                            this.showResults = false;
-                        })
-                        .finally(() => {
-                            this.searching = false;
-                        });
-                }, 300);
-            },
-
-            selectSuburb(item) {
-                this.suburb = `${item.suburb}, ${item.state} ${item.postcode}`;
-                this.suburbSelected = true;
-                this.showResults = false;
-                this.searchResults = [];
-                this.touched.suburb = true;
-                this.validateSuburb();
-            }
-        }
-    }
-</script>
+<style>
+    [x-cloak] { display: none !important; }
+</style>
 @endsection
