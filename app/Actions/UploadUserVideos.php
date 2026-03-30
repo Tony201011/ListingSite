@@ -5,7 +5,9 @@ namespace App\Actions;
 use App\Models\User;
 use App\Models\UserVideo;
 use App\Services\UserVideoStorageService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -14,12 +16,19 @@ class UploadUserVideos
 {
     public function __construct(
         private UserVideoStorageService $videoStorageService
-    ) {}
+    ) {
+    }
 
     public function execute(?User $user, array $videos): array
     {
         if (! $user) {
             return $this->errorResponse('Unauthenticated.', 401);
+        }
+
+        try {
+            Gate::forUser($user)->authorize('create', UserVideo::class);
+        } catch (AuthorizationException) {
+            return $this->errorResponse('Forbidden.', 403);
         }
 
         $username = $this->buildUsername($user);

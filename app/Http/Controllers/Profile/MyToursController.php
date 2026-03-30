@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
+
 use App\Actions\DeleteTour;
 use App\Actions\GetMyToursPageData;
 use App\Actions\SearchTourCities;
 use App\Actions\StoreTour;
 use App\Actions\UpdateTour;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\SearchTourCityRequest;
 use App\Http\Requests\StoreTourRequest;
 use App\Http\Requests\UpdateTourRequest;
@@ -31,6 +32,8 @@ class MyToursController extends Controller
      */
     public function index(): View
     {
+        $this->authorize('viewAny', Tour::class);
+
         return view('profile.my-tours', $this->getMyToursPageData->execute(Auth::user()));
     }
 
@@ -39,6 +42,8 @@ class MyToursController extends Controller
      */
     public function store(StoreTourRequest $request): JsonResponse
     {
+        $this->authorize('create', Tour::class);
+
         $tour = $this->storeTour->execute(
             Auth::user(),
             $request->validated()
@@ -55,6 +60,8 @@ class MyToursController extends Controller
      */
     public function update(UpdateTourRequest $request, Tour $tour): JsonResponse
     {
+        $this->authorize('update', $tour);
+
         $tour = $this->updateTour->execute(
             Auth::user(),
             $tour,
@@ -72,6 +79,8 @@ class MyToursController extends Controller
      */
     public function destroy(Tour $tour): JsonResponse
     {
+        $this->authorize('delete', $tour);
+
         $this->deleteTour->execute(Auth::user(), $tour);
 
         return response()->json([
@@ -81,6 +90,8 @@ class MyToursController extends Controller
 
     public function search(SearchTourCityRequest $request): JsonResponse
     {
+        $this->authorize('viewAny', Tour::class);
+
         $cities = $this->searchTourCities->execute(
             $request->validated('q')
         );

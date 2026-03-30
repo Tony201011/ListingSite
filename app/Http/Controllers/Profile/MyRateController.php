@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
+
 use App\Actions\DeleteRate;
 use App\Actions\DeleteRateGroup;
 use App\Actions\GetMyRatePageData;
 use App\Actions\StoreRate;
 use App\Actions\UpdateRate;
 use App\Actions\UpdateRateGroup;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRateRequest;
 use App\Http\Requests\UpdateRateGroupRequest;
 use App\Http\Requests\UpdateRateRequest;
@@ -36,6 +37,8 @@ class MyRateController extends Controller
 
     public function store(StoreRateRequest $request): JsonResponse
     {
+        $this->authorize('create', Rate::class);
+
         $rate = $this->storeRate->execute(
             Auth::user(),
             $request->validated()
@@ -46,6 +49,8 @@ class MyRateController extends Controller
 
     public function update(UpdateRateRequest $request, Rate $rate): JsonResponse
     {
+        $this->authorize('update', $rate);
+
         $rate = $this->updateRate->execute(
             Auth::user(),
             $rate,
@@ -57,6 +62,8 @@ class MyRateController extends Controller
 
     public function destroy(Rate $rate): JsonResponse
     {
+        $this->authorize('delete', $rate);
+
         $this->deleteRate->execute(Auth::user(), $rate);
 
         return response()->json(['success' => true]);
@@ -64,6 +71,8 @@ class MyRateController extends Controller
 
     public function updateGroup(UpdateRateGroupRequest $request, RateGroup $group): JsonResponse
     {
+        $this->authorize('update', $group);
+
         $group = $this->updateRateGroup->execute(
             Auth::user(),
             $group,
@@ -75,6 +84,8 @@ class MyRateController extends Controller
 
     public function destroyGroup(RateGroup $group): JsonResponse
     {
+        $this->authorize('delete', $group);
+
         $this->deleteRateGroup->execute(Auth::user(), $group);
 
         return response()->json(['success' => true]);

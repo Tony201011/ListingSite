@@ -5,6 +5,8 @@ namespace App\Actions;
 use App\Models\ProfileImage;
 use App\Models\User;
 use App\Services\UserPhotoStorageService;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -13,7 +15,8 @@ class UploadUserPhotos
 {
     public function __construct(
         private UserPhotoStorageService $photoStorageService
-    ) {}
+    ) {
+    }
 
     public function execute(?User $user, array $photos): array
     {
@@ -21,10 +24,17 @@ class UploadUserPhotos
             return $this->errorResponse('Unauthenticated.', 401);
         }
 
+        try {
+            Gate::forUser($user)->authorize('create', ProfileImage::class);
+        } catch (AuthorizationException) {
+            return $this->errorResponse('Forbidden.', 403);
+        }
+
         $username = $this->buildUsername($user);
 
         $uploadedPhotos = [];
-        $hasPrimary = ProfileImage::where('user_id', $user->id)
+        $hasPrimary = ProfileImage::query()
+            ->where('user_id', $user->id)
             ->where('is_primary', true)
             ->exists();
 

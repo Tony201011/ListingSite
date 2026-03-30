@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Profile;
+
 use App\Http\Controllers\Controller;
 use App\Actions\DeleteUserVideo;
 use App\Actions\GetUserVideos;
@@ -22,16 +24,25 @@ class MyVideosController extends Controller
 
     public function index(): View
     {
+        $this->authorize('viewAny', UserVideo::class);
+
         return view('profile.upload-video');
     }
 
     public function getVideos(): View
     {
-        return view('profile.my-videos', $this->getUserVideos->execute(Auth::id()));
+        $this->authorize('viewAny', UserVideo::class);
+
+        return view(
+            'profile.my-videos',
+            $this->getUserVideos->execute(Auth::user())
+        );
     }
 
     public function uploadVideos(UploadVideosRequest $request): JsonResponse
     {
+        $this->authorize('create', UserVideo::class);
+
         try {
             $result = $this->uploadUserVideos->execute(
                 Auth::user(),
@@ -53,6 +64,8 @@ class MyVideosController extends Controller
 
     public function destroy(UserVideo $video): JsonResponse
     {
+        $this->authorize('delete', $video);
+
         $result = $this->deleteUserVideo->execute(Auth::user(), $video);
 
         return response()->json($result['data'], $result['status']);
