@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Facades\Storage;
 
 class UserVideo extends Model
 {
@@ -18,14 +18,10 @@ class UserVideo extends Model
 
     protected $appends = ['video_url'];
 
-     public function getVideoUrlAttribute(): ?string
+    public function getVideoUrlAttribute(): ?string
     {
-        // return $this->video_path
-        //     ? Storage::disk('s3')->url($this->video_path)
-        //     : null;
-
         return $this->video_path
-            ? 'https://pub-4e37ec8f58e94a569d35a5245489f90d.r2.dev/'.$this->video_path
+            ? Storage::disk('r2')->url($this->video_path)
             : null;
     }
 }
