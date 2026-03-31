@@ -95,14 +95,14 @@
 
                         @if($stepPhotoVerificationCompleted)
                             <a
-                                href="{{ url('/click-here-to-verify') }}"
+                                href="{{ url('/verify-photo') }}"
                                 class="text-sm text-gray-500 transition hover:text-gray-700"
                             >
                                 edit your verified photos
                             </a>
                         @else
                             <a
-                                href="{{ url('/click-here-to-verify') }}"
+                                href="{{ url('/verify-photo') }}"
                                 class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
                             >
                                 Verified Photos Badges
@@ -186,14 +186,14 @@
 
                 @if($stepPhotoVerificationCompleted)
                     <a
-                        href="{{ url('/click-here-to-verify') }}"
+                        href="{{ url('/verify-photo') }}"
                         class="inline-flex rounded-lg bg-white px-5 py-2 font-medium text-gray-700 transition hover:bg-pink-50"
                     >
                         Edit photos for badge
                     </a>
                 @else
                     <a
-                        href="{{ url('/click-here-to-verify') }}"
+                        href="{{ url('/verify-photo') }}"
                         class="inline-flex rounded-lg bg-white px-5 py-2 font-medium text-gray-700 transition hover:bg-pink-50"
                     >
                         Verify photos for badge
