@@ -73,23 +73,23 @@ class UserPhotoStorageService
                 'thumbnail_url' => $disk->url($thumbnailPath),
             ];
         } catch (Throwable $e) {
-            $this->cleanup($disk, $uploadedImagePath, $uploadedThumbnailPath);
+            $this->deletePaths($uploadedImagePath, $uploadedThumbnailPath);
 
             throw $e;
         }
     }
 
-    private function cleanup(
-        FilesystemAdapter $disk,
-        ?string $uploadedImagePath,
-        ?string $uploadedThumbnailPath
-    ): void {
-        if ($uploadedImagePath) {
-            $disk->delete($uploadedImagePath);
+    public function deletePaths(?string $imagePath, ?string $thumbnailPath): void
+    {
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('s3');
+
+        if ($imagePath) {
+            $disk->delete($imagePath);
         }
 
-        if ($uploadedThumbnailPath) {
-            $disk->delete($uploadedThumbnailPath);
+        if ($thumbnailPath) {
+            $disk->delete($thumbnailPath);
         }
     }
 }

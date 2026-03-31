@@ -6,6 +6,7 @@ use App\Models\ProfileImage;
 use App\Models\User;
 use App\Services\UserPhotoStorageService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -30,25 +31,36 @@ class UploadUserPhotos
             return $this->errorResponse('Forbidden.', 403);
         }
 
+        $photos = array_values(array_filter($photos));
+
+        if ($photos === []) {
+            return $this->errorResponse('No photos were provided.', 422);
+        }
+
         $username = $this->buildUsername($user);
-
         $uploadedPhotos = [];
-        $hasPrimary = ProfileImage::query()
-            ->where('user_id', $user->id)
-            ->where('is_primary', true)
-            ->exists();
+        $storedBatchFiles = [];
 
-        foreach ($photos as $photo) {
-            if (! $photo) {
-                continue;
-            }
+        try {
+            DB::beginTransaction();
 
-            try {
+            $hasPrimary = ProfileImage::query()
+                ->where('user_id', $user->id)
+                ->where('is_primary', true)
+                ->lockForUpdate()
+                ->exists();
+
+            foreach ($photos as $photo) {
                 $storedPhoto = $this->photoStorageService->store(
                     user: $user,
                     photo: $photo,
                     username: $username
                 );
+
+                $storedBatchFiles[] = [
+                    'image_path' => $storedPhoto['image_path'],
+                    'thumbnail_path' => $storedPhoto['thumbnail_path'],
+                ];
 
                 $profileImage = ProfileImage::create([
                     'user_id' => $user->id,
@@ -69,26 +81,46 @@ class UploadUserPhotos
                     'thumbnail_url' => $storedPhoto['thumbnail_url'],
                     'is_primary' => $profileImage->is_primary,
                 ];
-            } catch (Throwable $e) {
-                Log::error('Photo upload failed.', [
-                    'user_id' => $user->id,
-                    'error' => $e->getMessage(),
-                ]);
-
-                return $this->errorResponse(
-                    'Failed to upload one or more photos.',
-                    500
-                );
             }
-        }
 
-        return [
-            'status' => 200,
-            'data' => [
-                'message' => 'Photos uploaded successfully.',
-                'photos' => $uploadedPhotos,
-            ],
-        ];
+            DB::commit();
+
+            return [
+                'status' => 200,
+                'data' => [
+                    'message' => 'Photos uploaded successfully.',
+                    'photos' => $uploadedPhotos,
+                ],
+            ];
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            foreach ($storedBatchFiles as $storedFile) {
+                try {
+                    $this->photoStorageService->deletePaths(
+                        $storedFile['image_path'] ?? null,
+                        $storedFile['thumbnail_path'] ?? null
+                    );
+                } catch (Throwable $cleanupException) {
+                    Log::warning('Failed to clean up uploaded photo after batch failure.', [
+                        'user_id' => $user->id,
+                        'image_path' => $storedFile['image_path'] ?? null,
+                        'thumbnail_path' => $storedFile['thumbnail_path'] ?? null,
+                        'error' => $cleanupException->getMessage(),
+                    ]);
+                }
+            }
+
+            Log::error('Photo upload batch failed.', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->errorResponse(
+                'Failed to upload photos. No changes were saved.',
+                500
+            );
+        }
     }
 
     private function buildUsername(User $user): string
