@@ -1,14 +1,18 @@
 <?php
 
 namespace App\Http\Controllers\SiteAccess;
-use App\Http\Controllers\Controller;
 
+use App\Actions\SiteAccess\VerifySitePassword;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
-use App\Models\SiteSetting;
 
 class SitePasswordController extends Controller
 {
+    public function __construct(
+        private VerifySitePassword $verifySitePassword
+    ) {
+    }
+
     public function showForm()
     {
         return view('site-access.site-password');
@@ -17,22 +21,10 @@ class SitePasswordController extends Controller
     public function submit(Request $request)
     {
         $request->validate([
-            'password' => 'required|string'
+            'password' => 'required|string',
         ]);
 
-        $dbPassword = null;
-
-        if (Schema::hasTable('site_settings')) {
-            $setting = SiteSetting::query()->latest('updated_at')->first();
-
-            if ($setting && $setting->site_password) {
-                $dbPassword = $setting->site_password;
-            }
-        }
-
-        $expected = $dbPassword ?? env('SITE_PASSWORD');
-
-        if ($expected && hash_equals((string) $expected, (string) $request->password)) {
+        if ($this->verifySitePassword->execute($request->password)) {
             $request->session()->regenerate();
             $request->session()->put('site_access', true);
 

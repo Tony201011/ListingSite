@@ -1,13 +1,17 @@
 <?php
 
 namespace App\Actions\Auth;
-use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class ResendProviderSignupOtp
 {
+    private const MAX_RESENDS = 5;
+    private const RESEND_WINDOW_MINUTES = 15;
+
     public function __construct(
         private SendProviderOtp $sendProviderOtp
     ) {
@@ -34,6 +38,20 @@ class ResendProviderSignupOtp
                 'data' => [
                     'success' => false,
                     'message' => 'Signup session expired. Please signup again.',
+                ],
+            ];
+        }
+
+        // Limit total resend count per signup session
+        $resendCountKey = $pendingKey . '_resend_count';
+        $resendCount = (int) Cache::get($resendCountKey, 0);
+
+        if ($resendCount >= self::MAX_RESENDS) {
+            return [
+                'status' => 429,
+                'data' => [
+                    'success' => false,
+                    'message' => 'Too many OTP resend requests. Please signup again.',
                 ],
             ];
         }
@@ -74,8 +92,12 @@ class ResendProviderSignupOtp
             'expires_at' => $sendResult['expires_at']->timestamp,
         ], $sendResult['expires_at']);
 
+        // Reset failed verification attempts on resend
+        Cache::forget($pendingKey . '_otp_attempts');
+
         Cache::put($pendingKey, $pendingUser, now()->addMinutes(10));
         Cache::put($resendLockKey, $resendCooldownSeconds, now()->addSeconds($resendCooldownSeconds));
+        Cache::put($resendCountKey, $resendCount + 1, now()->addMinutes(self::RESEND_WINDOW_MINUTES));
 
         Log::info('OTP resent successfully', [
             'mobile' => $pendingUser['mobile'],

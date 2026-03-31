@@ -1,52 +1,48 @@
 <?php
 
 namespace App\Http\Controllers\Subscription;
-use App\Http\Controllers\Controller;
 
+use App\Actions\Subscription\ProcessCreditCheckout;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class PurchaseCreditController extends Controller
 {
-    public function purchaseCredit()
+    public function __construct(
+        private ProcessCreditCheckout $processCreditCheckout
+    ) {
+    }
+
+    public function purchaseCredit(): View
     {
         return view('subscription.purchase-credit');
     }
 
     public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
-
-        $prices = [
-            7 => 10,
-            30 => 35,
-            60 => 65,
-            120 => 120,
-            180 => 160,
-        ];
-
-        $selectedCredits = (int) $validated['credits'];
-        $selectedPrice = $prices[$selectedCredits] ?? 0;
+        $result = $this->processCreditCheckout->execute($request->validated());
 
         return redirect('/purchase-history')->with(
             'checkout_success',
-            "Checkout started for {$selectedCredits} credits (AUD $" .
-            number_format($selectedPrice, 2) .
-            ") under invoice name '{$validated['invoice_name']}'."
+            "Checkout started for {$result['credits']} credits (AUD $" .
+            number_format($result['price'], 2) .
+            ") under invoice name '{$result['invoice_name']}'."
         );
     }
 
-    public function creditHistory()
+    public function creditHistory(): View
     {
         return view('subscription.credit-history');
     }
 
-    public function creditHistoryLastMonth()
+    public function creditHistoryLastMonth(): View
     {
         return view('subscription.credit-history-last-month');
     }
 
-    public function purchaseHistory()
+    public function purchaseHistory(): View
     {
         return view('subscription.purchase-history');
     }

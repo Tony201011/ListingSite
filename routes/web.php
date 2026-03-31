@@ -38,6 +38,7 @@ use App\Http\Controllers\Profile\UrlController;
 /**subscription controller start */
 use App\Http\Controllers\Subscription\PurchaseCreditController;
 use App\Http\Controllers\Subscription\MemberShipController;
+use App\Http\Controllers\Subscription\PaymentSubscriptionController;
 /**subscription controller end */
 
 /*******site access controller start here  */
@@ -114,7 +115,7 @@ Route::middleware('guest')->group(function (): void {
 
     Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerficationForm'])->name('otp-verfication');
     Route::post('/verify-otp', [ProviderRegisterController::class, 'verifyOtp'])->middleware('throttle:5,1')->name('verify.otp');
-    Route::post('/resend-otp', [ProviderRegisterController::class, 'resendOtp'])->middleware('throttle:5,1')->name('resend.otp');
+    Route::post('/resend-otp', [ProviderRegisterController::class, 'resendOtp'])->middleware('throttle:3,1')->name('resend.otp');
 
     Route::get('/reset-password', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('/reset-password', [PasswordResetController::class, 'sendResetLinkEmail'])
@@ -230,6 +231,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
         Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
         Route::get('/membership', [MemberShipController::class, 'membership'])->name('membership');
+        Route::get('/payment-subscription', [PaymentSubscriptionController::class, 'index'])->name('payment-subscription');
         /*** credit route end here */
     });
 });
