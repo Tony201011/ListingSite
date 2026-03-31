@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class HomeIndexRequest extends FormRequest
 {
@@ -26,7 +27,10 @@ class HomeIndexRequest extends FormRequest
     {
         return [
             'categories' => ['nullable', 'array'],
-            'categories.*' => ['integer', 'exists:categories,id'],
+            'categories.*' => [
+                'integer',
+                Rule::exists('categories', 'id')->where('is_active', true),
+            ],
             'min_age' => ['nullable', 'integer', 'min:18', 'max:100'],
             'max_age' => ['nullable', 'integer', 'min:18', 'max:100'],
             'min_price' => ['nullable', 'integer', 'min:0', 'max:100000'],
