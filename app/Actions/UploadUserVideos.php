@@ -7,6 +7,7 @@ use App\Models\UserVideo;
 use App\Services\UserVideoStorageService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -31,20 +32,30 @@ class UploadUserVideos
             return $this->errorResponse('Forbidden.', 403);
         }
 
+        $videos = array_values(array_filter(
+            $videos,
+            fn ($video) => $video instanceof UploadedFile
+        ));
+
+        if ($videos === []) {
+            return $this->errorResponse('No videos were provided.', 422);
+        }
+
         $username = $this->buildUsername($user);
         $uploadedVideos = [];
+        $storedVideoPaths = [];
 
-        foreach ($videos as $video) {
-            if (! $video instanceof UploadedFile) {
-                continue;
-            }
+        try {
+            DB::beginTransaction();
 
-            try {
+            foreach ($videos as $video) {
                 $storedVideo = $this->videoStorageService->store(
                     user: $user,
                     video: $video,
                     username: $username
                 );
+
+                $storedVideoPaths[] = $storedVideo['video_path'];
 
                 $userVideo = UserVideo::create([
                     'user_id' => $user->id,
@@ -59,27 +70,42 @@ class UploadUserVideos
                     'original_name' => $userVideo->original_name,
                     'created_at' => $userVideo->created_at,
                 ];
-            } catch (Throwable $e) {
-                Log::error('Video upload failed.', [
-                    'user_id' => $user->id,
-                    'original_name' => $video->getClientOriginalName(),
-                    'error' => $e->getMessage(),
-                ]);
-
-                return $this->errorResponse(
-                    'Failed to upload one or more videos.',
-                    500
-                );
             }
-        }
 
-        return [
-            'status' => 200,
-            'data' => [
-                'message' => 'Videos uploaded successfully.',
-                'videos' => $uploadedVideos,
-            ],
-        ];
+            DB::commit();
+
+            return [
+                'status' => 200,
+                'data' => [
+                    'message' => 'Videos uploaded successfully.',
+                    'videos' => $uploadedVideos,
+                ],
+            ];
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            foreach ($storedVideoPaths as $videoPath) {
+                try {
+                    $this->videoStorageService->deletePath($videoPath);
+                } catch (Throwable $cleanupException) {
+                    Log::warning('Failed to clean up uploaded video after batch failure.', [
+                        'user_id' => $user->id,
+                        'video_path' => $videoPath,
+                        'error' => $cleanupException->getMessage(),
+                    ]);
+                }
+            }
+
+            Log::error('Video upload batch failed.', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->errorResponse(
+                'Failed to upload videos. No changes were saved.',
+                500
+            );
+        }
     }
 
     private function buildUsername(User $user): string

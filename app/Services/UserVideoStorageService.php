@@ -46,16 +46,21 @@ class UserVideoStorageService
                 'video_url' => $disk->url($videoPath),
             ];
         } catch (Throwable $e) {
-            $this->cleanup($disk, $uploadedVideoPath);
+            $this->deletePath($uploadedVideoPath);
 
             throw $e;
         }
     }
 
-    private function cleanup(FilesystemAdapter $disk, ?string $uploadedVideoPath): void
+    public function deletePath(?string $videoPath): void
     {
-        if ($uploadedVideoPath) {
-            $disk->delete($uploadedVideoPath);
+        if (! $videoPath) {
+            return;
         }
+
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('s3');
+
+        $disk->delete($videoPath);
     }
 }
