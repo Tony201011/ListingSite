@@ -54,7 +54,7 @@ class ProviderRegisterController extends Controller
         return $this->signinProvider->execute($request);
     }
 
-    public function otpVerficationForm(): View|RedirectResponse
+    public function otpVerificationForm(): View|RedirectResponse
     {
         $result = $this->showProviderOtpVerificationData->execute();
 

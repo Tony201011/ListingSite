@@ -7,7 +7,7 @@
         initialStatus: @js((bool) $status),
         initialRemainingUses: @js((int) $remainingUses),
         initialExpiresAt: @js($expiresAt ?? null),
-        updateUrl: @js(route('availableUpdateStatus'))
+        updateUrl: @js(route('available.update-status'))
     })"
 >
     <div class="mx-auto max-w-3xl">

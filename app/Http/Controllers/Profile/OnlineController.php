@@ -25,7 +25,7 @@ class OnlineController extends Controller
         return view('profile.online-now', $data);
     }
 
-    public function onlineUpdateStatus(UpdateOnlineStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateOnlineStatusRequest $request): JsonResponse
     {
         $this->authorize('update', ProviderProfile::class);
 

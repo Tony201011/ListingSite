@@ -65,7 +65,7 @@
     class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="profileMessageEditor({
         initialContent: @js($message->message ?? ''),
-        storeUrl: @js(route('storeProfileMessage')),
+        storeUrl: @js(route('profile-message.store')),
         csrfToken: @js(csrf_token())
     })"
 >

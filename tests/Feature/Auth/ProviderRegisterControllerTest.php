@@ -135,7 +135,7 @@ class ProviderRegisterControllerTest extends TestCase
             $showProviderOtpVerificationData
         );
 
-        $response = $this->get(route('otp-verfication'));
+        $response = $this->get(route('otp-verification'));
 
         $response->assertOk();
         $response->assertViewIs('auth.otp-verification');
@@ -160,7 +160,7 @@ class ProviderRegisterControllerTest extends TestCase
             $showProviderOtpVerificationData
         );
 
-        $response = $this->from('/otp-verification')->get(route('otp-verfication'));
+        $response = $this->from('/otp-verification')->get(route('otp-verification'));
 
         $response->assertRedirect('/signup');
         $response->assertSessionHasErrors(['otp']);

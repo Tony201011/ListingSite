@@ -117,7 +117,7 @@ Route::middleware('guest')->group(function (): void {
     Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->name('signin');
     Route::post('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
 
-    Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerficationForm'])->name('otp-verfication');
+    Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerificationForm'])->name('otp-verification');
     Route::post('/verify-otp', [ProviderRegisterController::class, 'verifyOtp'])->middleware('throttle:5,1')->name('verify.otp');
     Route::post('/resend-otp', [ProviderRegisterController::class, 'resendOtp'])->middleware('throttle:3,1')->name('resend.otp');
 
@@ -132,7 +132,7 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function () {
     Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
-    Route::get('/edit-profile', [MyProfileController::class, 'editProfie'])->name('edit-profile');
+    Route::get('/edit-profile', [MyProfileController::class, 'editProfile'])->name('edit-profile');
     Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
     Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
     Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
@@ -186,7 +186,7 @@ Route::middleware('auth')->group(function () {
 
         /********** short url start */
         Route::get('/short-url', [UrlController::class, 'shortUrl'])->name('short-url');
-        Route::post('/short-url/update', [UrlController::class, 'updateShortUrl'])->name('short-url-update');
+        Route::post('/short-url/update', [UrlController::class, 'updateShortUrl'])->name('short-url.update');
         /********* short url end */
 
         /***** referral route start here */
@@ -195,12 +195,12 @@ Route::middleware('auth')->group(function () {
 
         /***** Online route start here */
         Route::get('/online-now', [OnlineController::class, 'onlineNow'])->name('online-now');
-        Route::post('/online-status', [OnlineController::class, 'onlineUpdateStatus'])->name('onlineUpdateStatus');
+        Route::post('/online-status', [OnlineController::class, 'updateStatus'])->name('online.update-status');
         /****** Online route end here */
 
         /***** Online available start here */
         Route::get('/available-now', [AvailableController::class, 'availableNow'])->name('available-now');
-        Route::post('/available-status', [AvailableController::class, 'availableUpdateStatus'])->name('availableUpdateStatus');
+        Route::post('/available-status', [AvailableController::class, 'updateStatus'])->name('available.update-status');
         /***** Online available end here */
 
         /*** forget end here */
@@ -214,7 +214,7 @@ Route::middleware('auth')->group(function () {
 
         /**** profile message route start here */
         Route::get('/profile-message', [ProfileMessageController::class, 'profileMessage'])->name('profile-message');
-        Route::post('/profile-message', [ProfileMessageController::class, 'storeProfileMessage'])->name('storeProfileMessage');
+        Route::post('/profile-message', [ProfileMessageController::class, 'store'])->name('profile-message.store');
         /**** profile message route end here */
 
         /**** hide show profile start here */

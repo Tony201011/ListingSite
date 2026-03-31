@@ -29,7 +29,7 @@ class MyProfileController extends Controller
         return view('profile.my-profile-1', $this->getMyProfilePageData->execute(Auth::user()));
     }
 
-    public function editProfie(): View
+    public function editProfile(): View
     {
         $this->authorize('view', ProviderProfile::class);
 

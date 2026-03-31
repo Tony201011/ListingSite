@@ -6,7 +6,7 @@
     x-data="shortUrlForm({
         initialSlug: @js($slug),
         baseUrl: @js(config('app.url')),
-        updateUrl: @js(route('short-url-update')),
+        updateUrl: @js(route('short-url.update')),
         csrfToken: @js(csrf_token())
     })"
 >

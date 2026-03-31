@@ -26,7 +26,7 @@ class ProfileMessageController extends Controller
         ]);
     }
 
-    public function storeProfileMessage(StoreProfileMessageRequest $request): JsonResponse
+    public function store(StoreProfileMessageRequest $request): JsonResponse
     {
         $this->authorize('update', ProviderProfile::class);
 

@@ -234,19 +234,19 @@ class AuthorizationTest extends TestCase
 
     public function test_guest_cannot_update_short_url(): void
     {
-        $this->postJson(route('short-url-update'), [])->assertUnauthorized();
+        $this->postJson(route('short-url.update'), [])->assertUnauthorized();
     }
 
     // --- Profile settings (ProviderProfile-gated) ---
 
     public function test_guest_cannot_update_online_status(): void
     {
-        $this->postJson(route('onlineUpdateStatus'), [])->assertUnauthorized();
+        $this->postJson(route('online.update-status'), [])->assertUnauthorized();
     }
 
     public function test_guest_cannot_update_available_status(): void
     {
-        $this->postJson(route('availableUpdateStatus'), [])->assertUnauthorized();
+        $this->postJson(route('available.update-status'), [])->assertUnauthorized();
     }
 
     public function test_guest_cannot_update_availability(): void
@@ -256,7 +256,7 @@ class AuthorizationTest extends TestCase
 
     public function test_guest_cannot_store_profile_message(): void
     {
-        $this->postJson(route('storeProfileMessage'), [])->assertUnauthorized();
+        $this->postJson(route('profile-message.store'), [])->assertUnauthorized();
     }
 
     public function test_guest_cannot_update_hide_show_profile(): void
@@ -444,7 +444,7 @@ class AuthorizationTest extends TestCase
 
         $this->withoutMiddleware(CheckProfileSteps::class)
             ->actingAs($user)
-            ->postJson(route('short-url-update'), ['slug' => 'test'])
+            ->postJson(route('short-url.update'), ['slug' => 'test'])
             ->assertForbidden();
     }
 

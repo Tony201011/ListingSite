@@ -25,7 +25,7 @@ class AvailableController extends Controller
         return view('profile.available-now', $data);
     }
 
-    public function availableUpdateStatus(UpdateAvailableStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateAvailableStatusRequest $request): JsonResponse
     {
         $this->authorize('update', ProviderProfile::class);
 

@@ -7,7 +7,7 @@
     initialStatus: @js((bool) $onlineStatus),
     initialRemainingUses: @js($remainingUses),
     initialExpiresAt: @js($expiresAt ?? null),
-    updateUrl: @js(route('onlineUpdateStatus')),
+    updateUrl: @js(route('online.update-status')),
     csrfToken: @js(csrf_token())
     })"
 >
