@@ -20,6 +20,11 @@ class DeleteProfilePhoto
         $wasPrimary = (bool) $photo->is_primary;
 
         DB::transaction(function () use ($photo, $user, $wasPrimary) {
+            // Lock all user photos to serialize concurrent primary-photo changes
+            ProfileImage::where('user_id', $user->id)
+                ->lockForUpdate()
+                ->get();
+
             $photo->delete();
 
             if ($wasPrimary) {
