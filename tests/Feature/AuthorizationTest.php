@@ -12,6 +12,7 @@ use App\Models\ShortUrl;
 use App\Models\Tour;
 use App\Models\User;
 use App\Models\UserVideo;
+use Illuminate\Http\UploadedFile;
 use App\Policies\PhotoVerificationPolicy;
 use App\Policies\ProfileImagePolicy;
 use App\Policies\ProviderProfilePolicy;
@@ -405,8 +406,8 @@ class AuthorizationTest extends TestCase
             ->actingAs($user)
             ->postJson(route('my-rate.store'), [
                 'description' => '30 min',
-                'incall' => 200,
-                'outcall' => 250,
+                'incall' => '200',
+                'outcall' => '250',
             ])
             ->assertForbidden();
     }
@@ -431,7 +432,9 @@ class AuthorizationTest extends TestCase
 
         $this->withoutMiddleware(CheckProfileSteps::class)
             ->actingAs($user)
-            ->postJson(route('photo-verification.upload'), [])
+            ->postJson(route('photo-verification.upload'), [
+                'photos' => [UploadedFile::fake()->image('verify.jpg')],
+            ])
             ->assertForbidden();
     }
 
@@ -454,12 +457,12 @@ class AuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_user_without_profile_cannot_save_profile(): void
+    public function test_user_without_profile_cannot_view_edit_profile(): void
     {
         $user = $this->userWithoutProfile();
 
         $this->actingAs($user)
-            ->postJson(route('edit-profile.save'), [])
+            ->get(route('edit-profile'))
             ->assertForbidden();
     }
 
