@@ -8,17 +8,8 @@ use Illuminate\Support\Facades\Storage;
 
 class DeletePhotoVerificationPhoto
 {
-    public function execute(?User $user, string $path): array
+    public function execute(User $user, string $path): array
     {
-        if (! $user) {
-            return [
-                'status' => 401,
-                'data' => [
-                    'message' => 'Unauthorized.',
-                ],
-            ];
-        }
-
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
 

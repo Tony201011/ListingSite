@@ -131,7 +131,7 @@ function otpVerification(config) {
                 const data = await res.json();
 
                 if (data.success) {
-                    window.location.href = data.redirect || '/dashboard';
+                    window.location.href = data.redirect || '/my-profile';
                 } else {
                     this.verificationStatus = { type: 'error', message: data.message };
                     this.isVerifying = false;

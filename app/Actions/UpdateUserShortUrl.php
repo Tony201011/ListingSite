@@ -7,18 +7,8 @@ use App\Models\User;
 
 class UpdateUserShortUrl
 {
-    public function execute(?User $user, string $slug): array
+    public function execute(User $user, string $slug): array
     {
-        if (! $user) {
-            return [
-                'status' => 401,
-                'data' => [
-                    'success' => false,
-                    'message' => 'User not authenticated.',
-                ],
-            ];
-        }
-
         ShortUrl::query()->updateOrCreate(
             ['user_id' => $user->id],
             ['short_url' => $slug]

@@ -10,17 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class DeleteProfilePhoto
 {
-    public function execute(?User $user, ProfileImage $photo): array
+    public function execute(User $user, ProfileImage $photo): array
     {
-        if (! $user || $photo->user_id !== $user->id) {
-            return [
-                'status' => 403,
-                'data' => [
-                    'message' => 'Unauthorized.',
-                ],
-            ];
-        }
-
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
 

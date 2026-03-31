@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Actions\GetShortUrlPageData;
 use App\Actions\UpdateUserShortUrl;
 use App\Http\Requests\UpdateShortUrlRequest;
+use App\Models\ShortUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -32,6 +33,8 @@ class UrlController extends Controller
 
     public function updateShortUrl(UpdateShortUrlRequest $request): JsonResponse
     {
+        $this->authorize('create', ShortUrl::class);
+
         $result = $this->updateUserShortUrl->execute(
             Auth::user(),
             $request->validated('slug')

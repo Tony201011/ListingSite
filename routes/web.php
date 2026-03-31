@@ -85,6 +85,10 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
 
+Route::post('/booking-enquiry', [BookingController::class, 'send'])
+    ->middleware('throttle:5,1')
+    ->name('booking.enquiry');
+
 Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
 Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
 Route::get('/naughty-corner', [FrontendPageController::class, 'naughtyCorner'])->name('naughty-corner');
@@ -179,8 +183,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/verify-profile-photos/upload', [PhotoVerificationController::class, 'upload'])->name('photo-verification.upload');
         Route::post('/photo-verification/delete-photo', [PhotoVerificationController::class, 'deletePhoto'])->name('photo-verification.delete-photo');
         /****** photo route end here */
-
-        Route::post('/booking-enquiry', [BookingController::class, 'send'])->name('booking.enquiry');
 
         /********** short url start */
         Route::get('/short-url', [UrlController::class, 'shortUrl'])->name('short-url');

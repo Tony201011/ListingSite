@@ -16,6 +16,7 @@ class CreateBookingEnquiry
     {
         $enquiry = DB::transaction(function () use ($validated) {
             return BookingEnquiry::create([
+                'user_id' => $validated['user_id'],
                 'name' => $validated['name'] ?? null,
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,

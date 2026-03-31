@@ -131,7 +131,7 @@ class VerifyProviderSignupOtp
             'data' => [
                 'success' => true,
                 'message' => 'Account created successfully.',
-                'redirect' => url('/profile'),
+                'redirect' => route('my-profile'),
             ],
         ];
     }

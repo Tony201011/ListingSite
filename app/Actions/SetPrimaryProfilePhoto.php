@@ -8,17 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class SetPrimaryProfilePhoto
 {
-    public function execute(?User $user, ProfileImage $photo): array
+    public function execute(User $user, ProfileImage $photo): array
     {
-        if (! $user || $photo->user_id !== $user->id) {
-            return [
-                'status' => 403,
-                'data' => [
-                    'message' => 'Unauthorized.',
-                ],
-            ];
-        }
-
         DB::transaction(function () use ($user, $photo) {
             ProfileImage::where('user_id', $user->id)->update([
                 'is_primary' => false,

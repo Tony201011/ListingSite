@@ -7,6 +7,7 @@ use App\Actions\GetPhotoVerificationPageData;
 use App\Actions\UploadPhotoVerificationPhotos;
 use App\Http\Requests\DeletePhotoVerificationPhotoRequest;
 use App\Http\Requests\UploadPhotoVerificationRequest;
+use App\Models\PhotoVerification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -31,6 +32,8 @@ class PhotoVerificationController extends Controller
 
     public function upload(UploadPhotoVerificationRequest $request): JsonResponse
     {
+        $this->authorize('create', PhotoVerification::class);
+
         try {
             $result = $this->uploadPhotoVerificationPhotos->execute(
                 Auth::user(),

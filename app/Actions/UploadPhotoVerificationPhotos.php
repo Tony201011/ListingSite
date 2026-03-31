@@ -12,17 +12,8 @@ use Throwable;
 
 class UploadPhotoVerificationPhotos
 {
-    public function execute(?User $user, array $photos): array
+    public function execute(User $user, array $photos): array
     {
-        if (! $user) {
-            return [
-                'status' => 401,
-                'data' => [
-                    'message' => 'Unauthenticated.',
-                ],
-            ];
-        }
-
         $countVerification = $user->photoVerification()
             ->whereNull('deleted_at')
             ->count();

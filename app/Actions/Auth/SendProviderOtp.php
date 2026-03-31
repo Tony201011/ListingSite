@@ -1,9 +1,12 @@
 <?php
 
 namespace App\Actions\Auth;
+
 use App\Models\TwilioSetting;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Twilio\Rest\Client;
+
 class SendProviderOtp
 {
     public function execute(string $mobile): array
@@ -11,17 +14,18 @@ class SendProviderOtp
         $twilioSetting = TwilioSetting::query()->first();
         $otp = random_int(100000, 999999);
         $otpExpiresAt = now()->addMinutes(2);
+        $maskedMobile = $this->maskMobile($mobile);
 
         if ($this->isDummyMobile($mobile, $twilioSetting)) {
             $otp = (int) ($twilioSetting->dummy_otp ?: $otp);
 
             Log::info('Dummy mobile OTP mode used', [
-                'mobile' => $this->maskMobile($mobile),
+                'mobile' => $maskedMobile,
             ]);
 
             return [
                 'success' => true,
-                'otp' => $otp,
+                'otp_hash' => Hash::make((string) $otp),
                 'expires_at' => $otpExpiresAt,
             ];
         }
@@ -34,7 +38,7 @@ class SendProviderOtp
             empty($twilioSetting->phone_number)
         ) {
             Log::error('Twilio configuration missing for OTP send.', [
-                'mobile' => $this->maskMobile($mobile),
+                'mobile' => $maskedMobile,
             ]);
 
             return [
@@ -58,18 +62,18 @@ class SendProviderOtp
                 ]
             );
 
-            Log::info('Twilio SMS send attempt', [
-                'mobile' => $this->maskMobile($mobile),
+            Log::info('OTP SMS sent', [
+                'mobile' => $maskedMobile,
             ]);
 
             return [
                 'success' => true,
-                'otp' => $otp,
+                'otp_hash' => Hash::make((string) $otp),
                 'expires_at' => $otpExpiresAt,
             ];
         } catch (\Exception $e) {
             Log::error('Twilio SMS error: ' . $e->getMessage(), [
-                'mobile' => $this->maskMobile($mobile),
+                'mobile' => $maskedMobile,
             ]);
 
             return [
@@ -92,6 +96,11 @@ class SendProviderOtp
         return trim((string) $mobile) === trim((string) $twilioSetting->dummy_mobile_number);
     }
 
+    private function convertToTwilioE164(string $mobile): string
+    {
+        return preg_replace('/^0/', '+61', $mobile);
+    }
+
     private function maskMobile(string $mobile): string
     {
         $length = strlen($mobile);
@@ -101,10 +110,5 @@ class SendProviderOtp
         }
 
         return str_repeat('*', $length - 4) . substr($mobile, -4);
-    }
-
-    private function convertToTwilioE164(string $mobile): string
-    {
-        return preg_replace('/^0/', '+61', $mobile);
     }
 }

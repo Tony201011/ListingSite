@@ -400,15 +400,16 @@
 
             <form method="POST" action="{{ route('booking.enquiry') }}" class="space-y-3">
                 @csrf
+                <input type="hidden" name="user_id" value="{{ auth()->id() }}">
 
                 <input type="text" name="name" value="{{ old('name') }}" placeholder="Your name" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                 <input type="email" name="email" value="{{ old('email') }}" placeholder="Your email (required)" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                 <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="Your phone" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <input type="text" name="datetime" value="{{ old('datetime') }}" placeholder="When / what time would you like to book" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                <input type="datetime-local" name="datetime" value="{{ old('datetime') }}" min="{{ now()->format('Y-m-d\TH:i') }}" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                 <input type="text" name="services" value="{{ old('services') }}" placeholder="What services are you interested in" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                 <input type="text" name="duration" value="{{ old('duration') }}" placeholder="How long would you like to book" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                 <input type="text" name="location" value="{{ old('location') }}" placeholder="Where would you like to meet" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <textarea name="message" rows="3" placeholder="Any other comments" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">{{ old('message') }}</textarea>
+                <textarea name="message" rows="3" maxlength="2000" placeholder="Any other comments" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">{{ old('message') }}</textarea>
 
                 <div class="pt-2 flex gap-3">
                     <button

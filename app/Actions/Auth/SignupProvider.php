@@ -42,7 +42,7 @@ class SignupProvider
         ], now()->addMinutes(10));
 
         Cache::put($pendingKey . '_otp', [
-            'code' => Hash::make((string) $sendResult['otp']),
+            'code' => $sendResult['otp_hash'],
             'expires_at' => $sendResult['expires_at']->timestamp,
         ], $sendResult['expires_at']);
 

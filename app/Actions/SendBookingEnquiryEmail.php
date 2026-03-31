@@ -90,13 +90,24 @@ class SendBookingEnquiryEmail
         ]);
 
         try {
+            $recipientEmail = $enquiry->user?->email;
+
+            if (! $recipientEmail) {
+                Log::error('Booking enquiry email failed: provider email not found.', [
+                    'booking_enquiry_id' => $enquiry->id,
+                    'user_id' => $enquiry->user_id,
+                ]);
+
+                return;
+            }
+
             Mail::mailer('mailgun')->send(
                 'emails.booking-enquiry',
                 [
                     'enquiry' => $enquiry,
                 ],
-                function ($message) use ($enquiry): void {
-                    $message->to('your@email.com')
+                function ($message) use ($enquiry, $recipientEmail): void {
+                    $message->to($recipientEmail)
                         ->replyTo($enquiry->email, $enquiry->name ?? 'Guest')
                         ->subject('New Booking Enquiry');
                 }

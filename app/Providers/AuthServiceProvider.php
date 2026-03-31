@@ -1,16 +1,22 @@
 <?php
+
 namespace App\Providers;
+
+use App\Models\PhotoVerification;
+use App\Models\ProfileImage;
+use App\Models\ProviderProfile;
 use App\Models\Rate;
 use App\Models\RateGroup;
-use App\Models\ProfileImage;
-use App\Models\UserVideo;
-use App\Models\ProviderProfile;
+use App\Models\ShortUrl;
 use App\Models\Tour;
-use App\Policies\ProviderProfilePolicy;
-use App\Policies\TourPolicy;
-use App\Policies\RateGroupPolicy;
+use App\Models\UserVideo;
+use App\Policies\PhotoVerificationPolicy;
 use App\Policies\ProfileImagePolicy;
+use App\Policies\ProviderProfilePolicy;
+use App\Policies\RateGroupPolicy;
 use App\Policies\RatePolicy;
+use App\Policies\ShortUrlPolicy;
+use App\Policies\TourPolicy;
 use App\Policies\UserVideoPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -23,6 +29,8 @@ class AuthServiceProvider extends ServiceProvider
         UserVideo::class => UserVideoPolicy::class,
         ProviderProfile::class => ProviderProfilePolicy::class,
         Tour::class => TourPolicy::class,
+        PhotoVerification::class => PhotoVerificationPolicy::class,
+        ShortUrl::class => ShortUrlPolicy::class,
     ];
 
     public function boot(): void

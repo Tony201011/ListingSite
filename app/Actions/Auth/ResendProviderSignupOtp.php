@@ -3,7 +3,6 @@
 namespace App\Actions\Auth;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
@@ -88,7 +87,7 @@ class ResendProviderSignupOtp
         $resendCooldownSeconds = 30;
 
         Cache::put($pendingKey . '_otp', [
-            'code' => Hash::make((string) $sendResult['otp']),
+            'code' => $sendResult['otp_hash'],
             'expires_at' => $sendResult['expires_at']->timestamp,
         ], $sendResult['expires_at']);
 
@@ -100,7 +99,7 @@ class ResendProviderSignupOtp
         Cache::put($resendCountKey, $resendCount + 1, now()->addMinutes(self::RESEND_WINDOW_MINUTES));
 
         Log::info('OTP resent successfully', [
-            'mobile' => $this->maskMobile($pendingUser['mobile']),
+            'mobile' => $pendingUser['maskMobile'] ?? '***',
         ]);
 
         return [
@@ -112,16 +111,5 @@ class ResendProviderSignupOtp
                 'resend_cooldown' => $resendCooldownSeconds,
             ],
         ];
-    }
-
-    private function maskMobile(string $mobile): string
-    {
-        $length = strlen($mobile);
-
-        if ($length <= 4) {
-            return str_repeat('*', $length);
-        }
-
-        return str_repeat('*', $length - 4) . substr($mobile, -4);
     }
 }
