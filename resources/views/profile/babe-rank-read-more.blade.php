@@ -5,7 +5,7 @@
     <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-5">
             <a
-                href="{{ url('/after-image-upload') }}"
+                href="{{ url('/profile') }}"
                 class="text-base text-[#e04ecb] transition hover:underline"
             >
                 &larr; back to dashboard

@@ -3,7 +3,7 @@
 @section('content')
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto">
-        <a href="{{ url('/after-image-upload') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium">
+        <a href="{{ url('/profile') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium">
             <span class="mr-1">&lt;</span> Back to dashboard
         </a>
 
@@ -77,7 +77,7 @@
                         Contact support
                     </a>
 
-                    <a href="{{ url('/after-image-upload') }}" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition">
+                    <a href="{{ url('/profile') }}" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition">
                         Cancel
                     </a>
                 </div>

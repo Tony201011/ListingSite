@@ -234,7 +234,7 @@
 
             <div class="text-center border-t border-gray-200 mt-8 pt-6">
                 <p class="text-gray-500 text-sm">
-                    <a href="{{ url('/after-image-upload') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">
+                    <a href="{{ url('/profile') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">
                         Return to dashboard
                     </a>
                 </p>
