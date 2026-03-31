@@ -3,24 +3,34 @@
 namespace App\Actions\Auth;
 
 use App\Models\TwilioSetting;
+use App\ValueObjects\AustralianMobile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Twilio\Rest\Client;
 
 class SendProviderOtp
 {
     public function execute(string $mobile): array
     {
+        try {
+            $phone = AustralianMobile::fromString($mobile);
+        } catch (InvalidArgumentException) {
+            return [
+                'success' => false,
+                'message' => 'Invalid Australian mobile number.',
+            ];
+        }
+
         $twilioSetting = TwilioSetting::query()->first();
         $otp = random_int(100000, 999999);
         $otpExpiresAt = now()->addMinutes(2);
-        $maskedMobile = $this->maskMobile($mobile);
 
-        if ($this->isDummyMobile($mobile, $twilioSetting)) {
+        if ($this->isDummyMobile($phone, $twilioSetting)) {
             $otp = (int) ($twilioSetting->dummy_otp ?: $otp);
 
             Log::info('Dummy mobile OTP mode used', [
-                'mobile' => $maskedMobile,
+                'mobile' => $phone->toMasked(),
             ]);
 
             return [
@@ -38,7 +48,7 @@ class SendProviderOtp
             empty($twilioSetting->phone_number)
         ) {
             Log::error('Twilio configuration missing for OTP send.', [
-                'mobile' => $maskedMobile,
+                'mobile' => $phone->toMasked(),
             ]);
 
             return [
@@ -55,7 +65,7 @@ class SendProviderOtp
             );
 
             $client->messages->create(
-                $this->convertToTwilioE164($mobile),
+                $phone->toE164(),
                 [
                     'from' => $twilioSetting->phone_number,
                     'body' => "Your HOTESCORT verification code is: {$otp}",
@@ -63,7 +73,7 @@ class SendProviderOtp
             );
 
             Log::info('OTP SMS sent', [
-                'mobile' => $maskedMobile,
+                'mobile' => $phone->toMasked(),
             ]);
 
             return [
@@ -73,7 +83,7 @@ class SendProviderOtp
             ];
         } catch (\Exception $e) {
             Log::error('Twilio SMS error: ' . $e->getMessage(), [
-                'mobile' => $maskedMobile,
+                'mobile' => $phone->toMasked(),
             ]);
 
             return [
@@ -83,7 +93,7 @@ class SendProviderOtp
         }
     }
 
-    private function isDummyMobile(?string $mobile, ?TwilioSetting $twilioSetting): bool
+    private function isDummyMobile(AustralianMobile $phone, ?TwilioSetting $twilioSetting): bool
     {
         if (! $twilioSetting || ! $twilioSetting->dummy_mode_enabled) {
             return false;
@@ -93,22 +103,6 @@ class SendProviderOtp
             return false;
         }
 
-        return trim((string) $mobile) === trim((string) $twilioSetting->dummy_mobile_number);
-    }
-
-    private function convertToTwilioE164(string $mobile): string
-    {
-        return preg_replace('/^0/', '+61', $mobile);
-    }
-
-    private function maskMobile(string $mobile): string
-    {
-        $length = strlen($mobile);
-
-        if ($length <= 4) {
-            return str_repeat('*', $length);
-        }
-
-        return str_repeat('*', $length - 4) . substr($mobile, -4);
+        return $phone->equals($twilioSetting->dummy_mobile_number);
     }
 }

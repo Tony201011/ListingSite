@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\GoogleRecaptchaSetting;
 use App\Models\SiteSetting;
+use App\ValueObjects\AustralianMobile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -13,6 +14,18 @@ class ProviderSignupRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('mobile') && is_string($this->input('mobile'))) {
+            try {
+                $phone = AustralianMobile::fromString($this->input('mobile'));
+                $this->merge(['mobile' => $phone->toLocal()]);
+            } catch (\InvalidArgumentException) {
+                // Leave as-is; the regex rule will reject it
+            }
+        }
     }
 
     public function rules(): array

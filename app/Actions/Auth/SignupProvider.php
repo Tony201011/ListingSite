@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Actions\Auth;
+
 use App\Models\User;
+use App\ValueObjects\AustralianMobile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+
 class SignupProvider
 {
     public function __construct(
@@ -15,12 +18,12 @@ class SignupProvider
 
     public function execute(array $validated): RedirectResponse
     {
-        $mobile = $validated['mobile'];
-        $pendingKey = 'provider_signup_' . md5($validated['email'] . '|' . $validated['mobile']);
+        $phone = AustralianMobile::fromString($validated['mobile']);
+        $normalizedMobile = $phone->toLocal();
 
-        $sendResult = $this->sendProviderOtp->execute($mobile);
-        $maskMobile = $this->maskMobile($mobile);
+        $pendingKey = 'provider_signup_' . md5($validated['email'] . '|' . $normalizedMobile);
 
+        $sendResult = $this->sendProviderOtp->execute($normalizedMobile);
 
         if (! $sendResult['success']) {
             return back()->withErrors([
@@ -31,10 +34,10 @@ class SignupProvider
         Cache::put($pendingKey, [
             'name' => $validated['nickname'],
             'email' => $validated['email'],
-            'mobile' => $validated['mobile'],
+            'mobile' => $normalizedMobile,
             'password' => Hash::make($validated['password']),
             'suburb' => $validated['suburb'],
-            'maskMobile' => $maskMobile,
+            'maskMobile' => $phone->toMasked(),
             'role' => User::ROLE_PROVIDER,
             'mobile_verified' => false,
             'referral_code' => $validated['referral_code'] ?? null,
@@ -52,17 +55,4 @@ class SignupProvider
         return redirect('/otp-verification')
             ->with('success', 'OTP sent successfully. Please verify your mobile number.');
     }
-
-    private function maskMobile(string $mobile): string
-    {
-        $length = strlen($mobile);
-
-        if ($length <= 4) {
-            return str_repeat('*', $length);
-        }
-
-        return str_repeat('*', $length - 4) . substr($mobile, -4);
-    }
-
-
 }
