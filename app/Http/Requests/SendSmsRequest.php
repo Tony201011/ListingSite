@@ -16,7 +16,7 @@ class SendSmsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'regex:/^[\d\s\-\+\(\)]{6,20}$/'],
             'message' => ['required', 'string', 'max:1000'],
         ];
     }

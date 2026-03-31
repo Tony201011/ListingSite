@@ -17,7 +17,7 @@ class UploadPhotosRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'photos' => ['required', 'array', 'min:1'],
+            'photos' => ['required', 'array', 'min:1', 'max:20'],
             'photos.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
         ];
     }
@@ -28,6 +28,7 @@ class UploadPhotosRequest extends FormRequest
             'photos.required' => 'Please upload at least one photo.',
             'photos.array' => 'Photos must be sent as an array.',
             'photos.min' => 'Please upload at least one photo.',
+            'photos.max' => 'You may not upload more than 20 photos at a time.',
             'photos.*.required' => 'Each photo file is required.',
             'photos.*.image' => 'Each uploaded item must be a valid image.',
             'photos.*.mimes' => 'Allowed image formats are jpg, jpeg, png, and webp.',

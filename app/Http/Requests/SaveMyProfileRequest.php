@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Rules\CategoryOfType;
+use App\ValueObjects\AustralianMobile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,14 +14,26 @@ class SaveMyProfileRequest extends FormRequest
         return Auth::check();
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('mobile') && is_string($this->input('mobile'))) {
+            try {
+                $phone = AustralianMobile::fromString($this->input('mobile'));
+                $this->merge(['mobile' => $phone->toLocal()]);
+            } catch (\InvalidArgumentException) {
+                // Leave as-is; the regex rule will reject it
+            }
+        }
+    }
+
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'mobile' => ['required', 'string', 'max:30'],
+            'mobile' => ['required', 'regex:/^04\d{8}$/'],
             'suburb' => ['required', 'string', 'max:255'],
-            'introduction_line' => ['required', 'string'],
-            'profile_text' => ['required', 'string'],
+            'introduction_line' => ['required', 'string', 'max:500'],
+            'profile_text' => ['required', 'string', 'max:5000'],
 
             'age_group' => ['required', 'integer', new CategoryOfType('age-group')],
             'hair_color' => ['required', 'integer', new CategoryOfType('hair-color')],
@@ -58,6 +71,7 @@ class SaveMyProfileRequest extends FormRequest
         return [
             'name.required' => 'Name is required.',
             'mobile.required' => 'Mobile is required.',
+            'mobile.regex' => 'The mobile number must be a valid Australian mobile starting with 04.',
             'suburb.required' => 'Suburb is required.',
             'introduction_line.required' => 'Introduction line is required.',
             'profile_text.required' => 'Profile text is required.',

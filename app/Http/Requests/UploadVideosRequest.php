@@ -17,7 +17,7 @@ class UploadVideosRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'videos' => ['required', 'array', 'min:1'],
+            'videos' => ['required', 'array', 'min:1', 'max:5'],
             'videos.*' => ['required', 'file', 'mimes:mp4,mov,avi,wmv,webm,mkv', 'max:102400'],
         ];
     }
@@ -28,6 +28,7 @@ class UploadVideosRequest extends FormRequest
             'videos.required' => 'Please upload at least one video.',
             'videos.array' => 'Videos must be sent as an array.',
             'videos.min' => 'Please upload at least one video.',
+            'videos.max' => 'You may not upload more than 5 videos at a time.',
             'videos.*.required' => 'Each video file is required.',
             'videos.*.file' => 'Each uploaded item must be a valid file.',
             'videos.*.mimes' => 'Allowed video formats are mp4, mov, avi, wmv, webm, and mkv.',
