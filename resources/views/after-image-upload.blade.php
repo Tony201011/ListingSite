@@ -54,7 +54,7 @@
         <div class="bg-[#e04ecb] text-white rounded-2xl p-5 sm:p-6 mb-4 shadow-sm">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-2">✅ PHOTO VERIFICATION OPTIONAL</h2>
             <p class="mb-4 text-sm sm:text-base">Your profile can be listed with or without verification. Verify 2 photos only if you want the “Photos Verified” badge.</p>
-            <a href="{{ url('/click-here-to-verify') }}" class="inline-flex bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition">Verify photos for badge</a>
+            <a href="{{ url('/verify-photo') }}" class="inline-flex bg-white text-gray-700 hover:bg-pink-50 px-5 py-2 rounded-lg font-medium transition">Verify photos for badge</a>
             <p class="mt-4 text-sm text-white/90">If you already submitted photos by email or SMS, just wait for the badge review.</p>
         </div>
 

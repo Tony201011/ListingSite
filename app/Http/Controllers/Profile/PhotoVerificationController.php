@@ -24,7 +24,7 @@ class PhotoVerificationController extends Controller
     public function index(): View
     {
         return view(
-            'profile.click-here-to-verify',
+            'profile.verify-photo',
             $this->getPhotoVerificationPageData->execute(Auth::user())
         );
     }

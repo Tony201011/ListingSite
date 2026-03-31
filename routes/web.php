@@ -174,7 +174,7 @@ Route::middleware('auth')->group(function () {
         /************* rate and group route end here */
 
         /*** photo route start here */
-        Route::get('/click-here-to-verify', [PhotoVerificationController::class, 'index'])->name('verify.photos');
+        Route::get('/verify-photo', [PhotoVerificationController::class, 'index'])->name('verify.photos');
         Route::post('/verify-profile-photos/upload', [PhotoVerificationController::class, 'upload'])->name('photo-verification.upload');
         Route::post('/photo-verification/delete-photo', [PhotoVerificationController::class, 'deletePhoto'])->name('photo-verification.delete-photo');
         /****** photo route end here */

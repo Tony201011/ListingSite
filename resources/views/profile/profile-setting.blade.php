@@ -42,7 +42,7 @@
                     Your profile is not yet verified. Verified profiles get a verified badge.
                 </p>
                 <a
-                    href="{{ url('/click-here-to-verify') }}"
+                    href="{{ url('/verify-photo') }}"
                     class="inline-flex items-center px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-semibold transition"
                 >
                     Verify now
