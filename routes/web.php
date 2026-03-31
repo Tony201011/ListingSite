@@ -187,7 +187,7 @@ Route::middleware('auth')->group(function () {
         /********* short url end */
 
         /***** referrals route start here */
-        Route::get('/referrals', [ReferralsController::class, 'referrals'])->name('referrals');
+        Route::get('/referral', [ReferralsController::class, 'referral'])->name('referral');
         /***** referrals route end here */
 
         /***** Online route start here */
