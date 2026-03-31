@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\CategoryOfType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,13 +22,13 @@ class SaveMyProfileRequest extends FormRequest
             'introduction_line' => ['required', 'string'],
             'profile_text' => ['required', 'string'],
 
-            'age_group' => ['required', 'exists:categories,id'],
-            'hair_color' => ['required', 'exists:categories,id'],
-            'hair_length' => ['required', 'exists:categories,id'],
-            'ethnicity' => ['required', 'exists:categories,id'],
-            'body_type' => ['required', 'exists:categories,id'],
-            'bust_size' => ['required', 'exists:categories,id'],
-            'your_length' => ['required', 'exists:categories,id'],
+            'age_group' => ['required', 'integer', new CategoryOfType('age-group')],
+            'hair_color' => ['required', 'integer', new CategoryOfType('hair-color')],
+            'hair_length' => ['required', 'integer', new CategoryOfType('hair-length')],
+            'ethnicity' => ['required', 'integer', new CategoryOfType('ethnicity')],
+            'body_type' => ['required', 'integer', new CategoryOfType('body-type')],
+            'bust_size' => ['required', 'integer', new CategoryOfType('bust-size')],
+            'your_length' => ['required', 'integer', new CategoryOfType('your-length')],
 
             'availability' => ['required', 'string', 'max:100'],
             'contact_method' => ['required', 'string', 'max:100'],

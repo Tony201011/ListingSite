@@ -134,11 +134,13 @@ class SaveMyProfile
         }
     }
 
-    private function categoryExistsForType(int $id, string $type): bool
+    private function categoryExistsForType(int $id, string $parentSlug): bool
     {
         return Category::query()
             ->where('id', $id)
-            ->where('type', $type)
+            ->where('is_active', true)
+            ->where('website_type', 'adult')
+            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug))
             ->exists();
     }
 }

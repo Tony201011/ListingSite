@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ShowProfileRequest extends FormRequest
 {
@@ -22,7 +23,10 @@ class ShowProfileRequest extends FormRequest
     {
         return [
             'categories' => ['nullable', 'array'],
-            'categories.*' => ['integer', 'exists:categories,id'],
+            'categories.*' => [
+                'integer',
+                Rule::exists('categories', 'id')->where('is_active', true),
+            ],
         ];
     }
 
