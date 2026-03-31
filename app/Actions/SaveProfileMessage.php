@@ -6,18 +6,8 @@ use App\Models\User;
 
 class SaveProfileMessage
 {
-    public function execute(?User $user, string $message): array
+    public function execute(User $user, string $message): array
     {
-        if (! $user) {
-            return [
-                'status' => 401,
-                'data' => [
-                    'success' => false,
-                    'message' => 'User not authenticated.',
-                ],
-            ];
-        }
-
         $profileMessage = $user->profileMessage;
 
         if ($profileMessage) {

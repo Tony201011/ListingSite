@@ -5,15 +5,23 @@ namespace Tests\Feature\Profile;
 use App\Actions\DeleteUserVideo;
 use App\Actions\GetUserVideos;
 use App\Actions\UploadUserVideos;
+use App\Http\Middleware\CheckProfileSteps;
 use App\Models\User;
 use App\Models\UserVideo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Mockery;
 use Tests\TestCase;
 
 class MyVideosControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(CheckProfileSteps::class);
+    }
 
     protected function tearDown(): void
     {
@@ -26,7 +34,7 @@ class MyVideosControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('profile.videos.index'));
+        $response = $this->actingAs($user)->get(route('upload-video'));
 
         $response->assertOk();
         $response->assertViewIs('profile.upload-video');
@@ -39,20 +47,20 @@ class MyVideosControllerTest extends TestCase
         $getUserVideos = Mockery::mock(GetUserVideos::class);
         $getUserVideos->shouldReceive('execute')
             ->once()
-            ->with($user->id)
+            ->with(Mockery::on(fn ($arg) => $arg->is($user)))
             ->andReturn([
-                'videos' => [
+                'videos' => collect([
                     [
                         'id' => 1,
                         'video_url' => 'https://example.com/video.mp4',
                         'original_name' => 'video.mp4',
                     ],
-                ],
+                ]),
             ]);
 
         $this->app->instance(GetUserVideos::class, $getUserVideos);
 
-        $response = $this->actingAs($user)->get(route('profile.videos.list'));
+        $response = $this->actingAs($user)->get(route('my-videos'));
 
         $response->assertOk();
         $response->assertViewIs('profile.my-videos');
@@ -84,8 +92,8 @@ class MyVideosControllerTest extends TestCase
 
         $this->app->instance(UploadUserVideos::class, $uploadUserVideos);
 
-        $response = $this->actingAs($user)->postJson(route('profile.videos.upload'), [
-            'videos' => [],
+        $response = $this->actingAs($user)->postJson(route('videos.upload'), [
+            'videos' => [UploadedFile::fake()->create('test.mp4', 1024, 'video/mp4')],
         ]);
 
         $response->assertOk();
@@ -109,8 +117,8 @@ class MyVideosControllerTest extends TestCase
 
         $this->app->instance(UploadUserVideos::class, $uploadUserVideos);
 
-        $response = $this->actingAs($user)->postJson(route('profile.videos.upload'), [
-            'videos' => [],
+        $response = $this->actingAs($user)->postJson(route('videos.upload'), [
+            'videos' => [UploadedFile::fake()->create('test.mp4', 1024, 'video/mp4')],
         ]);
 
         $response->assertStatus(500);
@@ -132,8 +140,8 @@ class MyVideosControllerTest extends TestCase
 
         $this->app->instance(UploadUserVideos::class, $uploadUserVideos);
 
-        $response = $this->actingAs($user)->postJson(route('profile.videos.upload'), [
-            'videos' => [],
+        $response = $this->actingAs($user)->postJson(route('videos.upload'), [
+            'videos' => [UploadedFile::fake()->create('test.mp4', 1024, 'video/mp4')],
         ]);
 
         $response->assertStatus(500);
@@ -156,8 +164,8 @@ class MyVideosControllerTest extends TestCase
 
         $this->app->instance(UploadUserVideos::class, $uploadUserVideos);
 
-        $response = $this->actingAs($user)->postJson(route('profile.videos.upload'), [
-            'videos' => [],
+        $response = $this->actingAs($user)->postJson(route('videos.upload'), [
+            'videos' => [UploadedFile::fake()->create('test.mp4', 1024, 'video/mp4')],
         ]);
 
         $response->assertStatus(500);
@@ -170,7 +178,7 @@ class MyVideosControllerTest extends TestCase
     public function test_destroy_returns_json_response_from_action(): void
     {
         $user = User::factory()->create();
-        $video = UserVideo::factory()->create();
+        $video = UserVideo::factory()->create(['user_id' => $user->id]);
 
         $deleteUserVideo = Mockery::mock(DeleteUserVideo::class);
         $deleteUserVideo->shouldReceive('execute')
@@ -185,7 +193,7 @@ class MyVideosControllerTest extends TestCase
 
         $this->app->instance(DeleteUserVideo::class, $deleteUserVideo);
 
-        $response = $this->actingAs($user)->deleteJson(route('profile.videos.destroy', $video));
+        $response = $this->actingAs($user)->deleteJson(route('videos.destroy', $video));
 
         $response->assertOk();
         $response->assertJson([
@@ -195,21 +203,21 @@ class MyVideosControllerTest extends TestCase
 
     public function test_guest_cannot_access_index(): void
     {
-        $response = $this->get(route('profile.videos.index'));
+        $response = $this->get(route('upload-video'));
 
         $response->assertRedirect();
     }
 
     public function test_guest_cannot_access_get_videos(): void
     {
-        $response = $this->get(route('profile.videos.list'));
+        $response = $this->get(route('my-videos'));
 
         $response->assertRedirect();
     }
 
     public function test_guest_cannot_upload_videos(): void
     {
-        $response = $this->postJson(route('profile.videos.upload'), [
+        $response = $this->postJson(route('videos.upload'), [
             'videos' => [],
         ]);
 
@@ -220,7 +228,7 @@ class MyVideosControllerTest extends TestCase
     {
         $video = UserVideo::factory()->create();
 
-        $response = $this->deleteJson(route('profile.videos.destroy', $video));
+        $response = $this->deleteJson(route('videos.destroy', $video));
 
         $response->assertStatus(401);
     }

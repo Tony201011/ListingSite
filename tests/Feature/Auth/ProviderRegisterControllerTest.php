@@ -41,7 +41,7 @@ class ProviderRegisterControllerTest extends TestCase
 
         $this->app->instance(BuildAuthPageData::class, $buildAuthPageData);
 
-        $response = $this->get(route('provider.signup.form'));
+        $response = $this->get(route('signup'));
 
         $response->assertOk();
         $response->assertViewIs('auth.signup');
@@ -76,7 +76,7 @@ class ProviderRegisterControllerTest extends TestCase
 
         $this->app->instance(SignupProvider::class, $signupProvider);
 
-        $response = $this->from('/signup')->post(route('provider.signup'), $validated);
+        $response = $this->from('/signup')->post(route('signup.submit'), $validated);
 
         $response->assertRedirect('/otp-verification');
         $response->assertSessionHas('success', 'OTP sent successfully. Please verify your mobile number.');
@@ -93,7 +93,7 @@ class ProviderRegisterControllerTest extends TestCase
 
         $this->app->instance(BuildAuthPageData::class, $buildAuthPageData);
 
-        $response = $this->get(route('provider.signin.form'));
+        $response = $this->get(route('signin'));
 
         $response->assertOk();
         $response->assertViewIs('auth.signin');
@@ -112,7 +112,7 @@ class ProviderRegisterControllerTest extends TestCase
 
         $this->app->instance(SigninProvider::class, $signinProvider);
 
-        $response = $this->from('/signin')->post(route('provider.signin'), [
+        $response = $this->from('/signin')->post(route('signin.submit'), [
             'email' => 'provider@example.com',
             'password' => 'secret123',
         ]);
@@ -135,7 +135,7 @@ class ProviderRegisterControllerTest extends TestCase
             $showProviderOtpVerificationData
         );
 
-        $response = $this->get(route('provider.otp.form'));
+        $response = $this->get(route('otp-verfication'));
 
         $response->assertOk();
         $response->assertViewIs('auth.otp-verification');
@@ -160,7 +160,7 @@ class ProviderRegisterControllerTest extends TestCase
             $showProviderOtpVerificationData
         );
 
-        $response = $this->from('/otp-verification')->get(route('provider.otp.form'));
+        $response = $this->from('/otp-verification')->get(route('otp-verfication'));
 
         $response->assertRedirect('/signup');
         $response->assertSessionHasErrors(['otp']);
@@ -180,7 +180,7 @@ class ProviderRegisterControllerTest extends TestCase
 
         $this->app->instance(ResendProviderSignupOtp::class, $resendProviderSignupOtp);
 
-        $response = $this->postJson(route('provider.otp.resend'));
+        $response = $this->postJson(route('resend.otp'));
 
         $response->assertOk();
         $response->assertJson([
@@ -203,7 +203,7 @@ class ProviderRegisterControllerTest extends TestCase
 
         $this->app->instance(VerifyProviderSignupOtp::class, $verifyProviderSignupOtp);
 
-        $response = $this->postJson(route('provider.otp.verify'), [
+        $response = $this->postJson(route('verify.otp'), [
             'otp' => '123456',
         ]);
 
@@ -217,24 +217,16 @@ class ProviderRegisterControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $logoutProvider = Mockery::mock(LogoutProvider::class);
-        $logoutProvider->shouldReceive('execute')
-            ->once()
-            ->with(Mockery::type(Request::class))
-            ->andReturn(redirect('/signin'));
+        $response = $this->actingAs($user)->post(route('logout'));
 
-        $this->app->instance(LogoutProvider::class, $logoutProvider);
-
-        $response = $this->actingAs($user)->post(route('provider.logout'));
-
-        $response->assertRedirect('/signin');
+        $response->assertRedirect('/');
     }
 
     public function test_change_password_returns_view(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('provider.password.change'));
+        $response = $this->actingAs($user)->get(route('change-password'));
 
         $response->assertOk();
         $response->assertViewIs('auth.change-password');
@@ -257,7 +249,8 @@ class ProviderRegisterControllerTest extends TestCase
 
         $this->app->instance(ChangeProviderPassword::class, $changeProviderPassword);
 
-        $response = $this->actingAs($user)->postJson(route('provider.password.update'), [
+        $response = $this->actingAs($user)->postJson(route('change-password.update'), [
+            'current_password' => 'password',
             'new_password' => 'new-secret-123',
             'new_password_confirmation' => 'new-secret-123',
         ]);
@@ -272,7 +265,7 @@ class ProviderRegisterControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('provider.account.delete'));
+        $response = $this->actingAs($user)->get(route('account.delete-page'));
 
         $response->assertOk();
         $response->assertViewIs('auth.delete-account');

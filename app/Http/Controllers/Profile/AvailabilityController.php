@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Actions\GetUserAvailability;
 use App\Actions\UpdateUserAvailability;
 use App\Http\Requests\UpdateAvailabilityRequest;
+use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,8 @@ class AvailabilityController extends Controller
 
     public function update(UpdateAvailabilityRequest $request): JsonResponse|RedirectResponse
     {
+        $this->authorize('update', ProviderProfile::class);
+
         $this->updateUserAvailability->execute(
             Auth::id(),
             $request->validated()['availability'] ?? []

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Actions\GetAvailableNowState;
 use App\Actions\UpdateAvailableNowStatus;
 use App\Http\Requests\UpdateAvailableStatusRequest;
+use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
@@ -26,6 +27,8 @@ class AvailableController extends Controller
 
     public function availableUpdateStatus(UpdateAvailableStatusRequest $request): JsonResponse
     {
+        $this->authorize('update', ProviderProfile::class);
+
         $result = $this->updateAvailableNowStatus->execute(
             $request->user(),
             $request->string('status')->toString()

@@ -7,18 +7,8 @@ use App\Models\User;
 
 class UpdateShowHideProfileState
 {
-    public function execute(?User $user, string $status): array
+    public function execute(User $user, string $status): array
     {
-        if (! $user) {
-            return [
-                'status' => 401,
-                'data' => [
-                    'success' => false,
-                    'message' => 'User not authenticated.',
-                ],
-            ];
-        }
-
         $profileVisibility = HideShowProfile::updateOrCreate(
             ['user_id' => $user->id],
             ['status' => $status]

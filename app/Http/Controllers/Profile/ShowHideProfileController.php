@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Actions\GetShowHideProfileState;
 use App\Actions\UpdateShowHideProfileState;
 use App\Http\Requests\UpdateShowHideProfileRequest;
+use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -28,6 +29,8 @@ class ShowHideProfileController extends Controller
 
     public function updateHideShowProfile(UpdateShowHideProfileRequest $request): JsonResponse
     {
+        $this->authorize('update', ProviderProfile::class);
+
         $result = $this->updateShowHideProfileState->execute(
             Auth::user(),
             $request->validated('status')

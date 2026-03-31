@@ -7,17 +7,8 @@ use App\Models\User;
 
 class UpdateOnlineNowStatus
 {
-    public function execute(?User $user, ?string $status): array
+    public function execute(User $user, ?string $status): array
     {
-        if (! $user) {
-            return [
-                'status' => 401,
-                'data' => [
-                    'message' => 'Unauthorized.',
-                ],
-            ];
-        }
-
         $onlineUser = $this->getOrCreateOnlineUser($user->id);
 
         $this->expireIfNeeded($onlineUser);

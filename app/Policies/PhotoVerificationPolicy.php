@@ -21,4 +21,9 @@ class PhotoVerificationPolicy
     {
         return $photoVerification->user_id === $user->id;
     }
+
+    public function deletePhoto(User $user): bool
+    {
+        return $user->providerProfile()->exists();
+    }
 }

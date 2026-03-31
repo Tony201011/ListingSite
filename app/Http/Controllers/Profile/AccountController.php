@@ -16,7 +16,7 @@ class AccountController extends Controller
 
     public function deleteAccountPage()
     {
-        return view('delete-account');
+        return view('auth.delete-account');
     }
 
     public function destroy(DeleteAccountRequest $request)

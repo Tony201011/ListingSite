@@ -55,6 +55,8 @@ class PhotoVerificationController extends Controller
 
     public function deletePhoto(DeletePhotoVerificationPhotoRequest $request): JsonResponse
     {
+        $this->authorize('deletePhoto', PhotoVerification::class);
+
         $result = $this->deletePhotoVerificationPhoto->execute(
             Auth::user(),
             $request->validated('path')

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Actions\CreateBookingEnquiry;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Tests\TestCase;
@@ -20,7 +21,10 @@ class BookingControllerTest extends TestCase
 
     public function test_send_creates_booking_enquiry_and_redirects_back_with_success_message(): void
     {
+        $user = User::factory()->create();
+
         $validatedPayload = [
+            'user_id' => $user->id,
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'phone' => '0400000000',
@@ -38,7 +42,7 @@ class BookingControllerTest extends TestCase
 
         $this->app->instance(CreateBookingEnquiry::class, $createBookingEnquiry);
 
-        $response = $this->from('/booking')->post(route('booking.send'), $validatedPayload);
+        $response = $this->from('/booking')->post(route('booking.enquiry'), $validatedPayload);
 
         $response->assertRedirect('/booking');
         $response->assertSessionHas('success', 'Enquiry sent successfully!');
@@ -46,12 +50,15 @@ class BookingControllerTest extends TestCase
 
     public function test_send_does_not_call_action_when_email_is_missing(): void
     {
+        $user = User::factory()->create();
+
         $createBookingEnquiry = Mockery::mock(CreateBookingEnquiry::class);
         $createBookingEnquiry->shouldNotReceive('execute');
 
         $this->app->instance(CreateBookingEnquiry::class, $createBookingEnquiry);
 
-        $response = $this->from('/booking')->post(route('booking.send'), [
+        $response = $this->from('/booking')->post(route('booking.enquiry'), [
+            'user_id' => $user->id,
             'name' => 'John Doe',
             'email' => '',
             'phone' => '0400000000',
@@ -63,12 +70,15 @@ class BookingControllerTest extends TestCase
 
     public function test_send_does_not_call_action_when_email_is_invalid(): void
     {
+        $user = User::factory()->create();
+
         $createBookingEnquiry = Mockery::mock(CreateBookingEnquiry::class);
         $createBookingEnquiry->shouldNotReceive('execute');
 
         $this->app->instance(CreateBookingEnquiry::class, $createBookingEnquiry);
 
-        $response = $this->from('/booking')->post(route('booking.send'), [
+        $response = $this->from('/booking')->post(route('booking.enquiry'), [
+            'user_id' => $user->id,
             'name' => 'John Doe',
             'email' => 'not-an-email',
             'phone' => '0400000000',
@@ -80,7 +90,10 @@ class BookingControllerTest extends TestCase
 
     public function test_send_passes_only_validated_data_to_action(): void
     {
+        $user = User::factory()->create();
+
         $requestPayload = [
+            'user_id' => $user->id,
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'phone' => '0412345678',
@@ -93,6 +106,7 @@ class BookingControllerTest extends TestCase
         ];
 
         $expectedValidatedPayload = [
+            'user_id' => $user->id,
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'phone' => '0412345678',
@@ -110,7 +124,7 @@ class BookingControllerTest extends TestCase
 
         $this->app->instance(CreateBookingEnquiry::class, $createBookingEnquiry);
 
-        $response = $this->from('/booking')->post(route('booking.send'), $requestPayload);
+        $response = $this->from('/booking')->post(route('booking.enquiry'), $requestPayload);
 
         $response->assertRedirect('/booking');
         $response->assertSessionHas('success', 'Enquiry sent successfully!');

@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->redirectUsersTo('/');
+        $middleware->redirectGuestsTo('/signin');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

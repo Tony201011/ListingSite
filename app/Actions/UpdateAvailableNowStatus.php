@@ -7,18 +7,8 @@ use App\Models\User;
 
 class UpdateAvailableNowStatus
 {
-    public function execute(?User $user, string $status): array
+    public function execute(User $user, string $status): array
     {
-        if (! $user) {
-            return [
-                'code' => 401,
-                'data' => [
-                    'success' => false,
-                    'message' => 'User not authenticated.',
-                ],
-            ];
-        }
-
         $available = $this->getOrCreateAvailableNow($user->id);
 
         $this->syncExpiredStatus($available);
