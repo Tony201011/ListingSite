@@ -39,7 +39,7 @@
                     </button>
 
                     <a
-                        href="{{ url('/after-image-upload') }}"
+                        href="{{ url('/profile') }}"
                         class="inline-flex w-full items-center justify-center rounded-full border border-pink-300 px-8 py-3 font-semibold text-pink-700 transition hover:bg-pink-50 sm:w-auto"
                     >
                         Continue setting up your profile

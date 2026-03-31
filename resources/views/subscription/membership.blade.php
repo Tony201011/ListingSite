@@ -135,7 +135,7 @@
                     <h2 class="text-3xl font-bold text-[#e04ecb]">Sourabh Wadhwa</h2>
                     <p class="text-sm text-gray-500">Melbourne</p>
                 </div>
-                <a href="{{ url('/after-image-upload') }}" class="text-sm font-medium text-[#e04ecb] hover:text-[#c13ab0] hover:underline">Back to dashboard</a>
+                <a href="{{ url('/profile') }}" class="text-sm font-medium text-[#e04ecb] hover:text-[#c13ab0] hover:underline">Back to dashboard</a>
             </div>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
