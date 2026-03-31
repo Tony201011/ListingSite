@@ -43,19 +43,14 @@ class MyVideosControllerTest extends TestCase
     public function test_get_videos_returns_my_videos_view_with_action_data(): void
     {
         $user = User::factory()->create();
+        $video = UserVideo::factory()->create(['user_id' => $user->id]);
 
         $getUserVideos = Mockery::mock(GetUserVideos::class);
         $getUserVideos->shouldReceive('execute')
             ->once()
             ->with(Mockery::on(fn ($arg) => $arg->is($user)))
             ->andReturn([
-                'videos' => collect([
-                    [
-                        'id' => 1,
-                        'video_url' => 'https://example.com/video.mp4',
-                        'original_name' => 'video.mp4',
-                    ],
-                ]),
+                'videos' => collect([$video]),
             ]);
 
         $this->app->instance(GetUserVideos::class, $getUserVideos);

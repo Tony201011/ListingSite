@@ -37,20 +37,14 @@ class PhotoControllerTest extends TestCase
     public function test_get_photos_returns_photos_view_with_action_data(): void
     {
         $user = User::factory()->create();
+        $photo = ProfileImage::factory()->create(['user_id' => $user->id]);
 
         $getUserPhotos = Mockery::mock(GetUserPhotos::class);
         $getUserPhotos->shouldReceive('execute')
             ->once()
             ->with(Mockery::on(fn ($arg) => $arg->is($user)))
             ->andReturn([
-                'photos' => collect([
-                    [
-                        'id' => 1,
-                        'image_url' => 'https://example.com/photo.jpg',
-                        'thumbnail_url' => 'https://example.com/photo-thumb.jpg',
-                        'is_primary' => true,
-                    ],
-                ]),
+                'photos' => collect([$photo]),
             ]);
 
         $this->app->instance(GetUserPhotos::class, $getUserPhotos);
