@@ -10,9 +10,6 @@ class MetaKeyword extends Model
 {
     use SoftDeletes;
 
-
-
-
     // Accessor for form: convert comma-separated string to array
     public function getMetaKeywordAttribute($value)
     {

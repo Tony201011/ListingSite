@@ -41,7 +41,6 @@ class CheckProfileSteps
             ->whereNull('deleted_at')
             ->exists();
 
-            //dd($stepOneCompleted);
 
         if (! $stepOneCompleted) {
             return redirect()

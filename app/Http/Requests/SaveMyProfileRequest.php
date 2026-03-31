@@ -9,7 +9,6 @@ class SaveMyProfileRequest extends FormRequest
 {
     public function authorize(): bool
     {
-       // return auth()->user() !== null;
         return Auth::check();
     }
 

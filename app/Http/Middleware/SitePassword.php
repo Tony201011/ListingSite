@@ -12,7 +12,6 @@ class SitePassword
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Allow password gate endpoints and static/framework assets required to render pages.
         if (
             $request->is('site-password') ||
             $request->is('site-password/*') ||
@@ -25,12 +24,11 @@ class SitePassword
             return $next($request);
         }
 
-        // Allow Filament admin
+
         if ($request->is('admin*')) {
             return $next($request);
         }
 
-        // Defaults
         $configuredPassword = null;
         $configurationEnabled = false;
 
@@ -43,7 +41,6 @@ class SitePassword
             }
         }
 
-        // Fallback to env only if DB password is not configured
         if (blank($configuredPassword)) {
             $envPassword = env('SITE_PASSWORD');
             $envEnabled = filter_var(env('SITE_PASSWORD_ENABLED', false), FILTER_VALIDATE_BOOL);
@@ -54,9 +51,6 @@ class SitePassword
             }
         }
 
-        // Protection is enabled only when both are true:
-        // - password exists
-        // - feature is enabled
         $protectionEnabled = $configurationEnabled && filled($configuredPassword);
 
         if ($protectionEnabled && $request->session()->get('site_access') !== true) {

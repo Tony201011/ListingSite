@@ -12,7 +12,7 @@ class FavIcon extends Model
     protected $table = 'fav_icons';
 
     protected $fillable = [
-        'icon_path', // Path or URL to the favicon file
+        'icon_path',
         'is_active',
     ];
 
