@@ -3,13 +3,12 @@
 namespace App\Filament\Resources\Users;
 
 use App\Filament\Resources\Users\Pages\ManageUsers;
+use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\ProviderProfile;
 use App\Models\State;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -317,7 +316,7 @@ class UserResource extends Resource
                     ->action(function (User $record): void {
                         $record->update(['is_blocked' => true]);
 
-                        self::sendProviderBlockedEmail($record);
+                        SendAdminProviderEmailJob::dispatch($record->id, 'blocked');
                     })
                     ->icon('heroicon-o-lock-closed'),
 
@@ -329,7 +328,7 @@ class UserResource extends Resource
                     ->action(function (User $record): void {
                         $record->update(['is_blocked' => false]);
 
-                        self::sendProviderUnblockedEmail($record);
+                        SendAdminProviderEmailJob::dispatch($record->id, 'unblocked');
                     })
                     ->icon('heroicon-o-lock-open'),
                       Action::make('delete')
@@ -356,216 +355,5 @@ class UserResource extends Resource
         return [
             'index' => ManageUsers::route('/'),
         ];
-    }
-
-    private static function sendProviderBlockedEmail(User $user): void
-    {
-        $activeMailSetting = \App\Models\SmtpSetting::query()
-            ->where('is_enabled', true)
-            ->latest('updated_at')
-            ->first();
-
-        if (! $activeMailSetting) {
-            $activeMailSetting = \App\Models\SmtpSetting::query()
-                ->latest('updated_at')
-                ->first();
-        }
-
-        if (! $activeMailSetting) {
-            Log::error('Provider blocked email failed: no active mail setting found.', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-            ]);
-            return;
-        }
-
-        if (! $activeMailSetting->is_enabled) {
-            Log::warning('Provider blocked email using latest mail setting that is disabled.', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'mail_setting_id' => $activeMailSetting->id,
-            ]);
-        }
-
-        $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
-        $liveDomain = $activeMailSetting->mailgun_live_domain;
-
-        $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
-            ? $sandboxDomain
-            : ($liveDomain ?: $sandboxDomain);
-
-        $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
-
-        if (filled($mailgunDomain)) {
-            $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
-        }
-
-        if (filled($mailgunEndpoint)) {
-            $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
-                ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
-        }
-
-        config([
-            'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
-            'mail.mailers.mailgun.transport' => 'mailgun',
-            'services.mailgun.domain' => $mailgunDomain,
-            'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
-            'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
-            'services.mailgun.scheme' => 'https',
-            'mail.from.address' => $activeMailSetting->mail_from_address ?: 'postmaster@' . $mailgunDomain,
-            'mail.from.name' => $activeMailSetting->mail_from_name ?: config('app.name'),
-        ]);
-
-        app('mail.manager')->forgetMailers();
-
-        Log::info('Provider blocked email attempt', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'mail_setting_id' => $activeMailSetting->id,
-            'mail_setting_enabled' => (bool) $activeMailSetting->is_enabled,
-            'mailer_used' => config('mail.default'),
-            'mail_from_address' => config('mail.from.address'),
-            'mail_from_name' => config('mail.from.name'),
-            'mailgun_domain' => config('services.mailgun.domain'),
-            'mailgun_endpoint' => config('services.mailgun.endpoint'),
-            'mailgun_secret_present' => filled(config('services.mailgun.secret')),
-        ]);
-
-        try {
-            // Use the default mailer (which is now configured)
-            Mail::send(
-                'emails.provider-blocked',
-                [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ],
-                function ($message) use ($user): void {
-                    $message->to($user->email)
-                        ->subject('Provider Account Blocked');
-                }
-            );
-
-            Log::info('Provider blocked email sent successfully', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'mailer_used' => config('mail.default'),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Provider blocked email failed', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'mailer_used' => config('mail.default'),
-                'mailgun_domain' => config('services.mailgun.domain'),
-                'mailgun_endpoint' => config('services.mailgun.endpoint'),
-                'exception_class' => get_class($e),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-        }
-    }
-
-    private static function sendProviderUnblockedEmail(User $user): void
-    {
-        $activeMailSetting = \App\Models\SmtpSetting::query()
-            ->where('is_enabled', true)
-            ->latest('updated_at')
-            ->first();
-
-        if (! $activeMailSetting) {
-            $activeMailSetting = \App\Models\SmtpSetting::query()
-                ->latest('updated_at')
-                ->first();
-        }
-
-        if (! $activeMailSetting) {
-            Log::error('Provider unblocked email failed: no active mail setting found.', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-            ]);
-            return;
-        }
-
-        if (! $activeMailSetting->is_enabled) {
-            Log::warning('Provider unblocked email using latest mail setting that is disabled.', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'mail_setting_id' => $activeMailSetting->id,
-            ]);
-        }
-
-        $sandboxDomain = $activeMailSetting->mailgun_sandbox_domain ?: $activeMailSetting->mailgun_domain;
-        $liveDomain = $activeMailSetting->mailgun_live_domain;
-
-        $mailgunDomain = $activeMailSetting->use_mailgun_sandbox
-            ? $sandboxDomain
-            : ($liveDomain ?: $sandboxDomain);
-
-        $mailgunEndpoint = $activeMailSetting->mailgun_endpoint ?: 'api.mailgun.net';
-
-        if (filled($mailgunDomain)) {
-            $mailgunDomain = preg_replace('#^https?://#i', '', rtrim(trim($mailgunDomain), '/'));
-        }
-
-        if (filled($mailgunEndpoint)) {
-            $mailgunEndpoint = parse_url(trim($mailgunEndpoint), PHP_URL_HOST)
-                ?: preg_replace('#^https?://#i', '', rtrim(trim($mailgunEndpoint), '/'));
-        }
-
-        config([
-            'mail.default' => $activeMailSetting->mail_mailer ?: 'mailgun',
-            'mail.mailers.mailgun.transport' => 'mailgun',
-            'services.mailgun.domain' => $mailgunDomain,
-            'services.mailgun.secret' => $activeMailSetting->mailgun_secret,
-            'services.mailgun.endpoint' => $mailgunEndpoint ?: 'api.mailgun.net',
-            'services.mailgun.scheme' => 'https',
-            'mail.from.address' => $activeMailSetting->mail_from_address ?: 'postmaster@' . $mailgunDomain,
-            'mail.from.name' => $activeMailSetting->mail_from_name ?: config('app.name'),
-        ]);
-
-        app('mail.manager')->forgetMailers();
-
-        Log::info('Provider unblocked email attempt', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'mail_setting_id' => $activeMailSetting->id,
-            'mail_setting_enabled' => (bool) $activeMailSetting->is_enabled,
-            'mailer_used' => config('mail.default'),
-            'mail_from_address' => config('mail.from.address'),
-            'mail_from_name' => config('mail.from.name'),
-            'mailgun_domain' => config('services.mailgun.domain'),
-            'mailgun_endpoint' => config('services.mailgun.endpoint'),
-            'mailgun_secret_present' => filled(config('services.mailgun.secret')),
-        ]);
-
-        try {
-            Mail::send(
-                'emails.provider-unblocked',
-                [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ],
-                function ($message) use ($user): void {
-                    $message->to($user->email)
-                        ->subject('Provider Account Reactivated');
-                }
-            );
-
-            Log::info('Provider unblocked email sent successfully', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'mailer_used' => config('mail.default'),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Provider unblocked email failed', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'mailer_used' => config('mail.default'),
-                'mailgun_domain' => config('services.mailgun.domain'),
-                'mailgun_endpoint' => config('services.mailgun.endpoint'),
-                'exception_class' => get_class($e),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-        }
     }
 }

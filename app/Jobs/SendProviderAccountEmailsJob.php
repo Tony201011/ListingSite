@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\SmtpSetting;
 use App\Models\User;
+use App\Services\MailgunConfigService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -25,7 +26,7 @@ class SendProviderAccountEmailsJob implements ShouldQueue
         public int $mailSettingId
     ) {}
 
-    public function handle(): void
+    public function handle(MailgunConfigService $mailgunConfig): void
     {
         $user = User::find($this->userId);
         $setting = SmtpSetting::find($this->mailSettingId);
@@ -53,9 +54,7 @@ class SendProviderAccountEmailsJob implements ShouldQueue
             ]);
         }
 
-        $this->configureMailgun($setting);
-
-        app('mail.manager')->forgetMailers();
+        $mailgunConfig->apply($setting);
 
         $verificationUrl = URL::temporarySignedRoute(
             'verification.verify',
@@ -68,46 +67,6 @@ class SendProviderAccountEmailsJob implements ShouldQueue
 
         $this->sendVerificationEmail($user, $verificationUrl);
         $this->sendAccountCreatedEmail($user);
-    }
-
-    private function configureMailgun(SmtpSetting $setting): void
-    {
-        $sandboxDomain = $setting->mailgun_sandbox_domain ?: $setting->mailgun_domain;
-        $liveDomain = $setting->mailgun_live_domain;
-
-        $domain = $setting->use_mailgun_sandbox
-            ? $sandboxDomain
-            : ($liveDomain ?: $sandboxDomain);
-
-        $endpoint = $setting->mailgun_endpoint ?: 'api.mailgun.net';
-
-        // Clean domain
-        if (filled($domain)) {
-            $domain = preg_replace('#^https?://#i', '', rtrim(trim($domain), '/'));
-        }
-
-        // Clean endpoint
-        if (filled($endpoint)) {
-            $endpoint = parse_url($endpoint, PHP_URL_HOST)
-                ?: preg_replace('#^https?://#i', '', rtrim(trim($endpoint), '/'));
-        }
-
-        $fromAddress = $setting->mail_from_address;
-
-        if (! $fromAddress && $domain) {
-            $fromAddress = 'postmaster@' . $domain;
-        }
-
-        config([
-            'mail.default' => $setting->mail_mailer ?: 'mailgun',
-            'mail.mailers.mailgun.transport' => 'mailgun',
-            'services.mailgun.domain' => $domain,
-            'services.mailgun.secret' => $setting->mailgun_secret,
-            'services.mailgun.endpoint' => $endpoint ?: 'api.mailgun.net',
-            'services.mailgun.scheme' => 'https',
-            'mail.from.address' => $fromAddress ?: config('mail.from.address'),
-            'mail.from.name' => $setting->mail_from_name ?: config('app.name'),
-        ]);
     }
 
     private function sendVerificationEmail(User $user, string $verificationUrl): void

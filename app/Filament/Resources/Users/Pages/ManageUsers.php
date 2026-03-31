@@ -7,6 +7,7 @@ use App\Filament\Widgets\ProviderStatsOverview;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\ProviderProfile;
+use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\State;
 use App\Models\User;
 use Filament\Actions\CreateAction;
@@ -17,7 +18,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Resources\Pages\ManageRecords;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ManageUsers extends ManageRecords
@@ -175,11 +175,7 @@ class ManageUsers extends ManageRecords
                         ],
                     );
 
-                    Mail::raw('Your provider account has been created by admin. You can log in at /provider/login.', function ($message) use ($record): void {
-                        $message
-                            ->to($record->email)
-                            ->subject('Provider Account Created');
-                    });
+                    SendAdminProviderEmailJob::dispatch($record->id, 'created');
                 })
                 ,
         ];

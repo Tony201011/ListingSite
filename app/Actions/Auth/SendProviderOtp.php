@@ -7,6 +7,7 @@ use App\ValueObjects\AustralianMobile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Twilio\Http\CurlClient;
 use Twilio\Rest\Client;
 
 class SendProviderOtp
@@ -58,10 +59,17 @@ class SendProviderOtp
         }
 
         try {
+            $httpClient = new CurlClient([
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_CONNECTTIMEOUT => 5,
+            ]);
+
             $client = new Client(
                 $twilioSetting->api_sid,
                 $twilioSetting->api_secret,
-                $twilioSetting->account_sid
+                $twilioSetting->account_sid,
+                null,
+                $httpClient
             );
 
             $client->messages->create(
