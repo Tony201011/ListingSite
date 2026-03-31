@@ -100,7 +100,7 @@ class ResendProviderSignupOtp
         Cache::put($resendCountKey, $resendCount + 1, now()->addMinutes(self::RESEND_WINDOW_MINUTES));
 
         Log::info('OTP resent successfully', [
-            'mobile' => $pendingUser['mobile'],
+            'mobile' => $this->maskMobile($pendingUser['mobile']),
         ]);
 
         return [
@@ -112,5 +112,16 @@ class ResendProviderSignupOtp
                 'resend_cooldown' => $resendCooldownSeconds,
             ],
         ];
+    }
+
+    private function maskMobile(string $mobile): string
+    {
+        $length = strlen($mobile);
+
+        if ($length <= 4) {
+            return str_repeat('*', $length);
+        }
+
+        return str_repeat('*', $length - 4) . substr($mobile, -4);
     }
 }

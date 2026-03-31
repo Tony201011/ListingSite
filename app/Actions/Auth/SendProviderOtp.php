@@ -16,8 +16,7 @@ class SendProviderOtp
             $otp = (int) ($twilioSetting->dummy_otp ?: $otp);
 
             Log::info('Dummy mobile OTP mode used', [
-                'mobile' => $mobile,
-                'dummy_mobile_number' => $twilioSetting->dummy_mobile_number,
+                'mobile' => $this->maskMobile($mobile),
             ]);
 
             return [
@@ -35,7 +34,7 @@ class SendProviderOtp
             empty($twilioSetting->phone_number)
         ) {
             Log::error('Twilio configuration missing for OTP send.', [
-                'mobile' => $mobile,
+                'mobile' => $this->maskMobile($mobile),
             ]);
 
             return [
@@ -60,7 +59,7 @@ class SendProviderOtp
             );
 
             Log::info('Twilio SMS send attempt', [
-                'mobile' => $mobile,
+                'mobile' => $this->maskMobile($mobile),
             ]);
 
             return [
@@ -70,7 +69,7 @@ class SendProviderOtp
             ];
         } catch (\Exception $e) {
             Log::error('Twilio SMS error: ' . $e->getMessage(), [
-                'mobile' => $mobile,
+                'mobile' => $this->maskMobile($mobile),
             ]);
 
             return [
@@ -91,6 +90,17 @@ class SendProviderOtp
         }
 
         return trim((string) $mobile) === trim((string) $twilioSetting->dummy_mobile_number);
+    }
+
+    private function maskMobile(string $mobile): string
+    {
+        $length = strlen($mobile);
+
+        if ($length <= 4) {
+            return str_repeat('*', $length);
+        }
+
+        return str_repeat('*', $length - 4) . substr($mobile, -4);
     }
 
     private function convertToTwilioE164(string $mobile): string
