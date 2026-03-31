@@ -68,6 +68,4 @@
         </div>
     </div>
 </div>
-
-<!-- No extra CSS needed – all styles are handled by Tailwind utilities -->
 @endsection

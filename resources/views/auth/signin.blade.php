@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('content')
-<!-- Main Content -->
+
 <div class="bg-[#f8fafc] min-h-screen py-10">
     <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
 
@@ -13,12 +13,11 @@
             Go back
         </a>
 
-        <!-- Header -->
+
         <div class="mb-8">
             <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#e04ecb] pl-4">Login to your HOTESCORTS profile</h2>
         </div>
 
-        <!-- Login Form Card -->
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
             @if (session('success'))
                 <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 text-sm">
