@@ -186,9 +186,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/short-url/update', [UrlController::class, 'updateShortUrl'])->name('short-url-update');
         /********* short url end */
 
-        /***** referrals route start here */
+        /***** referral route start here */
         Route::get('/referral', [ReferralsController::class, 'referral'])->name('referral');
-        /***** referrals route end here */
+        /***** referral route end here */
 
         /***** Online route start here */
         Route::get('/online-now', [OnlineController::class, 'onlineNow'])->name('online-now');
