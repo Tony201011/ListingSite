@@ -317,19 +317,19 @@ class UserResource extends Resource
                     ->placeholder('-'),
                 TextEntry::make('providerProfile.primary_identity')
                     ->label('Primary Identity')
-                    ->formatStateUsing(fn ($state): string => is_array($state) && $state !== [] ? implode(', ', $state) : '-')
+                    ->formatStateUsing(fn ($state): string => self::categoryNames($state))
                     ->columnSpanFull(),
                 TextEntry::make('providerProfile.attributes')
                     ->label('Attributes')
-                    ->formatStateUsing(fn ($state): string => is_array($state) && $state !== [] ? implode(', ', $state) : '-')
+                    ->formatStateUsing(fn ($state): string => self::categoryNames($state))
                     ->columnSpanFull(),
                 TextEntry::make('providerProfile.services_style')
                     ->label('Services Style')
-                    ->formatStateUsing(fn ($state): string => is_array($state) && $state !== [] ? implode(', ', $state) : '-')
+                    ->formatStateUsing(fn ($state): string => self::categoryNames($state))
                     ->columnSpanFull(),
                 TextEntry::make('providerProfile.services_provided')
                     ->label('Services Provided')
-                    ->formatStateUsing(fn ($state): string => is_array($state) && $state !== [] ? implode(', ', $state) : '-')
+                    ->formatStateUsing(fn ($state): string => self::categoryNames($state))
                     ->columnSpanFull(),
                 TextEntry::make('providerProfile.twitter_handle')
                     ->label('Twitter Handle')
@@ -526,5 +526,31 @@ class UserResource extends Resource
             ->whereKey((int) $id)
             ->value('name')
             ?? '-';
+    }
+
+    private static function categoryNames(mixed $state): string
+    {
+        if (! is_array($state) || $state === []) {
+            return '-';
+        }
+
+        $ids = collect($state)
+            ->filter(fn ($value): bool => filled($value) && is_numeric($value))
+            ->map(fn ($value): int => (int) $value)
+            ->unique()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return '-';
+        }
+
+        $names = Category::query()
+            ->whereIn('id', $ids->all())
+            ->orderBy('name')
+            ->pluck('name')
+            ->filter()
+            ->values();
+
+        return $names->isEmpty() ? '-' : $names->implode(', ');
     }
 }
