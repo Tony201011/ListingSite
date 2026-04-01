@@ -33,7 +33,7 @@ class ProfileImage extends Model
     {
         return Attribute::make(
             get: fn () => $this->image_path
-                ? Storage::disk('r2')->url($this->image_path)
+                ? Storage::disk(config('media.delivery_disk'))->url($this->image_path)
                 : null
         );
     }
@@ -42,7 +42,7 @@ class ProfileImage extends Model
     {
         return Attribute::make(
             get: fn () => $this->thumbnail_path
-                ? Storage::disk('r2')->url($this->thumbnail_path)
+                ? Storage::disk(config('media.delivery_disk'))->url($this->thumbnail_path)
                 : null
         );
     }

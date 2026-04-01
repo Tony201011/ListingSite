@@ -15,7 +15,7 @@ class DeleteUserVideo
             return ActionResult::authorizationFailure('You can only modify your own videos.');
         }
 
-        $disk = Storage::disk('s3');
+        $disk = Storage::disk(config('media.upload_disk'));
 
         if ($video->video_path) {
             $disk->delete($video->video_path);

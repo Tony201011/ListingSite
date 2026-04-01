@@ -136,6 +136,18 @@ class AppServiceProvider extends ServiceProvider
         if (! $setting || ! $setting->is_enabled) {
             Config::set('filesystems.default', 'public');
 
+            if (! env('MEDIA_UPLOAD_DISK')) {
+                Config::set('media.upload_disk', 'public');
+            }
+
+            if (! env('MEDIA_DELIVERY_DISK')) {
+                Config::set('media.delivery_disk', 'public');
+            }
+
+            if (! env('AVATAR_DISK')) {
+                Config::set('media.avatar_disk', 'public');
+            }
+
             app('filesystem')->forgetDisk('public');
 
             return;
@@ -150,6 +162,18 @@ class AppServiceProvider extends ServiceProvider
         Config::set('filesystems.disks.s3.url', $setting->url);
         Config::set('filesystems.disks.s3.endpoint', $setting->endpoint);
         Config::set('filesystems.disks.s3.use_path_style_endpoint', $setting->use_path_style_endpoint);
+
+        if (! env('MEDIA_UPLOAD_DISK')) {
+            Config::set('media.upload_disk', 's3');
+        }
+
+        if (! env('MEDIA_DELIVERY_DISK')) {
+            Config::set('media.delivery_disk', 's3');
+        }
+
+        if (! env('AVATAR_DISK')) {
+            Config::set('media.avatar_disk', 'public');
+        }
 
         app('filesystem')->forgetDisk('s3');
         app('filesystem')->forgetDisk('public');

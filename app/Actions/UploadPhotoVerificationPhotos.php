@@ -27,7 +27,7 @@ class UploadPhotoVerificationPhotos
         }
 
         /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
+        $disk = Storage::disk(config('media.upload_disk'));
 
         $baseName = $user->name ?: 'user';
         $username = Str::slug($baseName).$user->id;

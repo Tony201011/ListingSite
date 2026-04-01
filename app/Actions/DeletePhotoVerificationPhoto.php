@@ -12,7 +12,7 @@ class DeletePhotoVerificationPhoto
     public function execute(User $user, string $path): ActionResult
     {
         /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
+        $disk = Storage::disk(config('media.upload_disk'));
 
         $verifications = $user->photoVerification()
             ->whereNull('deleted_at')

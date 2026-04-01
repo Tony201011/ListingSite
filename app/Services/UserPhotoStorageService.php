@@ -16,7 +16,7 @@ class UserPhotoStorageService
     public function store(User $user, UploadedFile $photo, string $username): array
     {
         /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
+        $disk = Storage::disk(config('media.upload_disk'));
 
         $extension = strtolower($photo->extension() ?: $photo->getClientOriginalExtension() ?: 'jpg');
         $baseFileName = 'profile_'.$user->id.'_'.Str::uuid();
@@ -82,7 +82,7 @@ class UserPhotoStorageService
     public function deletePaths(?string $imagePath, ?string $thumbnailPath): void
     {
         /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
+        $disk = Storage::disk(config('media.upload_disk'));
 
         if ($imagePath) {
             $disk->delete($imagePath);

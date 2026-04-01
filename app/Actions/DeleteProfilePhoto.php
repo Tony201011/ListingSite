@@ -18,7 +18,7 @@ class DeleteProfilePhoto
         }
 
         /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
+        $disk = Storage::disk(config('media.upload_disk'));
 
         $imagePath = $photo->image_path;
         $thumbnailPath = $photo->thumbnail_path;

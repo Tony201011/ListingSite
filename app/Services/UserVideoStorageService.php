@@ -15,7 +15,7 @@ class UserVideoStorageService
     public function store(User $user, UploadedFile $video, string $username): array
     {
         /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
+        $disk = Storage::disk(config('media.upload_disk'));
 
         $extension = strtolower($video->extension() ?: $video->getClientOriginalExtension() ?: 'mp4');
         $baseFileName = 'profile_video_'.$user->id.'_'.Str::uuid();
@@ -59,7 +59,7 @@ class UserVideoStorageService
         }
 
         /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
+        $disk = Storage::disk(config('media.upload_disk'));
 
         $disk->delete($videoPath);
     }

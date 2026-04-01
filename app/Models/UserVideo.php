@@ -22,7 +22,7 @@ class UserVideo extends Model
     public function getVideoUrlAttribute(): ?string
     {
         return $this->video_path
-            ? Storage::disk('r2')->url($this->video_path)
+            ? Storage::disk(config('media.delivery_disk'))->url($this->video_path)
             : null;
     }
 }
