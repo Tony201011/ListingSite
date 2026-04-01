@@ -292,25 +292,25 @@ class UserResource extends Resource
                     ->columnSpanFull(),
                 TextEntry::make('providerProfile.age_group_id')
                     ->label('Age Group')
-                    ->placeholder('-'),
+                    ->formatStateUsing(fn ($state): string => self::categoryName($state)),
                 TextEntry::make('providerProfile.hair_color_id')
                     ->label('Hair Color')
-                    ->placeholder('-'),
+                    ->formatStateUsing(fn ($state): string => self::categoryName($state)),
                 TextEntry::make('providerProfile.hair_length_id')
                     ->label('Hair Length')
-                    ->placeholder('-'),
+                    ->formatStateUsing(fn ($state): string => self::categoryName($state)),
                 TextEntry::make('providerProfile.ethnicity_id')
                     ->label('Ethnicity')
-                    ->placeholder('-'),
+                    ->formatStateUsing(fn ($state): string => self::categoryName($state)),
                 TextEntry::make('providerProfile.body_type_id')
                     ->label('Body Type')
-                    ->placeholder('-'),
+                    ->formatStateUsing(fn ($state): string => self::categoryName($state)),
                 TextEntry::make('providerProfile.bust_size_id')
                     ->label('Bust Size')
-                    ->placeholder('-'),
+                    ->formatStateUsing(fn ($state): string => self::categoryName($state)),
                 TextEntry::make('providerProfile.your_length_id')
                     ->label('Your Length')
-                    ->placeholder('-'),
+                    ->formatStateUsing(fn ($state): string => self::categoryName($state)),
                 TextEntry::make('providerProfile.availability')
                     ->label('Availability')
                     ->placeholder('-'),
@@ -522,5 +522,17 @@ class UserResource extends Resource
             ->orderBy('name')
             ->pluck('name', 'id')
             ->all();
+    }
+
+    private static function categoryName(mixed $id): string
+    {
+        if (blank($id) || ! is_numeric($id)) {
+            return '-';
+        }
+
+        return Category::query()
+            ->whereKey((int) $id)
+            ->value('name')
+            ?? '-';
     }
 }
