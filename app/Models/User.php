@@ -68,7 +68,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return match ($panel->getId()) {
             'admin' => $this->role === self::ROLE_ADMIN,
-            'provider' => $this->role === self::ROLE_PROVIDER && ! $this->is_blocked,
             default => false,
         };
     }
