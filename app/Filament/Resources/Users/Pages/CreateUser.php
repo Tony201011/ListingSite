@@ -31,7 +31,6 @@ class CreateUser extends CreateRecord
             [
                 'name' => $data['profile_name'],
                 'slug' => filled($data['profile_slug'] ?? null) ? $data['profile_slug'] : Str::slug($data['profile_name']),
-                'age' => $data['profile_age'] ?? null,
                 'description' => $data['profile_description'] ?? null,
                 'introduction_line' => $data['introduction_line'] ?? null,
                 'profile_text' => $data['profile_text'] ?? null,

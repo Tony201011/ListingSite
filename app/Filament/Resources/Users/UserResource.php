@@ -106,11 +106,6 @@ class UserResource extends Resource
                     ->label('Slug')
                     ->maxLength(255)
                     ->unique(ignoreRecord: true, table: 'provider_profiles', column: 'slug'),
-                TextInput::make('profile_age')
-                    ->label('Age')
-                    ->numeric()
-                    ->minValue(18)
-                    ->maxValue(99),
                 Textarea::make('profile_description')
                     ->label('Description')
                     ->rows(4)
@@ -274,9 +269,6 @@ class UserResource extends Resource
                     ->placeholder('-'),
                 TextEntry::make('providerProfile.slug')
                     ->label('Profile Slug')
-                    ->placeholder('-'),
-                TextEntry::make('providerProfile.age')
-                    ->label('Age')
                     ->placeholder('-'),
                 TextEntry::make('providerProfile.description')
                     ->label('Description')

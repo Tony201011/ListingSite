@@ -21,7 +21,6 @@ class EditUser extends EditRecord
             ...$data,
             'profile_name' => $profile?->name,
             'profile_slug' => $profile?->slug,
-            'profile_age' => $profile?->age,
             'profile_description' => $profile?->description,
             'introduction_line' => $profile?->introduction_line,
             'profile_text' => $profile?->profile_text,
@@ -84,7 +83,6 @@ class EditUser extends EditRecord
             [
                 'name' => $data['profile_name'],
                 'slug' => $slug,
-                'age' => $data['profile_age'] ?? null,
                 'description' => $data['profile_description'] ?? null,
                 'introduction_line' => $data['introduction_line'] ?? null,
                 'profile_text' => $data['profile_text'] ?? null,
