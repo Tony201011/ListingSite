@@ -24,7 +24,7 @@ class SitePassword
             return $next($request);
         }
 
-        if ($request->is('admin*')) {
+        if ($request->is('admin*') || $request->is('agent*')) {
             return $next($request);
         }
 
