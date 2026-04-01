@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Agents;
 
-use App\Filament\Resources\Agents\Pages\ManageAgents;
+use App\Filament\Resources\Agents\Pages\CreateAgent;
+use App\Filament\Resources\Agents\Pages\EditAgent;
+use App\Filament\Resources\Agents\Pages\ListAgents;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -33,6 +35,11 @@ class AgentResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static function isCreatePage(): bool
+    {
+        return request()->routeIs('filament.admin.resources.agents.create');
+    }
+
     public static function canAccess(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
@@ -47,7 +54,30 @@ class AgentResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->components([]);
+        return $schema->components([
+            TextInput::make('name')
+                ->required()
+                ->maxLength(255),
+            TextInput::make('email')
+                ->email()
+                ->required()
+                ->maxLength(255)
+                ->unique(ignoreRecord: true),
+            TextInput::make('password')
+                ->password()
+                ->revealable(filament()->arePasswordsRevealable())
+                ->required(fn (): bool => static::isCreatePage())
+                ->minLength(8)
+                ->same('passwordConfirmation')
+                ->dehydrated(fn ($state): bool => filled($state)),
+            TextInput::make('passwordConfirmation')
+                ->label('Confirm Password')
+                ->password()
+                ->revealable(filament()->arePasswordsRevealable())
+                ->required(fn (): bool => static::isCreatePage() || filled(request()->input('password')))
+                ->visible(fn (): bool => static::isCreatePage())
+                ->dehydrated(false),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -84,30 +114,7 @@ class AgentResource extends Resource
                     ->since(),
             ])
             ->recordActions([
-                EditAction::make()
-                    ->label('Edit')
-                    ->schema([
-                        TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        TextInput::make('email')
-                            ->email()
-                            ->required()
-                            ->maxLength(255)
-                            ->unique(ignoreRecord: true),
-                        TextInput::make('password')
-                            ->password()
-                            ->revealable(filament()->arePasswordsRevealable())
-                            ->minLength(8)
-                            ->dehydrated(fn ($state): bool => filled($state)),
-                    ])
-                    ->using(function (array $data, User $record): void {
-                        $record->update(array_filter([
-                            'name' => $data['name'],
-                            'email' => $data['email'],
-                            'password' => $data['password'] ?? null,
-                        ], fn ($value): bool => $value !== null));
-                    }),
+                EditAction::make()->label('Edit'),
                 Action::make('block')
                     ->label('Block')
                     ->color('danger')
@@ -142,7 +149,9 @@ class AgentResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ManageAgents::route('/'),
+            'index' => ListAgents::route('/'),
+            'create' => CreateAgent::route('/create'),
+            'edit' => EditAgent::route('/{record}/edit'),
         ];
     }
 }
