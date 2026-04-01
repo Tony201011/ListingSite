@@ -196,4 +196,38 @@ class BookingEnquiryFlowTest extends TestCase
         $response->assertSessionHasErrors(['user_id']);
         $this->assertDatabaseCount('booking_enquiries', 0);
     }
+
+    public function test_booking_enquiry_is_stored_even_if_email_delivery_fails(): void
+    {
+        $provider = $this->createBookableProvider();
+
+        $mock = Mockery::mock(SendBookingEnquiryEmail::class);
+        $mock->shouldReceive('execute')
+            ->once()
+            ->andThrow(new \RuntimeException('SMTP timeout'));
+        $this->app->instance(SendBookingEnquiryEmail::class, $mock);
+
+        $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id));
+
+        $response->assertRedirect('/booking');
+        $response->assertSessionHas('success', 'Enquiry sent successfully!');
+        $this->assertDatabaseHas('booking_enquiries', [
+            'user_id' => $provider->id,
+            'email' => 'john@example.com',
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_booking_enquiry_route_throttles_repeated_abuse_attempts(): void
+    {
+        $this->mockBookingEmail();
+        $provider = $this->createBookableProvider();
+        $payload = $this->validPayload($provider->id);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/booking-enquiry', $payload)->assertRedirect();
+        }
+
+        $this->post('/booking-enquiry', $payload)->assertStatus(429);
+    }
 }

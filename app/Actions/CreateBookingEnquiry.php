@@ -4,6 +4,8 @@ namespace App\Actions;
 
 use App\Models\BookingEnquiry;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class CreateBookingEnquiry
 {
@@ -29,7 +31,16 @@ class CreateBookingEnquiry
             ]);
         });
 
-        $this->sendBookingEnquiryEmail->execute($enquiry);
+        try {
+            $this->sendBookingEnquiryEmail->execute($enquiry);
+        } catch (Throwable $e) {
+            // Keep the saved enquiry so staff can still process it manually.
+            Log::warning('Booking enquiry email dispatch failed after enquiry was saved.', [
+                'booking_enquiry_id' => $enquiry->id,
+                'user_id' => $enquiry->user_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return $enquiry;
     }
