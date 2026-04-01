@@ -6,10 +6,12 @@ use App\Actions\DeleteRate;
 use App\Actions\DeleteRateGroup;
 use App\Actions\GetMyRatePageData;
 use App\Actions\StoreRate;
+use App\Actions\StoreRateGroup;
 use App\Actions\UpdateRate;
 use App\Actions\UpdateRateGroup;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRateRequest;
+use App\Http\Requests\StoreRateGroupRequest;
 use App\Http\Requests\UpdateRateGroupRequest;
 use App\Http\Requests\UpdateRateRequest;
 use App\Models\Rate;
@@ -25,6 +27,7 @@ class MyRateController extends Controller
         private StoreRate $storeRate,
         private UpdateRate $updateRate,
         private DeleteRate $deleteRate,
+        private StoreRateGroup $storeRateGroup,
         private UpdateRateGroup $updateRateGroup,
         private DeleteRateGroup $deleteRateGroup
     ) {
@@ -67,6 +70,18 @@ class MyRateController extends Controller
         $this->deleteRate->execute(Auth::user(), $rate);
 
         return response()->json(['success' => true]);
+    }
+
+    public function storeGroup(StoreRateGroupRequest $request): JsonResponse
+    {
+        $this->authorize('create', RateGroup::class);
+
+        $group = $this->storeRateGroup->execute(
+            Auth::user(),
+            $request->validated()
+        );
+
+        return response()->json($group, 201);
     }
 
     public function updateGroup(UpdateRateGroupRequest $request, RateGroup $group): JsonResponse

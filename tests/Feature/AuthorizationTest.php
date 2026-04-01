@@ -696,6 +696,20 @@ class AuthorizationTest extends TestCase
         $this->assertFalse(app(RateGroupPolicy::class)->delete($other, $group));
     }
 
+    public function test_rate_group_policy_provider_with_profile_can_create(): void
+    {
+        $user = $this->providerWithProfile();
+
+        $this->assertTrue(app(RateGroupPolicy::class)->create($user));
+    }
+
+    public function test_rate_group_policy_blocks_create_without_profile(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->assertFalse(app(RateGroupPolicy::class)->create($user));
+    }
+
     // --- TourPolicy ---
 
     public function test_tour_policy_owner_can_view(): void
@@ -939,5 +953,341 @@ class AuthorizationTest extends TestCase
         $profile = $owner->providerProfile;
 
         $this->assertFalse(app(ProviderProfilePolicy::class)->updateOwned($other, $profile));
+    }
+
+    // ===============================================================
+    // 5. Guest access — GET pages behind auth rejected
+    // ===============================================================
+
+    public function test_guest_cannot_view_add_photos_page(): void
+    {
+        $this->get(route('add-photos'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_photos_page(): void
+    {
+        $this->get(route('photos'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_upload_video_page(): void
+    {
+        $this->get(route('upload-video'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_my_videos_page(): void
+    {
+        $this->get(route('my-videos'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_upload_video(): void
+    {
+        $this->postJson(route('videos.upload'), ['videos' => []])->assertUnauthorized();
+    }
+
+    public function test_guest_cannot_view_my_tours_page(): void
+    {
+        $this->get(route('my-tours'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_my_rate_page(): void
+    {
+        $this->get(route('my-rate'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_store_rate_group(): void
+    {
+        $this->postJson(route('my-rate.groups.store'), [])->assertUnauthorized();
+    }
+
+    public function test_guest_cannot_view_verify_photo_page(): void
+    {
+        $this->get(route('verify.photos'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_short_url_page(): void
+    {
+        $this->get(route('short-url'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_set_availability_page(): void
+    {
+        $this->get(route('availability.edit'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_my_availability_page(): void
+    {
+        $this->get(route('availability.show'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_my_profile_page(): void
+    {
+        $this->get(route('my-profile'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_edit_profile_page(): void
+    {
+        $this->get(route('edit-profile'))->assertRedirect();
+    }
+
+    public function test_guest_cannot_view_delete_account_page(): void
+    {
+        $this->get(route('account.delete-page'))->assertRedirect();
+    }
+
+    // ===============================================================
+    // 6. Owner CAN perform actions via HTTP routes (happy-path)
+    // ===============================================================
+
+    // --- Photos ---
+
+    public function test_owner_can_set_cover_on_own_photo(): void
+    {
+        $owner = $this->providerWithProfile();
+        $photo = $this->makePhoto($owner);
+
+        $this->actingAs($owner)
+            ->postJson(route('photos.setCover', $photo))
+            ->assertOk();
+    }
+
+    public function test_owner_can_delete_own_photo(): void
+    {
+        $owner = $this->providerWithProfile();
+        $photo = $this->makePhoto($owner);
+
+        $this->actingAs($owner)
+            ->deleteJson(route('photos.destroy', $photo))
+            ->assertOk();
+    }
+
+    // --- Videos ---
+
+    public function test_owner_can_delete_own_video(): void
+    {
+        $owner = $this->providerWithProfile();
+        $video = $this->makeVideo($owner);
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->deleteJson(route('videos.destroy', $video))
+            ->assertOk();
+    }
+
+    // --- Rates ---
+
+    public function test_owner_can_store_rate(): void
+    {
+        $owner = $this->providerWithProfile();
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->postJson(route('my-rate.store'), [
+                'description' => '30 min',
+                'incall' => '200',
+                'outcall' => '250',
+            ])
+            ->assertCreated();
+    }
+
+    public function test_owner_can_update_own_rate(): void
+    {
+        $owner = $this->providerWithProfile();
+        $rate = $this->makeRate($owner);
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->putJson(route('my-rate.update', $rate), [
+                'description' => '1 hour',
+                'incall' => '300',
+                'outcall' => '350',
+            ])
+            ->assertOk();
+    }
+
+    public function test_owner_can_delete_own_rate(): void
+    {
+        $owner = $this->providerWithProfile();
+        $rate = $this->makeRate($owner);
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->deleteJson(route('my-rate.destroy', $rate))
+            ->assertOk();
+    }
+
+    // --- Rate Groups ---
+
+    public function test_owner_can_store_rate_group(): void
+    {
+        $owner = $this->providerWithProfile();
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->postJson(route('my-rate.groups.store'), [
+                'name' => 'Standard',
+            ])
+            ->assertCreated();
+    }
+
+    public function test_owner_can_update_own_rate_group(): void
+    {
+        $owner = $this->providerWithProfile();
+        $group = $this->makeRateGroup($owner);
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->putJson(route('my-rate.groups.update', $group), [
+                'name' => 'VIP',
+            ])
+            ->assertOk();
+    }
+
+    public function test_owner_can_delete_own_rate_group(): void
+    {
+        $owner = $this->providerWithProfile();
+        $group = $this->makeRateGroup($owner);
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->deleteJson(route('my-rate.groups.destroy', $group))
+            ->assertOk();
+    }
+
+    // --- Tours ---
+
+    public function test_owner_can_store_tour(): void
+    {
+        $owner = $this->providerWithProfile();
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->postJson(route('my-tours.store'), [
+                'city' => 'Melbourne',
+                'from' => now()->addDays(1)->toDateString(),
+                'to' => now()->addDays(5)->toDateString(),
+            ])
+            ->assertCreated();
+    }
+
+    public function test_owner_can_update_own_tour(): void
+    {
+        $owner = $this->providerWithProfile();
+        $tour = $this->makeTour($owner);
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->putJson(route('my-tours.update', $tour), [
+                'city' => 'Brisbane',
+                'from' => now()->addDays(2)->toDateString(),
+                'to' => now()->addDays(6)->toDateString(),
+            ])
+            ->assertOk();
+    }
+
+    public function test_owner_can_delete_own_tour(): void
+    {
+        $owner = $this->providerWithProfile();
+        $tour = $this->makeTour($owner);
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($owner)
+            ->deleteJson(route('my-tours.destroy', $tour))
+            ->assertOk();
+    }
+
+    // ===============================================================
+    // 7. No-profile user blocked from viewAny-gated endpoints
+    // ===============================================================
+
+    public function test_user_without_profile_cannot_view_tours_index(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($user)
+            ->get(route('my-tours'))
+            ->assertForbidden();
+    }
+
+    public function test_user_without_profile_cannot_store_rate_group(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($user)
+            ->postJson(route('my-rate.groups.store'), ['name' => 'Test'])
+            ->assertForbidden();
+    }
+
+    // ===============================================================
+    // 8. Additional policy unit tests — missing methods
+    // ===============================================================
+
+    // --- TourPolicy::viewAny ---
+
+    public function test_tour_policy_view_any_allowed_with_profile(): void
+    {
+        $user = $this->providerWithProfile();
+
+        $this->assertTrue(app(TourPolicy::class)->viewAny($user));
+    }
+
+    public function test_tour_policy_view_any_blocked_without_profile(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->assertFalse(app(TourPolicy::class)->viewAny($user));
+    }
+
+    // --- UserVideoPolicy::viewAny ---
+
+    public function test_user_video_policy_view_any_always_allowed(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->assertTrue(app(UserVideoPolicy::class)->viewAny($user));
+    }
+
+    // --- UserVideoPolicy::create ---
+
+    public function test_user_video_policy_create_always_allowed(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->assertTrue(app(UserVideoPolicy::class)->create($user));
+    }
+
+    // --- ProfileImagePolicy::viewAny ---
+
+    public function test_profile_image_policy_view_any_always_allowed(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->assertTrue(app(ProfileImagePolicy::class)->viewAny($user));
+    }
+
+    // --- ProfileImagePolicy::create ---
+
+    public function test_profile_image_policy_create_always_allowed(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->assertTrue(app(ProfileImagePolicy::class)->create($user));
+    }
+
+    // --- PhotoVerificationPolicy::deletePhoto ---
+
+    public function test_photo_verification_policy_delete_photo_allowed_with_profile(): void
+    {
+        $user = $this->providerWithProfile();
+
+        $this->assertTrue(app(PhotoVerificationPolicy::class)->deletePhoto($user));
+    }
+
+    public function test_photo_verification_policy_delete_photo_blocked_without_profile(): void
+    {
+        $user = $this->userWithoutProfile();
+
+        $this->assertFalse(app(PhotoVerificationPolicy::class)->deletePhoto($user));
     }
 }
