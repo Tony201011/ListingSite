@@ -14,9 +14,11 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -108,7 +110,7 @@ class ManagedProfileResource extends Resource
                     ->dehydrated(false),
 
                 TextInput::make('name')
-                    ->label('Profile Name')
+                    ->label('Provider Name')
                     ->required()
                     ->maxLength(255)
                     ->live(onBlur: true)
@@ -135,6 +137,11 @@ class ManagedProfileResource extends Resource
 
                 TextInput::make('whatsapp')
                     ->maxLength(30),
+
+                Textarea::make('description')
+                    ->label('Description')
+                    ->rows(4)
+                    ->columnSpanFull(),
 
                 TextInput::make('introduction_line')
                     ->label('Introduction Line')
@@ -177,6 +184,40 @@ class ManagedProfileResource extends Resource
                     ->searchable()
                     ->preload()
                     ->disabled(fn (Get $get): bool => blank($get('state_id'))),
+
+                TextInput::make('latitude')
+                    ->label('Latitude')
+                    ->numeric(),
+
+                TextInput::make('longitude')
+                    ->label('Longitude')
+                    ->numeric(),
+
+                Toggle::make('is_verified')
+                    ->label('Verified')
+                    ->default(false),
+
+                Toggle::make('is_featured')
+                    ->label('Featured')
+                    ->default(false),
+
+                TextInput::make('membership_id')
+                    ->label('Membership ID')
+                    ->numeric(),
+
+                Select::make('profile_status')
+                    ->label('Profile Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                    ])
+                    ->default('pending')
+                    ->required()
+                    ->native(false),
+
+                DateTimePicker::make('expires_at')
+                    ->label('Expires At'),
             ]);
     }
 

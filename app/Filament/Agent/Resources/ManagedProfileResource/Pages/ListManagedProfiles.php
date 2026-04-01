@@ -13,7 +13,7 @@ class ListManagedProfiles extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('Add Profile'),
+            CreateAction::make()->label('Create Provider'),
         ];
     }
 }
