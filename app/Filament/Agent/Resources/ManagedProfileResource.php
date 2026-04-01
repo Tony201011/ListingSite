@@ -200,10 +200,6 @@ class ManagedProfileResource extends Resource
                     ->label('Featured')
                     ->default(false),
 
-                TextInput::make('membership_id')
-                    ->label('Membership ID')
-                    ->numeric(),
-
                 Select::make('profile_status')
                     ->label('Profile Status')
                     ->options([

@@ -42,7 +42,6 @@ class ProviderRegister extends Register
                 $this->getProfileWhatsappFormComponent(),
                 $this->getProfileVerifiedFormComponent(),
                 $this->getProfileFeaturedFormComponent(),
-                $this->getProfileMembershipFormComponent(),
                 $this->getProfileStatusFormComponent(),
                 $this->getProfileExpiresAtFormComponent(),
             ])
@@ -77,7 +76,6 @@ class ProviderRegister extends Register
             'whatsapp' => $data['whatsapp'] ?? null,
             'is_verified' => $data['is_verified'] ?? false,
             'is_featured' => $data['is_featured'] ?? false,
-            'membership_id' => $data['membership_id'] ?? null,
             'profile_status' => $data['profile_status'] ?? 'pending',
             'expires_at' => $data['expires_at'] ?? null,
         ]);
@@ -199,13 +197,6 @@ class ProviderRegister extends Register
         return Toggle::make('is_featured')
             ->label('Featured')
             ->default(false);
-    }
-
-    protected function getProfileMembershipFormComponent(): Component
-    {
-        return TextInput::make('membership_id')
-            ->label('Membership ID')
-            ->numeric();
     }
 
     protected function getProfileStatusFormComponent(): Component
