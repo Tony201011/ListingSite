@@ -523,6 +523,7 @@ class UserResource extends Resource
         }
 
         return Category::query()
+            ->withTrashed()
             ->whereKey((int) $id)
             ->value('name')
             ?? '-';
@@ -530,27 +531,74 @@ class UserResource extends Resource
 
     private static function categoryNames(mixed $state): string
     {
-        if (! is_array($state) || $state === []) {
+        $values = self::normalizeMultiValueState($state);
+
+        if ($values === []) {
             return '-';
         }
 
-        $ids = collect($state)
-            ->filter(fn ($value): bool => filled($value) && is_numeric($value))
+        $ids = collect($values)
+            ->filter(fn ($value): bool => is_numeric($value))
             ->map(fn ($value): int => (int) $value)
             ->unique()
             ->values();
 
-        if ($ids->isEmpty()) {
-            return '-';
+        $labels = collect($values)
+            ->filter(fn ($value): bool => ! is_numeric($value))
+            ->map(fn ($value): string => trim((string) $value))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $resolvedNames = collect();
+
+        if (! $ids->isEmpty()) {
+            $resolvedNames = Category::query()
+                ->withTrashed()
+                ->whereIn('id', $ids->all())
+                ->pluck('name')
+                ->filter()
+                ->values();
         }
 
-        $names = Category::query()
-            ->whereIn('id', $ids->all())
-            ->orderBy('name')
-            ->pluck('name')
+        $names = $resolvedNames
+            ->merge($labels)
             ->filter()
+            ->unique()
             ->values();
 
         return $names->isEmpty() ? '-' : $names->implode(', ');
+    }
+
+    private static function normalizeMultiValueState(mixed $state): array
+    {
+        if (is_string($state)) {
+            $trimmed = trim($state);
+
+            if ($trimmed === '' || $trimmed === '-' || $trimmed === 'null') {
+                return [];
+            }
+
+            $decoded = json_decode($trimmed, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $state = $decoded;
+            } else {
+                $state = str_contains($trimmed, ',')
+                    ? array_map('trim', explode(',', $trimmed))
+                    : [$trimmed];
+            }
+        }
+
+        if (! is_array($state)) {
+            return [];
+        }
+
+        return collect($state)
+            ->flatten(1)
+            ->map(fn ($value) => is_string($value) ? trim($value) : $value)
+            ->filter(fn ($value): bool => filled($value) && $value !== '-')
+            ->values()
+            ->all();
     }
 }
