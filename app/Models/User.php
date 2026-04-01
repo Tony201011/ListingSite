@@ -99,6 +99,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return $this->hasOne(ProviderProfile::class);
     }
 
+    public function managedProfiles(): HasMany
+    {
+        return $this->hasMany(ProviderProfile::class, 'agent_id');
+    }
+
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new BrandedResetPasswordNotification($token));
