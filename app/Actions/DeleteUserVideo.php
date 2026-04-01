@@ -11,6 +11,10 @@ class DeleteUserVideo
 {
     public function execute(User $user, UserVideo $video): ActionResult
     {
+        if ((int) $video->user_id !== (int) $user->id) {
+            return ActionResult::authorizationFailure('You can only modify your own videos.');
+        }
+
         $disk = Storage::disk('s3');
 
         if ($video->video_path) {

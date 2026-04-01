@@ -41,67 +41,67 @@ class MyRateController extends Controller
     {
         $this->authorize('create', Rate::class);
 
-        $rate = $this->storeRate->execute(
+        $result = $this->storeRate->execute(
             Auth::user(),
             $request->validated()
         );
 
-        return response()->json($rate, 201);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function update(UpdateRateRequest $request, Rate $rate): JsonResponse
     {
         $this->authorize('update', $rate);
 
-        $rate = $this->updateRate->execute(
+        $result = $this->updateRate->execute(
             Auth::user(),
             $rate,
             $request->validated()
         );
 
-        return response()->json($rate);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function destroy(Rate $rate): JsonResponse
     {
         $this->authorize('delete', $rate);
 
-        $this->deleteRate->execute(Auth::user(), $rate);
+        $result = $this->deleteRate->execute(Auth::user(), $rate);
 
-        return response()->json(['success' => true]);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function storeGroup(StoreRateGroupRequest $request): JsonResponse
     {
         $this->authorize('create', RateGroup::class);
 
-        $group = $this->storeRateGroup->execute(
+        $result = $this->storeRateGroup->execute(
             Auth::user(),
             $request->validated()
         );
 
-        return response()->json($group, 201);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function updateGroup(UpdateRateGroupRequest $request, RateGroup $group): JsonResponse
     {
         $this->authorize('update', $group);
 
-        $group = $this->updateRateGroup->execute(
+        $result = $this->updateRateGroup->execute(
             Auth::user(),
             $group,
             $request->validated()
         );
 
-        return response()->json($group);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function destroyGroup(RateGroup $group): JsonResponse
     {
         $this->authorize('delete', $group);
 
-        $this->deleteRateGroup->execute(Auth::user(), $group);
+        $result = $this->deleteRateGroup->execute(Auth::user(), $group);
 
-        return response()->json(['success' => true]);
+        return response()->json($result->toPayload(), $result->status());
     }
 }

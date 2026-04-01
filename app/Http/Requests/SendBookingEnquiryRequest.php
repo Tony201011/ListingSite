@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\BookableProviderUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SendBookingEnquiryRequest extends FormRequest
@@ -14,7 +15,7 @@ class SendBookingEnquiryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'user_id' => ['required', 'integer', new BookableProviderUser],
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'regex:/^[\d\s\-\+\(\)]{6,20}$/', 'max:20'],
@@ -30,7 +31,6 @@ class SendBookingEnquiryRequest extends FormRequest
     {
         return [
             'user_id.required' => 'Profile is required.',
-            'user_id.exists' => 'The selected profile does not exist.',
             'email.required' => 'Email is required.',
             'email.email' => 'Please enter a valid email address.',
             'phone.regex' => 'Please enter a valid phone number.',

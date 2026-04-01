@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Actions\SendBookingEnquiryEmail;
 use App\Models\BookingEnquiry;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -12,6 +13,19 @@ use Tests\TestCase;
 class BookingEnquiryFlowTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function createBookableProvider(): User
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'provider-'.$user->id,
+        ]);
+
+        return $user;
+    }
 
     protected function tearDown(): void
     {
@@ -48,7 +62,7 @@ class BookingEnquiryFlowTest extends TestCase
     public function test_booking_enquiry_creates_database_record(): void
     {
         $this->mockBookingEmail();
-        $provider = User::factory()->create();
+        $provider = $this->createBookableProvider();
 
         $response = $this->from('/profile/test')->post('/booking-enquiry', $this->validPayload($provider->id));
 
@@ -67,7 +81,7 @@ class BookingEnquiryFlowTest extends TestCase
     public function test_booking_enquiry_stores_all_optional_fields(): void
     {
         $this->mockBookingEmail();
-        $provider = User::factory()->create();
+        $provider = $this->createBookableProvider();
 
         $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id));
 
@@ -88,7 +102,7 @@ class BookingEnquiryFlowTest extends TestCase
 
     public function test_booking_enquiry_requires_valid_email(): void
     {
-        $provider = User::factory()->create();
+        $provider = $this->createBookableProvider();
 
         $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
             'email' => 'not-an-email',
@@ -101,7 +115,7 @@ class BookingEnquiryFlowTest extends TestCase
 
     public function test_booking_enquiry_requires_email(): void
     {
-        $provider = User::factory()->create();
+        $provider = $this->createBookableProvider();
 
         $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
             'email' => '',
@@ -121,7 +135,7 @@ class BookingEnquiryFlowTest extends TestCase
 
     public function test_booking_enquiry_rejects_past_datetime(): void
     {
-        $provider = User::factory()->create();
+        $provider = $this->createBookableProvider();
 
         $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
             'datetime' => '2020-01-01 10:00:00',
@@ -133,7 +147,7 @@ class BookingEnquiryFlowTest extends TestCase
 
     public function test_booking_enquiry_rejects_message_over_2000_chars(): void
     {
-        $provider = User::factory()->create();
+        $provider = $this->createBookableProvider();
 
         $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
             'message' => str_repeat('a', 2001),
@@ -146,7 +160,7 @@ class BookingEnquiryFlowTest extends TestCase
     public function test_booking_enquiry_accepts_minimal_required_fields(): void
     {
         $this->mockBookingEmail();
-        $provider = User::factory()->create();
+        $provider = $this->createBookableProvider();
 
         $response = $this->from('/booking')->post('/booking-enquiry', [
             'user_id' => $provider->id,
@@ -161,7 +175,7 @@ class BookingEnquiryFlowTest extends TestCase
     public function test_booking_enquiry_strips_unexpected_fields(): void
     {
         $this->mockBookingEmail();
-        $provider = User::factory()->create();
+        $provider = $this->createBookableProvider();
 
         $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
             'admin_notes' => 'injected',
@@ -170,5 +184,16 @@ class BookingEnquiryFlowTest extends TestCase
 
         $enquiry = BookingEnquiry::first();
         $this->assertSame('pending', $enquiry->status);
+    }
+
+    public function test_booking_enquiry_rejects_non_provider_target_without_listing(): void
+    {
+        $nonProvider = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($nonProvider->id));
+
+        $response->assertRedirect('/booking');
+        $response->assertSessionHasErrors(['user_id']);
+        $this->assertDatabaseCount('booking_enquiries', 0);
     }
 }

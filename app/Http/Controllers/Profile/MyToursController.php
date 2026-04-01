@@ -43,15 +43,12 @@ class MyToursController extends Controller
     {
         $this->authorize('create', Tour::class);
 
-        $tour = $this->storeTour->execute(
+        $result = $this->storeTour->execute(
             Auth::user(),
             $request->validated()
         );
 
-        return response()->json([
-            'message' => 'Tour created successfully.',
-            'tour' => $tour,
-        ], 201);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     /**
@@ -61,16 +58,13 @@ class MyToursController extends Controller
     {
         $this->authorize('update', $tour);
 
-        $tour = $this->updateTour->execute(
+        $result = $this->updateTour->execute(
             Auth::user(),
             $tour,
             $request->validated()
         );
 
-        return response()->json([
-            'message' => 'Tour updated successfully.',
-            'tour' => $tour,
-        ]);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     /**
@@ -80,11 +74,9 @@ class MyToursController extends Controller
     {
         $this->authorize('delete', $tour);
 
-        $this->deleteTour->execute(Auth::user(), $tour);
+        $result = $this->deleteTour->execute(Auth::user(), $tour);
 
-        return response()->json([
-            'message' => 'Tour deleted successfully.',
-        ]);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function search(SearchTourCityRequest $request): JsonResponse

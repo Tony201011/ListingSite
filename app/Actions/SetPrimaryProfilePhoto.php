@@ -11,6 +11,10 @@ class SetPrimaryProfilePhoto
 {
     public function execute(User $user, ProfileImage $photo): ActionResult
     {
+        if ((int) $photo->user_id !== (int) $user->id) {
+            return ActionResult::authorizationFailure('You can only modify your own photos.');
+        }
+
         DB::transaction(function () use ($user, $photo) {
             // Lock all user photos to serialize concurrent primary-photo changes
             ProfileImage::where('user_id', $user->id)

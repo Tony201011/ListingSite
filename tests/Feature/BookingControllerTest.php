@@ -3,6 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Actions\CreateBookingEnquiry;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -11,6 +12,19 @@ use Tests\TestCase;
 class BookingControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function createBookableProvider(): User
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'provider-'.$user->id,
+        ]);
+
+        return $user;
+    }
 
     protected function tearDown(): void
     {
@@ -21,7 +35,7 @@ class BookingControllerTest extends TestCase
 
     public function test_send_creates_booking_enquiry_and_redirects_back_with_success_message(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createBookableProvider();
 
         $validatedPayload = [
             'user_id' => $user->id,
@@ -50,7 +64,7 @@ class BookingControllerTest extends TestCase
 
     public function test_send_does_not_call_action_when_email_is_missing(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createBookableProvider();
 
         $createBookingEnquiry = Mockery::mock(CreateBookingEnquiry::class);
         $createBookingEnquiry->shouldNotReceive('execute');
@@ -70,7 +84,7 @@ class BookingControllerTest extends TestCase
 
     public function test_send_does_not_call_action_when_email_is_invalid(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createBookableProvider();
 
         $createBookingEnquiry = Mockery::mock(CreateBookingEnquiry::class);
         $createBookingEnquiry->shouldNotReceive('execute');
@@ -90,7 +104,7 @@ class BookingControllerTest extends TestCase
 
     public function test_send_passes_only_validated_data_to_action(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createBookableProvider();
 
         $requestPayload = [
             'user_id' => $user->id,

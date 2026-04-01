@@ -13,6 +13,10 @@ class DeleteProfilePhoto
 {
     public function execute(User $user, ProfileImage $photo): ActionResult
     {
+        if ((int) $photo->user_id !== (int) $user->id) {
+            return ActionResult::authorizationFailure('You can only modify your own photos.');
+        }
+
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
 
