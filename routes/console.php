@@ -8,9 +8,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('users:purge-deleted')->daily();
-
-
 Schedule::command('accounts:purge-deleted')
     ->dailyAt('02:00')
     ->withoutOverlapping()

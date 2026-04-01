@@ -34,8 +34,6 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
         'mobile',
         'suburb',
         'referral_code',
-        'otp',
-        'otp_expires_at',
         'mobile_verified',
         'password',
         'account_status',
@@ -58,7 +56,6 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
             'deleted_at' => 'datetime',
             'scheduled_purge_at' => 'datetime',
             'anonymized_at' => 'datetime',
-            'otp_expires_at' => 'datetime',
         ];
     }
 
