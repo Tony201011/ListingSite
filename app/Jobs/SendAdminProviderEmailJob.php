@@ -22,6 +22,8 @@ class SendAdminProviderEmailJob implements ShouldQueue
     public function __construct(
         public int $userId,
         public string $emailType,
+        public ?string $temporaryPassword = null,
+        public ?string $agentName = null,
     ) {}
 
     public function handle(MailgunConfigService $mailgunConfig): void
@@ -82,6 +84,8 @@ class SendAdminProviderEmailJob implements ShouldQueue
                 'data' => [
                     'name' => $user->name,
                     'email' => $user->email,
+                    'temporaryPassword' => $this->temporaryPassword,
+                    'agentName' => $this->agentName,
                     'signinUrl' => url('/signin'),
                 ],
                 'subject' => 'Provider Account Created',

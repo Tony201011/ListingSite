@@ -42,6 +42,11 @@ class ManagedProfileResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static function isCreatePage(): bool
+    {
+        return request()->routeIs('filament.agent.resources.managed-profiles.create');
+    }
+
     public static function canAccess(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'agent';
@@ -74,6 +79,33 @@ class ManagedProfileResource extends Resource
                     ->preload()
                     ->required(fn (): bool => Filament::auth()->user()?->role === User::ROLE_ADMIN)
                     ->visible(fn (): bool => Filament::auth()->user()?->role === User::ROLE_ADMIN),
+
+                TextInput::make('provider_email')
+                    ->label('Provider Email')
+                    ->email()
+                    ->required(fn (): bool => static::isCreatePage())
+                    ->maxLength(255)
+                    ->unique(User::class, 'email')
+                    ->visible(fn (): bool => static::isCreatePage())
+                    ->dehydrated(fn (): bool => static::isCreatePage()),
+
+                TextInput::make('provider_password')
+                    ->label('Provider Password')
+                    ->password()
+                    ->revealable(filament()->arePasswordsRevealable())
+                    ->required(fn (): bool => static::isCreatePage())
+                    ->minLength(8)
+                    ->same('provider_password_confirmation')
+                    ->visible(fn (): bool => static::isCreatePage())
+                    ->dehydrated(fn (): bool => static::isCreatePage()),
+
+                TextInput::make('provider_password_confirmation')
+                    ->label('Confirm Provider Password')
+                    ->password()
+                    ->revealable(filament()->arePasswordsRevealable())
+                    ->required(fn (): bool => static::isCreatePage())
+                    ->visible(fn (): bool => static::isCreatePage())
+                    ->dehydrated(false),
 
                 TextInput::make('name')
                     ->label('Profile Name')
@@ -156,6 +188,10 @@ class ManagedProfileResource extends Resource
                     ->label('Profile Name')
                     ->searchable()
                     ->sortable(),
+
+                TextColumn::make('user.email')
+                    ->label('Provider Email')
+                    ->searchable(),
 
                 TextColumn::make('agent.name')
                     ->label('Agent')

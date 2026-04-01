@@ -21,8 +21,14 @@
                         <td style="padding:28px;">
                             <h1 style="margin:0 0 10px 0;font-size:24px;line-height:1.3;color:#111827;">Welcome, {{ $name }}!</h1>
                             <p style="margin:0 0 18px 0;font-size:15px;line-height:1.7;color:#4b5563;">
-                                Your account has been created successfully. You can now sign in and start managing your profile.
+                                Your account has been created successfully. You can now sign in to the website and start managing your profile.
                             </p>
+
+                            @if (! empty($agentName))
+                                <p style="margin:0 0 18px 0;font-size:15px;line-height:1.7;color:#4b5563;">
+                                    Your agent <strong style="color:#111827;">{{ $agentName }}</strong> created this account for you.
+                                </p>
+                            @endif
 
                             <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 20px 0;">
                                 <tr>
@@ -36,6 +42,17 @@
                                 <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#9d174d;margin-bottom:6px;font-weight:700;">Account Email</div>
                                 <div style="font-size:14px;color:#111827;font-weight:600;">{{ $email }}</div>
                             </div>
+
+                            @if (! empty($temporaryPassword))
+                                <div style="background:#fdf2f8;border:1px solid #fbcfe8;border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+                                    <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#9d174d;margin-bottom:6px;font-weight:700;">Login Password</div>
+                                    <div style="font-size:14px;color:#111827;font-weight:600;">{{ $temporaryPassword }}</div>
+                                </div>
+                            @endif
+
+                            <p style="margin:0 0 18px 0;font-size:13px;line-height:1.7;color:#6b7280;">
+                                Use the same email and password above on the website login page.
+                            </p>
 
                             <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
                                 If you did not create this account, please contact support immediately.
