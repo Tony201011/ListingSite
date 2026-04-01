@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
 
 use App\Actions\GetShowHideProfileState;
 use App\Actions\UpdateShowHideProfileState;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateShowHideProfileRequest;
 use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
@@ -16,8 +16,7 @@ class ShowHideProfileController extends Controller
     public function __construct(
         private GetShowHideProfileState $getShowHideProfileState,
         private UpdateShowHideProfileState $updateShowHideProfileState
-    ) {
-    }
+    ) {}
 
     public function hideShowProfile(): View
     {

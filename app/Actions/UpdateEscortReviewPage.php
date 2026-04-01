@@ -10,7 +10,7 @@ class UpdateEscortReviewPage
     public function execute(string $content): EscortReviewPage
     {
         return DB::transaction(function () use ($content) {
-            $escortReviewPage = EscortReviewPage::first() ?? new EscortReviewPage();
+            $escortReviewPage = EscortReviewPage::first() ?? new EscortReviewPage;
 
             $escortReviewPage->content = $content;
             $escortReviewPage->save();

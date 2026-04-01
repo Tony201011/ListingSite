@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Models\Availability;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 
 class GetUserAvailability

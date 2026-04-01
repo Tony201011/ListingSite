@@ -23,8 +23,6 @@ class BookingEnquiry extends Model
         'is_read',
     ];
 
-
-
     protected $casts = [
         'is_read' => 'boolean',
     ];

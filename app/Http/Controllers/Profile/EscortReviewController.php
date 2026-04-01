@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
+
 use App\Actions\GetEscortReviewPage;
 use App\Actions\UpdateEscortReviewPage;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateEscortReviewRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -13,8 +14,7 @@ class EscortReviewController extends Controller
     public function __construct(
         private GetEscortReviewPage $getEscortReviewPage,
         private UpdateEscortReviewPage $updateEscortReviewPage
-    ) {
-    }
+    ) {}
 
     public function show(): View
     {

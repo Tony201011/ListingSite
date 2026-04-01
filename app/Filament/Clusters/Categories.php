@@ -8,7 +8,7 @@ use Filament\Support\Icons\Heroicon;
 
 class Categories extends Cluster
 {
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedTag;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
     protected static ?string $navigationLabel = 'Categories';
 

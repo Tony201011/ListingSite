@@ -29,7 +29,7 @@ class SendAdminProviderEmailJob implements ShouldQueue
         $user = User::find($this->userId);
 
         if (! $user) {
-            Log::error("Admin provider email job failed: user not found.", [
+            Log::error('Admin provider email job failed: user not found.', [
                 'user_id' => $this->userId,
                 'email_type' => $this->emailType,
             ]);

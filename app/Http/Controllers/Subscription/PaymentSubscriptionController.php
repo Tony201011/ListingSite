@@ -10,8 +10,7 @@ class PaymentSubscriptionController extends Controller
 {
     public function __construct(
         private GetSubscriptionPlans $getSubscriptionPlans
-    ) {
-    }
+    ) {}
 
     public function index(): View
     {

@@ -1,11 +1,11 @@
 <?php
+
 // database/seeders/MetaKeywordSeeder.php
 
 namespace Database\Seeders;
 
 use App\Models\MetaKeyword;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class MetaKeywordSeeder extends Seeder
 {

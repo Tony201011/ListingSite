@@ -23,7 +23,7 @@ class PricingPageResource extends Resource
 {
     protected static ?string $model = PricingPage::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBanknotes;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
     protected static ?string $navigationLabel = 'Pricing';
 

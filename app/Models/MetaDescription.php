@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MetaDescription extends Model
 {
@@ -25,7 +25,7 @@ class MetaDescription extends Model
     protected $fillable = [
         'page_name',
         'meta_description',
-        'is_active'
+        'is_active',
     ];
 
     /**
@@ -61,7 +61,7 @@ class MetaDescription extends Model
     /**
      * Scope a query to order by most recent.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeLatest($query)
@@ -72,7 +72,7 @@ class MetaDescription extends Model
     /**
      * Scope a query to order by oldest.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOldest($query)
@@ -82,8 +82,6 @@ class MetaDescription extends Model
 
     /**
      * Get the page name with proper formatting.
-     *
-     * @return string
      */
     public function getDisplayPageNameAttribute(): string
     {
@@ -92,8 +90,6 @@ class MetaDescription extends Model
 
     /**
      * Get the status badge class.
-     *
-     * @return string
      */
     public function getStatusBadgeAttribute(): string
     {
@@ -104,8 +100,6 @@ class MetaDescription extends Model
 
     /**
      * Get the status text.
-     *
-     * @return string
      */
     public function getStatusTextAttribute(): string
     {
@@ -114,9 +108,6 @@ class MetaDescription extends Model
 
     /**
      * Get the meta description for a specific page.
-     *
-     * @param string $pageName
-     * @return string|null
      */
     public static function getForPage(string $pageName): ?string
     {
@@ -127,9 +118,6 @@ class MetaDescription extends Model
 
     /**
      * Check if page has meta description.
-     *
-     * @param string $pageName
-     * @return bool
      */
     public static function hasForPage(string $pageName): bool
     {
@@ -140,8 +128,6 @@ class MetaDescription extends Model
 
     /**
      * Get the validation rules for meta description.
-     *
-     * @return array
      */
     public static function validationRules(): array
     {
@@ -154,14 +140,11 @@ class MetaDescription extends Model
 
     /**
      * Get the update validation rules for meta description.
-     *
-     * @param int $id
-     * @return array
      */
     public static function updateValidationRules(int $id): array
     {
         return [
-            'page_name' => 'required|string|max:255|unique:meta_descriptions,page_name,' . $id,
+            'page_name' => 'required|string|max:255|unique:meta_descriptions,page_name,'.$id,
             'meta_description' => 'nullable|string|max:255',
             'is_active' => 'boolean',
         ];

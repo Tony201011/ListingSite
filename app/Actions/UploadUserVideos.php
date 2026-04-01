@@ -17,8 +17,7 @@ class UploadUserVideos
 {
     public function __construct(
         private UserVideoStorageService $videoStorageService
-    ) {
-    }
+    ) {}
 
     public function execute(?User $user, array $videos): array
     {
@@ -117,7 +116,7 @@ class UploadUserVideos
             $slug = 'user';
         }
 
-        return $slug . $user->id;
+        return $slug.$user->id;
     }
 
     private function errorResponse(string $message, int $status): array

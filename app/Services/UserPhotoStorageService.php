@@ -19,10 +19,10 @@ class UserPhotoStorageService
         $disk = Storage::disk('s3');
 
         $extension = strtolower($photo->extension() ?: $photo->getClientOriginalExtension() ?: 'jpg');
-        $baseFileName = 'profile_' . $user->id . '_' . Str::uuid();
+        $baseFileName = 'profile_'.$user->id.'_'.Str::uuid();
 
-        $imageFileName = $baseFileName . '.' . $extension;
-        $thumbFileName = $baseFileName . '_thumb.jpg';
+        $imageFileName = $baseFileName.'.'.$extension;
+        $thumbFileName = $baseFileName.'_thumb.jpg';
 
         $imagePath = "images/{$username}/{$imageFileName}";
         $thumbnailPath = "thumbnails/{$username}/{$thumbFileName}";

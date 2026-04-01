@@ -8,15 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\SendPasswordResetLinkRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
 
 class PasswordResetController extends Controller
 {
     public function __construct(
         private SendPasswordResetLink $sendPasswordResetLink,
         private ResetProviderPassword $resetProviderPassword
-    ) {
-    }
+    ) {}
 
     public function showLinkRequestForm()
     {

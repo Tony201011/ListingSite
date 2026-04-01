@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
 
 use App\Actions\GetProfileMessage;
 use App\Actions\SaveProfileMessage;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProfileMessageRequest;
 use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
@@ -16,8 +16,7 @@ class ProfileMessageController extends Controller
     public function __construct(
         private GetProfileMessage $getProfileMessage,
         private SaveProfileMessage $saveProfileMessage
-    ) {
-    }
+    ) {}
 
     public function profileMessage(): View
     {

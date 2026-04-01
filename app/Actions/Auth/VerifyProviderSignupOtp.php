@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Session;
 class VerifyProviderSignupOtp
 {
     private const MAX_ATTEMPTS = 5;
+
     private const LOCKOUT_MINUTES = 15;
 
     public function __construct(
         private SendProviderAccountEmails $sendProviderAccountEmails
-    ) {
-    }
+    ) {}
 
     public function execute(string $otp): array
     {
@@ -33,7 +33,7 @@ class VerifyProviderSignupOtp
         $pendingKey = session()->get('pending_signup_key');
 
         // Check if locked out due to too many failed attempts
-        $attemptsKey = $pendingKey . '_otp_attempts';
+        $attemptsKey = $pendingKey.'_otp_attempts';
         $attempts = (int) Cache::get($attemptsKey, 0);
 
         if ($attempts >= self::MAX_ATTEMPTS) {
@@ -49,7 +49,7 @@ class VerifyProviderSignupOtp
         }
 
         $pendingUser = Cache::get($pendingKey);
-        $otpData = Cache::get($pendingKey . '_otp');
+        $otpData = Cache::get($pendingKey.'_otp');
 
         if (! $pendingUser || ! $otpData || ! isset($otpData['code'], $otpData['expires_at'])) {
             return [
@@ -94,7 +94,7 @@ class VerifyProviderSignupOtp
                 'status' => 422,
                 'data' => [
                     'success' => false,
-                    'message' => 'Invalid OTP. ' . $remaining . ' attempt(s) remaining.',
+                    'message' => 'Invalid OTP. '.$remaining.' attempt(s) remaining.',
                 ],
             ];
         }
@@ -139,8 +139,8 @@ class VerifyProviderSignupOtp
     private function expireOtpSession(string $pendingKey): void
     {
         Cache::forget($pendingKey);
-        Cache::forget($pendingKey . '_otp');
-        Cache::forget($pendingKey . '_otp_attempts');
+        Cache::forget($pendingKey.'_otp');
+        Cache::forget($pendingKey.'_otp_attempts');
 
         Session::forget('otp_required');
         Session::forget('pending_signup_key');

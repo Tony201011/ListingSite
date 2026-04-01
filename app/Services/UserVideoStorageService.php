@@ -18,8 +18,8 @@ class UserVideoStorageService
         $disk = Storage::disk('s3');
 
         $extension = strtolower($video->extension() ?: $video->getClientOriginalExtension() ?: 'mp4');
-        $baseFileName = 'profile_video_' . $user->id . '_' . Str::uuid();
-        $videoFileName = $baseFileName . '.' . $extension;
+        $baseFileName = 'profile_video_'.$user->id.'_'.Str::uuid();
+        $videoFileName = $baseFileName.'.'.$extension;
         $videoPath = "videos/{$username}/{$videoFileName}";
 
         $uploadedVideoPath = null;

@@ -14,8 +14,7 @@ class HandleSocialAuthCallback
     public function __construct(
         private ResolveSocialProviderSetting $resolveSocialProviderSetting,
         private ConfigureSocialProvider $configureSocialProvider
-    ) {
-    }
+    ) {}
 
     public function execute(string $provider): RedirectResponse
     {
@@ -51,10 +50,10 @@ class HandleSocialAuthCallback
         if (! $user) {
             $generatedEmail = filled($email)
                 ? $email
-                : Str::slug($provider . '-' . $socialUser->getId()) . '@social.local';
+                : Str::slug($provider.'-'.$socialUser->getId()).'@social.local';
 
             $user = User::query()->create([
-                'name' => $socialUser->getName() ?: ucfirst($provider) . ' User',
+                'name' => $socialUser->getName() ?: ucfirst($provider).' User',
                 'email' => $generatedEmail,
                 'password' => Str::random(40),
                 'profile_image' => $socialUser->getAvatar(),

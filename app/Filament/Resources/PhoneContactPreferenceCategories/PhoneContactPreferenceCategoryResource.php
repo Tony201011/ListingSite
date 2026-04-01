@@ -25,7 +25,7 @@ class PhoneContactPreferenceCategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedPhone;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhone;
 
     protected static ?string $navigationLabel = 'Phone contact preferences';
 

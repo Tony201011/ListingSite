@@ -9,8 +9,7 @@ class GetMyProfileStepTwoData
 {
     public function __construct(
         private GetProfileCategoryOptions $getProfileCategoryOptions
-    ) {
-    }
+    ) {}
 
     public function execute(?User $user): array
     {

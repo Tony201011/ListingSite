@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Actions;
+
 use App\Models\User;
 use App\Models\UserVideo;
 use Illuminate\Support\Facades\Gate;

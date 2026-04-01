@@ -17,8 +17,8 @@ class UserVideoFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'video_path' => 'videos/' . fake()->uuid() . '.mp4',
-            'original_name' => fake()->word() . '.mp4',
+            'video_path' => 'videos/'.fake()->uuid().'.mp4',
+            'original_name' => fake()->word().'.mp4',
         ];
     }
 }

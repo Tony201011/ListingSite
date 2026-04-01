@@ -49,7 +49,7 @@ class MetaDescriptionsTable
                     ->icon('heroicon-o-eye')
                     ->label('View')
                     ->modalHeading('Full Meta Description')
-                    ->modalContent(fn($record) => view('filament.modals.meta-description', ['record' => $record]))
+                    ->modalContent(fn ($record) => view('filament.modals.meta-description', ['record' => $record]))
                     ->color('info'),
             ])
             ->toolbarActions([

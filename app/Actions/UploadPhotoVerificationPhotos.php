@@ -31,7 +31,7 @@ class UploadPhotoVerificationPhotos
         $disk = Storage::disk('s3');
 
         $baseName = $user->name ?: 'user';
-        $username = Str::slug($baseName) . $user->id;
+        $username = Str::slug($baseName).$user->id;
 
         $uploadedPhotos = [];
         $storedPaths = [];
@@ -43,7 +43,7 @@ class UploadPhotoVerificationPhotos
                 }
 
                 $originalExtension = strtolower($photo->getClientOriginalExtension() ?: 'jpg');
-                $fileName = 'verification_' . $user->id . '_' . Str::uuid() . '.' . $originalExtension;
+                $fileName = 'verification_'.$user->id.'_'.Str::uuid().'.'.$originalExtension;
                 $filePath = "verification/{$username}/{$fileName}";
 
                 $uploaded = $disk->putFileAs(

@@ -34,8 +34,9 @@ class VideoUploadTest extends TestCase
         ProviderProfile::create([
             'user_id' => $user->id,
             'name' => $user->name,
-            'slug' => 'test-' . $user->id,
+            'slug' => 'test-'.$user->id,
         ]);
+
         return $user;
     }
 
@@ -44,6 +45,7 @@ class VideoUploadTest extends TestCase
         $mock = Mockery::mock(UserVideoStorageService::class);
         $mock->shouldReceive('store')->andReturnUsing(function ($user, $video, $username) {
             $uuid = fake()->uuid();
+
             return [
                 'video_path' => "videos/{$username}/{$uuid}.mp4",
                 'video_url' => "https://cdn.example.com/videos/{$uuid}.mp4",
@@ -132,6 +134,7 @@ class VideoUploadTest extends TestCase
             if ($callCount === 2) {
                 throw new \RuntimeException('Second upload failed');
             }
+
             return [
                 'video_path' => 'videos/test/video1.mp4',
                 'video_url' => 'https://cdn.example.com/videos/video1.mp4',

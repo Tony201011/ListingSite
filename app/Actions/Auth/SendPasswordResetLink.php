@@ -10,8 +10,7 @@ class SendPasswordResetLink
 {
     public function __construct(
         private ActiveMailSettingService $mailSettingService
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{success: bool, message: string}

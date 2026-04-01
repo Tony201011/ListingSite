@@ -9,8 +9,7 @@ class CreateBookingEnquiry
 {
     public function __construct(
         private SendBookingEnquiryEmail $sendBookingEnquiryEmail
-    ) {
-    }
+    ) {}
 
     public function execute(array $validated): BookingEnquiry
     {

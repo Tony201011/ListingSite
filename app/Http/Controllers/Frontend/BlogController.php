@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Frontend;
-use App\Http\Controllers\Controller;
+
 use App\Actions\GetBlogIndexData;
 use App\Actions\GetBlogPostData;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\LoadMoreBlogPostsRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
@@ -13,8 +14,7 @@ class BlogController extends Controller
     public function __construct(
         private GetBlogIndexData $getBlogIndexData,
         private GetBlogPostData $getBlogPostData
-    ) {
-    }
+    ) {}
 
     public function index(): View
     {

@@ -2,9 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Actions\SetPrimaryProfilePhoto;
-use App\Actions\DeleteProfilePhoto;
-use App\Actions\UploadUserPhotos;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
 use App\Models\User;
@@ -31,8 +28,9 @@ class PhotoManagementTest extends TestCase
         ProviderProfile::create([
             'user_id' => $user->id,
             'name' => $user->name,
-            'slug' => 'test-' . $user->id,
+            'slug' => 'test-'.$user->id,
         ]);
+
         return $user;
     }
 
@@ -41,6 +39,7 @@ class PhotoManagementTest extends TestCase
         $mock = Mockery::mock(UserPhotoStorageService::class);
         $mock->shouldReceive('store')->andReturnUsing(function ($user, $photo, $username) {
             $uuid = fake()->uuid();
+
             return [
                 'image_path' => "images/{$username}/{$uuid}.jpg",
                 'thumbnail_path' => "thumbnails/{$username}/{$uuid}.jpg",

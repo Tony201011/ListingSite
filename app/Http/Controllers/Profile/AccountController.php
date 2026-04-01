@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
+
 use App\Actions\DeleteUserAccount;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteAccountRequest;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -11,8 +12,7 @@ class AccountController extends Controller
 {
     public function __construct(
         private DeleteUserAccount $deleteUserAccount
-    ) {
-    }
+    ) {}
 
     public function deleteAccountPage()
     {

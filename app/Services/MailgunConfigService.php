@@ -33,7 +33,7 @@ class MailgunConfigService
         $fromAddress = $setting->mail_from_address;
 
         if (! filled($fromAddress) && filled($domain)) {
-            $fromAddress = 'postmaster@' . $domain;
+            $fromAddress = 'postmaster@'.$domain;
         }
 
         config([

@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Models\BlogPost;
-use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class GetBlogPostData
@@ -20,7 +19,7 @@ class GetBlogPostData
         $index = $posts->search(fn (BlogPost $post) => $post->slug === $slug);
 
         if ($index === false) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException;
         }
 
         $current = $posts[$index];

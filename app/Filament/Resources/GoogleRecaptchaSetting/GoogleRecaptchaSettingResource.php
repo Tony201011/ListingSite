@@ -3,12 +3,12 @@
 namespace App\Filament\Resources\GoogleRecaptchaSetting;
 
 use App\Filament\Clusters\Settings;
-use App\Models\GoogleRecaptchaSetting;
-use Filament\Facades\Filament;
 use App\Filament\Resources\GoogleRecaptchaSetting\Pages\ManageGoogleRecaptchaSettings;
 use App\Filament\Resources\GoogleRecaptchaSetting\Schemas\GoogleRecaptchaSettingForm;
 use App\Filament\Resources\GoogleRecaptchaSetting\Tables\GoogleRecaptchaSettingsTable;
+use App\Models\GoogleRecaptchaSetting;
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -30,7 +30,6 @@ class GoogleRecaptchaSettingResource extends Resource
 
     protected static ?string $cluster = Settings::class;
 
-
     public static function canAccess(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
@@ -41,7 +40,7 @@ class GoogleRecaptchaSettingResource extends Resource
         return GoogleRecaptchaSettingForm::configure($schema);
     }
 
-public static function canCreate(): bool
+    public static function canCreate(): bool
     {
         return GoogleRecaptchaSetting::query()->doesntExist();
     }
@@ -53,7 +52,7 @@ public static function canCreate(): bool
 
     public static function getPages(): array
     {
-         return [
+        return [
             'index' => ManageGoogleRecaptchaSettings::route('/'),
         ];
     }

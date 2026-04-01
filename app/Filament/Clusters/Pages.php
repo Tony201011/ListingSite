@@ -8,7 +8,7 @@ use Filament\Support\Icons\Heroicon;
 
 class Pages extends Cluster
 {
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedDocumentText;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $navigationLabel = 'Pages';
 

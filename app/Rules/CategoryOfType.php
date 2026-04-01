@@ -11,8 +11,7 @@ class CategoryOfType implements ValidationRule
     public function __construct(
         private string $parentSlug,
         private string $websiteType = 'adult',
-    ) {
-    }
+    ) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

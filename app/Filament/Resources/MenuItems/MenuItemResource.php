@@ -10,19 +10,25 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 
 class MenuItemResource extends Resource
 {
     protected static ?string $model = MenuItem::class;
+
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::Bars3;
+
     protected static ?string $navigationLabel = 'Menu Items';
+
     protected static ?string $modelLabel = 'Menu Item';
+
     protected static ?string $pluralModelLabel = 'Menu Items';
+
     protected static ?string $slug = 'menu-items';
+
     protected static ?int $navigationSort = 1;
+
     protected static bool $shouldRegisterNavigation = false;
 
     public static function canAccess(): bool

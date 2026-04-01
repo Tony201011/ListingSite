@@ -23,7 +23,7 @@ class SmtpSettingResource extends Resource
 {
     protected static ?string $model = SmtpSetting::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedEnvelope;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
     protected static ?string $navigationLabel = 'Mail Settings';
 
@@ -145,8 +145,8 @@ class SmtpSettingResource extends Resource
             ])
             ->defaultSort('updated_at', 'desc')
             ->striped()
-                ->emptyStateHeading('No mail settings added yet')
-                ->emptyStateDescription('Admin can add Mailgun credentials for outgoing emails.');
+            ->emptyStateHeading('No mail settings added yet')
+            ->emptyStateDescription('Admin can add Mailgun credentials for outgoing emails.');
     }
 
     public static function getPages(): array

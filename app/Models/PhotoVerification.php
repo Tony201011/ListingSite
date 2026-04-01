@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class PhotoVerification extends Model
 {
@@ -31,13 +31,13 @@ class PhotoVerification extends Model
     {
         return Attribute::make(
             get: function () {
-                if (empty($this->photos) || !is_array($this->photos)) {
+                if (empty($this->photos) || ! is_array($this->photos)) {
                     return null;
                 }
 
                 $firstPhoto = $this->photos[0] ?? null;
 
-                if (!$firstPhoto || !is_array($firstPhoto)) {
+                if (! $firstPhoto || ! is_array($firstPhoto)) {
                     return null;
                 }
 

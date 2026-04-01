@@ -1,15 +1,15 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
 
 use App\Actions\GetShortUrlPageData;
 use App\Actions\UpdateUserShortUrl;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateShortUrlRequest;
 use App\Models\ShortUrl;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class UrlController extends Controller
@@ -17,8 +17,7 @@ class UrlController extends Controller
     public function __construct(
         private GetShortUrlPageData $getShortUrlPageData,
         private UpdateUserShortUrl $updateUserShortUrl
-    ) {
-    }
+    ) {}
 
     public function shortUrl(): View|RedirectResponse
     {

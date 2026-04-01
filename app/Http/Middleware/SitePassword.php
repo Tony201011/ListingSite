@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
 use App\Models\SiteSetting;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +23,6 @@ class SitePassword
         ) {
             return $next($request);
         }
-
 
         if ($request->is('admin*')) {
             return $next($request);

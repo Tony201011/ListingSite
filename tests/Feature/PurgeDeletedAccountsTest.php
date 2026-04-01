@@ -40,7 +40,7 @@ class PurgeDeletedAccountsTest extends TestCase
         ProviderProfile::create([
             'user_id' => $user->id,
             'name' => $user->name,
-            'slug' => 'test-' . $user->id,
+            'slug' => 'test-'.$user->id,
         ]);
 
         ProfileImage::create([
@@ -52,7 +52,7 @@ class PurgeDeletedAccountsTest extends TestCase
 
         ShortUrl::create([
             'user_id' => $user->id,
-            'short_url' => 'slug-' . $user->id,
+            'short_url' => 'slug-'.$user->id,
         ]);
 
         $group = RateGroup::create([

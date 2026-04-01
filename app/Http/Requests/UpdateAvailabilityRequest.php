@@ -7,8 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 
-
-
 class UpdateAvailabilityRequest extends FormRequest
 {
     protected array $days = [
@@ -57,6 +55,7 @@ class UpdateAvailabilityRequest extends FormRequest
             foreach ($availability as $day => $dayData) {
                 if (! in_array($day, $this->days, true)) {
                     $validator->errors()->add("availability.$day", 'Invalid day provided.');
+
                     continue;
                 }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Actions;
 
 use App\Models\Category;
@@ -11,8 +12,7 @@ class SaveMyProfile
 {
     public function __construct(
         private GenerateUniqueProviderProfileSlug $generateUniqueProviderProfileSlug
-    ) {
-    }
+    ) {}
 
     public function execute(?User $user, array $validated): void
     {
@@ -34,7 +34,7 @@ class SaveMyProfile
             ]);
 
             $accountUserReferralCode = Str::substr(
-                md5($user->id . $user->email),
+                md5($user->id.$user->email),
                 0,
                 10
             );
@@ -119,6 +119,7 @@ class SaveMyProfile
 
             if (! is_array($values)) {
                 $errors[$field] = ["The {$field} field must be an array."];
+
                 continue;
             }
 

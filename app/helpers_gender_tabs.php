@@ -3,7 +3,7 @@
 use App\Models\Category;
 use Illuminate\Support\Facades\Cache;
 
-if (!function_exists('gender_tabs')) {
+if (! function_exists('gender_tabs')) {
     function gender_tabs()
     {
         return Cache::rememberForever('gender_tabs_categories', function () {

@@ -10,8 +10,7 @@ class SmsController extends Controller
 {
     public function __construct(
         private SendSms $sendSms
-    ) {
-    }
+    ) {}
 
     public function send(SendSmsRequest $request): JsonResponse
     {

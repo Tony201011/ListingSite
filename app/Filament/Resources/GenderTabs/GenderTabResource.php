@@ -19,12 +19,19 @@ use Filament\Tables\Columns\ToggleColumn;
 class GenderTabResource extends Resource
 {
     protected static ?string $model = GenderTab::class;
+
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::Bars3;
+
     protected static ?string $navigationLabel = 'Gender Tabs';
+
     protected static ?string $modelLabel = 'Gender Tab';
+
     protected static ?string $pluralModelLabel = 'Gender Tabs';
+
     protected static ?string $slug = 'gender-tabs';
+
     protected static ?string $cluster = Categories::class;
+
     protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool

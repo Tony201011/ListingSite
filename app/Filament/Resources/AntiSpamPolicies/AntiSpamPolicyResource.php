@@ -23,7 +23,7 @@ class AntiSpamPolicyResource extends Resource
 {
     protected static ?string $model = AntiSpamPolicy::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedNoSymbol;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNoSymbol;
 
     protected static ?string $navigationLabel = 'Anti Spam Policy';
 

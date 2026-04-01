@@ -52,6 +52,7 @@ class ProviderSigninRequest extends FormRequest
                     'g-recaptcha-response',
                     'reCAPTCHA verification failed'
                 );
+
                 return;
             }
 

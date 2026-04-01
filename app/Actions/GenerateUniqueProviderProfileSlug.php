@@ -14,7 +14,7 @@ class GenerateUniqueProviderProfileSlug
         $counter = 1;
 
         while (ProviderProfile::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $counter;
+            $slug = $base.'-'.$counter;
             $counter++;
         }
 

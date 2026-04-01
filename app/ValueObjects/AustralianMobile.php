@@ -27,7 +27,7 @@ class AustralianMobile
 
         // +61 / 61 prefix → strip to local
         if (str_starts_with($digits, '61') && strlen($digits) === 11) {
-            $digits = '0' . substr($digits, 2);
+            $digits = '0'.substr($digits, 2);
         }
 
         if (! preg_match('/^04\d{8}$/', $digits)) {
@@ -46,6 +46,7 @@ class AustralianMobile
     {
         try {
             self::fromString($input);
+
             return true;
         } catch (InvalidArgumentException) {
             return false;
@@ -55,7 +56,7 @@ class AustralianMobile
     /** E.164 format for Twilio: +614XXXXXXXX */
     public function toE164(): string
     {
-        return '+61' . substr($this->normalized, 1);
+        return '+61'.substr($this->normalized, 1);
     }
 
     /** Local 10-digit format: 04XXXXXXXX */
@@ -69,7 +70,7 @@ class AustralianMobile
     {
         $length = strlen($this->normalized);
 
-        return str_repeat('*', $length - 4) . substr($this->normalized, -4);
+        return str_repeat('*', $length - 4).substr($this->normalized, -4);
     }
 
     /**

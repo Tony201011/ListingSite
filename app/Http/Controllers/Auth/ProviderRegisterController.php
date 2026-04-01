@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-use App\Http\Controllers\Controller;
 
 use App\Actions\Auth\BuildAuthPageData;
 use App\Actions\Auth\ChangeProviderPassword;
@@ -11,6 +10,7 @@ use App\Actions\Auth\ShowProviderOtpVerificationData;
 use App\Actions\Auth\SigninProvider;
 use App\Actions\Auth\SignupProvider;
 use App\Actions\Auth\VerifyProviderSignupOtp;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ProviderSigninRequest;
 use App\Http\Requests\ProviderSignupRequest;
 use App\Http\Requests\UpdatePasswordRequest;
@@ -31,8 +31,7 @@ class ProviderRegisterController extends Controller
         private VerifyProviderSignupOtp $verifyProviderSignupOtp,
         private LogoutProvider $logoutProvider,
         private ChangeProviderPassword $changeProviderPassword
-    ) {
-    }
+    ) {}
 
     public function showSignupForm(): View
     {

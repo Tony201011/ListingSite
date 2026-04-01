@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\Frontend;
-use App\Http\Controllers\Controller;
+
 use App\Actions\GetAboutUsPageData;
 use App\Actions\GetAntiSpamPolicyPageData;
 use App\Actions\GetContactUsPageData;
 use App\Actions\GetFaqPageData;
 use App\Actions\GetFrontendSimplePage;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\FaqLoadMoreRequest;
 use App\Http\Requests\SubmitContactUsRequest;
 use Illuminate\Http\JsonResponse;
@@ -21,8 +22,7 @@ class FrontendPageController extends Controller
         private GetFaqPageData $getFaqPageData,
         private GetAntiSpamPolicyPageData $getAntiSpamPolicyPageData,
         private GetContactUsPageData $getContactUsPageData
-    ) {
-    }
+    ) {}
 
     public function aboutUs(): View
     {
@@ -101,6 +101,4 @@ class FrontendPageController extends Controller
     {
         return back()->with('success', 'Your message has been sent successfully.');
     }
-
-
 }

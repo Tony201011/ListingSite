@@ -52,7 +52,7 @@ class EditUser extends EditRecord
                 )
                 ->exists()
         ) {
-            $slug = $baseSlug . '-' . $index;
+            $slug = $baseSlug.'-'.$index;
             $index++;
         }
 

@@ -2,6 +2,4 @@
 
 namespace App\Http\Requests;
 
-class AdvancedSearchRequest extends HomeIndexRequest
-{
-}
+class AdvancedSearchRequest extends HomeIndexRequest {}

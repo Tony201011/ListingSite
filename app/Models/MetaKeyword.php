@@ -14,7 +14,7 @@ class MetaKeyword extends Model
     protected $fillable = [
         'page_name',
         'meta_keyword',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [

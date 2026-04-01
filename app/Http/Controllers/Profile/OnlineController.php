@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
+
 use App\Actions\GetOnlineNowState;
 use App\Actions\UpdateOnlineNowStatus;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOnlineStatusRequest;
 use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
@@ -15,8 +16,7 @@ class OnlineController extends Controller
     public function __construct(
         private GetOnlineNowState $getOnlineNowState,
         private UpdateOnlineNowStatus $updateOnlineNowStatus
-    ) {
-    }
+    ) {}
 
     public function onlineNow(): View
     {

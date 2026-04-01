@@ -8,8 +8,7 @@ class SendSms
 {
     public function __construct(
         private TwilioService $twilio
-    ) {
-    }
+    ) {}
 
     public function execute(string $phone, string $message): array
     {

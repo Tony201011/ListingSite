@@ -9,7 +9,6 @@ use App\Models\PricingPage;
 use App\Models\PrivacyPolicy;
 use App\Models\RefundPolicy;
 use App\Models\TermCondition;
-use Illuminate\Support\Collection;
 
 class GetFrontendSimplePage
 {

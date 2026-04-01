@@ -14,8 +14,7 @@ class ResetProviderPassword
 {
     public function __construct(
         private ActiveMailSettingService $mailSettingService
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{status: string, success: bool, user_email: string|null}

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('site_settings', function (Blueprint $table) {
-             $table->boolean('short_url')->default(false)->after('cookies_text');
+            $table->boolean('short_url')->default(false)->after('cookies_text');
         });
     }
 

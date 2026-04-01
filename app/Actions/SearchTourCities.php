@@ -15,7 +15,7 @@ class SearchTourCities
         }
 
         return TourCity::query()
-            ->where('name', 'like', $query . '%')
+            ->where('name', 'like', $query.'%')
             ->orderBy('name')
             ->get(['name', 'state'])
             ->map(fn ($city) => [

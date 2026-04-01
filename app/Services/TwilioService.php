@@ -7,6 +7,7 @@ use Twilio\Rest\Client;
 class TwilioService
 {
     protected $client;
+
     protected $from;
 
     public function __construct()
@@ -18,8 +19,8 @@ class TwilioService
     /**
      * Send an SMS message.
      *
-     * @param string $to   Recipient phone number (E.164 format)
-     * @param string $message
+     * @param  string  $to  Recipient phone number (E.164 format)
+     * @param  string  $message
      * @return \Twilio\Rest\Api\V2010\Account\MessageInstance
      */
     public function sendSms($to, $message)

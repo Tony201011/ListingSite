@@ -26,7 +26,7 @@ class HeaderWidgetResource extends Resource
 {
     protected static ?string $model = HeaderWidget::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBars3BottomLeft;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBars3BottomLeft;
 
     protected static ?string $navigationLabel = 'Header Widgets';
 

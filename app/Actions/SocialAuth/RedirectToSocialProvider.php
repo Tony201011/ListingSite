@@ -10,8 +10,7 @@ class RedirectToSocialProvider
     public function __construct(
         private ResolveSocialProviderSetting $resolveSocialProviderSetting,
         private ConfigureSocialProvider $configureSocialProvider
-    ) {
-    }
+    ) {}
 
     public function execute(string $provider): RedirectResponse
     {

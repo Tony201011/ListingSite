@@ -14,8 +14,7 @@ class SocialAuthController extends Controller
         private GetEnabledSocialProviders $getEnabledSocialProviders,
         private RedirectToSocialProvider $redirectToSocialProvider,
         private HandleSocialAuthCallback $handleSocialAuthCallback
-    ) {
-    }
+    ) {}
 
     public function showLogin(): View
     {

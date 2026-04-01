@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('photo_verifications', function (Blueprint $table) {
             //
-             $table->softDeletes(); // or $table->timestamp('deleted_at')->nullable();
+            $table->softDeletes(); // or $table->timestamp('deleted_at')->nullable();
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-      Schema::table('photo_verifications', function (Blueprint $table) {
+        Schema::table('photo_verifications', function (Blueprint $table) {
             $table->dropSoftDeletes(); // or $table->dropColumn('deleted_at');
         });
     }

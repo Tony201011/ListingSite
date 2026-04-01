@@ -141,7 +141,7 @@ class GetProfileShowData
 
         return collect($this->baseProfiles())
             ->map(function (array $profile, int $index) use ($galleryImages, $galleryVideos, $imageCount, $videoCount) {
-                $profile['slug'] = Str::slug($profile['name']) . '-' . ($index + 1);
+                $profile['slug'] = Str::slug($profile['name']).'-'.($index + 1);
 
                 $profile['images'] = collect(range(0, max(0, $imageCount - 1)))
                     ->map(function (int $offset) use ($profile, $galleryImages, $index) {

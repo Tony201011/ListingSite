@@ -63,12 +63,13 @@ class ManageS3BucketSettings extends ManageRecords
 
                     $tempDisk = Storage::disk('local');
 
-                    if (!$tempDisk->exists($tempPath)) {
+                    if (! $tempDisk->exists($tempPath)) {
                         Notification::make()
                             ->title('Upload test failed')
                             ->body("Temporary uploaded file not found: {$tempPath}")
                             ->danger()
                             ->send();
+
                         return;
                     }
 
@@ -81,11 +82,11 @@ class ManageS3BucketSettings extends ManageRecords
                         $isImage = str_starts_with($mimeType, 'image/');
                         $isVideo = str_starts_with($mimeType, 'video/');
 
-                        if ($type === 'image' && !$isImage) {
+                        if ($type === 'image' && ! $isImage) {
                             throw new \Exception('The selected file is not an image.');
                         }
 
-                        if ($type === 'video' && !$isVideo) {
+                        if ($type === 'video' && ! $isVideo) {
                             throw new \Exception('The selected file is not a video.');
                         }
 
@@ -94,7 +95,7 @@ class ManageS3BucketSettings extends ManageRecords
 
                         $timestamp = now()->format('YmdHis');
 
-                        $fileName = $timestamp . '-' . Str::random(6) . '-' . $originalName;
+                        $fileName = $timestamp.'-'.Str::random(6).'-'.$originalName;
                         $filePath = "settings-tests/{$fileName}";
 
                         $stream = fopen($absolutePath, 'r');
@@ -117,7 +118,7 @@ class ManageS3BucketSettings extends ManageRecords
                             $url = Storage::disk($diskName)->url($filePath);
                             $body .= "**URL:** [Open file]({$url})";
                         } catch (Throwable $e) {
-                            $body .= "**Note:** URL generation not supported for this disk.";
+                            $body .= '**Note:** URL generation not supported for this disk.';
                         }
 
                         Notification::make()
@@ -131,7 +132,7 @@ class ManageS3BucketSettings extends ManageRecords
                         Notification::make()
                             ->title('Upload test failed')
                             ->body(
-                                "Disk: {$diskName}\nError: " . $exception->getMessage()
+                                "Disk: {$diskName}\nError: ".$exception->getMessage()
                             )
                             ->danger()
                             ->send();

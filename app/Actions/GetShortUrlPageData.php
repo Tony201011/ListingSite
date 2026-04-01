@@ -34,10 +34,10 @@ class GetShortUrlPageData
 
     private function generateUniqueSlug(User $user): string
     {
-        $slug = md5($user->name . $user->id);
+        $slug = md5($user->name.$user->id);
 
         while (ShortUrl::query()->where('short_url', $slug)->exists()) {
-            $slug = md5($user->name . $user->id . random_int(1, 9999));
+            $slug = md5($user->name.$user->id.random_int(1, 9999));
         }
 
         return $slug;

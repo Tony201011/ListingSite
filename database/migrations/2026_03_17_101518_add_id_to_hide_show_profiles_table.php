@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('hide_show_profiles', function (Blueprint $table) {
-             $table->id()->first(); // Add an auto-incrementing 'id' column as the first column
+            $table->id()->first(); // Add an auto-incrementing 'id' column as the first column
         });
     }
 

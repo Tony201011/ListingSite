@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\SiteSetting;
+use Illuminate\Database\Seeder;
 
 class SiteSettingSeeder extends Seeder
 {
@@ -14,7 +14,7 @@ class SiteSettingSeeder extends Seeder
             'meta_description' => 'Test meta description.',
             'enable_cookies' => true,
             'captcha_enabled' => true,
-            'cookies_text' => 'We use cookies for analytics and personalization.'
+            'cookies_text' => 'We use cookies for analytics and personalization.',
         ]);
     }
 }

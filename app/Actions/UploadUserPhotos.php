@@ -16,8 +16,7 @@ class UploadUserPhotos
 {
     public function __construct(
         private UserPhotoStorageService $photoStorageService
-    ) {
-    }
+    ) {}
 
     public function execute(?User $user, array $photos): array
     {
@@ -132,7 +131,7 @@ class UploadUserPhotos
             $slug = 'user';
         }
 
-        return $slug . $user->id;
+        return $slug.$user->id;
     }
 
     private function errorResponse(string $message, int $status): array

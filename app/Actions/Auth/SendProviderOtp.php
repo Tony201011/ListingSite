@@ -90,7 +90,7 @@ class SendProviderOtp
                 'expires_at' => $otpExpiresAt,
             ];
         } catch (\Exception $e) {
-            Log::error('Twilio SMS error: ' . $e->getMessage(), [
+            Log::error('Twilio SMS error: '.$e->getMessage(), [
                 'mobile' => $phone->toMasked(),
             ]);
 

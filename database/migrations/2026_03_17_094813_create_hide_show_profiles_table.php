@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('hide_show_profiles', function (Blueprint $table) {
-             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-             $table->enum('status', ['hide', 'show'])->default('show');
-             $table->timestamps();
-             $table->unique('user_id'); // prevent duplicates per user
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->enum('status', ['hide', 'show'])->default('show');
+            $table->timestamps();
+            $table->unique('user_id'); // prevent duplicates per user
         });
     }
 

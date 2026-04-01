@@ -23,7 +23,7 @@ class RefundPolicyResource extends Resource
 {
     protected static ?string $model = RefundPolicy::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedArrowPathRoundedSquare;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPathRoundedSquare;
 
     protected static ?string $navigationLabel = 'Refund Policy';
 

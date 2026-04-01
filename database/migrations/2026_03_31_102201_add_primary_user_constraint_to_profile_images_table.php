@@ -15,16 +15,16 @@ return new class extends Migration
         // primary, NULL otherwise.  A unique index on this column allows multiple
         // NULLs (non-primary rows) but only one non-NULL value per user_id,
         // enforcing the "single primary photo" invariant at the database level.
-        DB::statement("
+        DB::statement('
             ALTER TABLE `profile_images`
             ADD COLUMN `primary_user_constraint` BIGINT UNSIGNED
             AS (CASE WHEN `is_primary` = 1 AND `deleted_at` IS NULL THEN `user_id` ELSE NULL END) VIRTUAL
-        ");
+        ');
 
-        DB::statement("
+        DB::statement('
             CREATE UNIQUE INDEX `uq_one_primary_per_user`
             ON `profile_images` (`primary_user_constraint`)
-        ");
+        ');
     }
 
     /**

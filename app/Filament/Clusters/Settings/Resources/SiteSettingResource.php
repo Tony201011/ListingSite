@@ -4,21 +4,26 @@ namespace App\Filament\Clusters\Settings\Resources;
 
 use App\Filament\Clusters\Settings;
 use App\Models\SiteSetting;
-use Filament\Resources\Resource;
-use Filament\Actions\EditAction;
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Facades\Filament;
-use Filament\Schemas\Schema;
 use BackedEnum;
+use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables;
 
 class SiteSettingResource extends Resource
 {
     protected static ?string $model = SiteSetting::class;
+
     protected static ?string $navigationLabel = 'Site Settings';
+
     protected static ?string $slug = 'site-settings';
+
     protected static ?string $cluster = Settings::class;
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
+
     protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool

@@ -24,7 +24,7 @@ class SocialLoginSettingSeeder extends Seeder
                 [
                     'client_id' => null,
                     'client_secret' => null,
-                    'redirect_url' => url('/auth/' . $provider . '/callback'),
+                    'redirect_url' => url('/auth/'.$provider.'/callback'),
                     'is_enabled' => false,
                 ],
             );

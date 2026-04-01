@@ -13,15 +13,14 @@ class SignupProvider
 {
     public function __construct(
         private SendProviderOtp $sendProviderOtp
-    ) {
-    }
+    ) {}
 
     public function execute(array $validated): RedirectResponse
     {
         $phone = AustralianMobile::fromString($validated['mobile']);
         $normalizedMobile = $phone->toLocal();
 
-        $pendingKey = 'provider_signup_' . md5($validated['email'] . '|' . $normalizedMobile);
+        $pendingKey = 'provider_signup_'.md5($validated['email'].'|'.$normalizedMobile);
 
         $sendResult = $this->sendProviderOtp->execute($normalizedMobile);
 
@@ -44,7 +43,7 @@ class SignupProvider
             'account_user_referral_code' => $validated['account_user_referral_code'] ?? null,
         ], now()->addMinutes(10));
 
-        Cache::put($pendingKey . '_otp', [
+        Cache::put($pendingKey.'_otp', [
             'code' => $sendResult['otp_hash'],
             'expires_at' => $sendResult['expires_at']->timestamp,
         ], $sendResult['expires_at']);

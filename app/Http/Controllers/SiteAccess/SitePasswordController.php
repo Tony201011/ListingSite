@@ -10,8 +10,7 @@ class SitePasswordController extends Controller
 {
     public function __construct(
         private VerifySitePassword $verifySitePassword
-    ) {
-    }
+    ) {}
 
     public function showForm()
     {

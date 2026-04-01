@@ -23,7 +23,7 @@ class NaughtyCornerPageResource extends Resource
 {
     protected static ?string $model = NaughtyCornerPage::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedGift;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGift;
 
     protected static ?string $navigationLabel = 'Naughty Corner';
 

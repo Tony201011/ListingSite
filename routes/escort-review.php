@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EscortReviewController;
+use Illuminate\Support\Facades\Route;
 
 // Public page
 Route::get('/escort-reviews', [EscortReviewController::class, 'show'])->name('escort-review');

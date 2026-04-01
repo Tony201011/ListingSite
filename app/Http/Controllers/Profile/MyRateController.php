@@ -10,8 +10,8 @@ use App\Actions\StoreRateGroup;
 use App\Actions\UpdateRate;
 use App\Actions\UpdateRateGroup;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreRateRequest;
 use App\Http\Requests\StoreRateGroupRequest;
+use App\Http\Requests\StoreRateRequest;
 use App\Http\Requests\UpdateRateGroupRequest;
 use App\Http\Requests\UpdateRateRequest;
 use App\Models\Rate;
@@ -30,8 +30,7 @@ class MyRateController extends Controller
         private StoreRateGroup $storeRateGroup,
         private UpdateRateGroup $updateRateGroup,
         private DeleteRateGroup $deleteRateGroup
-    ) {
-    }
+    ) {}
 
     public function index(): View
     {

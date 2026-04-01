@@ -31,7 +31,7 @@ class HeaderWidget extends Model
                 $label = strtolower(trim((string) ($item['label'] ?? '')));
                 $rawUrl = trim((string) ($item['url'] ?? ''));
                 $path = parse_url($rawUrl, PHP_URL_PATH);
-                $normalizedPath = '/' . ltrim((string) ($path ?? $rawUrl), '/');
+                $normalizedPath = '/'.ltrim((string) ($path ?? $rawUrl), '/');
 
                 return $label === 'pricing' || $normalizedPath === '/pricing';
             });
@@ -61,7 +61,7 @@ class HeaderWidget extends Model
             }
 
             $path = parse_url($url, PHP_URL_PATH);
-            $path = $path !== null ? '/' . ltrim((string) $path, '/') : '/' . ltrim($url, '/');
+            $path = $path !== null ? '/'.ltrim((string) $path, '/') : '/'.ltrim($url, '/');
 
             foreach (self::LEGACY_ROUTE_MAP as $legacyPath => $newPath) {
                 if ($path === $legacyPath) {

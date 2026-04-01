@@ -12,8 +12,7 @@ class PurchaseCreditController extends Controller
 {
     public function __construct(
         private ProcessCreditCheckout $processCreditCheckout
-    ) {
-    }
+    ) {}
 
     public function purchaseCredit(): View
     {
@@ -26,8 +25,8 @@ class PurchaseCreditController extends Controller
 
         return redirect('/purchase-history')->with(
             'checkout_success',
-            "Checkout started for {$result['credits']} credits (AUD $" .
-            number_format($result['price'], 2) .
+            "Checkout started for {$result['credits']} credits (AUD $".
+            number_format($result['price'], 2).
             ") under invoice name '{$result['invoice_name']}'."
         );
     }

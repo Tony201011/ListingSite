@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class PostcodeSeeder extends Seeder
 {
@@ -12,8 +11,9 @@ class PostcodeSeeder extends Seeder
     {
         $csvPath = database_path('seeders/2 (2).csv');
 
-        if (!file_exists($csvPath) || !is_readable($csvPath)) {
+        if (! file_exists($csvPath) || ! is_readable($csvPath)) {
             $this->command->error("CSV file not found or not readable at: {$csvPath}");
+
             return;
         }
 
@@ -21,9 +21,10 @@ class PostcodeSeeder extends Seeder
 
         // Read the header row
         $header = fgetcsv($handle);
-        if (!$header) {
-            $this->command->error("Invalid CSV file (no header)");
+        if (! $header) {
+            $this->command->error('Invalid CSV file (no header)');
             fclose($handle);
+
             return;
         }
 
@@ -34,14 +35,14 @@ class PostcodeSeeder extends Seeder
         while (($data = fgetcsv($handle)) !== false) {
             // Map CSV columns to array (assuming same order as header)
             $row = [
-                'state'        => $data[0] ?? null,
-                'city_region'  => $data[1] ?? null,
-                'suburb'       => $data[2] ?? null,
-                'postcode'     => $data[3] ?? null,
-                'longitude'    => isset($data[4]) && is_numeric($data[4]) ? $data[4] : null,
-                'latitude'     => isset($data[5]) && is_numeric($data[5]) ? $data[5] : null,
-                'created_at'   => now(),
-                'updated_at'   => now(),
+                'state' => $data[0] ?? null,
+                'city_region' => $data[1] ?? null,
+                'suburb' => $data[2] ?? null,
+                'postcode' => $data[3] ?? null,
+                'longitude' => isset($data[4]) && is_numeric($data[4]) ? $data[4] : null,
+                'latitude' => isset($data[5]) && is_numeric($data[5]) ? $data[5] : null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
 
             // Basic validation – skip rows missing essential fields
@@ -59,7 +60,7 @@ class PostcodeSeeder extends Seeder
         }
 
         // Insert remaining rows
-        if (!empty($rows)) {
+        if (! empty($rows)) {
             DB::table('postcodes')->insert($rows);
         }
 

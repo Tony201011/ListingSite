@@ -22,7 +22,7 @@ class FooterTextResource extends Resource
 {
     protected static ?string $model = FooterText::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleGroup;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleGroup;
 
     protected static ?string $navigationLabel = 'Footer Text';
 

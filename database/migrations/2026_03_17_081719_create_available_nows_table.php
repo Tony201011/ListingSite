@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('available_nows', function (Blueprint $table) {
-             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-             $table->enum('status', ['online', 'offline'])->default('offline');
-             $table->timestamps();
-             $table->unique('user_id'); // prevent duplicates per user
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->enum('status', ['online', 'offline'])->default('offline');
+            $table->timestamps();
+            $table->unique('user_id'); // prevent duplicates per user
         });
     }
 

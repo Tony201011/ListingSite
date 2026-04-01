@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Policies;
+
 use App\Models\ProfileImage;
 use App\Models\User;
-
 
 class ProfileImagePolicy
 {

@@ -23,7 +23,7 @@ class AboutUsPageResource extends Resource
 {
     protected static ?string $model = AboutUsPage::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedInformationCircle;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInformationCircle;
 
     protected static ?string $navigationLabel = 'About Us';
 

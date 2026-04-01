@@ -23,7 +23,7 @@ class TermConditionResource extends Resource
 {
     protected static ?string $model = TermCondition::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedDocumentText;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $navigationLabel = 'Terms & Conditions';
 

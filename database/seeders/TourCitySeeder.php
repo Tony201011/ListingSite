@@ -9,7 +9,7 @@ class TourCitySeeder extends Seeder
 {
     public function run(): void
     {
-           $cities = [
+        $cities = [
             ['name' => 'Sydney', 'state' => 'New South Wales'],
             ['name' => 'Melbourne', 'state' => 'Victoria'],
             ['name' => 'Brisbane', 'state' => 'Queensland'],
@@ -37,14 +37,13 @@ class TourCitySeeder extends Seeder
             ['name' => 'Wagga Wagga', 'state' => 'New South Wales'],
         ];
 
-
         foreach ($cities as $city) {
             DB::table('tour_cities')->insert([
-                'name'         => $city['name'],
-                'state'        => $city['state'],
+                'name' => $city['name'],
+                'state' => $city['state'],
                 'country_code' => 'AU',
-                'created_at'   => now(),
-                'updated_at'   => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
     }

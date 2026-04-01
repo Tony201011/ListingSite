@@ -16,14 +16,13 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -77,7 +76,7 @@ class UserResource extends Resource
                     ->label('')
                     ->disk(fn (): string => config('filesystems.default', 'public'))
                     ->circular()
-                    ->defaultImageUrl(fn (User $record): string => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&background=E5E7EB&color=111827')
+                    ->defaultImageUrl(fn (User $record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&background=E5E7EB&color=111827')
                     ->size(40),
                 TextColumn::make('name')
                     ->searchable()
@@ -282,7 +281,7 @@ class UserResource extends Resource
                                 fn (Builder $query): Builder => $query->where('id', '!=', $record->providerProfile?->id),
                             )
                             ->exists()) {
-                            $slug = $baseSlug . '-' . $index;
+                            $slug = $baseSlug.'-'.$index;
                             $index++;
                         }
 
@@ -331,7 +330,7 @@ class UserResource extends Resource
                         SendAdminProviderEmailJob::dispatch($record->id, 'unblocked');
                     })
                     ->icon('heroicon-o-lock-open'),
-                      Action::make('delete')
+                Action::make('delete')
                     ->label('Delete')
                     ->color('danger')
                     ->icon('heroicon-o-trash')

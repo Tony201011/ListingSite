@@ -4,13 +4,13 @@ namespace Tests\Feature;
 
 use App\Actions\Auth\SendProviderOtp;
 use App\Actions\GenerateUniqueProviderProfileSlug;
-use App\Actions\SetPrimaryProfilePhoto;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
 use App\Models\ShortUrl;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -31,7 +31,7 @@ class EdgeCaseTest extends TestCase
         ProviderProfile::create([
             'user_id' => $user->id,
             'name' => $user->name,
-            'slug' => 'test-' . $user->id,
+            'slug' => 'test-'.$user->id,
         ]);
 
         return $user;
@@ -47,7 +47,7 @@ class EdgeCaseTest extends TestCase
             ]);
         });
 
-        $pendingKey = 'provider_signup_' . md5($email . '|' . $mobile);
+        $pendingKey = 'provider_signup_'.md5($email.'|'.$mobile);
         $otpHash = Hash::make('123456');
 
         Cache::put($pendingKey, [
@@ -62,7 +62,7 @@ class EdgeCaseTest extends TestCase
             'referral_code' => null,
         ], now()->addMinutes(10));
 
-        Cache::put($pendingKey . '_otp', [
+        Cache::put($pendingKey.'_otp', [
             'code' => $otpHash,
             'expires_at' => now()->addMinutes(2)->timestamp,
         ], now()->addMinutes(2));
@@ -82,7 +82,7 @@ class EdgeCaseTest extends TestCase
         $pendingKey = $this->seedOtpSession();
 
         // Overwrite OTP data with an already-expired timestamp
-        Cache::put($pendingKey . '_otp', [
+        Cache::put($pendingKey.'_otp', [
             'code' => Hash::make('123456'),
             'expires_at' => now()->subSeconds(1)->timestamp,
         ], now()->addMinutes(5));
@@ -101,7 +101,7 @@ class EdgeCaseTest extends TestCase
         $this->postJson(route('verify.otp'), ['otp' => '123456'])->assertOk();
 
         // Log out so the guest middleware allows the retry attempt
-        auth()->logout();
+        Auth::logout();
 
         // Session and cache are cleared after success — second submission fails
         $response = $this->postJson(route('verify.otp'), ['otp' => '123456']);
@@ -392,11 +392,11 @@ class EdgeCaseTest extends TestCase
     {
         // Create profiles with slug, slug-1, slug-2
         for ($i = 0; $i < 3; $i++) {
-            $suffix = $i === 0 ? '' : '-' . $i;
+            $suffix = $i === 0 ? '' : '-'.$i;
             ProviderProfile::create([
                 'user_id' => User::factory()->create()->id,
                 'name' => 'Collision',
-                'slug' => 'collision' . $suffix,
+                'slug' => 'collision'.$suffix,
             ]);
         }
 
@@ -509,7 +509,7 @@ class EdgeCaseTest extends TestCase
             'is_primary' => true,
         ]);
 
-        ShortUrl::create(['user_id' => $user->id, 'short_url' => 'slug-' . $user->id]);
+        ShortUrl::create(['user_id' => $user->id, 'short_url' => 'slug-'.$user->id]);
 
         $this->actingAs($user)
             ->delete(route('account.destroy'), [

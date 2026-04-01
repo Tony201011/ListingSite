@@ -73,6 +73,7 @@ class ProviderSignupRequest extends FormRequest
                     'g-recaptcha-response',
                     'Google reCAPTCHA verification failed. Please try again.'
                 );
+
                 return;
             }
 

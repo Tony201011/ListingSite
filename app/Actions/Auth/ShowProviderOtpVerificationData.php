@@ -30,7 +30,7 @@ class ShowProviderOtpVerificationData
             ];
         }
 
-        $otpData = Cache::get($pendingKey . '_otp');
+        $otpData = Cache::get($pendingKey.'_otp');
         $remainingTime = 0;
 
         if ($otpData && isset($otpData['expires_at'])) {

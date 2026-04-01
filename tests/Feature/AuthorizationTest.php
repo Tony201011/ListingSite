@@ -12,7 +12,6 @@ use App\Models\ShortUrl;
 use App\Models\Tour;
 use App\Models\User;
 use App\Models\UserVideo;
-use Illuminate\Http\UploadedFile;
 use App\Policies\PhotoVerificationPolicy;
 use App\Policies\ProfileImagePolicy;
 use App\Policies\ProviderProfilePolicy;
@@ -22,6 +21,7 @@ use App\Policies\ShortUrlPolicy;
 use App\Policies\TourPolicy;
 use App\Policies\UserVideoPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class AuthorizationTest extends TestCase
@@ -39,7 +39,7 @@ class AuthorizationTest extends TestCase
         ProviderProfile::create([
             'user_id' => $user->id,
             'name' => $user->name,
-            'slug' => 'test-' . $user->id,
+            'slug' => 'test-'.$user->id,
         ]);
 
         return $user;
@@ -54,8 +54,8 @@ class AuthorizationTest extends TestCase
     {
         return ProfileImage::create([
             'user_id' => $owner->id,
-            'image_path' => 'images/photo-' . $owner->id . '.jpg',
-            'thumbnail_path' => 'thumbnails/photo-' . $owner->id . '.jpg',
+            'image_path' => 'images/photo-'.$owner->id.'.jpg',
+            'thumbnail_path' => 'thumbnails/photo-'.$owner->id.'.jpg',
             'is_primary' => $primary,
         ]);
     }
@@ -64,7 +64,7 @@ class AuthorizationTest extends TestCase
     {
         return UserVideo::create([
             'user_id' => $owner->id,
-            'video_path' => 'videos/video-' . $owner->id . '.mp4',
+            'video_path' => 'videos/video-'.$owner->id.'.mp4',
             'original_name' => 'video.mp4',
         ]);
     }
@@ -101,7 +101,7 @@ class AuthorizationTest extends TestCase
     {
         return ShortUrl::create([
             'user_id' => $owner->id,
-            'short_url' => 'slug-' . $owner->id,
+            'short_url' => 'slug-'.$owner->id,
         ]);
     }
 

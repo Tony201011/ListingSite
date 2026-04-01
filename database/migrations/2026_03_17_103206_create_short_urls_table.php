@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('short_urls', function (Blueprint $table) {
-             $table->id();
-             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-             $table->string('short_url')->unique();
-             $table->timestamps();
-             $table->unique('user_id'); // prevent duplicates per user
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('short_url')->unique();
+            $table->timestamps();
+            $table->unique('user_id'); // prevent duplicates per user
         });
     }
 

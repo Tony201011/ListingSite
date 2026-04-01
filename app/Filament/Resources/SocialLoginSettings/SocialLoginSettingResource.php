@@ -23,7 +23,7 @@ class SocialLoginSettingResource extends Resource
 {
     protected static ?string $model = SocialLoginSetting::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedKey;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
     protected static ?string $navigationLabel = 'Social Login';
 
@@ -72,7 +72,7 @@ class SocialLoginSettingResource extends Resource
                     ->label('Redirect URL')
                     ->url()
                     ->required()
-                    ->helperText('Example: ' . url('/auth/google/callback'))
+                    ->helperText('Example: '.url('/auth/google/callback'))
                     ->columnSpanFull(),
             ])
             ->columns(2);

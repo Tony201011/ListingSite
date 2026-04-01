@@ -4,7 +4,6 @@ namespace Tests\Feature\Auth;
 
 use App\Actions\Auth\BuildAuthPageData;
 use App\Actions\Auth\ChangeProviderPassword;
-use App\Actions\Auth\LogoutProvider;
 use App\Actions\Auth\ResendProviderSignupOtp;
 use App\Actions\Auth\ShowProviderOtpVerificationData;
 use App\Actions\Auth\SigninProvider;
@@ -12,8 +11,6 @@ use App\Actions\Auth\SignupProvider;
 use App\Actions\Auth\VerifyProviderSignupOtp;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 use Mockery;

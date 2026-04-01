@@ -21,7 +21,7 @@ class Tour extends Model
 
     protected $casts = [
         'from' => 'datetime',
-        'to'   => 'datetime',
+        'to' => 'datetime',
         'enabled' => 'boolean',
     ];
 

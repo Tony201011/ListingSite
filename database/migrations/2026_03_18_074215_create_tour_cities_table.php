@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tour_cities', function (Blueprint $table) {
             $table->id();
-                        $table->string('name');
+            $table->string('name');
             $table->string('state')->nullable();
             $table->string('country_code', 2)->default('AU');
             $table->index('name');

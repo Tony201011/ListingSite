@@ -21,8 +21,7 @@ class PhotoController extends Controller
         private UploadUserPhotos $uploadUserPhotos,
         private SetPrimaryProfilePhoto $setPrimaryProfilePhoto,
         private DeleteProfilePhoto $deleteProfilePhoto
-    ) {
-    }
+    ) {}
 
     public function index(): View
     {

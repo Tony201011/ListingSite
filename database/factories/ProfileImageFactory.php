@@ -17,8 +17,8 @@ class ProfileImageFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'image_path' => 'images/' . fake()->uuid() . '.jpg',
-            'thumbnail_path' => 'thumbnails/' . fake()->uuid() . '.jpg',
+            'image_path' => 'images/'.fake()->uuid().'.jpg',
+            'thumbnail_path' => 'thumbnails/'.fake()->uuid().'.jpg',
             'is_primary' => false,
         ];
     }

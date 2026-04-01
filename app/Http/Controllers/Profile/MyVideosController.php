@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Profile;
 
-use App\Http\Controllers\Controller;
 use App\Actions\DeleteUserVideo;
 use App\Actions\GetUserVideos;
 use App\Actions\UploadUserVideos;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadVideosRequest;
 use App\Models\UserVideo;
 use Illuminate\Http\JsonResponse;
@@ -19,8 +19,7 @@ class MyVideosController extends Controller
         private GetUserVideos $getUserVideos,
         private UploadUserVideos $uploadUserVideos,
         private DeleteUserVideo $deleteUserVideo
-    ) {
-    }
+    ) {}
 
     public function index(): View
     {

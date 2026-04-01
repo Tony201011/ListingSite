@@ -4,10 +4,10 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Widgets\ProviderStatsOverview;
+use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\ProviderProfile;
-use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\State;
 use App\Models\User;
 use Filament\Actions\CreateAction;
@@ -16,8 +16,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Str;
 
 class ManageUsers extends ManageRecords
@@ -31,7 +31,7 @@ class ManageUsers extends ManageRecords
         ];
     }
 
-    public function getHeaderWidgetsColumns(): int | array
+    public function getHeaderWidgetsColumns(): int|array
     {
         return 1;
     }
@@ -176,8 +176,7 @@ class ManageUsers extends ManageRecords
                     );
 
                     SendAdminProviderEmailJob::dispatch($record->id, 'created');
-                })
-                ,
+                }),
         ];
     }
 }

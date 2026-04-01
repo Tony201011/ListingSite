@@ -6,10 +6,10 @@ use App\Filament\Clusters\Categories;
 use App\Filament\Resources\TourCityCategories\Pages\ManageAttributeTourCity;
 use App\Models\TourCity;
 use BackedEnum;
-use Filament\Facades\Filament;
-use Filament\Forms\Components\TextInput;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -21,7 +21,7 @@ class TourCityCategoriesResource extends Resource
 {
     protected static ?string $model = TourCity::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 
     protected static ?string $navigationLabel = 'Tour City';
 

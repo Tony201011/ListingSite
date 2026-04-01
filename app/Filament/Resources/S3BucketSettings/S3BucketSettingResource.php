@@ -22,7 +22,7 @@ class S3BucketSettingResource extends Resource
 {
     protected static ?string $model = S3BucketSetting::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedCloud;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloud;
 
     protected static ?string $navigationLabel = 'S3 Bucket';
 

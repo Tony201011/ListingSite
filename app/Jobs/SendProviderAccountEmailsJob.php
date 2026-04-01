@@ -35,6 +35,7 @@ class SendProviderAccountEmailsJob implements ShouldQueue
             Log::error('Signup email job failed: user not found', [
                 'user_id' => $this->userId,
             ]);
+
             return;
         }
 
@@ -44,6 +45,7 @@ class SendProviderAccountEmailsJob implements ShouldQueue
                 'email' => $user->email,
                 'mail_setting_id' => $this->mailSettingId,
             ]);
+
             return;
         }
 

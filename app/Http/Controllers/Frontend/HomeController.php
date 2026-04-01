@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Frontend;
-use App\Http\Controllers\Controller;
+
 use App\Actions\BuildProfileFilterViewData;
 use App\Actions\GetProfileShowData;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\AdvancedSearchRequest;
 use App\Http\Requests\HomeIndexRequest;
 use App\Http\Requests\ShowProfileRequest;
@@ -14,8 +15,7 @@ class HomeController extends Controller
     public function __construct(
         private BuildProfileFilterViewData $buildProfileFilterViewData,
         private GetProfileShowData $getProfileShowData
-    ) {
-    }
+    ) {}
 
     public function index(HomeIndexRequest $request): View
     {

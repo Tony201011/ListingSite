@@ -23,7 +23,7 @@ class HelpPageResource extends Resource
 {
     protected static ?string $model = HelpPage::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedLifebuoy;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLifebuoy;
 
     protected static ?string $navigationLabel = 'Help';
 

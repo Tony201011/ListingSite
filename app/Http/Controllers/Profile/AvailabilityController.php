@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
 
 use App\Actions\GetUserAvailability;
 use App\Actions\UpdateUserAvailability;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateAvailabilityRequest;
 use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
@@ -17,8 +17,7 @@ class AvailabilityController extends Controller
     public function __construct(
         private UpdateUserAvailability $updateUserAvailability,
         private GetUserAvailability $getUserAvailability
-    ) {
-    }
+    ) {}
 
     public function edit(): View
     {

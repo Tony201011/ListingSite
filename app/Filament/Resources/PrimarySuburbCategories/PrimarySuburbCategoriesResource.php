@@ -6,10 +6,10 @@ use App\Filament\Clusters\Categories;
 use App\Filament\Resources\PrimarySuburbCategories\Pages\ManageAttributePrimarySuburbCategories;
 use App\Models\Postcode;
 use BackedEnum;
-use Filament\Facades\Filament;
-use Filament\Forms\Components\TextInput;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -21,7 +21,7 @@ class PrimarySuburbCategoriesResource extends Resource
 {
     protected static ?string $model = Postcode::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 
     protected static ?string $navigationLabel = 'Primary Suburb';
 
@@ -103,7 +103,7 @@ class PrimarySuburbCategoriesResource extends Resource
                     ->label('Postcode')
                     ->searchable()
                     ->sortable(),
-                 TextColumn::make('longitude')
+                TextColumn::make('longitude')
                     ->label('Longitude')
                     ->searchable()
                     ->sortable(),
@@ -111,9 +111,6 @@ class PrimarySuburbCategoriesResource extends Resource
                     ->label('Latitude')
                     ->searchable()
                     ->sortable(),
-
-
-
 
                 TextColumn::make('created_at')
                     ->dateTime()

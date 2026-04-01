@@ -1,20 +1,25 @@
 <?php
 
 /**frontend controller start*** */
-use App\Http\Controllers\Frontend\FrontendPageController;
-use App\Http\Controllers\Frontend\BlogController;
-use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\PasswordResetController;
 /**frontend controller end*** */
 
 /*******auth Controllers start */
-use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\ProviderRegisterController;
-use App\Http\Controllers\Auth\EmailVerificationController;
-use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Frontend\BlogController;
+use App\Http\Controllers\Frontend\FrontendPageController;
+use App\Http\Controllers\Frontend\HomeController;
 /*******auth Controllers end */
 
 /***profile Controllers start*/
 use App\Http\Controllers\Profile\AccountController;
+use App\Http\Controllers\Profile\AvailabilityController;
+use App\Http\Controllers\Profile\AvailableController;
+use App\Http\Controllers\Profile\BabeRankController;
+use App\Http\Controllers\Profile\BookingController;
+use App\Http\Controllers\Profile\ForgetController;
 use App\Http\Controllers\Profile\MyProfileController;
 use App\Http\Controllers\Profile\MyRateController;
 use App\Http\Controllers\Profile\MyToursController;
@@ -22,27 +27,22 @@ use App\Http\Controllers\Profile\MyVideosController;
 use App\Http\Controllers\Profile\OnlineController;
 use App\Http\Controllers\Profile\PhotoController;
 use App\Http\Controllers\Profile\PhotoVerificationController;
-use App\Http\Controllers\Profile\AvailabilityController;
-use App\Http\Controllers\Profile\BookingController;
-use App\Http\Controllers\Profile\ShowHideProfileController;
-use App\Http\Controllers\Profile\ReferralsController;
-use App\Http\Controllers\Profile\AvailableController;
 use App\Http\Controllers\Profile\ProfileMessageController;
-use App\Http\Controllers\Profile\BabeRankController;
-use App\Http\Controllers\Profile\ForgetController;
 use App\Http\Controllers\Profile\ProfileSettingController;
+use App\Http\Controllers\Profile\ReferralsController;
+use App\Http\Controllers\Profile\ShowHideProfileController;
 use App\Http\Controllers\Profile\SuburbController;
 use App\Http\Controllers\Profile\UrlController;
 /***profile Controllers start*/
 
 /**subscription controller start */
-use App\Http\Controllers\Subscription\PurchaseCreditController;
+use App\Http\Controllers\SiteAccess\SitePasswordController;
 use App\Http\Controllers\Subscription\MemberShipController;
 use App\Http\Controllers\Subscription\PaymentSubscriptionController;
 /**subscription controller end */
 
 /*******site access controller start here  */
-use App\Http\Controllers\SiteAccess\SitePasswordController;
+use App\Http\Controllers\Subscription\PurchaseCreditController;
 /*******site access controller end here  */
 
 use Illuminate\Support\Facades\Route;
@@ -56,7 +56,6 @@ Route::post('/site-password', [SitePasswordController::class, 'submit'])
 Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
     ->middleware('auth')
     ->name('verification.notice');
-
 
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware(['auth', 'signed'])
@@ -109,7 +108,6 @@ Route::get('/403', function () {
 Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout');
 /** auth routes end */
-
 Route::middleware('guest')->group(function (): void {
     Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->middleware('throttle:5,1')->name('signup');
     Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');
@@ -160,7 +158,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/my-tours/{tour}', [MyToursController::class, 'destroy'])->name('my-tours.destroy');
         Route::get('/search-cities', [MyToursController::class, 'search'])->name('search-cities');
         /*** tour route end here */
-
 
         /*** availability route start here */
         Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
@@ -238,5 +235,4 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-
-require __DIR__ . '/escort-review.php';
+require __DIR__.'/escort-review.php';

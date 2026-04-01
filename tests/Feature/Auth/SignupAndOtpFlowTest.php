@@ -15,6 +15,7 @@ class SignupAndOtpFlowTest extends TestCase
     use RefreshDatabase;
 
     private const DUMMY_MOBILE = '0400000000';
+
     private const DUMMY_OTP = '123456';
 
     protected function setUp(): void
@@ -132,7 +133,7 @@ class SignupAndOtpFlowTest extends TestCase
         $this->from('/signup')->post('/signup', $this->validSignupPayload());
 
         $pendingKey = session('pending_signup_key');
-        $otpData = Cache::get($pendingKey . '_otp');
+        $otpData = Cache::get($pendingKey.'_otp');
 
         $this->assertNotNull($otpData);
         $this->assertArrayHasKey('code', $otpData);
@@ -187,7 +188,7 @@ class SignupAndOtpFlowTest extends TestCase
         $this->postJson('/verify-otp', ['otp' => self::DUMMY_OTP]);
 
         $this->assertNull(Cache::get($pendingKey));
-        $this->assertNull(Cache::get($pendingKey . '_otp'));
+        $this->assertNull(Cache::get($pendingKey.'_otp'));
         $this->assertFalse(session()->has('otp_required'));
         $this->assertFalse(session()->has('pending_signup_key'));
     }
@@ -327,7 +328,7 @@ class SignupAndOtpFlowTest extends TestCase
         $pendingKey = session('pending_signup_key');
 
         // Manually set resend count to max (5)
-        Cache::put($pendingKey . '_resend_count', 5, now()->addMinutes(15));
+        Cache::put($pendingKey.'_resend_count', 5, now()->addMinutes(15));
 
         $response = $this->postJson('/resend-otp');
 
@@ -349,7 +350,7 @@ class SignupAndOtpFlowTest extends TestCase
 
         // Wait out cooldown conceptually — just clear the lock
         $pendingKey = session('pending_signup_key');
-        Cache::forget($pendingKey . '_resend_lock');
+        Cache::forget($pendingKey.'_resend_lock');
 
         // Resend OTP
         $this->postJson('/resend-otp');

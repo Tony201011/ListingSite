@@ -7,7 +7,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -23,7 +22,7 @@ class MetaKeywordsTable
                     ->searchable(),
                 TextColumn::make('meta_keyword')
                     ->searchable()
-                     ->limit(20),
+                    ->limit(20),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')
@@ -47,7 +46,7 @@ class MetaKeywordsTable
                     ->icon('heroicon-o-eye')
                     ->label('View')
                     ->modalHeading('Full Meta Keyword')
-                    ->modalContent(fn($record) => view('filament.modals.meta-keyword', ['record' => $record]))
+                    ->modalContent(fn ($record) => view('filament.modals.meta-keyword', ['record' => $record]))
                     ->color('info'),
                 EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),

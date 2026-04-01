@@ -19,8 +19,7 @@ class MyProfileController extends Controller
         private GetMyProfilePageData $getMyProfilePageData,
         private GetMyProfileStepTwoData $getMyProfileStepTwoData,
         private SaveMyProfile $saveMyProfile
-    ) {
-    }
+    ) {}
 
     public function myProfile(): View
     {

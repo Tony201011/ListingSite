@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Profile;
-use App\Http\Controllers\Controller;
+
 use App\Actions\DeletePhotoVerificationPhoto;
 use App\Actions\GetPhotoVerificationPageData;
 use App\Actions\UploadPhotoVerificationPhotos;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\DeletePhotoVerificationPhotoRequest;
 use App\Http\Requests\UploadPhotoVerificationRequest;
 use App\Models\PhotoVerification;
@@ -19,8 +20,7 @@ class PhotoVerificationController extends Controller
         private GetPhotoVerificationPageData $getPhotoVerificationPageData,
         private UploadPhotoVerificationPhotos $uploadPhotoVerificationPhotos,
         private DeletePhotoVerificationPhoto $deletePhotoVerificationPhoto
-    ) {
-    }
+    ) {}
 
     public function index(): View
     {

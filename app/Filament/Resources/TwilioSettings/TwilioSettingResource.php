@@ -3,12 +3,12 @@
 namespace App\Filament\Resources\TwilioSettings;
 
 use App\Filament\Clusters\Settings;
-use App\Models\TwilioSetting;
-use Filament\Facades\Filament;
 use App\Filament\Resources\TwilioSettings\Pages\ManageTwilioSettings;
 use App\Filament\Resources\TwilioSettings\Schemas\TwilioSettingForm;
 use App\Filament\Resources\TwilioSettings\Tables\TwilioSettingsTable;
+use App\Models\TwilioSetting;
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -30,7 +30,6 @@ class TwilioSettingResource extends Resource
 
     protected static ?string $cluster = Settings::class;
 
-
     public static function canAccess(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
@@ -41,7 +40,7 @@ class TwilioSettingResource extends Resource
         return TwilioSettingForm::configure($schema);
     }
 
-public static function canCreate(): bool
+    public static function canCreate(): bool
     {
         return TwilioSetting::query()->doesntExist();
     }
@@ -53,7 +52,7 @@ public static function canCreate(): bool
 
     public static function getPages(): array
     {
-         return [
+        return [
             'index' => ManageTwilioSettings::route('/'),
         ];
     }

@@ -23,7 +23,7 @@ class PricingPackageResource extends Resource
 {
     protected static ?string $model = PricingPackage::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedTableCells;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTableCells;
 
     protected static ?string $navigationLabel = 'Pricing Packages';
 

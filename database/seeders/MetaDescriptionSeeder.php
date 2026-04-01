@@ -1,11 +1,11 @@
 <?php
+
 // database/seeders/MetaDescriptionSeeder.php
 
 namespace Database\Seeders;
 
 use App\Models\MetaDescription;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class MetaDescriptionSeeder extends Seeder
 {

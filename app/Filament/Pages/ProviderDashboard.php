@@ -8,7 +8,7 @@ use Filament\Pages\Page;
 
 class ProviderDashboard extends Page
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationLabel = 'Provider Dashboard';
 

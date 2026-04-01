@@ -24,8 +24,7 @@ class MyToursController extends Controller
         private UpdateTour $updateTour,
         private DeleteTour $deleteTour,
         private SearchTourCities $searchTourCities
-    ) {
-    }
+    ) {}
 
     /**
      * Display the tours management page with existing tours.

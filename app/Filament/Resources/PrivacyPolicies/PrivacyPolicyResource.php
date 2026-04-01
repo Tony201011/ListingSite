@@ -23,7 +23,7 @@ class PrivacyPolicyResource extends Resource
 {
     protected static ?string $model = PrivacyPolicy::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedShieldCheck;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
     protected static ?string $navigationLabel = 'Privacy Policy';
 
