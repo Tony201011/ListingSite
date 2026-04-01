@@ -20,6 +20,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public const ROLE_ADMIN = 'admin';
 
+    public const ROLE_AGENT = 'agent';
+
     public const ROLE_PROVIDER = 'provider';
 
     protected $fillable = [
@@ -68,6 +70,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return match ($panel->getId()) {
             'admin' => $this->role === self::ROLE_ADMIN,
+            'agent' => $this->role === self::ROLE_AGENT && ! $this->is_blocked,
             default => false,
         };
     }

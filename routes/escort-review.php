@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\EscortReviewController;
+use App\Http\Controllers\Profile\EscortReviewController;
 use Illuminate\Support\Facades\Route;
 
 // Public page
