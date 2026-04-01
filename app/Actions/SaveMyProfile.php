@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -14,10 +15,10 @@ class SaveMyProfile
         private GenerateUniqueProviderProfileSlug $generateUniqueProviderProfileSlug
     ) {}
 
-    public function execute(?User $user, array $validated): void
+    public function execute(?User $user, array $validated): ActionResult
     {
         if (! $user) {
-            abort(403);
+            return ActionResult::authorizationFailure('Unauthenticated.', 401);
         }
 
         $this->validateCategorySelections($validated);
@@ -71,6 +72,8 @@ class SaveMyProfile
 
             $profile->save();
         });
+
+        return ActionResult::success([], 'Profile updated successfully.');
     }
 
     private function validateCategorySelections(array $validated): void

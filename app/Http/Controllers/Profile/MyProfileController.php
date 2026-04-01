@@ -39,20 +39,21 @@ class MyProfileController extends Controller
     {
         $this->authorize('update', ProviderProfile::class);
 
-        $this->saveMyProfile->execute(
+        $result = $this->saveMyProfile->execute(
             Auth::user(),
             $request->validated()
         );
 
+        if (! $result->isSuccess()) {
+            abort($result->status(), $result->message() ?? 'Forbidden');
+        }
+
         if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Profile updated successfully.',
-            ], 200);
+            return response()->json($result->toPayload(), $result->status());
         }
 
         return redirect()
             ->route('edit-profile')
-            ->with('success', 'Profile updated successfully.');
+            ->with('success', $result->message() ?? 'Profile updated successfully.');
     }
 }

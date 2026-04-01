@@ -2,16 +2,17 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\User;
 use App\Models\UserVideo;
 use Illuminate\Support\Facades\Gate;
 
 class GetUserVideos
 {
-    public function execute(?User $user): array
+    public function execute(?User $user): ActionResult
     {
         if (! $user) {
-            abort(403);
+            return ActionResult::authorizationFailure('Unauthenticated.', 401);
         }
 
         Gate::authorize('viewAny', UserVideo::class);
@@ -21,8 +22,8 @@ class GetUserVideos
             ->latest()
             ->get();
 
-        return [
+        return ActionResult::success([
             'videos' => $videos,
-        ];
+        ]);
     }
 }

@@ -2,16 +2,17 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\ProfileImage;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
 class GetUserPhotos
 {
-    public function execute(?User $user): array
+    public function execute(?User $user): ActionResult
     {
         if (! $user) {
-            abort(403);
+            return ActionResult::authorizationFailure('Unauthenticated.', 401);
         }
 
         Gate::authorize('viewAny', ProfileImage::class);
@@ -21,8 +22,8 @@ class GetUserPhotos
             ->latest()
             ->get();
 
-        return [
+        return ActionResult::success([
             'photos' => $photos,
-        ];
+        ]);
     }
 }

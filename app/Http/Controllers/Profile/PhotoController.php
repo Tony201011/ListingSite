@@ -34,9 +34,15 @@ class PhotoController extends Controller
     {
         $this->authorize('viewAny', ProfileImage::class);
 
+        $result = $this->getUserPhotos->execute(Auth::user());
+
+        if (! $result->isSuccess()) {
+            abort($result->status(), $result->message() ?? 'Forbidden');
+        }
+
         return view(
             'profile.photos',
-            $this->getUserPhotos->execute(Auth::user())
+            $result->data()
         );
     }
 

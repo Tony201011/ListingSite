@@ -32,9 +32,15 @@ class MyVideosController extends Controller
     {
         $this->authorize('viewAny', UserVideo::class);
 
+        $result = $this->getUserVideos->execute(Auth::user());
+
+        if (! $result->isSuccess()) {
+            abort($result->status(), $result->message() ?? 'Forbidden');
+        }
+
         return view(
             'profile.my-videos',
-            $this->getUserVideos->execute(Auth::user())
+            $result->data()
         );
     }
 
