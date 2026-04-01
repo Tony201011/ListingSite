@@ -25,11 +25,11 @@ class PasswordResetController extends Controller
     {
         $result = $this->sendPasswordResetLink->execute($request->validated('email'));
 
-        if (! $result['success']) {
-            return back()->withErrors(['email' => $result['message']])->withInput();
+        if (! $result->isSuccess()) {
+            return back()->withErrors(['email' => $result->message()])->withInput();
         }
 
-        return back()->with('success', $result['message']);
+        return back()->with('success', $result->message());
     }
 
     public function showResetForm(Request $request, string $token)
@@ -44,15 +44,17 @@ class PasswordResetController extends Controller
     {
         $result = $this->resetProviderPassword->execute($request->validated());
 
-        if ($result['success']) {
+        if ($result->isSuccess()) {
             return redirect()
                 ->route('signin')
                 ->with('success', 'Password reset successful. Please sign in.');
         }
 
+        $userEmail = $request->validated('email');
+
         return back()
-            ->with('error', __($result['status']))
-            ->withErrors(['email' => [__($result['status'])]])
-            ->withInput(['email' => $result['user_email']]);
+            ->with('error', $result->message())
+            ->withErrors($result->errors() ?: ['email' => [$result->message()]])
+            ->withInput(['email' => $userEmail]);
     }
 }

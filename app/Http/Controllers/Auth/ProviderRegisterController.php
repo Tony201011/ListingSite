@@ -57,25 +57,25 @@ class ProviderRegisterController extends Controller
     {
         $result = $this->showProviderOtpVerificationData->execute();
 
-        if (isset($result['redirect'])) {
-            return redirect($result['redirect'])->withErrors($result['errors']);
+        if (! $result->isSuccess()) {
+            return redirect('/signup')->withErrors($result->errors());
         }
 
-        return view('auth.otp-verification', $result);
+        return view('auth.otp-verification', $result->data());
     }
 
     public function resendOtp(): JsonResponse
     {
         $result = $this->resendProviderSignupOtp->execute();
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function verifyOtp(VerifyOtpRequest $request): JsonResponse
     {
         $result = $this->verifyProviderSignupOtp->execute($request->validated('otp'));
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function logout(Request $request): RedirectResponse

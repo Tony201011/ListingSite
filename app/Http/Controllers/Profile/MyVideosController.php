@@ -48,7 +48,7 @@ class MyVideosController extends Controller
                 $request->file('videos', [])
             );
 
-            return response()->json($result['data'], $result['status']);
+            return response()->json($result->toPayload(), $result->status());
         } catch (Throwable $e) {
             report($e);
 
@@ -67,6 +67,6 @@ class MyVideosController extends Controller
 
         $result = $this->deleteUserVideo->execute(Auth::user(), $video);
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 }

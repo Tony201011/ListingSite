@@ -34,6 +34,6 @@ class ProfileMessageController extends Controller
             $request->validated('message')
         );
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 }

@@ -34,6 +34,6 @@ class AvailableController extends Controller
             $request->string('status')->toString()
         );
 
-        return response()->json($result['data'], $result['code']);
+        return response()->json($result->toPayload(), $result->status());
     }
 }

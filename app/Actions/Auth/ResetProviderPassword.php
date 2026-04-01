@@ -2,6 +2,7 @@
 
 namespace App\Actions\Auth;
 
+use App\Actions\Support\ActionResult;
 use App\Jobs\SendPasswordResetSuccessEmailJob;
 use App\Services\Mail\ActiveMailSettingService;
 use Illuminate\Auth\Events\PasswordReset;
@@ -16,10 +17,7 @@ class ResetProviderPassword
         private ActiveMailSettingService $mailSettingService
     ) {}
 
-    /**
-     * @return array{status: string, success: bool, user_email: string|null}
-     */
-    public function execute(array $validated): array
+    public function execute(array $validated): ActionResult
     {
         $resetUser = null;
 
@@ -47,11 +45,13 @@ class ResetProviderPassword
 
             Log::info('Password reset successful', ['email' => $validated['email']]);
 
-            return [
-                'status' => $status,
-                'success' => true,
-                'user_email' => $validated['email'],
-            ];
+            return ActionResult::success(
+                [
+                    'reset_status' => $status,
+                    'user_email' => $validated['email'],
+                ],
+                'Password reset successful.'
+            );
         }
 
         Log::warning('Password reset failed', [
@@ -59,11 +59,11 @@ class ResetProviderPassword
             'status' => $status,
         ]);
 
-        return [
-            'status' => $status,
-            'success' => false,
-            'user_email' => $validated['email'],
-        ];
+        return ActionResult::validationError(
+            __($status),
+            ['email' => [__($status)]],
+            422
+        );
     }
 
     private function sendSuccessEmail(mixed $user): void

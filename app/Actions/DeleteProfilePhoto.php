@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\ProfileImage;
 use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class DeleteProfilePhoto
 {
-    public function execute(User $user, ProfileImage $photo): array
+    public function execute(User $user, ProfileImage $photo): ActionResult
     {
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
@@ -48,11 +49,6 @@ class DeleteProfilePhoto
             $disk->delete($thumbnailPath);
         }
 
-        return [
-            'status' => 200,
-            'data' => [
-                'message' => 'Photo deleted successfully.',
-            ],
-        ];
+        return ActionResult::success([], 'Photo deleted successfully.');
     }
 }

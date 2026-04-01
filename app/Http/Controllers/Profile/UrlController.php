@@ -39,6 +39,6 @@ class UrlController extends Controller
             $request->validated('slug')
         );
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 }

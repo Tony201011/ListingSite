@@ -2,25 +2,21 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\ShortUrl;
 use App\Models\User;
 
 class UpdateUserShortUrl
 {
-    public function execute(User $user, string $slug): array
+    public function execute(User $user, string $slug): ActionResult
     {
         ShortUrl::query()->updateOrCreate(
             ['user_id' => $user->id],
             ['short_url' => $slug]
         );
 
-        return [
-            'status' => 200,
-            'data' => [
-                'success' => true,
-                'message' => 'Short URL updated successfully.',
-                'slug' => $slug,
-            ],
-        ];
+        return ActionResult::success([
+            'slug' => $slug,
+        ], 'Short URL updated successfully.');
     }
 }

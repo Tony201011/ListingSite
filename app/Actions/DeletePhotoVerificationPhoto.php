@@ -2,13 +2,14 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 
 class DeletePhotoVerificationPhoto
 {
-    public function execute(User $user, string $path): array
+    public function execute(User $user, string $path): ActionResult
     {
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
@@ -39,20 +40,10 @@ class DeletePhotoVerificationPhoto
                 $verification->deleted_at = now();
                 $verification->save();
 
-                return [
-                    'status' => 200,
-                    'data' => [
-                        'message' => 'Photo deleted successfully.',
-                    ],
-                ];
+                return ActionResult::success([], 'Photo deleted successfully.');
             }
         }
 
-        return [
-            'status' => 404,
-            'data' => [
-                'message' => 'Photo not found.',
-            ],
-        ];
+        return ActionResult::domainError('Photo not found.', status: 404);
     }
 }

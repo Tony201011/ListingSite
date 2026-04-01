@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\PhotoVerification;
 use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -12,19 +13,17 @@ use Throwable;
 
 class UploadPhotoVerificationPhotos
 {
-    public function execute(User $user, array $photos): array
+    public function execute(User $user, array $photos): ActionResult
     {
         $countVerification = $user->photoVerification()
             ->whereNull('deleted_at')
             ->count();
 
         if ($countVerification >= 2) {
-            return [
-                'status' => 403,
-                'data' => [
-                    'message' => 'You have upload the maximum number of 2 verification photos. Please contact support for further assistance.',
-                ],
-            ];
+            return ActionResult::domainError(
+                'You have upload the maximum number of 2 verification photos. Please contact support for further assistance.',
+                status: 403
+            );
         }
 
         /** @var FilesystemAdapter $disk */
@@ -61,12 +60,7 @@ class UploadPhotoVerificationPhotos
                         $disk->delete($storedPath);
                     }
 
-                    return [
-                        'status' => 500,
-                        'data' => [
-                            'message' => 'Failed to upload one of the verification photos.',
-                        ],
-                    ];
+                    return ActionResult::infrastructureFailure('Failed to upload one of the verification photos.');
                 }
 
                 $storedPaths[] = $filePath;
@@ -85,18 +79,14 @@ class UploadPhotoVerificationPhotos
                 'submitted_at' => now(),
             ]);
 
-            return [
-                'status' => 200,
-                'data' => [
-                    'message' => 'Verification photos uploaded successfully. Your request is now pending review.',
-                    'verification' => [
-                        'id' => $verification->id,
-                        'status' => $verification->status,
-                        'submitted_at' => optional($verification->submitted_at)->toDateTimeString(),
-                        'photos' => $verification->photos,
-                    ],
+            return ActionResult::success([
+                'verification' => [
+                    'id' => $verification->id,
+                    'status' => $verification->status,
+                    'submitted_at' => optional($verification->submitted_at)->toDateTimeString(),
+                    'photos' => $verification->photos,
                 ],
-            ];
+            ], 'Verification photos uploaded successfully. Your request is now pending review.');
         } catch (Throwable $e) {
             foreach ($storedPaths as $storedPath) {
                 $disk->delete($storedPath);

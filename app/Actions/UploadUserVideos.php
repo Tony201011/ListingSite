@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\User;
 use App\Models\UserVideo;
 use App\Services\UserVideoStorageService;
@@ -19,7 +20,7 @@ class UploadUserVideos
         private UserVideoStorageService $videoStorageService
     ) {}
 
-    public function execute(?User $user, array $videos): array
+    public function execute(?User $user, array $videos): ActionResult
     {
         if (! $user) {
             return $this->errorResponse('Unauthenticated.', 401);
@@ -73,13 +74,9 @@ class UploadUserVideos
 
             DB::commit();
 
-            return [
-                'status' => 200,
-                'data' => [
-                    'message' => 'Videos uploaded successfully.',
-                    'videos' => $uploadedVideos,
-                ],
-            ];
+            return ActionResult::success([
+                'videos' => $uploadedVideos,
+            ], 'Videos uploaded successfully.');
         } catch (Throwable $e) {
             DB::rollBack();
 
@@ -119,13 +116,10 @@ class UploadUserVideos
         return $slug.$user->id;
     }
 
-    private function errorResponse(string $message, int $status): array
+    private function errorResponse(string $message, int $status): ActionResult
     {
-        return [
-            'status' => $status,
-            'data' => [
-                'message' => $message,
-            ],
-        ];
+        return $status >= 500
+            ? ActionResult::infrastructureFailure($message, $status)
+            : ActionResult::domainError($message, status: $status);
     }
 }

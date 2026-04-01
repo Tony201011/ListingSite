@@ -2,6 +2,7 @@
 
 namespace App\Actions\Auth;
 
+use App\Actions\Support\ActionResult;
 use App\Jobs\SendPasswordResetLinkJob;
 use App\Services\Mail\ActiveMailSettingService;
 use Illuminate\Support\Facades\Log;
@@ -12,10 +13,7 @@ class SendPasswordResetLink
         private ActiveMailSettingService $mailSettingService
     ) {}
 
-    /**
-     * @return array{success: bool, message: string}
-     */
-    public function execute(string $email): array
+    public function execute(string $email): ActionResult
     {
         $activeMailSetting = $this->mailSettingService->getActiveOrLatest();
 
@@ -24,10 +22,7 @@ class SendPasswordResetLink
                 'email' => $email,
             ]);
 
-            return [
-                'success' => false,
-                'message' => 'Unable to send reset email right now. Please try again later.',
-            ];
+            return ActionResult::infrastructureFailure('Unable to send reset email right now. Please try again later.');
         }
 
         SendPasswordResetLinkJob::dispatch($email, $activeMailSetting->id);
@@ -37,9 +32,6 @@ class SendPasswordResetLink
             'mail_setting_id' => $activeMailSetting->id,
         ]);
 
-        return [
-            'success' => true,
-            'message' => 'If your email exists in our system, a password reset link has been queued.',
-        ];
+        return ActionResult::success([], 'If your email exists in our system, a password reset link has been queued.');
     }
 }

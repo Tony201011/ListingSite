@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\ProfileImage;
 use App\Models\User;
 use App\Services\UserPhotoStorageService;
@@ -18,7 +19,7 @@ class UploadUserPhotos
         private UserPhotoStorageService $photoStorageService
     ) {}
 
-    public function execute(?User $user, array $photos): array
+    public function execute(?User $user, array $photos): ActionResult
     {
         if (! $user) {
             return $this->errorResponse('Unauthenticated.', 401);
@@ -84,13 +85,9 @@ class UploadUserPhotos
 
             DB::commit();
 
-            return [
-                'status' => 200,
-                'data' => [
-                    'message' => 'Photos uploaded successfully.',
-                    'photos' => $uploadedPhotos,
-                ],
-            ];
+            return ActionResult::success([
+                'photos' => $uploadedPhotos,
+            ], 'Photos uploaded successfully.');
         } catch (Throwable $e) {
             DB::rollBack();
 
@@ -134,13 +131,10 @@ class UploadUserPhotos
         return $slug.$user->id;
     }
 
-    private function errorResponse(string $message, int $status): array
+    private function errorResponse(string $message, int $status): ActionResult
     {
-        return [
-            'status' => $status,
-            'data' => [
-                'message' => $message,
-            ],
-        ];
+        return $status >= 500
+            ? ActionResult::infrastructureFailure($message, $status)
+            : ActionResult::domainError($message, status: $status);
     }
 }

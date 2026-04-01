@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Actions\Support\ActionResult;
 use App\Actions\Auth\BuildAuthPageData;
 use App\Actions\Auth\ChangeProviderPassword;
 use App\Actions\Auth\ResendProviderSignupOtp;
@@ -12,7 +13,6 @@ use App\Actions\Auth\VerifyProviderSignupOtp;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
-use Illuminate\Support\MessageBag;
 use Mockery;
 use Tests\TestCase;
 
@@ -122,10 +122,10 @@ class ProviderRegisterControllerTest extends TestCase
         $showProviderOtpVerificationData = Mockery::mock(ShowProviderOtpVerificationData::class);
         $showProviderOtpVerificationData->shouldReceive('execute')
             ->once()
-            ->andReturn([
+            ->andReturn(ActionResult::success([
                 'masked_mobile' => '04******78',
                 'expires_in' => 600,
-            ]);
+            ]));
 
         $this->app->instance(
             ShowProviderOtpVerificationData::class,
@@ -145,12 +145,9 @@ class ProviderRegisterControllerTest extends TestCase
         $showProviderOtpVerificationData = Mockery::mock(ShowProviderOtpVerificationData::class);
         $showProviderOtpVerificationData->shouldReceive('execute')
             ->once()
-            ->andReturn([
-                'redirect' => '/signup',
-                'errors' => new MessageBag([
-                    'otp' => ['OTP session expired.'],
-                ]),
-            ]);
+            ->andReturn(ActionResult::domainError('OTP session expired.', [
+                'otp' => ['OTP session expired.'],
+            ]));
 
         $this->app->instance(
             ShowProviderOtpVerificationData::class,
@@ -168,12 +165,7 @@ class ProviderRegisterControllerTest extends TestCase
         $resendProviderSignupOtp = Mockery::mock(ResendProviderSignupOtp::class);
         $resendProviderSignupOtp->shouldReceive('execute')
             ->once()
-            ->andReturn([
-                'status' => 200,
-                'data' => [
-                    'message' => 'OTP resent successfully.',
-                ],
-            ]);
+            ->andReturn(ActionResult::success([], 'OTP resent successfully.'));
 
         $this->app->instance(ResendProviderSignupOtp::class, $resendProviderSignupOtp);
 
@@ -191,12 +183,7 @@ class ProviderRegisterControllerTest extends TestCase
         $verifyProviderSignupOtp->shouldReceive('execute')
             ->once()
             ->with('123456')
-            ->andReturn([
-                'status' => 200,
-                'data' => [
-                    'message' => 'OTP verified successfully.',
-                ],
-            ]);
+            ->andReturn(ActionResult::success([], 'OTP verified successfully.'));
 
         $this->app->instance(VerifyProviderSignupOtp::class, $verifyProviderSignupOtp);
 

@@ -2,13 +2,14 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\ProfileImage;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class SetPrimaryProfilePhoto
 {
-    public function execute(User $user, ProfileImage $photo): array
+    public function execute(User $user, ProfileImage $photo): ActionResult
     {
         DB::transaction(function () use ($user, $photo) {
             // Lock all user photos to serialize concurrent primary-photo changes
@@ -28,11 +29,6 @@ class SetPrimaryProfilePhoto
             ]);
         });
 
-        return [
-            'status' => 200,
-            'data' => [
-                'message' => 'Cover photo updated successfully.',
-            ],
-        ];
+        return ActionResult::success([], 'Cover photo updated successfully.');
     }
 }

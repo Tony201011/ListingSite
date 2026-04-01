@@ -2,11 +2,12 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Models\User;
 
 class SaveProfileMessage
 {
-    public function execute(User $user, string $message): array
+    public function execute(User $user, string $message): ActionResult
     {
         $profileMessage = $user->profileMessage;
 
@@ -20,12 +21,6 @@ class SaveProfileMessage
             ]);
         }
 
-        return [
-            'status' => 200,
-            'data' => [
-                'success' => true,
-                'message' => 'Profile message saved successfully.',
-            ],
-        ];
+        return ActionResult::success([], 'Profile message saved successfully.');
     }
 }

@@ -50,7 +50,7 @@ class PhotoController extends Controller
                 $request->file('photos', [])
             );
 
-            return response()->json($result['data'], $result['status']);
+            return response()->json($result->toPayload(), $result->status());
         } catch (Throwable $e) {
             report($e);
 
@@ -69,7 +69,7 @@ class PhotoController extends Controller
 
         $result = $this->setPrimaryProfilePhoto->execute(Auth::user(), $photo);
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function destroy(ProfileImage $photo): JsonResponse
@@ -78,6 +78,6 @@ class PhotoController extends Controller
 
         $result = $this->deleteProfilePhoto->execute(Auth::user(), $photo);
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 }

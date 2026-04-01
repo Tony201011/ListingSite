@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Support\ActionResult;
 use App\Services\TwilioService;
 
 class SendSms
@@ -10,28 +11,20 @@ class SendSms
         private TwilioService $twilio
     ) {}
 
-    public function execute(string $phone, string $message): array
+    public function execute(string $phone, string $message): ActionResult
     {
         try {
             $response = $this->twilio->sendSms($phone, $message);
 
-            return [
-                'status' => 200,
-                'data' => [
-                    'success' => true,
-                    'sid' => $response->sid,
-                ],
-            ];
+            return ActionResult::success([
+                'sid' => $response->sid,
+            ], 'SMS sent successfully.');
         } catch (\Throwable $e) {
-            return [
-                'status' => 500,
-                'data' => [
-                    'success' => false,
-                    'error' => config('app.debug')
-                        ? $e->getMessage()
-                        : 'Failed to send SMS.',
-                ],
-            ];
+            return ActionResult::infrastructureFailure(
+                config('app.debug')
+                    ? $e->getMessage()
+                    : 'Failed to send SMS.'
+            );
         }
     }
 }

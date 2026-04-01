@@ -2,6 +2,7 @@
 
 namespace App\Actions\Auth;
 
+use App\Actions\Support\ActionResult;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -18,16 +19,10 @@ class VerifyProviderSignupOtp
         private SendProviderAccountEmails $sendProviderAccountEmails
     ) {}
 
-    public function execute(string $otp): array
+    public function execute(string $otp): ActionResult
     {
         if (! session()->has('otp_required') || ! session()->has('pending_signup_key')) {
-            return [
-                'status' => 422,
-                'data' => [
-                    'success' => false,
-                    'message' => 'OTP session expired. Please signup again.',
-                ],
-            ];
+            return ActionResult::domainError('OTP session expired. Please signup again.');
         }
 
         $pendingKey = session()->get('pending_signup_key');
@@ -39,36 +34,18 @@ class VerifyProviderSignupOtp
         if ($attempts >= self::MAX_ATTEMPTS) {
             $this->expireOtpSession($pendingKey);
 
-            return [
-                'status' => 429,
-                'data' => [
-                    'success' => false,
-                    'message' => 'Too many failed attempts. Please signup again.',
-                ],
-            ];
+            return ActionResult::domainError('Too many failed attempts. Please signup again.', status: 429);
         }
 
         $pendingUser = Cache::get($pendingKey);
         $otpData = Cache::get($pendingKey.'_otp');
 
         if (! $pendingUser || ! $otpData || ! isset($otpData['code'], $otpData['expires_at'])) {
-            return [
-                'status' => 422,
-                'data' => [
-                    'success' => false,
-                    'message' => 'OTP expired. Please signup again.',
-                ],
-            ];
+            return ActionResult::domainError('OTP expired. Please signup again.');
         }
 
         if (time() > $otpData['expires_at']) {
-            return [
-                'status' => 422,
-                'data' => [
-                    'success' => false,
-                    'message' => 'OTP expired. Please signup again.',
-                ],
-            ];
+            return ActionResult::domainError('OTP expired. Please signup again.');
         }
 
         // Constant-time comparison: hash the submitted OTP the same way and compare hashes
@@ -81,32 +58,14 @@ class VerifyProviderSignupOtp
             if ($remaining <= 0) {
                 $this->expireOtpSession($pendingKey);
 
-                return [
-                    'status' => 429,
-                    'data' => [
-                        'success' => false,
-                        'message' => 'Too many failed attempts. Please signup again.',
-                    ],
-                ];
+                return ActionResult::domainError('Too many failed attempts. Please signup again.', status: 429);
             }
 
-            return [
-                'status' => 422,
-                'data' => [
-                    'success' => false,
-                    'message' => 'Invalid OTP. '.$remaining.' attempt(s) remaining.',
-                ],
-            ];
+            return ActionResult::validationError('Invalid OTP. '.$remaining.' attempt(s) remaining.');
         }
 
         if (User::query()->where('email', $pendingUser['email'])->exists()) {
-            return [
-                'status' => 422,
-                'data' => [
-                    'success' => false,
-                    'message' => 'Email already exists.',
-                ],
-            ];
+            return ActionResult::domainError('Email already exists.');
         }
 
         $user = User::create([
@@ -126,14 +85,9 @@ class VerifyProviderSignupOtp
 
         Auth::login($user);
 
-        return [
-            'status' => 200,
-            'data' => [
-                'success' => true,
-                'message' => 'Account created successfully.',
-                'redirect' => route('my-profile'),
-            ],
-        ];
+        return ActionResult::success([
+            'redirect' => route('my-profile'),
+        ], 'Account created successfully.');
     }
 
     private function expireOtpSession(string $pendingKey): void

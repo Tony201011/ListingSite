@@ -40,7 +40,7 @@ class PhotoVerificationController extends Controller
                 $request->file('photos', [])
             );
 
-            return response()->json($result['data'], $result['status']);
+            return response()->json($result->toPayload(), $result->status());
         } catch (Throwable $e) {
             report($e);
 
@@ -62,6 +62,6 @@ class PhotoVerificationController extends Controller
             $request->validated('path')
         );
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 }

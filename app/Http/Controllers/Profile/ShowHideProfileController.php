@@ -35,6 +35,6 @@ class ShowHideProfileController extends Controller
             $request->validated('status')
         );
 
-        return response()->json($result['data'], $result['status']);
+        return response()->json($result->toPayload(), $result->status());
     }
 }
