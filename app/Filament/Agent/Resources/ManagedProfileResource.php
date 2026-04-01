@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\ProviderProfile;
 use App\Models\State;
+use App\Models\User;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -48,14 +49,32 @@ class ManagedProfileResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->where('agent_id', Filament::auth()->id());
+        $query = parent::getEloquentQuery();
+
+        if (Filament::auth()->user()?->role === User::ROLE_ADMIN) {
+            return $query->whereNotNull('agent_id');
+        }
+
+        return $query->where('agent_id', Filament::auth()->id());
     }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
+                Select::make('agent_id')
+                    ->label('Agent Account')
+                    ->options(fn (): array => User::query()
+                        ->where('role', User::ROLE_AGENT)
+                        ->where('is_blocked', false)
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all())
+                    ->searchable()
+                    ->preload()
+                    ->required(fn (): bool => Filament::auth()->user()?->role === User::ROLE_ADMIN)
+                    ->visible(fn (): bool => Filament::auth()->user()?->role === User::ROLE_ADMIN),
+
                 TextInput::make('name')
                     ->label('Profile Name')
                     ->required()
@@ -137,6 +156,11 @@ class ManagedProfileResource extends Resource
                     ->label('Profile Name')
                     ->searchable()
                     ->sortable(),
+
+                TextColumn::make('agent.name')
+                    ->label('Agent')
+                    ->toggleable(isToggledHiddenByDefault: false)
+                    ->visible(fn (): bool => Filament::auth()->user()?->role === User::ROLE_ADMIN),
 
                 TextColumn::make('phone')
                     ->searchable(),
