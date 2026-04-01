@@ -57,6 +57,8 @@ class EditUser extends EditRecord
         $record->update(array_filter([
             'name' => $data['name'],
             'email' => $data['email'],
+            'mobile' => $data['mobile'] ?? null,
+            'suburb' => $data['suburb'] ?? null,
             'password' => $data['password'] ?? null,
         ], fn ($value): bool => $value !== null));
 

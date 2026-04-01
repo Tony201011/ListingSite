@@ -79,6 +79,12 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
+                TextInput::make('mobile')
+                    ->label('Mobile')
+                    ->maxLength(20),
+                TextInput::make('suburb')
+                    ->label('Suburb')
+                    ->maxLength(255),
                 TextInput::make('password')
                     ->label('Password')
                     ->password()
