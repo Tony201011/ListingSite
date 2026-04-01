@@ -20,7 +20,10 @@ class SetPrimaryProfilePhoto
                 'is_primary' => false,
             ]);
 
-            $photo->update([
+            // Use query builder to ensure the UPDATE always runs, even when
+            // the in-memory model already has is_primary = true (stale after
+            // the bulk update above).
+            ProfileImage::where('id', $photo->id)->update([
                 'is_primary' => true,
             ]);
         });
