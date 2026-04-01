@@ -15,7 +15,6 @@ use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -227,8 +226,6 @@ class UserResource extends Resource
                     ->default('pending')
                     ->required()
                     ->native(false),
-                DateTimePicker::make('expires_at')
-                    ->label('Expires At'),
             ]);
     }
 
@@ -355,10 +352,6 @@ class UserResource extends Resource
                 TextEntry::make('providerProfile.profile_status')
                     ->label('Profile Status')
                     ->badge()
-                    ->placeholder('-'),
-                TextEntry::make('providerProfile.expires_at')
-                    ->label('Expires At')
-                    ->dateTime()
                     ->placeholder('-'),
             ])
             ->columns(2);

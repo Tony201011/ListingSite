@@ -57,7 +57,6 @@ class CreateUser extends CreateRecord
                 'is_verified' => $data['is_verified'] ?? false,
                 'is_featured' => $data['is_featured'] ?? false,
                 'profile_status' => $data['profile_status'] ?? 'pending',
-                'expires_at' => $data['expires_at'] ?? null,
             ],
         );
 

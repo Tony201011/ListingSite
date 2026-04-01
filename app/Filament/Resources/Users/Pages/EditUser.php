@@ -47,7 +47,6 @@ class EditUser extends EditRecord
             'is_verified' => $profile?->is_verified ?? false,
             'is_featured' => $profile?->is_featured ?? false,
             'profile_status' => $profile?->profile_status ?? 'pending',
-            'expires_at' => $profile?->expires_at,
         ];
     }
 
@@ -109,7 +108,6 @@ class EditUser extends EditRecord
                 'is_verified' => $data['is_verified'] ?? false,
                 'is_featured' => $data['is_featured'] ?? false,
                 'profile_status' => $data['profile_status'] ?? 'pending',
-                'expires_at' => $data['expires_at'] ?? null,
             ],
         );
 

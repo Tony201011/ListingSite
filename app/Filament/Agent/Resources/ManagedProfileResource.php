@@ -14,7 +14,6 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -216,8 +215,6 @@ class ManagedProfileResource extends Resource
                     ->required()
                     ->native(false),
 
-                DateTimePicker::make('expires_at')
-                    ->label('Expires At'),
             ]);
     }
 
