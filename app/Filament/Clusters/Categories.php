@@ -12,5 +12,5 @@ class Categories extends Cluster
 
     protected static ?string $navigationLabel = 'Categories';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 }
