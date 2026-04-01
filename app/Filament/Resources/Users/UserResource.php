@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users;
 
 use App\Filament\Resources\Users\Pages\ManageUsers;
+use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\City;
 use App\Models\Country;
@@ -12,6 +13,7 @@ use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -19,6 +21,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -66,6 +70,93 @@ class UserResource extends Resource
             ->components([
                 //
             ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('name')
+                    ->label('User Name'),
+                TextEntry::make('email')
+                    ->label('Email')
+                    ->copyable(),
+                TextEntry::make('mobile')
+                    ->label('Mobile')
+                    ->placeholder('-'),
+                TextEntry::make('suburb')
+                    ->label('Suburb')
+                    ->placeholder('-'),
+                TextEntry::make('referral_code')
+                    ->label('Referral Code')
+                    ->placeholder('-'),
+                IconEntry::make('is_blocked')
+                    ->label('Blocked')
+                    ->boolean(),
+                IconEntry::make('mobile_verified')
+                    ->label('Mobile Verified')
+                    ->boolean(),
+                TextEntry::make('email_verified_at')
+                    ->label('Email Verified At')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('created_at')
+                    ->label('Joined At')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.name')
+                    ->label('Profile Name')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.slug')
+                    ->label('Profile Slug')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.age')
+                    ->label('Age')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.description')
+                    ->label('Description')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                TextEntry::make('providerProfile.phone')
+                    ->label('Phone')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.whatsapp')
+                    ->label('WhatsApp')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.country.name')
+                    ->label('Country')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.state.name')
+                    ->label('State')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.city.name')
+                    ->label('City')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.latitude')
+                    ->label('Latitude')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.longitude')
+                    ->label('Longitude')
+                    ->placeholder('-'),
+                IconEntry::make('providerProfile.is_verified')
+                    ->label('Profile Verified')
+                    ->boolean(),
+                IconEntry::make('providerProfile.is_featured')
+                    ->label('Featured')
+                    ->boolean(),
+                TextEntry::make('providerProfile.profile_status')
+                    ->label('Profile Status')
+                    ->badge()
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.membership_id')
+                    ->label('Membership ID')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.expires_at')
+                    ->label('Expires At')
+                    ->dateTime()
+                    ->placeholder('-'),
+            ])
+            ->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -151,6 +242,9 @@ class UserResource extends Resource
                     }),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('View')
+                    ->icon('heroicon-o-eye'),
                 EditAction::make()
                     ->label('Edit')
                     ->schema([
@@ -353,6 +447,7 @@ class UserResource extends Resource
     {
         return [
             'index' => ManageUsers::route('/'),
+            'view' => ViewUser::route('/{record}'),
         ];
     }
 }
