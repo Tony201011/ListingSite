@@ -282,6 +282,72 @@ class UserResource extends Resource
                     ->label('Description')
                     ->placeholder('-')
                     ->columnSpanFull(),
+                TextEntry::make('providerProfile.introduction_line')
+                    ->label('Introduction Line')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                TextEntry::make('providerProfile.profile_text')
+                    ->label('Profile Text')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                TextEntry::make('providerProfile.age_group_id')
+                    ->label('Age Group')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.hair_color_id')
+                    ->label('Hair Color')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.hair_length_id')
+                    ->label('Hair Length')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.ethnicity_id')
+                    ->label('Ethnicity')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.body_type_id')
+                    ->label('Body Type')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.bust_size_id')
+                    ->label('Bust Size')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.your_length_id')
+                    ->label('Your Length')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.availability')
+                    ->label('Availability')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.contact_method')
+                    ->label('Contact Method')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.phone_contact_preference')
+                    ->label('Phone Contact Preference')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.time_waster_shield')
+                    ->label('Time Waster Shield')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.primary_identity')
+                    ->label('Primary Identity')
+                    ->formatStateUsing(fn ($state): string => is_array($state) && $state !== [] ? implode(', ', $state) : '-')
+                    ->columnSpanFull(),
+                TextEntry::make('providerProfile.attributes')
+                    ->label('Attributes')
+                    ->formatStateUsing(fn ($state): string => is_array($state) && $state !== [] ? implode(', ', $state) : '-')
+                    ->columnSpanFull(),
+                TextEntry::make('providerProfile.services_style')
+                    ->label('Services Style')
+                    ->formatStateUsing(fn ($state): string => is_array($state) && $state !== [] ? implode(', ', $state) : '-')
+                    ->columnSpanFull(),
+                TextEntry::make('providerProfile.services_provided')
+                    ->label('Services Provided')
+                    ->formatStateUsing(fn ($state): string => is_array($state) && $state !== [] ? implode(', ', $state) : '-')
+                    ->columnSpanFull(),
+                TextEntry::make('providerProfile.twitter_handle')
+                    ->label('Twitter Handle')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.website')
+                    ->label('Website')
+                    ->placeholder('-'),
+                TextEntry::make('providerProfile.onlyfans_username')
+                    ->label('OnlyFans Username')
+                    ->placeholder('-'),
                 TextEntry::make('providerProfile.phone')
                     ->label('Phone')
                     ->placeholder('-'),
