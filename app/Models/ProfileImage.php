@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,18 +32,24 @@ class ProfileImage extends Model
 
     protected function imageUrl(): Attribute
     {
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk(config('media.delivery_disk'));
+
         return Attribute::make(
             get: fn () => $this->image_path
-                ? Storage::disk(config('media.delivery_disk'))->url($this->image_path)
+                ? $disk->url($this->image_path)
                 : null
         );
     }
 
     protected function thumbnailUrl(): Attribute
     {
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk(config('media.delivery_disk'));
+
         return Attribute::make(
             get: fn () => $this->thumbnail_path
-                ? Storage::disk(config('media.delivery_disk'))->url($this->thumbnail_path)
+                ? $disk->url($this->thumbnail_path)
                 : null
         );
     }
