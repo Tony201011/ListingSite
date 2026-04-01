@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -10,14 +11,18 @@ class ProviderStatsOverview extends StatsOverviewWidget
 {
     protected ?string $heading = 'Provider Insights';
 
-    protected ?string $description = 'Quick overview of provider accounts';
-
     /**
      * @return array<Stat>
      */
     protected function getStats(): array
     {
         $providers = User::query()->where('role', User::ROLE_PROVIDER);
+
+        if (Filament::getCurrentPanel()?->getId() === 'agent' && Filament::auth()->id()) {
+            $providers->whereHas('providerProfile', function ($query): void {
+                $query->where('agent_id', Filament::auth()->id());
+            });
+        }
 
         $total = (clone $providers)->count();
         $active = (clone $providers)->where('is_blocked', false)->count();
@@ -38,5 +43,14 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ->color('warning')
                 ->icon('heroicon-o-shield-check'),
         ];
+    }
+
+    protected function getDescription(): ?string
+    {
+        if (Filament::getCurrentPanel()?->getId() === 'agent') {
+            return 'Quick overview of provider accounts created by this agent';
+        }
+
+        return 'Quick overview of provider accounts';
     }
 }
