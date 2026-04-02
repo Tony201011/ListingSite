@@ -19,6 +19,9 @@ class TwilioSettingsTable
                 TextColumn::make('api_sid'),
                 TextColumn::make('api_secret'),
                 TextColumn::make('phone_number'),
+                TextColumn::make('otp_expire_time')
+                    ->label('OTP Expire Time (min)')
+                    ->sortable(),
                 IconColumn::make('dummy_mode_enabled')
                     ->label('Dummy OTP')
                     ->boolean(),
