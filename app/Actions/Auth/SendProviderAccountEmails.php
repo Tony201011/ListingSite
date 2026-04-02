@@ -31,6 +31,6 @@ class SendProviderAccountEmails
             return;
         }
 
-        SendProviderAccountEmailsJob::dispatch($user->id, $activeMailSetting->id);
+        SendProviderAccountEmailsJob::dispatchSync($user->id, $activeMailSetting->id);
     }
 }

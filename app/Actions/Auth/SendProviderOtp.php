@@ -25,7 +25,7 @@ class SendProviderOtp
 
         $twilioSetting = TwilioSetting::query()->first();
         $otp = random_int(100000, 999999);
-        $otpExpiresAt = now()->addMinutes(2);
+        $otpExpiresAt = now()->addMinutes(5);
 
         if ($this->isDummyMobile($phone, $twilioSetting)) {
             $otp = (int) ($twilioSetting->dummy_otp ?: $otp);

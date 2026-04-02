@@ -46,7 +46,7 @@ class SignupProvider
         Cache::put($pendingKey.'_otp', [
             'code' => $sendResult['otp_hash'],
             'expires_at' => $sendResult['expires_at']->timestamp,
-        ], $sendResult['expires_at']);
+        ], $sendResult['expires_at']->copy()->addMinutes(2));
 
         Session::put('otp_required', true);
         Session::put('pending_signup_key', $pendingKey);

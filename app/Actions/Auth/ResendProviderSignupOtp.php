@@ -57,13 +57,13 @@ class ResendProviderSignupOtp
             return ActionResult::infrastructureFailure($sendResult['message']);
         }
 
-        $otpExpirySeconds = 120;
+        $otpExpirySeconds = 300;
         $resendCooldownSeconds = 30;
 
         Cache::put($pendingKey.'_otp', [
             'code' => $sendResult['otp_hash'],
             'expires_at' => $sendResult['expires_at']->timestamp,
-        ], $sendResult['expires_at']);
+        ], $sendResult['expires_at']->copy()->addMinutes(2));
 
         // Reset failed verification attempts on resend
         Cache::forget($pendingKey.'_otp_attempts');
