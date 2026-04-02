@@ -67,7 +67,7 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with('providerProfile')
+            ->with(['providerProfile', 'onlineUser', 'hideShowProfile', 'availableNow'])
             ->where('role', User::ROLE_PROVIDER);
     }
 
@@ -389,8 +389,23 @@ class UserResource extends Resource
                                             ->label('Profile Status')
                                             ->badge()
                                             ->placeholder('-'),
+                                        TextEntry::make('onlineUser.status')
+                                            ->label('Online Status')
+                                            ->badge()
+                                            ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray')
+                                            ->placeholder('Offline'),
+                                        TextEntry::make('hideShowProfile.status')
+                                            ->label('Profile Visibility')
+                                            ->badge()
+                                            ->color(fn ($state): string => $state === 'show' ? 'success' : 'warning')
+                                            ->placeholder('Visible'),
+                                        TextEntry::make('availableNow.status')
+                                            ->label('Available Now')
+                                            ->badge()
+                                            ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray')
+                                            ->placeholder('No'),
                                     ])
-                                    ->columns(2),
+                                    ->columns(3),
                             ]),
 
                         Tab::make('Images')
@@ -444,31 +459,54 @@ class UserResource extends Resource
 
                         Tab::make('Rate')
                             ->schema([
-                                RepeatableEntry::make('rateGroups')
+                                RepeatableEntry::make('rates')
                                     ->label('')
                                     ->schema([
-                                        TextEntry::make('name')
-                                            ->label('Group Name'),
-                                        RepeatableEntry::make('rates')
-                                            ->label('Rates')
-                                            ->schema([
-                                                TextEntry::make('description')
-                                                    ->label('Description')
-                                                    ->placeholder('-'),
-                                                TextEntry::make('incall')
-                                                    ->label('Incall')
-                                                    ->placeholder('-'),
-                                                TextEntry::make('outcall')
-                                                    ->label('Outcall')
-                                                    ->placeholder('-'),
-                                                TextEntry::make('extra')
-                                                    ->label('Extra')
-                                                    ->placeholder('-'),
-                                            ])
-                                            ->columns(4)
+                                        TextEntry::make('description')
+                                            ->label('Description')
+                                            ->placeholder('-'),
+                                        TextEntry::make('incall')
+                                            ->label('Incall')
+                                            ->placeholder('-'),
+                                        TextEntry::make('outcall')
+                                            ->label('Outcall')
+                                            ->placeholder('-'),
+                                        TextEntry::make('extra')
+                                            ->label('Extra')
+                                            ->placeholder('-'),
+                                    ])
+                                    ->columns(4),
+                            ]),
+
+                        Tab::make('Verified Images')
+                            ->schema([
+                                RepeatableEntry::make('photoVerification')
+                                    ->label('')
+                                    ->schema([
+                                        TextEntry::make('status')
+                                            ->label('Status')
+                                            ->badge()
+                                            ->color(fn ($state): string => match ($state) {
+                                                'approved' => 'success',
+                                                'rejected' => 'danger',
+                                                default => 'warning',
+                                            })
+                                            ->placeholder('-'),
+                                        TextEntry::make('submitted_at')
+                                            ->label('Submitted At')
+                                            ->dateTime()
+                                            ->placeholder('-'),
+                                        TextEntry::make('admin_note')
+                                            ->label('Admin Note')
+                                            ->placeholder('-')
+                                            ->columnSpanFull(),
+                                        ImageEntry::make('photo_url')
+                                            ->label('Photo')
+                                            ->disk(fn (): string => config('media.delivery_disk', 'public'))
+                                            ->height(200)
                                             ->columnSpanFull(),
                                     ])
-                                    ->columns(1),
+                                    ->columns(2),
                             ]),
 
                         Tab::make('Availability')
