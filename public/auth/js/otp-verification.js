@@ -123,6 +123,8 @@ function otpVerification(config) {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({ otp: this.otpCode })
@@ -133,11 +135,12 @@ function otpVerification(config) {
                 if (data.success) {
                     window.location.href = data.redirect || '/my-profile';
                 } else {
-                    this.verificationStatus = { type: 'error', message: data.message };
+                    const msg = data.message || data.errors?.otp?.[0] || 'Verification failed. Please try again.';
+                    this.verificationStatus = { type: 'error', message: msg };
                     this.isVerifying = false;
                 }
             } catch {
-                this.verificationStatus = { type: 'error', message: 'Error verifying OTP' };
+                this.verificationStatus = { type: 'error', message: 'Something went wrong. Please refresh the page and try again.' };
                 this.isVerifying = false;
             }
         },
@@ -152,6 +155,8 @@ function otpVerification(config) {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
                     }
                 });
