@@ -5,16 +5,16 @@
     class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8"
     x-data="profileSettingPage({
         bookingOpen: @js($errors->any() || session('success') || session('error')),
-        photos: @js(collect($profileImage ?? [])->map(fn ($image, $index) => [
-            'id' => $image['id'] ?? $index + 1,
-            'thumbnail_url' => $image['thumbnail_url'] ?? '',
-            'image_url' => $image['image_url'] ?? ($image['thumbnail_url'] ?? ''),
-            'is_primary' => (bool) ($image['is_primary'] ?? false),
+        photos: @js($profileImages->map(fn ($photo) => [
+            'id' => $photo->id,
+            'thumbnail_url' => $photo->thumbnail_url ?? '',
+            'image_url' => $photo->image_url ?? ($photo->thumbnail_url ?? ''),
+            'is_primary' => (bool) $photo->is_primary,
         ])->values()),
-        videos: @js(collect($videos ?? [])->map(fn ($video, $index) => [
-            'id' => $video['id'] ?? $index + 1,
-            'video_url' => $video['video_url'] ?? '',
-            'original_name' => $video['original_name'] ?? ('Video ' . ($index + 1)),
+        videos: @js($videos->map(fn ($video) => [
+            'id' => $video->id,
+            'video_url' => $video->video_url ?? '',
+            'original_name' => $video->original_name ?? ('Video ' . $video->id),
         ])->values())
     })"
 >

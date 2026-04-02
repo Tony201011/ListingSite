@@ -39,18 +39,16 @@ class GetProfileSettingPageData
             'your_length_name' => $categories[$profile?->your_length_id] ?? null,
         ];
 
-        $profileImage = $user?->profileImages()
-            ->whereNull('deleted_at')
-            ->get()
-            ->toArray() ?? [];
+        $profileImages = $user?->profileImages()
+            ->latest()
+            ->get() ?? collect();
 
         $videos = $user
             ? UserVideo::query()
                 ->where('user_id', $user->id)
                 ->latest()
                 ->get()
-                ->toArray()
-            : [];
+            : collect();
 
         $photoVerification = $user?->photoVerification()
             ->where('status', 'approved')
@@ -58,7 +56,7 @@ class GetProfileSettingPageData
             ->count() > 1;
 
         return [
-            'profileImage' => $profileImage,
+            'profileImages' => $profileImages,
             'videos' => $videos,
             'photoVerification' => $photoVerification,
             'userInfo' => $userInfo,
