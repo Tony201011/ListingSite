@@ -20,6 +20,14 @@ class TwilioSettingForm
                 TextInput::make('phone_number')
                     ->tel()
                     ->default(null),
+                TextInput::make('otp_expire_time')
+                    ->label('OTP Expire Time (minutes)')
+                    ->numeric()
+                    ->minValue(1)
+                    ->maxValue(60)
+                    ->default(5)
+                    ->helperText('How long (in minutes) the OTP code remains valid.')
+                    ->required(),
             ]);
     }
 }

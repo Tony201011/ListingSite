@@ -3,6 +3,7 @@
 namespace App\Actions\Auth;
 
 use App\Actions\Support\ActionResult;
+use App\Models\TwilioSetting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -57,7 +58,9 @@ class ResendProviderSignupOtp
             return ActionResult::infrastructureFailure($sendResult['message']);
         }
 
-        $otpExpirySeconds = 300;
+        $twilioSetting = TwilioSetting::query()->first();
+        $otpExpireMinutes = max(1, (int) ($twilioSetting->otp_expire_time ?? 5));
+        $otpExpirySeconds = $otpExpireMinutes * 60;
         $resendCooldownSeconds = 30;
 
         Cache::put($pendingKey.'_otp', [
