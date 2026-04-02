@@ -492,6 +492,5 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/verify-page.js') }}?v={{ filemtime(public_path('profile/js/verify-page.js')) }}"></script>
 @endpush

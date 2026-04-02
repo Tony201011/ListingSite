@@ -629,7 +629,6 @@
 </style>
 
 <script src="https://unpkg.com/alpinejs" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection --}}
 
 
@@ -1092,6 +1091,5 @@
 
 @push('scripts')
 <script src="https://unpkg.com/alpinejs" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush

@@ -110,7 +110,6 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/video-gallery.js') }}?v={{ filemtime(public_path('profile/js/video-gallery.js')) }}"></script>
 @endpush
 @endsection

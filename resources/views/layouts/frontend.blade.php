@@ -67,6 +67,7 @@
 
     @include('layouts.partials.footer')
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
