@@ -1,6 +1,9 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('photoGallery', (config = {}) => ({
         loading: false,
+        successMessage: '',
+        errorMessage: '',
+        confirmDeleteId: null,
 
         photos: config.photos || [],
         setCoverUrl: config.setCoverUrl,

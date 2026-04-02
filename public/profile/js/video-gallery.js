@@ -1,6 +1,10 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('videoGallery', (config = {}) => ({
         loading: false,
+        successMessage: '',
+        errorMessage: '',
+        confirmDeleteId: null,
+
         videos: config.videos || [],
         deleteUrl: config.deleteUrl,
         csrfToken: config.csrfToken,
