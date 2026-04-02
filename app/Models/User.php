@@ -134,6 +134,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return $this->hasMany(ProfileImage::class);
     }
 
+    public function userVideos(): HasMany
+    {
+        return $this->hasMany(UserVideo::class);
+    }
+
     public function photoVerification(): HasMany
     {
         return $this->hasMany(PhotoVerification::class);
