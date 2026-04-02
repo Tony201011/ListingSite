@@ -11,6 +11,7 @@ class TwilioSetting extends Model
         'api_sid',
         'api_secret',
         'phone_number',
+        'otp_expire_time',
         'dummy_mode_enabled',
         'dummy_mobile_number',
         'dummy_otp',
@@ -19,6 +20,7 @@ class TwilioSetting extends Model
     protected function casts(): array
     {
         return [
+            'otp_expire_time' => 'integer',
             'dummy_mode_enabled' => 'boolean',
         ];
     }

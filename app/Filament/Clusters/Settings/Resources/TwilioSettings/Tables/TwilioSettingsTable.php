@@ -22,6 +22,9 @@ class TwilioSettingsTable
                     ->searchable(),
                 TextColumn::make('phone_number')
                     ->searchable(),
+                TextColumn::make('otp_expire_time')
+                    ->label('OTP Expire Time (min)')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
