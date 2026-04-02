@@ -1,9 +1,11 @@
+// Store CKEditor instances outside Alpine's reactive proxy to avoid conflicts
+const editorInstances = new WeakMap();
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('profileMessageEditor', (config = {}) => ({
         content: config.initialContent || '',
         storeUrl: config.storeUrl || '',
         csrfToken: config.csrfToken || '',
-        editor: null,
         loading: false,
         errors: {},
 
@@ -11,10 +13,14 @@ document.addEventListener('alpine:init', () => {
             this.initEditor();
         },
 
+        getEditor() {
+            return editorInstances.get(this.$refs.editor);
+        },
+
         async initEditor() {
             await this.$nextTick();
 
-            if (!this.$refs.editor || this.editor) {
+            if (!this.$refs.editor || editorInstances.has(this.$refs.editor)) {
                 return;
             }
 
@@ -47,7 +53,7 @@ document.addEventListener('alpine:init', () => {
                     placeholder: 'Write your profile message...'
                 });
 
-                this.editor = editor;
+                editorInstances.set(this.$refs.editor, editor);
                 editor.setData(this.content || '');
 
                 editor.model.document.on('change:data', () => {
@@ -82,16 +88,11 @@ document.addEventListener('alpine:init', () => {
                     })
                 });
 
-                const responseText = await response.text();
-                console.log('Response status:', response.status);
-                console.log('Response body:', responseText);
-
                 let data;
                 try {
-                    data = JSON.parse(responseText);
+                    data = await response.json();
                 } catch (e) {
-                    console.error('JSON parse failed. Raw response:', responseText);
-                    throw new Error('Server returned an invalid response (status ' + response.status + ').');
+                    throw new Error('Server returned an invalid response.');
                 }
 
                 if (!response.ok) {
@@ -104,8 +105,9 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 // Update editor with saved content so it stays visible
-                if (this.editor) {
-                    this.editor.setData(this.content);
+                const ed = this.getEditor();
+                if (ed) {
+                    ed.setData(this.content);
                 }
 
                 this.toast(data.message || 'Profile message saved successfully.');
@@ -118,8 +120,9 @@ document.addEventListener('alpine:init', () => {
         },
 
         clearEditor() {
-            if (this.editor) {
-                this.editor.setData('');
+            const ed = this.getEditor();
+            if (ed) {
+                ed.setData('');
             }
 
             this.content = '';
