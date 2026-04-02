@@ -29,13 +29,21 @@ document.addEventListener('alpine:init', () => {
             statusFilter: 'all',
             dateFrom: '',
             dateTo: '',
-            currentPage: 1,
-            perPage: 10,
+            categoryTab: 'upcoming',
 
             get minDateTime() {
                 const now = new Date();
                 const pad = n => String(n).padStart(2, '0');
                 return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            },
+
+            getTourCategory(tour) {
+                const now = new Date();
+                const from = new Date(tour.from);
+                const to = new Date(tour.to);
+                if (to < now) return 'past';
+                if (from <= now && to >= now) return 'ongoing';
+                return 'upcoming';
             },
 
             get filteredTours() {
@@ -57,36 +65,22 @@ document.addEventListener('alpine:init', () => {
                 });
             },
 
-            get totalPages() {
-                return Math.max(1, Math.ceil(this.filteredTours.length / this.perPage));
+            get upcomingTours() {
+                return this.filteredTours.filter(t => this.getTourCategory(t) === 'upcoming');
             },
 
-            get paginatedGroups() {
-                const start = (this.currentPage - 1) * this.perPage;
-                const paginated = this.filteredTours.slice(start, start + this.perPage);
-
-                const groups = {};
-                paginated.forEach(tour => {
-                    const date = tour.from ? tour.from.substring(0, 10) : 'No date';
-                    const heading = this.formatDateHeading(date);
-                    if (!groups[heading]) groups[heading] = [];
-                    groups[heading].push(tour);
-                });
-
-                return Object.keys(groups).map(heading => ({
-                    heading,
-                    tours: groups[heading]
-                }));
+            get ongoingTours() {
+                return this.filteredTours.filter(t => this.getTourCategory(t) === 'ongoing');
             },
 
-            formatDateHeading(dateStr) {
-                if (dateStr === 'No date') return dateStr;
-                try {
-                    const d = new Date(dateStr + 'T00:00:00');
-                    return d.toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                } catch {
-                    return dateStr;
-                }
+            get pastTours() {
+                return this.filteredTours.filter(t => this.getTourCategory(t) === 'past');
+            },
+
+            get activeCategoryTours() {
+                if (this.categoryTab === 'ongoing') return this.ongoingTours;
+                if (this.categoryTab === 'past') return this.pastTours;
+                return this.upcomingTours;
             },
 
             formatDateTime(dt) {

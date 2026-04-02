@@ -104,24 +104,22 @@
                 </button>
             </div>
 
-            <!-- Tours list with grouping, date filters, and pagination -->
+            <!-- Tours list with category tabs -->
             <div class="mt-8" x-show="tours.length > 0">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                     <h2 class="text-lg font-semibold text-gray-800">Your scheduled tours</h2>
 
-                    <!-- Search, filter, and date range controls -->
+                    <!-- Search and filter controls -->
                     <div class="flex flex-col gap-2 w-full sm:w-auto">
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input
                                 type="text"
                                 x-model="searchQuery"
-                                @input="currentPage = 1"
                                 placeholder="Search by city or description..."
                                 class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                             >
                             <select
                                 x-model="statusFilter"
-                                @change="currentPage = 1"
                                 class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white"
                             >
                                 <option value="all">All status</option>
@@ -129,113 +127,100 @@
                                 <option value="disabled">Disabled only</option>
                             </select>
                         </div>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input
-                                type="date"
-                                x-model="dateFrom"
-                                @change="currentPage = 1"
-                                placeholder="From date"
-                                class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                            >
-                            <input
-                                type="date"
-                                x-model="dateTo"
-                                @change="currentPage = 1"
-                                placeholder="To date"
-                                class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                            >
-                        </div>
                     </div>
                 </div>
 
-                <!-- Grouped tours (from paginated results) -->
-                <template x-for="group in paginatedGroups" :key="group.heading">
-                    <div x-show="group.tours.length > 0" class="mb-6">
-                        <h3 class="text-md font-semibold text-gray-700 mb-2" x-text="group.heading"></h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left border border-gray-200">
-                                <thead class="bg-gray-50 text-gray-700">
-                                    <tr>
-                                        <th class="px-4 py-3 border-b">City</th>
-                                        <th class="px-4 py-3 border-b">From</th>
-                                        <th class="px-4 py-3 border-b">To</th>
-                                        <th class="px-4 py-3 border-b">Description</th>
-                                        <th class="px-4 py-3 border-b">Status</th>
-                                        <th class="px-4 py-3 border-b">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="tour in group.tours" :key="tour.id">
-                                        <tr class="border-b hover:bg-gray-50 text-gray-900">
-                                            <td class="px-4 py-3" x-text="tour.city"></td>
-                                            <td class="px-4 py-3" x-text="formatDateTime(tour.from)"></td>
-                                            <td class="px-4 py-3" x-text="formatDateTime(tour.to)"></td>
-                                            <td class="px-4 py-3" x-text="plainDescription(tour.description)"></td>
-                                            <td class="px-4 py-3">
-                                                <button
-                                                    @click="toggleStatus(tour)"
-                                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-                                                    :class="tour.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                                                >
-                                                    <span x-text="tour.enabled ? 'Enabled' : 'Disabled'"></span>
+                <!-- Category Tabs -->
+                <div class="flex border-b border-gray-200 mb-4">
+                    <button
+                        @click="categoryTab = 'upcoming'"
+                        :class="categoryTab === 'upcoming' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
+                    >
+                        Upcoming <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'upcoming' ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600'" x-text="upcomingTours.length"></span>
+                    </button>
+                    <button
+                        @click="categoryTab = 'ongoing'"
+                        :class="categoryTab === 'ongoing' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
+                    >
+                        Ongoing <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'ongoing' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'" x-text="ongoingTours.length"></span>
+                    </button>
+                    <button
+                        @click="categoryTab = 'past'"
+                        :class="categoryTab === 'past' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
+                    >
+                        Past <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'past' ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 text-gray-600'" x-text="pastTours.length"></span>
+                    </button>
+                </div>
+
+                <!-- Tour table for active category -->
+                <div x-show="activeCategoryTours.length > 0">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border border-gray-200">
+                            <thead class="bg-gray-50 text-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3 border-b">City</th>
+                                    <th class="px-4 py-3 border-b">From</th>
+                                    <th class="px-4 py-3 border-b">To</th>
+                                    <th class="px-4 py-3 border-b">Description</th>
+                                    <th class="px-4 py-3 border-b">Status</th>
+                                    <th class="px-4 py-3 border-b">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="tour in activeCategoryTours" :key="tour.id">
+                                    <tr class="border-b hover:bg-gray-50 text-gray-900">
+                                        <td class="px-4 py-3" x-text="tour.city"></td>
+                                        <td class="px-4 py-3" x-text="formatDateTime(tour.from)"></td>
+                                        <td class="px-4 py-3" x-text="formatDateTime(tour.to)"></td>
+                                        <td class="px-4 py-3" x-text="plainDescription(tour.description)"></td>
+                                        <td class="px-4 py-3">
+                                            <button
+                                                @click="toggleStatus(tour)"
+                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                                                :class="tour.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                            >
+                                                <span x-text="tour.enabled ? 'Enabled' : 'Disabled'"></span>
+                                            </button>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-2">
+                                                <button @click="openTourModal(tour)" class="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-1" title="View details">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                    <span class="sr-only">View</span>
                                                 </button>
-                                            </td>
-                                            <td class="px-4 py-3">
-                                                <div class="flex items-center gap-2">
-                                                    <button @click="openTourModal(tour)" class="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-1" title="View details">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                        </svg>
-                                                        <span class="sr-only">View</span>
-                                                    </button>
 
-                                                    <button @click="editTour(tour)" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1" title="Edit tour">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                        </svg>
-                                                        <span class="sr-only">Edit</span>
-                                                    </button>
-                                                    <button @click="confirmRemove(tour)" class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1" title="Remove tour">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                        <span class="sr-only">Remove</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
+                                                <button @click="editTour(tour)" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1" title="Edit tour">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                    </svg>
+                                                    <span class="sr-only">Edit</span>
+                                                </button>
+                                                <button @click="confirmRemove(tour)" class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1" title="Remove tour">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                    <span class="sr-only">Remove</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
                     </div>
-                </template>
-
-                <!-- Message when no tours match filters -->
-                <div x-show="filteredTours.length === 0" class="text-center py-6 text-gray-500">
-                    No tours match your filters.
                 </div>
 
-                <!-- Pagination controls -->
-                <div x-show="filteredTours.length > perPage" class="flex justify-center items-center gap-4 mt-6">
-                    <button
-                        @click="currentPage = Math.max(1, currentPage - 1)"
-                        :disabled="currentPage === 1"
-                        class="px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium disabled:opacity-50"
-                    >
-                        Previous
-                    </button>
-                    <span class="text-sm text-gray-700">
-                        Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span>
-                    </span>
-                    <button
-                        @click="currentPage = Math.min(totalPages, currentPage + 1)"
-                        :disabled="currentPage === totalPages"
-                        class="px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium disabled:opacity-50"
-                    >
-                        Next
-                    </button>
+                <!-- Empty state for active category -->
+                <div x-show="activeCategoryTours.length === 0" class="text-center py-8 text-gray-500">
+                    <span x-show="categoryTab === 'upcoming'">No upcoming tours.</span>
+                    <span x-show="categoryTab === 'ongoing'">No ongoing tours.</span>
+                    <span x-show="categoryTab === 'past'">No past tours.</span>
                 </div>
             </div>
         </div>
