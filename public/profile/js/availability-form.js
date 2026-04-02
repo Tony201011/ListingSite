@@ -13,8 +13,13 @@ document.addEventListener('alpine:init', () => {
 
         setupWatchers() {
             Object.keys(this.form).forEach(day => {
-                this.$watch(`form.${day}.from`, () => {
+                this.$watch(`form.${day}.from`, (newVal, oldVal) => {
                     this.clearFieldError(day, 'from');
+                    // Reset 'to' if it's no longer valid after 'from' changed
+                    const to = this.form[day].to;
+                    if (newVal && to && to <= newVal) {
+                        this.form[day].to = '';
+                    }
                     this.validateDay(day);
                 });
 
@@ -53,6 +58,16 @@ document.addEventListener('alpine:init', () => {
             } else {
                 this.validateDay(day);
             }
+        },
+
+        getToOptions(day) {
+            const from = this.form[day]?.from;
+            const allTimes = [];
+            for (let i = 0; i <= 23; i++) {
+                allTimes.push(String(i).padStart(2, '0') + ':00');
+            }
+            if (!from) return allTimes;
+            return allTimes.filter(t => t > from);
         },
 
         getFieldError(day, field) {

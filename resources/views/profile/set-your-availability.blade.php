@@ -109,11 +109,9 @@
                                                 class="w-full rounded-xl bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 disabled:text-gray-400"
                                             >
                                                 <option value="">Select end time</option>
-                                                @for($i = 0; $i <= 23; $i++)
-                                                    <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:00">
-                                                        {{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:00
-                                                    </option>
-                                                @endfor
+                                                <template x-for="opt in getToOptions('{{ $day }}')" :key="opt">
+                                                    <option :value="opt" x-text="opt"></option>
+                                                </template>
                                             </select>
 
                                             <p
@@ -197,5 +195,5 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('profile/js/availability-form.js') }}"></script>
+<script src="{{ asset('profile/js/availability-form.js') }}?v={{ filemtime(public_path('profile/js/availability-form.js')) }}"></script>
 @endpush
