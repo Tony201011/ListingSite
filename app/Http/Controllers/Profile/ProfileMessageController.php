@@ -21,7 +21,7 @@ class ProfileMessageController extends Controller
     public function profileMessage(): View
     {
         return view('profile.profile-message', [
-            'message' => $this->getProfileMessage->execute(Auth::user()),
+            'profileMessage' => $this->getProfileMessage->execute(Auth::user()),
         ]);
     }
 

@@ -64,7 +64,7 @@
 <div
     class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="profileMessageEditor({
-        initialContent: @js($message->message ?? ''),
+        initialContent: @js($profileMessage ?? ''),
         storeUrl: @js(route('profile-message.store')),
         csrfToken: @js(csrf_token())
     })"
@@ -90,17 +90,6 @@
             <div x-ref="editor" class="prose max-w-none"></div>
 
             <input type="hidden" x-model="content">
-
-            <template x-if="message.text">
-                <div
-                    class="mt-4 rounded-lg border px-4 py-3 text-sm"
-                    :class="message.type === 'success'
-                        ? 'border-green-200 bg-green-50 text-green-700'
-                        : 'border-red-200 bg-red-50 text-red-700'"
-                >
-                    <span x-text="message.text"></span>
-                </div>
-            </template>
 
             <template x-if="errors.message">
                 <div class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -133,6 +122,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
-<script src="{{ asset('profile/js/profile-message-editor.js') }}"></script>
+<script src="{{ asset('profile/js/profile-message-editor.js') }}?v={{ filemtime(public_path('profile/js/profile-message-editor.js')) }}"></script>
 @endpush

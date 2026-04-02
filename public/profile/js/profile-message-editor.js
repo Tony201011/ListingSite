@@ -6,10 +6,6 @@ document.addEventListener('alpine:init', () => {
         editor: null,
         loading: false,
         errors: {},
-        message: {
-            type: '',
-            text: ''
-        },
 
         init() {
             this.initEditor();
@@ -57,14 +53,10 @@ document.addEventListener('alpine:init', () => {
                 editor.model.document.on('change:data', () => {
                     this.content = editor.getData();
                     this.errors = {};
-                    this.message = { type: '', text: '' };
                 });
             } catch (error) {
                 console.error('CKEditor initialization error:', error);
-                this.message = {
-                    type: 'error',
-                    text: 'Unable to load the editor.'
-                };
+                this.error('Unable to load the editor.');
             }
         },
 
@@ -75,7 +67,6 @@ document.addEventListener('alpine:init', () => {
 
             this.loading = true;
             this.errors = {};
-            this.message = { type: '', text: '' };
 
             try {
                 const response = await fetch(this.storeUrl, {
@@ -96,23 +87,19 @@ document.addEventListener('alpine:init', () => {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
                     } else {
-                        this.message = {
-                            type: 'error',
-                            text: data.message || 'Something went wrong.'
-                        };
+                        this.error(data.message || 'Something went wrong.');
                     }
                     return;
                 }
 
-                this.message = {
-                    type: 'success',
-                    text: data.message || 'Profile message saved successfully.'
-                };
+                // Update editor with saved content so it stays visible
+                if (this.editor) {
+                    this.editor.setData(this.content);
+                }
+
+                this.toast(data.message || 'Profile message saved successfully.');
             } catch (error) {
-                this.message = {
-                    type: 'error',
-                    text: 'Unable to save profile message.'
-                };
+                this.error('Unable to save profile message.');
             } finally {
                 this.loading = false;
             }
@@ -125,7 +112,25 @@ document.addEventListener('alpine:init', () => {
 
             this.content = '';
             this.errors = {};
-            this.message = { type: '', text: '' };
+        },
+
+        toast(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: message,
+                timer: 1800,
+                showConfirmButton: false
+            });
+        },
+
+        error(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
         }
     }));
 });
