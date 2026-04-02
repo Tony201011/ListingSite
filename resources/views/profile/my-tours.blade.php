@@ -58,7 +58,7 @@
                 <input
                     x-model="newTour.to"
                     type="datetime-local"
-                    :min="editingIndex === null ? minDateTime : null"
+                    :min="newTour.from || (editingIndex === null ? minDateTime : null)"
                     class="px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
                 >
             </div>

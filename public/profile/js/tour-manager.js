@@ -72,6 +72,10 @@ document.addEventListener('alpine:init', () => {
                     return this.error('Fill all fields');
                 }
 
+                if (new Date(this.newTour.to) <= new Date(this.newTour.from)) {
+                    return this.error('"To" date must be after "From" date.');
+                }
+
                 this.submitting = true;
 
                 let url = this.storeUrl;
