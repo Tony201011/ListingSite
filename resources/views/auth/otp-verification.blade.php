@@ -70,7 +70,7 @@
 
                     <!-- TIMER -->
                     <div class="flex justify-between text-sm mb-6">
-                        <span x-text="timerText" class="font-bold bg-yellow-100 px-3 py-1 rounded"></span>
+                        <span x-text="timerText" class="font-bold px-3 py-1 rounded"></span>
 
                         <button
                             type="button"
