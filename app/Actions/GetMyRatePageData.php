@@ -9,7 +9,12 @@ class GetMyRatePageData
     public function execute(?User $user): array
     {
         $rates = $user
-            ? $user->rates()->whereNull('group_id')->orderByDesc('created_at')->get()
+            ? $user->rates()
+                ->whereNull('group_id')
+                ->whereNotNull('description')
+                ->where('description', '!=', '')
+                ->orderByDesc('created_at')
+                ->get()
             : collect();
 
         $groups = $user
