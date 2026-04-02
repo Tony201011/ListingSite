@@ -82,11 +82,16 @@ document.addEventListener('alpine:init', () => {
                     })
                 });
 
+                const responseText = await response.text();
+                console.log('Response status:', response.status);
+                console.log('Response body:', responseText);
+
                 let data;
                 try {
-                    data = await response.json();
+                    data = JSON.parse(responseText);
                 } catch (e) {
-                    throw new Error('Server returned an invalid response.');
+                    console.error('JSON parse failed. Raw response:', responseText);
+                    throw new Error('Server returned an invalid response (status ' + response.status + ').');
                 }
 
                 if (!response.ok) {
