@@ -75,6 +75,7 @@
                         x-model="email"
                         @blur="touched.email = true"
                         @input="touched.email = true; validateEmail()"
+                        autocomplete="off"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
                     @error('email')
@@ -96,6 +97,7 @@
                         @blur="touched.nickname = true"
                         @input="touched.nickname = true; validateNickname()"
                         placeholder="e.g. SexyBabe"
+                        autocomplete="off"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
                     @error('nickname')
@@ -119,6 +121,7 @@
                                 x-model="password"
                                 @blur="touched.password = true"
                                 @input="touched.password = true; validatePassword(); validateConfirmPassword()"
+                                autocomplete="new-password"
                                 class="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                             >
 
@@ -245,6 +248,7 @@
                             x-model="confirmPassword"
                             @blur="touched.confirmPassword = true"
                             @input="touched.confirmPassword = true; validateConfirmPassword()"
+                            autocomplete="new-password"
                             class="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                         >
 
@@ -292,6 +296,7 @@
                         @blur="touched.mobile = true"
                         @input="touched.mobile = true; validateMobile()"
                         placeholder="Australian mobile (e.g. 04XXXXXXXX)"
+                        autocomplete="off"
                         class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
                 </div>
@@ -379,6 +384,7 @@
                         name="referral_code"
                         value="{{ old('referral_code') }}"
                         placeholder="Enter code if you have one"
+                        autocomplete="off"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition"
                     >
                 </div>
