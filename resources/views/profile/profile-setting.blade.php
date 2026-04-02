@@ -55,7 +55,6 @@
                 @php
                     $actions = [
                         ['label' => 'Edit profile', 'url' => route('edit-profile')],
-                        ['label' => 'Hide profile', 'url' => url('/hide-show-profile')],
                         ['label' => 'Photos', 'url' => url('/photos')],
                         ['label' => 'Add photos', 'url' => url('/add-photo')],
                         ['label' => 'My videos', 'url' => url('/my-videos')],
@@ -63,8 +62,7 @@
                         ['label' => 'My tours', 'url' => url('/my-tours')],
                         ['label' => 'Availability', 'url' => url('/my-availability')],
                         ['label' => 'Short URL', 'url' => url('/short-url')],
-                        ['label' => 'Online now', 'url' => url('/online-now')],
-                        ['label' => 'Available now', 'url' => url('/available-now')],
+                        ['label' => 'Status', 'url' => route('status')],
                         ['label' => 'Set & Forget', 'url' => url('/set-and-forget')],
                         ['label' => 'My Babe Rank', 'url' => url('/my-babe-rank')],
                         ['label' => 'Profile message', 'url' => url('/profile-message')],

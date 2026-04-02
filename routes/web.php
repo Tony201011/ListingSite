@@ -31,6 +31,7 @@ use App\Http\Controllers\Profile\ProfileMessageController;
 use App\Http\Controllers\Profile\ProfileSettingController;
 use App\Http\Controllers\Profile\ReferralsController;
 use App\Http\Controllers\Profile\ShowHideProfileController;
+use App\Http\Controllers\Profile\StatusTabsController;
 use App\Http\Controllers\Profile\SuburbController;
 use App\Http\Controllers\Profile\UrlController;
 /***profile Controllers start*/
@@ -218,6 +219,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/hide-show-profile', [ShowHideProfileController::class, 'hideShowProfile'])->name('hide-show-profile');
         Route::post('/hide-show-profile', [ShowHideProfileController::class, 'updateHideShowProfile'])->name('update-hide-show-profile');
         /*** hide show profile end here */
+
+        /*** status tabs route */
+        Route::get('/status', [StatusTabsController::class, 'show'])->name('status');
+        /*** status tabs route end */
 
         /********** profile route start here */
         Route::get('/profile-setting', [ProfileSettingController::class, 'viewProfileSetting'])->name('profile-setting');
