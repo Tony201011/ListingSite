@@ -402,14 +402,38 @@
                 @csrf
                 <input type="hidden" name="user_id" value="{{ auth()->id() }}">
 
-                <input type="text" name="name" value="{{ old('name') }}" placeholder="Your name" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <input type="email" name="email" value="{{ old('email') }}" placeholder="Your email (required)" required class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="Your phone" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <input type="datetime-local" name="datetime" value="{{ old('datetime') }}" min="{{ now()->format('Y-m-d\TH:i') }}" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <input type="text" name="services" value="{{ old('services') }}" placeholder="What services are you interested in" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <input type="text" name="duration" value="{{ old('duration') }}" placeholder="How long would you like to book" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <input type="text" name="location" value="{{ old('location') }}" placeholder="Where would you like to meet" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <textarea name="message" rows="3" maxlength="2000" placeholder="Any other comments" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent">{{ old('message') }}</textarea>
+                <div>
+                    <label for="bk-name" class="mb-1 block text-sm font-medium text-gray-700">Name</label>
+                    <input id="bk-name" type="text" name="name" value="{{ old('name') }}" placeholder="Your name" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
+                </div>
+                <div>
+                    <label for="bk-email" class="mb-1 block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+                    <input id="bk-email" type="email" name="email" value="{{ old('email') }}" placeholder="Your email" required class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
+                </div>
+                <div>
+                    <label for="bk-phone" class="mb-1 block text-sm font-medium text-gray-700">Phone</label>
+                    <input id="bk-phone" type="tel" name="phone" value="{{ old('phone') }}" placeholder="Your phone" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
+                </div>
+                <div>
+                    <label for="bk-datetime" class="mb-1 block text-sm font-medium text-gray-700">Date & Time</label>
+                    <input id="bk-datetime" type="datetime-local" name="datetime" value="{{ old('datetime') }}" min="{{ now()->format('Y-m-d\TH:i') }}" class="w-full bg-white text-gray-900 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
+                </div>
+                <div>
+                    <label for="bk-services" class="mb-1 block text-sm font-medium text-gray-700">Services</label>
+                    <input id="bk-services" type="text" name="services" value="{{ old('services') }}" placeholder="What services are you interested in" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
+                </div>
+                <div>
+                    <label for="bk-duration" class="mb-1 block text-sm font-medium text-gray-700">Duration</label>
+                    <input id="bk-duration" type="text" name="duration" value="{{ old('duration') }}" placeholder="How long would you like to book" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
+                </div>
+                <div>
+                    <label for="bk-location" class="mb-1 block text-sm font-medium text-gray-700">Location</label>
+                    <input id="bk-location" type="text" name="location" value="{{ old('location') }}" placeholder="Where would you like to meet" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
+                </div>
+                <div>
+                    <label for="bk-message" class="mb-1 block text-sm font-medium text-gray-700">Message</label>
+                    <textarea id="bk-message" name="message" rows="3" maxlength="2000" placeholder="Any other comments" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">{{ old('message') }}</textarea>
+                </div>
 
                 <div class="pt-2 flex gap-3">
                     <button
