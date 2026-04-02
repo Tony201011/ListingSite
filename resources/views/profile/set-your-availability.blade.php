@@ -130,7 +130,7 @@
                                             <input
                                                 type="checkbox"
                                                 x-model="form['{{ $day }}'].all_day"
-                                                @change="handleAllDay('{{ $day }}')"
+                                                @change="handleOptionToggle('{{ $day }}', 'all_day')"
                                                 :disabled="!form['{{ $day }}'].enabled"
                                                 class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
                                             >
@@ -141,6 +141,7 @@
                                             <input
                                                 type="checkbox"
                                                 x-model="form['{{ $day }}'].till_late"
+                                                @change="handleOptionToggle('{{ $day }}', 'till_late')"
                                                 :disabled="!form['{{ $day }}'].enabled"
                                                 class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
                                             >
@@ -151,6 +152,7 @@
                                             <input
                                                 type="checkbox"
                                                 x-model="form['{{ $day }}'].by_appointment"
+                                                @change="handleOptionToggle('{{ $day }}', 'by_appointment')"
                                                 :disabled="!form['{{ $day }}'].enabled"
                                                 class="h-5 w-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
                                             >

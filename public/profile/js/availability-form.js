@@ -38,6 +38,8 @@ document.addEventListener('alpine:init', () => {
 
                 this.$watch(`form.${day}.all_day`, (value) => {
                     if (value) {
+                        this.form[day].till_late = false;
+                        this.form[day].by_appointment = false;
                         this.form[day].from = '';
                         this.form[day].to = '';
                         this.clearFieldError(day, 'from');
@@ -46,15 +48,45 @@ document.addEventListener('alpine:init', () => {
                         this.validateDay(day);
                     }
                 });
+
+                this.$watch(`form.${day}.till_late`, (value) => {
+                    if (value) {
+                        this.form[day].all_day = false;
+                        this.form[day].by_appointment = false;
+                    }
+                });
+
+                this.$watch(`form.${day}.by_appointment`, (value) => {
+                    if (value) {
+                        this.form[day].all_day = false;
+                        this.form[day].till_late = false;
+                        this.form[day].from = '';
+                        this.form[day].to = '';
+                        this.clearFieldError(day, 'from');
+                        this.clearFieldError(day, 'to');
+                    }
+                });
             });
         },
 
-        handleAllDay(day) {
-            if (this.form[day].all_day) {
-                this.form[day].from = '';
-                this.form[day].to = '';
-                this.clearFieldError(day, 'from');
-                this.clearFieldError(day, 'to');
+        handleOptionToggle(day, option) {
+            const options = ['all_day', 'till_late', 'by_appointment'];
+
+            if (this.form[day][option]) {
+                // Uncheck the other two options
+                options.forEach(opt => {
+                    if (opt !== option) {
+                        this.form[day][opt] = false;
+                    }
+                });
+
+                // Clear from/to when all_day or by_appointment is selected
+                if (option === 'all_day' || option === 'by_appointment') {
+                    this.form[day].from = '';
+                    this.form[day].to = '';
+                    this.clearFieldError(day, 'from');
+                    this.clearFieldError(day, 'to');
+                }
             } else {
                 this.validateDay(day);
             }
