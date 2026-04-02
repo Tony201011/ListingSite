@@ -317,11 +317,8 @@
 @endpush
 
 @push('scripts')
-@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script src="{{ asset('profile/js/tour-manager.js') }}"></script>
-@endpush
-</script>
 @endpush
 @endsection
