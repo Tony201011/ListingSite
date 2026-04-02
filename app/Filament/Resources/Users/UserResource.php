@@ -679,6 +679,18 @@ class UserResource extends Resource
                                 ])
                                 ->columns(4),
                         ]),
+
+                    Tab::make('Profile Message')
+                        ->schema([
+                            Section::make('Profile Message')
+                                ->schema([
+                                    TextEntry::make('profileMessage.message')
+                                        ->label('')
+                                        ->html()
+                                        ->placeholder('No profile message set.')
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
                 ])
                 ->columnSpanFull(),
         ]);
