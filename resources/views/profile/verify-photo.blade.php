@@ -325,7 +325,7 @@
                     >
                         <div class="mb-4 text-5xl">📁</div>
                         <p class="text-lg font-semibold text-gray-700">Drag &amp; drop photos here</p>
-                        <p class="mb-5 mt-1 text-sm text-gray-500">JPG, PNG, WEBP supported · max 5 photos · max 10MB each</p>
+                        <p class="mb-5 mt-1 text-sm text-gray-500">JPG, PNG, WEBP supported · min 2 photos · max 5 photos · max 10MB each</p>
 
                         <button
                             type="button"

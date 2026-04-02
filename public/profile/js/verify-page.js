@@ -201,8 +201,8 @@ function verifyPage(config) {
         },
 
         async uploadFiles() {
-            if (!this.selectedFiles.length) {
-                this.error('Please select at least one photo.');
+            if (this.selectedFiles.length < 2) {
+                this.error('Please select at least two photos.');
                 return;
             }
 
