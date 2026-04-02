@@ -65,7 +65,7 @@ Route::post('/email/verification-notification', [EmailVerificationController::cl
     ->middleware(['auth', 'throttle:'.config('security.throttles.verification_send', '6,1')])
     ->name('verification.send');
 
-Route::redirect('/login', '/');
+Route::redirect('/login', '/signin');
 
 /** frontend pages */
 Route::get('/terms-and-conditions', [FrontendPageController::class, 'termsAndConditions'])->name('terms-and-conditions');

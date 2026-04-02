@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EmailVerificationController extends Controller
 {
@@ -17,8 +18,12 @@ class EmailVerificationController extends Controller
     {
         $request->fulfill();
 
-        return redirect('/my-profile')
-            ->with('success', 'Email verified successfully.');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/signin')
+            ->with('success', 'Your account has been successfully verified. Please sign in to continue.');
     }
 
     public function resend(Request $request)

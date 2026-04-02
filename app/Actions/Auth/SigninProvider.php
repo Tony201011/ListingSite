@@ -25,12 +25,6 @@ class SigninProvider
             ])->withInput();
         }
 
-        if (! $user->hasVerifiedEmail()) {
-            return back()->withErrors([
-                'email' => 'Please verify your email address before signing in.',
-            ])->withInput();
-        }
-
         if (Auth::attempt([
             'email' => $request->email,
             'password' => $request->password,

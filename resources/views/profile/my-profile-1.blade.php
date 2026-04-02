@@ -20,6 +20,26 @@
 
         <div class="mb-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
             <div class="p-6 sm:p-8">
+                <div x-data="{ showSuccess: true }">
+                    @if(session('success'))
+                        <div
+                            x-show="showSuccess"
+                            x-transition
+                            class="mb-4 flex items-start justify-between gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700"
+                        >
+                            <span>{{ session('success') }}</span>
+
+                            <button
+                                type="button"
+                                @click="showSuccess = false"
+                                class="text-lg leading-none text-green-500 hover:text-green-700"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    @endif
+                </div>
+
                 <div x-data="{ showError: true }">
                     @if(session('error'))
                         <div

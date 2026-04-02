@@ -4,7 +4,6 @@ namespace App\Actions\Auth;
 
 use App\Actions\Support\ActionResult;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -83,10 +82,10 @@ class VerifyProviderSignupOtp
 
         $this->expireOtpSession($pendingKey);
 
-        Auth::login($user);
+        Session::flash('success', 'Your account has been successfully created. Please sign in to continue.');
 
         return ActionResult::success([
-            'redirect' => route('my-profile'),
+            'redirect' => route('signin'),
         ], 'Account created successfully.');
     }
 
