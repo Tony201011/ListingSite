@@ -21,6 +21,14 @@ class TwilioSettingForm
                 TextInput::make('phone_number')
                     ->tel()
                     ->default(null),
+                TextInput::make('otp_expire_time')
+                    ->label('OTP Expire Time (minutes)')
+                    ->numeric()
+                    ->minValue(1)
+                    ->maxValue(60)
+                    ->default(5)
+                    ->helperText('How long (in minutes) the OTP code remains valid.')
+                    ->required(),
                 Toggle::make('dummy_mode_enabled')
                     ->label('Enable Dummy Mobile OTP')
                     ->helperText('When enabled, OTP for the dummy number is not sent via Twilio and uses the fixed OTP below.'),
