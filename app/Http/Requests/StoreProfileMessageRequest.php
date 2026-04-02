@@ -17,7 +17,7 @@ class StoreProfileMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'message' => ['required', 'string', 'max:1000'],
+            'message' => ['required', 'string', 'max:10000'],
         ];
     }
 
@@ -26,7 +26,7 @@ class StoreProfileMessageRequest extends FormRequest
         return [
             'message.required' => 'Profile message is required.',
             'message.string' => 'Profile message must be a valid string.',
-            'message.max' => 'Profile message may not be greater than 1000 characters.',
+            'message.max' => 'Profile message may not be greater than 10000 characters.',
         ];
     }
 

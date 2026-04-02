@@ -74,14 +74,20 @@ document.addEventListener('alpine:init', () => {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': this.csrfToken,
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({
                         message: this.content
                     })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error('Server returned an invalid response.');
+                }
 
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
@@ -99,7 +105,8 @@ document.addEventListener('alpine:init', () => {
 
                 this.toast(data.message || 'Profile message saved successfully.');
             } catch (error) {
-                this.error('Unable to save profile message.');
+                console.error('Save error:', error);
+                this.error(error.message || 'Unable to save profile message.');
             } finally {
                 this.loading = false;
             }
