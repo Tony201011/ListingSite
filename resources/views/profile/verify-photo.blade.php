@@ -323,14 +323,6 @@
             </div>
 
             <div class="bg-gray-50 p-4 sm:p-6">
-                <template x-if="uploadSuccessMessage">
-                    <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700" x-text="uploadSuccessMessage"></div>
-                </template>
-
-                <template x-if="uploadErrorMessage">
-                    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-text="uploadErrorMessage"></div>
-                </template>
-
                 <div x-show="activeTab === 'files'" x-cloak x-transition>
                     <div
                         class="rounded-xl border-2 border-dashed p-8 text-center transition sm:p-10"
@@ -503,5 +495,6 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('profile/js/verify-page.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('profile/js/verify-page.js') }}?v={{ filemtime(public_path('profile/js/verify-page.js')) }}"></script>
 @endpush

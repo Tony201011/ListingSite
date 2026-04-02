@@ -11,24 +11,15 @@ function verifyPage(config) {
         capturedImage: '',
         stream: null,
         isUploading: false,
-        uploadSuccessMessage: '',
-        uploadErrorMessage: '',
 
         openModal() {
             this.isModalOpen = true;
-            this.clearMessages();
         },
 
         closeModal() {
             this.isModalOpen = false;
             this.isDragging = false;
             this.stopCamera();
-            this.clearMessages();
-        },
-
-        clearMessages() {
-            this.uploadSuccessMessage = '';
-            this.uploadErrorMessage = '';
         },
 
         switchTab(tab) {
@@ -63,8 +54,6 @@ function verifyPage(config) {
         },
 
         addFiles(files) {
-            this.clearMessages();
-
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
             const existingKeys = new Set(
                 this.selectedFiles.map((file) => `${file.name}-${file.size}-${file.lastModified || 0}`)
@@ -76,7 +65,7 @@ function verifyPage(config) {
                 }
 
                 if (file.size > 10 * 1024 * 1024) {
-                    this.uploadErrorMessage = 'Each photo must be 10MB or smaller.';
+                    this.error('Each photo must be 10MB or smaller.');
                     continue;
                 }
 
@@ -87,7 +76,7 @@ function verifyPage(config) {
                 }
 
                 if (this.selectedFiles.length >= 5) {
-                    this.uploadErrorMessage = 'You can upload a maximum of 5 photos.';
+                    this.error('You can upload a maximum of 5 photos.');
                     break;
                 }
 
@@ -113,14 +102,12 @@ function verifyPage(config) {
         },
 
         async startCamera() {
-            this.clearMessages();
-
             if (this.stream) {
                 return;
             }
 
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                this.uploadErrorMessage = 'Camera is not supported on this device or browser.';
+                this.error('Camera is not supported on this device or browser.');
                 return;
             }
 
@@ -132,8 +119,8 @@ function verifyPage(config) {
                 if (this.$refs.video) {
                     this.$refs.video.srcObject = this.stream;
                 }
-            } catch (error) {
-                this.uploadErrorMessage = 'Camera access denied or not available.';
+            } catch (err) {
+                this.error('Camera access denied or not available.');
             }
         },
 
@@ -149,13 +136,11 @@ function verifyPage(config) {
         },
 
         capturePhoto() {
-            this.clearMessages();
-
             const videoElement = this.$refs.video;
             const canvasElement = this.$refs.canvas;
 
             if (!videoElement || !canvasElement || !videoElement.videoWidth) {
-                this.uploadErrorMessage = 'Camera is not ready yet.';
+                this.error('Camera is not ready yet.');
                 return;
             }
 
@@ -165,7 +150,7 @@ function verifyPage(config) {
             const context = canvasElement.getContext('2d');
 
             if (!context) {
-                this.uploadErrorMessage = 'Unable to capture photo.';
+                this.error('Unable to capture photo.');
                 return;
             }
 
@@ -189,22 +174,20 @@ function verifyPage(config) {
         },
 
         addCapturedPhotoToSelection() {
-            this.clearMessages();
-
             if (!this.capturedImage) {
-                this.uploadErrorMessage = 'No captured photo to add.';
+                this.error('No captured photo to add.');
                 return;
             }
 
             if (this.selectedFiles.length >= 5) {
-                this.uploadErrorMessage = 'You can upload a maximum of 5 photos.';
+                this.error('You can upload a maximum of 5 photos.');
                 return;
             }
 
             const fileName = `camera-capture-${Date.now()}.png`;
             const file = this.dataURLtoFile(this.capturedImage, fileName);
             this.selectedFiles.push(file);
-            this.uploadSuccessMessage = 'Captured photo added to upload list.';
+            this.toast('Captured photo added to upload list.');
         },
 
         clearCapturedPhoto() {
@@ -219,13 +202,11 @@ function verifyPage(config) {
 
         async uploadFiles() {
             if (!this.selectedFiles.length) {
-                this.uploadErrorMessage = 'Please select at least one photo.';
-                this.uploadSuccessMessage = '';
+                this.error('Please select at least one photo.');
                 return;
             }
 
             this.isUploading = true;
-            this.clearMessages();
 
             const formData = new FormData();
             this.selectedFiles.forEach((file) => {
@@ -237,12 +218,18 @@ function verifyPage(config) {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': this.csrfToken,
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: formData
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error('Server returned an invalid response.');
+                }
 
                 if (!response.ok) {
                     if (data.errors) {
@@ -254,7 +241,7 @@ function verifyPage(config) {
                     throw new Error(data.message || 'Upload failed.');
                 }
 
-                this.uploadSuccessMessage = data.message || 'Verification photos uploaded successfully.';
+                this.toast(data.message || 'Verification photos uploaded successfully.');
                 this.selectedFiles = [];
                 this.capturedImage = '';
                 this.stopCamera();
@@ -262,8 +249,8 @@ function verifyPage(config) {
                 setTimeout(() => {
                     window.location.reload();
                 }, 1200);
-            } catch (error) {
-                this.uploadErrorMessage = error.message || 'Something went wrong while uploading.';
+            } catch (err) {
+                this.error(err.message || 'Something went wrong while uploading.');
             } finally {
                 this.isUploading = false;
             }
@@ -274,11 +261,17 @@ function verifyPage(config) {
                 return;
             }
 
-            if (!confirm('Are you sure you want to delete this photo?')) {
-                return;
-            }
+            const result = await Swal.fire({
+                title: 'Delete photo?',
+                text: 'Are you sure you want to delete this photo?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#db2777',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete'
+            });
 
-            this.clearMessages();
+            if (!result.isConfirmed) return;
 
             try {
                 const response = await fetch(this.deleteUrl, {
@@ -286,25 +279,50 @@ function verifyPage(config) {
                     headers: {
                         'X-CSRF-TOKEN': this.csrfToken,
                         'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({ path, index })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error('Server returned an invalid response.');
+                }
 
                 if (!response.ok) {
                     throw new Error(data.message || 'Photo delete failed.');
                 }
 
-                this.uploadSuccessMessage = data.message || 'Photo deleted successfully.';
+                this.toast(data.message || 'Photo deleted successfully.');
 
                 setTimeout(() => {
                     window.location.reload();
                 }, 800);
-            } catch (error) {
-                this.uploadErrorMessage = error.message || 'Something went wrong while deleting the photo.';
+            } catch (err) {
+                this.error(err.message || 'Something went wrong while deleting the photo.');
             }
+        },
+
+        toast(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: message,
+                timer: 1800,
+                showConfirmButton: false
+            });
+        },
+
+        error(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
         }
     };
 }
