@@ -11,7 +11,7 @@ class ProviderProfilePolicy
     {
         return $user->role === User::ROLE_ADMIN
             || ($user->role === User::ROLE_AGENT && ! $user->is_blocked)
-            || $user->providerProfile()->exists();
+            || $user->role === User::ROLE_PROVIDER;
     }
 
     public function create(User $user): bool
