@@ -416,24 +416,31 @@ class UserResource extends Resource
                                         ->label('Profile Status')
                                         ->badge()
                                         ->placeholder('-'),
+                                ])
+                                ->columns(3),
+                        ]),
 
+                    Tab::make('Live Status')
+                        ->schema([
+                            Section::make('Realtime Status')
+                                ->schema([
                                     TextEntry::make('onlineUser.status')
                                         ->label('Online Status')
                                         ->badge()
-                                        ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray')
-                                        ->placeholder('Offline'),
+                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Offline')
+                                        ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray'),
 
                                     TextEntry::make('hideShowProfile.status')
                                         ->label('Profile Visibility')
                                         ->badge()
-                                        ->color(fn ($state): string => $state === 'show' ? 'success' : 'warning')
-                                        ->placeholder('Visible'),
+                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Show')
+                                        ->color(fn ($state): string => $state === 'show' ? 'success' : 'warning'),
 
                                     TextEntry::make('availableNow.status')
                                         ->label('Available Now')
                                         ->badge()
-                                        ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray')
-                                        ->placeholder('No'),
+                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Offline')
+                                        ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray'),
                                 ])
                                 ->columns(3),
                         ]),
