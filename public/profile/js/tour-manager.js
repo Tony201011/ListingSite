@@ -32,6 +32,91 @@ document.addEventListener('alpine:init', () => {
             currentPage: 1,
             perPage: 10,
 
+            get minDateTime() {
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            },
+
+            get filteredTours() {
+                return this.tours.filter(tour => {
+                    if (this.statusFilter === 'enabled' && !tour.enabled) return false;
+                    if (this.statusFilter === 'disabled' && tour.enabled) return false;
+
+                    if (this.searchQuery) {
+                        const q = this.searchQuery.toLowerCase();
+                        const cityMatch = (tour.city || '').toLowerCase().includes(q);
+                        const descMatch = (tour.description || '').toLowerCase().includes(q);
+                        if (!cityMatch && !descMatch) return false;
+                    }
+
+                    if (this.dateFrom && tour.from < this.dateFrom) return false;
+                    if (this.dateTo && tour.to > this.dateTo + 'T23:59:59') return false;
+
+                    return true;
+                });
+            },
+
+            get totalPages() {
+                return Math.max(1, Math.ceil(this.filteredTours.length / this.perPage));
+            },
+
+            get paginatedGroups() {
+                const start = (this.currentPage - 1) * this.perPage;
+                const paginated = this.filteredTours.slice(start, start + this.perPage);
+
+                const groups = {};
+                paginated.forEach(tour => {
+                    const date = tour.from ? tour.from.substring(0, 10) : 'No date';
+                    const heading = this.formatDateHeading(date);
+                    if (!groups[heading]) groups[heading] = [];
+                    groups[heading].push(tour);
+                });
+
+                return Object.keys(groups).map(heading => ({
+                    heading,
+                    tours: groups[heading]
+                }));
+            },
+
+            formatDateHeading(dateStr) {
+                if (dateStr === 'No date') return dateStr;
+                try {
+                    const d = new Date(dateStr + 'T00:00:00');
+                    return d.toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                } catch {
+                    return dateStr;
+                }
+            },
+
+            formatDateTime(dt) {
+                if (!dt) return '';
+                try {
+                    const d = new Date(dt);
+                    return d.toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
+                } catch {
+                    return dt;
+                }
+            },
+
+            plainDescription(desc) {
+                if (!desc) return '';
+                const tmp = document.createElement('div');
+                tmp.innerHTML = desc;
+                const text = tmp.textContent || tmp.innerText || '';
+                return text.length > 80 ? text.substring(0, 80) + '...' : text;
+            },
+
+            openTourModal(tour) {
+                this.selectedTour = tour;
+                this.showModal = true;
+            },
+
+            closeModal() {
+                this.showModal = false;
+                this.selectedTour = null;
+            },
+
             init() {
                 this.$nextTick(() => this.initEditor());
             },
@@ -92,7 +177,9 @@ document.addEventListener('alpine:init', () => {
                         method,
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': this.csrfToken
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
                         },
                         body: JSON.stringify(this.newTour)
                     });
@@ -148,7 +235,11 @@ document.addEventListener('alpine:init', () => {
                 try {
                     const res = await fetch(this.deleteUrl.replace('__ID__', id), {
                         method: 'DELETE',
-                        headers: { 'X-CSRF-TOKEN': this.csrfToken }
+                        headers: {
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
                     });
 
                     if (!res.ok) throw new Error();
