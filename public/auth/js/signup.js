@@ -19,6 +19,7 @@ function signupForm(config = {}) {
         searching: false,
         debounceTimer: null,
         suburbSelected: !!config.suburb,
+        initialSuburb: config.suburb || '',
 
         errors: {},
         touched: {
@@ -153,7 +154,11 @@ function signupForm(config = {}) {
         },
 
         handleSuburbInput() {
+            if (this.initialSuburb && this.suburb === this.initialSuburb) {
+                return;
+            }
             this.suburbSelected = false;
+            this.initialSuburb = '';
             this.validateSuburb();
             this.searchSuburbs();
         },
