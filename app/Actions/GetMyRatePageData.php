@@ -9,14 +9,12 @@ class GetMyRatePageData
     public function execute(?User $user): array
     {
         $rates = $user
-            ? $user->rates()->orderByDesc('created_at')->get()
+            ? $user->rates()->whereNull('group_id')->orderByDesc('created_at')->get()
             : collect();
 
-        $groups = collect([
-            (object) ['id' => 1, 'name' => 'Group A'],
-            (object) ['id' => 2, 'name' => 'Group B'],
-            (object) ['id' => 3, 'name' => 'Group C'],
-        ]);
+        $groups = $user
+            ? $user->rateGroups()->with(['rates' => fn ($q) => $q->orderByDesc('created_at')])->get()
+            : collect();
 
         return [
             'rates' => $rates,

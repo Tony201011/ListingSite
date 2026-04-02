@@ -79,6 +79,8 @@ document.addEventListener('alpine:init', () => {
                     method,
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': this.csrfToken
                     },
                     body: JSON.stringify(payload)
@@ -94,23 +96,25 @@ document.addEventListener('alpine:init', () => {
                     throw new Error(data.message);
                 }
 
+                const rate = data.rate || data;
+
                 if (this.editingId) {
                     const index = this.rates.findIndex(r => r.id === this.editingId);
                     this.rates[index] = {
-                        id: data.id,
-                        desc: data.description,
-                        incall: data.incall,
-                        outcall: data.outcall,
-                        extra: data.extra
+                        id: rate.id,
+                        desc: rate.description,
+                        incall: rate.incall,
+                        outcall: rate.outcall,
+                        extra: rate.extra
                     };
                     this.toast('Updated successfully');
                 } else {
                     this.rates.push({
-                        id: data.id,
-                        desc: data.description,
-                        incall: data.incall,
-                        outcall: data.outcall,
-                        extra: data.extra
+                        id: rate.id,
+                        desc: rate.description,
+                        incall: rate.incall,
+                        outcall: rate.outcall,
+                        extra: rate.extra
                     });
                     this.toast('Added successfully');
                 }
@@ -144,6 +148,8 @@ document.addEventListener('alpine:init', () => {
                 const res = await fetch(url, {
                     method: 'DELETE',
                     headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': this.csrfToken
                     }
                 });
