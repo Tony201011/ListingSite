@@ -2,6 +2,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('tourManager', (config = {}) => {
 
         let editorInstance = null;
+        let editorInitializing = false;
 
         return {
             tours: config.tours || [],
@@ -37,7 +38,8 @@ document.addEventListener('alpine:init', () => {
 
             initEditor() {
                 const el = this.$refs.descriptionEditor;
-                if (!el || editorInstance) return;
+                if (!el || editorInstance || editorInitializing) return;
+                editorInitializing = true;
 
                 ClassicEditor.create(el).then(editor => {
                     editorInstance = editor;
