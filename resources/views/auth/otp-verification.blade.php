@@ -63,14 +63,14 @@
                                 @keydown.arrow-left.prevent="focusInput(index - 1)"
                                 @keydown.arrow-right.prevent="focusInput(index + 1)"
                                 @paste="handlePaste($event)"
-                                class="otp-input w-14 h-14 text-center text-2xl font-extrabold border-2 border-gray-400 rounded-xl focus:border-[#e04ecb]"
+                                class="otp-input w-14 h-14 text-center text-2xl font-extrabold text-gray-800 bg-white border-2 border-gray-400 rounded-xl focus:border-[#e04ecb] focus:outline-none"
                             >
                         </template>
                     </div>
 
                     <!-- TIMER -->
                     <div class="flex justify-between text-sm mb-6">
-                        <span x-text="timerText" class="font-bold px-3 py-1 rounded"></span>
+                        <span x-text="timerText" class="font-bold px-3 py-1 rounded text-gray-800"></span>
 
                         <button
                             type="button"
