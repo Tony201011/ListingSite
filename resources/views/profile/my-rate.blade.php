@@ -193,6 +193,6 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('profile/js/rates-manager.js') }}"></script>
+<script src="{{ asset('profile/js/rates-manager.js') }}?v={{ filemtime(public_path('profile/js/rates-manager.js')) }}"></script>
 @endpush
 @endsection

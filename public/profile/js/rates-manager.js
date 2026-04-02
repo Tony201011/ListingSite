@@ -98,24 +98,22 @@ document.addEventListener('alpine:init', () => {
 
                 const rate = data.rate || data;
 
+                const mapped = {
+                    id: rate.id,
+                    desc: rate.description || rate.desc || '',
+                    incall: rate.incall || '',
+                    outcall: rate.outcall || '',
+                    extra: rate.extra || ''
+                };
+
                 if (this.editingId) {
                     const index = this.rates.findIndex(r => r.id === this.editingId);
-                    this.rates[index] = {
-                        id: rate.id,
-                        desc: rate.description,
-                        incall: rate.incall,
-                        outcall: rate.outcall,
-                        extra: rate.extra
-                    };
+                    if (index !== -1) {
+                        this.rates.splice(index, 1, mapped);
+                    }
                     this.toast('Updated successfully');
                 } else {
-                    this.rates.push({
-                        id: rate.id,
-                        desc: rate.description,
-                        incall: rate.incall,
-                        outcall: rate.outcall,
-                        extra: rate.extra
-                    });
+                    this.rates.push(mapped);
                     this.toast('Added successfully');
                 }
 
