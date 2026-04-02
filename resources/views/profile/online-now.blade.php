@@ -12,13 +12,7 @@
     })"
 >
     <div class="mx-auto max-w-3xl">
-        <a
-            href="{{ url('/profile-setting') }}"
-            class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-pink-600 transition hover:text-pink-700"
-        >
-            <span>&larr;</span>
-            <span>Back to profile settings</span>
-        </a>
+        @include('profile.partials.back-to-settings')
 
         <div class="overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-lg shadow-pink-100/40">
             <div class="border-b border-pink-100 bg-gradient-to-r from-pink-600 to-fuchsia-500 px-6 py-6 text-white sm:px-8">

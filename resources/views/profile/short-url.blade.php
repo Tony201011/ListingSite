@@ -11,10 +11,7 @@
     })"
 >
     <div class="max-w-3xl mx-auto">
-        <a href="{{ url('/profile-setting') }}"
-           class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] text-sm font-medium mb-4">
-            <span class="mr-1">&lt;</span> Back to profile settings
-        </a>
+        @include('profile.partials.back-to-settings')
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Short URL</h1>
