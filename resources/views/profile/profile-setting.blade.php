@@ -55,7 +55,7 @@
                 @php
                     $actions = [
                         ['label' => 'Edit profile', 'url' => route('edit-profile')],
-                        ['label' => 'Hide profile', 'url' => url('/hide-profile')],
+                        ['label' => 'Hide profile', 'url' => url('/hide-show-profile')],
                         ['label' => 'Photos', 'url' => url('/photos')],
                         ['label' => 'Add photos', 'url' => url('/add-photo')],
                         ['label' => 'My videos', 'url' => url('/my-videos')],
