@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Models\User;
+use App\Models\VerificationExampleImage;
 
 class GetPhotoVerificationPageData
 {
@@ -45,9 +46,14 @@ class GetPhotoVerificationPageData
             }
         }
 
+        $exampleImages = VerificationExampleImage::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
         return [
             'latestVerification' => $latestVerification,
             'lastTwoPhotos' => $lastTwoPhotos,
+            'exampleImages' => $exampleImages,
         ];
     }
 }

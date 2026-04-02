@@ -263,25 +263,22 @@
                 </span>
             </p>
 
+            @if($exampleImages->count())
             <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                @foreach($exampleImages as $exampleImage)
                 <div class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
                     <img
-                        src="https://pub-4e37ec8f58e94a569d35a5245489f90d.r2.dev/verification/badge_dummy_image/badge-fummy-image.png"
-                        alt="Example 1"
+                        src="{{ $exampleImage->image_url }}"
+                        alt="{{ $exampleImage->caption ?? 'Example ' . $loop->iteration }}"
                         class="h-80 w-full object-cover"
                     >
-                    <p class="px-3 py-2 text-xs text-gray-600">Example 1: clear note + visible face</p>
+                    @if($exampleImage->caption)
+                    <p class="px-3 py-2 text-xs text-gray-600">{{ $exampleImage->caption }}</p>
+                    @endif
                 </div>
-
-                <div class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                    <img
-                        src="https://pub-4e37ec8f58e94a569d35a5245489f90d.r2.dev/verification/badge_dummy_image/same-note-in-another-hand.png"
-                        alt="Example 2"
-                        class="h-80 w-full object-cover"
-                    >
-                    <p class="px-3 py-2 text-xs text-gray-600">Example 2: same note in other hand</p>
-                </div>
+                @endforeach
             </div>
+            @endif
         </div>
     </div>
 
