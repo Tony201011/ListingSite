@@ -159,7 +159,7 @@ class AppServiceProvider extends ServiceProvider
         Config::set('filesystems.disks.s3.secret', env('AWS_SECRET_ACCESS_KEY'));
         Config::set('filesystems.disks.s3.region', $setting->region);
         Config::set('filesystems.disks.s3.bucket', $setting->bucket);
-        Config::set('filesystems.disks.s3.url', $setting->url);
+        Config::set('filesystems.disks.s3.url', env('AWS_URL') ?: $setting->url);
         Config::set('filesystems.disks.s3.endpoint', $setting->endpoint);
         Config::set('filesystems.disks.s3.use_path_style_endpoint', $setting->use_path_style_endpoint);
 

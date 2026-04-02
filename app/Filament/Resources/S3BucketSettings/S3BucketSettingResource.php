@@ -64,7 +64,8 @@ class S3BucketSettingResource extends Resource
                     ->label('Bucket')
                     ->maxLength(255),
                 TextInput::make('url')
-                    ->label('Bucket URL')
+                    ->label('Public CDN / Delivery URL')
+                    ->helperText('The public URL used to serve files (e.g. https://cdn.example.com). Not the S3 API endpoint.')
                     ->maxLength(255),
                 TextInput::make('endpoint')
                     ->label('Endpoint')
