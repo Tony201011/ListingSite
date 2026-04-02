@@ -78,7 +78,7 @@ class SaveMyProfile
 
     private function validateCategorySelections(array $validated): void
     {
-        $singleValueFields = [
+        $idFields = [
             'age_group' => 'age-group',
             'hair_color' => 'hair-color',
             'hair_length' => 'hair-length',
@@ -86,6 +86,9 @@ class SaveMyProfile
             'body_type' => 'body-type',
             'bust_size' => 'bust-size',
             'your_length' => 'your-length',
+        ];
+
+        $nameFields = [
             'availability' => 'availability',
             'contact_method' => 'contact-method',
             'phone_contact' => 'phone-contact-preferences',
@@ -101,7 +104,7 @@ class SaveMyProfile
 
         $errors = [];
 
-        foreach ($singleValueFields as $field => $type) {
+        foreach ($idFields as $field => $type) {
             $value = $validated[$field] ?? null;
 
             if ($value === null || $value === '') {
@@ -109,6 +112,18 @@ class SaveMyProfile
             }
 
             if (! $this->categoryExistsForType((int) $value, $type)) {
+                $errors[$field] = ["The selected {$field} is invalid."];
+            }
+        }
+
+        foreach ($nameFields as $field => $type) {
+            $value = $validated[$field] ?? null;
+
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            if (! $this->categoryNameExistsForType((string) $value, $type)) {
                 $errors[$field] = ["The selected {$field} is invalid."];
             }
         }
@@ -127,7 +142,7 @@ class SaveMyProfile
             }
 
             foreach ($values as $index => $value) {
-                if (! $this->categoryExistsForType((int) $value, $type)) {
+                if (! $this->categoryNameExistsForType((string) $value, $type)) {
                     $errors["{$field}.{$index}"] = ["The selected {$field} item is invalid."];
                 }
             }
@@ -142,6 +157,16 @@ class SaveMyProfile
     {
         return Category::query()
             ->where('id', $id)
+            ->where('is_active', true)
+            ->where('website_type', 'adult')
+            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug))
+            ->exists();
+    }
+
+    private function categoryNameExistsForType(string $name, string $parentSlug): bool
+    {
+        return Category::query()
+            ->where('name', $name)
             ->where('is_active', true)
             ->where('website_type', 'adult')
             ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug))
