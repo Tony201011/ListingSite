@@ -79,18 +79,12 @@
                 </span>
             </button>
 
-            <template x-if="message">
-                <div
-                    class="mt-4 text-sm"
-                    :class="messageType === 'success' ? 'text-green-600' : 'text-red-600'"
-                    x-text="message"
-                ></div>
-            </template>
         </div>
     </div>
 </div>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('profile/js/hide-toggle.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('profile/js/hide-toggle.js') }}?v={{ filemtime(public_path('profile/js/hide-toggle.js')) }}"></script>
 @endpush
