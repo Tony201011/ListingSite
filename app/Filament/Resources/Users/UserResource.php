@@ -141,7 +141,13 @@ class UserResource extends Resource
                                     TextInput::make('profile_slug')
                                         ->label('Slug')
                                         ->maxLength(255)
-                                        ->unique(table: 'provider_profiles', column: 'slug', ignorable: fn ($record) => $record?->providerProfile),
+                                        ->unique(
+                                            table: 'provider_profiles',
+                                            column: 'slug',
+                                            modifyRuleUsing: fn ($rule, $record) => $record?->providerProfile
+                                                ? $rule->ignore($record->providerProfile->id)
+                                                : $rule,
+                                        ),
 
                                     TextInput::make('introduction_line')
                                         ->label('Introduction Line')
