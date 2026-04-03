@@ -37,8 +37,7 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/helpers.php",
-            "app/helpers_gender_tabs.php"
+            "app/helpers.php"
         ]
     },
     "autoload-dev": {

@@ -47,7 +47,6 @@ class DatabaseSeeder extends Seeder
             SocialLoginSettingSeeder::class,
             SmtpSettingSeeder::class,
             S3BucketSettingSeeder::class,
-            GenderTabSeeder::class,
             MetaKeywordSeeder::class,
             MetaDescriptionSeeder::class,
         ]);

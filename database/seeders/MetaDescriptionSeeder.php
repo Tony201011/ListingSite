@@ -88,11 +88,6 @@ class MetaDescriptionSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'page_name' => 'gender-tabs',
-                'meta_description' => 'Navigate through gender-specific content with our intuitive gender tabs. Easily filter and access content based on gender preferences for a personalized browsing experience.',
-                'is_active' => true,
-            ],
-            [
                 'page_name' => 'content-listings',
                 'meta_description' => 'Discover our curated content listings featuring the best articles, posts, and resources. Browse through organized content to find valuable information and engaging material.',
                 'is_active' => true,
