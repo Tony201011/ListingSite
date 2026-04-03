@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationItem::make('Profile')
                     ->url(fn (): string => EditProfile::getUrl())
                     ->icon(Heroicon::OutlinedUserCircle)
-                    ->sort(100)
+                    ->sort(-1)
                     ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.auth.profile')),
             ])
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
