@@ -3,9 +3,23 @@
 namespace App\Actions;
 
 use App\Models\Category;
+use App\Models\ProviderProfile;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class BuildProfileFilterViewData
 {
+    private const PROFILES_PER_PAGE = 12;
+
+    private const SLUG_TO_COLUMN = [
+        'hair-color' => 'hair_color_id',
+        'hair-length' => 'hair_length_id',
+        'ethnicity' => 'ethnicity_id',
+        'body-type' => 'body_type_id',
+        'bust-size' => 'bust_size_id',
+        'your-length' => 'your_length_id',
+    ];
+
     public function execute(array $validated): array
     {
         $filterSlugs = [
@@ -85,14 +99,194 @@ class BuildProfileFilterViewData
             [$minPrice, $maxPrice] = [$maxPrice, $minPrice];
         }
 
+        $locationQuery = (string) ($validated['location'] ?? '');
+        $escortNameQuery = (string) ($validated['escort_name'] ?? '');
+
+        $categoryToParentSlug = $this->buildCategoryToParentSlugMap($parents, $childrenByParent);
+
+        $profiles = $this->queryProfiles(
+            $locationQuery,
+            $escortNameQuery,
+            $minAge,
+            $maxAge,
+            $minPrice,
+            $maxPrice,
+            $selectedCategoryIds,
+            $categoryToParentSlug,
+        );
+
+        $allFilterCategoriesCollection = collect($allFilterCategories);
+
+        $selectedCategoryItems = $allFilterCategoriesCollection
+            ->whereIn('id', $selectedCategoryIds)
+            ->values();
+
+        $hasAgeFilter = $minAge !== 18 || $maxAge !== 40;
+        $hasPriceFilter = $minPrice !== 150 || $maxPrice !== 400;
+
         return compact(
             'filterGroups',
             'allFilterCategories',
             'selectedCategoryIds',
+            'selectedCategoryItems',
             'minAge',
             'maxAge',
             'minPrice',
-            'maxPrice'
+            'maxPrice',
+            'locationQuery',
+            'escortNameQuery',
+            'profiles',
+            'hasAgeFilter',
+            'hasPriceFilter',
         );
+    }
+
+    private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
+    {
+        $map = [];
+
+        foreach ($parents as $parent) {
+            $children = $childrenByParent->get($parent->id) ?? collect();
+            foreach ($children as $child) {
+                $map[$child->id] = $parent->slug;
+            }
+        }
+
+        return $map;
+    }
+
+    private function queryProfiles(
+        string $locationQuery,
+        string $escortNameQuery,
+        int $minAge,
+        int $maxAge,
+        int $minPrice,
+        int $maxPrice,
+        array $selectedCategoryIds,
+        array $categoryToParentSlug,
+    ): LengthAwarePaginator {
+        $query = ProviderProfile::query()
+            ->where('profile_status', 'approved')
+            ->with([
+                'user.profileImages' => fn ($q) => $q->where('is_primary', true),
+                'user.rates',
+                'user.onlineUser',
+                'city',
+            ]);
+
+        if ($locationQuery !== '') {
+            $query->whereHas('city', fn ($q) => $q->where('name', 'like', '%' . $locationQuery . '%'));
+        }
+
+        if ($escortNameQuery !== '') {
+            $query->where('name', 'like', '%' . $escortNameQuery . '%');
+        }
+
+        if ($minAge > 18 || $maxAge < 40) {
+            $query->whereBetween('age', [$minAge, $maxAge]);
+        }
+
+        if (! empty($selectedCategoryIds)) {
+            $selectedBySlug = [];
+            foreach ($selectedCategoryIds as $categoryId) {
+                $slug = $categoryToParentSlug[$categoryId] ?? null;
+                if ($slug !== null) {
+                    $selectedBySlug[$slug][] = $categoryId;
+                }
+            }
+
+            if (! empty($selectedBySlug)) {
+                $query->where(function ($q) use ($selectedBySlug) {
+                    foreach ($selectedBySlug as $slug => $ids) {
+                        $column = self::SLUG_TO_COLUMN[$slug] ?? null;
+                        if ($column !== null) {
+                            $q->whereIn($column, $ids);
+                        }
+                    }
+                });
+            }
+        }
+
+        $appendParams = array_filter([
+            'location' => $locationQuery ?: null,
+            'escort_name' => $escortNameQuery ?: null,
+            'min_age' => $minAge !== 18 ? $minAge : null,
+            'max_age' => $maxAge !== 40 ? $maxAge : null,
+            'min_price' => $minPrice !== 150 ? $minPrice : null,
+            'max_price' => $maxPrice !== 400 ? $maxPrice : null,
+        ]);
+
+        foreach ($selectedCategoryIds as $categoryId) {
+            $appendParams['categories'][] = $categoryId;
+        }
+
+        $paginator = $query
+            ->orderByDesc('is_featured')
+            ->orderByDesc('created_at')
+            ->paginate(self::PROFILES_PER_PAGE)
+            ->appends($appendParams);
+
+        $paginator->getCollection()->transform(fn (ProviderProfile $profile) => $this->transformProfile($profile));
+
+        return $paginator;
+    }
+
+    private function transformProfile(ProviderProfile $profile): array
+    {
+        $primaryImage = $profile->user?->profileImages?->first();
+        $imageUrl = $primaryImage?->thumbnail_url ?? $primaryImage?->image_url ?? null;
+
+        $firstRate = $profile->user?->rates?->first();
+        $rateDisplay = $this->formatRate($firstRate);
+
+        $services = array_values(array_filter((array) ($profile->services_provided ?? [])));
+
+        $isOnline = $profile->user?->onlineUser?->isCurrentlyOnline() ?? false;
+
+        return [
+            'name' => $profile->name,
+            'age' => $profile->age,
+            'rate' => $rateDisplay,
+            'rate_numeric' => $this->extractNumericRate($firstRate),
+            'city' => $profile->city?->name ?? '',
+            'height' => '',
+            'service_1' => $services[0] ?? '',
+            'service_2' => $services[1] ?? '',
+            'date' => $profile->created_at->format('d/m/Y'),
+            'description' => $profile->description ?? '',
+            'active' => $isOnline,
+            'verified' => $profile->is_verified,
+            'image' => $imageUrl ?? '',
+            'slug' => $profile->slug,
+        ];
+    }
+
+    private function formatRate(mixed $rate): string
+    {
+        if ($rate === null) {
+            return 'Contact for rate';
+        }
+
+        $incall = trim((string) ($rate->incall ?? ''));
+
+        if ($incall !== '') {
+            return $incall;
+        }
+
+        $outcall = trim((string) ($rate->outcall ?? ''));
+
+        return $outcall !== '' ? $outcall : 'Contact for rate';
+    }
+
+    private function extractNumericRate(mixed $rate): int
+    {
+        if ($rate === null) {
+            return 0;
+        }
+
+        $value = (string) ($rate->incall ?? $rate->outcall ?? '');
+        $digits = preg_replace('/[^\d]/', '', $value);
+
+        return $digits !== '' ? (int) $digits : 0;
     }
 }

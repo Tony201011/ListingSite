@@ -3,87 +3,12 @@
 @section('title', 'Home')
 
 @php
-    $profiles = [
-        ['name' => 'Alina', 'age' => 24, 'rate' => '$250 / hour', 'city' => 'Houston', 'height' => "5'6\"", 'service_1' => 'Incall', 'service_2' => 'Outcall', 'date' => '27/05/2024', 'description' => 'Elegant companion with refined style, warm personality and premium experience for upscale dates.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&auto=format&fit=crop'],
-        ['name' => 'Sofia', 'age' => 26, 'rate' => '$300 / hour', 'city' => 'Chicago', 'height' => "5'7\"", 'service_1' => 'Incall', 'service_2' => 'Travel', 'date' => '16/08/2024', 'description' => 'Luxury model known for classy company, confidence and unforgettable private moments.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=900&auto=format&fit=crop'],
-        ['name' => 'Mia', 'age' => 22, 'rate' => '$220 / hour', 'city' => 'Boston', 'height' => "5'5\"", 'service_1' => 'Outcall', 'service_2' => 'Dinner Date', 'date' => '30/09/2024', 'description' => 'Friendly and playful vibe with great energy, ideal for fun social and intimate meetups.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=900&auto=format&fit=crop'],
-        ['name' => 'Valentina', 'age' => 25, 'rate' => '$280 / hour', 'city' => 'New York', 'height' => "5'8\"", 'service_1' => 'Incall', 'service_2' => 'Overnight', 'date' => '15/07/2024', 'description' => 'Sophisticated beauty offering premium companionship with attention to every detail.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=900&auto=format&fit=crop'],
-        ['name' => 'Luna', 'age' => 23, 'rate' => '$200 / hour', 'city' => 'Dallas', 'height' => "5'4\"", 'service_1' => 'Outcall', 'service_2' => 'Massage', 'date' => '23/04/2024', 'description' => 'Relaxed and charming personality, great choice for smooth and discreet companionship.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop'],
-        ['name' => 'Nora', 'age' => 27, 'rate' => '$340 / hour', 'city' => 'Los Angeles', 'height' => "5'9\"", 'service_1' => 'Travel', 'service_2' => 'VIP Date', 'date' => '28/06/2024', 'description' => 'High-end escort with elite presentation and polished etiquette for premium events.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1504593811423-6dd665756598?w=900&auto=format&fit=crop'],
-        ['name' => 'Ivy', 'age' => 21, 'rate' => '$180 / hour', 'city' => 'San Jose', 'height' => "5'3\"", 'service_1' => 'Incall', 'service_2' => 'Outcall', 'date' => '19/10/2024', 'description' => 'Young, vibrant and engaging companion with a fun and positive atmosphere.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=900&auto=format&fit=crop'],
-        ['name' => 'Camila', 'age' => 24, 'rate' => '$260 / hour', 'city' => 'Phoenix', 'height' => "5'6\"", 'service_1' => 'Dinner Date', 'service_2' => 'Overnight', 'date' => '02/06/2024', 'description' => 'Stylish and romantic companion, perfect for private dinners and memorable nights.', 'active' => true, 'verified' => true, 'image' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop'],
-        ['name' => 'Elena', 'age' => 25, 'rate' => '$295 / hour', 'city' => 'Philadelphia', 'height' => "5'7\"", 'service_1' => 'Incall', 'service_2' => 'Travel', 'date' => '13/07/2024', 'description' => 'Graceful and discreet companion with premium service and elegant communication.', 'active' => true, 'verified' => false, 'image' => 'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=900&auto=format&fit=crop'],
-    ];
-
-    $selectedCategoryIds = collect($selectedCategoryIds ?? [])->map(fn ($id) => (int) $id)->filter()->values();
-    $minAge = max(18, (int) ($minAge ?? 18));
-    $maxAge = min(60, (int) ($maxAge ?? 40));
-    $minPrice = max(100, (int) ($minPrice ?? 150));
-    $maxPrice = min(1000, (int) ($maxPrice ?? 400));
-
-    if ($minAge > $maxAge) {
-        [$minAge, $maxAge] = [$maxAge, $minAge];
-    }
-
-    if ($minPrice > $maxPrice) {
-        [$minPrice, $maxPrice] = [$maxPrice, $minPrice];
-    }
-
-    $locationQuery = trim((string) request('location', ''));
-    $escortNameQuery = trim((string) request('escort_name', ''));
-
-    $allFilterCategoriesCollection = collect($allFilterCategories ?? []);
-    $categoryIds = $allFilterCategoriesCollection->pluck('id')->map(fn ($id) => (int) $id)->values();
-
-    $profiles = collect($profiles)
-        ->map(function ($profile, $index) use ($categoryIds) {
-            $profile['slug'] = \Illuminate\Support\Str::slug((string) ($profile['name'] ?? 'profile')) . '-' . ($index + 1);
-
-            if ($categoryIds->isNotEmpty()) {
-                $profile['category_id'] = (int) $categoryIds[$index % $categoryIds->count()];
-            }
-
-            return $profile;
-        })
-        ->when($locationQuery !== '', function ($collection) use ($locationQuery) {
-            $needle = mb_strtolower($locationQuery);
-
-            return $collection->filter(function ($profile) use ($needle) {
-                return str_contains(mb_strtolower((string) ($profile['city'] ?? '')), $needle);
-            });
-        })
-        ->when($escortNameQuery !== '', function ($collection) use ($escortNameQuery) {
-            $needle = mb_strtolower($escortNameQuery);
-
-            return $collection->filter(function ($profile) use ($needle) {
-                return str_contains(mb_strtolower((string) ($profile['name'] ?? '')), $needle);
-            });
-        })
-        ->when($selectedCategoryIds->isNotEmpty(), function ($collection) use ($selectedCategoryIds) {
-            return $collection->filter(fn ($profile) => in_array((int) ($profile['category_id'] ?? 0), $selectedCategoryIds->all(), true));
-        })
-        ->filter(function ($profile) use ($minAge, $maxAge, $minPrice, $maxPrice) {
-            $profileAge = (int) ($profile['age'] ?? 0);
-            $profilePrice = (int) preg_replace('/[^\d]/', '', (string) ($profile['rate'] ?? '0'));
-
-            return $profileAge >= $minAge
-                && $profileAge <= $maxAge
-                && $profilePrice >= $minPrice
-                && $profilePrice <= $maxPrice;
-        })
-        ->values();
-
-    $selectedCategoryNames = $allFilterCategoriesCollection
-        ->whereIn('id', $selectedCategoryIds)
-        ->pluck('name')
-        ->values();
-
-    $selectedCategoryItems = $allFilterCategoriesCollection
-        ->whereIn('id', $selectedCategoryIds)
-        ->values();
-
-    $hasAgeFilter = $minAge !== 18 || $maxAge !== 40;
-    $hasPriceFilter = $minPrice !== 150 || $maxPrice !== 400;
+    $selectedCategoryIds = collect($selectedCategoryIds ?? []);
+    $locationQuery = (string) ($locationQuery ?? '');
+    $escortNameQuery = (string) ($escortNameQuery ?? '');
+    $hasAgeFilter = $hasAgeFilter ?? false;
+    $hasPriceFilter = $hasPriceFilter ?? false;
+    $selectedCategoryItems = $selectedCategoryItems ?? collect();
 @endphp
 
 @section('content')
@@ -96,8 +21,8 @@
         </div>
 
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs">
-            <span class="text-gray-500">Showing {{ $profiles->count() }} profiles</span>
-            @if($locationQuery !== '' || $escortNameQuery !== '' || $selectedCategoryItems->isNotEmpty() || $hasAgeFilter || $hasPriceFilter)
+            <span class="text-gray-500">Showing {{ $profiles->total() }} profiles</span>
+            @if($locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter)
                 <a href="{{ url('/') }}" class="ml-auto text-gray-500 hover:text-gray-700">Clear all</a>
             @endif
         </div>
@@ -189,9 +114,15 @@
 
                                 <div class="grid grid-cols-2 gap-2 border-t border-gray-100 pt-3 text-xs text-gray-500" :class="viewMode === 'list' ? 'md:grid-cols-4 md:gap-2 md:text-[11px]' : ''">
                                     <span>📍 {{ $profile['city'] }}</span>
-                                    <span>📏 {{ $profile['height'] }}</span>
-                                    <span>💼 {{ $profile['service_1'] }}</span>
-                                    <span>💎 {{ $profile['service_2'] }}</span>
+                                    @if(!empty($profile['height']))
+                                        <span>📏 {{ $profile['height'] }}</span>
+                                    @endif
+                                    @if(!empty($profile['service_1']))
+                                        <span>💼 {{ $profile['service_1'] }}</span>
+                                    @endif
+                                    @if(!empty($profile['service_2']))
+                                        <span>💎 {{ $profile['service_2'] }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </article>
@@ -202,14 +133,8 @@
                     @endforelse
                 </div>
 
-                <div class="mt-8 flex items-center justify-center gap-2 text-sm text-gray-600">
-                    <span class="rounded bg-gray-200 px-3 py-1">1</span>
-                    <span class="rounded px-3 py-1 hover:bg-gray-200">2</span>
-                    <span class="rounded px-3 py-1 hover:bg-gray-200">3</span>
-                    <span class="rounded px-3 py-1 hover:bg-gray-200">4</span>
-                    <span class="rounded px-3 py-1 hover:bg-gray-200">5</span>
-                    <span>...</span>
-                    <span class="rounded px-3 py-1 hover:bg-gray-200">10</span>
+                <div class="mt-8">
+                    {{ $profiles->links() }}
                 </div>
             </section>
         </div>
