@@ -88,11 +88,6 @@ class MetaKeywordSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'page_name' => 'gender-tabs',
-                'meta_keyword' => 'gender, gender tabs, male, female, other, gender selection, gender options, gender categories',
-                'is_active' => true,
-            ],
-            [
                 'page_name' => 'content-listings',
                 'meta_keyword' => 'content, listings, content list, content management, content listing, published content, content directory',
                 'is_active' => true,
