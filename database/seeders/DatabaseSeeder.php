@@ -44,7 +44,6 @@ class DatabaseSeeder extends Seeder
             GlobalBannerSeeder::class,
             FaqSeeder::class,
             AntiSpamPolicySeeder::class,
-            SocialLoginSettingSeeder::class,
             SmtpSettingSeeder::class,
             S3BucketSettingSeeder::class,
             MetaKeywordSeeder::class,
