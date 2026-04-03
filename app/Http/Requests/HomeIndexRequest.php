@@ -20,6 +20,8 @@ class HomeIndexRequest extends FormRequest
             'max_age' => $this->input('max_age', 40),
             'min_price' => $this->input('min_price', 150),
             'max_price' => $this->input('max_price', 400),
+            'location' => trim((string) $this->input('location', '')),
+            'escort_name' => trim((string) $this->input('escort_name', '')),
         ]);
     }
 
@@ -35,6 +37,8 @@ class HomeIndexRequest extends FormRequest
             'max_age' => ['nullable', 'integer', 'min:18', 'max:100'],
             'min_price' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'max_price' => ['nullable', 'integer', 'min:0', 'max:100000'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'escort_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 
