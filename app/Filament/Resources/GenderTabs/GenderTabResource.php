@@ -34,6 +34,8 @@ class GenderTabResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function canAccess(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
