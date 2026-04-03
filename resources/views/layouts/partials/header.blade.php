@@ -234,23 +234,23 @@
                             <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
                         </a>
                         <div class="absolute left-0 mt-2 w-64 rounded-lg bg-gray-800 py-2 shadow-lg z-50 opacity-0 group-hover:opacity-100 group-hover:visible invisible transition-opacity duration-200">
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Brisbane escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sydney escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Melbourne escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Adelaide escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Canberra escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Perth escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Darwin escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Gold Coast escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sunshine Coast escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Newcastle escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Cairns escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Tasmania escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Touring escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts directory</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Search for escorts</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts near me</a>
-                            <a href="#" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">View all our escorts</a>
+                            <a href="{{ url('/?location=Brisbane') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Brisbane escorts</a>
+                            <a href="{{ url('/?location=Sydney') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sydney escorts</a>
+                            <a href="{{ url('/?location=Melbourne') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Melbourne escorts</a>
+                            <a href="{{ url('/?location=Adelaide') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Adelaide escorts</a>
+                            <a href="{{ url('/?location=Canberra') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Canberra escorts</a>
+                            <a href="{{ url('/?location=Perth') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Perth escorts</a>
+                            <a href="{{ url('/?location=Darwin') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Darwin escorts</a>
+                            <a href="{{ url('/?location=Gold+Coast') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Gold Coast escorts</a>
+                            <a href="{{ url('/?location=Sunshine+Coast') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sunshine Coast escorts</a>
+                            <a href="{{ url('/?location=Newcastle') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Newcastle escorts</a>
+                            <a href="{{ url('/?location=Cairns') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Cairns escorts</a>
+                            <a href="{{ url('/?location=Tasmania') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Tasmania escorts</a>
+                            <a href="{{ url('/advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Touring escorts</a>
+                            <a href="{{ url('/') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts directory</a>
+                            <a href="{{ route('advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Search for escorts</a>
+                            <a href="{{ url('/advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts near me</a>
+                            <a href="{{ url('/') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">View all our escorts</a>
                         </div>
                     </div>
                 @else
