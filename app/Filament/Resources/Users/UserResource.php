@@ -84,9 +84,9 @@ class UserResource extends Resource
         return $schema->components([
             Tabs::make('ProviderFormTabs')
                 ->tabs([
-                    Tab::make('Account')
+                    Tab::make('Overview')
                         ->schema([
-                            Section::make('Basic Account Details')
+                            Section::make('Account Information')
                                 ->schema([
                                     TextInput::make('name')
                                         ->label('User Name')
@@ -107,7 +107,7 @@ class UserResource extends Resource
                                         ->label('Suburb')
                                         ->maxLength(255),
                                 ])
-                                ->columns(2),
+                                ->columns(3),
 
                             Section::make('Security')
                                 ->schema([
@@ -127,11 +127,8 @@ class UserResource extends Resource
                                 ])
                                 ->columns(2)
                                 ->visible(fn (): bool => static::isCreatePage()),
-                        ]),
 
-                    Tab::make('Profile')
-                        ->schema([
-                            Section::make('Profile Overview')
+                            Section::make('Profile Information')
                                 ->schema([
                                     TextInput::make('profile_name')
                                         ->label('Provider Name')
@@ -165,6 +162,29 @@ class UserResource extends Resource
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(2),
+
+                            Section::make('Current Status')
+                                ->schema([
+                                    Toggle::make('is_verified')
+                                        ->label('Verified')
+                                        ->default(false),
+
+                                    Toggle::make('is_featured')
+                                        ->label('Featured')
+                                        ->default(false),
+
+                                    Select::make('profile_status')
+                                        ->label('Profile Status')
+                                        ->options([
+                                            'pending' => 'Pending',
+                                            'approved' => 'Approved',
+                                            'rejected' => 'Rejected',
+                                        ])
+                                        ->default('pending')
+                                        ->required()
+                                        ->native(false),
+                                ])
+                                ->columns(3),
                         ]),
 
                     Tab::make('Attributes')
@@ -214,11 +234,8 @@ class UserResource extends Resource
                                         ->preload(),
                                 ])
                                 ->columns(3),
-                        ]),
 
-                    Tab::make('Services & Preferences')
-                        ->schema([
-                            Section::make('Preferences')
+                            Section::make('Preferences & Services')
                                 ->schema([
                                     Select::make('availability')
                                         ->label('Availability')
@@ -243,43 +260,43 @@ class UserResource extends Resource
                                         ->options(fn (): array => self::profileCategoryNameOptions('time-waster-shield'))
                                         ->searchable()
                                         ->preload(),
-                                ])
-                                ->columns(2),
 
-                            Section::make('Multi Select Categories')
-                                ->schema([
                                     Select::make('primary_identity')
                                         ->label('Primary Identity')
                                         ->options(fn (): array => self::profileCategoryNameOptions('primary-identity'))
                                         ->multiple()
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->columnSpanFull(),
 
                                     Select::make('attributes')
                                         ->label('Attributes')
                                         ->options(fn (): array => self::profileCategoryNameOptions('attributes'))
                                         ->multiple()
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->columnSpanFull(),
 
                                     Select::make('services_style')
                                         ->label('Services Style')
                                         ->options(fn (): array => self::profileCategoryNameOptions('services-style'))
                                         ->multiple()
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->columnSpanFull(),
 
                                     Select::make('services_provided')
                                         ->label('Services Provided')
                                         ->options(fn (): array => self::profileCategoryNameOptions('services-you-provide'))
                                         ->multiple()
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->columnSpanFull(),
                                 ])
                                 ->columns(2),
                         ]),
 
-                    Tab::make('Contact & Status')
+                    Tab::make('Contact')
                         ->schema([
                             Section::make('Social & Contact')
                                 ->schema([
@@ -304,29 +321,6 @@ class UserResource extends Resource
                                         ->maxLength(30),
                                 ])
                                 ->columns(2),
-
-                            Section::make('Profile Status')
-                                ->schema([
-                                    Toggle::make('is_verified')
-                                        ->label('Verified')
-                                        ->default(false),
-
-                                    Toggle::make('is_featured')
-                                        ->label('Featured')
-                                        ->default(false),
-
-                                    Select::make('profile_status')
-                                        ->label('Profile Status')
-                                        ->options([
-                                            'pending' => 'Pending',
-                                            'approved' => 'Approved',
-                                            'rejected' => 'Rejected',
-                                        ])
-                                        ->default('pending')
-                                        ->required()
-                                        ->native(false),
-                                ])
-                                ->columns(3),
                         ]),
                 ])
                 ->columnSpanFull(),
