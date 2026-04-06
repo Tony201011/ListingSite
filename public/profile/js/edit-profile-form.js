@@ -1,7 +1,3 @@
-document.addEventListener('trix-file-accept', function (event) {
-    event.preventDefault();
-});
-
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
         name: config.initial?.name || '',
@@ -46,35 +42,61 @@ document.addEventListener('alpine:init', () => {
 
         init() {
             this.$nextTick(() => {
-                this.initTrixEditors();
+                this.initEditors();
             });
         },
 
-        initTrixEditors() {
-            if (typeof Trix === 'undefined') {
-                console.error('Trix is not loaded.');
+        initEditors() {
+            if (typeof tinymce === 'undefined') {
+                console.error('TinyMCE is not loaded.');
                 return;
             }
 
-            if (this.$refs.introductionLineInput) {
-                this.$refs.introductionLineInput.value = this.introduction_line || '';
-            }
+            const self = this;
 
-            if (this.$refs.profileTextInput) {
-                this.$refs.profileTextInput.value = this.profile_text || '';
-            }
+            const commonConfig = {
+                menubar: false,
+                plugins: 'lists link autolink',
+                toolbar: 'bold italic underline | bullist numlist | link | undo redo',
+                content_style: 'body { font-family: inherit; font-size: 1rem; line-height: 1.6; color: #1f2937; }',
+                branding: false,
+            };
 
-            if (this.$refs.introductionLineEditor) {
-                this.$refs.introductionLineEditor.addEventListener('trix-change', () => {
-                    this.introduction_line = this.$refs.introductionLineInput.value || '';
-                });
-            }
+            tinymce.init({
+                ...commonConfig,
+                selector: '#introduction_line_editor',
+                height: 150,
+                placeholder: 'Write your introduction line here...',
+                setup(editor) {
+                    editor.on('init', () => {
+                        editor.setContent(self.introduction_line || '');
+                    });
+                    editor.on('change keyup', () => {
+                        self.introduction_line = editor.getContent();
+                        if (self.$refs.introductionLineInput) {
+                            self.$refs.introductionLineInput.value = self.introduction_line;
+                        }
+                    });
+                },
+            });
 
-            if (this.$refs.profileTextEditor) {
-                this.$refs.profileTextEditor.addEventListener('trix-change', () => {
-                    this.profile_text = this.$refs.profileTextInput.value || '';
-                });
-            }
+            tinymce.init({
+                ...commonConfig,
+                selector: '#profile_text_editor',
+                height: 260,
+                placeholder: 'Write your profile description here...',
+                setup(editor) {
+                    editor.on('init', () => {
+                        editor.setContent(self.profile_text || '');
+                    });
+                    editor.on('change keyup', () => {
+                        self.profile_text = editor.getContent();
+                        if (self.$refs.profileTextInput) {
+                            self.$refs.profileTextInput.value = self.profile_text;
+                        }
+                    });
+                },
+            });
         },
 
         toggleTag(group, tag, event) {
@@ -209,12 +231,24 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitForm() {
+            if (typeof tinymce !== 'undefined') {
+                const introEditor = tinymce.get('introduction_line_editor');
+                if (introEditor) {
+                    this.introduction_line = introEditor.getContent();
+                }
+
+                const textEditor = tinymce.get('profile_text_editor');
+                if (textEditor) {
+                    this.profile_text = textEditor.getContent();
+                }
+            }
+
             if (this.$refs.introductionLineInput) {
-                this.introduction_line = this.$refs.introductionLineInput.value || '';
+                this.introduction_line = this.$refs.introductionLineInput.value || this.introduction_line;
             }
 
             if (this.$refs.profileTextInput) {
-                this.profile_text = this.$refs.profileTextInput.value || '';
+                this.profile_text = this.$refs.profileTextInput.value || this.profile_text;
             }
 
             this.errors = this.validate();
