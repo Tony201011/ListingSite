@@ -1,4 +1,3 @@
-// Store CKEditor instance outside Alpine's reactive proxy to avoid conflicts
 const profileTextEditorInstances = new WeakMap();
 
 document.addEventListener('alpine:init', () => {
@@ -45,11 +44,27 @@ document.addEventListener('alpine:init', () => {
 
         init() {
             this.$nextTick(() => {
-                if (!this.$refs.profileTextEditor || profileTextEditorInstances.has(this.$refs.profileTextEditor)) {
-                    return;
-                }
+                this.initEditor();
+            });
+        },
 
-                ClassicEditor.create(this.$refs.profileTextEditor, {
+        async initEditor() {
+            if (!this.$refs.profileTextEditor) {
+                console.error('CKEditor target not found.');
+                return;
+            }
+
+            if (profileTextEditorInstances.has(this.$refs.profileTextEditor)) {
+                return;
+            }
+
+            if (typeof ClassicEditor === 'undefined') {
+                console.error('ClassicEditor is not loaded.');
+                return;
+            }
+
+            try {
+                const editor = await ClassicEditor.create(this.$refs.profileTextEditor, {
                     toolbar: [
                         'heading',
                         '|',
@@ -75,28 +90,32 @@ document.addEventListener('alpine:init', () => {
                         ]
                     },
                     placeholder: 'Write your profile description here...'
-                }).then((editor) => {
-                    profileTextEditorInstances.set(this.$refs.profileTextEditor, editor);
-                    editor.setData(this.profile_text || '');
-
-                    editor.model.document.on('change:data', () => {
-                        this.profile_text = editor.getData();
-                    });
-                }).catch((error) => {
-                    console.error('CKEditor initialization error:', error);
                 });
-            });
+
+                profileTextEditorInstances.set(this.$refs.profileTextEditor, editor);
+
+                editor.setData(this.profile_text || '');
+
+                editor.model.document.on('change:data', () => {
+                    this.profile_text = editor.getData();
+                });
+            } catch (error) {
+                console.error('CKEditor initialization error:', error);
+            }
         },
 
         destroy() {
-            if (this.$refs.profileTextEditor) {
-                const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
-                if (editor) {
-                    profileTextEditorInstances.delete(this.$refs.profileTextEditor);
-                    editor.destroy().catch((error) => {
-                        console.error('CKEditor destroy error:', error);
-                    });
-                }
+            if (!this.$refs.profileTextEditor) {
+                return;
+            }
+
+            const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
+
+            if (editor) {
+                profileTextEditorInstances.delete(this.$refs.profileTextEditor);
+                editor.destroy().catch((error) => {
+                    console.error('CKEditor destroy error:', error);
+                });
             }
         },
 
@@ -164,7 +183,6 @@ document.addEventListener('alpine:init', () => {
                         if (!response.ok) {
                             throw new Error('Failed to fetch suburbs');
                         }
-
                         return response.json();
                     })
                     .then((data) => {
@@ -189,6 +207,12 @@ document.addEventListener('alpine:init', () => {
             this.searchResults = [];
         },
 
+        stripHtml(html) {
+            const temp = document.createElement('div');
+            temp.innerHTML = html || '';
+            return (temp.textContent || temp.innerText || '').trim();
+        },
+
         validate() {
             const errors = [];
 
@@ -202,7 +226,10 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
-            if (!this.profile_text.trim()) errors.push('Profile text is required.');
+
+            const plainProfileText = this.stripHtml(this.profile_text);
+            if (!plainProfileText) errors.push('Profile text is required.');
+
             if (!this.age_group) errors.push('Age group is required.');
             if (!this.hair_color) errors.push('Hair color is required.');
             if (!this.hair_length) errors.push('Hair length is required.');
@@ -223,6 +250,13 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitForm() {
+            if (this.$refs.profileTextEditor) {
+                const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
+                if (editor) {
+                    this.profile_text = editor.getData();
+                }
+            }
+
             this.errors = this.validate();
 
             if (this.errors.length > 0) {
@@ -316,6 +350,8 @@ document.addEventListener('alpine:init', () => {
                     });
                 }
             } catch (error) {
+                console.error('Profile submit error:', error);
+
                 this.errors = ['Unable to save profile. Please check your connection and try again.'];
 
                 Swal.fire({
