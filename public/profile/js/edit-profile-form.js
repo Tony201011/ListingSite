@@ -1,4 +1,3 @@
-// Store CKEditor instance outside Alpine's reactive proxy to avoid conflicts
 const profileTextEditorInstances = new WeakMap();
 
 document.addEventListener('alpine:init', () => {
@@ -43,98 +42,32 @@ document.addEventListener('alpine:init', () => {
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
 
-<<<<<<< HEAD
-        introductionQuill: null,
-        profileQuill: null,
-
         init() {
             this.$nextTick(() => {
-                this.initEditors();
+                this.initEditor();
             });
         },
 
-        initEditors() {
-            console.log('Initializing editors...');
-
-            if (typeof Quill === 'undefined') {
-                console.error('Quill is not loaded. Check local asset path or CSP.');
+        async initEditor() {
+            if (!this.$refs.profileTextEditor) {
+                console.error('CKEditor target not found.');
                 return;
             }
 
-            if (this.$refs.introductionLineEditor && !this.introductionQuill) {
-                this.introductionQuill = new Quill(this.$refs.introductionLineEditor, {
-                    theme: 'snow',
-                    placeholder: 'Write your introduction line here...',
-                    modules: {
-                        toolbar: [
-                            ['bold', 'italic', 'underline'],
-                            [{ list: 'bullet' }],
-                            ['link'],
-                            ['clean']
-                        ]
-                    }
-                });
-
-                this.introductionQuill.root.innerHTML = this.introduction_line || '';
-
-                if (this.$refs.introductionLineInput) {
-                    this.$refs.introductionLineInput.value = this.introduction_line || '';
-                }
-
-                this.introductionQuill.on('text-change', () => {
-                    this.introduction_line = this.introductionQuill.root.innerHTML;
-                    if (this.$refs.introductionLineInput) {
-                        this.$refs.introductionLineInput.value = this.introduction_line;
-                    }
-                });
+            if (profileTextEditorInstances.has(this.$refs.profileTextEditor)) {
+                return;
             }
 
-            if (this.$refs.profileTextEditor && !this.profileQuill) {
-                this.profileQuill = new Quill(this.$refs.profileTextEditor, {
-                    theme: 'snow',
-                    placeholder: 'Write your profile description here...',
-                    modules: {
-                        toolbar: [
-                            [{ header: [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline'],
-                            [{ list: 'ordered' }, { list: 'bullet' }],
-                            ['link', 'blockquote'],
-                            ['clean']
-                        ]
-                    }
-                });
-
-                this.profileQuill.root.innerHTML = this.profile_text || '';
-
-                if (this.$refs.profileTextInput) {
-                    this.$refs.profileTextInput.value = this.profile_text || '';
-                }
-
-                this.profileQuill.on('text-change', () => {
-                    this.profile_text = this.profileQuill.root.innerHTML;
-                    if (this.$refs.profileTextInput) {
-                        this.$refs.profileTextInput.value = this.profile_text;
-                    }
-                });
-=======
-        init() {
-            this.initProfileTextEditor();
-        },
-
-        getProfileTextEditor() {
-            return profileTextEditorInstances.get(this.$refs.profileTextEditor);
-        },
-
-        async initProfileTextEditor() {
-            await this.$nextTick();
-
-            if (!this.$refs.profileTextEditor || profileTextEditorInstances.has(this.$refs.profileTextEditor)) {
+            if (typeof ClassicEditor === 'undefined') {
+                console.error('ClassicEditor is not loaded.');
                 return;
             }
 
             try {
                 const editor = await ClassicEditor.create(this.$refs.profileTextEditor, {
                     toolbar: [
+                        'heading',
+                        '|',
                         'bold',
                         'italic',
                         'underline',
@@ -148,10 +81,19 @@ document.addEventListener('alpine:init', () => {
                         'undo',
                         'redo'
                     ],
+                    heading: {
+                        options: [
+                            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                            { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                            { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                            { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                        ]
+                    },
                     placeholder: 'Write your profile description here...'
                 });
 
                 profileTextEditorInstances.set(this.$refs.profileTextEditor, editor);
+
                 editor.setData(this.profile_text || '');
 
                 editor.model.document.on('change:data', () => {
@@ -159,7 +101,21 @@ document.addEventListener('alpine:init', () => {
                 });
             } catch (error) {
                 console.error('CKEditor initialization error:', error);
->>>>>>> 9a4add665d33a2bea399845aa3a4540124fe71d4
+            }
+        },
+
+        destroy() {
+            if (!this.$refs.profileTextEditor) {
+                return;
+            }
+
+            const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
+
+            if (editor) {
+                profileTextEditorInstances.delete(this.$refs.profileTextEditor);
+                editor.destroy().catch((error) => {
+                    console.error('CKEditor destroy error:', error);
+                });
             }
         },
 
@@ -254,7 +210,7 @@ document.addEventListener('alpine:init', () => {
         stripHtml(html) {
             const temp = document.createElement('div');
             temp.innerHTML = html || '';
-            return (temp.textContent || temp.innerText || '').replace(/\u00A0/g, ' ').trim();
+            return (temp.textContent || temp.innerText || '').trim();
         },
 
         validate() {
@@ -269,16 +225,10 @@ document.addEventListener('alpine:init', () => {
                 errors.push('Please choose a location from the dropdown list, which appears while typing.');
             }
 
-<<<<<<< HEAD
-            const plainIntroductionLine = this.stripHtml(this.introduction_line);
-            if (!plainIntroductionLine) errors.push('Introduction line is required.');
+            if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
 
             const plainProfileText = this.stripHtml(this.profile_text);
             if (!plainProfileText) errors.push('Profile text is required.');
-=======
-            if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
-            if (!this.stripHtml(this.profile_text)) errors.push('Profile text is required.');
->>>>>>> 9a4add665d33a2bea399845aa3a4540124fe71d4
 
             if (!this.age_group) errors.push('Age group is required.');
             if (!this.hair_color) errors.push('Hair color is required.');
@@ -300,20 +250,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitForm() {
-            if (this.introductionQuill) {
-                this.introduction_line = this.introductionQuill.root.innerHTML;
-            }
-
-            if (this.profileQuill) {
-                this.profile_text = this.profileQuill.root.innerHTML;
-            }
-
-            if (this.$refs.introductionLineInput) {
-                this.$refs.introductionLineInput.value = this.introduction_line;
-            }
-
-            if (this.$refs.profileTextInput) {
-                this.$refs.profileTextInput.value = this.profile_text;
+            if (this.$refs.profileTextEditor) {
+                const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
+                if (editor) {
+                    this.profile_text = editor.getData();
+                }
             }
 
             this.errors = this.validate();
