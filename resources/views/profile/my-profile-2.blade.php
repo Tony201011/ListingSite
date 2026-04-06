@@ -116,14 +116,7 @@
                         x-ref="introductionLineInput"
                     >
 
-                    <div class="trix-wrapper trix-wrapper-sm">
-                        <trix-editor
-                            input="introduction_line_input"
-                            x-ref="introductionLineEditor"
-                            class="trix-content"
-                            placeholder="Write your introduction line here..."
-                        ></trix-editor>
-                    </div>
+                    <textarea id="introduction_line_editor" x-ref="introductionLineEditor"></textarea>
                 </div>
 
                 <div class="mt-6 relative">
@@ -195,14 +188,7 @@
                     x-ref="profileTextInput"
                 >
 
-                <div class="trix-wrapper">
-                    <trix-editor
-                        input="profile_text_input"
-                        x-ref="profileTextEditor"
-                        class="trix-content"
-                        placeholder="Write your profile description here..."
-                    ></trix-editor>
-                </div>
+                <textarea id="profile_text_editor" x-ref="profileTextEditor"></textarea>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -446,53 +432,8 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/2.1.1/trix.min.css">
-
 <style>
     [x-cloak] { display: none !important; }
-
-    .trix-wrapper {
-        border: 1px solid #9ca3af;
-        border-radius: 0.5rem;
-        overflow: hidden;
-        background: #ffffff;
-    }
-
-    .trix-wrapper-sm trix-editor {
-        min-height: 120px;
-    }
-
-    trix-toolbar {
-        border-bottom: 1px solid #d1d5db;
-        background: #f9fafb;
-        padding: 0.5rem;
-    }
-
-    trix-editor {
-        min-height: 220px;
-        padding: 1rem;
-        font-size: 1rem;
-        line-height: 1.6;
-        color: #1f2937;
-        border: 0;
-        outline: none;
-    }
-
-    trix-editor:empty:not(:focus)::before {
-        color: #9ca3af;
-    }
-
-    trix-editor h1 {
-        font-size: 2em;
-        font-weight: 700;
-    }
-
-    trix-editor blockquote {
-        border-left: 4px solid #e04ecb;
-        margin-left: 0;
-        padding-left: 1rem;
-        color: #4b5563;
-    }
 
     .tag-pill.selected {
         background-color: #e04ecb !important;
@@ -514,6 +455,6 @@
 @push('scripts')
 <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/trix/2.1.1/trix.umd.min.js"></script>
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush
