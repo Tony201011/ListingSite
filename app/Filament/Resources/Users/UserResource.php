@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Filament\Forms\Components\CkEditor;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -150,9 +151,8 @@ class UserResource extends Resource
                                                 : $rule,
                                         ),
 
-                                    TextInput::make('introduction_line')
+                                    CkEditor::make('introduction_line')
                                         ->label('Introduction Line')
-                                        ->maxLength(255)
                                         ->columnSpanFull(),
 
                                     Textarea::make('profile_description')
@@ -160,9 +160,8 @@ class UserResource extends Resource
                                         ->rows(4)
                                         ->columnSpanFull(),
 
-                                    Textarea::make('profile_text')
+                                    CkEditor::make('profile_text')
                                         ->label('Profile Text')
-                                        ->rows(6)
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(2),
@@ -371,9 +370,8 @@ class UserResource extends Resource
                         ->schema([
                             Section::make('Profile Message')
                                 ->schema([
-                                    Textarea::make('profile_message')
+                                    CkEditor::make('profile_message')
                                         ->label('Message')
-                                        ->rows(6)
                                         ->columnSpanFull(),
                                 ]),
                         ]),
