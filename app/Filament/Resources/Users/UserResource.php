@@ -143,7 +143,8 @@ public static function form(Schema $schema): Schema
                                             TextInput::make('name')
                                                 ->label('Provider Name')
                                                 ->required()
-                                                ->maxLength(255),
+                                                ->maxLength(255)
+                                                ->readOnly(),
 
                                             TextInput::make('slug')
                                                 ->label('Slug')
@@ -155,7 +156,7 @@ public static function form(Schema $schema): Schema
                                                 )
                                             ->readOnly(),
 
-                                            Textarea::make('introduction_line')
+                                            CkEditor::make('introduction_line')
                                                 ->label('Introduction Line')
                                                 ->columnSpanFull(),
 
@@ -164,7 +165,7 @@ public static function form(Schema $schema): Schema
                                                 ->rows(4)
                                                 ->columnSpanFull(),
 
-                                            Textarea::make('profile_text')
+                                            CkEditor::make('profile_text')
                                                 ->label('Profile Text')
                                                 ->columnSpanFull(),
                                         ])
