@@ -209,6 +209,8 @@ document.addEventListener('alpine:init', () => {
             const errors = [];
 
             if (!this.name.trim()) errors.push('Name is required.');
+             if (!this.email.trim()) errors.push('Email is required.');
+
             if (!this.mobile.trim()) errors.push('Mobile number is required.');
 
             if (!this.suburb.trim()) {
@@ -280,6 +282,7 @@ document.addEventListener('alpine:init', () => {
 
             const formData = new FormData();
             formData.append('name', this.name);
+            formData.append('email', this.email);
             formData.append('mobile', this.mobile);
             formData.append('introduction_line', this.introduction_line);
             formData.append('suburb', this.suburb);
