@@ -152,9 +152,10 @@ public static function form(Schema $schema): Schema
                                                     table: 'provider_profiles',
                                                     column: 'slug',
                                                     ignoreRecord: true,
-                                                ),
+                                                )
+                                            ->readOnly(),
 
-                                            CkEditor::make('introduction_line')
+                                            Textarea::make('introduction_line')
                                                 ->label('Introduction Line')
                                                 ->columnSpanFull(),
 
@@ -163,7 +164,7 @@ public static function form(Schema $schema): Schema
                                                 ->rows(4)
                                                 ->columnSpanFull(),
 
-                                            CkEditor::make('profile_text')
+                                            Textarea::make('profile_text')
                                                 ->label('Profile Text')
                                                 ->columnSpanFull(),
                                         ])
