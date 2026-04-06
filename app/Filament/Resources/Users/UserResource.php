@@ -114,7 +114,7 @@ class UserResource extends Resource
                                     TextInput::make('password')
                                         ->label('Password')
                                         ->password()
-                                        ->required()
+                                        ->required(fn (): bool => static::isCreatePage())
                                         ->minLength(8)
                                         ->same('passwordConfirmation')
                                         ->dehydrated(fn ($state): bool => filled($state)),
@@ -122,7 +122,7 @@ class UserResource extends Resource
                                     TextInput::make('passwordConfirmation')
                                         ->label('Confirm Password')
                                         ->password()
-                                        ->required()
+                                        ->required(fn (): bool => static::isCreatePage())
                                         ->dehydrated(false),
                                 ])
                                 ->columns(2)
