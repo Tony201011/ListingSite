@@ -25,8 +25,6 @@ class SaveMyProfile
 
         DB::transaction(function () use ($user, $validated) {
             $user->update([
-                'name' => $validated['name'],
-                'mobile' => $validated['mobile'] ?? null,
                 'suburb' => $validated['suburb'] ?? null,
             ]);
 
@@ -40,7 +38,7 @@ class SaveMyProfile
                 10
             );
 
-            $profile->name = $validated['name'] ?? $user->name;
+            $profile->name = $user->name;
 
             if (! $profile->slug) {
                 $profile->slug = $this->generateUniqueProviderProfileSlug->execute($profile->name);

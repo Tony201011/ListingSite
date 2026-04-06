@@ -304,11 +304,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Your name</label>
-                        <input name="name" type="text" x-model="name" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
+                        <input name="name" type="text" x-model="name" readonly class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium bg-gray-100 cursor-not-allowed transition">
                     </div>
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Mobile number</label>
-                        <input name="mobile" type="text" x-model="mobile" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition">
+                        <input name="mobile" type="text" x-model="mobile" readonly class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium bg-gray-100 cursor-not-allowed transition">
                     </div>
                 </div>
 
@@ -722,7 +722,8 @@
                             name="name"
                             type="text"
                             x-model="name"
-                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                            readonly
+                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium bg-gray-100 cursor-not-allowed transition"
                         >
                     </div>
 
@@ -732,7 +733,8 @@
                             name="mobile"
                             type="text"
                             x-model="mobile"
-                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                            readonly
+                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium bg-gray-100 cursor-not-allowed transition"
                         >
                     </div>
                 </div>
