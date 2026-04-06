@@ -25,7 +25,29 @@ class EditUser extends EditRecord
 
         $profileData = $data['providerProfile'] ?? [];
 
-        $baseSlug = Str::slug(($profileData['slug'] ?? null) ?: ($profileData['name'] ?? ''));
+        // Load existing profile so we can fall back to its values for fields that
+        // may be missing from $profileData.  This happens when the form contains
+        // multiple Section components that all use ->relationship('providerProfile'):
+        // Filament v5 may only populate $data['providerProfile'] with the fields
+        // belonging to the *last* such section, leaving earlier sections' fields
+        // (name, slug, introduction_line, profile_text …) absent.
+        $existingProfile = $record->providerProfile;
+
+        // Determine the profile name, falling back to existing values so the NOT
+        // NULL constraint on provider_profiles.name is never violated.  The chain
+        // is: submitted form value → existing profile name → user account name.
+        $profileName = filled($profileData['name'] ?? null)
+            ? $profileData['name']
+            : ($existingProfile?->name ?? ($data['name'] ?? ''));
+
+        $baseSlug = Str::slug(($profileData['slug'] ?? null) ?: $profileName);
+
+        // If the slug resolves to an empty string (e.g. only non-ASCII characters),
+        // fall back to the existing slug so we never attempt to save an empty value.
+        if (! filled($baseSlug)) {
+            $baseSlug = $existingProfile?->slug ?? '';
+        }
+
         $slug = $baseSlug;
         $index = 2;
 
@@ -45,11 +67,11 @@ class EditUser extends EditRecord
         ProviderProfile::query()->updateOrCreate(
             ['user_id' => $record->id],
             [
-                'name' => $profileData['name'] ?? null,
+                'name' => $profileName,
                 'slug' => $slug,
-                'description' => $profileData['description'] ?? null,
-                'introduction_line' => $profileData['introduction_line'] ?? null,
-                'profile_text' => $profileData['profile_text'] ?? null,
+                'description' => $profileData['description'] ?? $existingProfile?->description,
+                'introduction_line' => $profileData['introduction_line'] ?? $existingProfile?->introduction_line,
+                'profile_text' => $profileData['profile_text'] ?? $existingProfile?->profile_text,
                 'age_group_id' => $profileData['age_group_id'] ?? null,
                 'hair_color_id' => $profileData['hair_color_id'] ?? null,
                 'hair_length_id' => $profileData['hair_length_id'] ?? null,
