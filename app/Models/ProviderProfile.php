@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProviderProfile extends Model
@@ -96,5 +97,15 @@ class ProviderProfile extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function rates(): HasMany
+    {
+        return $this->hasMany(Rate::class, 'user_id', 'user_id');
+    }
+
+    public function availabilities(): HasMany
+    {
+        return $this->hasMany(Availability::class, 'user_id', 'user_id');
     }
 }
