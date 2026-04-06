@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
     @php
         $slug = trim(request()->path(), '/');
         if ($slug === '') {
@@ -12,16 +13,20 @@
         $metaDescription = get_meta_description_for_slug($slug);
         $metaKeywords = get_meta_keywords_for_slug($slug);
     @endphp
+
     <meta name="description" content="{{ $metaDescription ?? '' }}">
     <meta name="keywords" content="{{ $metaKeywords ?? '' }}">
     <title>@yield('title', 'Premium Directory')</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
         [x-cloak] { display: none !important; }
         .hero-gradient { background: linear-gradient(180deg, rgba(17,24,39,0.7) 0%, rgba(17,24,39,1) 100%); }
     </style>
+
     @stack('styles')
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans" x-data="{ mobileMenu: false }">
@@ -32,10 +37,10 @@
 
     @yield('content')
 
-    {{-- Cookie Consent Banner (dynamic) --}}
     @php
         $siteSetting = \App\Models\SiteSetting::first();
     @endphp
+
     @if($siteSetting && $siteSetting->enable_cookies)
         <div
             x-data="{
@@ -68,7 +73,9 @@
     @include('layouts.partials.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @stack('scripts')
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const passwordInputs = document.querySelectorAll('input[type="password"]:not([data-no-toggle="true"])');
