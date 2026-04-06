@@ -42,21 +42,26 @@ document.addEventListener('alpine:init', () => {
 
         init() {
             this.$nextTick(() => {
-                this.initTrixEditor();
+                this.initTrixEditors();
             });
         },
 
-        initTrixEditor() {
-            if (!this.$refs.profileTextEditor || !this.$refs.profileTextInput) {
-                console.error('Trix editor refs not found.');
-                return;
+        initTrixEditors() {
+            if (this.$refs.introductionLineInput && this.$refs.introductionLineEditor) {
+                this.$refs.introductionLineInput.value = this.introduction_line || '';
+
+                this.$refs.introductionLineEditor.addEventListener('trix-change', () => {
+                    this.introduction_line = this.$refs.introductionLineInput.value || '';
+                });
             }
 
-            this.$refs.profileTextInput.value = this.profile_text || '';
+            if (this.$refs.profileTextInput && this.$refs.profileTextEditor) {
+                this.$refs.profileTextInput.value = this.profile_text || '';
 
-            this.$refs.profileTextEditor.addEventListener('trix-change', () => {
-                this.profile_text = this.$refs.profileTextInput.value || '';
-            });
+                this.$refs.profileTextEditor.addEventListener('trix-change', () => {
+                    this.profile_text = this.$refs.profileTextInput.value || '';
+                });
+            }
         },
 
         toggleTag(group, tag, event) {
@@ -165,7 +170,8 @@ document.addEventListener('alpine:init', () => {
                 errors.push('Please choose a location from the dropdown list, which appears while typing.');
             }
 
-            if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
+            const plainIntroductionLine = this.stripHtml(this.introduction_line);
+            if (!plainIntroductionLine) errors.push('Introduction line is required.');
 
             const plainProfileText = this.stripHtml(this.profile_text);
             if (!plainProfileText) errors.push('Profile text is required.');
@@ -190,6 +196,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitForm() {
+            if (this.$refs.introductionLineInput) {
+                this.introduction_line = this.$refs.introductionLineInput.value || '';
+            }
+
             if (this.$refs.profileTextInput) {
                 this.profile_text = this.$refs.profileTextInput.value || '';
             }

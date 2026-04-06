@@ -107,12 +107,23 @@
 
                 <div class="mt-6">
                     <label class="block font-semibold text-[#e04ecb] mb-1">Introduction line</label>
-                    <textarea
+
+                    <input
+                        id="introduction_line_input"
+                        type="hidden"
                         name="introduction_line"
-                        x-model="introduction_line"
-                        rows="2"
-                        class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
-                    ></textarea>
+                        :value="introduction_line"
+                        x-ref="introductionLineInput"
+                    >
+
+                    <div class="trix-wrapper trix-wrapper-sm">
+                        <trix-editor
+                            input="introduction_line_input"
+                            x-ref="introductionLineEditor"
+                            class="trix-content"
+                            placeholder="Write your introduction line here..."
+                        ></trix-editor>
+                    </div>
                 </div>
 
                 <div class="mt-6 relative">
@@ -445,6 +456,10 @@
         border-radius: 0.5rem;
         overflow: hidden;
         background: #ffffff;
+    }
+
+    .trix-wrapper-sm trix-editor {
+        min-height: 120px;
     }
 
     trix-toolbar {
