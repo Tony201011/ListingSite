@@ -8,6 +8,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
+use App\Models\PhotoVerification;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -22,7 +23,9 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Actions as SchemaActions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -319,6 +322,157 @@ class UserResource extends Resource
                                     TextInput::make('whatsapp')
                                         ->label('WhatsApp')
                                         ->maxLength(30),
+                                ])
+                                ->columns(2),
+                        ]),
+
+                    Tab::make('Images')
+                        ->schema([
+                            RepeatableEntry::make('profileImages')
+                                ->label('')
+                                ->schema([
+                                    ImageEntry::make('image_path')
+                                        ->label('Image')
+                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
+                                        ->height(220),
+
+                                    ImageEntry::make('thumbnail_path')
+                                        ->label('Thumbnail')
+                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
+                                        ->height(120),
+
+                                    IconEntry::make('is_primary')
+                                        ->label('Primary')
+                                        ->boolean(),
+                                ])
+                                ->columns(3),
+                        ]),
+
+                    Tab::make('Videos')
+                        ->schema([
+                            RepeatableEntry::make('userVideos')
+                                ->label('')
+                                ->schema([
+                                    TextEntry::make('original_name')
+                                        ->label('File Name')
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('video_url')
+                                        ->label('Video URL')
+                                        ->placeholder('-')
+                                        ->copyable()
+                                        ->columnSpanFull(),
+                                ])
+                                ->columns(2),
+                        ]),
+
+                    Tab::make('Verification')
+                        ->schema([
+                            RepeatableEntry::make('photoVerification')
+                                ->label('')
+                                ->schema([
+                                    TextEntry::make('status')
+                                        ->label('Status')
+                                        ->badge()
+                                        ->color(fn ($state): string => match ($state) {
+                                            'approved' => 'success',
+                                            'rejected' => 'danger',
+                                            default => 'warning',
+                                        })
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('submitted_at')
+                                        ->label('Submitted At')
+                                        ->dateTime()
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('admin_note')
+                                        ->label('Admin Note')
+                                        ->placeholder('-')
+                                        ->columnSpanFull(),
+
+                                    ImageEntry::make('photo_url')
+                                        ->label('Photo')
+                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
+                                        ->height(220)
+                                        ->columnSpanFull(),
+
+                                    SchemaActions::make([
+                                        Action::make('approve_verification')
+                                            ->label('Approve')
+                                            ->color('success')
+                                            ->icon('heroicon-o-check-circle')
+                                            ->requiresConfirmation()
+                                            ->modalHeading('Approve Photo Verification')
+                                            ->modalDescription('Approving this verification will grant the provider a verified badge on their profile.')
+                                            ->visible(fn (PhotoVerification $record): bool => $record->status !== 'approved')
+                                            ->action(function (PhotoVerification $record): void {
+                                                $record->update(['status' => 'approved']);
+                                                $record->user?->providerProfile?->update(['is_verified' => true]);
+
+                                                Notification::make()
+                                                    ->title('Photo verification approved')
+                                                    ->success()
+                                                    ->send();
+                                            }),
+
+                                        Action::make('reject_verification')
+                                            ->label('Reject')
+                                            ->color('danger')
+                                            ->icon('heroicon-o-x-circle')
+                                            ->form([
+                                                Textarea::make('admin_note')
+                                                    ->label('Rejection Reason')
+                                                    ->placeholder('Explain why the photo verification was rejected...')
+                                                    ->required()
+                                                    ->rows(3),
+                                            ])
+                                            ->visible(fn (PhotoVerification $record): bool => $record->status !== 'rejected')
+                                            ->action(function (PhotoVerification $record, array $data): void {
+                                                $record->update(['status' => 'rejected', 'admin_note' => $data['admin_note']]);
+
+                                                $hasOtherApproved = $record->user?->photoVerification()
+                                                    ->where('status', 'approved')
+                                                    ->where('id', '!=', $record->id)
+                                                    ->whereNull('deleted_at')
+                                                    ->exists();
+
+                                                if (! $hasOtherApproved) {
+                                                    $record->user?->providerProfile?->update(['is_verified' => false]);
+                                                }
+
+                                                Notification::make()
+                                                    ->title('Photo verification rejected')
+                                                    ->danger()
+                                                    ->send();
+                                            }),
+
+                                        Action::make('delete_verification')
+                                            ->label('Delete')
+                                            ->color('danger')
+                                            ->icon('heroicon-o-trash')
+                                            ->requiresConfirmation()
+                                            ->modalHeading('Delete Verification')
+                                            ->modalDescription('Are you sure you want to delete this verification record? This action cannot be undone.')
+                                            ->action(function (PhotoVerification $record): void {
+                                                $hasOtherApproved = $record->user?->photoVerification()
+                                                    ->where('status', 'approved')
+                                                    ->where('id', '!=', $record->id)
+                                                    ->whereNull('deleted_at')
+                                                    ->exists();
+
+                                                if ($record->status === 'approved' && ! $hasOtherApproved) {
+                                                    $record->user?->providerProfile?->update(['is_verified' => false]);
+                                                }
+
+                                                $record->delete();
+
+                                                Notification::make()
+                                                    ->title('Verification deleted')
+                                                    ->success()
+                                                    ->send();
+                                            }),
+                                    ])->columnSpanFull(),
                                 ])
                                 ->columns(2),
                         ]),
