@@ -16,8 +16,6 @@ class SaveMyProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['nullable', 'string', 'max:255'],
-            'mobile' => ['nullable', 'regex:/^04\d{8}$/'],
             'suburb' => ['required', 'string', 'max:255'],
             'introduction_line' => ['required', 'string', 'max:500'],
             'profile_text' => ['required', 'string', 'max:5000'],
@@ -56,7 +54,6 @@ class SaveMyProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'mobile.regex' => 'The mobile number must be a valid Australian mobile starting with 04.',
             'suburb.required' => 'Suburb is required.',
             'introduction_line.required' => 'Introduction line is required.',
             'profile_text.required' => 'Profile text is required.',
