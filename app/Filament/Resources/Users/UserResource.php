@@ -431,13 +431,7 @@ class UserResource extends Resource
                                             ->action(function (PhotoVerification $record, array $data): void {
                                                 $record->update(['status' => 'rejected', 'admin_note' => $data['admin_note']]);
 
-                                                $hasOtherApproved = $record->user?->photoVerification()
-                                                    ->where('status', 'approved')
-                                                    ->where('id', '!=', $record->id)
-                                                    ->whereNull('deleted_at')
-                                                    ->exists();
-
-                                                if (! $hasOtherApproved) {
+                                                if (! self::verificationHasOtherApproved($record)) {
                                                     $record->user?->providerProfile?->update(['is_verified' => false]);
                                                 }
 
@@ -455,13 +449,7 @@ class UserResource extends Resource
                                             ->modalHeading('Delete Verification')
                                             ->modalDescription('Are you sure you want to delete this verification record? This action cannot be undone.')
                                             ->action(function (PhotoVerification $record): void {
-                                                $hasOtherApproved = $record->user?->photoVerification()
-                                                    ->where('status', 'approved')
-                                                    ->where('id', '!=', $record->id)
-                                                    ->whereNull('deleted_at')
-                                                    ->exists();
-
-                                                if ($record->status === 'approved' && ! $hasOtherApproved) {
+                                                if ($record->status === 'approved' && ! self::verificationHasOtherApproved($record)) {
                                                     $record->user?->providerProfile?->update(['is_verified' => false]);
                                                 }
 
@@ -1077,6 +1065,15 @@ class UserResource extends Resource
             ->values();
 
         return $names->isEmpty() ? '-' : $names->implode(', ');
+    }
+
+    private static function verificationHasOtherApproved(PhotoVerification $record): bool
+    {
+        return (bool) $record->user?->photoVerification()
+            ->where('status', 'approved')
+            ->where('id', '!=', $record->id)
+            ->whereNull('deleted_at')
+            ->exists();
     }
 
     private static function normalizeMultiValueState(mixed $state): array
