@@ -61,7 +61,7 @@ class EditUser extends EditRecord
             'suburb' => $data['suburb'] ?? null,
         ], fn ($value): bool => $value !== null));
 
-        $baseSlug = Str::slug($data['profile_slug'] ?: $data['profile_name']);
+        $baseSlug = Str::slug(($data['profile_slug'] ?? null) ?: ($data['profile_name'] ?? ''));
         $slug = $baseSlug;
         $index = 2;
 
