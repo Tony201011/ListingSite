@@ -57,7 +57,6 @@ class EditUser extends EditRecord
             'email' => $data['email'],
             'mobile' => $data['mobile'] ?? null,
             'suburb' => $data['suburb'] ?? null,
-            'password' => $data['password'] ?? null,
         ], fn ($value): bool => $value !== null));
 
         $baseSlug = Str::slug($data['profile_slug'] ?: $data['profile_name']);
