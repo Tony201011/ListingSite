@@ -39,7 +39,6 @@ class CreateManagedProfile extends CreateRecord
                 ...$data,
                 'agent_id' => $agentId,
                 'user_id' => $providerUser->id,
-                'profile_status' => 'pending',
             ]);
         });
 
@@ -50,7 +49,9 @@ class CreateManagedProfile extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['profile_status'] = 'pending';
+        if (Filament::auth()->user()?->role !== User::ROLE_ADMIN) {
+            $data['profile_status'] = 'pending';
+        }
 
         return $data;
     }
