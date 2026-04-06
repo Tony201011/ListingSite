@@ -80,7 +80,43 @@
 @section('content')
 <div
     class="bg-white min-h-screen py-10 px-4"
-    x-data="{ activeTab: 'edit-profile' }"
+    x-data="editProfileForm({
+        initial: {
+            name: @js(old('name', $user->name ?? '')),
+            email: @js(old('email', $user->email ?? '')),
+            mobile: @js(old('mobile', $user->mobile ?? '')),
+            introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
+            suburb: @js(old('suburb', $user->suburb ?? '')),
+            profile_text: @js(old('profile_text', $profile->profile_text ?? '')),
+
+            age_group: @js(old('age_group', $selected['age_group'] ?? '')),
+            hair_color: @js(old('hair_color', $selected['hair_color'] ?? '')),
+            hair_length: @js(old('hair_length', $selected['hair_length'] ?? '')),
+            ethnicity: @js(old('ethnicity', $selected['ethnicity'] ?? '')),
+            body_type: @js(old('body_type', $selected['body_type'] ?? '')),
+            bust_size: @js(old('bust_size', $selected['bust_size'] ?? '')),
+            your_length: @js(old('your_length', $selected['your_length'] ?? '')),
+
+            primaryIdentity: @js(old('primary_identity', $selected['primary_identity'] ?? [])),
+            attributes: @js(old('attributes', $selected['attributes'] ?? [])),
+            servicesStyle: @js(old('services_style', $selected['services_style'] ?? [])),
+            services_provided: @js(old('services_provided', $selected['services_provided'] ?? [])),
+
+            availability: @js(old('availability', $selected['availability'] ?? '')),
+            contact_method: @js(old('contact_method', $selected['contact_method'] ?? '')),
+            phone_contact: @js(old('phone_contact', $selected['phone_contact'] ?? '')),
+            time_waster: @js(old('time_waster', $selected['time_waster'] ?? '')),
+
+            twitter_handle: @js(old('twitter_handle', $profile->twitter_handle ?? '')),
+            website: @js(old('website', $profile->website ?? '')),
+            onlyfans_username: @js(old('onlyfans_username', $profile->onlyfans_username ?? '')),
+
+            suburbSelected: @js((bool) old('suburb', $user->suburb ?? '')),
+            serverErrors: @js($errors->all()),
+        },
+        submitUrl: @js(url()->current()),
+        csrfToken: @js(csrf_token())
+    })"
 >
     <div class="max-w-4xl mx-auto">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-l-6 border-[#e04ecb] pl-4">
@@ -95,72 +131,6 @@
             <span class="mr-1">&lt;</span> back
         </button>
 
-        {{-- Tab navigation --}}
-        <div class="flex gap-1 border-b border-gray-200 mb-8">
-            <button
-                type="button"
-                @click="activeTab = 'edit-profile'"
-                class="px-5 py-2.5 text-sm font-semibold rounded-t-lg transition"
-                :class="activeTab === 'edit-profile'
-                    ? 'bg-[#e04ecb] text-white'
-                    : 'text-gray-600 hover:text-[#e04ecb] hover:bg-pink-50'"
-            >
-                Edit Profile
-            </button>
-            <button
-                type="button"
-                @click="activeTab = 'profile-message'"
-                class="px-5 py-2.5 text-sm font-semibold rounded-t-lg transition"
-                :class="activeTab === 'profile-message'
-                    ? 'bg-[#e04ecb] text-white'
-                    : 'text-gray-600 hover:text-[#e04ecb] hover:bg-pink-50'"
-            >
-                Profile Message
-            </button>
-        </div>
-
-        {{-- Edit Profile tab --}}
-        <div
-            x-show="activeTab === 'edit-profile'"
-            x-cloak
-            x-data="editProfileForm({
-                initial: {
-                    name: @js(old('name', $user->name ?? '')),
-                    email: @js(old('email', $user->email ?? '')),
-                    mobile: @js(old('mobile', $user->mobile ?? '')),
-                    introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
-                    suburb: @js(old('suburb', $user->suburb ?? '')),
-                    profile_text: @js(old('profile_text', $profile->profile_text ?? '')),
-
-                    age_group: @js(old('age_group', $selected['age_group'] ?? '')),
-                    hair_color: @js(old('hair_color', $selected['hair_color'] ?? '')),
-                    hair_length: @js(old('hair_length', $selected['hair_length'] ?? '')),
-                    ethnicity: @js(old('ethnicity', $selected['ethnicity'] ?? '')),
-                    body_type: @js(old('body_type', $selected['body_type'] ?? '')),
-                    bust_size: @js(old('bust_size', $selected['bust_size'] ?? '')),
-                    your_length: @js(old('your_length', $selected['your_length'] ?? '')),
-
-                    primaryIdentity: @js(old('primary_identity', $selected['primary_identity'] ?? [])),
-                    attributes: @js(old('attributes', $selected['attributes'] ?? [])),
-                    servicesStyle: @js(old('services_style', $selected['services_style'] ?? [])),
-                    services_provided: @js(old('services_provided', $selected['services_provided'] ?? [])),
-
-                    availability: @js(old('availability', $selected['availability'] ?? '')),
-                    contact_method: @js(old('contact_method', $selected['contact_method'] ?? '')),
-                    phone_contact: @js(old('phone_contact', $selected['phone_contact'] ?? '')),
-                    time_waster: @js(old('time_waster', $selected['time_waster'] ?? '')),
-
-                    twitter_handle: @js(old('twitter_handle', $profile->twitter_handle ?? '')),
-                    website: @js(old('website', $profile->website ?? '')),
-                    onlyfans_username: @js(old('onlyfans_username', $profile->onlyfans_username ?? '')),
-
-                    suburbSelected: @js((bool) old('suburb', $user->suburb ?? '')),
-                    serverErrors: @js($errors->all()),
-                },
-                submitUrl: @js(url()->current()),
-                csrfToken: @js(csrf_token())
-            })"
-        >
         <form method="POST" @submit.prevent="submitForm" id="editProfileForm" class="space-y-8">
             @csrf
 
@@ -554,59 +524,6 @@
                 </button>
             </div>
         </form>
-        </div>{{-- end edit-profile tab --}}
-
-        {{-- Profile Message tab --}}
-        <div
-            x-show="activeTab === 'profile-message'"
-            x-cloak
-            x-data="profileMessageEditor({
-                initialContent: @js($profileMessage ?? ''),
-                storeUrl: @js(route('profile-message.store')),
-                csrfToken: @js(csrf_token())
-            })"
-        >
-            <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
-                <h2 class="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl">
-                    Profile message
-                </h2>
-
-                <p class="mb-6 text-gray-600">
-                    Set a short announcement for promotions, links, or important updates.
-                </p>
-
-                <div x-ref="editor" class="prose max-w-none"></div>
-
-                <input type="hidden" x-model="content">
-
-                <template x-if="errors.message">
-                    <div class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        <span x-text="errors.message[0]"></span>
-                    </div>
-                </template>
-
-                <div class="mt-6 flex gap-3">
-                    <button
-                        type="button"
-                        @click="saveMessage()"
-                        :disabled="loading"
-                        class="rounded-lg bg-pink-600 px-5 py-2.5 font-semibold text-white transition hover:bg-pink-700 disabled:opacity-60"
-                    >
-                        <span x-show="!loading">Save message</span>
-                        <span x-show="loading">Saving...</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        @click="clearEditor()"
-                        class="rounded-lg bg-gray-100 px-5 py-2.5 font-semibold text-gray-700 transition hover:bg-gray-200"
-                    >
-                        Clear
-                    </button>
-                </div>
-            </div>
-        </div>{{-- end profile-message tab --}}
-
     </div>
 </div>
 @endsection
@@ -615,5 +532,4 @@
 <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
-<script src="{{ asset('profile/js/profile-message-editor.js') }}?v={{ filemtime(public_path('profile/js/profile-message-editor.js')) }}"></script>
 @endpush
