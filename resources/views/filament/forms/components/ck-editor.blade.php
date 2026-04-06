@@ -28,6 +28,11 @@
             }).then(editor => {
                 this.editor = editor;
                 editor.setData(this.state ?? '');
+                this.$watch('state', (value) => {
+                    if (editor.getData() !== value) {
+                        editor.setData(value ?? '');
+                    }
+                });
                 editor.model.document.on('change:data', () => {
                     this.state = editor.getData();
                 });
