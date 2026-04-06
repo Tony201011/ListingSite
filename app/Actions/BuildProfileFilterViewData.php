@@ -166,6 +166,7 @@ class BuildProfileFilterViewData
         array $categoryToParentSlug,
     ): LengthAwarePaginator {
         $query = ProviderProfile::query()
+            ->whereNull('deleted_at')
             ->where('profile_status', 'approved')
             ->whereHas('user')
             ->with([
