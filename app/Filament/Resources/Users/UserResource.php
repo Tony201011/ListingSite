@@ -222,25 +222,25 @@ class UserResource extends Resource
                                 ->schema([
                                     Select::make('availability')
                                         ->label('Availability')
-                                        ->options(fn (): array => self::profileCategoryOptions('availability'))
+                                        ->options(fn (): array => self::profileCategoryNameOptions('availability'))
                                         ->searchable()
                                         ->preload(),
 
                                     Select::make('contact_method')
                                         ->label('Contact Method')
-                                        ->options(fn (): array => self::profileCategoryOptions('contact-method'))
+                                        ->options(fn (): array => self::profileCategoryNameOptions('contact-method'))
                                         ->searchable()
                                         ->preload(),
 
                                     Select::make('phone_contact')
                                         ->label('Phone Contact Preference')
-                                        ->options(fn (): array => self::profileCategoryOptions('phone-contact-preferences'))
+                                        ->options(fn (): array => self::profileCategoryNameOptions('phone-contact-preferences'))
                                         ->searchable()
                                         ->preload(),
 
                                     Select::make('time_waster')
                                         ->label('Time Waster Shield')
-                                        ->options(fn (): array => self::profileCategoryOptions('time-waster-shield'))
+                                        ->options(fn (): array => self::profileCategoryNameOptions('time-waster-shield'))
                                         ->searchable()
                                         ->preload(),
                                 ])
@@ -250,28 +250,28 @@ class UserResource extends Resource
                                 ->schema([
                                     Select::make('primary_identity')
                                         ->label('Primary Identity')
-                                        ->options(fn (): array => self::profileCategoryOptions('primary-identity'))
+                                        ->options(fn (): array => self::profileCategoryNameOptions('primary-identity'))
                                         ->multiple()
                                         ->searchable()
                                         ->preload(),
 
                                     Select::make('attributes')
                                         ->label('Attributes')
-                                        ->options(fn (): array => self::profileCategoryOptions('attributes'))
+                                        ->options(fn (): array => self::profileCategoryNameOptions('attributes'))
                                         ->multiple()
                                         ->searchable()
                                         ->preload(),
 
                                     Select::make('services_style')
                                         ->label('Services Style')
-                                        ->options(fn (): array => self::profileCategoryOptions('services-style'))
+                                        ->options(fn (): array => self::profileCategoryNameOptions('services-style'))
                                         ->multiple()
                                         ->searchable()
                                         ->preload(),
 
                                     Select::make('services_provided')
                                         ->label('Services Provided')
-                                        ->options(fn (): array => self::profileCategoryOptions('services-you-provide'))
+                                        ->options(fn (): array => self::profileCategoryNameOptions('services-you-provide'))
                                         ->multiple()
                                         ->searchable()
                                         ->preload(),
@@ -864,6 +864,17 @@ class UserResource extends Resource
             ->whereHas('parent', fn ($query) => $query->where('slug', $parentSlug))
             ->orderBy('name')
             ->pluck('name', 'id')
+            ->all();
+    }
+
+    private static function profileCategoryNameOptions(string $parentSlug): array
+    {
+        return Category::query()
+            ->where('is_active', true)
+            ->where('website_type', 'adult')
+            ->whereHas('parent', fn ($query) => $query->where('slug', $parentSlug))
+            ->orderBy('name')
+            ->pluck('name', 'name')
             ->all();
     }
 
