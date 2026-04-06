@@ -116,7 +116,12 @@
                         x-ref="introductionLineInput"
                     >
 
-                    <textarea id="introduction_line_editor" x-ref="introductionLineEditor"></textarea>
+                    <textarea
+                        id="introduction_line_editor"
+                        x-ref="introductionLineEditor"
+                        x-model="introduction_line"
+                        class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                    ></textarea>
                 </div>
 
                 <div class="mt-6 relative">
@@ -188,7 +193,12 @@
                     x-ref="profileTextInput"
                 >
 
-                <textarea id="profile_text_editor" x-ref="profileTextEditor"></textarea>
+                <textarea
+                    id="profile_text_editor"
+                    x-ref="profileTextEditor"
+                    x-model="profile_text"
+                    class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                ></textarea>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -455,6 +465,6 @@
 @push('scripts')
 <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush

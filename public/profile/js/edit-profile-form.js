@@ -49,6 +49,7 @@ document.addEventListener('alpine:init', () => {
         initEditors() {
             if (typeof tinymce === 'undefined') {
                 console.error('TinyMCE is not loaded.');
+                this.syncHiddenEditorInputs();
                 return;
             }
 
@@ -97,6 +98,16 @@ document.addEventListener('alpine:init', () => {
                     });
                 },
             });
+        },
+
+        syncHiddenEditorInputs() {
+            if (this.$refs.introductionLineInput) {
+                this.$refs.introductionLineInput.value = this.introduction_line || '';
+            }
+
+            if (this.$refs.profileTextInput) {
+                this.$refs.profileTextInput.value = this.profile_text || '';
+            }
         },
 
         toggleTag(group, tag, event) {
@@ -231,6 +242,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitForm() {
+            this.syncHiddenEditorInputs();
+
             if (typeof tinymce !== 'undefined') {
                 const introEditor = tinymce.get('introduction_line_editor');
                 if (introEditor) {
