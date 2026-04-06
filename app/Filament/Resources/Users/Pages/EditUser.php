@@ -21,31 +21,24 @@ class EditUser extends EditRecord
             'email' => $data['email'],
             'mobile' => $data['mobile'] ?? null,
             'suburb' => $data['suburb'] ?? null,
+            'password' => filled($data['password'] ?? null) ? $data['password'] : null,
         ], fn ($value): bool => $value !== null));
 
         $profileData = $data['providerProfile'] ?? [];
-
-        // Load existing profile so we can fall back to its values for fields that
-        // may be missing from $profileData.  This happens when the form contains
-        // multiple Section components that all use ->relationship('providerProfile'):
-        // Filament v5 may only populate $data['providerProfile'] with the fields
-        // belonging to the *last* such section, leaving earlier sections' fields
-        // (name, slug, introduction_line, profile_text …) absent.
         $existingProfile = $record->providerProfile;
 
-        // Determine the profile name, falling back to existing values so the NOT
-        // NULL constraint on provider_profiles.name is never violated.  The chain
-        // is: submitted form value → existing profile name → user account name.
         $profileName = filled($profileData['name'] ?? null)
             ? $profileData['name']
             : ($existingProfile?->name ?? ($data['name'] ?? ''));
 
-        $baseSlug = Str::slug(($profileData['slug'] ?? null) ?: $profileName);
+        $requestedSlug = filled($profileData['slug'] ?? null)
+            ? $profileData['slug']
+            : $profileName;
 
-        // If the slug resolves to an empty string (e.g. only non-ASCII characters),
-        // fall back to the existing slug so we never attempt to save an empty value.
+        $baseSlug = Str::slug($requestedSlug);
+
         if (! filled($baseSlug)) {
-            $baseSlug = $existingProfile?->slug ?? '';
+            $baseSlug = $existingProfile?->slug ?: 'provider-'.$record->id;
         }
 
         $slug = $baseSlug;
@@ -55,8 +48,8 @@ class EditUser extends EditRecord
             ProviderProfile::query()
                 ->where('slug', $slug)
                 ->when(
-                    filled($record->providerProfile?->id),
-                    fn (Builder $query): Builder => $query->where('id', '!=', $record->providerProfile?->id),
+                    filled($existingProfile?->id),
+                    fn (Builder $query): Builder => $query->where('id', '!=', $existingProfile->id),
                 )
                 ->exists()
         ) {
@@ -72,38 +65,38 @@ class EditUser extends EditRecord
                 'description' => $profileData['description'] ?? $existingProfile?->description,
                 'introduction_line' => $profileData['introduction_line'] ?? $existingProfile?->introduction_line,
                 'profile_text' => $profileData['profile_text'] ?? $existingProfile?->profile_text,
-                'age_group_id' => $profileData['age_group_id'] ?? null,
-                'hair_color_id' => $profileData['hair_color_id'] ?? null,
-                'hair_length_id' => $profileData['hair_length_id'] ?? null,
-                'ethnicity_id' => $profileData['ethnicity_id'] ?? null,
-                'body_type_id' => $profileData['body_type_id'] ?? null,
-                'bust_size_id' => $profileData['bust_size_id'] ?? null,
-                'your_length_id' => $profileData['your_length_id'] ?? null,
-                'availability' => $profileData['availability'] ?? null,
-                'contact_method' => $profileData['contact_method'] ?? null,
-                'phone_contact_preference' => $profileData['phone_contact_preference'] ?? null,
-                'time_waster_shield' => $profileData['time_waster_shield'] ?? null,
-                'primary_identity' => $profileData['primary_identity'] ?? [],
-                'attributes' => $profileData['attributes'] ?? [],
-                'services_style' => $profileData['services_style'] ?? [],
-                'services_provided' => $profileData['services_provided'] ?? [],
-                'twitter_handle' => $profileData['twitter_handle'] ?? null,
-                'website' => $profileData['website'] ?? null,
-                'onlyfans_username' => $profileData['onlyfans_username'] ?? null,
-                'phone' => $profileData['phone'] ?? null,
-                'whatsapp' => $profileData['whatsapp'] ?? null,
-                'is_verified' => $profileData['is_verified'] ?? false,
-                'is_featured' => $profileData['is_featured'] ?? false,
-                'profile_status' => $profileData['profile_status'] ?? 'pending',
+                'age_group_id' => $profileData['age_group_id'] ?? $existingProfile?->age_group_id,
+                'hair_color_id' => $profileData['hair_color_id'] ?? $existingProfile?->hair_color_id,
+                'hair_length_id' => $profileData['hair_length_id'] ?? $existingProfile?->hair_length_id,
+                'ethnicity_id' => $profileData['ethnicity_id'] ?? $existingProfile?->ethnicity_id,
+                'body_type_id' => $profileData['body_type_id'] ?? $existingProfile?->body_type_id,
+                'bust_size_id' => $profileData['bust_size_id'] ?? $existingProfile?->bust_size_id,
+                'your_length_id' => $profileData['your_length_id'] ?? $existingProfile?->your_length_id,
+                'availability' => $profileData['availability'] ?? $existingProfile?->availability,
+                'contact_method' => $profileData['contact_method'] ?? $existingProfile?->contact_method,
+                'phone_contact_preference' => $profileData['phone_contact_preference'] ?? $existingProfile?->phone_contact_preference,
+                'time_waster_shield' => $profileData['time_waster_shield'] ?? $existingProfile?->time_waster_shield,
+                'primary_identity' => $profileData['primary_identity'] ?? $existingProfile?->primary_identity ?? [],
+                'attributes' => $profileData['attributes'] ?? $existingProfile?->attributes ?? [],
+                'services_style' => $profileData['services_style'] ?? $existingProfile?->services_style ?? [],
+                'services_provided' => $profileData['services_provided'] ?? $existingProfile?->services_provided ?? [],
+                'twitter_handle' => $profileData['twitter_handle'] ?? $existingProfile?->twitter_handle,
+                'website' => $profileData['website'] ?? $existingProfile?->website,
+                'onlyfans_username' => $profileData['onlyfans_username'] ?? $existingProfile?->onlyfans_username,
+                'phone' => $profileData['phone'] ?? $existingProfile?->phone,
+                'whatsapp' => $profileData['whatsapp'] ?? $existingProfile?->whatsapp,
+                'is_verified' => $profileData['is_verified'] ?? $existingProfile?->is_verified ?? false,
+                'is_featured' => $profileData['is_featured'] ?? $existingProfile?->is_featured ?? false,
+                'profile_status' => $profileData['profile_status'] ?? $existingProfile?->profile_status ?? 'pending',
             ],
         );
 
         $messageData = $data['profileMessage'] ?? [];
 
-        if (filled($messageData['message'] ?? null)) {
+        if (array_key_exists('message', $messageData)) {
             ProfileMessage::query()->updateOrCreate(
                 ['user_id' => $record->id],
-                ['message' => $messageData['message']],
+                ['message' => $messageData['message'] ?? null],
             );
         }
 
