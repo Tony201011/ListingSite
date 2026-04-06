@@ -40,81 +40,6 @@ document.addEventListener('alpine:init', () => {
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
 
-        introductionQuill: null,
-        profileQuill: null,
-
-        init() {
-            this.$nextTick(() => {
-                this.initEditors();
-            });
-        },
-
-        initEditors() {
-            console.log('Initializing editors...');
-
-            if (typeof Quill === 'undefined') {
-                console.error('Quill is not loaded. Check local asset path or CSP.');
-                return;
-            }
-
-            if (this.$refs.introductionLineEditor && !this.introductionQuill) {
-                this.introductionQuill = new Quill(this.$refs.introductionLineEditor, {
-                    theme: 'snow',
-                    placeholder: 'Write your introduction line here...',
-                    modules: {
-                        toolbar: [
-                            ['bold', 'italic', 'underline'],
-                            [{ list: 'bullet' }],
-                            ['link'],
-                            ['clean']
-                        ]
-                    }
-                });
-
-                this.introductionQuill.root.innerHTML = this.introduction_line || '';
-
-                if (this.$refs.introductionLineInput) {
-                    this.$refs.introductionLineInput.value = this.introduction_line || '';
-                }
-
-                this.introductionQuill.on('text-change', () => {
-                    this.introduction_line = this.introductionQuill.root.innerHTML;
-                    if (this.$refs.introductionLineInput) {
-                        this.$refs.introductionLineInput.value = this.introduction_line;
-                    }
-                });
-            }
-
-            if (this.$refs.profileTextEditor && !this.profileQuill) {
-                this.profileQuill = new Quill(this.$refs.profileTextEditor, {
-                    theme: 'snow',
-                    placeholder: 'Write your profile description here...',
-                    modules: {
-                        toolbar: [
-                            [{ header: [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline'],
-                            [{ list: 'ordered' }, { list: 'bullet' }],
-                            ['link', 'blockquote'],
-                            ['clean']
-                        ]
-                    }
-                });
-
-                this.profileQuill.root.innerHTML = this.profile_text || '';
-
-                if (this.$refs.profileTextInput) {
-                    this.$refs.profileTextInput.value = this.profile_text || '';
-                }
-
-                this.profileQuill.on('text-change', () => {
-                    this.profile_text = this.profileQuill.root.innerHTML;
-                    if (this.$refs.profileTextInput) {
-                        this.$refs.profileTextInput.value = this.profile_text;
-                    }
-                });
-            }
-        },
-
         toggleTag(group, tag, event) {
             if (group === 'primaryIdentity') {
                 this.primaryIdentity = [tag];
@@ -221,11 +146,8 @@ document.addEventListener('alpine:init', () => {
                 errors.push('Please choose a location from the dropdown list, which appears while typing.');
             }
 
-            const plainIntroductionLine = this.stripHtml(this.introduction_line);
-            if (!plainIntroductionLine) errors.push('Introduction line is required.');
-
-            const plainProfileText = this.stripHtml(this.profile_text);
-            if (!plainProfileText) errors.push('Profile text is required.');
+            if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
+            if (!this.profile_text.trim()) errors.push('Profile text is required.');
 
             if (!this.age_group) errors.push('Age group is required.');
             if (!this.hair_color) errors.push('Hair color is required.');
@@ -247,22 +169,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitForm() {
-            if (this.introductionQuill) {
-                this.introduction_line = this.introductionQuill.root.innerHTML;
-            }
-
-            if (this.profileQuill) {
-                this.profile_text = this.profileQuill.root.innerHTML;
-            }
-
-            if (this.$refs.introductionLineInput) {
-                this.$refs.introductionLineInput.value = this.introduction_line;
-            }
-
-            if (this.$refs.profileTextInput) {
-                this.$refs.profileTextInput.value = this.profile_text;
-            }
-
             this.errors = this.validate();
 
             if (this.errors.length > 0) {
