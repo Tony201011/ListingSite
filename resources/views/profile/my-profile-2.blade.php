@@ -6,7 +6,7 @@
     x-data="editProfileForm({
         initial: {
             name: @js(old('name', $user->name ?? '')),
-            email: @js(old('email', contactEmail ?? '')),
+            email: @js(old('email', $user->email ?? '')),
             mobile: @js(old('mobile', $user->mobile ?? '')),
             introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
             suburb: @js(old('suburb', $user->suburb ?? '')),
