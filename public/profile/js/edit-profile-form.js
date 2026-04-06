@@ -88,6 +88,17 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
+        destroy() {
+            if (this.$refs.profileTextEditor) {
+                const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
+                if (editor) {
+                    editor.destroy().catch((error) => {
+                        console.error('CKEditor destroy error:', error);
+                    });
+                }
+            }
+        },
+
         toggleTag(group, tag, event) {
             if (group === 'primaryIdentity') {
                 this.primaryIdentity = [tag];
