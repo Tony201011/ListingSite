@@ -810,24 +810,8 @@
                     or you can type them down here.
                 </p>
 
-                <div class="flex items-center gap-4 p-2 bg-gray-100 border border-gray-400 rounded-t-lg text-gray-700">
-                    <span class="font-serif text-xl">✎</span>
-                    <span class="font-bold">B</span>
-                    <span class="italic">I</span>
-                    <span class="underline">U</span>
-                    <span class="line-through">S</span>
-                    <span>16 ▼</span>
-                    <span>▦</span>
-                    <span>▤</span>
-                </div>
-
-                <textarea
-                    name="profile_text"
-                    x-model="profile_text"
-                    rows="6"
-                    class="w-full px-4 py-3 border border-t-0 border-gray-400 rounded-b-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
-                    placeholder="Write your profile description here..."
-                ></textarea>
+                <div x-ref="profileTextEditor" class="prose max-w-none"></div>
+                <input type="hidden" name="profile_text" x-model="profile_text">
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -1074,6 +1058,62 @@
 <style>
     [x-cloak] { display: none !important; }
 
+    .ck-editor__editable {
+        min-height: 200px;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+        color: #1f2937 !important;
+        background-color: #ffffff !important;
+        font-family: inherit !important;
+    }
+
+    .ck-editor__editable.ck-placeholder::before {
+        color: #9ca3af !important;
+        font-style: normal !important;
+        opacity: 1;
+    }
+
+    .ck-content h1 {
+        font-size: 2em !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.5em !important;
+    }
+
+    .ck-content h2 {
+        font-size: 1.5em !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5em !important;
+    }
+
+    .ck-content h3 {
+        font-size: 1.25em !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5em !important;
+    }
+
+    .ck-content a {
+        color: #e04ecb !important;
+        text-decoration: underline !important;
+    }
+
+    .ck-content a:hover {
+        color: #c13ab0 !important;
+    }
+
+    .ck-content ul,
+    .ck-content ol {
+        padding-left: 2em !important;
+        margin-bottom: 1em !important;
+    }
+
+    .ck-content blockquote {
+        border-left: 4px solid #e04ecb !important;
+        padding-left: 1em !important;
+        margin-left: 0 !important;
+        font-style: italic !important;
+        color: #4b5563 !important;
+    }
+
     .tag-pill.selected {
         background-color: #e04ecb !important;
         color: white !important;
@@ -1092,6 +1132,7 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
 <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush

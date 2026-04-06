@@ -1,3 +1,6 @@
+// Store CKEditor instance outside Alpine's reactive proxy to avoid conflicts
+const profileTextEditorInstances = new WeakMap();
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
         name: config.initial?.name || '',
@@ -39,6 +42,62 @@ document.addEventListener('alpine:init', () => {
 
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
+
+        init() {
+            this.$nextTick(() => {
+                if (!this.$refs.profileTextEditor || profileTextEditorInstances.has(this.$refs.profileTextEditor)) {
+                    return;
+                }
+
+                ClassicEditor.create(this.$refs.profileTextEditor, {
+                    toolbar: [
+                        'heading',
+                        '|',
+                        'bold',
+                        'italic',
+                        'underline',
+                        '|',
+                        'bulletedList',
+                        'numberedList',
+                        '|',
+                        'link',
+                        'blockQuote',
+                        '|',
+                        'undo',
+                        'redo'
+                    ],
+                    heading: {
+                        options: [
+                            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                            { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                            { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                            { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                        ]
+                    },
+                    placeholder: 'Write your profile description here...'
+                }).then((editor) => {
+                    profileTextEditorInstances.set(this.$refs.profileTextEditor, editor);
+                    editor.setData(this.profile_text || '');
+
+                    editor.model.document.on('change:data', () => {
+                        this.profile_text = editor.getData();
+                    });
+                }).catch((error) => {
+                    console.error('CKEditor initialization error:', error);
+                });
+            });
+        },
+
+        destroy() {
+            if (this.$refs.profileTextEditor) {
+                const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
+                if (editor) {
+                    editor.destroy().catch((error) => {
+                        console.error('CKEditor destroy error:', error);
+                    });
+                }
+            }
+        },
 
         toggleTag(group, tag, event) {
             if (group === 'primaryIdentity') {
