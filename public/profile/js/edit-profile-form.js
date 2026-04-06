@@ -92,6 +92,7 @@ document.addEventListener('alpine:init', () => {
             if (this.$refs.profileTextEditor) {
                 const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
                 if (editor) {
+                    profileTextEditorInstances.delete(this.$refs.profileTextEditor);
                     editor.destroy().catch((error) => {
                         console.error('CKEditor destroy error:', error);
                     });

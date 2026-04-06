@@ -1133,6 +1133,5 @@
 
 @push('scripts')
 <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
-<script src="https://unpkg.com/alpinejs" defer></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush
