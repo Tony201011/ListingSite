@@ -105,6 +105,49 @@
                         >
                     </div>
 
+                    <div class="relative">
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Your suburb</label>
+                        <input
+                            name="suburb"
+                            type="text"
+                            x-model="suburb"
+                            @input="handleSuburbInput()"
+                            @blur="handleSuburbBlur()"
+                            @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
+                            autocomplete="off"
+                            placeholder="Start typing your suburb..."
+                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                        >
+
+                        <div
+                            x-show="showResults && searchResults.length > 0"
+                            x-cloak
+                            x-transition
+                            class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                            style="display: none;"
+                        >
+                            <template x-for="(item, index) in searchResults" :key="`${item.suburb}-${item.state}-${item.postcode}-${index}`">
+                                <div
+                                    @mousedown.prevent="selectSuburb(item)"
+                                    class="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-800"
+                                >
+                                    <span x-text="`${item.suburb}, ${item.state} ${item.postcode}`"></span>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div
+                            x-show="showResults && searching"
+                            x-cloak
+                            class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500"
+                            style="display: none;"
+                        >
+                            Searching...
+                        </div>
+
+                        <p class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
+                    </div>
+
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Mobile number</label>
                         <input
@@ -134,49 +177,6 @@
                         x-model="introduction_line"
                         class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
                     ></textarea>
-                </div>
-
-                <div class="mt-6 relative">
-                    <label class="block font-semibold text-[#e04ecb] mb-1">Your suburb</label>
-                    <input
-                        name="suburb"
-                        type="text"
-                        x-model="suburb"
-                        @input="handleSuburbInput()"
-                        @blur="handleSuburbBlur()"
-                        @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
-                        autocomplete="off"
-                        placeholder="Start typing your suburb..."
-                        class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
-                    >
-
-                    <div
-                        x-show="showResults && searchResults.length > 0"
-                        x-cloak
-                        x-transition
-                        class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
-                        style="display: none;"
-                    >
-                        <template x-for="(item, index) in searchResults" :key="`${item.suburb}-${item.state}-${item.postcode}-${index}`">
-                            <div
-                                @mousedown.prevent="selectSuburb(item)"
-                                class="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-800"
-                            >
-                                <span x-text="`${item.suburb}, ${item.state} ${item.postcode}`"></span>
-                            </div>
-                        </template>
-                    </div>
-
-                    <div
-                        x-show="showResults && searching"
-                        x-cloak
-                        class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500"
-                        style="display: none;"
-                    >
-                        Searching...
-                    </div>
-
-                    <p class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
                 </div>
             </div>
 
@@ -477,6 +477,5 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush
