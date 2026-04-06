@@ -33,6 +33,11 @@ class AppServiceProvider extends ServiceProvider
             fn (): string => '<style>.fi-sidebar{min-height:0!important;}.fi-body-has-topbar .fi-sidebar{max-height:calc(100dvh - 4rem)!important;}.fi-sidebar-nav{min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;scrollbar-gutter:stable;}</style>',
         );
 
+        FilamentView::registerRenderHook(
+            'panels::body.end',
+            fn (): string => '<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>',
+        );
+
         $this->shareFooterText();
         $this->configureSmtpFromDatabase();
         $this->configureStorageFromDatabase();
