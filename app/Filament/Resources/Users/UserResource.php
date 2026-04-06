@@ -134,28 +134,27 @@ class UserResource extends Resource
                                 ->visible(fn (): bool => static::isCreatePage()),
 
                             Section::make('Profile Information')
+                                ->relationship('providerProfile')
                                 ->schema([
-                                    TextInput::make('profile_name')
+                                    TextInput::make('name')
                                         ->label('Provider Name')
                                         ->required()
                                         ->maxLength(255),
 
-                                    TextInput::make('profile_slug')
+                                    TextInput::make('slug')
                                         ->label('Slug')
                                         ->maxLength(255)
                                         ->unique(
                                             table: 'provider_profiles',
                                             column: 'slug',
-                                            modifyRuleUsing: fn ($rule, $record) => $record?->providerProfile
-                                                ? $rule->ignore($record->providerProfile->id)
-                                                : $rule,
+                                            ignoreRecord: true,
                                         ),
 
                                     CkEditor::make('introduction_line')
                                         ->label('Introduction Line')
                                         ->columnSpanFull(),
 
-                                    Textarea::make('profile_description')
+                                    Textarea::make('description')
                                         ->label('Description')
                                         ->rows(4)
                                         ->columnSpanFull(),
@@ -167,6 +166,7 @@ class UserResource extends Resource
                                 ->columns(2),
 
                             Section::make('Current Status')
+                                ->relationship('providerProfile')
                                 ->schema([
                                     Toggle::make('is_verified')
                                         ->label('Verified')
@@ -193,44 +193,45 @@ class UserResource extends Resource
                     Tab::make('Attributes')
                         ->schema([
                             Section::make('Physical Attributes')
+                                ->relationship('providerProfile')
                                 ->schema([
-                                    Select::make('age_group')
+                                    Select::make('age_group_id')
                                         ->label('Age Group')
                                         ->options(fn (): array => self::profileCategoryOptions('age-group'))
                                         ->searchable()
                                         ->preload(),
 
-                                    Select::make('hair_color')
+                                    Select::make('hair_color_id')
                                         ->label('Hair Color')
                                         ->options(fn (): array => self::profileCategoryOptions('hair-color'))
                                         ->searchable()
                                         ->preload(),
 
-                                    Select::make('hair_length')
+                                    Select::make('hair_length_id')
                                         ->label('Hair Length')
                                         ->options(fn (): array => self::profileCategoryOptions('hair-length'))
                                         ->searchable()
                                         ->preload(),
 
-                                    Select::make('ethnicity')
+                                    Select::make('ethnicity_id')
                                         ->label('Ethnicity')
                                         ->options(fn (): array => self::profileCategoryOptions('ethnicity'))
                                         ->searchable()
                                         ->preload(),
 
-                                    Select::make('body_type')
+                                    Select::make('body_type_id')
                                         ->label('Body Type')
                                         ->options(fn (): array => self::profileCategoryOptions('body-type'))
                                         ->searchable()
                                         ->preload(),
 
-                                    Select::make('bust_size')
+                                    Select::make('bust_size_id')
                                         ->label('Bust Size')
                                         ->options(fn (): array => self::profileCategoryOptions('bust-size'))
                                         ->searchable()
                                         ->preload(),
 
-                                    Select::make('your_length')
+                                    Select::make('your_length_id')
                                         ->label('Your Length')
                                         ->options(fn (): array => self::profileCategoryOptions('your-length'))
                                         ->searchable()
@@ -239,6 +240,7 @@ class UserResource extends Resource
                                 ->columns(3),
 
                             Section::make('Preferences & Services')
+                                ->relationship('providerProfile')
                                 ->schema([
                                     Select::make('availability')
                                         ->label('Availability')
@@ -252,13 +254,13 @@ class UserResource extends Resource
                                         ->searchable()
                                         ->preload(),
 
-                                    Select::make('phone_contact')
+                                    Select::make('phone_contact_preference')
                                         ->label('Phone Contact Preference')
                                         ->options(fn (): array => self::profileCategoryNameOptions('phone-contact-preferences'))
                                         ->searchable()
                                         ->preload(),
 
-                                    Select::make('time_waster')
+                                    Select::make('time_waster_shield')
                                         ->label('Time Waster Shield')
                                         ->options(fn (): array => self::profileCategoryNameOptions('time-waster-shield'))
                                         ->searchable()
@@ -302,6 +304,7 @@ class UserResource extends Resource
                     Tab::make('Contact')
                         ->schema([
                             Section::make('Social & Contact')
+                                ->relationship('providerProfile')
                                 ->schema([
                                     TextInput::make('twitter_handle')
                                         ->label('Twitter Handle')
@@ -326,153 +329,15 @@ class UserResource extends Resource
                                 ->columns(2),
                         ]),
 
-                    Tab::make('Images')
-                        ->schema([
-                            RepeatableEntry::make('profileImages')
-                                ->label('')
-                                ->schema([
-                                    ImageEntry::make('image_path')
-                                        ->label('Image')
-                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
-                                        ->height(220),
-
-                                    ImageEntry::make('thumbnail_path')
-                                        ->label('Thumbnail')
-                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
-                                        ->height(120),
-
-                                    IconEntry::make('is_primary')
-                                        ->label('Primary')
-                                        ->boolean(),
-                                ])
-                                ->columns(3),
-                        ]),
-
-                    Tab::make('Videos')
-                        ->schema([
-                            RepeatableEntry::make('userVideos')
-                                ->label('')
-                                ->schema([
-                                    TextEntry::make('original_name')
-                                        ->label('File Name')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('video_url')
-                                        ->label('Video URL')
-                                        ->placeholder('-')
-                                        ->copyable()
-                                        ->columnSpanFull(),
-                                ])
-                                ->columns(2),
-                        ]),
-
                     Tab::make('Profile Message')
                         ->schema([
                             Section::make('Profile Message')
+                                ->relationship('profileMessage')
                                 ->schema([
-                                    CkEditor::make('profile_message')
+                                    CkEditor::make('message')
                                         ->label('Message')
                                         ->columnSpanFull(),
                                 ]),
-                        ]),
-
-                    Tab::make('Verification')
-                        ->schema([
-                            RepeatableEntry::make('photoVerification')
-                                ->label('')
-                                ->schema([
-                                    TextEntry::make('status')
-                                        ->label('Status')
-                                        ->badge()
-                                        ->color(fn ($state): string => match ($state) {
-                                            'approved' => 'success',
-                                            'rejected' => 'danger',
-                                            default => 'warning',
-                                        })
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('submitted_at')
-                                        ->label('Submitted At')
-                                        ->dateTime()
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('admin_note')
-                                        ->label('Admin Note')
-                                        ->placeholder('-')
-                                        ->columnSpanFull(),
-
-                                    ImageEntry::make('photo_url')
-                                        ->label('Photo')
-                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
-                                        ->height(220)
-                                        ->columnSpanFull(),
-
-                                    SchemaActions::make([
-                                        Action::make('approve_verification')
-                                            ->label('Approve')
-                                            ->color('success')
-                                            ->icon('heroicon-o-check-circle')
-                                            ->requiresConfirmation()
-                                            ->modalHeading('Approve Photo Verification')
-                                            ->modalDescription('Approving this verification will grant the provider a verified badge on their profile.')
-                                            ->visible(fn (PhotoVerification $record): bool => $record->status !== 'approved')
-                                            ->action(function (PhotoVerification $record): void {
-                                                $record->update(['status' => 'approved']);
-                                                $record->user?->providerProfile?->update(['is_verified' => true]);
-
-                                                Notification::make()
-                                                    ->title('Photo verification approved')
-                                                    ->success()
-                                                    ->send();
-                                            }),
-
-                                        Action::make('reject_verification')
-                                            ->label('Reject')
-                                            ->color('danger')
-                                            ->icon('heroicon-o-x-circle')
-                                            ->form([
-                                                Textarea::make('admin_note')
-                                                    ->label('Rejection Reason')
-                                                    ->placeholder('Explain why the photo verification was rejected...')
-                                                    ->required()
-                                                    ->rows(3),
-                                            ])
-                                            ->visible(fn (PhotoVerification $record): bool => $record->status !== 'rejected')
-                                            ->action(function (PhotoVerification $record, array $data): void {
-                                                $record->update(['status' => 'rejected', 'admin_note' => $data['admin_note']]);
-
-                                                if (! self::verificationHasOtherApproved($record)) {
-                                                    $record->user?->providerProfile?->update(['is_verified' => false]);
-                                                }
-
-                                                Notification::make()
-                                                    ->title('Photo verification rejected')
-                                                    ->danger()
-                                                    ->send();
-                                            }),
-
-                                        Action::make('delete_verification')
-                                            ->label('Delete')
-                                            ->color('danger')
-                                            ->icon('heroicon-o-trash')
-                                            ->requiresConfirmation()
-                                            ->modalHeading('Delete Verification')
-                                            ->modalDescription('Are you sure you want to delete this verification record? This action cannot be undone.')
-                                            ->action(function (PhotoVerification $record): void {
-                                                if ($record->status === 'approved' && ! self::verificationHasOtherApproved($record)) {
-                                                    $record->user?->providerProfile?->update(['is_verified' => false]);
-                                                }
-
-                                                $record->delete();
-
-                                                Notification::make()
-                                                    ->title('Verification deleted')
-                                                    ->success()
-                                                    ->send();
-                                            }),
-                                    ])->columnSpanFull(),
-                                ])
-                                ->columns(2),
                         ]),
                 ])
                 ->columnSpanFull(),
@@ -551,11 +416,7 @@ class UserResource extends Resource
                                         ->label('Profile Text')
                                         ->placeholder('-')
                                         ->columnSpanFull(),
-                                ])
-                                ->columns(2),
 
-                            Section::make('Current Status')
-                                ->schema([
                                     IconEntry::make('providerProfile.is_verified')
                                         ->label('Profile Verified')
                                         ->boolean(),
@@ -569,7 +430,7 @@ class UserResource extends Resource
                                         ->badge()
                                         ->placeholder('-'),
                                 ])
-                                ->columns(3),
+                                ->columns(2),
                         ]),
 
                     Tab::make('Live Status')
