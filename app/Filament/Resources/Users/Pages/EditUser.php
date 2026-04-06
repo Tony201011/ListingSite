@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Models\ProfileMessage;
 use App\Models\ProviderProfile;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,6 +48,7 @@ class EditUser extends EditRecord
             'is_verified' => $profile?->is_verified ?? false,
             'is_featured' => $profile?->is_featured ?? false,
             'profile_status' => $profile?->profile_status ?? 'pending',
+            'profile_message' => $this->record->profileMessage?->message,
         ];
     }
 
@@ -108,6 +110,11 @@ class EditUser extends EditRecord
                 'is_featured' => $data['is_featured'] ?? false,
                 'profile_status' => $data['profile_status'] ?? 'pending',
             ],
+        );
+
+        ProfileMessage::query()->updateOrCreate(
+            ['user_id' => $record->id],
+            ['message' => $data['profile_message'] ?? null],
         );
 
         return $record->refresh();

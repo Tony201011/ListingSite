@@ -78,6 +78,7 @@ class UserResource extends Resource
                 'rates',
                 'photoVerification',
                 'availabilities',
+                'profileMessage',
             ])
             ->where('role', User::ROLE_PROVIDER);
     }
@@ -364,6 +365,17 @@ class UserResource extends Resource
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(2),
+                        ]),
+
+                    Tab::make('Profile Message')
+                        ->schema([
+                            Section::make('Profile Message')
+                                ->schema([
+                                    Textarea::make('profile_message')
+                                        ->label('Message')
+                                        ->rows(6)
+                                        ->columnSpanFull(),
+                                ]),
                         ]),
 
                     Tab::make('Verification')
