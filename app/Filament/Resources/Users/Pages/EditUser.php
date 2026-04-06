@@ -100,10 +100,12 @@ class EditUser extends EditRecord
 
         $messageData = $data['profileMessage'] ?? [];
 
-        ProfileMessage::query()->updateOrCreate(
-            ['user_id' => $record->id],
-            ['message' => $messageData['message'] ?? null],
-        );
+        if (filled($messageData['message'] ?? null)) {
+            ProfileMessage::query()->updateOrCreate(
+                ['user_id' => $record->id],
+                ['message' => $messageData['message']],
+            );
+        }
 
         return $record->refresh();
     }
