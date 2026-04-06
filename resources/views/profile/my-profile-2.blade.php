@@ -176,11 +176,22 @@
                     or you can type them down here.
                 </p>
 
-                <div class="border border-gray-400 rounded-lg overflow-hidden">
-                    <div x-ref="profileTextEditor"></div>
-                </div>
+                <input
+                    id="profile_text_input"
+                    type="hidden"
+                    name="profile_text"
+                    :value="profile_text"
+                    x-ref="profileTextInput"
+                >
 
-                <input type="hidden" name="profile_text" :value="profile_text">
+                <div class="trix-wrapper">
+                    <trix-editor
+                        input="profile_text_input"
+                        x-ref="profileTextEditor"
+                        class="trix-content"
+                        placeholder="Write your profile description here..."
+                    ></trix-editor>
+                </div>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -424,72 +435,48 @@
 @endsection
 
 @push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/2.1.1/trix.min.css">
+
 <style>
     [x-cloak] { display: none !important; }
 
-    .ck.ck-editor {
-        width: 100%;
+    .trix-wrapper {
+        border: 1px solid #9ca3af;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        background: #ffffff;
     }
 
-    .ck-editor__editable_inline {
+    trix-toolbar {
+        border-bottom: 1px solid #d1d5db;
+        background: #f9fafb;
+        padding: 0.5rem;
+    }
+
+    trix-editor {
         min-height: 220px;
-        font-size: 1rem !important;
-        line-height: 1.6 !important;
-        color: #1f2937 !important;
-        background-color: #ffffff !important;
-        font-family: inherit !important;
-        padding: 1rem !important;
+        padding: 1rem;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #1f2937;
+        border: 0;
+        outline: none;
     }
 
-    .ck.ck-toolbar {
-        border-bottom: 1px solid #d1d5db !important;
+    trix-editor:empty:not(:focus)::before {
+        color: #9ca3af;
     }
 
-    .ck-editor__editable.ck-placeholder::before {
-        color: #9ca3af !important;
-        font-style: normal !important;
-        opacity: 1;
+    trix-editor h1 {
+        font-size: 2em;
+        font-weight: 700;
     }
 
-    .ck-content h1 {
-        font-size: 2em !important;
-        font-weight: 700 !important;
-        margin-bottom: 0.5em !important;
-    }
-
-    .ck-content h2 {
-        font-size: 1.5em !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.5em !important;
-    }
-
-    .ck-content h3 {
-        font-size: 1.25em !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.5em !important;
-    }
-
-    .ck-content a {
-        color: #e04ecb !important;
-        text-decoration: underline !important;
-    }
-
-    .ck-content a:hover {
-        color: #c13ab0 !important;
-    }
-
-    .ck-content ul,
-    .ck-content ol {
-        padding-left: 2em !important;
-        margin-bottom: 1em !important;
-    }
-
-    .ck-content blockquote {
-        border-left: 4px solid #e04ecb !important;
-        padding-left: 1em !important;
-        margin-left: 0 !important;
-        font-style: italic !important;
-        color: #4b5563 !important;
+    trix-editor blockquote {
+        border-left: 4px solid #e04ecb;
+        margin-left: 0;
+        padding-left: 1rem;
+        color: #4b5563;
     }
 
     .tag-pill.selected {
@@ -512,6 +499,6 @@
 @push('scripts')
 <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/trix/2.1.1/trix.umd.min.js"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush
