@@ -107,7 +107,7 @@ class UserResource extends Resource
                                         ->label('Suburb')
                                         ->maxLength(255),
                                 ])
-                                ->columns(3),
+                                ->columns(2),
 
                             Section::make('Security')
                                 ->schema([
