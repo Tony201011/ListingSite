@@ -1,5 +1,5 @@
 // Store CKEditor instances outside Alpine's reactive proxy to avoid conflicts
-const editorInstances = new WeakMap();
+const profileMsgEditorInstances = new WeakMap();
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('profileMessageEditor', (config = {}) => ({
@@ -14,13 +14,13 @@ document.addEventListener('alpine:init', () => {
         },
 
         getEditor() {
-            return editorInstances.get(this.$refs.editor);
+            return profileMsgEditorInstances.get(this.$refs.editor);
         },
 
         async initEditor() {
             await this.$nextTick();
 
-            if (!this.$refs.editor || editorInstances.has(this.$refs.editor)) {
+            if (!this.$refs.editor || profileMsgEditorInstances.has(this.$refs.editor)) {
                 return;
             }
 
@@ -53,7 +53,7 @@ document.addEventListener('alpine:init', () => {
                     placeholder: 'Write your profile message...'
                 });
 
-                editorInstances.set(this.$refs.editor, editor);
+                profileMsgEditorInstances.set(this.$refs.editor, editor);
                 editor.setData(this.content || '');
 
                 editor.model.document.on('change:data', () => {
