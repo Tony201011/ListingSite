@@ -6,6 +6,7 @@
     x-data="editProfileForm({
         initial: {
             name: @js(old('name', $user->name ?? '')),
+            email: @js(old('email', $user->email ?? '')),
             mobile: @js(old('mobile', $user->mobile ?? '')),
             introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
             suburb: @js(old('suburb', $user->suburb ?? '')),
@@ -88,6 +89,17 @@
                             name="name"
                             type="text"
                             x-model="name"
+                            readonly
+                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium bg-gray-100 cursor-not-allowed transition"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Email</label>
+                        <input
+                            name="email"
+                            type="email"
+                            x-model="email"
                             readonly
                             class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium bg-gray-100 cursor-not-allowed transition"
                         >
