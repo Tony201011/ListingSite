@@ -8,7 +8,8 @@ use App\Models\User;
 class GetMyProfileStepTwoData
 {
     public function __construct(
-        private GetProfileCategoryOptions $getProfileCategoryOptions
+        private GetProfileCategoryOptions $getProfileCategoryOptions,
+        private GetProfileMessage $getProfileMessage
     ) {}
 
     public function execute(?User $user): array
@@ -43,6 +44,7 @@ class GetMyProfileStepTwoData
             'profile' => $profile,
             'contactEmail' => $contactEmail,
             'selected' => $selected,
+            'profileMessage' => $this->getProfileMessage->execute($user),
             'ageGroupOptions' => $this->getProfileCategoryOptions->execute('age-group'),
             'hairColorOptions' => $this->getProfileCategoryOptions->execute('hair-color'),
             'hairLengthOptions' => $this->getProfileCategoryOptions->execute('hair-length'),
