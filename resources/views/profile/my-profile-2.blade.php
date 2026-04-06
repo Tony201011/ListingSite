@@ -181,220 +181,13 @@
                     or you can type them down here.
                 </p>
 
-                <input
-                    type="hidden"
+                <textarea
                     name="profile_text"
-                    :value="profile_text"
-                    x-ref="profileTextInput"
-                >
-
-                <div class="editor-shell profile-editor">
-                    <div x-ref="profileTextEditor"></div>
-                </div>
-            </div>
-
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-6">Your stats</h2>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Age group</label>
-                        <select name="age_group" x-model="age_group" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option value="">- Select age -</option>
-                            @foreach($ageGroupOptions ?? [] as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Hair color</label>
-                        <select name="hair_color" x-model="hair_color" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option value="">- Select -</option>
-                            @foreach($hairColorOptions ?? [] as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Hair length</label>
-                        <select name="hair_length" x-model="hair_length" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option value="">- Select -</option>
-                            @foreach($hairLengthOptions ?? [] as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Ethnicity</label>
-                        <select name="ethnicity" x-model="ethnicity" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option value="">- Select -</option>
-                            @foreach($ethnicityOptions ?? [] as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Body type</label>
-                        <select name="body_type" x-model="body_type" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option value="">- Select -</option>
-                            @foreach($bodyTypeOptions ?? [] as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Bust size</label>
-                        <select name="bust_size" x-model="bust_size" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option value="">- Select -</option>
-                            @foreach($bustSizeOptions ?? [] as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Your length</label>
-                        <select name="your_length" x-model="your_length" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
-                            <option value="">- Select -</option>
-                            @foreach($yourLengthOptions ?? [] as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Tags that describe you</h2>
-                <p class="text-gray-600 text-sm mb-6">These tags help clients find you. Click to select.</p>
-
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="font-semibold text-[#e04ecb] mb-3">Primary identity <span class="text-[#e04ecb] text-sm">(select one)</span></h3>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($primaryTags as $tag)
-                                <span
-                                    class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition"
-                                    :class="{ 'selected': primaryIdentity.includes(@js($tag)) }"
-                                    @click="toggleTag('primaryIdentity', @js($tag), $event)"
-                                >
-                                    {{ $tag }}
-                                </span>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="font-semibold text-[#e04ecb] mb-3">Attributes <span class="text-[#e04ecb] text-sm">(multiple allowed)</span></h3>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($attrTags as $tag)
-                                <span
-                                    class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition"
-                                    :class="{ 'selected': attributes.includes(@js($tag)) }"
-                                    @click="toggleTag('attributes', @js($tag), $event)"
-                                >
-                                    {{ $tag }}
-                                </span>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="font-semibold text-[#e04ecb] mb-3">Services & style <span class="text-[#e04ecb] text-sm">(up to 12)</span></h3>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($styleTags as $tag)
-                                <span
-                                    class="tag-pill px-4 py-2 bg-gray-200 text-gray-800 rounded-full text-sm cursor-pointer hover:bg-[#e04ecb] hover:text-white transition"
-                                    :class="{ 'selected': servicesStyle.includes(@js($tag)) }"
-                                    @click="toggleTag('servicesStyle', @js($tag), $event)"
-                                >
-                                    {{ $tag }}
-                                </span>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Services you provide</h2>
-                <p class="text-gray-600 text-sm mb-4">Check all that apply</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    @foreach($services as $service)
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                name="services_provided[]"
-                                value="{{ $service }}"
-                                class="w-5 h-5 text-[#e04ecb] rounded border-gray-400 focus:ring-[#e04ecb]"
-                                :checked="services_provided.includes(@js($service))"
-                                @change="toggleService(@js($service))"
-                            >
-                            <span class="text-gray-800 text-sm">{{ $service }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Availability & contact</h2>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-2">Are you available for:</label>
-                        <div class="flex flex-wrap gap-4">
-                            @foreach($availabilityOptions ?? [] as $option)
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="availability" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400" x-model="availability">
-                                    <span class="text-gray-800">{{ $option }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-2">How can people contact you?</label>
-                        <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: {{ $contactEmail ?? 's8813w@gmail.com' }}</p>
-                        <div class="flex flex-wrap gap-4">
-                            @foreach($contactMethodOptions ?? [] as $option)
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="contact_method" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400" x-model="contact_method">
-                                    <span class="text-gray-800">{{ $option }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-2">Phone contact preferences</label>
-                        <div class="flex flex-wrap gap-4">
-                            @foreach($phoneContactOptions ?? [] as $option)
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="phone_contact" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400" x-model="phone_contact">
-                                    <span class="text-gray-800">{{ $option }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-2">Use time waster shield for SMS?</label>
-                        <div class="flex gap-4">
-                            @foreach($timeWasterOptions ?? [] as $option)
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="time_waster" value="{{ $option }}" class="w-4 h-4 text-[#e04ecb] border-gray-400" x-model="time_waster">
-                                    <span class="text-gray-800">{{ $option }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
+                    x-model="profile_text"
+                    rows="10"
+                    class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                    placeholder="Write your profile description here..."
+                ></textarea>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -487,12 +280,45 @@
     .shake {
         animation: shake 0.3s ease-in-out;
     }
+
+    .ck-editor__editable {
+        min-height: 250px;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+        color: #1f2937 !important;
+        background-color: #ffffff !important;
+        font-family: inherit !important;
+    }
+
+    .ck-editor__editable.ck-placeholder::before {
+        color: #9ca3af !important;
+        font-style: normal !important;
+        opacity: 1;
+    }
+
+    .ck-content a {
+        color: #e04ecb !important;
+        text-decoration: underline !important;
+    }
+
+    .ck-content ul,
+    .ck-content ol {
+        padding-left: 2em !important;
+        margin-bottom: 1em !important;
+    }
+
+    .ck-content blockquote {
+        border-left: 4px solid #e04ecb !important;
+        padding-left: 1em !important;
+        margin-left: 0 !important;
+        font-style: italic !important;
+        color: #4b5563 !important;
+    }
 </style>
 @endpush
 
 @push('scripts')
-<script src="{{ asset('vendor/alpine/alpine.min.js') }}" defer></script>
-<script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
-<script src="{{ asset('vendor/quill/quill.min.js') }}"></script>
+<script src="https://unpkg.com/alpinejs" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush

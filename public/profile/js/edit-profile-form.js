@@ -1,3 +1,6 @@
+// Store CKEditor instance outside Alpine's reactive proxy to avoid conflicts
+const profileTextEditorInstances = new WeakMap();
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
         name: config.initial?.name || '',
@@ -40,6 +43,7 @@ document.addEventListener('alpine:init', () => {
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
 
+<<<<<<< HEAD
         introductionQuill: null,
         profileQuill: null,
 
@@ -112,6 +116,50 @@ document.addEventListener('alpine:init', () => {
                         this.$refs.profileTextInput.value = this.profile_text;
                     }
                 });
+=======
+        init() {
+            this.initProfileTextEditor();
+        },
+
+        getProfileTextEditor() {
+            return profileTextEditorInstances.get(this.$refs.profileTextEditor);
+        },
+
+        async initProfileTextEditor() {
+            await this.$nextTick();
+
+            if (!this.$refs.profileTextEditor || profileTextEditorInstances.has(this.$refs.profileTextEditor)) {
+                return;
+            }
+
+            try {
+                const editor = await ClassicEditor.create(this.$refs.profileTextEditor, {
+                    toolbar: [
+                        'bold',
+                        'italic',
+                        'underline',
+                        '|',
+                        'bulletedList',
+                        'numberedList',
+                        '|',
+                        'link',
+                        'blockQuote',
+                        '|',
+                        'undo',
+                        'redo'
+                    ],
+                    placeholder: 'Write your profile description here...'
+                });
+
+                profileTextEditorInstances.set(this.$refs.profileTextEditor, editor);
+                editor.setData(this.profile_text || '');
+
+                editor.model.document.on('change:data', () => {
+                    this.profile_text = editor.getData();
+                });
+            } catch (error) {
+                console.error('CKEditor initialization error:', error);
+>>>>>>> 9a4add665d33a2bea399845aa3a4540124fe71d4
             }
         },
 
@@ -221,11 +269,16 @@ document.addEventListener('alpine:init', () => {
                 errors.push('Please choose a location from the dropdown list, which appears while typing.');
             }
 
+<<<<<<< HEAD
             const plainIntroductionLine = this.stripHtml(this.introduction_line);
             if (!plainIntroductionLine) errors.push('Introduction line is required.');
 
             const plainProfileText = this.stripHtml(this.profile_text);
             if (!plainProfileText) errors.push('Profile text is required.');
+=======
+            if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
+            if (!this.stripHtml(this.profile_text)) errors.push('Profile text is required.');
+>>>>>>> 9a4add665d33a2bea399845aa3a4540124fe71d4
 
             if (!this.age_group) errors.push('Age group is required.');
             if (!this.hair_color) errors.push('Hair color is required.');
