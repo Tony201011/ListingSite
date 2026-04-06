@@ -177,13 +177,8 @@
                     or you can type them down here.
                 </p>
 
-                <textarea
-                    name="profile_text"
-                    x-model="profile_text"
-                    rows="10"
-                    class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
-                    placeholder="Write your profile description here..."
-                ></textarea>
+                <div x-ref="profileTextEditor" class="prose max-w-none"></div>
+                <input type="hidden" name="profile_text" x-model="profile_text">
             </div>
 
             {{-- keep the rest of your form exactly the same --}}
@@ -221,10 +216,45 @@
     .shake {
         animation: shake 0.3s ease-in-out;
     }
+
+    .ck-editor__editable {
+        min-height: 250px;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+        color: #1f2937 !important;
+        background-color: #ffffff !important;
+        font-family: inherit !important;
+    }
+
+    .ck-editor__editable.ck-placeholder::before {
+        color: #9ca3af !important;
+        font-style: normal !important;
+        opacity: 1;
+    }
+
+    .ck-content a {
+        color: #e04ecb !important;
+        text-decoration: underline !important;
+    }
+
+    .ck-content ul,
+    .ck-content ol {
+        padding-left: 2em !important;
+        margin-bottom: 1em !important;
+    }
+
+    .ck-content blockquote {
+        border-left: 4px solid #e04ecb !important;
+        padding-left: 1em !important;
+        margin-left: 0 !important;
+        font-style: italic !important;
+        color: #4b5563 !important;
+    }
 </style>
 @endpush
 
 @push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
 <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
