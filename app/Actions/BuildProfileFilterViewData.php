@@ -167,6 +167,7 @@ class BuildProfileFilterViewData
     ): LengthAwarePaginator {
         $query = ProviderProfile::query()
             ->where('profile_status', 'approved')
+            ->whereHas('user')
             ->with([
                 'user.profileImages' => fn ($q) => $q->where('is_primary', true),
                 'user.rates',
