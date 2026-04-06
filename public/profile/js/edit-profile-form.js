@@ -1,3 +1,6 @@
+// Store CKEditor instance outside Alpine's reactive proxy to avoid conflicts
+const profileTextEditorInstances = new WeakMap();
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
         name: config.initial?.name || '',
@@ -39,6 +42,51 @@ document.addEventListener('alpine:init', () => {
 
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
+
+        init() {
+            this.initProfileTextEditor();
+        },
+
+        getProfileTextEditor() {
+            return profileTextEditorInstances.get(this.$refs.profileTextEditor);
+        },
+
+        async initProfileTextEditor() {
+            await this.$nextTick();
+
+            if (!this.$refs.profileTextEditor || profileTextEditorInstances.has(this.$refs.profileTextEditor)) {
+                return;
+            }
+
+            try {
+                const editor = await ClassicEditor.create(this.$refs.profileTextEditor, {
+                    toolbar: [
+                        'bold',
+                        'italic',
+                        'underline',
+                        '|',
+                        'bulletedList',
+                        'numberedList',
+                        '|',
+                        'link',
+                        'blockQuote',
+                        '|',
+                        'undo',
+                        'redo'
+                    ],
+                    placeholder: 'Write your profile description here...'
+                });
+
+                profileTextEditorInstances.set(this.$refs.profileTextEditor, editor);
+                editor.setData(this.profile_text || '');
+
+                editor.model.document.on('change:data', () => {
+                    this.profile_text = editor.getData();
+                });
+            } catch (error) {
+                console.error('CKEditor initialization error:', error);
+            }
+        },
 
         toggleTag(group, tag, event) {
             if (group === 'primaryIdentity') {
@@ -147,7 +195,7 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
-            if (!this.profile_text.trim()) errors.push('Profile text is required.');
+            if (!this.stripHtml(this.profile_text)) errors.push('Profile text is required.');
 
             if (!this.age_group) errors.push('Age group is required.');
             if (!this.hair_color) errors.push('Hair color is required.');
