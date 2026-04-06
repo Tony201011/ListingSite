@@ -1,6 +1,7 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
         name: config.initial?.name || '',
+        email: config.initial?.email || '',
         mobile: config.initial?.mobile || '',
         introduction_line: config.initial?.introduction_line || '',
         suburb: config.initial?.suburb || '',
