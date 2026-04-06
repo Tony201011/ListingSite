@@ -1,4 +1,6 @@
-const profileTextEditorInstances = new WeakMap();
+document.addEventListener('trix-file-accept', function (event) {
+    event.preventDefault();
+});
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
@@ -44,77 +46,33 @@ document.addEventListener('alpine:init', () => {
 
         init() {
             this.$nextTick(() => {
-                this.initEditor();
+                this.initTrixEditors();
             });
         },
 
-        async initEditor() {
-            if (!this.$refs.profileTextEditor) {
-                console.error('CKEditor target not found.');
+        initTrixEditors() {
+            if (typeof Trix === 'undefined') {
+                console.error('Trix is not loaded.');
                 return;
             }
 
-            if (profileTextEditorInstances.has(this.$refs.profileTextEditor)) {
-                return;
+            if (this.$refs.introductionLineInput) {
+                this.$refs.introductionLineInput.value = this.introduction_line || '';
             }
 
-            if (typeof ClassicEditor === 'undefined') {
-                console.error('ClassicEditor is not loaded.');
-                return;
+            if (this.$refs.profileTextInput) {
+                this.$refs.profileTextInput.value = this.profile_text || '';
             }
 
-            try {
-                const editor = await ClassicEditor.create(this.$refs.profileTextEditor, {
-                    toolbar: [
-                        'heading',
-                        '|',
-                        'bold',
-                        'italic',
-                        'underline',
-                        '|',
-                        'bulletedList',
-                        'numberedList',
-                        '|',
-                        'link',
-                        'blockQuote',
-                        '|',
-                        'undo',
-                        'redo'
-                    ],
-                    heading: {
-                        options: [
-                            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-                            { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-                            { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-                            { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
-                        ]
-                    },
-                    placeholder: 'Write your profile description here...'
+            if (this.$refs.introductionLineEditor) {
+                this.$refs.introductionLineEditor.addEventListener('trix-change', () => {
+                    this.introduction_line = this.$refs.introductionLineInput.value || '';
                 });
-
-                profileTextEditorInstances.set(this.$refs.profileTextEditor, editor);
-
-                editor.setData(this.profile_text || '');
-
-                editor.model.document.on('change:data', () => {
-                    this.profile_text = editor.getData();
-                });
-            } catch (error) {
-                console.error('CKEditor initialization error:', error);
-            }
-        },
-
-        destroy() {
-            if (!this.$refs.profileTextEditor) {
-                return;
             }
 
-            const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
-
-            if (editor) {
-                profileTextEditorInstances.delete(this.$refs.profileTextEditor);
-                editor.destroy().catch((error) => {
-                    console.error('CKEditor destroy error:', error);
+            if (this.$refs.profileTextEditor) {
+                this.$refs.profileTextEditor.addEventListener('trix-change', () => {
+                    this.profile_text = this.$refs.profileTextInput.value || '';
                 });
             }
         },
@@ -210,7 +168,7 @@ document.addEventListener('alpine:init', () => {
         stripHtml(html) {
             const temp = document.createElement('div');
             temp.innerHTML = html || '';
-            return (temp.textContent || temp.innerText || '').trim();
+            return (temp.textContent || temp.innerText || '').replace(/\u00A0/g, ' ').trim();
         },
 
         validate() {
@@ -225,7 +183,8 @@ document.addEventListener('alpine:init', () => {
                 errors.push('Please choose a location from the dropdown list, which appears while typing.');
             }
 
-            if (!this.introduction_line.trim()) errors.push('Introduction line is required.');
+            const plainIntroductionLine = this.stripHtml(this.introduction_line);
+            if (!plainIntroductionLine) errors.push('Introduction line is required.');
 
             const plainProfileText = this.stripHtml(this.profile_text);
             if (!plainProfileText) errors.push('Profile text is required.');
@@ -250,11 +209,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitForm() {
-            if (this.$refs.profileTextEditor) {
-                const editor = profileTextEditorInstances.get(this.$refs.profileTextEditor);
-                if (editor) {
-                    this.profile_text = editor.getData();
-                }
+            if (this.$refs.introductionLineInput) {
+                this.introduction_line = this.$refs.introductionLineInput.value || '';
+            }
+
+            if (this.$refs.profileTextInput) {
+                this.profile_text = this.$refs.profileTextInput.value || '';
             }
 
             this.errors = this.validate();
