@@ -109,20 +109,14 @@
                     <label class="block font-semibold text-[#e04ecb] mb-1">Introduction line</label>
 
                     <input
-                        id="introduction_line_input"
                         type="hidden"
                         name="introduction_line"
                         :value="introduction_line"
                         x-ref="introductionLineInput"
                     >
 
-                    <div class="trix-wrapper trix-wrapper-sm">
-                        <trix-editor
-                            input="introduction_line_input"
-                            x-ref="introductionLineEditor"
-                            class="trix-content"
-                            placeholder="Write your introduction line here..."
-                        ></trix-editor>
+                    <div class="editor-shell">
+                        <div x-ref="introductionLineEditor"></div>
                     </div>
                 </div>
 
@@ -188,20 +182,14 @@
                 </p>
 
                 <input
-                    id="profile_text_input"
                     type="hidden"
                     name="profile_text"
                     :value="profile_text"
                     x-ref="profileTextInput"
                 >
 
-                <div class="trix-wrapper">
-                    <trix-editor
-                        input="profile_text_input"
-                        x-ref="profileTextEditor"
-                        class="trix-content"
-                        placeholder="Write your profile description here..."
-                    ></trix-editor>
+                <div class="editor-shell">
+                    <div x-ref="profileTextEditor"></div>
                 </div>
             </div>
 
@@ -446,52 +434,43 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/2.1.1/trix.min.css">
+<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 
 <style>
     [x-cloak] { display: none !important; }
 
-    .trix-wrapper {
+    .editor-shell {
         border: 1px solid #9ca3af;
         border-radius: 0.5rem;
         overflow: hidden;
         background: #ffffff;
     }
 
-    .trix-wrapper-sm trix-editor {
-        min-height: 120px;
-    }
-
-    trix-toolbar {
+    .editor-shell .ql-toolbar.ql-snow {
+        border: 0;
         border-bottom: 1px solid #d1d5db;
         background: #f9fafb;
-        padding: 0.5rem;
     }
 
-    trix-editor {
-        min-height: 220px;
-        padding: 1rem;
+    .editor-shell .ql-container.ql-snow {
+        border: 0;
+        font-family: inherit;
+    }
+
+    .editor-shell .ql-editor {
+        min-height: 140px;
         font-size: 1rem;
         line-height: 1.6;
         color: #1f2937;
-        border: 0;
-        outline: none;
     }
 
-    trix-editor:empty:not(:focus)::before {
+    .editor-shell .ql-editor.ql-blank::before {
         color: #9ca3af;
+        font-style: normal;
     }
 
-    trix-editor h1 {
-        font-size: 2em;
-        font-weight: 700;
-    }
-
-    trix-editor blockquote {
-        border-left: 4px solid #e04ecb;
-        margin-left: 0;
-        padding-left: 1rem;
-        color: #4b5563;
+    .editor-shell.profile-editor .ql-editor {
+        min-height: 220px;
     }
 
     .tag-pill.selected {
@@ -514,6 +493,6 @@
 @push('scripts')
 <script src="https://unpkg.com/alpinejs" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/trix/2.1.1/trix.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush

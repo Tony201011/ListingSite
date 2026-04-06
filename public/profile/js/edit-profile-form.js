@@ -40,26 +40,69 @@ document.addEventListener('alpine:init', () => {
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
 
+        introductionQuill: null,
+        profileQuill: null,
+
         init() {
             this.$nextTick(() => {
-                this.initTrixEditors();
+                this.initEditors();
             });
         },
 
-        initTrixEditors() {
-            if (this.$refs.introductionLineInput && this.$refs.introductionLineEditor) {
-                this.$refs.introductionLineInput.value = this.introduction_line || '';
+        initEditors() {
+            if (typeof Quill === 'undefined') {
+                console.error('Quill is not loaded.');
+                return;
+            }
 
-                this.$refs.introductionLineEditor.addEventListener('trix-change', () => {
-                    this.introduction_line = this.$refs.introductionLineInput.value || '';
+            if (this.$refs.introductionLineEditor) {
+                this.introductionQuill = new Quill(this.$refs.introductionLineEditor, {
+                    theme: 'snow',
+                    placeholder: 'Write your introduction line here...',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ list: 'bullet' }],
+                            ['link'],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                this.introductionQuill.root.innerHTML = this.introduction_line || '';
+
+                this.introductionQuill.on('text-change', () => {
+                    this.introduction_line = this.introductionQuill.root.innerHTML;
+                    if (this.$refs.introductionLineInput) {
+                        this.$refs.introductionLineInput.value = this.introduction_line;
+                    }
                 });
             }
 
-            if (this.$refs.profileTextInput && this.$refs.profileTextEditor) {
-                this.$refs.profileTextInput.value = this.profile_text || '';
+            if (this.$refs.profileTextEditor) {
+                this.$refs.profileTextEditor.parentElement.classList.add('profile-editor');
 
-                this.$refs.profileTextEditor.addEventListener('trix-change', () => {
-                    this.profile_text = this.$refs.profileTextInput.value || '';
+                this.profileQuill = new Quill(this.$refs.profileTextEditor, {
+                    theme: 'snow',
+                    placeholder: 'Write your profile description here...',
+                    modules: {
+                        toolbar: [
+                            [{ header: [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline'],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            ['link', 'blockquote'],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                this.profileQuill.root.innerHTML = this.profile_text || '';
+
+                this.profileQuill.on('text-change', () => {
+                    this.profile_text = this.profileQuill.root.innerHTML;
+                    if (this.$refs.profileTextInput) {
+                        this.$refs.profileTextInput.value = this.profile_text;
+                    }
                 });
             }
         },
@@ -196,12 +239,20 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitForm() {
+            if (this.introductionQuill) {
+                this.introduction_line = this.introductionQuill.root.innerHTML;
+            }
+
+            if (this.profileQuill) {
+                this.profile_text = this.profileQuill.root.innerHTML;
+            }
+
             if (this.$refs.introductionLineInput) {
-                this.introduction_line = this.$refs.introductionLineInput.value || '';
+                this.$refs.introductionLineInput.value = this.introduction_line;
             }
 
             if (this.$refs.profileTextInput) {
-                this.profile_text = this.$refs.profileTextInput.value || '';
+                this.$refs.profileTextInput.value = this.profile_text;
             }
 
             this.errors = this.validate();
