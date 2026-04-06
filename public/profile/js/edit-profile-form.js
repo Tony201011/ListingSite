@@ -1,3 +1,6 @@
+// Store CKEditor instances outside Alpine's reactive proxy to avoid conflicts
+const editorInstances = new Map();
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
         name: config.initial?.name || '',
@@ -42,66 +45,104 @@ document.addEventListener('alpine:init', () => {
         csrfToken: config.csrfToken || '',
 
         init() {
-            this.$nextTick(() => {
-                this.initEditors();
-            });
+            this.initEditors();
         },
 
-        initEditors() {
-            if (typeof tinymce === 'undefined') {
-                console.error('TinyMCE is not loaded.');
+        getEditor(key) {
+            return editorInstances.get(key);
+        },
+
+        async initEditors() {
+            await this.$nextTick();
+
+            if (typeof ClassicEditor === 'undefined') {
+                console.error('CKEditor is not loaded.');
                 this.syncHiddenEditorInputs();
                 return;
             }
 
-            const self = this;
+            await this.createEditor(
+                'introduction_line_editor',
+                'introduction_line',
+                'Write your introduction line here...'
+            );
 
-            const commonConfig = {
-                menubar: false,
-                plugins: 'lists link autolink',
-                toolbar: 'bold italic underline | bullist numlist | link | undo redo',
-                content_style: 'body { font-family: inherit; font-size: 1rem; line-height: 1.6; color: #1f2937; }',
-                branding: false,
-            };
+            await this.createEditor(
+                'profile_text_editor',
+                'profile_text',
+                'Write your profile description here...'
+            );
+        },
 
-            tinymce.init({
-                ...commonConfig,
-                selector: '#introduction_line_editor',
-                height: 150,
-                placeholder: 'Write your introduction line here...',
-                setup(editor) {
-                    editor.on('init', () => {
-                        editor.setContent(self.introduction_line || '');
-                    });
-                    editor.on('change keyup', () => {
-                        self.introduction_line = editor.getContent();
-                        if (self.$refs.introductionLineInput) {
-                            self.$refs.introductionLineInput.value = self.introduction_line;
-                        }
-                    });
-                },
-            });
+        async createEditor(elementId, modelKey, placeholder) {
+            const element = document.querySelector(`#${elementId}`);
 
-            tinymce.init({
-                ...commonConfig,
-                selector: '#profile_text_editor',
-                height: 260,
-                placeholder: 'Write your profile description here...',
-                setup(editor) {
-                    editor.on('init', () => {
-                        editor.setContent(self.profile_text || '');
-                    });
-                    editor.on('change keyup', () => {
-                        self.profile_text = editor.getContent();
-                        if (self.$refs.profileTextInput) {
-                            self.$refs.profileTextInput.value = self.profile_text;
-                        }
-                    });
-                },
-            });
+            if (!element || editorInstances.has(elementId)) {
+                return;
+            }
+
+            try {
+                const editor = await ClassicEditor.create(element, {
+                    toolbar: [
+                        'heading',
+                        '|',
+                        'bold',
+                        'italic',
+                        'underline',
+                        '|',
+                        'bulletedList',
+                        'numberedList',
+                        '|',
+                        'link',
+                        'blockQuote',
+                        '|',
+                        'undo',
+                        'redo'
+                    ],
+                    heading: {
+                        options: [
+                            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                            { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                            { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                            { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                        ]
+                    },
+                    placeholder
+                });
+
+                editorInstances.set(elementId, editor);
+                editor.setData(this[modelKey] || '');
+
+                editor.model.document.on('change:data', () => {
+                    this[modelKey] = editor.getData();
+
+                    if (modelKey === 'introduction_line' && this.$refs.introductionLineInput) {
+                        this.$refs.introductionLineInput.value = this[modelKey];
+                    }
+
+                    if (modelKey === 'profile_text' && this.$refs.profileTextInput) {
+                        this.$refs.profileTextInput.value = this[modelKey];
+                    }
+                });
+            } catch (error) {
+                console.error(`CKEditor initialization error for ${elementId}:`, error);
+                this.error('Unable to load the editor.');
+                this.syncHiddenEditorInputs();
+            }
         },
 
         syncHiddenEditorInputs() {
+            const introductionEditor = this.getEditor('introduction_line_editor');
+            const profileEditor = this.getEditor('profile_text_editor');
+
+            if (introductionEditor) {
+                this.introduction_line = introductionEditor.getData();
+            }
+
+            if (profileEditor) {
+                this.profile_text = profileEditor.getData();
+            }
+
             if (this.$refs.introductionLineInput) {
                 this.$refs.introductionLineInput.value = this.introduction_line || '';
             }
@@ -209,8 +250,7 @@ document.addEventListener('alpine:init', () => {
             const errors = [];
 
             if (!this.name.trim()) errors.push('Name is required.');
-             if (!this.email.trim()) errors.push('Email is required.');
-
+            if (!this.email.trim()) errors.push('Email is required.');
             if (!this.mobile.trim()) errors.push('Mobile number is required.');
 
             if (!this.suburb.trim()) {
@@ -244,37 +284,40 @@ document.addEventListener('alpine:init', () => {
             return errors;
         },
 
+        toast(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: message,
+                timer: 1800,
+                showConfirmButton: false
+            });
+        },
+
+        error(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
+        },
+
+        validationError(messages) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation errors',
+                html: `<ul style="text-align:left; margin:0; padding-left:1.2rem;">${messages.map((message) => `<li>${message}</li>`).join('')}</ul>`
+            });
+        },
+
         async submitForm() {
             this.syncHiddenEditorInputs();
-
-            if (typeof tinymce !== 'undefined') {
-                const introEditor = tinymce.get('introduction_line_editor');
-                if (introEditor) {
-                    this.introduction_line = introEditor.getContent();
-                }
-
-                const textEditor = tinymce.get('profile_text_editor');
-                if (textEditor) {
-                    this.profile_text = textEditor.getContent();
-                }
-            }
-
-            if (this.$refs.introductionLineInput) {
-                this.introduction_line = this.$refs.introductionLineInput.value || this.introduction_line;
-            }
-
-            if (this.$refs.profileTextInput) {
-                this.profile_text = this.$refs.profileTextInput.value || this.profile_text;
-            }
 
             this.errors = this.validate();
 
             if (this.errors.length > 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation errors',
-                    html: `<ul style="text-align:left; margin:0; padding-left:1.2rem;">${this.errors.map((error) => `<li>${error}</li>`).join('')}</ul>`
-                });
+                this.validationError(this.errors);
                 return;
             }
 
@@ -333,43 +376,19 @@ document.addEventListener('alpine:init', () => {
 
                 if (response.ok) {
                     this.errors = [];
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Saved',
-                        text: data.message || 'Profile updated successfully.',
-                        timer: 2500,
-                        timerProgressBar: true,
-                        showConfirmButton: false
-                    });
+                    this.toast(data.message || 'Profile updated successfully.');
                 } else if (response.status === 422) {
                     const messages = Object.values(data.errors || {}).flat();
                     this.errors = messages.length ? messages : ['Validation failed.'];
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Validation errors',
-                        html: `<ul style="text-align:left; margin:0; padding-left:1.2rem;">${this.errors.map((message) => `<li>${message}</li>`).join('')}</ul>`
-                    });
+                    this.validationError(this.errors);
                 } else {
                     this.errors = [data.message || 'Unable to save profile. Please try again later.'];
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Unable to save profile. Please try again later.'
-                    });
+                    this.error(data.message || 'Unable to save profile. Please try again later.');
                 }
             } catch (error) {
                 console.error('Profile submit error:', error);
-
                 this.errors = ['Unable to save profile. Please check your connection and try again.'];
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Unable to save profile. Please check your connection and try again.'
-                });
+                this.error('Unable to save profile. Please check your connection and try again.');
             } finally {
                 this.submitting = false;
             }

@@ -1,5 +1,82 @@
 @extends('layouts.frontend')
 
+@push('styles')
+<style>
+    .ck-editor__editable {
+        min-height: 250px;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+        color: #1f2937 !important;
+        background-color: #ffffff !important;
+        font-family: inherit !important;
+    }
+
+    .ck-editor__editable.ck-placeholder::before {
+        color: #9ca3af !important;
+        font-style: normal !important;
+        opacity: 1;
+    }
+
+    .ck-content h1 {
+        font-size: 2em !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.5em !important;
+    }
+
+    .ck-content h2 {
+        font-size: 1.5em !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5em !important;
+    }
+
+    .ck-content h3 {
+        font-size: 1.25em !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5em !important;
+    }
+
+    .ck-content a {
+        color: #e04ecb !important;
+        text-decoration: underline !important;
+    }
+
+    .ck-content a:hover {
+        color: #c13ab0 !important;
+    }
+
+    .ck-content ul,
+    .ck-content ol {
+        padding-left: 2em !important;
+        margin-bottom: 1em !important;
+    }
+
+    .ck-content blockquote {
+        border-left: 4px solid #e04ecb !important;
+        padding-left: 1em !important;
+        margin-left: 0 !important;
+        font-style: italic !important;
+        color: #4b5563 !important;
+    }
+
+    [x-cloak] { display: none !important; }
+
+    .tag-pill.selected {
+        background-color: #e04ecb !important;
+        color: #ffffff !important;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-3px); }
+        75% { transform: translateX(3px); }
+    }
+
+    .shake {
+        animation: shake 0.3s ease-in-out;
+    }
+</style>
+@endpush
+
 @section('content')
 <div
     class="bg-white min-h-screen py-10 px-4"
@@ -174,8 +251,7 @@
                     <textarea
                         id="introduction_line_editor"
                         x-ref="introductionLineEditor"
-                        x-model="introduction_line"
-                        class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                        class="w-full"
                     ></textarea>
                 </div>
             </div>
@@ -208,8 +284,7 @@
                 <textarea
                     id="profile_text_editor"
                     x-ref="profileTextEditor"
-                    x-model="profile_text"
-                    class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                    class="w-full"
                 ></textarea>
             </div>
 
@@ -453,29 +528,8 @@
 </div>
 @endsection
 
-@push('styles')
-<style>
-    [x-cloak] { display: none !important; }
-
-    .tag-pill.selected {
-        background-color: #e04ecb !important;
-        color: #ffffff !important;
-    }
-
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-3px); }
-        75% { transform: translateX(3px); }
-    }
-
-    .shake {
-        animation: shake 0.3s ease-in-out;
-    }
-</style>
-@endpush
-
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush
