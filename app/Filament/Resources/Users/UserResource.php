@@ -16,6 +16,7 @@ use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -24,13 +25,11 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Actions as SchemaActions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -84,9 +83,9 @@ class UserResource extends Resource
             ->where('role', User::ROLE_PROVIDER);
     }
 
-    public static function form(Schema $schema): Schema
-    {
-        return $schema->components([
+public static function form(Schema $schema): Schema
+{
+    return $schema->components([
             Tabs::make('ProviderFormTabs')
                 ->tabs([
                     Tab::make('Overview')
@@ -133,210 +132,220 @@ class UserResource extends Resource
                                 ->columns(2)
                                 ->visible(fn (): bool => static::isCreatePage()),
 
-                            Section::make('Profile Information')
+                            Group::make()
                                 ->relationship('providerProfile')
                                 ->schema([
-                                    TextInput::make('name')
-                                        ->label('Provider Name')
-                                        ->required()
-                                        ->maxLength(255),
+                                    Section::make('Profile Information')
+                                        ->schema([
+                                            TextInput::make('name')
+                                                ->label('Provider Name')
+                                                ->required()
+                                                ->maxLength(255),
 
-                                    TextInput::make('slug')
-                                        ->label('Slug')
-                                        ->maxLength(255)
-                                        ->unique(
-                                            table: 'provider_profiles',
-                                            column: 'slug',
-                                            ignoreRecord: true,
-                                        ),
+                                            TextInput::make('slug')
+                                                ->label('Slug')
+                                                ->maxLength(255)
+                                                ->unique(
+                                                    table: 'provider_profiles',
+                                                    column: 'slug',
+                                                    ignoreRecord: true,
+                                                ),
 
-                                    CkEditor::make('introduction_line')
-                                        ->label('Introduction Line')
-                                        ->columnSpanFull(),
+                                            CkEditor::make('introduction_line')
+                                                ->label('Introduction Line')
+                                                ->columnSpanFull(),
 
-                                    Textarea::make('description')
-                                        ->label('Description')
-                                        ->rows(4)
-                                        ->columnSpanFull(),
+                                            Textarea::make('description')
+                                                ->label('Description')
+                                                ->rows(4)
+                                                ->columnSpanFull(),
 
-                                    CkEditor::make('profile_text')
-                                        ->label('Profile Text')
-                                        ->columnSpanFull(),
-                                ])
-                                ->columns(2),
-
-                            Section::make('Current Status')
-                                ->relationship('providerProfile')
-                                ->schema([
-                                    Toggle::make('is_verified')
-                                        ->label('Verified')
-                                        ->default(false),
-
-                                    Toggle::make('is_featured')
-                                        ->label('Featured')
-                                        ->default(false),
-
-                                    Select::make('profile_status')
-                                        ->label('Profile Status')
-                                        ->options([
-                                            'pending' => 'Pending',
-                                            'approved' => 'Approved',
-                                            'rejected' => 'Rejected',
+                                            CkEditor::make('profile_text')
+                                                ->label('Profile Text')
+                                                ->columnSpanFull(),
                                         ])
-                                        ->default('pending')
-                                        ->required()
-                                        ->native(false),
-                                ])
-                                ->columns(3),
+                                        ->columns(2),
+
+                                    Section::make('Current Status')
+                                        ->schema([
+                                            Toggle::make('is_verified')
+                                                ->label('Verified')
+                                                ->default(false),
+
+                                            Toggle::make('is_featured')
+                                                ->label('Featured')
+                                                ->default(false),
+
+                                            Select::make('profile_status')
+                                                ->label('Profile Status')
+                                                ->options([
+                                                    'pending' => 'Pending',
+                                                    'approved' => 'Approved',
+                                                    'rejected' => 'Rejected',
+                                                ])
+                                                ->default('pending')
+                                                ->required()
+                                                ->native(false),
+                                        ])
+                                        ->columns(3),
+                                ]),
                         ]),
 
                     Tab::make('Attributes')
                         ->schema([
-                            Section::make('Physical Attributes')
+                            Group::make()
                                 ->relationship('providerProfile')
                                 ->schema([
-                                    Select::make('age_group_id')
-                                        ->label('Age Group')
-                                        ->options(fn (): array => self::profileCategoryOptions('age-group'))
-                                        ->searchable()
-                                        ->preload(),
+                                    Section::make('Physical Attributes')
+                                        ->schema([
+                                            Select::make('age_group_id')
+                                                ->label('Age Group')
+                                                ->options(fn (): array => self::profileCategoryOptions('age-group'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('hair_color_id')
-                                        ->label('Hair Color')
-                                        ->options(fn (): array => self::profileCategoryOptions('hair-color'))
-                                        ->searchable()
-                                        ->preload(),
+                                            Select::make('hair_color_id')
+                                                ->label('Hair Color')
+                                                ->options(fn (): array => self::profileCategoryOptions('hair-color'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('hair_length_id')
-                                        ->label('Hair Length')
-                                        ->options(fn (): array => self::profileCategoryOptions('hair-length'))
-                                        ->searchable()
-                                        ->preload(),
+                                            Select::make('hair_length_id')
+                                                ->label('Hair Length')
+                                                ->options(fn (): array => self::profileCategoryOptions('hair-length'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('ethnicity_id')
-                                        ->label('Ethnicity')
-                                        ->options(fn (): array => self::profileCategoryOptions('ethnicity'))
-                                        ->searchable()
-                                        ->preload(),
+                                            Select::make('ethnicity_id')
+                                                ->label('Ethnicity')
+                                                ->options(fn (): array => self::profileCategoryOptions('ethnicity'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('body_type_id')
-                                        ->label('Body Type')
-                                        ->options(fn (): array => self::profileCategoryOptions('body-type'))
-                                        ->searchable()
-                                        ->preload(),
+                                            Select::make('body_type_id')
+                                                ->label('Body Type')
+                                                ->options(fn (): array => self::profileCategoryOptions('body-type'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('bust_size_id')
-                                        ->label('Bust Size')
-                                        ->options(fn (): array => self::profileCategoryOptions('bust-size'))
-                                        ->searchable()
-                                        ->preload(),
+                                            Select::make('bust_size_id')
+                                                ->label('Bust Size')
+                                                ->options(fn (): array => self::profileCategoryOptions('bust-size'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('your_length_id')
-                                        ->label('Your Length')
-                                        ->options(fn (): array => self::profileCategoryOptions('your-length'))
-                                        ->searchable()
-                                        ->preload(),
-                                ])
-                                ->columns(3),
+                                            Select::make('your_length_id')
+                                                ->label('Your Length')
+                                                ->options(fn (): array => self::profileCategoryOptions('your-length'))
+                                                ->searchable()
+                                                ->preload(),
+                                        ])
+                                        ->columns(3),
 
-                            Section::make('Preferences & Services')
-                                ->relationship('providerProfile')
-                                ->schema([
-                                    Select::make('availability')
-                                        ->label('Availability')
-                                        ->options(fn (): array => self::profileCategoryNameOptions('availability'))
-                                        ->searchable()
-                                        ->preload(),
+                                    Section::make('Preferences & Services')
+                                        ->schema([
+                                            Select::make('availability')
+                                                ->label('Availability')
+                                                ->options(fn (): array => self::profileCategoryNameOptions('availability'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('contact_method')
-                                        ->label('Contact Method')
-                                        ->options(fn (): array => self::profileCategoryNameOptions('contact-method'))
-                                        ->searchable()
-                                        ->preload(),
+                                            Select::make('contact_method')
+                                                ->label('Contact Method')
+                                                ->options(fn (): array => self::profileCategoryNameOptions('contact-method'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('phone_contact_preference')
-                                        ->label('Phone Contact Preference')
-                                        ->options(fn (): array => self::profileCategoryNameOptions('phone-contact-preferences'))
-                                        ->searchable()
-                                        ->preload(),
+                                            Select::make('phone_contact_preference')
+                                                ->label('Phone Contact Preference')
+                                                ->options(fn (): array => self::profileCategoryNameOptions('phone-contact-preferences'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('time_waster_shield')
-                                        ->label('Time Waster Shield')
-                                        ->options(fn (): array => self::profileCategoryNameOptions('time-waster-shield'))
-                                        ->searchable()
-                                        ->preload(),
+                                            Select::make('time_waster_shield')
+                                                ->label('Time Waster Shield')
+                                                ->options(fn (): array => self::profileCategoryNameOptions('time-waster-shield'))
+                                                ->searchable()
+                                                ->preload(),
 
-                                    Select::make('primary_identity')
-                                        ->label('Primary Identity')
-                                        ->options(fn (): array => self::profileCategoryNameOptions('primary-identity'))
-                                        ->multiple()
-                                        ->searchable()
-                                        ->preload()
-                                        ->columnSpanFull(),
+                                            Select::make('primary_identity')
+                                                ->label('Primary Identity')
+                                                ->options(fn (): array => self::profileCategoryNameOptions('primary-identity'))
+                                                ->multiple()
+                                                ->searchable()
+                                                ->preload()
+                                                ->columnSpanFull(),
 
-                                    Select::make('attributes')
-                                        ->label('Attributes')
-                                        ->options(fn (): array => self::profileCategoryNameOptions('attributes'))
-                                        ->multiple()
-                                        ->searchable()
-                                        ->preload()
-                                        ->columnSpanFull(),
+                                            Select::make('attributes')
+                                                ->label('Attributes')
+                                                ->options(fn (): array => self::profileCategoryNameOptions('attributes'))
+                                                ->multiple()
+                                                ->searchable()
+                                                ->preload()
+                                                ->columnSpanFull(),
 
-                                    Select::make('services_style')
-                                        ->label('Services Style')
-                                        ->options(fn (): array => self::profileCategoryNameOptions('services-style'))
-                                        ->multiple()
-                                        ->searchable()
-                                        ->preload()
-                                        ->columnSpanFull(),
+                                            Select::make('services_style')
+                                                ->label('Services Style')
+                                                ->options(fn (): array => self::profileCategoryNameOptions('services-style'))
+                                                ->multiple()
+                                                ->searchable()
+                                                ->preload()
+                                                ->columnSpanFull(),
 
-                                    Select::make('services_provided')
-                                        ->label('Services Provided')
-                                        ->options(fn (): array => self::profileCategoryNameOptions('services-you-provide'))
-                                        ->multiple()
-                                        ->searchable()
-                                        ->preload()
-                                        ->columnSpanFull(),
-                                ])
-                                ->columns(2),
+                                            Select::make('services_provided')
+                                                ->label('Services Provided')
+                                                ->options(fn (): array => self::profileCategoryNameOptions('services-you-provide'))
+                                                ->multiple()
+                                                ->searchable()
+                                                ->preload()
+                                                ->columnSpanFull(),
+                                        ])
+                                        ->columns(2),
+                                ]),
                         ]),
 
                     Tab::make('Contact')
                         ->schema([
-                            Section::make('Social & Contact')
+                            Group::make()
                                 ->relationship('providerProfile')
                                 ->schema([
-                                    TextInput::make('twitter_handle')
-                                        ->label('Twitter Handle')
-                                        ->maxLength(255),
+                                    Section::make('Social & Contact')
+                                        ->schema([
+                                            TextInput::make('twitter_handle')
+                                                ->label('Twitter Handle')
+                                                ->maxLength(255),
 
-                                    TextInput::make('website')
-                                        ->label('Website')
-                                        ->maxLength(255),
+                                            TextInput::make('website')
+                                                ->label('Website')
+                                                ->maxLength(255),
 
-                                    TextInput::make('onlyfans_username')
-                                        ->label('OnlyFans Username')
-                                        ->maxLength(255),
+                                            TextInput::make('onlyfans_username')
+                                                ->label('OnlyFans Username')
+                                                ->maxLength(255),
 
-                                    TextInput::make('phone')
-                                        ->label('Phone')
-                                        ->maxLength(30),
+                                            TextInput::make('phone')
+                                                ->label('Phone')
+                                                ->maxLength(30),
 
-                                    TextInput::make('whatsapp')
-                                        ->label('WhatsApp')
-                                        ->maxLength(30),
-                                ])
-                                ->columns(2),
+                                            TextInput::make('whatsapp')
+                                                ->label('WhatsApp')
+                                                ->maxLength(30),
+                                        ])
+                                        ->columns(2),
+                                ]),
                         ]),
 
                     Tab::make('Profile Message')
                         ->schema([
-                            Section::make('Profile Message')
+                            Group::make()
                                 ->relationship('profileMessage')
                                 ->schema([
-                                    CkEditor::make('message')
-                                        ->label('Message')
-                                        ->columnSpanFull(),
+                                    Section::make('Profile Message')
+                                        ->schema([
+                                            CkEditor::make('message')
+                                                ->label('Message')
+                                                ->columnSpanFull(),
+                                        ]),
                                 ]),
                         ]),
                 ])
@@ -346,7 +355,7 @@ class UserResource extends Resource
 
     public static function infolist(Schema $schema): Schema
     {
-        return $schema->components([
+        return $schema->schema([
             Tabs::make('ProviderDetailsTabs')
                 ->tabs([
                     Tab::make('Overview')
@@ -840,7 +849,7 @@ class UserResource extends Resource
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation()
                     ->modalHeading('Delete provider')
-                    ->modalDescription('Are you sure you want to delete this provider? This will soft-delete the user, and they will no longer appear in listings.')
+                    ->modalDescription('Delete this provider? This soft-deletes the user and removes them from listings.')
                     ->action(function (User $record): void {
                         $record->delete();
                     })
