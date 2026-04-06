@@ -50,12 +50,14 @@ document.addEventListener('alpine:init', () => {
         },
 
         initEditors() {
+            console.log('Initializing editors...');
+
             if (typeof Quill === 'undefined') {
-                console.error('Quill is not loaded.');
+                console.error('Quill is not loaded. Check local asset path or CSP.');
                 return;
             }
 
-            if (this.$refs.introductionLineEditor) {
+            if (this.$refs.introductionLineEditor && !this.introductionQuill) {
                 this.introductionQuill = new Quill(this.$refs.introductionLineEditor, {
                     theme: 'snow',
                     placeholder: 'Write your introduction line here...',
@@ -71,6 +73,10 @@ document.addEventListener('alpine:init', () => {
 
                 this.introductionQuill.root.innerHTML = this.introduction_line || '';
 
+                if (this.$refs.introductionLineInput) {
+                    this.$refs.introductionLineInput.value = this.introduction_line || '';
+                }
+
                 this.introductionQuill.on('text-change', () => {
                     this.introduction_line = this.introductionQuill.root.innerHTML;
                     if (this.$refs.introductionLineInput) {
@@ -79,9 +85,7 @@ document.addEventListener('alpine:init', () => {
                 });
             }
 
-            if (this.$refs.profileTextEditor) {
-                this.$refs.profileTextEditor.parentElement.classList.add('profile-editor');
-
+            if (this.$refs.profileTextEditor && !this.profileQuill) {
                 this.profileQuill = new Quill(this.$refs.profileTextEditor, {
                     theme: 'snow',
                     placeholder: 'Write your profile description here...',
@@ -97,6 +101,10 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 this.profileQuill.root.innerHTML = this.profile_text || '';
+
+                if (this.$refs.profileTextInput) {
+                    this.$refs.profileTextInput.value = this.profile_text || '';
+                }
 
                 this.profileQuill.on('text-change', () => {
                     this.profile_text = this.profileQuill.root.innerHTML;

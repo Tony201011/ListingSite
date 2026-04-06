@@ -188,7 +188,7 @@
                     x-ref="profileTextInput"
                 >
 
-                <div class="editor-shell">
+                <div class="editor-shell profile-editor">
                     <div x-ref="profileTextEditor"></div>
                 </div>
             </div>
@@ -434,7 +434,7 @@
 @endsection
 
 @push('styles')
-<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('vendor/quill/quill.snow.css') }}">
 
 <style>
     [x-cloak] { display: none !important; }
@@ -491,8 +491,8 @@
 @endpush
 
 @push('scripts')
-<script src="https://unpkg.com/alpinejs" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script src="{{ asset('vendor/alpine/alpine.min.js') }}" defer></script>
+<script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
+<script src="{{ asset('vendor/quill/quill.min.js') }}"></script>
 <script src="{{ asset('profile/js/edit-profile-form.js') }}"></script>
 @endpush
