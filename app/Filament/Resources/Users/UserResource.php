@@ -95,17 +95,20 @@ public static function form(Schema $schema): Schema
                                     TextInput::make('name')
                                         ->label('User Name')
                                         ->required()
-                                        ->maxLength(255),
+                                        ->maxLength(255)
+                                        ->readOnly(),
 
                                     TextInput::make('email')
                                         ->email()
                                         ->required()
                                         ->maxLength(255)
-                                        ->unique(ignoreRecord: true),
+                                        ->unique(ignoreRecord: true)
+                                        ->readOnly(),
 
                                     TextInput::make('mobile')
                                         ->label('Mobile')
-                                        ->maxLength(20),
+                                        ->maxLength(20)
+                                        ->readOnly(),
 
                                     TextInput::make('suburb')
                                         ->label('Suburb')
