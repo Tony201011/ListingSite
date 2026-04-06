@@ -210,8 +210,8 @@ class ManageUsers extends ManageRecords
                     ProviderProfile::query()->updateOrCreate(
                         ['user_id' => $record->id],
                         [
-                            'name' => $data['profile_name'],
-                            'slug' => filled($data['profile_slug'] ?? null) ? $data['profile_slug'] : Str::slug($data['profile_name']),
+                            'name' => $data['profile_name'] ?? null,
+                            'slug' => filled($data['profile_slug'] ?? null) ? $data['profile_slug'] : Str::slug($data['profile_name'] ?? ''),
                             'age' => $data['profile_age'] ?? null,
                             'description' => $data['profile_description'] ?? null,
                             'introduction_line' => $data['introduction_line'] ?? null,

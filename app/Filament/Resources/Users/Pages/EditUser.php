@@ -14,44 +14,6 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        $profile = $this->record->providerProfile;
-
-        return [
-            ...$data,
-            'profile_name' => $profile?->name,
-            'profile_slug' => $profile?->slug,
-            'profile_description' => $profile?->description,
-            'introduction_line' => $profile?->introduction_line,
-            'profile_text' => $profile?->profile_text,
-            'age_group' => $profile?->age_group_id,
-            'hair_color' => $profile?->hair_color_id,
-            'hair_length' => $profile?->hair_length_id,
-            'ethnicity' => $profile?->ethnicity_id,
-            'body_type' => $profile?->body_type_id,
-            'bust_size' => $profile?->bust_size_id,
-            'your_length' => $profile?->your_length_id,
-            'availability' => $profile?->availability,
-            'contact_method' => $profile?->contact_method,
-            'phone_contact' => $profile?->phone_contact_preference,
-            'time_waster' => $profile?->time_waster_shield,
-            'primary_identity' => $profile?->primary_identity ?? [],
-            'attributes' => $profile?->attributes ?? [],
-            'services_style' => $profile?->services_style ?? [],
-            'services_provided' => $profile?->services_provided ?? [],
-            'twitter_handle' => $profile?->twitter_handle,
-            'website' => $profile?->website,
-            'onlyfans_username' => $profile?->onlyfans_username,
-            'phone' => $profile?->phone,
-            'whatsapp' => $profile?->whatsapp,
-            'is_verified' => $profile?->is_verified ?? false,
-            'is_featured' => $profile?->is_featured ?? false,
-            'profile_status' => $profile?->profile_status ?? 'pending',
-            'profile_message' => $this->record->profileMessage?->message,
-        ];
-    }
-
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         $record->update(array_filter([
@@ -61,7 +23,9 @@ class EditUser extends EditRecord
             'suburb' => $data['suburb'] ?? null,
         ], fn ($value): bool => $value !== null));
 
-        $baseSlug = Str::slug(($data['profile_slug'] ?? null) ?: ($data['profile_name'] ?? ''));
+        $profileData = $data['providerProfile'] ?? [];
+
+        $baseSlug = Str::slug(($profileData['slug'] ?? null) ?: ($profileData['name'] ?? ''));
         $slug = $baseSlug;
         $index = 2;
 
@@ -81,40 +45,42 @@ class EditUser extends EditRecord
         ProviderProfile::query()->updateOrCreate(
             ['user_id' => $record->id],
             [
-                'name' => $data['profile_name'],
+                'name' => $profileData['name'] ?? null,
                 'slug' => $slug,
-                'description' => $data['profile_description'] ?? null,
-                'introduction_line' => $data['introduction_line'] ?? null,
-                'profile_text' => $data['profile_text'] ?? null,
-                'age_group_id' => $data['age_group'] ?? null,
-                'hair_color_id' => $data['hair_color'] ?? null,
-                'hair_length_id' => $data['hair_length'] ?? null,
-                'ethnicity_id' => $data['ethnicity'] ?? null,
-                'body_type_id' => $data['body_type'] ?? null,
-                'bust_size_id' => $data['bust_size'] ?? null,
-                'your_length_id' => $data['your_length'] ?? null,
-                'availability' => $data['availability'] ?? null,
-                'contact_method' => $data['contact_method'] ?? null,
-                'phone_contact_preference' => $data['phone_contact'] ?? null,
-                'time_waster_shield' => $data['time_waster'] ?? null,
-                'primary_identity' => $data['primary_identity'] ?? [],
-                'attributes' => $data['attributes'] ?? [],
-                'services_style' => $data['services_style'] ?? [],
-                'services_provided' => $data['services_provided'] ?? [],
-                'twitter_handle' => $data['twitter_handle'] ?? null,
-                'website' => $data['website'] ?? null,
-                'onlyfans_username' => $data['onlyfans_username'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'whatsapp' => $data['whatsapp'] ?? null,
-                'is_verified' => $data['is_verified'] ?? false,
-                'is_featured' => $data['is_featured'] ?? false,
-                'profile_status' => $data['profile_status'] ?? 'pending',
+                'description' => $profileData['description'] ?? null,
+                'introduction_line' => $profileData['introduction_line'] ?? null,
+                'profile_text' => $profileData['profile_text'] ?? null,
+                'age_group_id' => $profileData['age_group_id'] ?? null,
+                'hair_color_id' => $profileData['hair_color_id'] ?? null,
+                'hair_length_id' => $profileData['hair_length_id'] ?? null,
+                'ethnicity_id' => $profileData['ethnicity_id'] ?? null,
+                'body_type_id' => $profileData['body_type_id'] ?? null,
+                'bust_size_id' => $profileData['bust_size_id'] ?? null,
+                'your_length_id' => $profileData['your_length_id'] ?? null,
+                'availability' => $profileData['availability'] ?? null,
+                'contact_method' => $profileData['contact_method'] ?? null,
+                'phone_contact_preference' => $profileData['phone_contact_preference'] ?? null,
+                'time_waster_shield' => $profileData['time_waster_shield'] ?? null,
+                'primary_identity' => $profileData['primary_identity'] ?? [],
+                'attributes' => $profileData['attributes'] ?? [],
+                'services_style' => $profileData['services_style'] ?? [],
+                'services_provided' => $profileData['services_provided'] ?? [],
+                'twitter_handle' => $profileData['twitter_handle'] ?? null,
+                'website' => $profileData['website'] ?? null,
+                'onlyfans_username' => $profileData['onlyfans_username'] ?? null,
+                'phone' => $profileData['phone'] ?? null,
+                'whatsapp' => $profileData['whatsapp'] ?? null,
+                'is_verified' => $profileData['is_verified'] ?? false,
+                'is_featured' => $profileData['is_featured'] ?? false,
+                'profile_status' => $profileData['profile_status'] ?? 'pending',
             ],
         );
 
+        $messageData = $data['profileMessage'] ?? [];
+
         ProfileMessage::query()->updateOrCreate(
             ['user_id' => $record->id],
-            ['message' => $data['profile_message'] ?? null],
+            ['message' => $messageData['message'] ?? null],
         );
 
         return $record->refresh();

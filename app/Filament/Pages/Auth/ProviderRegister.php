@@ -63,8 +63,8 @@ class ProviderRegister extends Register
 
         ProviderProfile::query()->create([
             'user_id' => $user->id,
-            'name' => $data['profile_name'],
-            'slug' => filled($data['profile_slug'] ?? null) ? $data['profile_slug'] : Str::slug($data['profile_name']),
+            'name' => $data['profile_name'] ?? null,
+            'slug' => filled($data['profile_slug'] ?? null) ? $data['profile_slug'] : Str::slug($data['profile_name'] ?? ''),
             'age' => $data['profile_age'] ?? null,
             'description' => $data['profile_description'] ?? null,
             'country_id' => $data['country_id'] ?? null,
