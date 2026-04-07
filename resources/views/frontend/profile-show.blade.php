@@ -527,8 +527,11 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
                                 </thead>
                                 <tbody>
                                     @forelse($profile['price_list'] ?? [] as $i => $rate)
+                                    @php
+                                        $sessionLabel = $rate['description'] ?: ($rate['group'] ?: '—');
+                                    @endphp
                                     <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
-                                        <td class="px-4 py-2 font-normal text-black">{{ $rate['description'] ?: ($rate['group'] ?: '—') }}</td>
+                                        <td class="px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
                                         <td class="px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: '—' }}</td>
                                         <td class="px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: '—' }}</td>
                                     </tr>

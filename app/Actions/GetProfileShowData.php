@@ -156,8 +156,14 @@ class GetProfileShowData
             } elseif (! $avail->enabled) {
                 $time = 'Unavailable';
             } else {
-                $from = $avail->from_time ? substr((string) $avail->from_time, 0, 5) : '';
-                $to = $avail->till_late ? 'Late' : ($avail->to_time ? substr((string) $avail->to_time, 0, 5) : '');
+                $from = $avail->from_time ? \Carbon\Carbon::parse($avail->from_time)->format('H:i') : '';
+                if ($avail->till_late) {
+                    $to = 'Late';
+                } elseif ($avail->to_time) {
+                    $to = \Carbon\Carbon::parse($avail->to_time)->format('H:i');
+                } else {
+                    $to = '';
+                }
                 $time = $from && $to ? "{$from} - {$to}" : ($from ?: 'Unavailable');
             }
 
