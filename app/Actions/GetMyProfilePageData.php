@@ -42,12 +42,15 @@ class GetMyProfilePageData
             ->whereNull('deleted_at')
             ->count() > 1;
 
+        $shortUrl = $user?->shortUrl;
+
         return [
             'user' => $user,
             'profile' => $profile,
             'stepOneCompleted' => $stepOneCompleted,
             'stepTwoCompleted' => $stepTwoCompleted,
             'stepPhotoVerificationCompleted' => $stepPhotoVerificationCompleted,
+            'shortUrl' => $shortUrl,
         ];
     }
 }
