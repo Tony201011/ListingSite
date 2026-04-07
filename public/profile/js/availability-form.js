@@ -53,6 +53,8 @@ document.addEventListener('alpine:init', () => {
                     if (value) {
                         this.form[day].all_day = false;
                         this.form[day].by_appointment = false;
+                        this.form[day].to = '';
+                        this.clearFieldError(day, 'to');
                     }
                 });
 
@@ -85,6 +87,9 @@ document.addEventListener('alpine:init', () => {
                     this.form[day].from = '';
                     this.form[day].to = '';
                     this.clearFieldError(day, 'from');
+                    this.clearFieldError(day, 'to');
+                } else if (option === 'till_late') {
+                    this.form[day].to = '';
                     this.clearFieldError(day, 'to');
                 }
             } else {
@@ -149,7 +154,7 @@ document.addEventListener('alpine:init', () => {
                 return false;
             }
 
-            if (item.from && !item.to) {
+            if (item.from && !item.to && !item.till_late) {
                 this.setFieldError(day, 'to', `Please select an end time for ${day}.`);
                 return false;
             }

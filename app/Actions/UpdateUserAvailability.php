@@ -59,6 +59,10 @@ class UpdateUserAvailability
             $toTime = null;
         }
 
+        if ($tillLate) {
+            $toTime = null;
+        }
+
         return [
             'enabled' => $enabled,
             'from_time' => $fromTime,
