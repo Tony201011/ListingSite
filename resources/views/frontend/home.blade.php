@@ -24,8 +24,12 @@
             </h1>
             <p class="mb-8 text-sm text-gray-400 tracking-widest uppercase">100% Real &amp; Genuine Escorts · Australia-Wide</p>
 
-            <div x-data="{ searchMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}', term: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}' }">
-                <form method="GET" action="{{ url('/') }}">
+            <div x-data="escortSearch({
+                    initialMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}',
+                    initialTerm: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}',
+                    suggestionsUrl: '{{ route('api.search.suggestions') }}'
+                })" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
+                <form method="GET" action="{{ url('/') }}" @submit="closeSuggestions()">
                     <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
                     <input type="hidden" name="escort_name" :value="searchMode === 'username' ? term : ''">
 
@@ -35,9 +39,41 @@
                             <input
                                 type="text"
                                 x-model="term"
+                                @input.debounce.300ms="fetchSuggestions()"
+                                @focus="fetchSuggestions()"
+                                @keydown.arrow-down.prevent="highlightNext()"
+                                @keydown.arrow-up.prevent="highlightPrev()"
+                                @keydown.enter.prevent="selectHighlighted($event)"
                                 :placeholder="searchMode === 'username' ? 'Search by escort name…' : 'Search by suburb or city…'"
                                 class="w-full rounded-xl border border-gray-700 bg-gray-800/80 py-3 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/50"
+                                autocomplete="off"
                             >
+
+                            {{-- Suggestions dropdown --}}
+                            <div
+                                x-show="showSuggestions && suggestions.length > 0"
+                                x-cloak
+                                class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-gray-700 bg-gray-900 shadow-xl"
+                            >
+                                <ul class="divide-y divide-gray-800">
+                                    <template x-for="(item, index) in suggestions" :key="item.slug">
+                                        <li>
+                                            <a
+                                                :href="'/profile/' + item.slug"
+                                                class="flex items-center gap-3 px-4 py-2.5 text-left text-sm transition"
+                                                :class="index === highlightedIndex ? 'bg-pink-600/20 text-pink-300' : 'text-gray-200 hover:bg-gray-800'"
+                                                @mouseenter="highlightedIndex = index"
+                                                @mouseleave="highlightedIndex = -1"
+                                            >
+                                                <i class="fa-solid fa-user text-gray-500 text-xs shrink-0"></i>
+                                                <span class="truncate" x-text="item.name"></span>
+                                                <span class="ml-auto shrink-0 text-xs text-gray-500" x-show="item.location" x-text="item.location"></span>
+                                                <span class="shrink-0 text-xs text-gray-600" x-show="item.age" x-text="item.age + 'y'"></span>
+                                            </a>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
                         </div>
                         <button type="submit" class="shrink-0 rounded-xl bg-pink-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-900/40 transition hover:bg-pink-700 active:scale-95">
                             Find Escort
@@ -47,7 +83,7 @@
                     <div class="mt-3 flex flex-wrap justify-center gap-2">
                         <button
                             type="button"
-                            @click="searchMode = searchMode === 'suburb' ? 'username' : 'suburb'; term = ''"
+                            @click="searchMode = searchMode === 'suburb' ? 'username' : 'suburb'; term = ''; closeSuggestions()"
                             class="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs font-medium text-gray-300 transition hover:border-pink-500 hover:text-pink-400"
                             x-text="searchMode === 'suburb' ? '🔎 Search by Name' : '📍 Search by Suburb'"
                         ></button>
@@ -291,6 +327,70 @@
 
 @push('scripts')
 <script>
+    function escortSearch(config) {
+        return {
+            searchMode: config.initialMode || 'suburb',
+            term: config.initialTerm || '',
+            suggestions: [],
+            showSuggestions: false,
+            highlightedIndex: -1,
+            abortController: null,
+
+            fetchSuggestions() {
+                const q = this.term.trim();
+                if (q.length < 2) {
+                    this.closeSuggestions();
+                    return;
+                }
+
+                if (this.abortController) {
+                    this.abortController.abort();
+                }
+                this.abortController = new AbortController();
+
+                fetch(config.suggestionsUrl + '?q=' + encodeURIComponent(q), {
+                    signal: this.abortController.signal,
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                })
+                .then(r => r.ok ? r.json() : Promise.resolve({ suggestions: [] }))
+                .then(data => {
+                    this.suggestions = data.suggestions || [];
+                    this.showSuggestions = this.suggestions.length > 0;
+                    this.highlightedIndex = -1;
+                })
+                .catch(err => {
+                    if (err.name !== 'AbortError') {
+                        this.closeSuggestions();
+                    }
+                });
+            },
+
+            closeSuggestions() {
+                this.showSuggestions = false;
+                this.highlightedIndex = -1;
+            },
+
+            highlightNext() {
+                if (!this.showSuggestions) return;
+                this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.suggestions.length - 1);
+            },
+
+            highlightPrev() {
+                if (!this.showSuggestions) return;
+                this.highlightedIndex = Math.max(this.highlightedIndex - 1, -1);
+            },
+
+            selectHighlighted(event) {
+                if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
+                    window.location.href = '/profile/' + this.suggestions[this.highlightedIndex].slug;
+                    return;
+                }
+                // Default: submit the form
+                event.target.closest('form').submit();
+            },
+        };
+    }
+
     function favouriteBookmark(config) {
         return {
             viewMode: 'grid',
