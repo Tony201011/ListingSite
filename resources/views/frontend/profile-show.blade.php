@@ -6,25 +6,7 @@
 @section('title', $profile['name'] . ' Profile')
 
 @php
-$profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
-    'sex goddess',
-    'nympho',
-    'bisexual',
-    'natural boobs',
-    'some tattoos',
-    'round bottom',
-    'fully shaved or waxed',
-    'tanned skin',
-    'lingerie',
-    'high heels',
-    'love conversations',
-    'shower facilities',
-    'published pornstar / model',
-    'sensual experience',
-    'fantasy experiences',
-    'french kissing',
-    'nuru'
-];
+$profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
 @endphp
 
 @section('content')
@@ -39,26 +21,13 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
         </div>
 
         @php
-            $primaryPhone = trim((string) ($profile['phone'] ?? $profile['whatsapp'] ?? '+61 451 442 992'));
+            $primaryPhone = trim((string) ($profile['phone'] ?? $profile['whatsapp'] ?? ''));
             $phoneHref = preg_replace('/[^0-9+]/', '', $primaryPhone);
             $whatsAppHref = preg_replace('/[^0-9]/', '', $phoneHref);
 
-            $priceList = collect($profile['price_list'] ?? [
-                ['label' => '30 Minutes', 'price' => '$150'],
-                ['label' => '45 Minutes', 'price' => '$180'],
-                ['label' => '1 Hour', 'price' => '$200'],
-                ['label' => '2 Hours', 'price' => '$380'],
-            ])->values();
+            $priceList = collect($profile['price_list'] ?? [])->values();
 
-            $availabilityList = collect($profile['availability_list'] ?? [
-                ['day' => 'Today', 'time' => 'Unavailable'],
-                ['day' => 'Tomorrow', 'time' => '10:00 - 21:00'],
-                ['day' => 'Sun', 'time' => '10:00 - 21:00'],
-                ['day' => 'Mon', 'time' => '10:00 - 05:00'],
-                ['day' => 'Tue', 'time' => '10:00 - 05:00'],
-                ['day' => 'Wed', 'time' => '10:00 - 05:00'],
-                ['day' => 'Thu', 'time' => 'Unavailable'],
-            ])->values();
+            $availabilityList = collect($profile['availability_list'] ?? [])->values();
 
             $profileStats = $profileStats ?? [
                 ['label' => 'Age group', 'value' => $profile['age_group'] ?? '—'],
@@ -70,36 +39,41 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
                 ['label' => 'Length', 'value' => $profile['your_length'] ?? '—'],
             ];
 
-            $contactForItems = [
-                'Incalls only',
-                'GFE bookings',
-                'PSE or very naughty bookings',
-                'Erotic body rubs',
-            ];
+            $galleryImages = !empty($profile['images']) ? $profile['images'] : (!empty($profile['image']) ? [$profile['image']] : []);
 
-            $sidebarFacts = [
-                ['label' => 'Nationality', 'value' => $profile['nationality'] ?? 'Colombia'],
-                ['label' => 'Ethnicity', 'value' => $profile['ethnicity'] ?? 'Latina'],
-                ['label' => 'Hair color', 'value' => $profile['hair_color'] ?? 'Black'],
-                ['label' => 'Eyes', 'value' => $profile['eye_color'] ?? 'Brown'],
-                ['label' => 'Body type', 'value' => $profile['body_type'] ?? 'Slim'],
-                ['label' => 'Breast', 'value' => $profile['breast'] ?? 'C'],
-                ['label' => 'Pubic hair', 'value' => $profile['pubic_hair'] ?? 'Shaved'],
-                ['label' => 'Place of service', 'value' => $profile['place_of_service'] ?? 'Hotel, Private Apartment'],
-                ['label' => 'Meeting with', 'value' => $profile['meeting_with'] ?? 'Men, Couples'],
-                ['label' => 'Languages', 'value' => $profile['languages'] ?? 'Spanish, English'],
-                ['label' => 'Location', 'value' => $profile['city'] ?? 'Sydney'],
-            ];
-        @endphp
-        @php
-            $galleryImages = $profile['images'] ?? [$profile['image'] ?? 'https://via.placeholder.com/300'];
+            $servicesProvided = !empty($profile['services_provided']) ? $profile['services_provided'] : [];
+
+            $availableNow = $profile['available_now'] ?? false;
+            $isOnline = $profile['active'] ?? false;
+            $availableExpiresAt = $profile['available_expires_at'] ?? null;
+            $availableTillText = $availableNow && $availableExpiresAt
+                ? ' - AVAILABLE TILL ' . \Carbon\Carbon::parse($availableExpiresAt)->format('g:ia')
+                : '';
+
+            $profileUrl = route('profile.show', ['slug' => $profile['slug']]);
+            $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . '/profile/' . $profile['slug'];
+
+            $introTagline = '';
+            if (!empty($profile['age']) && !empty($profile['introduction_line'])) {
+                $introTagline = $profile['age'] . ' - ' . $profile['introduction_line'];
+            } elseif (!empty($profile['age'])) {
+                $introTagline = (string) $profile['age'];
+            } elseif (!empty($profile['introduction_line'])) {
+                $introTagline = $profile['introduction_line'];
+            }
         @endphp
 
         <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-8">
+                    @if($availableNow)
                     <div class="inline-block mb-2 px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
-                        AVAILABLE NOW - AVAILABLE TILL 8PM
+                        AVAILABLE NOW{{ $availableTillText }}
                     </div>
+                    @elseif($isOnline)
+                    <div class="inline-block mb-2 px-6 py-2 rounded bg-green-500 text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
+                        ONLINE NOW
+                    </div>
+                    @endif
                     <h1 class="text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">
                         {{ $profile['name'] }}
                     </h1>
@@ -111,7 +85,9 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
                             </span>
                         </div>
                     @endif
-                    <div class="mt-1 text-lg text-gray-700 font-medium">{{ $profile['age'] }} - barely legal, but already dangerous.</div>
+                    @if(!empty($introTagline))
+                    <div class="mt-1 text-lg text-gray-700 font-medium">{{ $introTagline }}</div>
+                    @endif
                 </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
@@ -290,6 +266,7 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
 
                     <!-- Contact Me For Section (Card Style) -->
                     <section id="contact-me-for" class="mt-12 scroll-mt-32">
+                        @if(!empty($servicesProvided))
                         <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
                             <div class="flex items-center mb-1">
                                 <i class="fa-solid fa-comments text-pink-600 text-xl mr-2"></i>
@@ -298,16 +275,7 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
                             </div>
                             <div class="border-b border-pink-300 mb-6 w-24"></div>
                             <ul class="space-y-2 list-none pl-0">
-                                @foreach ([
-                                    'Incalls or Outcalls',
-                                    'GFE bookings',
-                                    'PSE or Very naughty bookings',
-                                    'Social, Netflix, Lunch & Dinner dates',
-                                    'Extended or Overnight bookings',
-                                    'Bookings for couples',
-                                    'Online services',
-                                    'Fly Me To You',
-                                ] as $item)
+                                @foreach($servicesProvided as $item)
                                     <li class="flex items-start gap-2 text-lg">
                                         <span class="text-pink-600 text-xl mt-0.5">&raquo;</span>
                                         <span class="text-gray-900">{{ $item }}</span>
@@ -315,14 +283,15 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
                                 @endforeach
                             </ul>
                         </div>
+                        @endif
                     </section>
 
                                     <!-- Short Link Section -->
                 <div class="text-center mb-8 mt-8">
                     <span class="text-lg font-medium" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
                         Find me easily with this short link:
-                        <a href="https://realbabes.com.au/{{ $profile['slug'] }}" class="hover:underline text-blue-500" style="background: none; color: #4fa3e3;">
-                            hotescorts.com.au/{{ $profile['slug'] }}
+                        <a href="{{ $profileUrl }}" class="hover:underline text-blue-500" style="background: none; color: #4fa3e3;">
+                            {{ $profileUrlDisplay }}
                         </a>
                     </span>
                 </div>
@@ -332,79 +301,93 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
                     <div class="bg-white rounded-2xl shadow p-6 border border-gray-100 mb-6">
                         <div class="flex items-center justify-between mb-4">
                             <span class="font-bold text-lg text-black">Info</span>
+                            @if($profile['is_verified'])
                             <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-xs font-semibold text-blue-700"><i class="fa-solid fa-badge-check text-blue-500 mr-1"></i> PHOTOS VERIFIED</span>
-                            <span class="text-xs text-gray-500 flex items-center"><i class="fa-regular fa-clock mr-1"></i> 3 hours ago</span>
+                            @endif
                         </div>
                         <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm mb-3">
+                            @if(!empty($profile['age']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-hourglass-half text-pink-600 w-5 text-center"></i>
-                                <span>Age <span class="font-bold text-gray-900 ml-1">{{ $profile['age'] ?? '19' }}</span></span>
+                                <span>Age <span class="font-bold text-gray-900 ml-1">{{ $profile['age'] }}</span></span>
                             </div>
+                            @endif
+                            @if(!empty($profile['your_length']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
-                                <span>Height <span class="font-bold text-gray-900 ml-1">{{ $profile['height'] ?? '160 CM' }}</span></span>
+                                <span>Length <span class="font-bold text-gray-900 ml-1">{{ $profile['your_length'] }}</span></span>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-weight-scale text-pink-600 w-5 text-center"></i>
-                                <span>Weight <span class="font-bold text-gray-900 ml-1">{{ $profile['weight'] ?? '48 KG' }}</span></span>
-                            </div>
+                            @endif
+                            @if(!empty($profile['bust_size']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-braille text-pink-600 w-5 text-center"></i>
-                                <span>Cup Size <span class="font-bold text-gray-900 ml-1">{{ $profile['breast'] ?? 'C' }}</span></span>
+                                <span>Bust Size <span class="font-bold text-gray-900 ml-1">{{ $profile['bust_size'] }}</span></span>
                             </div>
+                            @endif
+                            @if(!empty($profile['rate']))
                             <div class="flex items-center space-x-2 col-span-2">
                                 <i class="fa-solid fa-dollar-sign text-pink-600 w-5 text-center"></i>
-                                <span>Price 1 Hour <span class="font-bold text-gray-900 ml-1">{{ $profile['rate'] ?? '$400' }}</span></span>
+                                <span>Rate <span class="font-bold text-gray-900 ml-1">{{ $profile['rate'] }}</span></span>
                             </div>
+                            @endif
                         </div>
                         <div class="mt-4">
                             <span class="block text-lg font-bold mb-1 text-black">Contact</span>
                             <div class="mb-2 text-sm p-2 text-gray-700">
-                                Tell you saw advertisement in <span class="text-pink-600 font-semibold">HotEscort</span>, thanks!<br>
-                                Preferred contact method: <span class="font-semibold">Whatsapp</span>
+                                Tell you saw advertisement in <span class="text-pink-600 font-semibold">HotEscort</span>, thanks!
+                                @if(!empty($profile['contact_method']))
+                                <br>Preferred contact method: <span class="font-semibold">{{ $profile['contact_method'] }}</span>
+                                @endif
                             </div>
+                            @if(!empty($primaryPhone))
                             <div class="flex items-center gap-2 mt-2">
                                 <i class="fa-solid fa-mobile-screen text-blue-600 text-2xl"></i>
                                 <span class="text-xs font-bold text-black">PHONE:</span>
                             </div>
-                            <div class="text-2xl font-bold tracking-wide mb-2 text-black">{{ $primaryPhone ?? '61480858703' }}</div>
+                            <div class="text-2xl font-bold tracking-wide mb-2 text-black">{{ $primaryPhone }}</div>
+                            @endif
+                            @if(!empty($profile['website']))
                             <hr class="my-3">
                             <div class="flex items-center gap-2 mt-2">
                                 <i class="fa-solid fa-globe text-blue-600 text-2xl"></i>
                                 <span class="text-xs font-bold text-black">WEBSITE:</span>
                             </div>
-                            @if(!empty($profile['website']))
-                                <a href="{{ $profile['website'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank">{{ $profile['website'] }}</a>
-                            @else
-                                <a href="https://onlyfans.com/tessa.fox/c156" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank">https://onlyfans.com/tessa.fox/c156</a>
+                            <a href="{{ $profile['website'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['website'] }}</a>
+                            @endif
+                            @if(!empty($profile['onlyfans']))
+                            <hr class="my-3">
+                            <div class="flex items-center gap-2 mt-2">
+                                <i class="fas fa-heart text-pink-600 text-2xl"></i>
+                                <span class="text-xs font-bold text-black">ONLYFANS:</span>
+                            </div>
+                            <a href="{{ $profile['onlyfans'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['onlyfans'] }}</a>
                             @endif
                         </div>
                         <!-- Social Media Links -->
+                        @if(!empty($profile['twitter']) || !empty($profile['whatsapp']))
                         <div class="mt-2">
                             <div class="flex items-center gap-2 mt-2">
                                 <i class="fa-solid fa-share-nodes text-blue-600 text-2xl"></i>
                                 <span class="text-xs font-bold text-black">SOCIAL MEDIA:</span>
                             </div>
                             <div class="flex gap-3 mt-2">
-                                <a href="{{ !empty($profile['facebook']) ? $profile['facebook'] : 'https://facebook.com/dummy' }}" target="_blank" class="text-blue-700 hover:underline" title="Facebook">
-                                    <i class="fab fa-facebook-square fa-2x"></i>
-                                </a>
-                                <a href="{{ !empty($profile['twitter']) ? $profile['twitter'] : 'https://twitter.com/dummy' }}" target="_blank" class="text-blue-400 hover:underline" title="Twitter">
+                                @if(!empty($profile['twitter']))
+                                <a href="{{ $profile['twitter'] }}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline" title="Twitter">
                                     <i class="fab fa-twitter-square fa-2x"></i>
                                 </a>
-                                <a href="{{ !empty($profile['instagram']) ? $profile['instagram'] : 'https://instagram.com/dummy' }}" target="_blank" class="text-pink-500 hover:underline" title="Instagram">
-                                    <i class="fab fa-instagram-square fa-2x"></i>
+                                @endif
+                                @if(!empty($profile['whatsapp']))
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile['whatsapp']) }}" target="_blank" rel="noopener noreferrer" class="text-green-500 hover:underline" title="WhatsApp">
+                                    <i class="fab fa-whatsapp-square fa-2x"></i>
                                 </a>
+                                @endif
                             </div>
                         </div>
+                        @endif
                         <div class="flex gap-4 mt-4">
                             <button class="flex items-center gap-2 border border-gray-300 bg-white rounded-xl px-6 py-3 transition hover:bg-pink-50 text-pink-700 font-semibold text-lg w-1/2 justify-center" style="border-width:2px;">
                                 <i class="fa-regular fa-heart text-2xl"></i>
                                 <span class="font-semibold">Save favourite</span>
-                            </button>
-                            <button class="flex items-center gap-2 border border-gray-300 bg-white rounded-xl px-6 py-3 transition hover:bg-pink-50 text-pink-700 font-semibold text-lg w-1/2 justify-center" style="border-width:2px;">
-                                <i class="fa-regular fa-thumbs-up text-2xl"></i>
-                                <span class="font-semibold">Like <span class="font-bold">46</span></span>
                             </button>
                         </div>
                     </div>
@@ -414,91 +397,80 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
                         </h3>
                         <hr class="mb-4">
                         <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-flag text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Nationality</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['nationality'] ?? 'Colombian' }}</span>
-                                </div>
-                            </div>
+                            @if(!empty($profile['ethnicity']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-globe text-pink-600 w-5 text-center"></i>
                                 <div>
                                     <span>Ethnicity</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['ethnicity'] ?? 'Latina' }}</span>
+                                    <span class="font-bold text-gray-900">{{ $profile['ethnicity'] }}</span>
                                 </div>
                             </div>
+                            @endif
+                            @if(!empty($profile['hair_color']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-palette text-pink-600 w-5 text-center"></i>
                                 <div>
                                     <span>Hair color</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['hair_color'] ?? 'Black' }}</span>
+                                    <span class="font-bold text-gray-900">{{ $profile['hair_color'] }}</span>
                                 </div>
                             </div>
+                            @endif
+                            @if(!empty($profile['hair_length']))
                             <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-eye text-pink-600 w-5 text-center"></i>
+                                <i class="fa-solid fa-scissors text-pink-600 w-5 text-center"></i>
                                 <div>
-                                    <span>Eyes</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['eye_color'] ?? 'Brown' }}</span>
+                                    <span>Hair length</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['hair_length'] }}</span>
                                 </div>
                             </div>
+                            @endif
+                            @if(!empty($profile['body_type']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-child-reaching text-pink-600 w-5 text-center"></i>
                                 <div>
                                     <span>Body type</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['body_type'] ?? 'Slim' }}</span>
+                                    <span class="font-bold text-gray-900">{{ $profile['body_type'] }}</span>
                                 </div>
                             </div>
+                            @endif
+                            @if(!empty($profile['age_group']))
                             <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
+                                <i class="fa-solid fa-hourglass-half text-pink-600 w-5 text-center"></i>
                                 <div>
-                                    <span>Height</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['height'] ?? "5'6\"" }}</span>
+                                    <span>Age group</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['age_group'] }}</span>
                                 </div>
                             </div>
+                            @endif
+                            @if(!empty($profile['bust_size']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-braille text-pink-600 w-5 text-center"></i>
                                 <div>
-                                    <span>Breast</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['breast'] ?? 'C' }}</span>
+                                    <span>Bust size</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['bust_size'] }}</span>
                                 </div>
                             </div>
+                            @endif
+                            @if(!empty($profile['your_length']))
                             <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-water text-pink-600 w-5 text-center"></i>
+                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
                                 <div>
-                                    <span>Pubic hair</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['pubic_hair'] ?? 'Shaved' }}</span>
+                                    <span>Length</span><br>
+                                    <span class="font-bold text-gray-900">{{ $profile['your_length'] }}</span>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-bed text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Place of service</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['place_of_service'] ?? 'Hotel, Private Apartment' }}</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-people-arrows text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Meeting with</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['meeting_with'] ?? 'Men, Couples' }}</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-comments text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Languages</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['languages'] ?? 'Spanish, English' }}</span>
-                                </div>
-                            </div>
+                            @endif
+                            @if(!empty($profile['city']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-location-dot text-pink-600 w-5 text-center"></i>
                                 <div>
                                     <span>Location</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['city'] ?? 'Houston' }}</span>
+                                    <span class="font-bold text-gray-900">{{ $profile['city'] }}{{ !empty($profile['state']) ? ', ' . $profile['state'] : '' }}</span>
                                 </div>
                             </div>
+                            @endif
                         </div>
+                        @if(!empty($profileTags))
                         <div class="flex flex-col gap-y-2 mt-6">
                             <div class="flex flex-wrap gap-x-2">
                                 @foreach(array_chunk($profileTags, 2) as $row)
@@ -510,6 +482,7 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
                                 @endforeach
                             </div>
                         </div>
+                        @endif
                     </div>
                     <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
                         <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">

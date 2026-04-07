@@ -19,6 +19,7 @@ class GetProfileShowData
                 'user.tours',
                 'user.userVideos',
                 'user.onlineUser',
+                'user.availableNow',
                 'user.profileMessage',
                 'city',
                 'state',
@@ -229,6 +230,12 @@ class GetProfileShowData
             'age_group' => $categoryNames->get($providerProfile->age_group_id) ?? '',
             'profile_message' => $user?->profileMessage?->message ?? '',
             'active' => $user?->onlineUser?->isCurrentlyOnline() ?? false,
+            'available_now' => $user?->availableNow?->isCurrentlyAvailable() ?? false,
+            'available_expires_at' => $user?->availableNow?->isCurrentlyAvailable()
+                ? $user->availableNow->available_expires_at
+                : null,
+            'contact_method' => $providerProfile->contact_method ?? '',
+            'phone_contact_preference' => $providerProfile->phone_contact_preference ?? '',
         ];
     }
 
