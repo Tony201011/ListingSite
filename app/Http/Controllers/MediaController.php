@@ -10,7 +10,12 @@ class MediaController extends Controller
 {
     public function show(Request $request, string $path): StreamedResponse
     {
-        if (str_contains($path, '..')) {
+        // Reject paths with traversal sequences, null bytes, or leading slashes
+        if (
+            str_contains($path, '..') ||
+            str_contains($path, "\0") ||
+            str_starts_with($path, '/')
+        ) {
             abort(404);
         }
 
@@ -20,6 +25,8 @@ class MediaController extends Controller
             abort(404);
         }
 
-        return $disk->response($path);
+        return $disk->response($path, null, [
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
     }
 }
