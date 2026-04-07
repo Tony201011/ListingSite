@@ -395,9 +395,16 @@
                 <p class="mb-2 font-medium text-gray-700">
                     You can be found on Hotescorts with the following URLs
                 </p>
-                <p class="break-all font-semibold text-pink-600">
-                    Hotescorts.com.au/escorts/vic/melbourne/sourabh-wadhwa
-                </p>
+                @if($profileUrl)
+                    <a href="{{ $profileUrl }}" target="_blank" class="block break-all font-semibold text-pink-600 hover:underline">
+                        {{ $profileUrl }}
+                    </a>
+                @endif
+                @if($shortUrlFull)
+                    <a href="{{ $shortUrlFull }}" target="_blank" class="mt-1 block break-all font-semibold text-pink-600 hover:underline">
+                        {{ $shortUrlFull }}
+                    </a>
+                @endif
             </div>
         @endif
     </div>
