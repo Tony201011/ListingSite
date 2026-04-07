@@ -152,7 +152,7 @@ return [
                         ['name' => 'suburb', 'type' => 'string', 'optional' => true],
                         ['name' => 'profile_status', 'type' => 'string', 'optional' => true],
                         ['name' => 'is_featured', 'type' => 'bool', 'optional' => true],
-                        ['name' => 'created_at', 'type' => 'int64', 'optional' => true],
+                        ['name' => 'created_at', 'type' => 'int64'],
                     ],
                     'default_sorting_field' => 'created_at',
                 ],
