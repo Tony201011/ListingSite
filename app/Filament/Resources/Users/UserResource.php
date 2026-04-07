@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Users;
 
-use App\Filament\Forms\Components\CkEditor;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -19,6 +18,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -157,13 +157,45 @@ class UserResource extends Resource
                                         ->rows(4)
                                         ->columnSpanFull(),
 
-                                    CkEditor::make('introduction_line')
+                                    RichEditor::make('introduction_line')
                                         ->label('Introduction Line')
-                                        ->columnSpanFull(),
+                                        ->columnSpanFull()
+                                        ->toolbarButtons([
+                                            'bold',
+                                            'italic',
+                                            'underline',
+                                            'strike',
+                                            'bulletList',
+                                            'orderedList',
+                                            'h2',
+                                            'h3',
+                                            'link',
+                                            'blockquote',
+                                            'redo',
+                                            'undo',
+                                        ])
+                                        ->formatStateUsing(fn ($state) => $state ?? '')
+                                        ->dehydrateStateUsing(fn ($state) => $state ?? ''),
 
-                                    CkEditor::make('profile_text')
+                                    RichEditor::make('profile_text')
                                         ->label('Profile Text')
-                                        ->columnSpanFull(),
+                                        ->columnSpanFull()
+                                        ->toolbarButtons([
+                                            'bold',
+                                            'italic',
+                                            'underline',
+                                            'strike',
+                                            'bulletList',
+                                            'orderedList',
+                                            'h2',
+                                            'h3',
+                                            'link',
+                                            'blockquote',
+                                            'redo',
+                                            'undo',
+                                        ])
+                                        ->formatStateUsing(fn ($state) => $state ?? '')
+                                        ->dehydrateStateUsing(fn ($state) => $state ?? ''),
                                 ])
                                 ->columns(2),
 
@@ -502,9 +534,25 @@ class UserResource extends Resource
                             Section::make('Profile Message')
                                 ->relationship('profileMessage')
                                 ->schema([
-                                    CkEditor::make('message')
+                                    RichEditor::make('message')
                                         ->label('Message')
-                                        ->columnSpanFull(),
+                                        ->columnSpanFull()
+                                        ->toolbarButtons([
+                                            'bold',
+                                            'italic',
+                                            'underline',
+                                            'strike',
+                                            'bulletList',
+                                            'orderedList',
+                                            'h2',
+                                            'h3',
+                                            'link',
+                                            'blockquote',
+                                            'redo',
+                                            'undo',
+                                        ])
+                                        ->formatStateUsing(fn ($state) => $state ?? '')
+                                        ->dehydrateStateUsing(fn ($state) => $state ?? ''),
                                 ]),
                         ]),
                 ])
@@ -521,84 +569,28 @@ class UserResource extends Resource
                         ->schema([
                             Section::make('Account Information')
                                 ->schema([
-                                    TextEntry::make('name')
-                                        ->label('User Name'),
-
-                                    TextEntry::make('email')
-                                        ->label('Email')
-                                        ->copyable(),
-
-                                    TextEntry::make('mobile')
-                                        ->label('Mobile')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('suburb')
-                                        ->label('Suburb')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('referral_code')
-                                        ->label('Referral Code')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('created_at')
-                                        ->label('Joined At')
-                                        ->dateTime()
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('email_verified_at')
-                                        ->label('Email Verified At')
-                                        ->dateTime()
-                                        ->placeholder('-'),
-
-                                    IconEntry::make('mobile_verified')
-                                        ->label('Mobile Verified')
-                                        ->boolean(),
-
-                                    IconEntry::make('is_blocked')
-                                        ->label('Blocked')
-                                        ->boolean(),
+                                    TextEntry::make('name')->label('User Name'),
+                                    TextEntry::make('email')->label('Email')->copyable(),
+                                    TextEntry::make('mobile')->label('Mobile')->placeholder('-'),
+                                    TextEntry::make('suburb')->label('Suburb')->placeholder('-'),
+                                    TextEntry::make('referral_code')->label('Referral Code')->placeholder('-'),
+                                    TextEntry::make('created_at')->label('Joined At')->dateTime()->placeholder('-'),
+                                    TextEntry::make('email_verified_at')->label('Email Verified At')->dateTime()->placeholder('-'),
+                                    IconEntry::make('mobile_verified')->label('Mobile Verified')->boolean(),
+                                    IconEntry::make('is_blocked')->label('Blocked')->boolean(),
                                 ])
                                 ->columns(3),
 
                             Section::make('Profile Information')
                                 ->schema([
-                                    TextEntry::make('providerProfile.name')
-                                        ->label('Profile Name')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.slug')
-                                        ->label('Profile Slug')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.description')
-                                        ->label('Description')
-                                        ->placeholder('-')
-                                        ->columnSpanFull(),
-
-                                    TextEntry::make('providerProfile.introduction_line')
-                                        ->label('Introduction Line')
-                                        ->html()
-                                        ->placeholder('-')
-                                        ->columnSpanFull(),
-
-                                    TextEntry::make('providerProfile.profile_text')
-                                        ->label('Profile Text')
-                                        ->html()
-                                        ->placeholder('-')
-                                        ->columnSpanFull(),
-
-                                    IconEntry::make('providerProfile.is_verified')
-                                        ->label('Profile Verified')
-                                        ->boolean(),
-
-                                    IconEntry::make('providerProfile.is_featured')
-                                        ->label('Featured')
-                                        ->boolean(),
-
-                                    TextEntry::make('providerProfile.profile_status')
-                                        ->label('Profile Status')
-                                        ->badge()
-                                        ->placeholder('-'),
+                                    TextEntry::make('providerProfile.name')->label('Profile Name')->placeholder('-'),
+                                    TextEntry::make('providerProfile.slug')->label('Profile Slug')->placeholder('-'),
+                                    TextEntry::make('providerProfile.description')->label('Description')->placeholder('-')->columnSpanFull(),
+                                    TextEntry::make('providerProfile.introduction_line')->label('Introduction Line')->html()->placeholder('-')->columnSpanFull(),
+                                    TextEntry::make('providerProfile.profile_text')->label('Profile Text')->html()->placeholder('-')->columnSpanFull(),
+                                    IconEntry::make('providerProfile.is_verified')->label('Profile Verified')->boolean(),
+                                    IconEntry::make('providerProfile.is_featured')->label('Featured')->boolean(),
+                                    TextEntry::make('providerProfile.profile_status')->label('Profile Status')->badge()->placeholder('-'),
                                 ])
                                 ->columns(2),
                         ]),
@@ -632,73 +624,26 @@ class UserResource extends Resource
                         ->schema([
                             Section::make('Physical Attributes')
                                 ->schema([
-                                    TextEntry::make('providerProfile.age_group_id')
-                                        ->label('Age Group')
-                                        ->formatStateUsing(fn ($state): string => self::categoryName($state)),
-
-                                    TextEntry::make('providerProfile.hair_color_id')
-                                        ->label('Hair Color')
-                                        ->formatStateUsing(fn ($state): string => self::categoryName($state)),
-
-                                    TextEntry::make('providerProfile.hair_length_id')
-                                        ->label('Hair Length')
-                                        ->formatStateUsing(fn ($state): string => self::categoryName($state)),
-
-                                    TextEntry::make('providerProfile.ethnicity_id')
-                                        ->label('Ethnicity')
-                                        ->formatStateUsing(fn ($state): string => self::categoryName($state)),
-
-                                    TextEntry::make('providerProfile.body_type_id')
-                                        ->label('Body Type')
-                                        ->formatStateUsing(fn ($state): string => self::categoryName($state)),
-
-                                    TextEntry::make('providerProfile.bust_size_id')
-                                        ->label('Bust Size')
-                                        ->formatStateUsing(fn ($state): string => self::categoryName($state)),
-
-                                    TextEntry::make('providerProfile.your_length_id')
-                                        ->label('Your Length')
-                                        ->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.age_group_id')->label('Age Group')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.hair_color_id')->label('Hair Color')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.hair_length_id')->label('Hair Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.ethnicity_id')->label('Ethnicity')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.body_type_id')->label('Body Type')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.bust_size_id')->label('Bust Size')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.your_length_id')->label('Your Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
                                 ])
                                 ->columns(3),
 
                             Section::make('Preferences & Services')
                                 ->schema([
-                                    TextEntry::make('providerProfile.availability')
-                                        ->label('Availability')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.contact_method')
-                                        ->label('Contact Method')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.phone_contact_preference')
-                                        ->label('Phone Contact Preference')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.time_waster_shield')
-                                        ->label('Time Waster Shield')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.primary_identity')
-                                        ->label('Primary Identity')
-                                        ->formatStateUsing(fn ($state): string => self::categoryNames($state))
-                                        ->columnSpanFull(),
-
-                                    TextEntry::make('providerProfile.attributes')
-                                        ->label('Attributes')
-                                        ->formatStateUsing(fn ($state): string => self::categoryNames($state))
-                                        ->columnSpanFull(),
-
-                                    TextEntry::make('providerProfile.services_style')
-                                        ->label('Services Style')
-                                        ->formatStateUsing(fn ($state): string => self::categoryNames($state))
-                                        ->columnSpanFull(),
-
-                                    TextEntry::make('providerProfile.services_provided')
-                                        ->label('Services Provided')
-                                        ->formatStateUsing(fn ($state): string => self::categoryNames($state))
-                                        ->columnSpanFull(),
+                                    TextEntry::make('providerProfile.availability')->label('Availability')->placeholder('-'),
+                                    TextEntry::make('providerProfile.contact_method')->label('Contact Method')->placeholder('-'),
+                                    TextEntry::make('providerProfile.phone_contact_preference')->label('Phone Contact Preference')->placeholder('-'),
+                                    TextEntry::make('providerProfile.time_waster_shield')->label('Time Waster Shield')->placeholder('-'),
+                                    TextEntry::make('providerProfile.primary_identity')->label('Primary Identity')->formatStateUsing(fn ($state): string => self::categoryNames($state))->columnSpanFull(),
+                                    TextEntry::make('providerProfile.attributes')->label('Attributes')->formatStateUsing(fn ($state): string => self::categoryNames($state))->columnSpanFull(),
+                                    TextEntry::make('providerProfile.services_style')->label('Services Style')->formatStateUsing(fn ($state): string => self::categoryNames($state))->columnSpanFull(),
+                                    TextEntry::make('providerProfile.services_provided')->label('Services Provided')->formatStateUsing(fn ($state): string => self::categoryNames($state))->columnSpanFull(),
                                 ])
                                 ->columns(2),
                         ]),
@@ -707,25 +652,11 @@ class UserResource extends Resource
                         ->schema([
                             Section::make('Social & Contact')
                                 ->schema([
-                                    TextEntry::make('providerProfile.phone')
-                                        ->label('Phone')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.whatsapp')
-                                        ->label('WhatsApp')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.twitter_handle')
-                                        ->label('Twitter Handle')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.website')
-                                        ->label('Website')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('providerProfile.onlyfans_username')
-                                        ->label('OnlyFans Username')
-                                        ->placeholder('-'),
+                                    TextEntry::make('providerProfile.phone')->label('Phone')->placeholder('-'),
+                                    TextEntry::make('providerProfile.whatsapp')->label('WhatsApp')->placeholder('-'),
+                                    TextEntry::make('providerProfile.twitter_handle')->label('Twitter Handle')->placeholder('-'),
+                                    TextEntry::make('providerProfile.website')->label('Website')->placeholder('-'),
+                                    TextEntry::make('providerProfile.onlyfans_username')->label('OnlyFans Username')->placeholder('-'),
                                 ])
                                 ->columns(2),
                         ]),
@@ -735,19 +666,9 @@ class UserResource extends Resource
                             RepeatableEntry::make('profileImages')
                                 ->label('')
                                 ->schema([
-                                    ImageEntry::make('image_path')
-                                        ->label('Image')
-                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
-                                        ->height(220),
-
-                                    ImageEntry::make('thumbnail_path')
-                                        ->label('Thumbnail')
-                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
-                                        ->height(120),
-
-                                    IconEntry::make('is_primary')
-                                        ->label('Primary')
-                                        ->boolean(),
+                                    ImageEntry::make('image_path')->label('Image')->disk(fn (): string => config('media.delivery_disk', 'public'))->height(220),
+                                    ImageEntry::make('thumbnail_path')->label('Thumbnail')->disk(fn (): string => config('media.delivery_disk', 'public'))->height(120),
+                                    IconEntry::make('is_primary')->label('Primary')->boolean(),
                                 ])
                                 ->columns(3),
                         ]),
@@ -757,15 +678,8 @@ class UserResource extends Resource
                             RepeatableEntry::make('userVideos')
                                 ->label('')
                                 ->schema([
-                                    TextEntry::make('original_name')
-                                        ->label('File Name')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('video_url')
-                                        ->label('Video URL')
-                                        ->placeholder('-')
-                                        ->copyable()
-                                        ->columnSpanFull(),
+                                    TextEntry::make('original_name')->label('File Name')->placeholder('-'),
+                                    TextEntry::make('video_url')->label('Video URL')->placeholder('-')->copyable()->columnSpanFull(),
                                 ])
                                 ->columns(2),
                         ]),
@@ -775,21 +689,10 @@ class UserResource extends Resource
                             RepeatableEntry::make('rates')
                                 ->label('')
                                 ->schema([
-                                    TextEntry::make('description')
-                                        ->label('Description')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('incall')
-                                        ->label('Incall')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('outcall')
-                                        ->label('Outcall')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('extra')
-                                        ->label('Extra')
-                                        ->placeholder('-'),
+                                    TextEntry::make('description')->label('Description')->placeholder('-'),
+                                    TextEntry::make('incall')->label('Incall')->placeholder('-'),
+                                    TextEntry::make('outcall')->label('Outcall')->placeholder('-'),
+                                    TextEntry::make('extra')->label('Extra')->placeholder('-'),
                                 ])
                                 ->columns(4),
                         ]),
@@ -808,22 +711,9 @@ class UserResource extends Resource
                                             default => 'warning',
                                         })
                                         ->placeholder('-'),
-
-                                    TextEntry::make('submitted_at')
-                                        ->label('Submitted At')
-                                        ->dateTime()
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('admin_note')
-                                        ->label('Admin Note')
-                                        ->placeholder('-')
-                                        ->columnSpanFull(),
-
-                                    ImageEntry::make('photo_url')
-                                        ->label('Photo')
-                                        ->disk(fn (): string => config('media.delivery_disk', 'public'))
-                                        ->height(220)
-                                        ->columnSpanFull(),
+                                    TextEntry::make('submitted_at')->label('Submitted At')->dateTime()->placeholder('-'),
+                                    TextEntry::make('admin_note')->label('Admin Note')->placeholder('-')->columnSpanFull(),
+                                    ImageEntry::make('photo_url')->label('Photo')->disk(fn (): string => config('media.delivery_disk', 'public'))->height(220)->columnSpanFull(),
                                 ])
                                 ->columns(2),
                         ]),
@@ -833,32 +723,13 @@ class UserResource extends Resource
                             RepeatableEntry::make('availabilities')
                                 ->label('')
                                 ->schema([
-                                    TextEntry::make('day')
-                                        ->label('Day'),
-
-                                    IconEntry::make('enabled')
-                                        ->label('Enabled')
-                                        ->boolean(),
-
-                                    TextEntry::make('from_time')
-                                        ->label('From')
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('to_time')
-                                        ->label('To')
-                                        ->placeholder('-'),
-
-                                    IconEntry::make('till_late')
-                                        ->label('Till Late')
-                                        ->boolean(),
-
-                                    IconEntry::make('all_day')
-                                        ->label('All Day')
-                                        ->boolean(),
-
-                                    IconEntry::make('by_appointment')
-                                        ->label('By Appointment')
-                                        ->boolean(),
+                                    TextEntry::make('day')->label('Day'),
+                                    IconEntry::make('enabled')->label('Enabled')->boolean(),
+                                    TextEntry::make('from_time')->label('From')->placeholder('-'),
+                                    TextEntry::make('to_time')->label('To')->placeholder('-'),
+                                    IconEntry::make('till_late')->label('Till Late')->boolean(),
+                                    IconEntry::make('all_day')->label('All Day')->boolean(),
+                                    IconEntry::make('by_appointment')->label('By Appointment')->boolean(),
                                 ])
                                 ->columns(4),
                         ]),
@@ -956,10 +827,8 @@ class UserResource extends Resource
                 Filter::make('created_at')
                     ->label('Created Date')
                     ->schema([
-                        DatePicker::make('created_from')
-                            ->label('From'),
-                        DatePicker::make('created_until')
-                            ->label('Until'),
+                        DatePicker::make('created_from')->label('From'),
+                        DatePicker::make('created_until')->label('Until'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -1143,7 +1012,7 @@ class UserResource extends Resource
 
         return collect($state)
             ->flatten(1)
-            ->map(fn ($value) => is_string($value) ? trim($value) : $value)
+            ->map(fn ($value) => is_string($value) ? trim((string) $value) : $value)
             ->filter(fn ($value): bool => filled($value) && $value !== '-')
             ->values()
             ->all();
