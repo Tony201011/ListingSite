@@ -484,13 +484,13 @@ class UserResource extends Resource
                                             Select::make('day')
                                                 ->label('Day')
                                                 ->options([
-                                                    'monday' => 'Monday',
-                                                    'tuesday' => 'Tuesday',
-                                                    'wednesday' => 'Wednesday',
-                                                    'thursday' => 'Thursday',
-                                                    'friday' => 'Friday',
-                                                    'saturday' => 'Saturday',
-                                                    'sunday' => 'Sunday',
+                                                    'Monday' => 'Monday',
+                                                    'Tuesday' => 'Tuesday',
+                                                    'Wednesday' => 'Wednesday',
+                                                    'Thursday' => 'Thursday',
+                                                    'Friday' => 'Friday',
+                                                    'Saturday' => 'Saturday',
+                                                    'Sunday' => 'Sunday',
                                                 ])
                                                 ->required(),
 
