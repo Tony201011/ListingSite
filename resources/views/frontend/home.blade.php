@@ -13,7 +13,7 @@
 @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-900 text-gray-100">
+<div class="min-h-screen bg-gray-50 text-gray-800">
 
     {{-- Hero / Search Section --}}
     <div class="relative overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-900">
@@ -64,18 +64,18 @@
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8" x-data="{ viewMode: 'grid' }">
 
         {{-- Toolbar: filters, sort, view toggle --}}
-        <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-800 pb-4">
+        <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
             <div class="flex items-center gap-2">
-                <span class="rounded-full border border-gray-700 bg-gray-800 px-4 py-1.5 text-xs font-semibold text-gray-300 cursor-default">New girls</span>
-                <span class="rounded-full border border-pink-600 bg-pink-600/10 px-4 py-1.5 text-xs font-semibold text-pink-400">All girls</span>
+                <span class="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-xs font-semibold text-gray-700 cursor-default">New girls</span>
+                <span class="rounded-full border border-pink-600 bg-pink-600/10 px-4 py-1.5 text-xs font-semibold text-pink-600">All girls</span>
             </div>
 
-            <div class="flex items-center gap-1 text-xs text-gray-400 ml-1">
+            <div class="flex items-center gap-1 text-xs text-gray-600 ml-1">
                 <i class="fa-solid fa-fire text-pink-500 text-[10px]"></i>
                 <span>Popular</span>
             </div>
 
-            <div class="ml-auto flex items-center gap-2 text-xs text-gray-400">
+            <div class="ml-auto flex items-center gap-2 text-xs text-gray-600">
                 <span class="hidden sm:inline text-gray-500">
                     {{ $profiles->total() }} {{ $profiles->total() === 1 ? 'profile' : 'profiles' }}
                     @if($hasActiveFilters)
@@ -85,7 +85,7 @@
                 <button
                     type="button"
                     class="rounded-lg border px-2.5 py-1.5 transition"
-                    :class="viewMode === 'list' ? 'border-pink-600 bg-pink-600/10 text-pink-400' : 'border-gray-700 text-gray-500 hover:border-gray-600 hover:text-gray-300'"
+                    :class="viewMode === 'list' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'"
                     @click="viewMode = 'list'"
                     title="List view"
                 >
@@ -94,7 +94,7 @@
                 <button
                     type="button"
                     class="rounded-lg border px-2.5 py-1.5 transition"
-                    :class="viewMode === 'grid' ? 'border-pink-600 bg-pink-600/10 text-pink-400' : 'border-gray-700 text-gray-500 hover:border-gray-600 hover:text-gray-300'"
+                    :class="viewMode === 'grid' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'"
                     @click="viewMode = 'grid'"
                     title="Grid view"
                 >
@@ -107,19 +107,19 @@
         @if($hasActiveFilters)
             <div class="mb-4 flex flex-wrap gap-2">
                 @if($locationQuery !== '')
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-800 border border-gray-700 px-3 py-1 text-xs text-gray-300">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 border border-gray-300 px-3 py-1 text-xs text-gray-700">
                         <i class="fa-solid fa-location-dot text-pink-500 text-[10px]"></i> {{ $locationQuery }}
                     </span>
                 @endif
                 @if($escortNameQuery !== '')
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-800 border border-gray-700 px-3 py-1 text-xs text-gray-300">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 border border-gray-300 px-3 py-1 text-xs text-gray-700">
                         <i class="fa-solid fa-user text-pink-500 text-[10px]"></i> {{ $escortNameQuery }}
                     </span>
                 @endif
                 @foreach(collect($selectedCategoryItems) as $item)
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-800 border border-gray-700 px-3 py-1 text-xs text-gray-300">
-                        {{ $item['name'] }}
-                    </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                            {{ $item['name'] }}
+                        </span>
                 @endforeach
             </div>
         @endif
@@ -205,9 +205,9 @@
                     </div>
                 </article>
             @empty
-                <div class="col-span-full rounded-2xl border border-dashed border-gray-700 bg-gray-800/40 p-12 text-center">
-                    <i class="fa-solid fa-magnifying-glass mb-4 text-3xl text-gray-600"></i>
-                    <p class="text-sm font-medium text-gray-400">No profiles found matching your criteria.</p>
+                <div class="col-span-full rounded-2xl border border-dashed border-gray-300 bg-gray-100 p-12 text-center">
+                    <i class="fa-solid fa-magnifying-glass mb-4 text-3xl text-gray-400"></i>
+                    <p class="text-sm font-medium text-gray-600">No profiles found matching your criteria.</p>
                     @if($hasActiveFilters)
                         <a href="{{ url('/') }}" class="mt-4 inline-block rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white hover:bg-pink-700 transition">Clear filters</a>
                     @endif
@@ -237,17 +237,17 @@
         transform-origin: center center;
     }
 
-    /* Pagination dark theme override */
+    /* Pagination light theme override */
     nav[aria-label="Pagination"] span,
     nav[aria-label="Pagination"] a {
-        background-color: #1f2937 !important;
-        border-color: #374151 !important;
-        color: #d1d5db !important;
+        background-color: #ffffff !important;
+        border-color: #d1d5db !important;
+        color: #374151 !important;
     }
 
     nav[aria-label="Pagination"] a:hover {
-        background-color: #374151 !important;
-        color: #f9fafb !important;
+        background-color: #f3f4f6 !important;
+        color: #111827 !important;
     }
 
     nav[aria-label="Pagination"] [aria-current="page"] span,
