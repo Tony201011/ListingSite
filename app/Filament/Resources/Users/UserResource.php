@@ -992,8 +992,16 @@ class UserResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->label('View')
+                    ->label('View as Admin')
                     ->icon('heroicon-o-eye'),
+
+                Action::make('view_as_provider')
+                    ->label('View as Provider')
+                    ->icon('heroicon-o-user')
+                    ->color('info')
+                    ->url(fn (User $record): string => $record->providerProfile?->slug ? route('profile.show', ['slug' => $record->providerProfile->slug]) : '#')
+                    ->openUrlInNewTab()
+                    ->visible(fn (User $record): bool => filled($record->providerProfile?->slug)),
 
                 Action::make('edit')
                     ->label('Edit')
