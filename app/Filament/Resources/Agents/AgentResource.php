@@ -10,7 +10,6 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
@@ -75,7 +74,7 @@ class AgentResource extends Resource
                 ->same('passwordConfirmation')
                 ->dehydrated(fn ($state): bool => filled($state))
                 ->suffixAction(
-                    FormAction::make('generatePassword')
+                    Action::make('generatePassword')
                         ->label('Generate')
                         ->icon('heroicon-o-sparkles')
                         ->action(function (Set $set): void {
