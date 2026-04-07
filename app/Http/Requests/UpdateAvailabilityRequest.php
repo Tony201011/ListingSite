@@ -61,6 +61,8 @@ class UpdateAvailabilityRequest extends FormRequest
 
                 $enabled = ! empty($dayData['enabled']);
                 $allDay = ! empty($dayData['all_day']);
+                $tillLate = ! empty($dayData['till_late']);
+                $byAppointment = ! empty($dayData['by_appointment']);
                 $from = $dayData['from'] ?? null;
                 $to = $dayData['to'] ?? null;
 
@@ -68,7 +70,7 @@ class UpdateAvailabilityRequest extends FormRequest
                     continue;
                 }
 
-                if ($allDay) {
+                if ($allDay || $byAppointment || $tillLate) {
                     continue;
                 }
 

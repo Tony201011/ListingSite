@@ -104,7 +104,7 @@
                                             </label>
                                             <select
                                                 x-model="form['{{ $day }}'].to"
-                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day || form['{{ $day }}'].by_appointment"
+                                                :disabled="!form['{{ $day }}'].enabled || form['{{ $day }}'].all_day || form['{{ $day }}'].by_appointment || form['{{ $day }}'].till_late"
                                                 :class="getFieldError('{{ $day }}', 'to') ? 'border-red-500 ring-2 ring-red-100' : 'border-gray-300'"
                                                 class="w-full rounded-xl bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 disabled:bg-gray-100 disabled:text-gray-400"
                                             >
