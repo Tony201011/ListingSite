@@ -38,10 +38,6 @@ class AgentResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static function isCreatePage(): bool
-    {
-        return request()->routeIs('filament.admin.resources.agents.create');
-    }
 
     public static function canAccess(): bool
     {
@@ -69,7 +65,7 @@ class AgentResource extends Resource
             TextInput::make('password')
                 ->password()
                 ->revealable(filament()->arePasswordsRevealable())
-                ->required(fn (): bool => static::isCreatePage())
+                ->required(fn ($livewire): bool => $livewire instanceof CreateAgent)
                 ->minLength(8)
                 ->same('passwordConfirmation')
                 ->dehydrated(fn ($state): bool => filled($state))
@@ -93,8 +89,8 @@ class AgentResource extends Resource
                 ->label('Confirm Password')
                 ->password()
                 ->revealable(filament()->arePasswordsRevealable())
-                ->required(fn (): bool => static::isCreatePage() || filled(request()->input('password')))
-                ->visible(fn (): bool => static::isCreatePage())
+                ->required(fn ($livewire): bool => $livewire instanceof CreateAgent)
+                ->visible(fn ($livewire): bool => $livewire instanceof CreateAgent)
                 ->dehydrated(false),
         ]);
     }
