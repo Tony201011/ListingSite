@@ -46,13 +46,28 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
             $availableNow = $profile['available_now'] ?? false;
             $isOnline = $profile['active'] ?? false;
             $availableExpiresAt = $profile['available_expires_at'] ?? null;
+            $availableTillText = $availableNow && $availableExpiresAt
+                ? ' - AVAILABLE TILL ' . \Carbon\Carbon::parse($availableExpiresAt)->format('g:ia')
+                : '';
+
+            $profileUrl = route('profile.show', ['slug' => $profile['slug']]);
+            $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . '/profile/' . $profile['slug'];
+
+            $introTagline = '';
+            if (!empty($profile['age']) && !empty($profile['introduction_line'])) {
+                $introTagline = $profile['age'] . ' - ' . $profile['introduction_line'];
+            } elseif (!empty($profile['age'])) {
+                $introTagline = (string) $profile['age'];
+            } elseif (!empty($profile['introduction_line'])) {
+                $introTagline = $profile['introduction_line'];
+            }
         @endphp
 
         <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-8">
                     @if($availableNow)
                     <div class="inline-block mb-2 px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
-                        AVAILABLE NOW{{ $availableExpiresAt ? ' - AVAILABLE TILL ' . \Carbon\Carbon::parse($availableExpiresAt)->format('g:ia') : '' }}
+                        AVAILABLE NOW{{ $availableTillText }}
                     </div>
                     @elseif($isOnline)
                     <div class="inline-block mb-2 px-6 py-2 rounded bg-green-500 text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
@@ -70,10 +85,8 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                             </span>
                         </div>
                     @endif
-                    @if(!empty($profile['introduction_line']) || !empty($profile['age']))
-                    <div class="mt-1 text-lg text-gray-700 font-medium">
-                        @if(!empty($profile['age'])){{ $profile['age'] }}@endif@if(!empty($profile['age']) && !empty($profile['introduction_line'])) - @endif@if(!empty($profile['introduction_line'])){{ $profile['introduction_line'] }}@endif
-                    </div>
+                    @if(!empty($introTagline))
+                    <div class="mt-1 text-lg text-gray-700 font-medium">{{ $introTagline }}</div>
                     @endif
                 </div>
 
@@ -277,9 +290,8 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                 <div class="text-center mb-8 mt-8">
                     <span class="text-lg font-medium" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
                         Find me easily with this short link:
-                        @php $profileUrl = route('profile.show', ['slug' => $profile['slug']]); @endphp
                         <a href="{{ $profileUrl }}" class="hover:underline text-blue-500" style="background: none; color: #4fa3e3;">
-                            {{ parse_url($profileUrl, PHP_URL_HOST) }}/profile/{{ $profile['slug'] }}
+                            {{ $profileUrlDisplay }}
                         </a>
                     </span>
                 </div>
