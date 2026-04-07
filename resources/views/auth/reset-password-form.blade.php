@@ -134,7 +134,7 @@
                         x-cloak
                         x-transition
                         @click.away="showPasswordPopup = false"
-                        class="absolute z-20 mt-3 w-full bg-white border border-gray-200 rounded-2xl shadow-xl p-4"
+                        class="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-white border border-gray-200 rounded-2xl shadow-xl p-4"
                     >
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div>
