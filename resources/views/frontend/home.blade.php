@@ -13,7 +13,7 @@
 @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-50 text-gray-800">
+<div class="min-h-screen bg-gray-100 text-gray-800">
 
     {{-- Hero / Search Section --}}
     <div class="relative overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-900">
@@ -66,7 +66,7 @@
         {{-- Toolbar: filters, sort, view toggle --}}
         <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
             <div class="flex items-center gap-2">
-                <span class="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-xs font-semibold text-gray-700 cursor-default">New girls</span>
+                <span class="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-xs font-semibold text-gray-600 cursor-default">New girls</span>
                 <span class="rounded-full border border-pink-600 bg-pink-600/10 px-4 py-1.5 text-xs font-semibold text-pink-600">All girls</span>
             </div>
 
@@ -107,17 +107,17 @@
         @if($hasActiveFilters)
             <div class="mb-4 flex flex-wrap gap-2">
                 @if($locationQuery !== '')
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
                         <i class="fa-solid fa-location-dot text-pink-500 text-[10px]"></i> {{ $locationQuery }}
                     </span>
                 @endif
                 @if($escortNameQuery !== '')
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
                         <i class="fa-solid fa-user text-pink-500 text-[10px]"></i> {{ $escortNameQuery }}
                     </span>
                 @endif
                 @foreach(collect($selectedCategoryItems) as $item)
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
                             {{ $item['name'] }}
                         </span>
                 @endforeach
@@ -128,84 +128,101 @@
         <div x-cloak class="grid gap-4" :class="viewMode === 'grid' ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5' : 'grid-cols-1'">
             @forelse($profiles as $profile)
                 <article
-                    class="view-card group relative overflow-hidden rounded-2xl border border-gray-800 bg-gray-850 shadow-md transition-all duration-300 hover:border-pink-700/50 hover:shadow-pink-900/20 hover:shadow-xl"
+                    class="view-card group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300"
                     :class="viewMode === 'list' ? 'md:flex md:flex-row' : ''"
-                    style="background-color: #111827;"
                 >
                     <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
                     {{-- Image --}}
-                    <div class="view-card-media relative overflow-hidden" :class="viewMode === 'list' ? 'md:w-64 md:shrink-0' : ''">
+                    <div class="view-card-media relative overflow-hidden rounded-t-2xl" :class="viewMode === 'list' ? 'md:w-56 md:shrink-0 md:rounded-none md:rounded-l-2xl' : ''">
                         @if($profile['image'])
                             <img
                                 src="{{ $profile['image'] }}"
                                 alt="{{ $profile['name'] }}"
-                                class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'"
                                 loading="lazy"
                             >
                         @else
-                            <div class="flex items-center justify-center bg-gray-800 text-gray-600" :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'">
+                            <div class="flex items-center justify-center bg-gray-100 text-gray-400" :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'">
                                 <i class="fa-solid fa-image text-4xl"></i>
                             </div>
                         @endif
 
-                        {{-- Gradient overlay --}}
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent pointer-events-none"></div>
-
-                        {{-- Badges --}}
-                        <div class="absolute left-2 top-2 z-10 flex flex-wrap gap-1">
+                        {{-- Photo Verified / Online badges --}}
+                        <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
                             @if($profile['verified'])
-                                <span class="inline-flex items-center gap-1 rounded-md bg-cyan-600/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-white shadow">
-                                    <i class="fa-solid fa-shield-check text-[8px]"></i> Verified
+                                <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                    <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
                                 </span>
                             @endif
                             @if($profile['active'])
-                                <span class="inline-flex items-center gap-1 rounded-md bg-emerald-600/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-white shadow">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online
+                                <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
                                 </span>
                             @endif
-                        </div>
-
-                        {{-- Rate badge bottom-left of image --}}
-                        <div class="absolute bottom-2 left-2 z-10">
-                            <span class="rounded-lg bg-gray-900/80 backdrop-blur-sm px-2.5 py-1 text-xs font-bold text-white border border-white/10">
-                                {{ $profile['rate'] }}
-                            </span>
                         </div>
                     </div>
 
                     {{-- Content --}}
                     <div class="p-3.5" :class="viewMode === 'list' ? 'flex flex-col justify-between flex-1 p-4' : ''">
-                        <div>
-                            <div class="mb-1 flex items-center justify-between">
-                                <h3 class="text-sm font-semibold text-white truncate" :class="viewMode === 'list' ? 'md:text-xl' : ''">
-                                    {{ $profile['name'] }}
-                                    <span class="font-normal text-gray-400">({{ $profile['age'] }})</span>
-                                </h3>
+                        {{-- Date + Actions row --}}
+                        <div class="mb-2 flex items-center justify-between">
+                            <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
+                            <div class="flex items-center gap-2 text-gray-400 relative z-20">
+                                <button type="button" class="hover:text-pink-500 transition-colors" title="Favourite">
+                                    <i class="fa-regular fa-heart text-xs"></i>
+                                </button>
+                                <button type="button" class="hover:text-blue-500 transition-colors" title="Bookmark">
+                                    <i class="fa-regular fa-bookmark text-xs"></i>
+                                </button>
+                                @if($profile['age'])
+                                    <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none">{{ $profile['age'] }}</span>
+                                @endif
                             </div>
-
-                            <p class="mb-2.5 line-clamp-2 text-xs leading-relaxed text-gray-400" :class="viewMode === 'list' ? 'md:line-clamp-3 md:text-sm' : ''">
-                                {{ $profile['description'] ?? '' }}
-                            </p>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-gray-800 pt-2.5 text-[11px] text-gray-500" :class="viewMode === 'list' ? 'md:gap-x-4 md:text-xs' : ''">
+                        {{-- Name --}}
+                        <h3 class="text-sm font-medium text-gray-800 truncate" :class="viewMode === 'list' ? 'md:text-base' : ''">
+                            {{ $profile['name'] }} <span class="text-gray-400 font-normal">()</span>
+                        </h3>
+
+                        {{-- Rate --}}
+                        <p class="mt-0.5 text-2xl font-bold text-gray-900" :class="viewMode === 'list' ? 'md:text-3xl' : ''">
+                            {{ $profile['rate'] }}
+                        </p>
+
+                        {{-- Location + Service --}}
+                        <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
                             @if($profile['city'])
-                                <span class="inline-flex items-center gap-1"><i class="fa-solid fa-location-dot text-pink-500 text-[9px]"></i> {{ $profile['city'] }}</span>
+                                <span class="inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
+                                    {{ $profile['city'] }}
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
+                                </span>
                             @endif
                             @if(!empty($profile['service_1']))
-                                <span class="inline-flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[9px]"></i> {{ $profile['service_1'] }}</span>
+                                <span class="inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
+                                    {{ $profile['service_1'] }}
+                                </span>
                             @endif
-                            @if(!empty($profile['service_2']))
-                                <span class="inline-flex items-center gap-1"><i class="fa-solid fa-gem text-purple-400 text-[9px]"></i> {{ $profile['service_2'] }}</span>
-                            @endif
-                            <span class="ml-auto text-gray-600 text-[10px]">{{ $profile['date'] }}</span>
                         </div>
+
+                        {{-- Categories --}}
+                        @if(!empty($profile['service_2']) || !empty($profile['description']))
+                            <div class="mt-2 text-[12px] text-gray-600 line-clamp-2">
+                                <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
+                                {{ !empty($profile['service_2']) ? $profile['service_2'] : $profile['description'] }}
+                            </div>
+                        @endif
                     </div>
                 </article>
             @empty
-                <div class="col-span-full rounded-2xl border border-dashed border-gray-300 bg-gray-100 p-12 text-center">
+                <div class="col-span-full rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
                     <i class="fa-solid fa-magnifying-glass mb-4 text-3xl text-gray-400"></i>
                     <p class="text-sm font-medium text-gray-600">No profiles found matching your criteria.</p>
                     @if($hasActiveFilters)
@@ -237,7 +254,7 @@
         transform-origin: center center;
     }
 
-    /* Pagination light theme override */
+    /* Pagination light theme */
     nav[aria-label="Pagination"] span,
     nav[aria-label="Pagination"] a {
         background-color: #ffffff !important;
@@ -246,7 +263,7 @@
     }
 
     nav[aria-label="Pagination"] a:hover {
-        background-color: #f3f4f6 !important;
+        background-color: #f9fafb !important;
         color: #111827 !important;
     }
 
