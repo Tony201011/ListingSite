@@ -13,6 +13,7 @@ use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\FavouriteBookmarkController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\SearchController;
 /*******auth Controllers end */
 
 /***profile Controllers start*/
@@ -83,6 +84,7 @@ Route::get('/faq/load-more', [FrontendPageController::class, 'faqLoadMore'])->na
 Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('anti-spam-policy');
 
 Route::get('api/suburbs/search', [SuburbController::class, 'search'])->name('api.suburbs.search');
+Route::get('api/search/suggestions', [SearchController::class, 'suggestions'])->name('api.search.suggestions');
 
 Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('contact-us');
 Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
