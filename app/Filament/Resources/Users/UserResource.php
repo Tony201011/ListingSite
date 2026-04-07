@@ -376,7 +376,7 @@ class UserResource extends Resource
                                             FileUpload::make('image_path')
                                                 ->label('Image')
                                                 ->image()
-                                                ->disk(fn (): string => config('media.upload_disk', 'public'))
+                                                ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/images')
                                                 ->preserveFilenames()
                                                 ->columnSpanFull(),
@@ -384,7 +384,7 @@ class UserResource extends Resource
                                             FileUpload::make('thumbnail_path')
                                                 ->label('Thumbnail')
                                                 ->image()
-                                                ->disk(fn (): string => config('media.upload_disk', 'public'))
+                                                ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/thumbnails')
                                                 ->preserveFilenames()
                                                 ->columnSpanFull(),
