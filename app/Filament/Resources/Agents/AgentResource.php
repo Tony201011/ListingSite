@@ -10,7 +10,10 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,6 +21,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class AgentResource extends Resource
 {
@@ -69,7 +73,23 @@ class AgentResource extends Resource
                 ->required(fn (): bool => static::isCreatePage())
                 ->minLength(8)
                 ->same('passwordConfirmation')
-                ->dehydrated(fn ($state): bool => filled($state)),
+                ->dehydrated(fn ($state): bool => filled($state))
+                ->suffixAction(
+                    FormAction::make('generatePassword')
+                        ->label('Generate')
+                        ->icon('heroicon-o-sparkles')
+                        ->action(function (Set $set): void {
+                            $password = Str::password(16, symbols: true);
+                            $set('password', $password);
+                            $set('passwordConfirmation', $password);
+                            Notification::make()
+                                ->title('Password generated')
+                                ->body($password)
+                                ->success()
+                                ->persistent()
+                                ->send();
+                        })
+                ),
             TextInput::make('passwordConfirmation')
                 ->label('Confirm Password')
                 ->password()
