@@ -3,7 +3,6 @@
 @section('title', 'Advanced Search / Filter')
 
 @php
-    $selectedCategoryIds = collect($selectedCategoryIds ?? []);
     $locationQuery = (string) ($locationQuery ?? '');
     $escortNameQuery = (string) ($escortNameQuery ?? '');
     $hasAgeFilter = $hasAgeFilter ?? false;

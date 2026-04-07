@@ -11,6 +11,14 @@ class BuildProfileFilterViewData
 {
     private const PROFILES_PER_PAGE = 12;
 
+    private const DEFAULT_MIN_AGE = 18;
+
+    private const DEFAULT_MAX_AGE = 40;
+
+    private const DEFAULT_MIN_PRICE = 150;
+
+    private const DEFAULT_MAX_PRICE = 400;
+
     private const SLUG_TO_COLUMN = [
         'hair-color' => 'hair_color_id',
         'hair-length' => 'hair_length_id',
@@ -100,10 +108,10 @@ class BuildProfileFilterViewData
             ->values()
             ->all();
 
-        $minAge = (int) ($validated['min_age'] ?? 18);
-        $maxAge = (int) ($validated['max_age'] ?? 40);
-        $minPrice = (int) ($validated['min_price'] ?? 150);
-        $maxPrice = (int) ($validated['max_price'] ?? 400);
+        $minAge = (int) ($validated['min_age'] ?? self::DEFAULT_MIN_AGE);
+        $maxAge = (int) ($validated['max_age'] ?? self::DEFAULT_MAX_AGE);
+        $minPrice = (int) ($validated['min_price'] ?? self::DEFAULT_MIN_PRICE);
+        $maxPrice = (int) ($validated['max_price'] ?? self::DEFAULT_MAX_PRICE);
 
         if ($minAge > $maxAge) {
             [$minAge, $maxAge] = [$maxAge, $minAge];
@@ -140,8 +148,8 @@ class BuildProfileFilterViewData
             ->whereIn('id', $selectedCategoryIds)
             ->values();
 
-        $hasAgeFilter = $minAge !== 18 || $maxAge !== 40;
-        $hasPriceFilter = $minPrice !== 150 || $maxPrice !== 400;
+        $hasAgeFilter = $minAge !== self::DEFAULT_MIN_AGE || $maxAge !== self::DEFAULT_MAX_AGE;
+        $hasPriceFilter = $minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE;
 
         return compact(
             'filterGroups',
@@ -211,7 +219,7 @@ class BuildProfileFilterViewData
             $query->whereBetween('age', [$minAge, $maxAge]);
         }
 
-        if ($minPrice !== 150 || $maxPrice !== 400) {
+        if ($minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE) {
             $query->whereHas('user.rates', function ($q) use ($minPrice, $maxPrice): void {
                 $q->whereRaw(
                     "CASE
@@ -276,10 +284,10 @@ class BuildProfileFilterViewData
         $appendParams = array_filter([
             'location' => $locationQuery ?: null,
             'escort_name' => $escortNameQuery ?: null,
-            'min_age' => $minAge !== 18 ? $minAge : null,
-            'max_age' => $maxAge !== 40 ? $maxAge : null,
-            'min_price' => $minPrice !== 150 ? $minPrice : null,
-            'max_price' => $maxPrice !== 400 ? $maxPrice : null,
+            'min_age' => $minAge !== self::DEFAULT_MIN_AGE ? $minAge : null,
+            'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
+            'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
+            'max_price' => $maxPrice !== self::DEFAULT_MAX_PRICE ? $maxPrice : null,
         ]);
 
         foreach ($selectedCategoryIds as $categoryId) {
