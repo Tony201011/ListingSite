@@ -158,6 +158,7 @@ class UserResource extends Resource
 
                                             CkEditor::make('introduction_line')
                                                 ->label('Introduction Line')
+                                                ->html()
                                                 ->columnSpanFull(),
 
                                             Textarea::make('description')
@@ -167,6 +168,7 @@ class UserResource extends Resource
 
                                             CkEditor::make('profile_text')
                                                 ->label('Profile Text')
+                                                ->html()
                                                 ->columnSpanFull(),
                                         ])
                                         ->columns(2),
