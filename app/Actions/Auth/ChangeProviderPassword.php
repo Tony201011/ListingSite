@@ -3,7 +3,7 @@
 namespace App\Actions\Auth;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class ChangeProviderPassword
 {
@@ -12,12 +12,15 @@ class ChangeProviderPassword
         abort_if(! $user, 403);
 
         $user->update([
-            'password' => Hash::make($newPassword),
+            'password' => $newPassword,
         ]);
+
+        Auth::login($user->fresh());
 
         return [
             'success' => true,
             'message' => 'Your password has been changed successfully.',
+            'redirect' => '/my-profile',
         ];
     }
 }
