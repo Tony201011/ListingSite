@@ -86,7 +86,7 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                         </div>
                     @endif
                     @if(!empty($introTagline))
-                    <div class="mt-1 text-lg text-gray-700 font-medium">{{ $introTagline }}</div>
+                    <div class="mt-1 text-lg text-gray-700 font-medium">{!! $introTagline !!}</div>
                     @endif
                 </div>
 
