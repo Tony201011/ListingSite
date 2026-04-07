@@ -49,6 +49,9 @@ class CreateAgent extends CreateRecord
             return;
         }
 
-        SendAgentAccountEmailJob::dispatchSync($user->id, $this->plainPassword, $activeMailSetting->id);
+        $plainPassword = $this->plainPassword;
+        $this->plainPassword = '';
+
+        SendAgentAccountEmailJob::dispatchSync($user->id, $plainPassword, $activeMailSetting->id);
     }
 }
