@@ -334,7 +334,7 @@
             suggestions: [],
             showSuggestions: false,
             highlightedIndex: -1,
-            _abortController: null,
+            abortController: null,
 
             fetchSuggestions() {
                 const q = this.term.trim();
@@ -343,22 +343,26 @@
                     return;
                 }
 
-                if (this._abortController) {
-                    this._abortController.abort();
+                if (this.abortController) {
+                    this.abortController.abort();
                 }
-                this._abortController = new AbortController();
+                this.abortController = new AbortController();
 
                 fetch(config.suggestionsUrl + '?q=' + encodeURIComponent(q), {
-                    signal: this._abortController.signal,
+                    signal: this.abortController.signal,
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 })
-                .then(r => r.ok ? r.json() : { suggestions: [] })
+                .then(r => r.ok ? r.json() : Promise.resolve({ suggestions: [] }))
                 .then(data => {
                     this.suggestions = data.suggestions || [];
                     this.showSuggestions = this.suggestions.length > 0;
                     this.highlightedIndex = -1;
                 })
-                .catch(() => {});
+                .catch(err => {
+                    if (err.name !== 'AbortError') {
+                        this.closeSuggestions();
+                    }
+                });
             },
 
             closeSuggestions() {
