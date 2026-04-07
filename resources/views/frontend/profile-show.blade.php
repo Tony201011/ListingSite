@@ -144,7 +144,7 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                     <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
                     <hr class="mb-4">
                     <div class="text-base text-gray-900 leading-relaxed">
-                        {!! nl2br(e($profile['about'] ?? $profile['description'] ?? 'No about me provided.')) !!}
+                        {!! $profile['about'] ?? $profile['description'] ?? 'No about me provided.' !!}
                     </div>
                 </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
