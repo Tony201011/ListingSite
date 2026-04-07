@@ -6,7 +6,7 @@
 @section('title', $profile['name'] . ' Profile')
 
 @php
-$profileTags = [
+$profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [
     'sex goddess',
     'nympho',
     'bisexual',
@@ -60,14 +60,14 @@ $profileTags = [
                 ['day' => 'Thu', 'time' => 'Unavailable'],
             ])->values();
 
-            $profileStats = [
-                ['label' => 'Age group', 'value' => '25 - 29'],
-                ['label' => 'Ethnicity', 'value' => 'Caucasian'],
-                ['label' => 'Hair color', 'value' => 'Other'],
-                ['label' => 'Hair length', 'value' => 'Short'],
-                ['label' => 'Body type', 'value' => 'Athletic'],
-                ['label' => 'Bust size', 'value' => 'Busty'],
-                ['label' => 'Length', 'value' => 'Average (164cm - 176cm)'],
+            $profileStats = $profileStats ?? [
+                ['label' => 'Age group', 'value' => $profile['age_group'] ?? '—'],
+                ['label' => 'Ethnicity', 'value' => $profile['ethnicity'] ?? '—'],
+                ['label' => 'Hair color', 'value' => $profile['hair_color'] ?? '—'],
+                ['label' => 'Hair length', 'value' => $profile['hair_length'] ?? '—'],
+                ['label' => 'Body type', 'value' => $profile['body_type'] ?? '—'],
+                ['label' => 'Bust size', 'value' => $profile['bust_size'] ?? '—'],
+                ['label' => 'Length', 'value' => $profile['your_length'] ?? '—'],
             ];
 
             $contactForItems = [
@@ -148,20 +148,22 @@ $profileTags = [
                             </div>
                         </a>
                 <!-- Currently Touring Section -->
+                @if(!empty($profile['tours']))
                 <div class="mb-6">
                     <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
                         <div class="mb-6">
                             <div class="flex items-center mb-2">
                                 <i class="fa-solid fa-location-dot text-pink-500 text-2xl mr-3"></i>
-                                <span class="text-2xl font-extrabold text-pink-600">Currently touring in Brisbane (QLD)</span>
+                                <span class="text-2xl font-extrabold text-pink-600">Currently touring in {{ $profile['tours'][0]['city'] }}</span>
                             </div>
-                            <span class="font-bold text-lg text-gray-800">Sun 15 February - Sat 28 March</span>
+                            <span class="font-bold text-lg text-gray-800">{{ $profile['tours'][0]['from'] }} - {{ $profile['tours'][0]['to'] }}</span>
                         </div>
                         <a href="#upcoming-tours" class="border border-pink-300 text-pink-400 px-6 py-3 rounded-md bg-transparent font-medium text-lg hover:bg-pink-50 transition block text-center smooth-scroll">
                             See all my other tours
                         </a>
                     </div>
                 </div>
+                @endif
                 <div class="mt-8 mb-8">
                     <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
                     <hr class="mb-4">
@@ -230,15 +232,14 @@ $profileTags = [
                             {{-- </div> --}}
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Dummy video URLs, replace with dynamic if available -->
+                            @forelse($profile['videos'] ?? [] as $videoUrl)
                             <video controls class="rounded-xl w-full h-64 bg-black">
-                                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                                <source src="{{ $videoUrl }}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
-                            <video controls class="rounded-xl w-full h-64 bg-black">
-                                <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
+                            @empty
+                            <p class="text-gray-400 col-span-2">No videos available.</p>
+                            @endforelse
                         </div>
                     </section>
 
@@ -275,18 +276,14 @@ $profileTags = [
                             </div>
                             <div class="border-b border-gray-200 mb-6"></div>
                             <div class="space-y-4">
+                                @forelse($profile['tours'] ?? [] as $tour)
                                 <div class="flex items-center">
-                                    <span class="font-bold text-pink-600 text-base mr-4">Brisbane QLD</span>
-                                    <span class="font-semibold text-gray-900 text-base">Sun 15 Feb - Sat 28 Mar</span>
+                                    <span class="font-bold text-pink-600 text-base mr-4">{{ $tour['city'] }}</span>
+                                    <span class="font-semibold text-gray-900 text-base">{{ $tour['from'] }} - {{ $tour['to'] }}</span>
                                 </div>
-                                <div class="flex items-center">
-                                    <span class="font-bold text-pink-600 text-base mr-4">South Brisbane QLD</span>
-                                    <span class="font-semibold text-gray-900 text-base">Sun 15 Feb - Sat 28 Mar</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <span class="font-bold text-pink-600 text-base mr-4">Mackay QLD</span>
-                                    <span class="font-semibold text-gray-900 text-base">Sun 15 Feb - Sat 28 Mar</span>
-                                </div>
+                                @empty
+                                <p class="text-gray-400">No upcoming tours scheduled.</p>
+                                @endforelse
                             </div>
                         </div>
                     </section>
@@ -523,32 +520,28 @@ $profileTags = [
                             <table class="min-w-full text-sm">
                                 <thead>
                                     <tr>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Time</th>
+                                        <th class="px-4 py-2 text-left font-bold text-black">Session</th>
                                         <th class="px-4 py-2 text-left font-bold text-black">Outcall</th>
                                         <th class="px-4 py-2 text-left font-bold text-black">In-call</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="bg-gray-100">
-                                        <td class="px-4 py-2 font-normal text-black">30 min</td>
-                                        <td class="px-4 py-2 font-bold text-black">300</td>
-                                        <td class="px-4 py-2 font-bold text-black">300</td>
+                                    @forelse($profile['price_list'] ?? [] as $i => $rate)
+                                    <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
+                                        <td class="px-4 py-2 font-normal text-black">{{ $rate['description'] ?: ($rate['group'] ?: '—') }}</td>
+                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: '—' }}</td>
+                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: '—' }}</td>
                                     </tr>
+                                    @empty
                                     <tr>
-                                        <td class="px-4 py-2 font-normal text-black">1 hour</td>
-                                        <td class="px-4 py-2 font-bold text-black">400</td>
-                                        <td class="px-4 py-2 font-bold text-black">400</td>
+                                        <td colspan="3" class="px-4 py-2 text-gray-400 text-center">Contact for rates</td>
                                     </tr>
-                                    <tr class="bg-gray-100">
-                                        <td class="px-4 py-2 font-normal text-black">2 hours</td>
-                                        <td class="px-4 py-2 font-bold text-black">600</td>
-                                        <td class="px-4 py-2 font-bold text-black">600</td>
-                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                                        <!-- My Availability Section -->
+                    <!-- My Availability Section -->
                     <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mt-6">
                         <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
                             <i class="fa-regular fa-calendar-days text-pink-600"></i> My availability
@@ -563,34 +556,16 @@ $profileTags = [
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="bg-gray-100">
-                                        <td class="px-4 py-2 font-normal text-black">Monday</td>
-                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
+                                    @forelse($profile['availability_list'] ?? [] as $i => $avail)
+                                    <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
+                                        <td class="px-4 py-2 font-normal text-black">{{ $avail['day'] }}</td>
+                                        <td class="px-4 py-2 font-bold text-black">{{ $avail['time'] }}</td>
                                     </tr>
+                                    @empty
                                     <tr>
-                                        <td class="px-4 py-2 font-normal text-black">Tuesday</td>
-                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
+                                        <td colspan="2" class="px-4 py-2 text-gray-400 text-center">No availability set</td>
                                     </tr>
-                                    <tr class="bg-gray-100">
-                                        <td class="px-4 py-2 font-normal text-black">Wednesday</td>
-                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-4 py-2 font-normal text-black">Thursday</td>
-                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
-                                    </tr>
-                                    <tr class="bg-gray-100">
-                                        <td class="px-4 py-2 font-normal text-black">Friday</td>
-                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-4 py-2 font-normal text-black">Saturday</td>
-                                        <td class="px-4 py-2 font-bold text-black">10:00 - 21:00</td>
-                                    </tr>
-                                    <tr class="bg-gray-100">
-                                        <td class="px-4 py-2 font-normal text-black">Sunday</td>
-                                        <td class="px-4 py-2 font-bold text-black">Unavailable</td>
-                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
