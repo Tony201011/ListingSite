@@ -376,7 +376,7 @@ class UserResource extends Resource
                                             FileUpload::make('image_path')
                                                 ->label('Image')
                                                 ->image()
-                                                ->disk(config('media.delivery_disk', 'public'))
+                                                ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/images')
                                                 ->preserveFilenames()
                                                 ->columnSpanFull(),
@@ -384,7 +384,7 @@ class UserResource extends Resource
                                             FileUpload::make('thumbnail_path')
                                                 ->label('Thumbnail')
                                                 ->image()
-                                                ->disk(config('media.delivery_disk', 'public'))
+                                                ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/thumbnails')
                                                 ->preserveFilenames()
                                                 ->columnSpanFull(),
@@ -418,9 +418,8 @@ class UserResource extends Resource
                                                 ->maxLength(255)
                                                 ->required(),
 
-                                            TextInput::make('video_url')
-                                                ->label('Video URL')
-                                                ->url()
+                                            TextInput::make('video_path')
+                                                ->label('Video Path')
                                                 ->required()
                                                 ->columnSpanFull(),
                                         ])

@@ -219,7 +219,7 @@ class EditUser extends EditRecord
         $this->syncHasManyRelation(
             $record->userVideos(),
             $data['userVideos'] ?? [],
-            ['original_name', 'video_url']
+            ['original_name', 'video_path']
         );
     }
 
