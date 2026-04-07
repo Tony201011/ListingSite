@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 /*******auth Controllers start */
 use App\Http\Controllers\Auth\ProviderRegisterController;
 use App\Http\Controllers\Frontend\BlogController;
+use App\Http\Controllers\Frontend\FavouriteBookmarkController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Http\Controllers\Frontend\HomeController;
 /*******auth Controllers end */
@@ -89,6 +90,9 @@ Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
+
+Route::post('/favourite/{slug}', [FavouriteBookmarkController::class, 'toggleFavourite'])->name('favourite.toggle');
+Route::post('/bookmark/{slug}', [FavouriteBookmarkController::class, 'toggleBookmark'])->name('bookmark.toggle');
 
 Route::post('/booking-enquiry', [BookingController::class, 'send'])
     ->middleware('throttle:'.config('security.throttles.booking_enquiry', '5,1'))

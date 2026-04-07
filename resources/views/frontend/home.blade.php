@@ -61,7 +61,12 @@
     </div>
 
     {{-- Main Content --}}
-    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8" x-data="{ viewMode: 'grid' }">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8"
+        x-data="favouriteBookmark({
+            favourites: {{ Js::from($userFavourites ?? []) }},
+            bookmarks: {{ Js::from($userBookmarks ?? []) }}
+        })"
+    >
 
         {{-- Toolbar: filters, sort, view toggle --}}
         <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
@@ -170,11 +175,23 @@
                         <div class="mb-2 flex items-center justify-between">
                             <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
                             <div class="flex items-center gap-2 text-gray-400 relative z-20">
-                                <button type="button" class="hover:text-pink-500 transition-colors" title="Favourite">
-                                    <i class="fa-regular fa-heart text-xs"></i>
+                                <button
+                                    type="button"
+                                    @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
+                                    :class="isFavourite('{{ $profile['slug'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
+                                    class="transition-colors"
+                                    title="Favourite"
+                                >
+                                    <i :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
                                 </button>
-                                <button type="button" class="hover:text-blue-500 transition-colors" title="Bookmark">
-                                    <i class="fa-regular fa-bookmark text-xs"></i>
+                                <button
+                                    type="button"
+                                    @click.prevent="toggleBookmark('{{ $profile['slug'] }}')"
+                                    :class="isBookmark('{{ $profile['slug'] }}') ? 'text-blue-500' : 'hover:text-blue-500'"
+                                    class="transition-colors"
+                                    title="Bookmark"
+                                >
+                                    <i :class="isBookmark('{{ $profile['slug'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
                                 </button>
                                 @if($profile['age'])
                                     <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none">{{ $profile['age'] }}</span>
@@ -270,5 +287,59 @@
         color: #fff !important;
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    function favouriteBookmark(config) {
+        return {
+            viewMode: 'grid',
+            favourites: config.favourites || [],
+            bookmarks: config.bookmarks || [],
+
+            isFavourite(slug) {
+                return this.favourites.includes(slug);
+            },
+
+            isBookmark(slug) {
+                return this.bookmarks.includes(slug);
+            },
+
+            async toggleFavourite(slug) {
+                const res = await fetch('/favourite/' + encodeURIComponent(slug), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.active) {
+                    if (!this.favourites.includes(slug)) this.favourites.push(slug);
+                } else {
+                    this.favourites = this.favourites.filter(s => s !== slug);
+                }
+            },
+
+            async toggleBookmark(slug) {
+                const res = await fetch('/bookmark/' + encodeURIComponent(slug), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.active) {
+                    if (!this.bookmarks.includes(slug)) this.bookmarks.push(slug);
+                } else {
+                    this.bookmarks = this.bookmarks.filter(s => s !== slug);
+                }
+            },
+        };
+    }
+</script>
 @endpush
 

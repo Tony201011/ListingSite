@@ -20,6 +20,8 @@ class HomeController extends Controller
     public function index(HomeIndexRequest $request): View
     {
         $viewData = $this->buildProfileFilterViewData->execute($request->validated());
+        $viewData['userFavourites'] = FavouriteBookmarkController::getUserFavourites();
+        $viewData['userBookmarks'] = FavouriteBookmarkController::getUserBookmarks();
 
         return view('frontend.home', $viewData);
     }
