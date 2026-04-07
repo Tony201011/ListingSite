@@ -395,16 +395,12 @@
                 <p class="mb-2 font-medium text-gray-700">
                     You can be found on Hotescorts with the following URLs
                 </p>
-                @php
-                    $profileUrl = route('profile.show', ['slug' => $profile->slug]);
-                @endphp
-                <a href="{{ $profileUrl }}" target="_blank" class="block break-all font-semibold text-pink-600 hover:underline">
-                    {{ $profileUrl }}
-                </a>
-                @if($shortUrl)
-                    @php
-                        $shortUrlFull = config('app.url') . '/' . $shortUrl->short_url;
-                    @endphp
+                @if($profileUrl)
+                    <a href="{{ $profileUrl }}" target="_blank" class="block break-all font-semibold text-pink-600 hover:underline">
+                        {{ $profileUrl }}
+                    </a>
+                @endif
+                @if($shortUrlFull)
                     <a href="{{ $shortUrlFull }}" target="_blank" class="mt-1 block break-all font-semibold text-pink-600 hover:underline">
                         {{ $shortUrlFull }}
                     </a>

@@ -42,7 +42,15 @@ class GetMyProfilePageData
             ->whereNull('deleted_at')
             ->count() > 1;
 
-        $shortUrl = $user?->shortUrl;
+        $shortUrlRecord = $user?->shortUrl;
+
+        $profileUrl = $profile?->slug
+            ? route('profile.show', ['slug' => $profile->slug])
+            : null;
+
+        $shortUrlFull = $shortUrlRecord?->short_url
+            ? url($shortUrlRecord->short_url)
+            : null;
 
         return [
             'user' => $user,
@@ -50,7 +58,8 @@ class GetMyProfilePageData
             'stepOneCompleted' => $stepOneCompleted,
             'stepTwoCompleted' => $stepTwoCompleted,
             'stepPhotoVerificationCompleted' => $stepPhotoVerificationCompleted,
-            'shortUrl' => $shortUrl,
+            'profileUrl' => $profileUrl,
+            'shortUrlFull' => $shortUrlFull,
         ];
     }
 }
