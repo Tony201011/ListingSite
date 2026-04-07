@@ -175,5 +175,12 @@ class AppServiceProvider extends ServiceProvider
 
         app('filesystem')->forgetDisk('s3');
         app('filesystem')->forgetDisk('public');
+
+        // Override temporary URL generation so Filament's FileUpload previews
+        // are served through the Laravel proxy instead of directly from S3/R2,
+        // avoiding browser CORS errors.
+        \Illuminate\Support\Facades\Storage::disk('s3')->buildTemporaryUrlsUsing(
+            fn (string $path, \DateTimeInterface $expiration, array $options): string => route('media.show', ['path' => $path])
+        );
     }
 }

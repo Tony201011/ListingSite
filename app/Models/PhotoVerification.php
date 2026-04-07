@@ -41,6 +41,11 @@ class PhotoVerification extends Model
                     return null;
                 }
 
+                $path = $firstPhoto['path'] ?? null;
+                if ($path) {
+                    return route('media.show', ['path' => $path]);
+                }
+
                 return $firstPhoto['url'] ?? null;
             }
         );

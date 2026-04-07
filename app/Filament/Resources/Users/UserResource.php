@@ -665,8 +665,8 @@ class UserResource extends Resource
                             RepeatableEntry::make('profileImages')
                                 ->label('')
                                 ->schema([
-                                    ImageEntry::make('image_path')->label('Image')->disk(fn (): string => config('media.delivery_disk', 'public'))->height(220),
-                                    ImageEntry::make('thumbnail_path')->label('Thumbnail')->disk(fn (): string => config('media.delivery_disk', 'public'))->height(120),
+                                    ImageEntry::make('image_url')->label('Image')->height(220),
+                                    ImageEntry::make('thumbnail_url')->label('Thumbnail')->height(120),
                                     IconEntry::make('is_primary')->label('Primary')->boolean(),
                                 ])
                                 ->columns(3),
@@ -712,7 +712,7 @@ class UserResource extends Resource
                                         ->placeholder('-'),
                                     TextEntry::make('submitted_at')->label('Submitted At')->dateTime()->placeholder('-'),
                                     TextEntry::make('admin_note')->label('Admin Note')->placeholder('-')->columnSpanFull(),
-                                    ImageEntry::make('photo_url')->label('Photo')->disk(fn (): string => config('media.delivery_disk', 'public'))->height(220)->columnSpanFull(),
+                                    ImageEntry::make('photo_url')->label('Photo')->height(220)->columnSpanFull(),
                                 ])
                                 ->columns(2),
                         ]),

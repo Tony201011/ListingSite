@@ -2,6 +2,7 @@
 
 /**frontend controller start*** */
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 /**frontend controller end*** */
@@ -53,6 +54,10 @@ Route::get('/site-password', [SitePasswordController::class, 'showForm'])
 
 Route::post('/site-password', [SitePasswordController::class, 'submit'])
     ->name('site-password.submit');
+
+Route::get('/media/{path}', [MediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('media.show');
 
 Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
     ->middleware('auth')

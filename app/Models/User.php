@@ -81,7 +81,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             return null;
         }
 
-        return app('filesystem')->disk(config('media.avatar_disk', 'public'))->url($this->profile_image);
+        return route('media.show', ['path' => $this->profile_image]);
     }
 
     public function providerListings(): HasMany
