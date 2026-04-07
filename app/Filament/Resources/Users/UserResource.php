@@ -158,7 +158,8 @@ public static function form(Schema $schema): Schema
 
                                             CkEditor::make('introduction_line')
                                                 ->label('Introduction Line')
-                                                ->columnSpanFull(),
+                                                ->columnSpanFull()
+                                                ->html(),
 
                                             Textarea::make('description')
                                                 ->label('Description')
@@ -167,7 +168,8 @@ public static function form(Schema $schema): Schema
 
                                             CkEditor::make('profile_text')
                                                 ->label('Profile Text')
-                                                ->columnSpanFull(),
+                                                ->columnSpanFull()
+                                                ->html(),
                                         ])
                                         ->columns(2),
 
@@ -711,7 +713,7 @@ public static function form(Schema $schema): Schema
                         ->schema([
                             Section::make('Profile Message')
                                 ->schema([
-                                    TextEntry::make('profileMessage.message')
+                                    CkEditor::make('profileMessage.message')
                                         ->label('')
                                         ->html()
                                         ->placeholder('No profile message set.')
