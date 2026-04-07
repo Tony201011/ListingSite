@@ -126,6 +126,10 @@ function passwordForm(config) {
                 this.showConfirmPassword = false;
                 this.showPasswordPopup = false;
                 this.generatedPassword = '';
+
+                setTimeout(() => {
+                    window.location.href = data.redirect || '/my-profile';
+                }, 1500);
             } catch (error) {
                 this.message = {
                     type: 'error',
