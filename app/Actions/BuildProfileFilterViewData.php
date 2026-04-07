@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\ProviderProfile;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Laravel\Scout\Builder as ScoutBuilder;
 
 class BuildProfileFilterViewData
 {
@@ -193,6 +194,17 @@ class BuildProfileFilterViewData
         array $categoryToParentSlug,
         array $categoryNameById,
     ): LengthAwarePaginator {
+        $hasTextQuery = $locationQuery !== '' || $escortNameQuery !== '';
+
+        // When a text query is present, use Typesense via Laravel Scout to resolve
+        // matching profile IDs, then constrain the Eloquent query to those IDs.
+        // This provides fast, typo-tolerant full-text search while keeping all
+        // relational filters (age, price, categories) on the Eloquent side.
+        $scoutMatchedIds = null;
+        if ($hasTextQuery) {
+            $scoutMatchedIds = $this->resolveScoutIds($locationQuery, $escortNameQuery);
+        }
+
         $query = ProviderProfile::query()
             ->whereNull('deleted_at')
             ->where('profile_status', 'approved')
@@ -204,15 +216,26 @@ class BuildProfileFilterViewData
                 'city',
             ]);
 
-        if ($locationQuery !== '') {
-            $query->where(function ($q) use ($locationQuery) {
-                $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%' . $locationQuery . '%'))
-                  ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%' . $locationQuery . '%'));
-            });
-        }
+        if ($scoutMatchedIds !== null) {
+            // If Scout returned IDs, constrain the query to those profiles.
+            if ($scoutMatchedIds->isEmpty()) {
+                // No Scout results – force an empty result set.
+                $query->whereRaw('0 = 1');
+            } else {
+                $query->whereIn('id', $scoutMatchedIds);
+            }
+        } elseif ($hasTextQuery) {
+            // Scout is not configured or unavailable – fall back to LIKE queries.
+            if ($locationQuery !== '') {
+                $query->where(function ($q) use ($locationQuery) {
+                    $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%' . $locationQuery . '%'))
+                      ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%' . $locationQuery . '%'));
+                });
+            }
 
-        if ($escortNameQuery !== '') {
-            $query->where('name', 'like', '%' . $escortNameQuery . '%');
+            if ($escortNameQuery !== '') {
+                $query->where('name', 'like', '%' . $escortNameQuery . '%');
+            }
         }
 
         if ($minAge > 18 || $maxAge < 40) {
@@ -303,6 +326,33 @@ class BuildProfileFilterViewData
         $paginator->getCollection()->transform(fn (ProviderProfile $profile) => $this->transformProfile($profile));
 
         return $paginator;
+    }
+
+    /**
+     * Use Laravel Scout (Typesense) to resolve profile IDs matching the text queries.
+     * Returns null when Scout is unavailable or throws an exception, signalling that
+     * the caller should fall back to Eloquent LIKE queries.
+     *
+     * @return \Illuminate\Support\Collection<int>|null
+     */
+    private function resolveScoutIds(string $locationQuery, string $escortNameQuery): ?Collection
+    {
+        try {
+            $searchTerm = trim($escortNameQuery . ' ' . $locationQuery);
+
+            /** @var ScoutBuilder $scoutQuery */
+            $scoutQuery = ProviderProfile::search($searchTerm)
+                ->where('profile_status', 'approved');
+
+            // Retrieve up to 1000 matching IDs so that downstream Eloquent
+            // pagination can work correctly against the full filtered set.
+            $results = $scoutQuery->take(1000)->keys();
+
+            return collect($results)->map(fn ($id) => (int) $id);
+        } catch (\Throwable) {
+            // Typesense is unreachable or not yet indexed – fall back gracefully.
+            return null;
+        }
     }
 
     private function transformProfile(ProviderProfile $profile): array

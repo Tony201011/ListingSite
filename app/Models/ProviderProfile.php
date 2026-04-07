@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class ProviderProfile extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -107,5 +108,33 @@ class ProviderProfile extends Model
     public function availabilities(): HasMany
     {
         return $this->hasMany(Availability::class, 'user_id', 'user_id');
+    }
+
+    public function searchableAs(): string
+    {
+        return 'provider_profiles';
+    }
+
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing(['city', 'state', 'user']);
+
+        return [
+            'id' => (string) $this->id,
+            'name' => (string) ($this->name ?? ''),
+            'age' => (int) ($this->age ?? 0),
+            'description' => (string) ($this->description ?? ''),
+            'city' => (string) ($this->city?->name ?? ''),
+            'state' => (string) ($this->state?->name ?? ''),
+            'suburb' => (string) ($this->user?->suburb ?? ''),
+            'profile_status' => (string) ($this->profile_status ?? ''),
+            'is_featured' => (bool) $this->is_featured,
+            'created_at' => $this->created_at ? $this->created_at->timestamp : 0,
+        ];
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->profile_status === 'approved' && $this->deleted_at === null;
     }
 }
