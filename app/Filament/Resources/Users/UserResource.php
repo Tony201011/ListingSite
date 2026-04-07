@@ -83,9 +83,9 @@ class UserResource extends Resource
             ->where('role', User::ROLE_PROVIDER);
     }
 
-public static function form(Schema $schema): Schema
-{
-    return $schema->components([
+    public static function form(Schema $schema): Schema
+    {
+        return $schema->components([
             Tabs::make('ProviderFormTabs')
                 ->tabs([
                     Tab::make('Overview')
@@ -154,12 +154,11 @@ public static function form(Schema $schema): Schema
                                                     column: 'slug',
                                                     ignoreRecord: true,
                                                 )
-                                            ->readOnly(),
+                                                ->readOnly(),
 
                                             CkEditor::make('introduction_line')
                                                 ->label('Introduction Line')
-                                                ->columnSpanFull()
-                                                ->html(),
+                                                ->columnSpanFull(),
 
                                             Textarea::make('description')
                                                 ->label('Description')
@@ -168,8 +167,7 @@ public static function form(Schema $schema): Schema
 
                                             CkEditor::make('profile_text')
                                                 ->label('Profile Text')
-                                                ->columnSpanFull()
-                                                ->html(),
+                                                ->columnSpanFull(),
                                         ])
                                         ->columns(2),
 
@@ -425,11 +423,13 @@ public static function form(Schema $schema): Schema
 
                                     TextEntry::make('providerProfile.introduction_line')
                                         ->label('Introduction Line')
+                                        ->html()
                                         ->placeholder('-')
                                         ->columnSpanFull(),
 
                                     TextEntry::make('providerProfile.profile_text')
                                         ->label('Profile Text')
+                                        ->html()
                                         ->placeholder('-')
                                         ->columnSpanFull(),
 
@@ -713,7 +713,7 @@ public static function form(Schema $schema): Schema
                         ->schema([
                             Section::make('Profile Message')
                                 ->schema([
-                                    CkEditor::make('profileMessage.message')
+                                    TextEntry::make('profileMessage.message')
                                         ->label('')
                                         ->html()
                                         ->placeholder('No profile message set.')

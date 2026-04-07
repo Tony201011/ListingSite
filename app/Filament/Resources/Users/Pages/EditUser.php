@@ -62,9 +62,15 @@ class EditUser extends EditRecord
             [
                 'name' => $profileName,
                 'slug' => $slug,
-                'description' => $profileData['description'] ?? $existingProfile?->description,
-                'introduction_line' => $profileData['introduction_line'] ?? $existingProfile?->introduction_line,
-                'profile_text' => $profileData['profile_text'] ?? $existingProfile?->profile_text,
+                'description' => array_key_exists('description', $profileData)
+                    ? ($profileData['description'] ?? '')
+                    : ($existingProfile?->description ?? ''),
+                'introduction_line' => array_key_exists('introduction_line', $profileData)
+                    ? ($profileData['introduction_line'] ?? '')
+                    : ($existingProfile?->introduction_line ?? ''),
+                'profile_text' => array_key_exists('profile_text', $profileData)
+                    ? ($profileData['profile_text'] ?? '')
+                    : ($existingProfile?->profile_text ?? ''),
                 'age_group_id' => $profileData['age_group_id'] ?? $existingProfile?->age_group_id,
                 'hair_color_id' => $profileData['hair_color_id'] ?? $existingProfile?->hair_color_id,
                 'hair_length_id' => $profileData['hair_length_id'] ?? $existingProfile?->hair_length_id,
@@ -96,7 +102,7 @@ class EditUser extends EditRecord
         if (array_key_exists('message', $messageData)) {
             ProfileMessage::query()->updateOrCreate(
                 ['user_id' => $record->id],
-                ['message' => $messageData['message'] ?? null],
+                ['message' => $messageData['message'] ?? ''],
             );
         }
 

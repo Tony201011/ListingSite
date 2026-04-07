@@ -58,9 +58,9 @@ class CreateUser extends CreateRecord
             [
                 'name' => $profileName,
                 'slug' => $slug,
-                'description' => $profileData['description'] ?? null,
-                'introduction_line' => $profileData['introduction_line'] ?? null,
-                'profile_text' => $profileData['profile_text'] ?? null,
+                'description' => $profileData['description'] ?? '',
+                'introduction_line' => $profileData['introduction_line'] ?? '',
+                'profile_text' => $profileData['profile_text'] ?? '',
                 'age_group_id' => $profileData['age_group_id'] ?? null,
                 'hair_color_id' => $profileData['hair_color_id'] ?? null,
                 'hair_length_id' => $profileData['hair_length_id'] ?? null,
@@ -92,7 +92,7 @@ class CreateUser extends CreateRecord
         if (array_key_exists('message', $messageData)) {
             ProfileMessage::query()->updateOrCreate(
                 ['user_id' => $user->id],
-                ['message' => $messageData['message'] ?? null],
+                ['message' => $messageData['message'] ?? ''],
             );
         }
 
