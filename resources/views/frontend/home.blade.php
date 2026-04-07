@@ -184,7 +184,7 @@
 
                         {{-- Name --}}
                         <h3 class="text-sm font-medium text-gray-800 truncate" :class="viewMode === 'list' ? 'md:text-base' : ''">
-                            {{ $profile['name'] }} <span class="text-gray-400 font-normal">()</span>
+                            {{ $profile['name'] }}@if($profile['suburb']) <span class="text-gray-400 font-normal">({{ $profile['suburb'] }})</span>@endif
                         </h3>
 
                         {{-- Rate --}}
@@ -194,14 +194,10 @@
 
                         {{-- Location + Service --}}
                         <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
-                            @if($profile['city'])
+                            @if($profile['city'] || $profile['suburb'])
                                 <span class="inline-flex items-center gap-1">
                                     <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
-                                    {{ $profile['city'] }}
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1">
-                                    <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
+                                    {{ $profile['city'] ?: $profile['suburb'] }}
                                 </span>
                             @endif
                             @if(!empty($profile['service_1']))

@@ -177,7 +177,10 @@ class BuildProfileFilterViewData
             ]);
 
         if ($locationQuery !== '') {
-            $query->whereHas('city', fn ($q) => $q->where('name', 'like', '%' . $locationQuery . '%'));
+            $query->where(function ($q) use ($locationQuery) {
+                $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%' . $locationQuery . '%'))
+                  ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%' . $locationQuery . '%'));
+            });
         }
 
         if ($escortNameQuery !== '') {
@@ -251,6 +254,7 @@ class BuildProfileFilterViewData
             'rate' => $rateDisplay,
             'rate_numeric' => $this->extractNumericRate($firstRate),
             'city' => $profile->city?->name ?? '',
+            'suburb' => $profile->user?->suburb ?? '',
             'height' => '',
             'service_1' => $services[0] ?? '',
             'service_2' => $services[1] ?? '',
