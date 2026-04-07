@@ -11,7 +11,7 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Set;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
