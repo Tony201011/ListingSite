@@ -253,23 +253,31 @@ class GetProfileShowData
     {
         if ($direction === 'prev') {
             $adjacent = ProviderProfile::query()
+                ->where('profile_status', 'approved')
+                ->whereHas('user')
                 ->where('id', '<', $currentId)
                 ->orderByDesc('id')
                 ->first(['id', 'name', 'slug']);
 
             if ($adjacent === null) {
                 $adjacent = ProviderProfile::query()
+                    ->where('profile_status', 'approved')
+                    ->whereHas('user')
                     ->orderByDesc('id')
                     ->first(['id', 'name', 'slug']);
             }
         } else {
             $adjacent = ProviderProfile::query()
+                ->where('profile_status', 'approved')
+                ->whereHas('user')
                 ->where('id', '>', $currentId)
                 ->orderBy('id')
                 ->first(['id', 'name', 'slug']);
 
             if ($adjacent === null) {
                 $adjacent = ProviderProfile::query()
+                    ->where('profile_status', 'approved')
+                    ->whereHas('user')
                     ->orderBy('id')
                     ->first(['id', 'name', 'slug']);
             }
@@ -289,6 +297,8 @@ class GetProfileShowData
     {
         return ProviderProfile::query()
             ->where('id', '!=', $currentId)
+            ->where('profile_status', 'approved')
+            ->whereHas('user')
             ->with([
                 'user.primaryProfileImage',
                 'city',
