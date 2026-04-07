@@ -77,8 +77,8 @@ class UploadUserPhotos
                     'id' => $profileImage->id,
                     'image_path' => $profileImage->image_path,
                     'thumbnail_path' => $profileImage->thumbnail_path,
-                    'image_url' => $storedPhoto['image_url'],
-                    'thumbnail_url' => $storedPhoto['thumbnail_url'],
+                    'image_url' => $profileImage->image_url,
+                    'thumbnail_url' => $profileImage->thumbnail_url,
                     'is_primary' => $profileImage->is_primary,
                 ];
             }

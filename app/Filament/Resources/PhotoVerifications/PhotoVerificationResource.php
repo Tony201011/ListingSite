@@ -77,7 +77,6 @@ class PhotoVerificationResource extends Resource
                     ->schema([
                         ImageEntry::make('photo_url')
                             ->label('Photo')
-                            ->disk(fn (): string => config('media.delivery_disk', 'public'))
                             ->height(300)
                             ->columnSpanFull(),
                     ]),
@@ -94,7 +93,6 @@ class PhotoVerificationResource extends Resource
                     ->description(fn (PhotoVerification $record): string => $record->user?->email ?? ''),
                 ImageColumn::make('photo_url')
                     ->label('Photo')
-                    ->disk(fn (): string => config('media.delivery_disk', 'public'))
                     ->height(60),
                 TextColumn::make('status')
                     ->label('Status')
