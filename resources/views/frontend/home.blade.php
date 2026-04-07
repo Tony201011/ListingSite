@@ -9,134 +9,215 @@
     $hasAgeFilter = $hasAgeFilter ?? false;
     $hasPriceFilter = $hasPriceFilter ?? false;
     $selectedCategoryItems = $selectedCategoryItems ?? collect();
+    $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter;
 @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-50 text-gray-800">
-    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div class="mb-4 flex items-center gap-2 text-xs text-gray-500">
-            <span>Home</span>
-            <span>›</span>
-            <span class="text-gray-700">Girls</span>
-        </div>
+<div class="min-h-screen bg-gray-900 text-gray-100">
 
-        <div class="mb-4 flex flex-wrap items-center gap-2 text-xs">
-            <span class="text-gray-500">Showing {{ $profiles->total() }} profiles</span>
-            @if($locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter)
-                <a href="{{ url('/') }}" class="ml-auto text-gray-500 hover:text-gray-700">Clear all</a>
-            @endif
-        </div>
+    {{-- Hero / Search Section --}}
+    <div class="relative overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-900">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(236,72,153,0.15)_0%,_transparent_65%)] pointer-events-none"></div>
+        <div class="relative mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 text-center">
+            <h1 class="mb-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                Popular <span class="text-pink-500">Hot</span>escorts
+            </h1>
+            <p class="mb-8 text-sm text-gray-400 tracking-widest uppercase">100% Real &amp; Genuine Escorts · Australia-Wide</p>
 
-        <div x-data="{ viewMode: 'grid' }">
-            <section>
-                <div class="mb-4 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-3">
-                    <div class="flex items-center gap-2">
-                        <button type="button" class="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100">New girls</button>
-                        <button type="button" class="rounded-full border border-gray-900 bg-gray-100 px-4 py-1.5 text-xs font-semibold text-gray-900">All girls</button>
-                    </div>
+            <div x-data="{ searchMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}', term: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}' }">
+                <form method="GET" action="{{ url('/') }}">
+                    <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
+                    <input type="hidden" name="escort_name" :value="searchMode === 'username' ? term : ''">
 
-                    <div class="ml-2 flex items-center gap-1 text-xs text-gray-500">
-                        <span>Popular</span>
-                        <span>▾</span>
-                    </div>
-
-                    <div class="ml-auto flex items-center gap-3 text-xs text-gray-500">
-                        <span class="hidden sm:inline">Compare (1)</span>
-                        <button type="button" class="rounded border px-2 py-1 hover:bg-gray-100" :class="viewMode === 'list' ? 'border-gray-900 bg-gray-100 text-gray-900' : 'border-gray-300 text-gray-500'" @click="viewMode = 'list'">☰</button>
-                        <button type="button" class="rounded border px-2 py-1 hover:bg-gray-100" :class="viewMode === 'grid' ? 'border-gray-900 bg-gray-100 text-gray-900' : 'border-gray-300 text-gray-500'" @click="viewMode = 'grid'">▦</button>
-                    </div>
-                </div>
-
-                <div class="mb-4 rounded-xl border border-gray-200 bg-white p-5" x-data="{ searchMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}', term: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}' }">
-                    <h3 class="mb-3 text-2xl font-bold text-gray-900" x-text="searchMode === 'username' ? 'Enter username to find escort' : 'Enter suburb to search local escorts'"></h3>
-                    <form method="GET" action="{{ url('/') }}" class="space-y-3">
-                        <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
-                        <input type="hidden" name="escort_name" :value="searchMode === 'username' ? term : ''">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div class="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
                             <input
                                 type="text"
                                 x-model="term"
-                                :placeholder="searchMode === 'username' ? 'Enter username' : 'Enter suburb'"
-                                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none sm:w-[340px]"
+                                :placeholder="searchMode === 'username' ? 'Search by escort name…' : 'Search by suburb or city…'"
+                                class="w-full rounded-xl border border-gray-700 bg-gray-800/80 py-3 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/50"
                             >
-                            <button type="submit" class="rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]">
-                                Find Escort
-                            </button>
                         </div>
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <button
-                                type="button"
-                                @click="searchMode = searchMode === 'suburb' ? 'username' : 'suburb'; term = ''"
-                                class="rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]"
-                                x-text="searchMode === 'suburb' ? 'Search by Name' : 'Search by Suburb'"
+                        <button type="submit" class="shrink-0 rounded-xl bg-pink-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-900/40 transition hover:bg-pink-700 active:scale-95">
+                            Find Escort
+                        </button>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap justify-center gap-2">
+                        <button
+                            type="button"
+                            @click="searchMode = searchMode === 'suburb' ? 'username' : 'suburb'; term = ''"
+                            class="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs font-medium text-gray-300 transition hover:border-pink-500 hover:text-pink-400"
+                            x-text="searchMode === 'suburb' ? '🔎 Search by Name' : '📍 Search by Suburb'"
+                        ></button>
+                        <a href="{{ route('advanced-search') }}" class="rounded-lg border border-pink-700/50 bg-pink-600/10 px-4 py-2 text-xs font-medium text-pink-400 transition hover:bg-pink-600/20 hover:text-pink-300">
+                            <i class="fa-solid fa-sliders mr-1"></i> Advanced Search / Filter
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Main Content --}}
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8" x-data="{ viewMode: 'grid' }">
+
+        {{-- Toolbar: filters, sort, view toggle --}}
+        <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-800 pb-4">
+            <div class="flex items-center gap-2">
+                <span class="rounded-full border border-gray-700 bg-gray-800 px-4 py-1.5 text-xs font-semibold text-gray-300 cursor-default">New girls</span>
+                <span class="rounded-full border border-pink-600 bg-pink-600/10 px-4 py-1.5 text-xs font-semibold text-pink-400">All girls</span>
+            </div>
+
+            <div class="flex items-center gap-1 text-xs text-gray-400 ml-1">
+                <i class="fa-solid fa-fire text-pink-500 text-[10px]"></i>
+                <span>Popular</span>
+            </div>
+
+            <div class="ml-auto flex items-center gap-2 text-xs text-gray-400">
+                <span class="hidden sm:inline text-gray-500">
+                    {{ $profiles->total() }} {{ $profiles->total() === 1 ? 'profile' : 'profiles' }}
+                    @if($hasActiveFilters)
+                        <a href="{{ url('/') }}" class="ml-2 text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
+                    @endif
+                </span>
+                <button
+                    type="button"
+                    class="rounded-lg border px-2.5 py-1.5 transition"
+                    :class="viewMode === 'list' ? 'border-pink-600 bg-pink-600/10 text-pink-400' : 'border-gray-700 text-gray-500 hover:border-gray-600 hover:text-gray-300'"
+                    @click="viewMode = 'list'"
+                    title="List view"
+                >
+                    <i class="fa-solid fa-list text-xs"></i>
+                </button>
+                <button
+                    type="button"
+                    class="rounded-lg border px-2.5 py-1.5 transition"
+                    :class="viewMode === 'grid' ? 'border-pink-600 bg-pink-600/10 text-pink-400' : 'border-gray-700 text-gray-500 hover:border-gray-600 hover:text-gray-300'"
+                    @click="viewMode = 'grid'"
+                    title="Grid view"
+                >
+                    <i class="fa-solid fa-table-cells text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        {{-- Active filter pills --}}
+        @if($hasActiveFilters)
+            <div class="mb-4 flex flex-wrap gap-2">
+                @if($locationQuery !== '')
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-800 border border-gray-700 px-3 py-1 text-xs text-gray-300">
+                        <i class="fa-solid fa-location-dot text-pink-500 text-[10px]"></i> {{ $locationQuery }}
+                    </span>
+                @endif
+                @if($escortNameQuery !== '')
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-800 border border-gray-700 px-3 py-1 text-xs text-gray-300">
+                        <i class="fa-solid fa-user text-pink-500 text-[10px]"></i> {{ $escortNameQuery }}
+                    </span>
+                @endif
+                @foreach(collect($selectedCategoryItems) as $item)
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-800 border border-gray-700 px-3 py-1 text-xs text-gray-300">
+                        {{ $item['name'] }}
+                    </span>
+                @endforeach
+            </div>
+        @endif
+
+        {{-- Profile Cards Grid / List --}}
+        <div x-cloak class="grid gap-4" :class="viewMode === 'grid' ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5' : 'grid-cols-1'">
+            @forelse($profiles as $profile)
+                <article
+                    class="view-card group relative overflow-hidden rounded-2xl border border-gray-800 bg-gray-850 shadow-md transition-all duration-300 hover:border-pink-700/50 hover:shadow-pink-900/20 hover:shadow-xl"
+                    :class="viewMode === 'list' ? 'md:flex md:flex-row' : ''"
+                    style="background-color: #111827;"
+                >
+                    <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
+
+                    {{-- Image --}}
+                    <div class="view-card-media relative overflow-hidden" :class="viewMode === 'list' ? 'md:w-64 md:shrink-0' : ''">
+                        @if($profile['image'])
+                            <img
+                                src="{{ $profile['image'] }}"
+                                alt="{{ $profile['name'] }}"
+                                class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'"
+                                loading="lazy"
                             >
-                            </button>
-                            <a href="{{ route('advanced-search') }}" class="inline-flex items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]">
-                                Advanced Search / Filter
-                            </a>
+                        @else
+                            <div class="flex items-center justify-center bg-gray-800 text-gray-600" :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'">
+                                <i class="fa-solid fa-image text-4xl"></i>
+                            </div>
+                        @endif
+
+                        {{-- Gradient overlay --}}
+                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent pointer-events-none"></div>
+
+                        {{-- Badges --}}
+                        <div class="absolute left-2 top-2 z-10 flex flex-wrap gap-1">
+                            @if($profile['verified'])
+                                <span class="inline-flex items-center gap-1 rounded-md bg-cyan-600/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                                    <i class="fa-solid fa-shield-check text-[8px]"></i> Verified
+                                </span>
+                            @endif
+                            @if($profile['active'])
+                                <span class="inline-flex items-center gap-1 rounded-md bg-emerald-600/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online
+                                </span>
+                            @endif
                         </div>
-                    </form>
-                </div>
 
-                <div class="mb-4 text-center">
-                    <h2 class="text-lg font-bold tracking-wide text-gray-900">
-                        Popular
-                        <span class="uppercase"><span class="text-pink-600">Hot</span><span class="text-gray-900">escorts</span></span>
-                        100% real and genuine escorts
-                    </h2>
-                </div>
+                        {{-- Rate badge bottom-left of image --}}
+                        <div class="absolute bottom-2 left-2 z-10">
+                            <span class="rounded-lg bg-gray-900/80 backdrop-blur-sm px-2.5 py-1 text-xs font-bold text-white border border-white/10">
+                                {{ $profile['rate'] }}
+                            </span>
+                        </div>
+                    </div>
 
-                <div x-cloak class="grid gap-4" :class="viewMode === 'grid' ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5' : 'grid-cols-1'">
-                    @forelse($profiles as $profile)
-                        <article class="view-card relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm" :class="viewMode === 'list' ? 'md:grid md:grid-cols-[300px_1fr]' : ''">
-                            <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
-                            <div class="view-card-media relative" :class="viewMode === 'list' ? 'md:h-[220px]' : ''">
-                                <img src="{{ $profile['image'] }}" alt="{{ $profile['name'] }}" class="view-card-image object-cover" :class="viewMode === 'list' ? 'h-56 w-full md:h-[220px] md:w-full' : 'h-44 w-full'">
-                                <div class="absolute left-2 top-2 z-10 flex gap-1 text-[10px] font-semibold">
-                                    @if($profile['verified'])
-                                        <span class="rounded bg-cyan-500 px-2 py-0.5 text-white">Photo Verified</span>
-                                    @endif
-                                    @if($profile['active'])
-                                        <span class="rounded bg-emerald-500 px-2 py-0.5 text-white">Online</span>
-                                    @endif
-                                </div>
+                    {{-- Content --}}
+                    <div class="p-3.5" :class="viewMode === 'list' ? 'flex flex-col justify-between flex-1 p-4' : ''">
+                        <div>
+                            <div class="mb-1 flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-white truncate" :class="viewMode === 'list' ? 'md:text-xl' : ''">
+                                    {{ $profile['name'] }}
+                                    <span class="font-normal text-gray-400">({{ $profile['age'] }})</span>
+                                </h3>
                             </div>
 
-                            <div class="view-card-content p-3" :class="viewMode === 'list' ? 'md:flex md:flex-col md:justify-between md:px-4 md:py-3' : ''">
-                                <div class="mb-1.5 flex items-center justify-between text-[10px] text-gray-400">
-                                    <span>{{ $profile['date'] }}</span>
-                                    <span>♡  ⎘  ⤴</span>
-                                </div>
-
-                                <h3 class="text-sm font-semibold text-gray-900" :class="viewMode === 'list' ? 'md:text-[22px] md:leading-6' : ''">{{ $profile['name'] }} <span class="text-gray-400">({{ $profile['age'] }})</span></h3>
-                                <p class="mb-2 text-xl font-bold text-gray-900" :class="viewMode === 'list' ? 'md:text-3xl md:leading-8' : ''">{{ $profile['rate'] }}</p>
-                                <p class="mb-3 text-xs text-gray-500" :class="viewMode === 'list' ? 'list-desc md:text-[12px] md:leading-5' : ''">{{ $profile['description'] ?? '' }}</p>
-
-                                <div class="grid grid-cols-2 gap-2 border-t border-gray-100 pt-3 text-xs text-gray-500" :class="viewMode === 'list' ? 'md:grid-cols-4 md:gap-2 md:text-[11px]' : ''">
-                                    <span>📍 {{ $profile['city'] }}</span>
-                                    @if(!empty($profile['height']))
-                                        <span>📏 {{ $profile['height'] }}</span>
-                                    @endif
-                                    @if(!empty($profile['service_1']))
-                                        <span>💼 {{ $profile['service_1'] }}</span>
-                                    @endif
-                                    @if(!empty($profile['service_2']))
-                                        <span>💎 {{ $profile['service_2'] }}</span>
-                                    @endif
-                                </div>
-                            </div>
-                        </article>
-                    @empty
-                        <div class="col-span-full rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
-                            No profiles found for selected categories.
+                            <p class="mb-2.5 line-clamp-2 text-xs leading-relaxed text-gray-400" :class="viewMode === 'list' ? 'md:line-clamp-3 md:text-sm' : ''">
+                                {{ $profile['description'] ?? '' }}
+                            </p>
                         </div>
-                    @endforelse
-                </div>
 
-                <div class="mt-8">
-                    {{ $profiles->links() }}
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-gray-800 pt-2.5 text-[11px] text-gray-500" :class="viewMode === 'list' ? 'md:gap-x-4 md:text-xs' : ''">
+                            @if($profile['city'])
+                                <span class="inline-flex items-center gap-1"><i class="fa-solid fa-location-dot text-pink-500 text-[9px]"></i> {{ $profile['city'] }}</span>
+                            @endif
+                            @if(!empty($profile['service_1']))
+                                <span class="inline-flex items-center gap-1"><i class="fa-solid fa-star text-yellow-500 text-[9px]"></i> {{ $profile['service_1'] }}</span>
+                            @endif
+                            @if(!empty($profile['service_2']))
+                                <span class="inline-flex items-center gap-1"><i class="fa-solid fa-gem text-purple-400 text-[9px]"></i> {{ $profile['service_2'] }}</span>
+                            @endif
+                            <span class="ml-auto text-gray-600 text-[10px]">{{ $profile['date'] }}</span>
+                        </div>
+                    </div>
+                </article>
+            @empty
+                <div class="col-span-full rounded-2xl border border-dashed border-gray-700 bg-gray-800/40 p-12 text-center">
+                    <i class="fa-solid fa-magnifying-glass mb-4 text-3xl text-gray-600"></i>
+                    <p class="text-sm font-medium text-gray-400">No profiles found matching your criteria.</p>
+                    @if($hasActiveFilters)
+                        <a href="{{ url('/') }}" class="mt-4 inline-block rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white hover:bg-pink-700 transition">Clear filters</a>
+                    @endif
                 </div>
-            </section>
+            @endforelse
+        </div>
+
+        {{-- Pagination --}}
+        <div class="mt-10">
+            {{ $profiles->links() }}
         </div>
     </div>
 </div>
@@ -145,45 +226,35 @@
 @push('styles')
 <style>
     .view-card {
-        transition: box-shadow 0.25s ease, transform 0.25s ease;
+        transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
     }
 
     .view-card:hover {
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
-    }
-
-    .view-card-media {
-        overflow: hidden;
-    }
-
-    .view-card-media::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(to top, rgba(10, 15, 28, 0.45) 0%, rgba(10, 15, 28, 0.1) 45%, rgba(10, 15, 28, 0) 100%);
-        opacity: 0.35;
-        transition: opacity 0.35s ease;
+        transform: translateY(-2px);
     }
 
     .view-card-image {
-        transition: transform 0.45s ease;
         transform-origin: center center;
     }
 
-    .view-card:hover .view-card-image {
-        transform: scale(1.08);
+    /* Pagination dark theme override */
+    nav[aria-label="Pagination"] span,
+    nav[aria-label="Pagination"] a {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+        color: #d1d5db !important;
     }
 
-    .view-card:hover .view-card-media::after {
-        opacity: 0.65;
+    nav[aria-label="Pagination"] a:hover {
+        background-color: #374151 !important;
+        color: #f9fafb !important;
     }
 
-    .list-desc {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+    nav[aria-label="Pagination"] [aria-current="page"] span,
+    nav[aria-label="Pagination"] span[aria-current="page"] {
+        background-color: #db2777 !important;
+        border-color: #db2777 !important;
+        color: #fff !important;
     }
 </style>
 @endpush
