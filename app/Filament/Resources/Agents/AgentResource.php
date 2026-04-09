@@ -47,6 +47,7 @@ class AgentResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->withTrashed()
             ->withCount('managedProfiles')
             ->where('role', User::ROLE_AGENT);
     }
@@ -115,8 +116,12 @@ class AgentResource extends Resource
                 TextColumn::make('account_status')
                     ->label('Account')
                     ->badge()
-                    ->state(fn (User $record): string => $record->is_blocked ? 'Blocked' : 'Active')
-                    ->color(fn (string $state): string => $state === 'Blocked' ? 'danger' : 'success'),
+                    ->state(fn (User $record): string => $record->trashed() ? 'Deleted' : ($record->is_blocked ? 'Blocked' : 'Active'))
+                    ->color(fn (string $state): string => match ($state) {
+                        'Deleted' => 'danger',
+                        'Blocked' => 'warning',
+                        default => 'success',
+                    }),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -129,21 +134,34 @@ class AgentResource extends Resource
                     ->since(),
             ])
             ->recordActions([
-                EditAction::make()->label('Edit'),
+                EditAction::make()->label('Edit')
+                    ->visible(fn (User $record): bool => ! $record->trashed()),
                 Action::make('block')
                     ->label('Block')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => ! $record->is_blocked)
+                    ->visible(fn (User $record): bool => ! $record->is_blocked && ! $record->trashed())
                     ->action(fn (User $record): bool => $record->update(['is_blocked' => true]))
                     ->icon('heroicon-o-lock-closed'),
                 Action::make('unblock')
                     ->label('Unblock')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => $record->is_blocked)
+                    ->visible(fn (User $record): bool => $record->is_blocked && ! $record->trashed())
                     ->action(fn (User $record): bool => $record->update(['is_blocked' => false]))
                     ->icon('heroicon-o-lock-open'),
+                Action::make('restore')
+                    ->label('Restore')
+                    ->color('success')
+                    ->icon('heroicon-o-arrow-path')
+                    ->requiresConfirmation()
+                    ->modalHeading('Restore agent')
+                    ->modalDescription('Are you sure you want to restore this agent account?')
+                    ->visible(fn (User $record): bool => $record->trashed())
+                    ->action(function (User $record): void {
+                        $record->restore();
+                    })
+                    ->successNotificationTitle('Agent restored'),
                 Action::make('delete')
                     ->label('Delete')
                     ->color('danger')
@@ -151,6 +169,7 @@ class AgentResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading('Delete agent')
                     ->modalDescription('Are you sure you want to delete this agent? This will soft-delete the user account.')
+                    ->visible(fn (User $record): bool => ! $record->trashed())
                     ->action(fn (User $record): ?bool => $record->delete())
                     ->successNotificationTitle('Agent deleted'),
             ])
