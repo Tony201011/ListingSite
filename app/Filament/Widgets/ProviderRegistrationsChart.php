@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 
 class ProviderRegistrationsChart extends ChartWidget
 {
-    protected static ?string $heading = 'Provider Registrations';
+    protected ?string $heading = 'Provider Registrations';
 
     protected static ?int $sort = 2;
 
