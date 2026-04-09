@@ -8,8 +8,13 @@
     $escortNameQuery = (string) ($escortNameQuery ?? '');
     $hasAgeFilter = $hasAgeFilter ?? false;
     $hasPriceFilter = $hasPriceFilter ?? false;
+    $hasDistanceFilter = $hasDistanceFilter ?? false;
+    $maxSearchDistance = (int) ($maxSearchDistance ?? 500);
+    $distanceFilter = (int) ($distanceFilter ?? $maxSearchDistance);
+    $userLat = $userLat ?? null;
+    $userLng = $userLng ?? null;
     $selectedCategoryItems = $selectedCategoryItems ?? collect();
-    $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter;
+    $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
 @endphp
 
 @section('content')
@@ -24,14 +29,44 @@
             </h1>
             <p class="mb-8 text-sm text-gray-400 tracking-widest uppercase">100% Real &amp; Genuine Escorts · Australia-Wide</p>
 
-            <div x-data="escortSearch({
+            <div x-data="Object.assign(escortSearch({
                     initialMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}',
                     initialTerm: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}',
                     suggestionsUrl: '{{ route('api.search.suggestions') }}'
+                }), {
+                    userLat: '{{ $userLat ?? '' }}',
+                    userLng: '{{ $userLng ?? '' }}',
+                    distance: {{ $distanceFilter }},
+                    maxDistance: {{ $maxSearchDistance }},
+                    locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }},
+                    geoError: '',
+                    requestLocation() {
+                        this.geoError = '';
+                        if (!navigator.geolocation) {
+                            this.geoError = 'Geolocation not supported.';
+                            return;
+                        }
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                this.userLat = pos.coords.latitude;
+                                this.userLng = pos.coords.longitude;
+                                this.locationEnabled = true;
+                            },
+                            () => { this.geoError = 'Unable to get location. Please allow access.'; }
+                        );
+                    },
+                    clearLocation() {
+                        this.userLat = '';
+                        this.userLng = '';
+                        this.locationEnabled = false;
+                    }
                 })" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
                 <form method="GET" action="{{ url('/') }}" @submit="closeSuggestions()">
                     <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
                     <input type="hidden" name="escort_name" :value="searchMode === 'username' ? term : ''">
+                    <input type="hidden" name="user_lat" :value="userLat">
+                    <input type="hidden" name="user_lng" :value="userLng">
+                    <input type="hidden" name="distance" :value="locationEnabled ? distance : ''">
 
                     <div class="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center">
                         <div class="relative flex-1">
@@ -90,6 +125,39 @@
                         <a href="{{ route('advanced-search') }}" class="rounded-lg border border-pink-700/50 bg-pink-600/10 px-4 py-2 text-xs font-medium text-pink-400 transition hover:bg-pink-600/20 hover:text-pink-300">
                             <i class="fa-solid fa-sliders mr-1"></i> Advanced Search / Filter
                         </a>
+                    </div>
+
+                    {{-- Near Me / Distance filter --}}
+                    <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
+                        <button
+                            type="button"
+                            x-show="!locationEnabled"
+                            @click="requestLocation()"
+                            class="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs font-medium text-gray-300 transition hover:border-pink-500 hover:text-pink-400"
+                        >
+                            <i class="fa-solid fa-location-crosshairs mr-1 text-pink-400"></i> Near Me
+                        </button>
+                        <div x-show="locationEnabled" x-cloak class="flex flex-wrap items-center justify-center gap-2">
+                            <span class="text-xs text-green-400">
+                                <i class="fa-solid fa-circle-check text-[10px]"></i> Within <strong x-text="distance"></strong> km
+                            </span>
+                            <input
+                                type="range"
+                                min="1"
+                                :max="maxDistance"
+                                step="10"
+                                x-model.number="distance"
+                                class="w-32"
+                            >
+                            <button
+                                type="button"
+                                @click="clearLocation()"
+                                class="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-400 hover:text-gray-200"
+                            >
+                                <i class="fa-solid fa-xmark text-[10px]"></i>
+                            </button>
+                        </div>
+                        <span x-show="geoError" x-cloak class="text-xs text-red-400" x-text="geoError"></span>
                     </div>
                 </form>
             </div>
@@ -162,6 +230,11 @@
                             {{ $item['name'] }}
                         </span>
                 @endforeach
+                @if($hasDistanceFilter)
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                        <i class="fa-solid fa-location-crosshairs text-pink-500 text-[10px]"></i> Within {{ $distanceFilter }} km
+                    </span>
+                @endif
             </div>
         @endif
 

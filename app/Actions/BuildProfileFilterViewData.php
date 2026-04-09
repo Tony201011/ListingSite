@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Category;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Laravel\Scout\Builder as ScoutBuilder;
@@ -42,6 +43,8 @@ class BuildProfileFilterViewData
         'phone-contact-preferences' => 'phone_contact_preference',
         'time-waster-shield'        => 'time_waster_shield',
     ];
+
+    private const DEFAULT_MAX_DISTANCE = 500;
 
     public function execute(array $validated): array
     {
@@ -125,6 +128,20 @@ class BuildProfileFilterViewData
         $locationQuery = (string) ($validated['location'] ?? '');
         $escortNameQuery = (string) ($validated['escort_name'] ?? '');
 
+        $userLat = isset($validated['user_lat']) && $validated['user_lat'] !== '' ? (float) $validated['user_lat'] : null;
+        $userLng = isset($validated['user_lng']) && $validated['user_lng'] !== '' ? (float) $validated['user_lng'] : null;
+
+        $maxSearchDistance = (int) (SiteSetting::query()->value('max_search_distance') ?? self::DEFAULT_MAX_DISTANCE);
+        if ($maxSearchDistance < 1) {
+            $maxSearchDistance = self::DEFAULT_MAX_DISTANCE;
+        }
+
+        $distanceFilter = null;
+        if ($userLat !== null && $userLng !== null) {
+            $requestedDistance = isset($validated['distance']) && $validated['distance'] !== '' ? (int) $validated['distance'] : $maxSearchDistance;
+            $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
+        }
+
         $categoryToParentSlug = $this->buildCategoryToParentSlugMap($parents, $childrenByParent);
 
         $categoryNameById = collect($allFilterCategories)
@@ -141,6 +158,9 @@ class BuildProfileFilterViewData
             $selectedCategoryIds,
             $categoryToParentSlug,
             $categoryNameById,
+            $userLat,
+            $userLng,
+            $distanceFilter,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -151,6 +171,7 @@ class BuildProfileFilterViewData
 
         $hasAgeFilter = $minAge !== self::DEFAULT_MIN_AGE || $maxAge !== self::DEFAULT_MAX_AGE;
         $hasPriceFilter = $minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE;
+        $hasDistanceFilter = $distanceFilter !== null;
 
         return compact(
             'filterGroups',
@@ -166,6 +187,11 @@ class BuildProfileFilterViewData
             'profiles',
             'hasAgeFilter',
             'hasPriceFilter',
+            'maxSearchDistance',
+            'distanceFilter',
+            'hasDistanceFilter',
+            'userLat',
+            'userLng',
         );
     }
 
@@ -193,6 +219,9 @@ class BuildProfileFilterViewData
         array $selectedCategoryIds,
         array $categoryToParentSlug,
         array $categoryNameById,
+        ?float $userLat = null,
+        ?float $userLng = null,
+        ?int $distanceFilter = null,
     ): LengthAwarePaginator {
         $hasTextQuery = $locationQuery !== '' || $escortNameQuery !== '';
 
@@ -304,6 +333,20 @@ class BuildProfileFilterViewData
             }
         }
 
+        if ($distanceFilter !== null && $userLat !== null && $userLng !== null) {
+            // Haversine formula – filter profiles whose lat/lng is within $distanceFilter km.
+            // Profiles without coordinates are excluded when a distance filter is active.
+            $query->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->whereRaw(
+                    '(6371 * acos(
+                        cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) +
+                        sin(radians(?)) * sin(radians(latitude))
+                    )) <= ?',
+                    [$userLat, $userLng, $userLat, $distanceFilter]
+                );
+        }
+
         $appendParams = array_filter([
             'location' => $locationQuery ?: null,
             'escort_name' => $escortNameQuery ?: null,
@@ -311,6 +354,9 @@ class BuildProfileFilterViewData
             'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
             'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
             'max_price' => $maxPrice !== self::DEFAULT_MAX_PRICE ? $maxPrice : null,
+            'user_lat' => $userLat,
+            'user_lng' => $userLng,
+            'distance' => $distanceFilter,
         ]);
 
         foreach ($selectedCategoryIds as $categoryId) {
