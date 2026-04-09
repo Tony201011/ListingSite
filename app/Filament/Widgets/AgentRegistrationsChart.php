@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 
 class AgentRegistrationsChart extends ChartWidget
 {
-    protected static ?string $heading = 'Agent Registrations';
+    protected ?string $heading = 'Agent Registrations';
 
     protected static ?int $sort = 3;
 
