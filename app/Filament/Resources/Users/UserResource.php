@@ -927,8 +927,12 @@ class UserResource extends Resource
                 TextColumn::make('account_status')
                     ->label('Account')
                     ->badge()
-                    ->state(fn (User $record): string => $record->is_blocked ? 'Blocked' : 'Active')
-                    ->color(fn (string $state): string => $state === 'Blocked' ? 'danger' : 'success'),
+                    ->state(fn (User $record): string => $record->trashed() ? 'Deleted' : ($record->is_blocked ? 'Blocked' : 'Active'))
+                    ->color(fn (string $state): string => match ($state) {
+                        'Deleted' => 'danger',
+                        'Blocked' => 'warning',
+                        default => 'success',
+                    }),
 
                 TextColumn::make('status')
                     ->label('Verification')
@@ -964,7 +968,7 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->since()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—')
                     ->color('danger'),
             ])
             ->filters([
