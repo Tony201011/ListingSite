@@ -22,6 +22,9 @@ class HomeIndexRequest extends FormRequest
             'max_price' => $this->input('max_price', 400),
             'location' => trim((string) $this->input('location', '')),
             'escort_name' => trim((string) $this->input('escort_name', '')),
+            'user_lat' => $this->input('user_lat'),
+            'user_lng' => $this->input('user_lng'),
+            'distance' => $this->input('distance'),
         ]);
     }
 
@@ -39,6 +42,9 @@ class HomeIndexRequest extends FormRequest
             'max_price' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'location' => ['nullable', 'string', 'max:255'],
             'escort_name' => ['nullable', 'string', 'max:255'],
+            'user_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'user_lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'distance' => ['nullable', 'integer', 'min:1', 'max:20000'],
         ];
     }
 

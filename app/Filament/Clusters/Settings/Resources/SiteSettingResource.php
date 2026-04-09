@@ -61,6 +61,13 @@ class SiteSettingResource extends Resource
                 ->email()
                 ->maxLength(255)
                 ->helperText('Shown on profile contact section for email enquiries.'),
+            Forms\Components\TextInput::make('max_search_distance')
+                ->label('Max Search Distance (km)')
+                ->numeric()
+                ->minValue(1)
+                ->maxValue(20000)
+                ->default(500)
+                ->helperText('Maximum distance in kilometres users can filter profiles by. Default is 500 km.'),
         ]);
     }
 
@@ -74,6 +81,7 @@ class SiteSettingResource extends Resource
                 Tables\Columns\IconColumn::make('site_password_enabled')->label('Site Password')->boolean(),
                 Tables\Columns\IconColumn::make('short_url')->label('Short URL')->boolean(),
                 Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
+                Tables\Columns\TextColumn::make('max_search_distance')->label('Max Distance (km)'),
                 Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
             ])
             ->recordActions([

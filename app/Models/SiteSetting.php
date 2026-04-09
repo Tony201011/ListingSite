@@ -18,6 +18,7 @@ class SiteSetting extends Model
         'site_password',
         'contact_email',
         'short_url',      // new field for short URL feature
+        'max_search_distance',
     ];
 
     protected $casts = [
@@ -26,5 +27,6 @@ class SiteSetting extends Model
         'site_password_enabled' => 'boolean',
         'site_password' => 'encrypted',
         'short_url' => 'boolean',
+        'max_search_distance' => 'integer',
     ];
 }

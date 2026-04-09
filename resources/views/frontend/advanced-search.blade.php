@@ -7,8 +7,13 @@
     $escortNameQuery = (string) ($escortNameQuery ?? '');
     $hasAgeFilter = $hasAgeFilter ?? false;
     $hasPriceFilter = $hasPriceFilter ?? false;
+    $hasDistanceFilter = $hasDistanceFilter ?? false;
+    $maxSearchDistance = (int) ($maxSearchDistance ?? 500);
+    $distanceFilter = (int) ($distanceFilter ?? $maxSearchDistance);
+    $userLat = $userLat ?? null;
+    $userLng = $userLng ?? null;
     $selectedCategoryItems = $selectedCategoryItems ?? collect();
-    $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter;
+    $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
 @endphp
 
 @section('content')
@@ -28,7 +33,40 @@
                 $selectedCategoryIds = collect($selectedCategoryIds ?? [])->map(fn ($id) => (string) $id)->values();
             @endphp
 
-            <form method="GET" action="{{ route('advanced-search') }}" class="mt-6 space-y-4 text-sm text-gray-600" x-data="{ minAge: {{ (int) ($minAge ?? 18) }}, maxAge: {{ (int) ($maxAge ?? 40) }}, minPrice: {{ (int) ($minPrice ?? 150) }}, maxPrice: {{ (int) ($maxPrice ?? 400) }} }">
+            <form method="GET" action="{{ route('advanced-search') }}" class="mt-6 space-y-4 text-sm text-gray-600" x-data="{
+                minAge: {{ (int) ($minAge ?? 18) }},
+                maxAge: {{ (int) ($maxAge ?? 40) }},
+                minPrice: {{ (int) ($minPrice ?? 150) }},
+                maxPrice: {{ (int) ($maxPrice ?? 400) }},
+                distance: {{ $distanceFilter }},
+                maxDistance: {{ $maxSearchDistance }},
+                userLat: '{{ $userLat ?? '' }}',
+                userLng: '{{ $userLng ?? '' }}',
+                locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }},
+                geoError: '',
+                requestLocation() {
+                    this.geoError = '';
+                    if (!navigator.geolocation) {
+                        this.geoError = 'Geolocation is not supported by your browser.';
+                        return;
+                    }
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            this.userLat = pos.coords.latitude;
+                            this.userLng = pos.coords.longitude;
+                            this.locationEnabled = true;
+                        },
+                        () => {
+                            this.geoError = 'Unable to retrieve your location. Please allow location access.';
+                        }
+                    );
+                },
+                clearLocation() {
+                    this.userLat = '';
+                    this.userLng = '';
+                    this.locationEnabled = false;
+                }
+            }">
                 <div>
                     <label for="location" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Location</label>
                     <input
@@ -74,6 +112,54 @@
                         </div>
                         <input id="min-price" name="min_price" type="range" min="100" max="1000" step="10" x-model.number="minPrice" @input="if (minPrice > maxPrice) maxPrice = minPrice" class="w-full">
                         <input id="max-price" name="max_price" type="range" min="100" max="1000" step="10" x-model.number="maxPrice" @input="if (maxPrice < minPrice) minPrice = maxPrice" class="mt-2 w-full">
+                    </div>
+                </div>
+
+                {{-- Distance / Near Me filter --}}
+                <input type="hidden" name="user_lat" :value="userLat">
+                <input type="hidden" name="user_lng" :value="userLng">
+                <div>
+                    <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Distance (Near Me)</label>
+                    <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <button
+                                type="button"
+                                x-show="!locationEnabled"
+                                @click="requestLocation()"
+                                class="inline-flex items-center gap-1.5 rounded-md bg-pink-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-700"
+                            >
+                                <i class="fa-solid fa-location-crosshairs text-[10px]"></i> Use My Location
+                            </button>
+                            <button
+                                type="button"
+                                x-show="locationEnabled"
+                                x-cloak
+                                @click="clearLocation()"
+                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:border-gray-400"
+                            >
+                                <i class="fa-solid fa-xmark text-[10px]"></i> Clear Location
+                            </button>
+                            <span x-show="locationEnabled" x-cloak class="text-xs text-green-600">
+                                <i class="fa-solid fa-circle-check text-[10px]"></i> Location detected
+                            </span>
+                            <span x-show="geoError" x-cloak class="text-xs text-red-500" x-text="geoError"></span>
+                        </div>
+                        <div x-show="locationEnabled" x-cloak>
+                            <div class="mb-1 flex items-center justify-between text-xs text-gray-500">
+                                <span>Within: <strong x-text="distance"></strong> km</span>
+                                <span class="text-gray-400">Max: {{ $maxSearchDistance }} km</span>
+                            </div>
+                            <input
+                                name="distance"
+                                type="range"
+                                min="1"
+                                :max="maxDistance"
+                                step="10"
+                                x-model.number="distance"
+                                class="w-full"
+                            >
+                        </div>
+                        <p x-show="!locationEnabled" class="text-xs text-gray-400">Click "Use My Location" to filter by distance.</p>
                     </div>
                 </div>
 
@@ -200,6 +286,11 @@
                     @if($hasPriceFilter)
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
                             Price: ${{ $minPrice }}–${{ $maxPrice }}
+                        </span>
+                    @endif
+                    @if($hasDistanceFilter)
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                            <i class="fa-solid fa-location-crosshairs text-pink-500 text-[10px]"></i> Within {{ $distanceFilter }} km
                         </span>
                     @endif
                 </div>
