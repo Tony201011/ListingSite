@@ -7,26 +7,28 @@ use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
-class AgentRegistrationsChart extends ChartWidget
+class AgentProviderRegistrationsChart extends ChartWidget
 {
-    protected ?string $heading = 'Agent Registrations';
+    protected ?string $heading = 'Provider Registrations (My Providers)';
 
-    protected static ?int $sort = 3;
-
-    protected int | string | array $columnSpan = 1;
+    protected static ?int $sort = 2;
 
     public static function canView(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'admin';
+        return Filament::getCurrentPanel()?->getId() === 'agent';
     }
 
     protected function getData(): array
     {
         $start = Carbon::now()->subMonths(11)->startOfMonth();
+        $agentId = Filament::auth()->id();
 
         $rows = User::query()
-            ->where('role', User::ROLE_AGENT)
+            ->where('role', User::ROLE_PROVIDER)
             ->where('created_at', '>=', $start)
+            ->whereHas('providerProfile', function ($query) use ($agentId): void {
+                $query->where('agent_id', $agentId);
+            })
             ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total")
             ->groupBy('month')
             ->orderBy('month')
@@ -46,10 +48,10 @@ class AgentRegistrationsChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'New Agents',
+                    'label' => 'New Providers',
                     'data' => $data,
-                    'backgroundColor' => 'rgba(245, 158, 11, 0.2)',
-                    'borderColor' => 'rgba(245, 158, 11, 1)',
+                    'backgroundColor' => 'rgba(59, 130, 246, 0.2)',
+                    'borderColor' => 'rgba(59, 130, 246, 1)',
                     'borderWidth' => 2,
                     'fill' => true,
                     'tension' => 0.4,
