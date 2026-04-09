@@ -122,6 +122,25 @@ class UserResource extends Resource
                                         ->label('Suburb')
                                         ->placeholder('Enter suburb')
                                         ->maxLength(255),
+
+                                    TextInput::make('password')
+                                        ->label('Password')
+                                        ->password()
+                                        ->revealable()
+                                        ->required(fn (string $operation): bool => $operation === 'create')
+                                        ->minLength(8)
+                                        ->maxLength(255)
+                                        ->dehydrated(fn ($state): bool => filled($state)),
+
+                                    TextInput::make('password_confirmation')
+                                        ->label('Confirm Password')
+                                        ->password()
+                                        ->revealable()
+                                        ->required(fn (string $operation): bool => $operation === 'create')
+                                        ->minLength(8)
+                                        ->maxLength(255)
+                                        ->same('password')
+                                        ->dehydrated(false),
                                 ])
                                 ->columns(2)
                                 ->collapsible(),
