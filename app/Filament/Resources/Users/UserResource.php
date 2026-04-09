@@ -933,14 +933,6 @@ class UserResource extends Resource
                         'Blocked' => 'warning',
                         default => 'success',
                     }),
-
-
-
-
-
-
-
-
                 TextColumn::make('status')
                     ->label('Verification')
                     ->badge()
