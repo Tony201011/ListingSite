@@ -11,6 +11,8 @@ class ProviderStatsOverview extends StatsOverviewWidget
 {
     protected ?string $heading = 'Provider Insights';
 
+    protected static ?int $sort = 6;
+
     /**
      * @return array<Stat>
      */

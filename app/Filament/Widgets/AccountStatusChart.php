@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Filament\Widgets;
+
+use App\Models\User;
+use Filament\Facades\Filament;
+use Filament\Widgets\ChartWidget;
+
+class AccountStatusChart extends ChartWidget
+{
+    protected static ?string $heading = 'Account Status Overview';
+
+    protected static ?int $sort = 4;
+
+    public static function canView(): bool
+    {
+        return Filament::getCurrentPanel()?->getId() === 'admin';
+    }
+
+    protected function getData(): array
+    {
+        $stats = User::query()
+            ->whereIn('role', [User::ROLE_PROVIDER, User::ROLE_AGENT])
+            ->selectRaw("
+                role,
+                SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,
+                SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NULL THEN 1 ELSE 0 END) as active_unverified,
+                SUM(CASE WHEN is_blocked = 1 THEN 1 ELSE 0 END) as blocked
+            ")
+            ->groupBy('role')
+            ->get()
+            ->keyBy('role');
+
+        $providers = $stats->get(User::ROLE_PROVIDER);
+        $agents = $stats->get(User::ROLE_AGENT);
+
+        return [
+            'datasets' => [
+                [
+                    'label' => 'Providers',
+                    'data' => [
+                        (int) ($providers?->active_verified ?? 0),
+                        (int) ($providers?->active_unverified ?? 0),
+                        (int) ($providers?->blocked ?? 0),
+                    ],
+                    'backgroundColor' => [
+                        'rgba(34, 197, 94, 0.7)',
+                        'rgba(251, 191, 36, 0.7)',
+                        'rgba(239, 68, 68, 0.7)',
+                    ],
+                    'borderColor' => [
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(251, 191, 36, 1)',
+                        'rgba(239, 68, 68, 1)',
+                    ],
+                    'borderWidth' => 1,
+                ],
+                [
+                    'label' => 'Agents',
+                    'data' => [
+                        (int) ($agents?->active_verified ?? 0),
+                        (int) ($agents?->active_unverified ?? 0),
+                        (int) ($agents?->blocked ?? 0),
+                    ],
+                    'backgroundColor' => [
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(168, 85, 247, 0.7)',
+                        'rgba(249, 115, 22, 0.7)',
+                    ],
+                    'borderColor' => [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(168, 85, 247, 1)',
+                        'rgba(249, 115, 22, 1)',
+                    ],
+                    'borderWidth' => 1,
+                ],
+            ],
+            'labels' => ['Active & Verified', 'Active & Unverified', 'Blocked'],
+        ];
+    }
+
+    protected function getType(): string
+    {
+        return 'bar';
+    }
+}

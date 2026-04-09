@@ -11,6 +11,8 @@ class AgentStatsOverview extends StatsOverviewWidget
 {
     protected ?string $heading = 'Agent Insights';
 
+    protected static ?int $sort = 5;
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
