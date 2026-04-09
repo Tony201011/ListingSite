@@ -28,10 +28,12 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
@@ -41,6 +43,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class UserResource extends Resource
 {
@@ -130,7 +133,23 @@ class UserResource extends Resource
                                         ->required(fn (string $operation): bool => $operation === 'create')
                                         ->minLength(8)
                                         ->maxLength(255)
-                                        ->dehydrated(fn ($state): bool => filled($state)),
+                                        ->dehydrated(fn ($state): bool => filled($state))
+                                        ->suffixAction(
+                                            Action::make('generatePassword')
+                                                ->label('Generate')
+                                                ->icon('heroicon-o-sparkles')
+                                                ->action(function (Set $set): void {
+                                                    $password = Str::password(16, symbols: true);
+                                                    $set('password', $password);
+                                                    $set('password_confirmation', $password);
+                                                    Notification::make()
+                                                        ->title('Password generated')
+                                                        ->body($password)
+                                                        ->success()
+                                                        ->persistent()
+                                                        ->send();
+                                                })
+                                        ),
 
                                     TextInput::make('password_confirmation')
                                         ->label('Confirm Password')
