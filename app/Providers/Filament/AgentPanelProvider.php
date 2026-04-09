@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Agent\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Http\Middleware\AgentEmailVerification;
 use App\Http\Middleware\AgentForcePasswordChange;
@@ -29,7 +30,7 @@ class AgentPanelProvider extends PanelProvider
             ->path('agent')
             ->brandName('HOTESCORTS Agent')
             ->login()
-            ->passwordReset()
+            ->passwordReset(resetAction: ResetPassword::class)
             ->profile(EditProfile::class, isSimple: false)
             ->colors([
                 'primary' => Color::Blue,
