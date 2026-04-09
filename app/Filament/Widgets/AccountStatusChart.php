@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Carbon;
 
 class AccountStatusChart extends ChartWidget
 {
@@ -17,10 +18,28 @@ class AccountStatusChart extends ChartWidget
         return Filament::getCurrentPanel()?->getId() === 'admin';
     }
 
+    protected function getFilters(): ?array
+    {
+        $currentYear = (int) Carbon::now()->year;
+        $years = ['all' => 'All Time'];
+
+        for ($year = $currentYear; $year >= $currentYear - 4; $year--) {
+            $years[(string) $year] = (string) $year;
+        }
+
+        return $years;
+    }
+
     protected function getData(): array
     {
-        $stats = User::query()
-            ->whereIn('role', [User::ROLE_PROVIDER, User::ROLE_AGENT])
+        $query = User::query()
+            ->whereIn('role', [User::ROLE_PROVIDER, User::ROLE_AGENT]);
+
+        if ($this->filter && $this->filter !== 'all') {
+            $query->whereYear('created_at', (int) $this->filter);
+        }
+
+        $stats = $query
             ->selectRaw("
                 role,
                 SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,

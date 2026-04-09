@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Carbon;
 
 class AgentAccountStatusChart extends ChartWidget
 {
@@ -17,15 +18,33 @@ class AgentAccountStatusChart extends ChartWidget
         return Filament::getCurrentPanel()?->getId() === 'agent';
     }
 
+    protected function getFilters(): ?array
+    {
+        $currentYear = (int) Carbon::now()->year;
+        $years = ['all' => 'All Time'];
+
+        for ($year = $currentYear; $year >= $currentYear - 4; $year--) {
+            $years[(string) $year] = (string) $year;
+        }
+
+        return $years;
+    }
+
     protected function getData(): array
     {
         $agentId = Filament::auth()->id();
 
-        $stats = User::query()
+        $query = User::query()
             ->where('role', User::ROLE_PROVIDER)
             ->whereHas('providerProfile', function ($query) use ($agentId): void {
                 $query->where('agent_id', $agentId);
-            })
+            });
+
+        if ($this->filter && $this->filter !== 'all') {
+            $query->whereYear('created_at', (int) $this->filter);
+        }
+
+        $stats = $query
             ->selectRaw("
                 SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,
                 SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NULL THEN 1 ELSE 0 END) as active_unverified,
