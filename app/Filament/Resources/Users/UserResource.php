@@ -999,16 +999,20 @@ class UserResource extends Resource
                             );
                     }),
 
-                Filter::make('deleted_accounts')
-                    ->label('Deleted Accounts')
-                    ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when(
-                            $data['isActive'] ?? false,
-                            fn (Builder $q): Builder => $q->whereNotNull((new User)->getTable() . '.deleted_at'),
-                            fn (Builder $q): Builder => $q->whereNull((new User)->getTable() . '.deleted_at'),
-                        )
-                    )
-                    ->toggle(),
+                SelectFilter::make('deleted_status')
+                    ->label('Deleted Status')
+                    ->options([
+                        'deleted' => 'Deleted At',
+                        'not_deleted' => 'Not Deleted At',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'deleted' => $query->whereNotNull((new User)->getTable() . '.deleted_at'),
+                            'not_deleted' => $query->whereNull((new User)->getTable() . '.deleted_at'),
+                            default => $query,
+                        };
+                    })
+                    ->placeholder('All Accounts'),
             ])
             ->recordActions([
                 ViewAction::make()
