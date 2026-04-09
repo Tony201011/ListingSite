@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
+use App\Http\Middleware\AgentEmailVerification;
 use App\Http\Middleware\AgentForcePasswordChange;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -53,6 +54,7 @@ class AgentPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                AgentEmailVerification::class,
                 AgentForcePasswordChange::class,
             ]);
     }
