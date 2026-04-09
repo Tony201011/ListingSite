@@ -142,7 +142,6 @@
                                 <i class="fa-solid fa-circle-check text-[10px]"></i> Within <strong x-text="distance"></strong> km
                             </span>
                             <input
-                                name="distance"
                                 type="range"
                                 min="1"
                                 :max="maxDistance"

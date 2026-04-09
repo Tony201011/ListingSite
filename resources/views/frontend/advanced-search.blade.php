@@ -150,7 +150,6 @@
                                 <span class="text-gray-400">Max: {{ $maxSearchDistance }} km</span>
                             </div>
                             <input
-                                name="distance"
                                 type="range"
                                 min="1"
                                 :max="maxDistance"
