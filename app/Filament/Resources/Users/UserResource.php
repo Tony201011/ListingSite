@@ -934,6 +934,13 @@ class UserResource extends Resource
                         default => 'success',
                     }),
 
+
+
+
+
+
+
+
                 TextColumn::make('status')
                     ->label('Verification')
                     ->badge()
