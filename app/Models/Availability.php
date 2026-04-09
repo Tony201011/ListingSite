@@ -16,4 +16,9 @@ class Availability extends Model
         'all_day',
         'by_appointment',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
