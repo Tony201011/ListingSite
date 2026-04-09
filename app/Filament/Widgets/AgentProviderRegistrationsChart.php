@@ -18,14 +18,26 @@ class AgentProviderRegistrationsChart extends ChartWidget
         return Filament::getCurrentPanel()?->getId() === 'agent';
     }
 
+    protected function getFilters(): ?array
+    {
+        $currentYear = (int) Carbon::now()->year;
+        $years = [];
+
+        for ($year = $currentYear; $year >= $currentYear - 4; $year--) {
+            $years[(string) $year] = (string) $year;
+        }
+
+        return $years;
+    }
+
     protected function getData(): array
     {
-        $start = Carbon::now()->subMonths(11)->startOfMonth();
+        $selectedYear = (int) ($this->filter ?? Carbon::now()->year);
         $agentId = Filament::auth()->id();
 
         $rows = User::query()
             ->where('role', User::ROLE_PROVIDER)
-            ->where('created_at', '>=', $start)
+            ->whereYear('created_at', $selectedYear)
             ->whereHas('providerProfile', function ($query) use ($agentId): void {
                 $query->where('agent_id', $agentId);
             })
@@ -36,10 +48,9 @@ class AgentProviderRegistrationsChart extends ChartWidget
 
         $data = [];
         $labels = [];
-        $now = Carbon::now();
 
-        for ($i = 11; $i >= 0; $i--) {
-            $month = $now->copy()->subMonths($i);
+        for ($m = 1; $m <= 12; $m++) {
+            $month = Carbon::createFromDate($selectedYear, $m, 1);
             $key = $month->format('Y-m');
             $labels[] = $month->format('M Y');
             $data[] = $rows->get($key, 0);
