@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SmtpSettings\Pages;
 
 use App\Filament\Resources\SmtpSettings\SmtpSettingResource;
 use App\Filament\Resources\SmtpSettings\Widgets\MailSettingsStats;
+use App\Models\EmailLog;
 use App\Models\SmtpSetting;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -149,6 +150,14 @@ class ManageSmtpSettings extends ManageRecords
                             'mailgun_endpoint' => config('services.mailgun.endpoint'),
                         ]);
 
+                        EmailLog::create([
+                            'recipient' => $data['email'],
+                            'subject' => 'Test Email from Mail Settings',
+                            'type' => 'test_mail',
+                            'status' => 'sent',
+                            'sent_at' => now(),
+                        ]);
+
                         Notification::make()
                             ->title('Test email sent successfully.')
                             ->success()
@@ -160,6 +169,15 @@ class ManageSmtpSettings extends ManageRecords
                             'mailgun_domain' => config('services.mailgun.domain'),
                             'mailgun_endpoint' => config('services.mailgun.endpoint'),
                             'error' => $e->getMessage(),
+                        ]);
+
+                        EmailLog::create([
+                            'recipient' => $data['email'],
+                            'subject' => 'Test Email from Mail Settings',
+                            'type' => 'test_mail',
+                            'status' => 'failed',
+                            'error' => $e->getMessage(),
+                            'sent_at' => now(),
                         ]);
 
                         Notification::make()

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\EmailLog;
 use App\Models\User;
 use App\Services\MailgunConfigService;
 use Illuminate\Bus\Queueable;
@@ -64,12 +65,29 @@ class SendAdminProviderEmailJob implements ShouldQueue
                 'user_id' => $user->id,
                 'email' => $user->email,
             ]);
+
+            EmailLog::create([
+                'recipient' => $user->email,
+                'subject' => $config['subject'],
+                'type' => $this->emailType,
+                'status' => 'sent',
+                'sent_at' => now(),
+            ]);
         } catch (Throwable $e) {
             Log::error("Admin provider email ({$this->emailType}) failed", [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'exception_class' => get_class($e),
                 'error' => $e->getMessage(),
+            ]);
+
+            EmailLog::create([
+                'recipient' => $user->email,
+                'subject' => $config['subject'],
+                'type' => $this->emailType,
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+                'sent_at' => now(),
             ]);
 
             throw $e;

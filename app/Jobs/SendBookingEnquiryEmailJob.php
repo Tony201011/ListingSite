@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\BookingEnquiry;
+use App\Models\EmailLog;
 use App\Services\MailgunConfigService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -70,12 +71,29 @@ class SendBookingEnquiryEmailJob implements ShouldQueue
                 'booking_enquiry_id' => $enquiry->id,
                 'email' => $enquiry->email,
             ]);
+
+            EmailLog::create([
+                'recipient' => $recipientEmail,
+                'subject' => 'New Booking Enquiry',
+                'type' => 'booking_enquiry',
+                'status' => 'sent',
+                'sent_at' => now(),
+            ]);
         } catch (Throwable $e) {
             Log::error('Booking enquiry email failed', [
                 'booking_enquiry_id' => $enquiry->id,
                 'email' => $enquiry->email,
                 'exception_class' => get_class($e),
                 'error' => $e->getMessage(),
+            ]);
+
+            EmailLog::create([
+                'recipient' => $recipientEmail,
+                'subject' => 'New Booking Enquiry',
+                'type' => 'booking_enquiry',
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+                'sent_at' => now(),
             ]);
 
             throw $e;

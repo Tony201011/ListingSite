@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\EmailLog;
 use App\Models\SmtpSetting;
 use App\Services\MailgunConfigService;
 use Illuminate\Bus\Queueable;
@@ -48,10 +49,27 @@ class SendPasswordResetLinkJob implements ShouldQueue
                     'email' => $this->email,
                     'status' => $status,
                 ]);
+
+                EmailLog::create([
+                    'recipient' => $this->email,
+                    'subject' => 'Reset Password Notification',
+                    'type' => 'password_reset_link',
+                    'status' => 'sent',
+                    'sent_at' => now(),
+                ]);
             } else {
                 Log::warning('Password reset link email not sent from queue.', [
                     'email' => $this->email,
                     'status' => $status,
+                ]);
+
+                EmailLog::create([
+                    'recipient' => $this->email,
+                    'subject' => 'Reset Password Notification',
+                    'type' => 'password_reset_link',
+                    'status' => 'failed',
+                    'error' => $status,
+                    'sent_at' => now(),
                 ]);
             }
         } catch (\Throwable $e) {
@@ -59,6 +77,15 @@ class SendPasswordResetLinkJob implements ShouldQueue
                 'email' => $this->email,
                 'exception_class' => get_class($e),
                 'error' => $e->getMessage(),
+            ]);
+
+            EmailLog::create([
+                'recipient' => $this->email,
+                'subject' => 'Reset Password Notification',
+                'type' => 'password_reset_link',
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+                'sent_at' => now(),
             ]);
         }
     }
