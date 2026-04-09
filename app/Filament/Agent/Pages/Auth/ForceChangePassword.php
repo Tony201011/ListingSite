@@ -14,6 +14,8 @@ class ForceChangePassword extends Page
 {
     protected string $view = 'filament.agent.pages.auth.force-change-password';
 
+    protected static ?string $title = 'Change Password';
+
     protected static bool $shouldRegisterNavigation = false;
 
     public string $new_password = '';
