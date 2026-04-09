@@ -15,10 +15,11 @@ class AgentForcePasswordChange
         $user = Filament::auth()->user();
 
         if ($user && $user->must_change_password) {
-            $changePasswordRoute = ForceChangePassword::getRouteName(panel: 'agent');
+            $panel = Filament::getPanel('agent');
+            $changePasswordRoute = ForceChangePassword::getRouteName(panel: $panel);
 
             if ($request->route()?->getName() !== $changePasswordRoute) {
-                return redirect(ForceChangePassword::getUrl(panel: 'agent'));
+                return redirect(ForceChangePassword::getUrl(panel: $panel));
             }
         }
 
