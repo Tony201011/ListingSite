@@ -30,6 +30,7 @@ class AgentPanelProvider extends PanelProvider
             ->login()
             ->passwordReset()
             ->profile(EditProfile::class, isSimple: false)
+            ->viteTheme('resources/css/app.css')
             ->colors([
                 'primary' => Color::Blue,
             ])
