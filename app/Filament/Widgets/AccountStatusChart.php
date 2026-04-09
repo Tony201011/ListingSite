@@ -8,7 +8,7 @@ use Filament\Widgets\ChartWidget;
 
 class AccountStatusChart extends ChartWidget
 {
-    protected static ?string $heading = 'Account Status Overview';
+    protected ?string $heading = 'Account Status Overview';
 
     protected static ?int $sort = 4;
 
