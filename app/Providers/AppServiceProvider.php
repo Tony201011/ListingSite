@@ -7,6 +7,8 @@ use App\Models\FooterWidget;
 use App\Models\HeaderWidget;
 use App\Models\S3BucketSetting;
 use App\Models\SmtpSetting;
+use App\Notifications\BrandedAgentResetPasswordNotification;
+use Filament\Auth\Notifications\ResetPassword as FilamentResetPasswordNotification;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(FilamentResetPasswordNotification::class, BrandedAgentResetPasswordNotification::class);
     }
 
     /**
