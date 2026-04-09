@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\EmailLog;
 use App\Models\SmtpSetting;
 use App\Models\User;
 use App\Services\MailgunConfigService;
@@ -87,11 +88,28 @@ class SendAgentAccountEmailJob implements ShouldQueue
                         ->subject('Verify Your Email Address');
                 }
             );
+
+            EmailLog::create([
+                'recipient' => $user->email,
+                'subject' => 'Verify Your Email Address',
+                'type' => 'verify_email',
+                'status' => 'sent',
+                'sent_at' => now(),
+            ]);
         } catch (\Throwable $e) {
             Log::error('Agent verification email failed', [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'error' => $e->getMessage(),
+            ]);
+
+            EmailLog::create([
+                'recipient' => $user->email,
+                'subject' => 'Verify Your Email Address',
+                'type' => 'verify_email',
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+                'sent_at' => now(),
             ]);
         }
     }
@@ -112,11 +130,28 @@ class SendAgentAccountEmailJob implements ShouldQueue
                         ->subject('Your agent account has been created');
                 }
             );
+
+            EmailLog::create([
+                'recipient' => $user->email,
+                'subject' => 'Your agent account has been created',
+                'type' => 'account_created',
+                'status' => 'sent',
+                'sent_at' => now(),
+            ]);
         } catch (\Throwable $e) {
             Log::error('Agent account created email failed', [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'error' => $e->getMessage(),
+            ]);
+
+            EmailLog::create([
+                'recipient' => $user->email,
+                'subject' => 'Your agent account has been created',
+                'type' => 'account_created',
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+                'sent_at' => now(),
             ]);
         }
     }

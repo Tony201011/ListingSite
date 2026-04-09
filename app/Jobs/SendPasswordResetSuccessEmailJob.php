@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\EmailLog;
 use App\Models\SmtpSetting;
 use App\Models\User;
 use App\Services\MailgunConfigService;
@@ -61,11 +62,28 @@ class SendPasswordResetSuccessEmailJob implements ShouldQueue
             Log::info('Password reset success email sent from queue', [
                 'email' => $user->email,
             ]);
+
+            EmailLog::create([
+                'recipient' => $user->email,
+                'subject' => 'Your password was changed successfully',
+                'type' => 'password_reset_success',
+                'status' => 'sent',
+                'sent_at' => now(),
+            ]);
         } catch (\Throwable $e) {
             Log::error('Failed to send password reset success email from queue', [
                 'email' => $user->email,
                 'exception_class' => get_class($e),
                 'error' => $e->getMessage(),
+            ]);
+
+            EmailLog::create([
+                'recipient' => $user->email,
+                'subject' => 'Your password was changed successfully',
+                'type' => 'password_reset_success',
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+                'sent_at' => now(),
             ]);
         }
     }
