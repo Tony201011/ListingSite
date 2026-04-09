@@ -2,18 +2,18 @@
 
 /**frontend controller start*** */
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\ProviderRegisterController;
 /**frontend controller end*** */
 
 /*******auth Controllers start */
-use App\Http\Controllers\Auth\ProviderRegisterController;
 use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\FavouriteBookmarkController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\SearchController;
+use App\Http\Controllers\MediaController;
 /*******auth Controllers end */
 
 /***profile Controllers start*/

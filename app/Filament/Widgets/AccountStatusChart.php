@@ -40,12 +40,12 @@ class AccountStatusChart extends ChartWidget
         }
 
         $stats = $query
-            ->selectRaw("
+            ->selectRaw('
                 role,
                 SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,
                 SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NULL THEN 1 ELSE 0 END) as active_unverified,
                 SUM(CASE WHEN is_blocked = 1 THEN 1 ELSE 0 END) as blocked
-            ")
+            ')
             ->groupBy('role')
             ->get()
             ->keyBy('role');

@@ -38,7 +38,7 @@ class CreateUser extends CreateRecord
             : Str::slug($profileName);
 
         if (! filled($baseSlug)) {
-            $baseSlug = 'provider-' . $user->id;
+            $baseSlug = 'provider-'.$user->id;
         }
 
         $slug = $baseSlug;
@@ -49,7 +49,7 @@ class CreateUser extends CreateRecord
                 ->where('slug', $slug)
                 ->exists()
         ) {
-            $slug = $baseSlug . '-' . $index;
+            $slug = $baseSlug.'-'.$index;
             $index++;
         }
 

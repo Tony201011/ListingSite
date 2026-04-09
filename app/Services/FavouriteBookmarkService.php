@@ -58,9 +58,9 @@ class FavouriteBookmarkService
     private function cacheKey(string $type): string
     {
         if (auth()->check()) {
-            return "{$type}_user_" . auth()->id();
+            return "{$type}_user_".auth()->id();
         }
 
-        return "{$type}_sess_" . session()->getId();
+        return "{$type}_sess_".session()->getId();
     }
 }

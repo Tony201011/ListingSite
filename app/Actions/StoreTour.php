@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
-use App\Models\Tour;
 use App\Models\User;
 
 class StoreTour

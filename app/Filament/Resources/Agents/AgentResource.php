@@ -10,9 +10,9 @@ use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
@@ -39,7 +39,6 @@ class AgentResource extends Resource
     protected static ?string $slug = 'agents';
 
     protected static ?int $navigationSort = 1;
-
 
     public static function canAccess(): bool
     {

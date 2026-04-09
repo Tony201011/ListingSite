@@ -121,7 +121,7 @@ class EditUser extends EditRecord
         $baseSlug = Str::slug($requestedSlug);
 
         if (! filled($baseSlug)) {
-            $baseSlug = $existingProfile?->slug ?: 'provider-' . $record->id;
+            $baseSlug = $existingProfile?->slug ?: 'provider-'.$record->id;
         }
 
         $slug = $baseSlug;
@@ -136,7 +136,7 @@ class EditUser extends EditRecord
                 )
                 ->exists()
         ) {
-            $slug = $baseSlug . '-' . $index;
+            $slug = $baseSlug.'-'.$index;
             $index++;
         }
 
