@@ -19,7 +19,7 @@ class AgentForcePasswordChange
             $changePasswordRoute = ForceChangePassword::getRouteName(panel: $panel);
 
             if ($request->route()?->getName() !== $changePasswordRoute) {
-                return redirect(ForceChangePassword::getUrl(panel: $panel));
+                return redirect(ForceChangePassword::getUrl(panel: 'agent'));
             }
         }
 
