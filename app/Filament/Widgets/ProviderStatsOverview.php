@@ -13,6 +13,11 @@ class ProviderStatsOverview extends StatsOverviewWidget
 
     protected static ?int $sort = 6;
 
+    public static function canView(): bool
+    {
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'agent'], true);
+    }
+
     /**
      * @return array<Stat>
      */
