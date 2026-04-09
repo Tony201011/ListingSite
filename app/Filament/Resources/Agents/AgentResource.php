@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Agents;
 
-use App\Filament\Resources\Agents\Pages\CreateAgent;
-use App\Filament\Resources\Agents\Pages\EditAgent;
 use App\Filament\Resources\Agents\Pages\ListAgents;
 use App\Models\User;
 use BackedEnum;
@@ -70,7 +68,7 @@ class AgentResource extends Resource
             TextInput::make('password')
                 ->password()
                 ->revealable(filament()->arePasswordsRevealable())
-                ->required(fn ($livewire): bool => $livewire instanceof CreateAgent)
+                ->required(fn (string $operation): bool => $operation === 'create')
                 ->minLength(8)
                 ->same('passwordConfirmation')
                 ->dehydrated(fn ($state): bool => filled($state))
@@ -94,8 +92,8 @@ class AgentResource extends Resource
                 ->label('Confirm Password')
                 ->password()
                 ->revealable(filament()->arePasswordsRevealable())
-                ->required(fn ($livewire): bool => $livewire instanceof CreateAgent)
-                ->visible(fn ($livewire): bool => $livewire instanceof CreateAgent)
+                ->required(fn (string $operation): bool => $operation === 'create')
+                ->visible(fn (string $operation): bool => $operation === 'create')
                 ->dehydrated(false),
         ]);
     }
@@ -235,8 +233,6 @@ class AgentResource extends Resource
     {
         return [
             'index' => ListAgents::route('/'),
-            'create' => CreateAgent::route('/create'),
-            'edit' => EditAgent::route('/{record}/edit'),
         ];
     }
 }
