@@ -20,7 +20,7 @@ class AvailableController extends Controller
 
     public function availableNow(): View
     {
-        $data = $this->getAvailableNowState->execute(auth::user());
+        $data = $this->getAvailableNowState->execute(Auth::user());
 
         return view('profile.available-now', $data);
     }

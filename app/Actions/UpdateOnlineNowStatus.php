@@ -57,7 +57,7 @@ class UpdateOnlineNowStatus
             return ActionResult::success([
                 'status' => 'online',
                 'remaining_uses' => max(0, 4 - $onlineUser->usage_count),
-                'expires_at' => optional($onlineUser->online_expires_at)?->toDateTimeString(),
+                'expires_at' => optional($onlineUser->online_expires_at)?->toIso8601String(),
             ], 'You are already online.');
         }
 
