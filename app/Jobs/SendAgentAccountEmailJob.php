@@ -10,8 +10,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class SendAgentAccountEmailJob implements ShouldQueue
 {
@@ -57,6 +59,45 @@ class SendAgentAccountEmailJob implements ShouldQueue
 
         $mailgunConfig->apply($setting);
 
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            Carbon::now()->addMinutes(60),
+            [
+                'id' => $user->getKey(),
+                'hash' => sha1($user->getEmailForVerification()),
+            ]
+        );
+
+        $this->sendVerificationEmail($user, $verificationUrl);
+        $this->sendAccountCreatedEmail($user);
+    }
+
+    private function sendVerificationEmail(User $user, string $verificationUrl): void
+    {
+        try {
+            Mail::mailer('mailgun')->send(
+                'emails.verify-email',
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'verificationUrl' => $verificationUrl,
+                ],
+                function ($message) use ($user): void {
+                    $message->to($user->email)
+                        ->subject('Verify Your Email Address');
+                }
+            );
+        } catch (\Throwable $e) {
+            Log::error('Agent verification email failed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function sendAccountCreatedEmail(User $user): void
+    {
         try {
             Mail::mailer('mailgun')->send(
                 'emails.account-created',
