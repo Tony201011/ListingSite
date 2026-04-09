@@ -41,7 +41,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
@@ -72,6 +71,7 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->withTrashed()
             ->with([
                 'providerProfile',
                 'onlineUser',
@@ -1001,9 +1001,12 @@ class UserResource extends Resource
 
                 Filter::make('deleted_accounts')
                     ->label('Deleted Accounts')
-                    ->query(fn (Builder $query): Builder => $query
-                        ->withoutGlobalScope(SoftDeletingScope::class)
-                        ->whereNotNull((new User)->getTable() . '.deleted_at')
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['isActive'] ?? false,
+                            fn (Builder $q): Builder => $q->whereNotNull((new User)->getTable() . '.deleted_at'),
+                            fn (Builder $q): Builder => $q->whereNull((new User)->getTable() . '.deleted_at'),
+                        )
                     )
                     ->toggle(),
             ])
