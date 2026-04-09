@@ -1,6 +1,226 @@
 <x-filament-panels::page>
     <style>
         [x-cloak] { display: none !important; }
+
+        /* ── Wrapper ─────────────────────────────────────────── */
+        .fcp-wrapper {
+            max-width: 32rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ── Card ────────────────────────────────────────────── */
+        .fcp-card {
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* ── Header banner ───────────────────────────────────── */
+        .fcp-header {
+            background: linear-gradient(to right, #e04ecb, #c13ab0);
+            padding: 1.25rem 1.5rem;
+        }
+        .fcp-header-inner {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .fcp-icon-circle-lg {
+            flex-shrink: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fcp-icon-lg {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #ffffff;
+        }
+        .fcp-header-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.25;
+            margin: 0;
+        }
+        .fcp-header-sub {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0.125rem 0 0;
+        }
+
+        /* ── Form body ───────────────────────────────────────── */
+        .fcp-body {
+            padding: 1.5rem;
+        }
+
+        /* ── Generate-password button ────────────────────────── */
+        .fcp-generate-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            background-color: #fdf0fb;
+            color: #c13ab0;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: 1px solid #f3c4ea;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            margin-top: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .fcp-generate-btn:hover {
+            background-color: #fae3f6;
+        }
+        .fcp-generate-btn svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* ── Backdrop ────────────────────────────────────────── */
+        .fcp-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ── Modal ───────────────────────────────────────────── */
+        .fcp-modal {
+            position: fixed;
+            z-index: 50;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: calc(100% - 2rem);
+            max-width: 24rem;
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            padding: 1.25rem;
+        }
+        .fcp-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .fcp-modal-title-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .fcp-icon-circle-sm {
+            flex-shrink: 0;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            background-color: #fdf0fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fcp-icon-sm {
+            width: 1rem;
+            height: 1rem;
+            color: #c13ab0;
+        }
+        .fcp-modal-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+        }
+        .fcp-modal-sub {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin: 0;
+        }
+        .fcp-close-btn {
+            color: #9ca3af;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 9999px;
+            width: 1.75rem;
+            height: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s ease, background-color 0.15s ease;
+            padding: 0;
+        }
+        .fcp-close-btn:hover {
+            color: #4b5563;
+            background-color: #f3f4f6;
+        }
+        .fcp-close-btn svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* ── Generated-password display ──────────────────────── */
+        .fcp-password-display {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            user-select: all;
+        }
+
+        /* ── Modal action buttons ────────────────────────────── */
+        .fcp-btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .fcp-btn-secondary {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            font-weight: 500;
+            font-size: 0.875rem;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        .fcp-btn-secondary:hover {
+            background-color: #f9fafb;
+        }
+        .fcp-btn-primary {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: none;
+            background: linear-gradient(to right, #e04ecb, #c13ab0);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+        .fcp-btn-primary:hover {
+            opacity: 0.9;
+        }
     </style>
 
     <div
@@ -39,44 +259,42 @@
                 } catch (e) {}
             }
         }"
-        class="max-w-lg mx-auto"
+        class="fcp-wrapper"
     >
         {{-- Card --}}
-        <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-gray-900 overflow-hidden">
+        <div class="fcp-card">
             {{-- Header banner --}}
-            <div class="bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] px-6 py-5">
-                <div class="flex items-center gap-3">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="fcp-header">
+                <div class="fcp-header-inner">
+                    <div class="fcp-icon-circle-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="fcp-icon-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-base font-bold text-white leading-tight">Change Your Password</h2>
-                        <p class="text-xs text-white/80 mt-0.5">You must set a new password before continuing.</p>
+                        <h2 class="fcp-header-title">Change Your Password</h2>
+                        <p class="fcp-header-sub">You must set a new password before continuing.</p>
                     </div>
                 </div>
             </div>
 
             {{-- Form body --}}
-            <div class="px-6 py-6">
+            <div class="fcp-body">
                 <form wire:submit="save">
                     {{ $this->form }}
 
-                    <div class="mt-4 mb-5">
-                        <button
-                            type="button"
-                            @click="generatePasswordPopup()"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#fdf0fb] text-[#c13ab0] font-semibold border border-[#f3c4ea] hover:bg-[#fae3f6] transition text-sm"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                            </svg>
-                            Generate Password
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        @click="generatePasswordPopup()"
+                        class="fcp-generate-btn"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        Generate Password
+                    </button>
 
-                    <x-filament::button type="submit" size="lg" class="w-full justify-center">
+                    <x-filament::button type="submit" size="lg" style="width:100%;justify-content:center;">
                         Change Password
                     </x-filament::button>
                 </form>
@@ -94,7 +312,7 @@
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             @click="showPasswordPopup = false"
-            class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            class="fcp-backdrop"
         ></div>
 
         {{-- Popup modal --}}
@@ -107,41 +325,41 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl p-5"
+            class="fcp-modal"
         >
-            <div class="flex items-start justify-between gap-3 mb-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-[#fdf0fb] flex items-center justify-center flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#c13ab0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="fcp-modal-header">
+                <div class="fcp-modal-title-row">
+                    <div class="fcp-icon-circle-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="fcp-icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
                     <div>
-                        <h4 class="font-bold text-gray-900 dark:text-white text-sm">Strong password suggestion</h4>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Save this somewhere safe before using it.</p>
+                        <h4 class="fcp-modal-title">Strong password suggestion</h4>
+                        <p class="fcp-modal-sub">Save this somewhere safe before using it.</p>
                     </div>
                 </div>
                 <button
                     type="button"
                     @click="showPasswordPopup = false"
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10"
+                    class="fcp-close-btn"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
             <div
-                class="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-mono text-sm break-all text-gray-800 dark:text-gray-100 mb-4 select-all"
+                class="fcp-password-display"
                 x-text="generatedPassword"
             ></div>
 
-            <div class="flex flex-wrap gap-2">
+            <div class="fcp-btn-row">
                 <button
                     type="button"
                     @click="generatePasswordPopup()"
-                    class="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition text-sm"
+                    class="fcp-btn-secondary"
                 >
                     Regenerate
                 </button>
@@ -149,7 +367,7 @@
                 <button
                     type="button"
                     @click="copyGeneratedPassword()"
-                    class="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition text-sm"
+                    class="fcp-btn-secondary"
                 >
                     <span x-text="copied ? '✓ Copied!' : 'Copy'"></span>
                 </button>
@@ -157,7 +375,7 @@
                 <button
                     type="button"
                     @click="useGeneratedPassword()"
-                    class="w-full px-3 py-2 rounded-lg bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-semibold hover:opacity-90 transition text-sm"
+                    class="fcp-btn-primary"
                 >
                     Use this password
                 </button>
