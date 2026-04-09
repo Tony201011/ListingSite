@@ -55,7 +55,7 @@
                 <span
                     x-show="!loading"
                     x-cloak
-                    x-text="enabled ? 'Available now enabled' : 'Enable available now'"
+                    x-text="enabled ? 'Disable available now' : 'Enable available now'"
                 ></span>
 
                 <span x-show="loading" x-cloak class="flex items-center gap-2">

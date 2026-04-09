@@ -20,7 +20,7 @@ class OnlineController extends Controller
 
     public function onlineNow(): View
     {
-        $data = $this->getOnlineNowState->execute(auth::user());
+        $data = $this->getOnlineNowState->execute(Auth::user());
 
         return view('profile.online-now', $data);
     }
@@ -30,7 +30,7 @@ class OnlineController extends Controller
         $this->authorize('update', ProviderProfile::class);
 
         $result = $this->updateOnlineNowStatus->execute(
-            auth::user(),
+            Auth::user(),
             $request->validated('status')
         );
 
