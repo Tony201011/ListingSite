@@ -48,8 +48,6 @@ class ListAgents extends ManageRecords
                             'email' => $record->email,
                         ]);
 
-                        $this->plainPassword = '';
-
                         return;
                     }
 
