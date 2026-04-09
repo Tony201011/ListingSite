@@ -26,13 +26,13 @@ class StatusTabsController extends Controller
         $visibilityData = $this->getShowHideProfileState->execute($user);
 
         return view('profile.status-tabs', [
-            'onlineStatus'          => $onlineData['onlineStatus'],
-            'onlineRemainingUses'   => $onlineData['remainingUses'],
-            'onlineExpiresAt'       => $onlineData['expiresAt'],
-            'availableStatus'       => $availableData['status'],
+            'onlineStatus' => $onlineData['onlineStatus'],
+            'onlineRemainingUses' => $onlineData['remainingUses'],
+            'onlineExpiresAt' => $onlineData['expiresAt'],
+            'availableStatus' => $availableData['status'],
             'availableRemainingUses' => $availableData['remainingUses'],
-            'availableExpiresAt'    => $availableData['expiresAt'],
-            'visibilityStatus'      => $visibilityData['status'],
+            'availableExpiresAt' => $availableData['expiresAt'],
+            'visibilityStatus' => $visibilityData['status'],
         ]);
     }
 }

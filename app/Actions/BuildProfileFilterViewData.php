@@ -31,17 +31,17 @@ class BuildProfileFilterViewData
     ];
 
     private const SLUG_TO_JSON_COLUMN = [
-        'primary-identity'     => 'primary_identity',
-        'attributes'           => 'attributes',
-        'services-style'       => 'services_style',
+        'primary-identity' => 'primary_identity',
+        'attributes' => 'attributes',
+        'services-style' => 'services_style',
         'services-you-provide' => 'services_provided',
     ];
 
     private const SLUG_TO_STRING_COLUMN = [
-        'availability'              => 'availability',
-        'contact-method'            => 'contact_method',
+        'availability' => 'availability',
+        'contact-method' => 'contact_method',
         'phone-contact-preferences' => 'phone_contact_preference',
-        'time-waster-shield'        => 'time_waster_shield',
+        'time-waster-shield' => 'time_waster_shield',
     ];
 
     private const DEFAULT_MAX_DISTANCE = 500;
@@ -257,13 +257,13 @@ class BuildProfileFilterViewData
             // Scout is not configured or unavailable – fall back to LIKE queries.
             if ($locationQuery !== '') {
                 $query->where(function ($q) use ($locationQuery) {
-                    $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%' . $locationQuery . '%'))
-                      ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%' . $locationQuery . '%'));
+                    $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
+                        ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%'.$locationQuery.'%'));
                 });
             }
 
             if ($escortNameQuery !== '') {
-                $query->where('name', 'like', '%' . $escortNameQuery . '%');
+                $query->where('name', 'like', '%'.$escortNameQuery.'%');
             }
         }
 
@@ -301,6 +301,7 @@ class BuildProfileFilterViewData
                         $column = self::SLUG_TO_COLUMN[$slug] ?? null;
                         if ($column !== null) {
                             $q->whereIn($column, $ids);
+
                             continue;
                         }
 
@@ -316,6 +317,7 @@ class BuildProfileFilterViewData
                                     }
                                 });
                             }
+
                             continue;
                         }
 
@@ -384,7 +386,7 @@ class BuildProfileFilterViewData
     private function resolveScoutIds(string $locationQuery, string $escortNameQuery): ?Collection
     {
         try {
-            $searchTerm = trim($escortNameQuery . ' ' . $locationQuery);
+            $searchTerm = trim($escortNameQuery.' '.$locationQuery);
 
             /** @var ScoutBuilder $scoutQuery */
             $scoutQuery = ProviderProfile::search($searchTerm)

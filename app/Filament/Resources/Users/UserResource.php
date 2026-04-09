@@ -908,7 +908,7 @@ class UserResource extends Resource
                     ->disk(fn (): string => config('filesystems.default', 'public'))
                     ->circular()
                     ->defaultImageUrl(
-                        fn (User $record): string => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&background=E5E7EB&color=111827'
+                        fn (User $record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&background=E5E7EB&color=111827'
                     )
                     ->size(40),
 
@@ -1011,8 +1011,8 @@ class UserResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
-                            'deleted' => $query->whereNotNull((new User)->getTable() . '.deleted_at'),
-                            'not_deleted' => $query->whereNull((new User)->getTable() . '.deleted_at'),
+                            'deleted' => $query->whereNotNull((new User)->getTable().'.deleted_at'),
+                            'not_deleted' => $query->whereNull((new User)->getTable().'.deleted_at'),
                             default => $query,
                         };
                     })

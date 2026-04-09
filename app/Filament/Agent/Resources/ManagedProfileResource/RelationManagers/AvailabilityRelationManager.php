@@ -27,13 +27,13 @@ class AvailabilityRelationManager extends RelationManager
                 Select::make('day')
                     ->label('Day')
                     ->options([
-                        'Monday'    => 'Monday',
-                        'Tuesday'   => 'Tuesday',
+                        'Monday' => 'Monday',
+                        'Tuesday' => 'Tuesday',
                         'Wednesday' => 'Wednesday',
-                        'Thursday'  => 'Thursday',
-                        'Friday'    => 'Friday',
-                        'Saturday'  => 'Saturday',
-                        'Sunday'    => 'Sunday',
+                        'Thursday' => 'Thursday',
+                        'Friday' => 'Friday',
+                        'Saturday' => 'Saturday',
+                        'Sunday' => 'Sunday',
                     ])
                     ->required()
                     ->native(false),

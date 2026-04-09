@@ -32,4 +32,4 @@ class AddAgentIdToProviderProfilesTable extends Migration
 
         DB::statement('ALTER TABLE provider_profiles MODIFY user_id BIGINT UNSIGNED NOT NULL');
     }
-};
+}
