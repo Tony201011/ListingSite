@@ -23,6 +23,7 @@ class CreateAgent extends CreateRecord
             ...$data,
             'role' => User::ROLE_AGENT,
             'is_blocked' => false,
+            'must_change_password' => true,
         ];
     }
 
