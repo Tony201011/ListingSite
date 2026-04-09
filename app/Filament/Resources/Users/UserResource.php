@@ -41,6 +41,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
@@ -957,6 +958,14 @@ class UserResource extends Resource
                     ->sortable()
                     ->since()
                     ->tooltip(fn (User $record): string => $record->created_at?->format('M d, Y h:i A') ?? ''),
+
+                TextColumn::make('deleted_at')
+                    ->label('Deleted At')
+                    ->dateTime()
+                    ->sortable()
+                    ->since()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->color('danger'),
             ])
             ->filters([
                 TernaryFilter::make('email_verified_at')
@@ -989,11 +998,21 @@ class UserResource extends Resource
                                 fn (Builder $query): Builder => $query->whereDate('created_at', '<=', $data['created_until']),
                             );
                     }),
+
+                Filter::make('deleted_accounts')
+                    ->label('Deleted Accounts')
+                    ->query(fn (Builder $query): Builder => $query
+                        ->withoutGlobalScope(SoftDeletingScope::class)
+                        ->whereNotNull('users.deleted_at')
+                        ->where('role', User::ROLE_PROVIDER)
+                    )
+                    ->toggle(),
             ])
             ->recordActions([
                 ViewAction::make()
                     ->label('View as Admin')
-                    ->icon('heroicon-o-eye'),
+                    ->icon('heroicon-o-eye')
+                    ->visible(fn (User $record): bool => ! $record->trashed()),
 
                 Action::make('view_as_provider')
                     ->label('View as Provider')
@@ -1001,18 +1020,19 @@ class UserResource extends Resource
                     ->color('info')
                     ->url(fn (User $record): string => $record->providerProfile?->slug ? route('profile.show', ['slug' => $record->providerProfile->slug]) : '#')
                     ->openUrlInNewTab()
-                    ->visible(fn (User $record): bool => filled($record->providerProfile?->slug)),
+                    ->visible(fn (User $record): bool => filled($record->providerProfile?->slug) && ! $record->trashed()),
 
                 Action::make('edit')
                     ->label('Edit')
-                    ->url(fn (User $record): string => static::getUrl('edit', ['record' => $record])),
+                    ->url(fn (User $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->visible(fn (User $record): bool => ! $record->trashed()),
 
                 Action::make('block')
                     ->label('Block')
                     ->color('danger')
                     ->icon('heroicon-o-lock-closed')
                     ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => ! $record->is_blocked)
+                    ->visible(fn (User $record): bool => ! $record->is_blocked && ! $record->trashed())
                     ->action(function (User $record): void {
                         $record->update(['is_blocked' => true]);
                         SendAdminProviderEmailJob::dispatch($record->id, 'blocked');
@@ -1023,11 +1043,24 @@ class UserResource extends Resource
                     ->color('success')
                     ->icon('heroicon-o-lock-open')
                     ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => $record->is_blocked)
+                    ->visible(fn (User $record): bool => $record->is_blocked && ! $record->trashed())
                     ->action(function (User $record): void {
                         $record->update(['is_blocked' => false]);
                         SendAdminProviderEmailJob::dispatch($record->id, 'unblocked');
                     }),
+
+                Action::make('restore')
+                    ->label('Restore')
+                    ->color('success')
+                    ->icon('heroicon-o-arrow-path')
+                    ->requiresConfirmation()
+                    ->modalHeading('Restore provider')
+                    ->modalDescription('Are you sure you want to restore this provider account?')
+                    ->visible(fn (User $record): bool => $record->trashed())
+                    ->action(function (User $record): void {
+                        $record->restore();
+                    })
+                    ->successNotificationTitle('Provider restored'),
 
                 Action::make('delete')
                     ->label('Delete')
@@ -1036,6 +1069,7 @@ class UserResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading('Delete provider')
                     ->modalDescription('Delete this provider? This soft-deletes the user and removes them from listings.')
+                    ->visible(fn (User $record): bool => ! $record->trashed())
                     ->action(function (User $record): void {
                         $record->delete();
                     })
