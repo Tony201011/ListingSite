@@ -1003,8 +1003,7 @@ class UserResource extends Resource
                     ->label('Deleted Accounts')
                     ->query(fn (Builder $query): Builder => $query
                         ->withoutGlobalScope(SoftDeletingScope::class)
-                        ->whereNotNull('users.deleted_at')
-                        ->where('role', User::ROLE_PROVIDER)
+                        ->whereNotNull((new User)->getTable() . '.deleted_at')
                     )
                     ->toggle(),
             ])
