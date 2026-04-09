@@ -7,10 +7,13 @@ use App\Models\FooterWidget;
 use App\Models\HeaderWidget;
 use App\Models\S3BucketSetting;
 use App\Models\SmtpSetting;
+use App\Listeners\RecordUserLogin;
 use App\Notifications\BrandedAgentResetPasswordNotification;
 use Filament\Auth\Notifications\ResetPassword as FilamentResetPasswordNotification;
 use Filament\Support\Facades\FilamentView;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -43,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
         $this->shareFooterText();
         $this->configureSmtpFromDatabase();
         $this->configureStorageFromDatabase();
+
+        Event::listen(Login::class, RecordUserLogin::class);
     }
 
     private function shareFooterText(): void
