@@ -12,8 +12,6 @@ use Illuminate\Validation\Rules\Password;
 
 class ForceChangePassword extends Page
 {
-    protected static ?string $navigationIcon = null;
-
     protected static string $view = 'filament.agent.pages.auth.force-change-password';
 
     protected static bool $shouldRegisterNavigation = false;
