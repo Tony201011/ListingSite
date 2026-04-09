@@ -10,6 +10,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Notifications\Notification;
@@ -18,6 +19,9 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -132,6 +136,53 @@ class AgentResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->since(),
+            ])
+            ->filters([
+                TernaryFilter::make('email_verified_at')
+                    ->label('Status')
+                    ->nullable()
+                    ->trueLabel('Verified')
+                    ->falseLabel('Unverified'),
+
+                SelectFilter::make('is_blocked')
+                    ->label('Account')
+                    ->options([
+                        '0' => 'Active',
+                        '1' => 'Blocked',
+                    ]),
+
+                Filter::make('created_at')
+                    ->label('Created Date')
+                    ->schema([
+                        DatePicker::make('created_from')->label('From'),
+                        DatePicker::make('created_until')->label('Until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                filled($data['created_from'] ?? null),
+                                fn (Builder $query): Builder => $query->whereDate('created_at', '>=', $data['created_from']),
+                            )
+                            ->when(
+                                filled($data['created_until'] ?? null),
+                                fn (Builder $query): Builder => $query->whereDate('created_at', '<=', $data['created_until']),
+                            );
+                    }),
+
+                SelectFilter::make('deleted_status')
+                    ->label('Deleted Status')
+                    ->options([
+                        'deleted' => 'Deleted',
+                        'not_deleted' => 'Not Deleted',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'deleted' => $query->whereNotNull((new User)->getTable().'.deleted_at'),
+                            'not_deleted' => $query->whereNull((new User)->getTable().'.deleted_at'),
+                            default => $query,
+                        };
+                    })
+                    ->placeholder('All Accounts'),
             ])
             ->recordActions([
                 EditAction::make()->label('Edit')

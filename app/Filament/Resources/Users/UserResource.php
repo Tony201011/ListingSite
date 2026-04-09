@@ -1006,8 +1006,8 @@ class UserResource extends Resource
                 SelectFilter::make('deleted_status')
                     ->label('Deleted Status')
                     ->options([
-                        'deleted' => 'Deleted At',
-                        'not_deleted' => 'Not Deleted At',
+                        'deleted' => 'Deleted',
+                        'not_deleted' => 'Not Deleted',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
