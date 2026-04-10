@@ -140,15 +140,13 @@ class AdminPanelTest extends TestCase
     }
 
     // ---------------------------------------------------------------
-    // Agent management actions (block / unblock / delete / restore)
+    // Agent model – block / unblock / soft-delete / restore
+    // (The Filament panel actions delegate directly to these model calls.)
     // ---------------------------------------------------------------
 
-    public function test_admin_can_block_an_agent(): void
+    public function test_agent_model_can_be_blocked(): void
     {
-        $admin = $this->createAdmin();
         $agent = $this->createAgent(['is_blocked' => false]);
-
-        $this->actingAs($admin);
 
         $agent->update(['is_blocked' => true]);
 
@@ -158,12 +156,9 @@ class AdminPanelTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_unblock_a_blocked_agent(): void
+    public function test_agent_model_can_be_unblocked(): void
     {
-        $admin = $this->createAdmin();
         $agent = $this->createAgent(['is_blocked' => true]);
-
-        $this->actingAs($admin);
 
         $agent->update(['is_blocked' => false]);
 
@@ -173,27 +168,21 @@ class AdminPanelTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_soft_delete_an_agent(): void
+    public function test_agent_model_can_be_soft_deleted(): void
     {
-        $admin = $this->createAdmin();
         $agent = $this->createAgent();
-
-        $this->actingAs($admin);
 
         $agent->delete();
 
         $this->assertSoftDeleted('users', ['id' => $agent->id]);
     }
 
-    public function test_admin_can_restore_a_soft_deleted_agent(): void
+    public function test_soft_deleted_agent_model_can_be_restored(): void
     {
-        $admin = $this->createAdmin();
         $agent = $this->createAgent();
         $agent->delete();
 
         $this->assertSoftDeleted('users', ['id' => $agent->id]);
-
-        $this->actingAs($admin);
 
         $agent->restore();
 
@@ -203,12 +192,10 @@ class AdminPanelTest extends TestCase
         ]);
     }
 
-    public function test_blocked_agent_is_shown_as_blocked_in_agent_resource(): void
+    public function test_blocked_agent_is_flagged_in_database(): void
     {
         $admin = $this->createAdmin();
         $agent = $this->createAgent(['is_blocked' => true]);
-
-        $this->actingAs($admin);
 
         $response = $this->actingAs($admin)->get('/admin/agents');
 
