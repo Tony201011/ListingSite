@@ -5,13 +5,17 @@ namespace App\Filament\Agent\Resources;
 use App\Filament\Agent\Resources\ProviderListingResource\Pages\CreateProviderListing;
 use App\Filament\Agent\Resources\ProviderListingResource\Pages\EditProviderListing;
 use App\Filament\Agent\Resources\ProviderListingResource\Pages\ListProviderListings;
+use App\Filament\Agent\Resources\ProviderListingResource\Pages\ViewProviderListing;
+use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -21,6 +25,10 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -29,7 +37,11 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -64,7 +76,7 @@ class ProviderListingResource extends Resource
     {
         $query = parent::getEloquentQuery()
             ->withTrashed()
-            ->with(['providerProfile', 'profileImages', 'userVideos', 'rates', 'availabilities', 'profileMessage'])
+            ->with(['providerProfile', 'onlineUser', 'hideShowProfile', 'availableNow', 'profileImages', 'userVideos', 'rates', 'photoVerification', 'availabilities', 'profileMessage'])
             ->where('role', User::ROLE_PROVIDER);
 
         if (Filament::auth()->user()?->role === User::ROLE_ADMIN) {
@@ -586,10 +598,327 @@ class ProviderListingResource extends Resource
         ]);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->schema([
+            Tabs::make('ProviderDetailsTabs')
+                ->tabs([
+                    Tab::make('Overview')
+                        ->icon('heroicon-o-user-circle')
+                        ->schema([
+                            Section::make('Account Overview')
+                                ->description('Core account details and verification state.')
+                                ->icon('heroicon-o-identification')
+                                ->schema([
+                                    TextEntry::make('name')
+                                        ->label('User Name')
+                                        ->weight('bold'),
+
+                                    TextEntry::make('email')
+                                        ->label('Email')
+                                        ->copyable(),
+
+                                    TextEntry::make('mobile')
+                                        ->label('Mobile')
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('suburb')
+                                        ->label('Suburb')
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('referral_code')
+                                        ->label('Referral Code')
+                                        ->badge()
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('created_at')
+                                        ->label('Joined At')
+                                        ->dateTime()
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('email_verified_at')
+                                        ->label('Email Verified At')
+                                        ->dateTime()
+                                        ->placeholder('-'),
+
+                                    IconEntry::make('mobile_verified')
+                                        ->label('Mobile Verified')
+                                        ->boolean(),
+
+                                    IconEntry::make('is_blocked')
+                                        ->label('Blocked')
+                                        ->boolean(),
+                                ])
+                                ->columns(3)
+                                ->collapsible(),
+
+                            Section::make('Profile Information')
+                                ->description('Public-facing provider profile content and status.')
+                                ->icon('heroicon-o-sparkles')
+                                ->schema([
+                                    TextEntry::make('providerProfile.name')
+                                        ->label('Profile Name')
+                                        ->weight('bold')
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('providerProfile.slug')
+                                        ->label('Profile Slug')
+                                        ->badge()
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('providerProfile.description')
+                                        ->label('Description')
+                                        ->placeholder('-')
+                                        ->columnSpanFull(),
+
+                                    TextEntry::make('providerProfile.introduction_line')
+                                        ->label('Introduction Line')
+                                        ->html()
+                                        ->placeholder('-')
+                                        ->columnSpanFull(),
+
+                                    TextEntry::make('providerProfile.profile_text')
+                                        ->label('Profile Text')
+                                        ->html()
+                                        ->placeholder('-')
+                                        ->columnSpanFull(),
+
+                                    IconEntry::make('providerProfile.is_verified')
+                                        ->label('Profile Verified')
+                                        ->boolean(),
+
+                                    IconEntry::make('providerProfile.is_featured')
+                                        ->label('Featured')
+                                        ->boolean(),
+
+                                    TextEntry::make('providerProfile.profile_status')
+                                        ->label('Profile Status')
+                                        ->badge()
+                                        ->color(fn ($state): string => match ($state) {
+                                            'approved' => 'success',
+                                            'rejected' => 'danger',
+                                            default => 'warning',
+                                        })
+                                        ->placeholder('-'),
+                                ])
+                                ->columns(2)
+                                ->collapsible(),
+                        ]),
+
+                    Tab::make('Live Status')
+                        ->icon('heroicon-o-signal')
+                        ->schema([
+                            Section::make('Realtime Status')
+                                ->description('Current visibility and live profile state.')
+                                ->icon('heroicon-o-bolt')
+                                ->schema([
+                                    TextEntry::make('onlineUser.status')
+                                        ->label('Online Status')
+                                        ->badge()
+                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Offline')
+                                        ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray'),
+
+                                    TextEntry::make('hideShowProfile.status')
+                                        ->label('Profile Visibility')
+                                        ->badge()
+                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Show')
+                                        ->color(fn ($state): string => $state === 'show' ? 'success' : 'warning'),
+
+                                    TextEntry::make('availableNow.status')
+                                        ->label('Available Now')
+                                        ->badge()
+                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Offline')
+                                        ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray'),
+                                ])
+                                ->columns(3),
+                        ]),
+
+                    Tab::make('Attributes')
+                        ->icon('heroicon-o-adjustments-horizontal')
+                        ->schema([
+                            Section::make('Physical Attributes')
+                                ->icon('heroicon-o-user')
+                                ->schema([
+                                    TextEntry::make('providerProfile.age_group_id')->label('Age Group')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.hair_color_id')->label('Hair Color')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.hair_length_id')->label('Hair Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.ethnicity_id')->label('Ethnicity')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.body_type_id')->label('Body Type')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.bust_size_id')->label('Bust Size')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('providerProfile.your_length_id')->label('Your Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                ])
+                                ->columns(3)
+                                ->collapsible(),
+
+                            Section::make('Preferences & Services')
+                                ->icon('heroicon-o-heart')
+                                ->schema([
+                                    TextEntry::make('providerProfile.availability')->label('Availability')->placeholder('-'),
+                                    TextEntry::make('providerProfile.contact_method')->label('Contact Method')->placeholder('-'),
+                                    TextEntry::make('providerProfile.phone_contact_preference')->label('Phone Contact Preference')->placeholder('-'),
+                                    TextEntry::make('providerProfile.time_waster_shield')->label('Time Waster Shield')->placeholder('-'),
+                                    TextEntry::make('providerProfile.primary_identity')->label('Primary Identity')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
+                                    TextEntry::make('providerProfile.attributes')->label('Attributes')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
+                                    TextEntry::make('providerProfile.services_style')->label('Services Style')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
+                                    TextEntry::make('providerProfile.services_provided')->label('Services Provided')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
+                                ])
+                                ->columns(2)
+                                ->collapsible(),
+                        ]),
+
+                    Tab::make('Contact')
+                        ->icon('heroicon-o-phone')
+                        ->schema([
+                            Section::make('Social & Contact')
+                                ->icon('heroicon-o-chat-bubble-left-right')
+                                ->schema([
+                                    TextEntry::make('providerProfile.phone')->label('Phone')->placeholder('-'),
+                                    TextEntry::make('providerProfile.whatsapp')->label('WhatsApp')->placeholder('-'),
+                                    TextEntry::make('providerProfile.twitter_handle')->label('Twitter Handle')->placeholder('-'),
+                                    TextEntry::make('providerProfile.website')->label('Website')->placeholder('-'),
+                                    TextEntry::make('providerProfile.onlyfans_username')->label('OnlyFans Username')->placeholder('-'),
+                                ])
+                                ->columns(2),
+                        ]),
+
+                    Tab::make('Images')
+                        ->icon('heroicon-o-photo')
+                        ->schema([
+                            RepeatableEntry::make('profileImages')
+                                ->label('')
+                                ->schema([
+                                    ImageEntry::make('image_url')
+                                        ->label('Image')
+                                        ->height(220)
+                                        ->columnSpan(2),
+
+                                    ImageEntry::make('thumbnail_url')
+                                        ->label('Thumbnail')
+                                        ->height(120),
+
+                                    IconEntry::make('is_primary')
+                                        ->label('Primary')
+                                        ->boolean(),
+                                ])
+                                ->columns(4),
+                        ]),
+
+                    Tab::make('Videos')
+                        ->icon('heroicon-o-video-camera')
+                        ->schema([
+                            RepeatableEntry::make('userVideos')
+                                ->label('')
+                                ->schema([
+                                    TextEntry::make('original_name')
+                                        ->label('File Name')
+                                        ->weight('bold')
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('video_url')
+                                        ->label('Video URL')
+                                        ->placeholder('-')
+                                        ->copyable()
+                                        ->columnSpanFull(),
+                                ])
+                                ->columns(2),
+                        ]),
+
+                    Tab::make('Rates')
+                        ->icon('heroicon-o-banknotes')
+                        ->schema([
+                            RepeatableEntry::make('rates')
+                                ->label('')
+                                ->schema([
+                                    TextEntry::make('description')->label('Description')->weight('bold')->placeholder('-'),
+                                    TextEntry::make('incall')->label('Incall')->badge()->placeholder('-'),
+                                    TextEntry::make('outcall')->label('Outcall')->badge()->placeholder('-'),
+                                    TextEntry::make('extra')->label('Extra')->placeholder('-'),
+                                ])
+                                ->columns(4),
+                        ]),
+
+                    Tab::make('Verification')
+                        ->icon('heroicon-o-shield-check')
+                        ->schema([
+                            RepeatableEntry::make('photoVerification')
+                                ->label('')
+                                ->schema([
+                                    TextEntry::make('status')
+                                        ->label('Status')
+                                        ->badge()
+                                        ->color(fn ($state): string => match ($state) {
+                                            'approved' => 'success',
+                                            'rejected' => 'danger',
+                                            default => 'warning',
+                                        })
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('submitted_at')
+                                        ->label('Submitted At')
+                                        ->dateTime()
+                                        ->placeholder('-'),
+
+                                    TextEntry::make('admin_note')
+                                        ->label('Admin Note')
+                                        ->placeholder('-')
+                                        ->columnSpanFull(),
+
+                                    ImageEntry::make('photo_url')
+                                        ->label('Photo')
+                                        ->height(220)
+                                        ->columnSpanFull(),
+                                ])
+                                ->columns(2),
+                        ]),
+
+                    Tab::make('Availability')
+                        ->icon('heroicon-o-clock')
+                        ->schema([
+                            RepeatableEntry::make('availabilities')
+                                ->label('')
+                                ->schema([
+                                    TextEntry::make('day')->label('Day')->weight('bold'),
+                                    IconEntry::make('enabled')->label('Enabled')->boolean(),
+                                    TextEntry::make('from_time')->label('From')->placeholder('-'),
+                                    TextEntry::make('to_time')->label('To')->placeholder('-'),
+                                    IconEntry::make('till_late')->label('Till Late')->boolean(),
+                                    IconEntry::make('all_day')->label('All Day')->boolean(),
+                                    IconEntry::make('by_appointment')->label('By Appointment')->boolean(),
+                                ])
+                                ->columns(4),
+                        ]),
+
+                    Tab::make('Profile Message')
+                        ->icon('heroicon-o-megaphone')
+                        ->schema([
+                            Section::make('Profile Message')
+                                ->icon('heroicon-o-pencil-square')
+                                ->schema([
+                                    TextEntry::make('profileMessage.message')
+                                        ->label('')
+                                        ->html()
+                                        ->placeholder('No profile message set.')
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                ])
+                ->columnSpanFull(),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
+                ImageColumn::make('profile_image')
+                    ->label('')
+                    ->disk(fn (): string => config('filesystems.default', 'public'))
+                    ->circular()
+                    ->defaultImageUrl(
+                        fn (User $record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&background=E5E7EB&color=111827'
+                    )
+                    ->size(40),
+
                 TextColumn::make('name')
                     ->label('Provider')
                     ->searchable()
@@ -612,6 +941,12 @@ class ProviderListingResource extends Resource
                         default => 'success',
                     }),
 
+                TextColumn::make('status')
+                    ->label('Verification')
+                    ->badge()
+                    ->state(fn (User $record): string => filled($record->email_verified_at) ? 'Verified' : 'Unverified')
+                    ->color(fn (string $state): string => $state === 'Verified' ? 'success' : 'warning'),
+
                 TextColumn::make('providerProfile.profile_status')
                     ->label('Profile')
                     ->badge()
@@ -622,17 +957,144 @@ class ProviderListingResource extends Resource
                         default => 'warning',
                     }),
 
+                TextColumn::make('providerProfile.is_featured')
+                    ->label('Featured')
+                    ->badge()
+                    ->state(fn (User $record): string => $record->providerProfile?->is_featured ? 'Yes' : 'No')
+                    ->color(fn (string $state): string => $state === 'Yes' ? 'success' : 'gray'),
+
                 TextColumn::make('created_at')
                     ->label('Joined')
                     ->dateTime()
                     ->sortable()
                     ->since()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->tooltip(fn (User $record): string => $record->created_at?->format('M d, Y h:i A') ?? ''),
+
+                TextColumn::make('deleted_at')
+                    ->label('Deleted At')
+                    ->dateTime()
+                    ->sortable()
+                    ->since()
+                    ->placeholder('—')
+                    ->color('danger'),
             ])
+            ->filters([
+                TernaryFilter::make('email_verified_at')
+                    ->label('Status')
+                    ->nullable()
+                    ->trueLabel('Verified')
+                    ->falseLabel('Unverified'),
+
+                SelectFilter::make('is_blocked')
+                    ->label('Account')
+                    ->options([
+                        '0' => 'Active',
+                        '1' => 'Blocked',
+                    ]),
+
+                Filter::make('created_at')
+                    ->label('Created Date')
+                    ->schema([
+                        DatePicker::make('created_from')->label('From'),
+                        DatePicker::make('created_until')->label('Until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                filled($data['created_from'] ?? null),
+                                fn (Builder $query): Builder => $query->whereDate('created_at', '>=', $data['created_from']),
+                            )
+                            ->when(
+                                filled($data['created_until'] ?? null),
+                                fn (Builder $query): Builder => $query->whereDate('created_at', '<=', $data['created_until']),
+                            );
+                    }),
+
+                SelectFilter::make('deleted_status')
+                    ->label('Deleted Status')
+                    ->options([
+                        'deleted' => 'Deleted',
+                        'not_deleted' => 'Not Deleted',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'deleted' => $query->whereNotNull((new User)->getTable().'.deleted_at'),
+                            'not_deleted' => $query->whereNull((new User)->getTable().'.deleted_at'),
+                            default => $query,
+                        };
+                    })
+                    ->placeholder('All Accounts'),
+            ])
+            ->recordActions([
+                ViewAction::make()
+                    ->visible(fn (User $record): bool => ! $record->trashed()),
+
+                Action::make('view_as_provider')
+                    ->label('View as Provider')
+                    ->icon('heroicon-o-user')
+                    ->color('info')
+                    ->url(fn (User $record): string => $record->providerProfile?->slug ? route('profile.show', ['slug' => $record->providerProfile->slug]) : '#')
+                    ->openUrlInNewTab()
+                    ->visible(fn (User $record): bool => filled($record->providerProfile?->slug) && ! $record->trashed()),
+
+                Action::make('edit')
+                    ->label('Edit')
+                    ->url(fn (User $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->visible(fn (User $record): bool => ! $record->trashed()),
+
+                Action::make('block')
+                    ->label('Block')
+                    ->color('danger')
+                    ->icon('heroicon-o-lock-closed')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record): bool => ! $record->is_blocked && ! $record->trashed())
+                    ->action(function (User $record): void {
+                        $record->update(['is_blocked' => true]);
+                        SendAdminProviderEmailJob::dispatch($record->id, 'blocked');
+                    }),
+
+                Action::make('unblock')
+                    ->label('Unblock')
+                    ->color('success')
+                    ->icon('heroicon-o-lock-open')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record): bool => $record->is_blocked && ! $record->trashed())
+                    ->action(function (User $record): void {
+                        $record->update(['is_blocked' => false]);
+                        SendAdminProviderEmailJob::dispatch($record->id, 'unblocked');
+                    }),
+
+                Action::make('restore')
+                    ->label('Restore')
+                    ->color('success')
+                    ->icon('heroicon-o-arrow-path')
+                    ->requiresConfirmation()
+                    ->modalHeading('Restore provider')
+                    ->modalDescription('Are you sure you want to restore this provider account?')
+                    ->visible(fn (User $record): bool => $record->trashed())
+                    ->action(function (User $record): void {
+                        $record->restore();
+                    })
+                    ->successNotificationTitle('Provider restored'),
+
+                Action::make('delete')
+                    ->label('Delete')
+                    ->color('danger')
+                    ->icon('heroicon-o-trash')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete provider')
+                    ->modalDescription('Delete this provider? This soft-deletes the user and removes them from listings.')
+                    ->visible(fn (User $record): bool => ! $record->trashed())
+                    ->action(function (User $record): void {
+                        $record->delete();
+                    })
+                    ->successNotificationTitle('Provider deleted'),
+            ])
+            ->toolbarActions([])
             ->defaultSort('created_at', 'desc')
-            ->actions([
-                EditAction::make(),
-            ]);
+            ->striped()
+            ->emptyStateHeading('No providers yet')
+            ->emptyStateDescription('Create your first provider to start managing accounts here.');
     }
 
     public static function getPages(): array
@@ -640,6 +1102,7 @@ class ProviderListingResource extends Resource
         return [
             'index' => ListProviderListings::route('/'),
             'create' => CreateProviderListing::route('/create'),
+            'view' => ViewProviderListing::route('/{record}'),
             'edit' => EditProviderListing::route('/{record}/edit'),
         ];
     }
@@ -663,6 +1126,91 @@ class ProviderListingResource extends Resource
             ->whereHas('parent', fn ($query) => $query->where('slug', $parentSlug))
             ->orderBy('name')
             ->pluck('name', 'name')
+            ->all();
+    }
+
+    private static function categoryName(mixed $id): string
+    {
+        if (blank($id) || ! is_numeric($id)) {
+            return '-';
+        }
+
+        return Category::query()
+            ->withTrashed()
+            ->whereKey((int) $id)
+            ->value('name') ?? '-';
+    }
+
+    private static function categoryNames(mixed $state): string
+    {
+        $values = self::normalizeMultiValueState($state);
+
+        if ($values === []) {
+            return '-';
+        }
+
+        $ids = collect($values)
+            ->filter(fn ($value): bool => is_numeric($value))
+            ->map(fn ($value): int => (int) $value)
+            ->unique()
+            ->values();
+
+        $labels = collect($values)
+            ->filter(fn ($value): bool => ! is_numeric($value))
+            ->map(fn ($value): string => trim((string) $value))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $resolvedNames = collect();
+
+        if (! $ids->isEmpty()) {
+            $resolvedNames = Category::query()
+                ->withTrashed()
+                ->whereIn('id', $ids->all())
+                ->pluck('name')
+                ->filter()
+                ->values();
+        }
+
+        $names = $resolvedNames
+            ->merge($labels)
+            ->filter()
+            ->unique()
+            ->values();
+
+        return $names->isEmpty() ? '-' : $names->implode(', ');
+    }
+
+    private static function normalizeMultiValueState(mixed $state): array
+    {
+        if (is_string($state)) {
+            $trimmed = trim($state);
+
+            if ($trimmed === '' || $trimmed === '-' || $trimmed === 'null') {
+                return [];
+            }
+
+            $decoded = json_decode($trimmed, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $state = $decoded;
+            } else {
+                $state = str_contains($trimmed, ',')
+                    ? array_map('trim', explode(',', $trimmed))
+                    : [$trimmed];
+            }
+        }
+
+        if (! is_array($state)) {
+            return [];
+        }
+
+        return collect($state)
+            ->flatten(1)
+            ->map(fn ($value) => is_string($value) ? trim((string) $value) : $value)
+            ->filter(fn ($value): bool => filled($value) && $value !== '-')
+            ->values()
             ->all();
     }
 }
