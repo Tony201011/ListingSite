@@ -53,6 +53,8 @@ class ManagedProfileResource extends Resource
 
     protected static ?string $slug = 'managed-profiles';
 
+    protected static ?string $navigationGroup = 'My Profiles';
+
     protected static ?int $navigationSort = 1;
 
     protected static function isCreatePage(): bool
