@@ -4,12 +4,14 @@ namespace App\Filament\Agent\Resources\ManagedProfileResource\Pages;
 
 use App\Filament\Agent\Resources\ManagedProfileResource;
 use App\Jobs\SendAdminProviderEmailJob;
+use App\Models\ProfileMessage;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class CreateManagedProfile extends CreateRecord
@@ -29,7 +31,10 @@ class CreateManagedProfile extends CreateRecord
         $suburb = $data['suburb'] ?? null;
         unset($data['mobile'], $data['suburb']);
 
-        $profile = DB::transaction(function () use ($agentId, $providerEmail, $providerPassword, $mobile, $suburb, $data): ProviderProfile {
+        $messageData = $data['profileMessage'] ?? [];
+        unset($data['profileMessage']);
+
+        $profile = DB::transaction(function () use ($agentId, $providerEmail, $providerPassword, $mobile, $suburb, $data, $messageData): ProviderProfile {
             $providerUser = User::query()->create([
                 'name' => $data['name'],
                 'email' => $providerEmail,
@@ -41,11 +46,39 @@ class CreateManagedProfile extends CreateRecord
                 'suburb' => $suburb,
             ]);
 
-            return ProviderProfile::query()->create([
+            $profileName = filled($data['name'] ?? null) ? $data['name'] : '';
+            $baseSlug = filled($data['slug'] ?? null)
+                ? Str::slug($data['slug'])
+                : Str::slug($profileName);
+
+            if (blank($baseSlug)) {
+                $baseSlug = 'provider-'.$providerUser->id;
+            }
+
+            $slug = $baseSlug;
+            $index = 2;
+
+            while (ProviderProfile::query()->where('slug', $slug)->exists()) {
+                $slug = $baseSlug.'-'.$index;
+                $index++;
+            }
+
+            $data['slug'] = $slug;
+
+            $profile = ProviderProfile::query()->create([
                 ...$data,
                 'agent_id' => $agentId,
                 'user_id' => $providerUser->id,
             ]);
+
+            if (array_key_exists('message', $messageData)) {
+                ProfileMessage::query()->updateOrCreate(
+                    ['user_id' => $providerUser->id],
+                    ['message' => $messageData['message'] ?? ''],
+                );
+            }
+
+            return $profile;
         });
 
         SendAdminProviderEmailJob::dispatch($profile->user_id, 'created', $providerPassword, $agentName);

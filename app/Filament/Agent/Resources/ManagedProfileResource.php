@@ -183,7 +183,6 @@ class ManagedProfileResource extends Resource
                                             }),
 
                                         TextInput::make('slug')
-                                            ->required()
                                             ->maxLength(255)
                                             ->unique(ProviderProfile::class, 'slug', ignoreRecord: true)
                                             ->helperText('Auto-generated from name. Can be customised.'),
