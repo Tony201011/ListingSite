@@ -25,7 +25,9 @@ class SigninProvider
             ])->withInput();
         }
 
-        if (Auth::attempt([
+        $guard = $user->role === User::ROLE_AGENT ? 'agent' : 'web';
+
+        if (Auth::guard($guard)->attempt([
             'email' => $request->email,
             'password' => $request->password,
         ], $request->boolean('remember'))) {
