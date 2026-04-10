@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Models\SiteSetting;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -53,6 +55,13 @@ class SitePassword
         $protectionEnabled = $configurationEnabled && filled($configuredPassword);
 
         if ($protectionEnabled && $request->session()->get('site_access') !== true) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+
+            if ($user && in_array($user->role, [User::ROLE_ADMIN, User::ROLE_AGENT], true)) {
+                return $next($request);
+            }
+
             return redirect()->guest('/site-password');
         }
 
