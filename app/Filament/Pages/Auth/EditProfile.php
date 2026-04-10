@@ -15,13 +15,6 @@ use Illuminate\Validation\Rules\Password;
 
 class EditProfile extends BaseEditProfile
 {
-    protected function getNameFormComponent(): Component
-    {
-        return parent::getNameFormComponent()
-            ->disabled()
-            ->dehydrated(false);
-    }
-
     protected function getEmailFormComponent(): Component
     {
         return parent::getEmailFormComponent()
@@ -40,6 +33,21 @@ class EditProfile extends BaseEditProfile
             ->avatar();
     }
 
+    protected function getMobileFormComponent(): Component
+    {
+        return TextInput::make('mobile')
+            ->label('Mobile')
+            ->tel()
+            ->maxLength(20);
+    }
+
+    protected function getSuburbFormComponent(): Component
+    {
+        return TextInput::make('suburb')
+            ->label('Suburb')
+            ->maxLength(255);
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -50,6 +58,8 @@ class EditProfile extends BaseEditProfile
                         $this->getProfileImageFormComponent(),
                         $this->getNameFormComponent(),
                         $this->getEmailFormComponent(),
+                        $this->getMobileFormComponent(),
+                        $this->getSuburbFormComponent(),
                     ])
                     ->columns(2),
                 Section::make('Security')
