@@ -31,7 +31,13 @@ class SigninProvider
         ], $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/my-profile');
+            $destination = match ($user->role) {
+                User::ROLE_ADMIN => '/admin',
+                User::ROLE_AGENT => '/agent',
+                default => '/my-profile',
+            };
+
+            return redirect()->intended($destination);
         }
 
         return back()->withErrors([
