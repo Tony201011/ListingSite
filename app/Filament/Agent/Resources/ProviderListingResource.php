@@ -60,7 +60,7 @@ class ProviderListingResource extends Resource
 
     protected static ?string $slug = 'provider-listings';
 
-    protected static ?string $navigationGroup = 'My Profiles';
+    protected static \UnitEnum|string|null $navigationGroup = 'My Profiles';
 
     protected static ?int $navigationSort = 2;
 
