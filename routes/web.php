@@ -12,6 +12,7 @@ use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\FavouriteBookmarkController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\ReportUserController;
 use App\Http\Controllers\Frontend\SearchController;
 use App\Http\Controllers\MediaController;
 /*******auth Controllers end */
@@ -95,6 +96,10 @@ Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('pro
 
 Route::post('/favourite/{slug}', [FavouriteBookmarkController::class, 'toggleFavourite'])->name('favourite.toggle');
 Route::post('/bookmark/{slug}', [FavouriteBookmarkController::class, 'toggleBookmark'])->name('bookmark.toggle');
+
+Route::post('/report-profile', [ReportUserController::class, 'store'])
+    ->middleware('throttle:'.config('security.throttles.booking_enquiry', '5,1'))
+    ->name('profile.report');
 
 Route::post('/booking-enquiry', [BookingController::class, 'send'])
     ->middleware('throttle:'.config('security.throttles.booking_enquiry', '5,1'))

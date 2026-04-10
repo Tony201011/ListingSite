@@ -126,6 +126,11 @@ class ProviderProfile extends Model
         return $this->hasOne(ProfileMessage::class, 'user_id', 'user_id');
     }
 
+    public function reports(): HasMany
+    {
+        return $this->hasMany(UserReport::class);
+    }
+
     public function searchableAs(): string
     {
         return 'provider_profiles';

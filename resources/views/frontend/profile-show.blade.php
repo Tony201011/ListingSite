@@ -576,7 +576,11 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                     </div>
 
 
-                      <button class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-700 font-semibold hover:bg-gray-50 transition"><i class="fa-regular fa-flag"></i> Report User</button>
+                      <button
+                            onclick="document.getElementById('report-modal').classList.remove('hidden')"
+                            class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-700 font-semibold hover:bg-gray-50 transition">
+                            <i class="fa-regular fa-flag"></i> Report User
+                        </button>
                 </div>
             </div>
         </div>
@@ -610,6 +614,122 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<!-- Report User Modal -->
+<div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6 relative">
+        <button onclick="document.getElementById('report-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold leading-none">&times;</button>
+        <h2 class="text-xl font-bold text-pink-600 mb-1 flex items-center gap-2"><i class="fa-regular fa-flag"></i> Report Profile</h2>
+        <p class="text-sm text-gray-500 mb-4">Help us keep the community safe. All reports are reviewed by our admin team.</p>
+
+        <div id="report-success" class="hidden mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium">
+            Thank you! Your report has been submitted and will be reviewed by our team.
+        </div>
+        <div id="report-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
+
+        <form id="report-form" onsubmit="submitReport(event)">
+            @csrf
+            <input type="hidden" name="provider_profile_id" value="{{ $profile['id'] }}">
+
+            <div class="mb-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Your Name <span class="text-gray-400 font-normal">(optional)</span></label>
+                <input type="text" name="reporter_name" placeholder="Enter your name" maxlength="255"
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Your Email <span class="text-gray-400 font-normal">(optional)</span></label>
+                <input type="email" name="reporter_email" placeholder="Enter your email" maxlength="255"
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Reason <span class="text-red-500">*</span></label>
+                <select name="reason" required
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+                    <option value="" disabled selected>Select a reason</option>
+                    <option value="spam">Spam</option>
+                    <option value="fake_profile">Fake Profile</option>
+                    <option value="inappropriate_content">Inappropriate Content</option>
+                    <option value="harassment">Harassment</option>
+                    <option value="scam">Scam</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Additional Details <span class="text-gray-400 font-normal">(optional)</span></label>
+                <textarea name="description" rows="3" placeholder="Provide any additional details..." maxlength="2000"
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none"></textarea>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" onclick="document.getElementById('report-modal').classList.add('hidden')"
+                    class="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                    Cancel
+                </button>
+                <button type="submit" id="report-submit-btn"
+                    class="flex-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl px-4 py-2 text-sm font-semibold transition">
+                    Submit Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function submitReport(event) {
+    event.preventDefault();
+    const form = document.getElementById('report-form');
+    const btn = document.getElementById('report-submit-btn');
+    const errorEl = document.getElementById('report-error');
+    const successEl = document.getElementById('report-success');
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    errorEl.classList.add('hidden');
+    successEl.classList.add('hidden');
+
+    const formData = new FormData(form);
+
+    fetch('{{ route('profile.report') }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': formData.get('_token'),
+            'Accept': 'application/json',
+        },
+        body: formData,
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (response.ok) {
+            successEl.classList.remove('hidden');
+            form.reset();
+            form.querySelector('[name="provider_profile_id"]').value = '{{ $profile['id'] }}';
+            setTimeout(() => {
+                document.getElementById('report-modal').classList.add('hidden');
+                successEl.classList.add('hidden');
+            }, 3000);
+        } else {
+            const messages = data.errors
+                ? Object.values(data.errors).flat().join(' ')
+                : (data.message || 'An error occurred. Please try again.');
+            errorEl.textContent = messages;
+            errorEl.classList.remove('hidden');
+        }
+    })
+    .catch(() => {
+        errorEl.textContent = 'A network error occurred. Please try again.';
+        errorEl.classList.remove('hidden');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = 'Submit Report';
+    });
+}
+</script>
+@endpush
 
 @push('styles')
 <style>
