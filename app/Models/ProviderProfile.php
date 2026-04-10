@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
 
@@ -108,6 +109,21 @@ class ProviderProfile extends Model
     public function availabilities(): HasMany
     {
         return $this->hasMany(Availability::class, 'user_id', 'user_id');
+    }
+
+    public function profileImages(): HasMany
+    {
+        return $this->hasMany(ProfileImage::class, 'user_id', 'user_id');
+    }
+
+    public function userVideos(): HasMany
+    {
+        return $this->hasMany(UserVideo::class, 'user_id', 'user_id');
+    }
+
+    public function profileMessage(): HasOne
+    {
+        return $this->hasOne(ProfileMessage::class, 'user_id', 'user_id');
     }
 
     public function searchableAs(): string

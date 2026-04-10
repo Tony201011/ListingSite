@@ -25,7 +25,11 @@ class CreateManagedProfile extends CreateRecord
 
         unset($data['provider_password'], $data['provider_password_confirmation'], $data['provider_email']);
 
-        $profile = DB::transaction(function () use ($agentId, $providerEmail, $providerPassword, $data): ProviderProfile {
+        $mobile = $data['mobile'] ?? null;
+        $suburb = $data['suburb'] ?? null;
+        unset($data['mobile'], $data['suburb']);
+
+        $profile = DB::transaction(function () use ($agentId, $providerEmail, $providerPassword, $mobile, $suburb, $data): ProviderProfile {
             $providerUser = User::query()->create([
                 'name' => $data['name'],
                 'email' => $providerEmail,
@@ -33,6 +37,8 @@ class CreateManagedProfile extends CreateRecord
                 'role' => User::ROLE_PROVIDER,
                 'is_blocked' => false,
                 'email_verified_at' => now(),
+                'mobile' => $mobile,
+                'suburb' => $suburb,
             ]);
 
             return ProviderProfile::query()->create([
