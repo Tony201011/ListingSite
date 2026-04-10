@@ -14,6 +14,7 @@ class GetProfileShowData
             ->where('slug', $slug)
             ->with([
                 'user.profileImages',
+                'user.primaryProfileImage',
                 'user.rates.group',
                 'user.availabilities',
                 'user.tours',
