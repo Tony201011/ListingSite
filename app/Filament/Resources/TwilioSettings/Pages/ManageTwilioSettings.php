@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TwilioSettings\Pages;
 
 use App\Filament\Resources\TwilioSettings\TwilioSettingResource;
 use App\Filament\Resources\TwilioSettings\Widgets\TwilioAccountStats;
+use App\Models\SmsLog;
 use App\Models\TwilioSetting;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -169,6 +170,19 @@ class ManageTwilioSettings extends ManageRecords
                             'message_sid' => $message->sid ?? null,
                         ]);
 
+                        try {
+                            SmsLog::create([
+                                'recipient' => $data['mobile'],
+                                'message' => $data['message'],
+                                'status' => 'sent',
+                                'sid' => $message->sid ?? null,
+                                'error' => null,
+                                'sent_at' => now(),
+                            ]);
+                        } catch (\Throwable $logException) {
+                            report($logException);
+                        }
+
                         Notification::make()
                             ->title('Test SMS sent successfully.')
                             ->success()
@@ -180,6 +194,19 @@ class ManageTwilioSettings extends ManageRecords
                             'error' => $e->getMessage(),
                             'exception_class' => get_class($e),
                         ]);
+
+                        try {
+                            SmsLog::create([
+                                'recipient' => $data['mobile'],
+                                'message' => $data['message'],
+                                'status' => 'failed',
+                                'sid' => null,
+                                'error' => $e->getMessage(),
+                                'sent_at' => now(),
+                            ]);
+                        } catch (\Throwable $logException) {
+                            report($logException);
+                        }
 
                         Notification::make()
                             ->title('Failed to send test SMS.')
