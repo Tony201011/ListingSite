@@ -224,7 +224,7 @@ class ContactUsTest extends TestCase
         $this->createActiveContactPage(['enable_name_field' => true]);
 
         $response = $this->post(route('contact-us.submit'), [
-            'name' => str_repeat('a', 101),
+            'name' => str_repeat('a', 101), // one over the 100-character maximum
             'email' => 'jane@example.com',
             'subject' => 'Test',
             'message' => 'Test message',
@@ -241,7 +241,7 @@ class ContactUsTest extends TestCase
             'name' => 'Jane',
             'email' => 'jane@example.com',
             'subject' => 'Test',
-            'message' => str_repeat('a', 3001),
+            'message' => str_repeat('a', 3001), // one over the 3000-character maximum
         ]);
 
         $response->assertSessionHasErrors('message');
