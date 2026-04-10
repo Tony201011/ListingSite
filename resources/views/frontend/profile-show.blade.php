@@ -1,6 +1,34 @@
 @extends('layouts.frontend')
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('resources/css/profile-nav-mobile.css') }}">
+<style>
+@media (max-width: 640px) {
+  .mobile-nav-btn-wrapper {
+    position: sticky !important;
+    top: 80vh !important;
+    left: unset !important;
+    right: unset !important;
+    transform: none !important;
+    margin: 0 auto !important;
+    width: max-content;
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .mobile-transparent-nav-btn {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(2px);
+    color: #fff !important;
+    border: 1px solid rgba(255, 192, 203, 0.3) !important;
+    box-shadow: none !important;
+  }
+  .mobile-transparent-nav-btn span,
+  .mobile-transparent-nav-btn i {
+    color: #fff !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+}
+</style>
 @endpush
 
 @section('title', $profile['name'] . ' Profile')
@@ -344,7 +372,7 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                                 <i class="fa-solid fa-mobile-screen text-blue-600 text-2xl"></i>
                                 <span class="text-xs font-bold text-black">PHONE:</span>
                             </div>
-                            <div class="text-2xl font-bold tracking-wide mb-2 text-black">{{ $primaryPhone }}</div>
+                            <a href="tel:{{ $phoneHref }}" aria-label="Call {{ $primaryPhone }}" class="block text-2xl font-bold tracking-wide mb-2 text-black hover:text-pink-600 transition">{{ $primaryPhone }}</a>
                             @endif
                             @if(!empty($profile['website']))
                             <hr class="my-3">
@@ -563,7 +591,13 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach($nearbyProfiles as $nearby)
                     <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                        @if(!empty($nearby['image']))
                         <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="h-48 w-full object-cover">
+                        @else
+                        <div class="h-48 w-full bg-gray-200 flex items-center justify-center">
+                            <i class="fa-solid fa-user text-gray-400 text-4xl"></i>
+                        </div>
+                        @endif
                         <div class="p-3">
                             <h3 class="text-lg font-semibold text-gray-900">{{ $nearby['name'] }}</h3>
                             <p class="text-xs text-gray-500">{{ $nearby['city'] }} • {{ $nearby['service_1'] }}</p>
