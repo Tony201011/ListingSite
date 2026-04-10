@@ -16,6 +16,7 @@ use Filament\Support\Facades\FilamentView;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
@@ -93,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
                 ->first();
 
             $escortCities = Schema::hasTable('cities')
-                ? City::query()->orderBy('name')->get(['id', 'name'])
+                ? Cache::remember('header_escort_cities', now()->addHour(), fn () => City::query()->orderBy('name')->get(['id', 'name']))
                 : collect();
 
             $view->with('headerWidget', $headerWidget);
