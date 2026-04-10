@@ -15,8 +15,6 @@
     justify-content: center;
     align-items: center;
   }
-}
-@media (max-width: 640px) {
   .mobile-transparent-nav-btn {
     background-color: rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: blur(2px);
@@ -374,7 +372,7 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                                 <i class="fa-solid fa-mobile-screen text-blue-600 text-2xl"></i>
                                 <span class="text-xs font-bold text-black">PHONE:</span>
                             </div>
-                            <a href="tel:{{ $phoneHref }}" class="block text-2xl font-bold tracking-wide mb-2 text-black hover:text-pink-600 transition">{{ $primaryPhone }}</a>
+                            <a href="tel:{{ $phoneHref }}" aria-label="Call {{ $primaryPhone }}" class="block text-2xl font-bold tracking-wide mb-2 text-black hover:text-pink-600 transition">{{ $primaryPhone }}</a>
                             @endif
                             @if(!empty($profile['website']))
                             <hr class="my-3">
