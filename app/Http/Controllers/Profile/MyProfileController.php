@@ -44,7 +44,7 @@ class MyProfileController extends Controller
 
         $this->authorize('view', ProviderProfile::class);
 
-        return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute(Auth::user()));
+        return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute($user));
     }
 
     public function save(SaveMyProfileRequest $request): JsonResponse|RedirectResponse
