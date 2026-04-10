@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\City;
 use App\Models\FooterText;
 use App\Models\FooterWidget;
 use App\Models\HeaderWidget;
@@ -81,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.partials.header', function ($view): void {
             if (! Schema::hasTable('header_widgets')) {
                 $view->with('headerWidget', null);
+                $view->with('escortCities', collect());
 
                 return;
             }
@@ -90,7 +92,12 @@ class AppServiceProvider extends ServiceProvider
                 ->latest('updated_at')
                 ->first();
 
+            $escortCities = Schema::hasTable('cities')
+                ? City::query()->orderBy('name')->get(['id', 'name'])
+                : collect();
+
             $view->with('headerWidget', $headerWidget);
+            $view->with('escortCities', $escortCities);
         });
     }
 
