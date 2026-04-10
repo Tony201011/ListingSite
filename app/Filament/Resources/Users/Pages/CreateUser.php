@@ -2,21 +2,29 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Concerns\ChecksEmailSendingOutcome;
 use App\Filament\Resources\Users\UserResource;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\ProfileMessage;
 use App\Models\ProviderProfile;
 use App\Models\User;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class CreateUser extends CreateRecord
 {
+    use ChecksEmailSendingOutcome;
+
     protected static string $resource = UserResource::class;
+
+    protected string $plainPassword = '';
 
     protected function handleRecordCreation(array $data): Model
     {
+        $this->plainPassword = $data['password'] ?? '';
+
         $user = User::query()->create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -101,6 +109,29 @@ class CreateUser extends CreateRecord
 
     protected function afterCreate(): void
     {
-        SendAdminProviderEmailJob::dispatch($this->record->id, 'created');
+        $user = $this->record;
+
+        if (! $this->plainPassword) {
+            return;
+        }
+
+        $plainPassword = $this->plainPassword;
+        $this->plainPassword = '';
+
+        $dispatchedAt = now();
+
+        try {
+            SendAdminProviderEmailJob::dispatchSync($user->id, 'created', $plainPassword);
+        } catch (\Throwable) {
+            // Job already logged the error and created an email log entry
+        }
+
+        if ($this->hasRecentEmailFailure($user->email, $dispatchedAt)) {
+            Notification::make()
+                ->title('Email sending failed')
+                ->body('Provider was created but the account email failed to send. Check Email Logs for details.')
+                ->warning()
+                ->send();
+        }
     }
 }

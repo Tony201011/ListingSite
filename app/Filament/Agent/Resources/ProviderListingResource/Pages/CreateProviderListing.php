@@ -3,21 +3,32 @@
 namespace App\Filament\Agent\Resources\ProviderListingResource\Pages;
 
 use App\Filament\Agent\Resources\ProviderListingResource;
+use App\Filament\Concerns\ChecksEmailSendingOutcome;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\ProfileMessage;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class CreateProviderListing extends CreateRecord
 {
+    use ChecksEmailSendingOutcome;
+
     protected static string $resource = ProviderListingResource::class;
+
+    protected string $plainPassword = '';
+
+    protected string $creatorName = '';
 
     protected function handleRecordCreation(array $data): Model
     {
+        $this->plainPassword = $data['password'] ?? '';
+        $this->creatorName = $this->resolveCreatorName();
+
         $user = User::query()->create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -99,9 +110,37 @@ class CreateProviderListing extends CreateRecord
             );
         }
 
-        SendAdminProviderEmailJob::dispatch($user->id, 'created');
-
         return $user->refresh();
+    }
+
+    protected function afterCreate(): void
+    {
+        $user = $this->record;
+
+        if (! $this->plainPassword) {
+            return;
+        }
+
+        $plainPassword = $this->plainPassword;
+        $this->plainPassword = '';
+
+        $agentName = filled($this->creatorName) ? $this->creatorName : null;
+
+        $dispatchedAt = now();
+
+        try {
+            SendAdminProviderEmailJob::dispatchSync($user->id, 'created', $plainPassword, $agentName);
+        } catch (\Throwable) {
+            // Job already logged the error and created an email log entry
+        }
+
+        if ($this->hasRecentEmailFailure($user->email, $dispatchedAt)) {
+            Notification::make()
+                ->title('Email sending failed')
+                ->body('Provider was created but the account email failed to send. Check Email Logs for details.')
+                ->warning()
+                ->send();
+        }
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -115,5 +154,20 @@ class CreateProviderListing extends CreateRecord
         }
 
         return $data;
+    }
+
+    /**
+     * Returns the authenticated user's name when they are an agent (not admin).
+     * Admins creating providers on behalf of themselves should not appear as "agents".
+     */
+    private function resolveCreatorName(): string
+    {
+        $authUser = Filament::auth()->user();
+
+        if (! $authUser || $authUser->role === User::ROLE_ADMIN) {
+            return '';
+        }
+
+        return $authUser->name ?? '';
     }
 }
