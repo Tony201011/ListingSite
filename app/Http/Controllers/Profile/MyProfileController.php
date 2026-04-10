@@ -25,14 +25,6 @@ class MyProfileController extends Controller
     {
         $user = Auth::user();
 
-        if ($user && $user->role === \App\Models\User::ROLE_ADMIN) {
-            return redirect('/admin');
-        }
-
-        if ($user && $user->role === \App\Models\User::ROLE_AGENT) {
-            return redirect('/agent');
-        }
-
         $this->authorize('view', ProviderProfile::class);
 
         return view('profile.my-profile-1', $this->getMyProfilePageData->execute($user));
@@ -41,14 +33,6 @@ class MyProfileController extends Controller
     public function editProfile(): View|RedirectResponse
     {
         $user = Auth::user();
-
-        if ($user && $user->role === \App\Models\User::ROLE_ADMIN) {
-            return redirect('/admin');
-        }
-
-        if ($user && $user->role === \App\Models\User::ROLE_AGENT) {
-            return redirect('/agent');
-        }
 
         $this->authorize('view', ProviderProfile::class);
 

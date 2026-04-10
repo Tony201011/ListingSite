@@ -140,7 +140,7 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/reset-password/update', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-Route::middleware('auth:web,agent')->group(function () {
+Route::middleware('provider.auth')->group(function () {
     Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
     Route::get('/edit-profile', [MyProfileController::class, 'editProfile'])->name('edit-profile');
     Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');

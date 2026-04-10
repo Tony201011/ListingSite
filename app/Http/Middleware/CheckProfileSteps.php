@@ -18,6 +18,10 @@ class CheckProfileSteps
             return $next($request);
         }
 
+        if ($user->role === \App\Models\User::ROLE_ADMIN) {
+            return redirect('/admin');
+        }
+
         if ($user->role === \App\Models\User::ROLE_AGENT) {
             return $next($request);
         }

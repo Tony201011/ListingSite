@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'profile.steps' => \App\Http\Middleware\CheckProfileSteps::class,
+            'provider.auth' => \App\Http\Middleware\EnsureProviderAccess::class,
             'site.password' => \App\Http\Middleware\SitePassword::class,
         ]);
 
