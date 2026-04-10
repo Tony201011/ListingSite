@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,7 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->redirectUsersTo('/');
-        $middleware->redirectGuestsTo('/signin');
+        $middleware->redirectGuestsTo(function () {
+            if (Auth::guard('agent')->check()) {
+                return '/agent';
+            }
+
+            return '/signin';
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
