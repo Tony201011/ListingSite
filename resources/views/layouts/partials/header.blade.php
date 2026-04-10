@@ -236,7 +236,7 @@
                         </button>
                         <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-64 rounded-lg bg-gray-800 py-2 shadow-lg z-50 max-h-80 overflow-y-auto" style="display:none;">
                             @forelse($escortCities as $city)
-                                <a @click="open = false" href="{{ url('/?location='.urlencode($city->name)) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">{{ $city->name }} escorts</a>
+                                <a @click="open = false" href="{{ url('/?location='.urlencode($city->suburb)) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">{{ $city->suburb }} escorts</a>
                             @empty
                                 <a @click="open = false" href="{{ url('/?location=Brisbane') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Brisbane escorts</a>
                                 <a @click="open = false" href="{{ url('/?location=Sydney') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sydney escorts</a>
@@ -287,7 +287,7 @@
                             </button>
                             <div x-show="open" x-transition class="ml-3 mt-1 space-y-0.5 border-l border-gray-700 pl-3">
                                 @forelse($escortCities as $city)
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode($city->name)) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">{{ $city->name }} escorts</a>
+                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode($city->suburb)) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">{{ $city->suburb }} escorts</a>
                                 @empty
                                     <a @click="mobileMenu = false" href="{{ url('/?location=Brisbane') }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Brisbane escorts</a>
                                     <a @click="mobileMenu = false" href="{{ url('/?location=Sydney') }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Sydney escorts</a>

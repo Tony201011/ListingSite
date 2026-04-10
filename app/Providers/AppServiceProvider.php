@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\City;
 use App\Models\FooterText;
+use App\Models\Postcode;
 use App\Models\FooterWidget;
 use App\Models\HeaderWidget;
 use App\Models\S3BucketSetting;
@@ -93,8 +93,27 @@ class AppServiceProvider extends ServiceProvider
                 ->latest('updated_at')
                 ->first();
 
-            $escortCities = Schema::hasTable('cities')
-                ? Cache::remember('header_escort_cities', now()->addHour(), fn () => City::query()->orderBy('name')->get(['id', 'name']))
+            $escortCities = Schema::hasTable('postcodes')
+                ? Cache::remember('header_escort_suburbs', now()->addHour(), function () {
+                    return Postcode::query()
+                        ->select('suburb')
+                        ->distinct()
+                        ->whereIn('suburb', function ($q) {
+                            $q->select('suburb')
+                                ->from('users')
+                                ->whereNotNull('suburb')
+                                ->where('suburb', '!=', '')
+                                ->whereExists(function ($q2) {
+                                    $q2->selectRaw('1')
+                                        ->from('provider_profiles')
+                                        ->whereColumn('provider_profiles.user_id', 'users.id')
+                                        ->where('provider_profiles.profile_status', 'approved')
+                                        ->whereNull('provider_profiles.deleted_at');
+                                });
+                        })
+                        ->orderBy('suburb')
+                        ->get();
+                })
                 : collect();
 
             $view->with('headerWidget', $headerWidget);
