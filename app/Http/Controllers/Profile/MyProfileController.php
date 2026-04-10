@@ -21,15 +21,27 @@ class MyProfileController extends Controller
         private SaveMyProfile $saveMyProfile
     ) {}
 
-    public function myProfile(): View
+    public function myProfile(): View|RedirectResponse
     {
+        $user = Auth::user();
+
+        if ($user && $user->role === \App\Models\User::ROLE_AGENT) {
+            return redirect('/agent');
+        }
+
         $this->authorize('view', ProviderProfile::class);
 
-        return view('profile.my-profile-1', $this->getMyProfilePageData->execute(Auth::user()));
+        return view('profile.my-profile-1', $this->getMyProfilePageData->execute($user));
     }
 
-    public function editProfile(): View
+    public function editProfile(): View|RedirectResponse
     {
+        $user = Auth::user();
+
+        if ($user && $user->role === \App\Models\User::ROLE_AGENT) {
+            return redirect('/agent');
+        }
+
         $this->authorize('view', ProviderProfile::class);
 
         return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute(Auth::user()));

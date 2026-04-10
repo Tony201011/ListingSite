@@ -50,8 +50,9 @@
         $currentUser = auth()->user();
         $isAuthenticated = filled($currentUser);
         $isAdminAuthenticated = $isAuthenticated && (($currentUser->role ?? null) === \App\Models\User::ROLE_ADMIN);
-        $primaryAuthUrl = $isAdminAuthenticated ? filament()->getUrl() : url('/my-profile');
-        $primaryAuthLabel = $isAdminAuthenticated ? 'Dashboard' : 'My Profile';
+        $isAgentAuthenticated = $isAuthenticated && (($currentUser->role ?? null) === \App\Models\User::ROLE_AGENT);
+        $primaryAuthUrl = $isAdminAuthenticated ? filament()->getUrl() : ($isAgentAuthenticated ? url('/agent') : url('/my-profile'));
+        $primaryAuthLabel = $isAdminAuthenticated ? 'Dashboard' : ($isAgentAuthenticated ? 'Agent Panel' : 'My Profile');
 
         if ($isAuthenticated) {
             $actionLinks = $actionLinks->reject(function ($item): bool {
