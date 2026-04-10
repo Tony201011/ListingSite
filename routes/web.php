@@ -62,15 +62,15 @@ Route::get('/media/{path}', [MediaController::class, 'show'])
     ->name('media.show');
 
 Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
-    ->middleware('auth')
+    ->middleware('auth:web,agent')
     ->name('verification.notice');
 
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-    ->middleware(['auth', 'signed'])
+    ->middleware(['auth:web,agent', 'signed'])
     ->name('verification.verify');
 
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
-    ->middleware(['auth', 'throttle:'.config('security.throttles.verification_send', '6,1')])
+    ->middleware(['auth:web,agent', 'throttle:'.config('security.throttles.verification_send', '6,1')])
     ->name('verification.send');
 
 Route::redirect('/login', '/signin');
@@ -140,7 +140,7 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/reset-password/update', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:web,agent')->group(function () {
     Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
     Route::get('/edit-profile', [MyProfileController::class, 'editProfile'])->name('edit-profile');
     Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
