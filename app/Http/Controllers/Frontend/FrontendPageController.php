@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Frontend;
 
+use App\Actions\CreateContactInquiry;
 use App\Actions\GetAboutUsPageData;
 use App\Actions\GetAntiSpamPolicyPageData;
 use App\Actions\GetContactUsPageData;
@@ -21,7 +22,8 @@ class FrontendPageController extends Controller
         private GetFrontendSimplePage $getFrontendSimplePage,
         private GetFaqPageData $getFaqPageData,
         private GetAntiSpamPolicyPageData $getAntiSpamPolicyPageData,
-        private GetContactUsPageData $getContactUsPageData
+        private GetContactUsPageData $getContactUsPageData,
+        private CreateContactInquiry $createContactInquiry
     ) {}
 
     public function aboutUs(): View
@@ -99,6 +101,8 @@ class FrontendPageController extends Controller
 
     public function submitContactUs(SubmitContactUsRequest $request): RedirectResponse
     {
+        $this->createContactInquiry->execute($request->validated());
+
         return back()->with('success', 'Your message has been sent successfully.');
     }
 }

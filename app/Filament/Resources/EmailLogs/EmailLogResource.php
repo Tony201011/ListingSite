@@ -95,6 +95,8 @@ class EmailLogResource extends Resource
                 SelectFilter::make('type')
                     ->options([
                         'booking_enquiry' => 'Booking Enquiry',
+                        'contact_inquiry' => 'Contact Inquiry',
+                        'contact_inquiry_reply' => 'Contact Inquiry Reply',
                         'verify_email' => 'Verify Email',
                         'account_created' => 'Account Created',
                         'password_reset_link' => 'Password Reset Link',
