@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\City;
 use App\Models\FooterText;
 use App\Models\FooterWidget;
 use App\Models\HeaderWidget;
@@ -15,6 +16,7 @@ use Filament\Support\Facades\FilamentView;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
@@ -81,6 +83,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.partials.header', function ($view): void {
             if (! Schema::hasTable('header_widgets')) {
                 $view->with('headerWidget', null);
+                $view->with('escortCities', collect());
 
                 return;
             }
@@ -90,7 +93,12 @@ class AppServiceProvider extends ServiceProvider
                 ->latest('updated_at')
                 ->first();
 
+            $escortCities = Schema::hasTable('cities')
+                ? Cache::remember('header_escort_cities', now()->addHour(), fn () => City::query()->orderBy('name')->get(['id', 'name']))
+                : collect();
+
             $view->with('headerWidget', $headerWidget);
+            $view->with('escortCities', $escortCities);
         });
     }
 
