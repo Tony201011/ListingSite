@@ -33,6 +33,7 @@ class CreateUser extends CreateRecord
             'password' => $data['password'],
             'role' => User::ROLE_PROVIDER,
             'is_blocked' => false,
+            'email_verified_at' => now(),
         ]);
 
         $profileData = $data['providerProfile'] ?? [];
