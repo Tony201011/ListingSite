@@ -10,7 +10,7 @@ trait ChecksEmailSendingOutcome
     protected function hasRecentEmailFailure(string $email, Carbon $since): bool
     {
         return EmailLog::where('recipient', $email)
-            ->whereIn('type', ['account_created', 'verify_email', 'created'])
+            ->where('type', 'account_created')
             ->where('status', 'failed')
             ->where('sent_at', '>=', $since)
             ->exists();

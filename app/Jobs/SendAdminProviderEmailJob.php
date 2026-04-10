@@ -69,7 +69,7 @@ class SendAdminProviderEmailJob implements ShouldQueue
             EmailLog::create([
                 'recipient' => $user->email,
                 'subject' => $config['subject'],
-                'type' => $this->emailType,
+                'type' => $this->resolveLogType(),
                 'status' => 'sent',
                 'sent_at' => now(),
             ]);
@@ -84,7 +84,7 @@ class SendAdminProviderEmailJob implements ShouldQueue
             EmailLog::create([
                 'recipient' => $user->email,
                 'subject' => $config['subject'],
-                'type' => $this->emailType,
+                'type' => $this->resolveLogType(),
                 'status' => 'failed',
                 'error' => $e->getMessage(),
                 'sent_at' => now(),
@@ -92,6 +92,16 @@ class SendAdminProviderEmailJob implements ShouldQueue
 
             throw $e;
         }
+    }
+
+    private function resolveLogType(): string
+    {
+        return match ($this->emailType) {
+            'created' => 'account_created',
+            'blocked' => 'provider_blocked',
+            'unblocked' => 'provider_unblocked',
+            default => $this->emailType,
+        };
     }
 
     private function resolveEmailConfig(User $user): array
