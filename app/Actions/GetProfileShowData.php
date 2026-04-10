@@ -193,6 +193,7 @@ class GetProfileShowData
         $primaryImageUrl = $primaryImage?->image_url ?? ($images[0] ?? null);
 
         return [
+            'id' => $providerProfile->id,
             'slug' => $providerProfile->slug,
             'name' => $providerProfile->name,
             'age' => $providerProfile->age,
