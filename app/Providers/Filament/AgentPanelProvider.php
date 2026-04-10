@@ -28,6 +28,7 @@ class AgentPanelProvider extends PanelProvider
         return $panel
             ->id('agent')
             ->path('agent')
+            ->authGuard('agent')
             ->brandName('HOTESCORTS Agent')
             ->login()
             ->passwordReset(resetAction: ResetPassword::class)
