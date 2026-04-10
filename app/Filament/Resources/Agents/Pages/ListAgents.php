@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Agents\Pages;
 
+use App\Filament\Concerns\ChecksEmailSendingOutcome;
 use App\Filament\Resources\Agents\AgentResource;
 use App\Jobs\SendAgentAccountEmailJob;
-use App\Models\EmailLog;
 use App\Models\SmtpSetting;
 use App\Models\User;
 use Filament\Actions\CreateAction;
@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 
 class ListAgents extends ManageRecords
 {
+    use ChecksEmailSendingOutcome;
+
     protected static string $resource = AgentResource::class;
 
     private string $plainPassword = '';
@@ -74,14 +76,5 @@ class ListAgents extends ManageRecords
                     }
                 }),
         ];
-    }
-
-    private function hasRecentEmailFailure(string $email, \Illuminate\Support\Carbon $since): bool
-    {
-        return EmailLog::where('recipient', $email)
-            ->whereIn('type', ['account_created', 'verify_email'])
-            ->where('status', 'failed')
-            ->where('sent_at', '>=', $since)
-            ->exists();
     }
 }

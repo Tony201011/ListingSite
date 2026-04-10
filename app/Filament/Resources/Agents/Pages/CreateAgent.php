@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Agents\Pages;
 
+use App\Filament\Concerns\ChecksEmailSendingOutcome;
 use App\Filament\Resources\Agents\AgentResource;
 use App\Jobs\SendAgentAccountEmailJob;
-use App\Models\EmailLog;
 use App\Models\SmtpSetting;
 use App\Models\User;
 use Filament\Notifications\Notification;
@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class CreateAgent extends CreateRecord
 {
+    use ChecksEmailSendingOutcome;
+
     protected static string $resource = AgentResource::class;
 
     protected string $plainPassword = '';
@@ -71,14 +73,5 @@ class CreateAgent extends CreateRecord
                 ->warning()
                 ->send();
         }
-    }
-
-    private function hasRecentEmailFailure(string $email, \Illuminate\Support\Carbon $since): bool
-    {
-        return EmailLog::where('recipient', $email)
-            ->whereIn('type', ['account_created', 'verify_email'])
-            ->where('status', 'failed')
-            ->where('sent_at', '>=', $since)
-            ->exists();
     }
 }
