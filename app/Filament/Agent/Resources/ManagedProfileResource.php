@@ -5,8 +5,6 @@ namespace App\Filament\Agent\Resources;
 use App\Filament\Agent\Resources\ManagedProfileResource\Pages\CreateManagedProfile;
 use App\Filament\Agent\Resources\ManagedProfileResource\Pages\EditManagedProfile;
 use App\Filament\Agent\Resources\ManagedProfileResource\Pages\ListManagedProfiles;
-use App\Filament\Agent\Resources\ManagedProfileResource\RelationManagers\AvailabilityRelationManager;
-use App\Filament\Agent\Resources\ManagedProfileResource\RelationManagers\RatesRelationManager;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
@@ -728,10 +726,7 @@ class ManagedProfileResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            RatesRelationManager::class,
-            AvailabilityRelationManager::class,
-        ];
+        return [];
     }
 
     public static function getPages(): array
