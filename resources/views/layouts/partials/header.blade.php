@@ -229,33 +229,33 @@
                         <button type="submit" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Logout</button>
                     </form>
                 @elseif(strtolower($item['label']) === 'escorts')
-                    <div class="relative group">
-                        <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                        <button @click="open = !open" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
                             {{ $item['label'] }}
-                            <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
-                        </a>
-                        <div class="absolute left-0 mt-2 w-64 rounded-lg bg-gray-800 py-2 shadow-lg z-50 opacity-0 group-hover:opacity-100 group-hover:visible invisible transition-opacity duration-200">
+                            <i class="fa-solid fa-chevron-down text-xs ml-1" :class="{ 'rotate-180': open }"></i>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-64 rounded-lg bg-gray-800 py-2 shadow-lg z-50 max-h-80 overflow-y-auto" style="display:none;">
                             @forelse($escortCities as $city)
-                                <a href="{{ url('/?location='.urlencode($city->name)) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">{{ $city->name }} escorts</a>
+                                <a @click="open = false" href="{{ url('/?location='.urlencode($city->name)) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">{{ $city->name }} escorts</a>
                             @empty
-                                <a href="{{ url('/?location=Brisbane') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Brisbane escorts</a>
-                                <a href="{{ url('/?location=Sydney') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sydney escorts</a>
-                                <a href="{{ url('/?location=Melbourne') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Melbourne escorts</a>
-                                <a href="{{ url('/?location=Adelaide') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Adelaide escorts</a>
-                                <a href="{{ url('/?location=Canberra') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Canberra escorts</a>
-                                <a href="{{ url('/?location=Perth') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Perth escorts</a>
-                                <a href="{{ url('/?location=Darwin') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Darwin escorts</a>
-                                <a href="{{ url('/?location=Gold+Coast') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Gold Coast escorts</a>
-                                <a href="{{ url('/?location=Sunshine+Coast') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sunshine Coast escorts</a>
-                                <a href="{{ url('/?location=Newcastle') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Newcastle escorts</a>
-                                <a href="{{ url('/?location=Cairns') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Cairns escorts</a>
-                                <a href="{{ url('/?location=Tasmania') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Tasmania escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Brisbane') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Brisbane escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Sydney') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sydney escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Melbourne') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Melbourne escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Adelaide') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Adelaide escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Canberra') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Canberra escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Perth') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Perth escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Darwin') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Darwin escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Gold+Coast') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Gold Coast escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Sunshine+Coast') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sunshine Coast escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Newcastle') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Newcastle escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Cairns') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Cairns escorts</a>
+                                <a @click="open = false" href="{{ url('/?location=Tasmania') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Tasmania escorts</a>
                             @endforelse
-                            <a href="{{ url('/advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Touring escorts</a>
-                            <a href="{{ url('/') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts directory</a>
-                            <a href="{{ route('advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Search for escorts</a>
-                            <a href="{{ url('/advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts near me</a>
-                            <a href="{{ url('/') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">View all our escorts</a>
+                            <a @click="open = false" href="{{ url('/advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Touring escorts</a>
+                            <a @click="open = false" href="{{ url('/') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts directory</a>
+                            <a @click="open = false" href="{{ route('advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Search for escorts</a>
+                            <a @click="open = false" href="{{ url('/advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts near me</a>
+                            <a @click="open = false" href="{{ url('/') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">View all our escorts</a>
                         </div>
                     </div>
                 @else
