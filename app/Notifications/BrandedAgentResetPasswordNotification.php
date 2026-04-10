@@ -7,7 +7,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 class BrandedAgentResetPasswordNotification extends FilamentResetPasswordNotification
 {
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject('Reset Your Password')
