@@ -19,6 +19,9 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:YLqWl22bGaXPmIk40oWEzog1pu03/ekUcMkIUSrrs8Y="/>
+        <env name="MEDIA_UPLOAD_DISK" value="local"/>
+        <env name="MEDIA_DELIVERY_DISK" value="local"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
