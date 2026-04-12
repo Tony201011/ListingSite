@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
@@ -83,7 +84,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             return null;
         }
 
-        return route('media.show', ['path' => $this->profile_image]);
+        return Storage::disk(config('media.avatar_disk'))->url($this->profile_image);
     }
 
     public function providerListings(): HasMany
