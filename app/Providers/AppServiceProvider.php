@@ -123,7 +123,11 @@ class AppServiceProvider extends ServiceProvider
 
     private function configureSmtpFromDatabase(): void
     {
-        if (! Schema::hasTable('smtp_settings')) {
+        try {
+            if (! Schema::hasTable('smtp_settings')) {
+                return;
+            }
+        } catch (\Exception) {
             return;
         }
 
@@ -164,7 +168,11 @@ class AppServiceProvider extends ServiceProvider
 
     private function configureStorageFromDatabase(): void
     {
-        if (! Schema::hasTable('s3_bucket_settings')) {
+        try {
+            if (! Schema::hasTable('s3_bucket_settings')) {
+                return;
+            }
+        } catch (\Exception) {
             return;
         }
 
