@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileImage extends Model
 {
@@ -33,7 +32,7 @@ class ProfileImage extends Model
     {
         return Attribute::make(
             get: fn () => $this->image_path
-                ? Storage::disk(config('media.delivery_disk'))->url($this->image_path)
+                ? route('media.show', ['path' => $this->image_path])
                 : null
         );
     }
@@ -42,7 +41,7 @@ class ProfileImage extends Model
     {
         return Attribute::make(
             get: fn () => $this->thumbnail_path
-                ? Storage::disk(config('media.delivery_disk'))->url($this->thumbnail_path)
+                ? route('media.show', ['path' => $this->thumbnail_path])
                 : null
         );
     }

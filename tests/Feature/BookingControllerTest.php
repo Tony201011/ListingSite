@@ -28,22 +28,21 @@ class BookingControllerTest extends TestCase
 
     protected function tearDown(): void
     {
-        parent::tearDown();
         Mockery::close();
+
+        parent::tearDown();
     }
 
     public function test_send_creates_booking_enquiry_and_redirects_back_with_success_message(): void
     {
         $user = $this->createBookableProvider();
 
-        $futureDate = now()->addDays(2)->format('Y-m-d H:i:s');
-
         $validatedPayload = [
             'user_id' => $user->id,
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'phone' => '0400000000',
-            'datetime' => $futureDate,
+            'datetime' => '2026-04-10 14:30:00',
             'services' => 'Massage, Facial',
             'duration' => '90 mins',
             'location' => 'Sydney',
@@ -107,14 +106,12 @@ class BookingControllerTest extends TestCase
     {
         $user = $this->createBookableProvider();
 
-        $futureDate = now()->addDays(3)->format('Y-m-d H:i:s');
-
         $requestPayload = [
             'user_id' => $user->id,
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'phone' => '0412345678',
-            'datetime' => $futureDate,
+            'datetime' => '2026-04-12 10:00:00',
             'services' => 'Hair Styling',
             'duration' => '60 mins',
             'location' => 'Melbourne',
@@ -127,7 +124,7 @@ class BookingControllerTest extends TestCase
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'phone' => '0412345678',
-            'datetime' => $futureDate,
+            'datetime' => '2026-04-12 10:00:00',
             'services' => 'Hair Styling',
             'duration' => '60 mins',
             'location' => 'Melbourne',
