@@ -11,7 +11,7 @@ class UploadPhotoVerificationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::check();
+        return Auth::check() && Auth::user()->providerProfile()->exists();
     }
 
     public function rules(): array

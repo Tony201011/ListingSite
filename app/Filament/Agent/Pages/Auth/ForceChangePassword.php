@@ -63,7 +63,10 @@ class ForceChangePassword extends Page
         ]);
 
         Filament::auth()->login($user->fresh());
-        request()->session()->regenerate();
+
+        if (request()->hasSession()) {
+            request()->session()->regenerate();
+        }
 
         Notification::make()
             ->title('Password changed successfully.')
