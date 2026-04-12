@@ -4,9 +4,9 @@ namespace App\Providers\Filament;
 
 use App\Filament\Agent\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Auth\EditProfile;
+use App\Http\Middleware\AgentAuthenticate;
 use App\Http\Middleware\AgentEmailVerification;
 use App\Http\Middleware\AgentForcePasswordChange;
-use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -55,7 +55,7 @@ class AgentPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                AgentAuthenticate::class,
                 AgentEmailVerification::class,
                 AgentForcePasswordChange::class,
             ]);

@@ -25,6 +25,12 @@ class SigninProvider
             ])->withInput();
         }
 
+        if (! $user->email_verified_at) {
+            return back()->withErrors([
+                'email' => 'Please verify your email address before logging in.',
+            ])->withInput();
+        }
+
         $guard = $user->role === User::ROLE_AGENT ? 'agent' : 'web';
 
         if (Auth::guard($guard)->attempt([

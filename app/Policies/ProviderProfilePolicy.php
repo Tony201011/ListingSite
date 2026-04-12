@@ -24,6 +24,10 @@ class ProviderProfilePolicy
     public function view(User $user, ?ProviderProfile $profile = null): bool
     {
         if (! $profile) {
+            if ($user->role === User::ROLE_PROVIDER) {
+                return $user->providerProfile()->exists();
+            }
+
             return $this->viewAny($user);
         }
 
@@ -33,9 +37,23 @@ class ProviderProfilePolicy
     public function update(User $user, ?ProviderProfile $profile = null): bool
     {
         if (! $profile) {
+            if ($user->role === User::ROLE_PROVIDER) {
+                return $user->providerProfile()->exists();
+            }
+
             return $this->create($user);
         }
 
+        return $this->ownsProfile($user, $profile);
+    }
+
+    public function viewOwned(User $user, ProviderProfile $profile): bool
+    {
+        return $this->ownsProfile($user, $profile);
+    }
+
+    public function updateOwned(User $user, ProviderProfile $profile): bool
+    {
         return $this->ownsProfile($user, $profile);
     }
 

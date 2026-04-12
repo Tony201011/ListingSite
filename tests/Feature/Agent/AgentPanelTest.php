@@ -2,9 +2,12 @@
 
 namespace Tests\Feature\Agent;
 
+use App\Filament\Agent\Pages\Auth\ForceChangePassword;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class AgentPanelTest extends TestCase
@@ -215,14 +218,14 @@ class AgentPanelTest extends TestCase
     {
         $agent = $this->createAgent(['must_change_password' => true]);
 
-        $forceChangeUrl = \App\Filament\Agent\Pages\Auth\ForceChangePassword::getUrl(panel: 'agent');
+        Filament::setCurrentPanel(Filament::getPanel('agent'));
 
-        $response = $this->actingAs($agent, 'agent')->post($forceChangeUrl, [
-            'new_password' => 'NewSecurePass1!',
-            'new_password_confirmation' => 'NewSecurePass1!',
-        ]);
-
-        $response->assertRedirect('/agent');
+        Livewire::actingAs($agent, 'agent')
+            ->test(ForceChangePassword::class)
+            ->set('new_password', 'NewSecurePass1!')
+            ->set('new_password_confirmation', 'NewSecurePass1!')
+            ->call('save')
+            ->assertRedirect('/agent');
 
         $this->assertFalse($agent->fresh()->must_change_password);
     }
