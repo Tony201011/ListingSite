@@ -5,6 +5,7 @@ namespace Tests\Feature\Profile;
 use App\Actions\DeleteProfilePhoto;
 use App\Actions\GetUserPhotos;
 use App\Actions\SetPrimaryProfilePhoto;
+use App\Actions\Support\ActionResult;
 use App\Actions\UploadUserPhotos;
 use App\Models\ProfileImage;
 use App\Models\User;
@@ -43,9 +44,7 @@ class PhotoControllerTest extends TestCase
         $getUserPhotos->shouldReceive('execute')
             ->once()
             ->with(Mockery::on(fn ($arg) => $arg->is($user)))
-            ->andReturn([
-                'photos' => collect([$photo]),
-            ]);
+            ->andReturn(ActionResult::success(['photos' => collect([$photo])]));
 
         $this->app->instance(GetUserPhotos::class, $getUserPhotos);
 
@@ -64,22 +63,18 @@ class PhotoControllerTest extends TestCase
         $uploadUserPhotos->shouldReceive('execute')
             ->once()
             ->with($user, Mockery::type('array'))
-            ->andReturn([
-                'status' => 200,
-                'data' => [
-                    'message' => 'Photos uploaded successfully.',
-                    'photos' => [
-                        [
-                            'id' => 1,
-                            'image_path' => 'images/test/photo.jpg',
-                            'thumbnail_path' => 'thumbnails/test/photo-thumb.jpg',
-                            'image_url' => 'https://example.com/photo.jpg',
-                            'thumbnail_url' => 'https://example.com/photo-thumb.jpg',
-                            'is_primary' => true,
-                        ],
+            ->andReturn(ActionResult::success([
+                'photos' => [
+                    [
+                        'id' => 1,
+                        'image_path' => 'images/test/photo.jpg',
+                        'thumbnail_path' => 'thumbnails/test/photo-thumb.jpg',
+                        'image_url' => 'https://example.com/photo.jpg',
+                        'thumbnail_url' => 'https://example.com/photo-thumb.jpg',
+                        'is_primary' => true,
                     ],
                 ],
-            ]);
+            ], 'Photos uploaded successfully.'));
 
         $this->app->instance(UploadUserPhotos::class, $uploadUserPhotos);
 
@@ -175,12 +170,7 @@ class PhotoControllerTest extends TestCase
         $setPrimaryProfilePhoto->shouldReceive('execute')
             ->once()
             ->with($user, Mockery::on(fn ($arg) => $arg->is($photo)))
-            ->andReturn([
-                'status' => 200,
-                'data' => [
-                    'message' => 'Profile photo updated successfully.',
-                ],
-            ]);
+            ->andReturn(ActionResult::success([], 'Profile photo updated successfully.'));
 
         $this->app->instance(SetPrimaryProfilePhoto::class, $setPrimaryProfilePhoto);
 
@@ -201,12 +191,7 @@ class PhotoControllerTest extends TestCase
         $deleteProfilePhoto->shouldReceive('execute')
             ->once()
             ->with($user, Mockery::on(fn ($arg) => $arg->is($photo)))
-            ->andReturn([
-                'status' => 200,
-                'data' => [
-                    'message' => 'Photo deleted successfully.',
-                ],
-            ]);
+            ->andReturn(ActionResult::success([], 'Photo deleted successfully.'));
 
         $this->app->instance(DeleteProfilePhoto::class, $deleteProfilePhoto);
 

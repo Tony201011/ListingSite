@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Agents;
 
+use App\Filament\Resources\Agents\Pages\CreateAgent;
 use App\Filament\Resources\Agents\Pages\ListAgents;
 use App\Models\User;
 use BackedEnum;
@@ -232,6 +233,7 @@ class AgentResource extends Resource
     {
         return [
             'index' => ListAgents::route('/'),
+            'create' => CreateAgent::route('/create'),
         ];
     }
 }
