@@ -1,22 +1,29 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('online_users', function (Blueprint $table) {
-            $table->renameColumn('online', 'status');
-        });
+        DB::statement("
+            ALTER TABLE `online_users`
+            CHANGE `online` `status`
+            ENUM('online', 'offline')
+            NOT NULL
+            DEFAULT 'offline'
+        ");
     }
 
     public function down(): void
     {
-        Schema::table('online_users', function (Blueprint $table) {
-            $table->renameColumn('status', 'online');
-        });
+        DB::statement("
+            ALTER TABLE `online_users`
+            CHANGE `status` `online`
+            ENUM('online', 'offline')
+            NOT NULL
+            DEFAULT 'offline'
+        ");
     }
 };

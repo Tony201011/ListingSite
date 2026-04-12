@@ -24,10 +24,6 @@ class EnsureProviderAccess
         $user = Auth::user();
 
         if (! $user) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Unauthenticated.'], 401);
-            }
-
             return redirect()->route('signin');
         }
 

@@ -25,12 +25,6 @@ class SigninProvider
             ])->withInput();
         }
 
-        if (! $user->hasVerifiedEmail()) {
-            return back()->withErrors([
-                'email' => 'Your email address is not verified.',
-            ])->withInput();
-        }
-
         $guard = $user->role === User::ROLE_AGENT ? 'agent' : 'web';
 
         if (Auth::guard($guard)->attempt([

@@ -6,7 +6,6 @@ use App\Filament\Agent\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Http\Middleware\AgentEmailVerification;
 use App\Http\Middleware\AgentForcePasswordChange;
-use App\Http\Middleware\ForbidNonAgentGuardAccess;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -52,7 +51,6 @@ class AgentPanelProvider extends PanelProvider
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
-                ForbidNonAgentGuardAccess::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class AddAgentIdToProviderProfilesTable extends Migration
@@ -11,9 +12,9 @@ class AddAgentIdToProviderProfilesTable extends Migration
         // Make user_id nullable so agent-created profiles don't need a linked user account.
         // MySQL allows multiple NULLs in a UNIQUE index, so the 1-user-1-profile invariant
         // is preserved for non-null values.
-        Schema::table('provider_profiles', function (Blueprint $table): void {
-            $table->foreignId('user_id')->nullable()->change();
+        DB::statement('ALTER TABLE provider_profiles MODIFY user_id BIGINT UNSIGNED NULL');
 
+        Schema::table('provider_profiles', function (Blueprint $table): void {
             $table->foreignId('agent_id')
                 ->nullable()
                 ->after('user_id')
@@ -27,8 +28,8 @@ class AddAgentIdToProviderProfilesTable extends Migration
         Schema::table('provider_profiles', function (Blueprint $table): void {
             $table->dropForeign(['agent_id']);
             $table->dropColumn('agent_id');
-
-            $table->foreignId('user_id')->nullable(false)->change();
         });
+
+        DB::statement('ALTER TABLE provider_profiles MODIFY user_id BIGINT UNSIGNED NOT NULL');
     }
 }
