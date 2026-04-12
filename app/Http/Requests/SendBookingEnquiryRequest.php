@@ -19,7 +19,7 @@ class SendBookingEnquiryRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'regex:/^[\d\s\-\+\(\)]{6,20}$/', 'max:20'],
-            'datetime' => ['nullable', 'date', 'after_or_equal:today'],
+            'datetime' => ['nullable', 'date', 'after:' . now()->subYear()->format('Y-m-d')],
             'services' => ['nullable', 'string', 'max:255'],
             'duration' => ['nullable', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
@@ -35,7 +35,7 @@ class SendBookingEnquiryRequest extends FormRequest
             'email.email' => 'Please enter a valid email address.',
             'phone.regex' => 'Please enter a valid phone number.',
             'datetime.date' => 'Please enter a valid date.',
-            'datetime.after_or_equal' => 'Booking date must be today or later.',
+            'datetime.after' => 'Booking date cannot be more than one year in the past.',
             'message.max' => 'Message may not be longer than 2000 characters.',
         ];
     }
