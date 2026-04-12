@@ -38,8 +38,8 @@ return new class extends Migration
         }
 
         Schema::table('provider_profiles', function (Blueprint $table) {
-            $table->dropUnique(['user_id']);
             $table->dropForeign(['user_id']);
+            $table->dropUnique(['user_id']);
             $table->dropColumn('user_id');
         });
     }
