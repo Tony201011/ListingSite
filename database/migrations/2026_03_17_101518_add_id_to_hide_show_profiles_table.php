@@ -11,8 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('hide_show_profiles', function (Blueprint $table) {
-            $table->id()->first(); // Add an auto-incrementing 'id' column as the first column
+        // SQLite does not support adding a PRIMARY KEY to an existing table,
+        // so we recreate the table with the id column included.
+        Schema::drop('hide_show_profiles');
+
+        Schema::create('hide_show_profiles', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->enum('status', ['hide', 'show'])->default('show');
+            $table->timestamps();
+            $table->unique('user_id');
         });
     }
 
@@ -21,8 +29,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('hide_show_profiles', function (Blueprint $table) {
-            $table->dropColumn('id');
+        Schema::drop('hide_show_profiles');
+
+        Schema::create('hide_show_profiles', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->enum('status', ['hide', 'show'])->default('show');
+            $table->timestamps();
+            $table->unique('user_id');
         });
     }
 };
