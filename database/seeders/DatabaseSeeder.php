@@ -32,7 +32,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             LocationImportSeeder::class,
             CategorySeeder::class,
-            DummyProviderSeeder::class,
             DummyProviderListingSeeder::class,
             BlogPostSeeder::class,
             TermConditionSeeder::class,
