@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class UserVideo extends Model
 {
@@ -21,7 +22,7 @@ class UserVideo extends Model
     public function getVideoUrlAttribute(): ?string
     {
         return $this->video_path
-            ? route('media.show', ['path' => $this->video_path])
+            ? Storage::disk(config('media.delivery_disk'))->url($this->video_path)
             : null;
     }
 }
