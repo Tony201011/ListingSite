@@ -4,6 +4,7 @@ namespace Tests\Feature\Profile;
 
 use App\Actions\DeleteUserVideo;
 use App\Actions\GetUserVideos;
+use App\Actions\Support\ActionResult;
 use App\Actions\UploadUserVideos;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Models\User;
@@ -49,9 +50,7 @@ class MyVideosControllerTest extends TestCase
         $getUserVideos->shouldReceive('execute')
             ->once()
             ->with(Mockery::on(fn ($arg) => $arg->is($user)))
-            ->andReturn([
-                'videos' => collect([$video]),
-            ]);
+            ->andReturn(ActionResult::success(['videos' => collect([$video])]));
 
         $this->app->instance(GetUserVideos::class, $getUserVideos);
 
@@ -70,20 +69,16 @@ class MyVideosControllerTest extends TestCase
         $uploadUserVideos->shouldReceive('execute')
             ->once()
             ->with($user, Mockery::type('array'))
-            ->andReturn([
-                'status' => 200,
-                'data' => [
-                    'message' => 'Videos uploaded successfully.',
-                    'videos' => [
-                        [
-                            'id' => 1,
-                            'video_path' => 'videos/test/video.mp4',
-                            'video_url' => 'https://example.com/video.mp4',
-                            'original_name' => 'video.mp4',
-                        ],
+            ->andReturn(ActionResult::success([
+                'videos' => [
+                    [
+                        'id' => 1,
+                        'video_path' => 'videos/test/video.mp4',
+                        'video_url' => 'https://example.com/video.mp4',
+                        'original_name' => 'video.mp4',
                     ],
                 ],
-            ]);
+            ], 'Videos uploaded successfully.'));
 
         $this->app->instance(UploadUserVideos::class, $uploadUserVideos);
 
@@ -179,12 +174,7 @@ class MyVideosControllerTest extends TestCase
         $deleteUserVideo->shouldReceive('execute')
             ->once()
             ->with($user, Mockery::on(fn ($arg) => $arg->is($video)))
-            ->andReturn([
-                'status' => 200,
-                'data' => [
-                    'message' => 'Video deleted successfully.',
-                ],
-            ]);
+            ->andReturn(ActionResult::success([], 'Video deleted successfully.'));
 
         $this->app->instance(DeleteUserVideo::class, $deleteUserVideo);
 
