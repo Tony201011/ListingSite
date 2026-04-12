@@ -127,7 +127,7 @@ class AppServiceProvider extends ServiceProvider
             if (! Schema::hasTable('smtp_settings')) {
                 return;
             }
-        } catch (\Illuminate\Database\QueryException|\PDOException) {
+        } catch (\Illuminate\Database\QueryException | \PDOException) {
             return;
         }
 
@@ -172,7 +172,7 @@ class AppServiceProvider extends ServiceProvider
             if (! Schema::hasTable('s3_bucket_settings')) {
                 return;
             }
-        } catch (\Illuminate\Database\QueryException|\PDOException) {
+        } catch (\Illuminate\Database\QueryException | \PDOException) {
             return;
         }
 
