@@ -2,11 +2,14 @@
 
 namespace App\Actions;
 
+use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\SiteSetting;
 use App\Models\User;
 
 class GetMyProfileStepTwoData
 {
+    use ResolvesProfileCategoryValues;
+
     public function __construct(
         private GetProfileCategoryOptions $getProfileCategoryOptions
     ) {}
@@ -28,14 +31,14 @@ class GetMyProfileStepTwoData
             'body_type' => $profile?->body_type_id,
             'bust_size' => $profile?->bust_size_id,
             'your_length' => $profile?->your_length_id,
-            'availability' => $profile?->availability,
-            'contact_method' => $profile?->contact_method,
-            'phone_contact' => $profile?->phone_contact_preference,
-            'time_waster' => $profile?->time_waster_shield,
-            'primary_identity' => $profile?->primary_identity ?? [],
-            'attributes' => $profile?->attributes ?? [],
-            'services_style' => $profile?->services_style ?? [],
-            'services_provided' => $profile?->services_provided ?? [],
+            'availability' => self::resolveProfileCategoryName($profile?->availability, 'availability'),
+            'contact_method' => self::resolveProfileCategoryName($profile?->contact_method, 'contact-method'),
+            'phone_contact' => self::resolveProfileCategoryName($profile?->phone_contact_preference, 'phone-contact-preferences'),
+            'time_waster' => self::resolveProfileCategoryName($profile?->time_waster_shield, 'time-waster-shield'),
+            'primary_identity' => self::resolveProfileCategoryNames($profile?->primary_identity ?? [], 'primary-identity'),
+            'attributes' => self::resolveProfileCategoryNames($profile?->attributes ?? [], 'attributes'),
+            'services_style' => self::resolveProfileCategoryNames($profile?->services_style ?? [], 'services-style'),
+            'services_provided' => self::resolveProfileCategoryNames($profile?->services_provided ?? [], 'services-you-provide'),
         ];
 
         return [

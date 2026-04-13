@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Concerns\ResolvesProfileCategoryValues;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -48,6 +49,8 @@ use Illuminate\Support\Str;
 
 class UserResource extends Resource
 {
+    use ResolvesProfileCategoryValues;
+
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
@@ -339,25 +342,37 @@ class UserResource extends Resource
                                         ->label('Availability')
                                         ->options(fn (): array => self::profileCategoryNameOptions('availability'))
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryName($state, 'availability'));
+                                        }),
 
                                     Select::make('contact_method')
                                         ->label('Contact Method')
                                         ->options(fn (): array => self::profileCategoryNameOptions('contact-method'))
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryName($state, 'contact-method'));
+                                        }),
 
                                     Select::make('phone_contact_preference')
                                         ->label('Phone Contact Preference')
                                         ->options(fn (): array => self::profileCategoryNameOptions('phone-contact-preferences'))
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryName($state, 'phone-contact-preferences'));
+                                        }),
 
                                     Select::make('time_waster_shield')
                                         ->label('Time Waster Shield')
                                         ->options(fn (): array => self::profileCategoryNameOptions('time-waster-shield'))
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryName($state, 'time-waster-shield'));
+                                        }),
 
                                     Select::make('primary_identity')
                                         ->label('Primary Identity')
@@ -365,6 +380,9 @@ class UserResource extends Resource
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryNames($state, 'primary-identity'));
+                                        })
                                         ->columnSpanFull(),
 
                                     Select::make('attributes')
@@ -373,6 +391,9 @@ class UserResource extends Resource
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryNames($state, 'attributes'));
+                                        })
                                         ->columnSpanFull(),
 
                                     Select::make('services_style')
@@ -381,6 +402,9 @@ class UserResource extends Resource
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryNames($state, 'services-style'));
+                                        })
                                         ->columnSpanFull(),
 
                                     Select::make('services_provided')
@@ -389,6 +413,9 @@ class UserResource extends Resource
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryNames($state, 'services-you-provide'));
+                                        })
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(2)
