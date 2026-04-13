@@ -2,12 +2,14 @@
 
 namespace App\Actions;
 
+use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
 use App\Models\ProviderProfile;
 use Illuminate\Support\Collection;
 
 class GetProfileShowData
 {
+    use ResolvesProfileCategoryIds;
     public function execute(string $slug, array $validated): array
     {
         $providerProfile = ProviderProfile::query()
@@ -40,8 +42,20 @@ class GetProfileShowData
             $providerProfile->your_length_id,
         ]);
 
+        $arrayFieldIds = collect([
+            ...(array) ($providerProfile->primary_identity ?? []),
+            ...(array) ($providerProfile->attributes ?? []),
+            ...(array) ($providerProfile->services_style ?? []),
+            ...(array) ($providerProfile->services_provided ?? []),
+        ])->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->all();
+
+        $allCategoryIds = array_unique(array_merge($categoryIds, $arrayFieldIds));
+
         $categoryNames = Category::query()
-            ->whereIn('id', $categoryIds)
+            ->whereIn('id', array_filter($allCategoryIds))
             ->pluck('name', 'id');
 
         $profile = $this->buildProfileArray($providerProfile, $categoryNames);
@@ -184,7 +198,7 @@ class GetProfileShowData
             ->values()
             ->all() ?? [];
 
-        $services = array_values(array_filter((array) ($providerProfile->services_provided ?? [])));
+        $services = $this->resolveIds((array) ($providerProfile->services_provided ?? []), $categoryNames);
 
         $firstRate = $rates->first();
         $rateDisplay = $this->formatRate($firstRate);
@@ -220,9 +234,9 @@ class GetProfileShowData
             'service_1' => $services[0] ?? '',
             'service_2' => $services[1] ?? '',
             'services_provided' => $services,
-            'services_style' => array_values(array_filter((array) ($providerProfile->services_style ?? []))),
-            'primary_identity' => array_values(array_filter((array) ($providerProfile->primary_identity ?? []))),
-            'attributes' => array_values(array_filter((array) ($providerProfile->attributes ?? []))),
+            'services_style' => $this->resolveIds((array) ($providerProfile->services_style ?? []), $categoryNames),
+            'primary_identity' => $this->resolveIds((array) ($providerProfile->primary_identity ?? []), $categoryNames),
+            'attributes' => $this->resolveIds((array) ($providerProfile->attributes ?? []), $categoryNames),
             'ethnicity' => $categoryNames->get($providerProfile->ethnicity_id) ?? '',
             'hair_color' => $categoryNames->get($providerProfile->hair_color_id) ?? '',
             'hair_length' => $categoryNames->get($providerProfile->hair_length_id) ?? '',

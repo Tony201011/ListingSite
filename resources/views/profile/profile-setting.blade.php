@@ -121,30 +121,7 @@
 
                         <div class="flex flex-wrap gap-2 mt-4">
                             @php
-                                $profile = $userInfo['provider_profile'] ?? null;
-
-                                $tags = collect([
-                                    $profile?->primary_identity,
-                                    $profile?->attributes,
-                                    $profile?->services_style,
-                                    $profile?->services_provided,
-                                ])
-                                ->filter()
-                                ->flatMap(function ($item) {
-                                    if (is_array($item)) {
-                                        return $item;
-                                    }
-
-                                    if (is_string($item)) {
-                                        $decoded = json_decode($item, true);
-                                        return is_array($decoded) ? $decoded : [$item];
-                                    }
-
-                                    return [];
-                                })
-                                ->filter()
-                                ->unique()
-                                ->values();
+                                $tags = collect($userInfo['resolved_tags'] ?? []);
                             @endphp
 
                             @forelse($tags as $tag)

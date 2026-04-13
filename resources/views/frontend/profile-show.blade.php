@@ -235,9 +235,11 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                                 </div> --}}
                             {{-- </div> --}}
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                            x-data="{ pauseOthers(current) { $root.querySelectorAll('video').forEach(function(v){ if(v !== current) v.pause(); }); } }">
                             @forelse($profile['videos'] ?? [] as $videoUrl)
-                            <video controls class="rounded-xl w-full h-64 bg-black">
+                            <video controls class="rounded-xl w-full h-64 bg-black"
+                                x-on:play="pauseOthers($el)">
                                 <source src="{{ $videoUrl }}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
