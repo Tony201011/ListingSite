@@ -70,23 +70,17 @@ class GetMyProfileStepTwoData
 
         $strValue = (string) $value;
 
-        $query = Category::query()
+        return Category::query()
             ->where('is_active', true)
             ->where('website_type', 'adult')
-            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug));
-
-        if ((clone $query)->where('name', $strValue)->exists()) {
-            return $strValue;
-        }
-
-        if (is_numeric($value)) {
-            $name = (clone $query)->whereKey((int) $value)->value('name');
-            if ($name !== null) {
-                return $name;
-            }
-        }
-
-        return (clone $query)->where('slug', $strValue)->value('name');
+            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug))
+            ->where(function ($q) use ($strValue, $value): void {
+                $q->where('name', $strValue)->orWhere('slug', $strValue);
+                if (is_numeric($value)) {
+                    $q->orWhereKey((int) $value);
+                }
+            })
+            ->value('name');
     }
 
     private function resolveNamesFromCategories(mixed $values, string $parentSlug): array
@@ -95,10 +89,45 @@ class GetMyProfileStepTwoData
             return [];
         }
 
+        $values = collect($values)->flatten(1)->filter()->values()->all();
+
+        if (empty($values)) {
+            return [];
+        }
+
+        $numericIds = collect($values)->filter(fn ($v) => is_numeric($v))->map(fn ($v) => (int) $v)->all();
+        $stringValues = collect($values)->filter(fn ($v) => ! is_numeric($v))->map(fn ($v) => (string) $v)->all();
+
+        $categories = Category::query()
+            ->where('is_active', true)
+            ->where('website_type', 'adult')
+            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug))
+            ->where(function ($q) use ($numericIds, $stringValues): void {
+                $q->whereIn('name', $stringValues)->orWhereIn('slug', $stringValues);
+                if (! empty($numericIds)) {
+                    $q->orWhereIn('id', $numericIds);
+                }
+            })
+            ->get(['id', 'name', 'slug']);
+
+        $idMap = $categories->pluck('name', 'id')->all();
+        $nameMap = $categories->pluck('name', 'name')->all();
+        $slugMap = $categories->pluck('name', 'slug')->all();
+
         return collect($values)
-            ->flatten(1)
-            ->map(fn ($val) => $this->resolveNameFromCategory($val, $parentSlug))
+            ->map(function ($val) use ($idMap, $nameMap, $slugMap) {
+                $strVal = (string) $val;
+                if (isset($nameMap[$strVal])) {
+                    return $nameMap[$strVal];
+                }
+                if (is_numeric($val) && isset($idMap[(int) $val])) {
+                    return $idMap[(int) $val];
+                }
+
+                return $slugMap[$strVal] ?? null;
+            })
             ->filter()
+            ->unique()
             ->values()
             ->all();
     }
