@@ -478,6 +478,7 @@ class UserResource extends Resource
                                                 ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/images')
                                                 ->preserveFilenames()
+                                                ->fetchFileInformation(false)
                                                 ->columnSpanFull(),
 
                                             FileUpload::make('thumbnail_path')
@@ -489,6 +490,7 @@ class UserResource extends Resource
                                                 ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/thumbnails')
                                                 ->preserveFilenames()
+                                                ->fetchFileInformation(false)
                                                 ->columnSpanFull(),
 
                                             Toggle::make('is_primary')
