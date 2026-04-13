@@ -245,7 +245,7 @@ class HomeControllerTest extends TestCase
         $response->assertSessionHasErrors(['min_age']);
     }
 
-    public function test_home_page_rejects_min_age_above_max(): void
+    public function test_home_page_rejects_non_numeric_min_age(): void
     {
         $response = $this->get('/?min_age=abc');
 
