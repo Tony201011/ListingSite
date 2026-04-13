@@ -94,7 +94,15 @@ class EditUser extends EditRecord
 
     protected function getCurrentTab(): string
     {
-        return (string) request()->query('tab', '0');
+        $tab = (string) request()->query('tab', '0');
+
+        // Filament 5 persists tabs as "{label}::{statePath}::{type}" (e.g. "availability::data::tab").
+        // Extract only the label portion so it matches the switch cases below.
+        if (str_contains($tab, '::')) {
+            return Str::before($tab, '::');
+        }
+
+        return $tab;
     }
 
     protected function updateOverviewTab(Model $record, array $data): void
@@ -207,36 +215,52 @@ class EditUser extends EditRecord
 
     protected function updateImagesTab(Model $record, array $data): void
     {
+        if (! array_key_exists('profileImages', $data)) {
+            return;
+        }
+
         $this->syncHasManyRelation(
             $record->profileImages(),
-            $data['profileImages'] ?? [],
+            $data['profileImages'],
             ['image_path', 'thumbnail_path', 'is_primary']
         );
     }
 
     protected function updateVideosTab(Model $record, array $data): void
     {
+        if (! array_key_exists('userVideos', $data)) {
+            return;
+        }
+
         $this->syncHasManyRelation(
             $record->userVideos(),
-            $data['userVideos'] ?? [],
+            $data['userVideos'],
             ['original_name', 'video_path']
         );
     }
 
     protected function updateRatesTab(Model $record, array $data): void
     {
+        if (! array_key_exists('rates', $data)) {
+            return;
+        }
+
         $this->syncHasManyRelation(
             $record->rates(),
-            $data['rates'] ?? [],
+            $data['rates'],
             ['description', 'incall', 'outcall', 'extra']
         );
     }
 
     protected function updateAvailabilityTab(Model $record, array $data): void
     {
+        if (! array_key_exists('availabilities', $data)) {
+            return;
+        }
+
         $this->syncHasManyRelation(
             $record->availabilities(),
-            $data['availabilities'] ?? [],
+            $data['availabilities'],
             ['day', 'enabled', 'from_time', 'to_time', 'till_late', 'all_day', 'by_appointment']
         );
     }
