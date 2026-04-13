@@ -32,22 +32,34 @@ class ProfileImage extends Model
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->image_path
-                ? (str_starts_with($this->image_path, 'http')
-                    ? $this->image_path
-                    : Storage::disk(config('media.delivery_disk'))->url($this->image_path))
-                : null
+            get: function () {
+                if (! $this->image_path) {
+                    return null;
+                }
+
+                if (str_starts_with($this->image_path, 'http')) {
+                    return $this->image_path;
+                }
+
+                return Storage::disk(config('media.delivery_disk'))->url($this->image_path);
+            }
         );
     }
 
     protected function thumbnailUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->thumbnail_path
-                ? (str_starts_with($this->thumbnail_path, 'http')
-                    ? $this->thumbnail_path
-                    : Storage::disk(config('media.delivery_disk'))->url($this->thumbnail_path))
-                : null
+            get: function () {
+                if (! $this->thumbnail_path) {
+                    return null;
+                }
+
+                if (str_starts_with($this->thumbnail_path, 'http')) {
+                    return $this->thumbnail_path;
+                }
+
+                return Storage::disk(config('media.delivery_disk'))->url($this->thumbnail_path);
+            }
         );
     }
 

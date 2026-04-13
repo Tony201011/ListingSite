@@ -37,6 +37,8 @@ class DummyProviderProfileSeeder extends Seeder
 
     private const TIME_WASTER_OPTIONS = ['no', 'yes'];
 
+    private const WEBSITE_TYPES = ['adult', 'porn'];
+
     private const SAMPLE_VIDEOS = [
         'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
