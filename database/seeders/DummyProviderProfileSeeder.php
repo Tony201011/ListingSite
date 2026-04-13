@@ -115,8 +115,126 @@ class DummyProviderProfileSeeder extends Seeder
             ->values()
             ->all();
 
+        // If the postcodes table is empty, read directly from the CSV file used by PostcodeSeeder.
         if (empty($suburbs)) {
-            $suburbs = ['Bondi, NSW 2026', 'Surry Hills, NSW 2010', 'Newtown, NSW 2042', 'Manly, NSW 2095', 'Parramatta, NSW 2150'];
+            $csvPath = database_path('seeders/2 (2).csv');
+            if (file_exists($csvPath) && is_readable($csvPath)) {
+                $handle = fopen($csvPath, 'r');
+                fgetcsv($handle); // skip header
+                $csvSuburbs = [];
+                while (($data = fgetcsv($handle)) !== false) {
+                    $state   = trim($data[0] ?? '');
+                    $suburb  = trim($data[2] ?? '');
+                    $postcode = trim($data[3] ?? '');
+                    if ($suburb !== '' && $postcode !== '' && $state !== '') {
+                        $csvSuburbs[] = "{$suburb}, {$state} {$postcode}";
+                    }
+                }
+                fclose($handle);
+                if (! empty($csvSuburbs)) {
+                    shuffle($csvSuburbs);
+                    $suburbs = array_slice($csvSuburbs, 0, 500);
+                }
+            }
+        }
+
+        if (empty($suburbs)) {
+            $suburbs = [
+                // NSW
+                'Bondi, NSW 2026',
+                'Surry Hills, NSW 2010',
+                'Newtown, NSW 2042',
+                'Manly, NSW 2095',
+                'Parramatta, NSW 2150',
+                'Chatswood, NSW 2067',
+                'Randwick, NSW 2031',
+                'Leichhardt, NSW 2040',
+                'Glebe, NSW 2037',
+                'Paddington, NSW 2021',
+                'Dee Why, NSW 2099',
+                'Cronulla, NSW 2230',
+                'Penrith, NSW 2750',
+                'Blacktown, NSW 2148',
+                'Liverpool, NSW 2170',
+                'Campbelltown, NSW 2560',
+                'Hornsby, NSW 2077',
+                'Gosford, NSW 2250',
+                'Newcastle, NSW 2300',
+                'Wollongong, NSW 2500',
+                // VIC
+                'Melbourne, VIC 3000',
+                'St Kilda, VIC 3182',
+                'Richmond, VIC 3121',
+                'Fitzroy, VIC 3065',
+                'Carlton, VIC 3053',
+                'South Yarra, VIC 3141',
+                'Prahran, VIC 3181',
+                'Collingwood, VIC 3066',
+                'Brunswick, VIC 3056',
+                'Footscray, VIC 3011',
+                'Caulfield, VIC 3162',
+                'Brighton, VIC 3186',
+                'Geelong, VIC 3220',
+                'Ballarat, VIC 3350',
+                'Bendigo, VIC 3550',
+                'Dandenong, VIC 3175',
+                'Frankston, VIC 3199',
+                'Box Hill, VIC 3128',
+                'Glen Waverley, VIC 3150',
+                'Ringwood, VIC 3134',
+                // QLD
+                'Brisbane City, QLD 4000',
+                'South Brisbane, QLD 4101',
+                'Fortitude Valley, QLD 4006',
+                'Toowong, QLD 4066',
+                'Indooroopilly, QLD 4068',
+                'Chermside, QLD 4032',
+                'Carindale, QLD 4152',
+                'Southport, QLD 4215',
+                'Surfers Paradise, QLD 4217',
+                'Broadbeach, QLD 4218',
+                'Robina, QLD 4226',
+                'Bundall, QLD 4217',
+                'Cairns, QLD 4870',
+                'Townsville, QLD 4810',
+                'Sunshine Coast, QLD 4558',
+                // SA
+                'Adelaide, SA 5000',
+                'Glenelg, SA 5045',
+                'Norwood, SA 5067',
+                'Unley, SA 5061',
+                'Prospect, SA 5082',
+                'Port Adelaide, SA 5015',
+                'Marion, SA 5043',
+                'Tea Tree Gully, SA 5091',
+                'Elizabeth, SA 5112',
+                'Mount Gambier, SA 5290',
+                // WA
+                'Perth, WA 6000',
+                'Fremantle, WA 6160',
+                'Subiaco, WA 6008',
+                'Cottesloe, WA 6011',
+                'Victoria Park, WA 6100',
+                'Joondalup, WA 6027',
+                'Rockingham, WA 6168',
+                'Mandurah, WA 6210',
+                'Bunbury, WA 6230',
+                'Geraldton, WA 6530',
+                // ACT
+                'Canberra, ACT 2600',
+                'Belconnen, ACT 2617',
+                'Tuggeranong, ACT 2900',
+                'Woden, ACT 2606',
+                'Gungahlin, ACT 2912',
+                // TAS
+                'Hobart, TAS 7000',
+                'Sandy Bay, TAS 7005',
+                'Launceston, TAS 7250',
+                'Devonport, TAS 7310',
+                // NT
+                'Darwin, NT 0800',
+                'Palmerston, NT 0830',
+            ];
         }
 
         for ($i = 1; $i <= self::TOTAL; $i++) {

@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             LocationSeeder::class,
             CategorySeeder::class,
             TourCitySeeder::class,
+            PostcodeSeeder::class,
             SiteSettingSeeder::class,
             DummyAgentSeeder::class,
             DummyProviderProfileSeeder::class,
@@ -56,7 +57,6 @@ class DatabaseSeeder extends Seeder
           //  CookieSettingSeeder::class,
             MetaKeywordSeeder::class,
             MetaDescriptionSeeder::class,
-            PostcodeSeeder::class,
         ]);
     }
 }
