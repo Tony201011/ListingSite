@@ -25,7 +25,7 @@ class ProviderProfilePolicy
     {
         if (! $profile) {
             if ($user->role === User::ROLE_PROVIDER) {
-                return $user->providerProfile()->exists();
+                return true;
             }
 
             return $this->viewAny($user);
@@ -38,7 +38,7 @@ class ProviderProfilePolicy
     {
         if (! $profile) {
             if ($user->role === User::ROLE_PROVIDER) {
-                return $user->providerProfile()->exists();
+                return true;
             }
 
             return $this->create($user);
