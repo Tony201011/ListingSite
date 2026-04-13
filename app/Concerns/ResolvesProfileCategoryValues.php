@@ -58,8 +58,9 @@ trait ResolvesProfileCategoryValues
             return [];
         }
 
-        $numericIds = collect($values)->filter(fn ($v) => is_numeric($v))->map(fn ($v) => (int) $v)->all();
-        $stringValues = collect($values)->filter(fn ($v) => ! is_numeric($v))->map(fn ($v) => (string) $v)->all();
+        [$numericItems, $stringItems] = collect($values)->partition(fn ($v) => is_numeric($v));
+        $numericIds = $numericItems->map(fn ($v) => (int) $v)->all();
+        $stringValues = $stringItems->map(fn ($v) => (string) $v)->all();
 
         $categories = Category::query()
             ->where('is_active', true)
