@@ -4,7 +4,6 @@ namespace App\Actions\Auth;
 
 use App\Actions\Support\ActionResult;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -83,9 +82,7 @@ class VerifyProviderSignupOtp
 
         $this->expireOtpSession($pendingKey);
 
-        Auth::guard('web')->login($user);
-
-        Session::flash('success', 'Your account has been successfully created. Please sign in to continue.');
+        Session::flash('success', 'Your account has been created successfully! Please check your email and verify your email address before logging in.');
 
         return ActionResult::success([
             'redirect' => route('signin'),
