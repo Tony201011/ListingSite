@@ -77,8 +77,8 @@
             ['label' => 'Escorts', 'url' => url('/')],
             ['label' => 'Naughty corner', 'url' => route('naughty-corner')],
             ['label' => 'Blog', 'url' => route('blog')],
-            ['label' => 'Sign In', 'url' => url('/signin')],
             ['label' => 'Sign Up', 'url' => url('/signup')],
+            ['label' => 'Sign In', 'url' => url('/signin')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
         $hasPricingInMainNav = $mainNavLinks->contains(function ($item) {
