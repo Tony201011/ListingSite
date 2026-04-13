@@ -20,8 +20,13 @@ class UpdateUserAvailability
     public function execute(int $userId, array $availabilityData): void
     {
         DB::transaction(function () use ($userId, $availabilityData) {
+            $normalizedData = [];
+            foreach ($availabilityData as $key => $value) {
+                $normalizedData[ucfirst(strtolower($key))] = $value;
+            }
+
             foreach ($this->days as $day) {
-                $dayData = $availabilityData[$day] ?? [];
+                $dayData = $normalizedData[$day] ?? [];
 
                 $payload = $this->buildPayload($dayData);
 
