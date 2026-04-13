@@ -234,15 +234,17 @@ class BuildProfileFilterViewData
         ?float $userLng = null,
         ?int $distanceFilter = null,
     ): LengthAwarePaginator {
-        $hasTextQuery = $locationQuery !== '' || $escortNameQuery !== '';
+        $hasLocationQuery = $locationQuery !== '';
 
-        // When a text query is present, use Typesense via Laravel Scout to resolve
+        // When a location query is present, use Typesense via Laravel Scout to resolve
         // matching profile IDs, then constrain the Eloquent query to those IDs.
         // This provides fast, typo-tolerant full-text search while keeping all
         // relational filters (age, price, categories) on the Eloquent side.
+        // NOTE: escort_name is intentionally excluded from Scout to avoid fuzzy/typo-tolerant
+        // matching, which would return unrelated names (e.g. searching "2620" returning "2621").
         $scoutMatchedIds = null;
-        if ($hasTextQuery) {
-            $scoutMatchedIds = $this->resolveScoutIds($locationQuery, $escortNameQuery);
+        if ($hasLocationQuery) {
+            $scoutMatchedIds = $this->resolveScoutIds($locationQuery);
         }
 
         $query = ProviderProfile::query()
@@ -264,18 +266,17 @@ class BuildProfileFilterViewData
             } else {
                 $query->whereIn('id', $scoutMatchedIds);
             }
-        } elseif ($hasTextQuery) {
-            // Scout is not configured or unavailable – fall back to LIKE queries.
-            if ($locationQuery !== '') {
-                $query->where(function ($q) use ($locationQuery) {
-                    $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
-                        ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%'.$locationQuery.'%'));
-                });
-            }
+        } elseif ($hasLocationQuery) {
+            // Scout is not configured or unavailable – fall back to LIKE queries for location.
+            $query->where(function ($q) use ($locationQuery) {
+                $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
+                    ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%'.$locationQuery.'%'));
+            });
+        }
 
-            if ($escortNameQuery !== '') {
-                $query->where('name', 'like', '%'.$escortNameQuery.'%');
-            }
+        // Always apply escort name as an exact LIKE filter to avoid fuzzy matching.
+        if ($escortNameQuery !== '') {
+            $query->where('name', 'like', '%'.$escortNameQuery.'%');
         }
 
         if ($minAge > 18 || $maxAge < 40) {
@@ -394,10 +395,10 @@ class BuildProfileFilterViewData
      *
      * @return \Illuminate\Support\Collection<int>|null
      */
-    private function resolveScoutIds(string $locationQuery, string $escortNameQuery): ?Collection
+    private function resolveScoutIds(string $locationQuery): ?Collection
     {
         try {
-            $searchTerm = trim($escortNameQuery.' '.$locationQuery);
+            $searchTerm = trim($locationQuery);
 
             /** @var ScoutBuilder $scoutQuery */
             $scoutQuery = ProviderProfile::search($searchTerm)
