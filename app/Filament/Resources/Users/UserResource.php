@@ -1225,6 +1225,10 @@ class UserResource extends Resource
 
     private static function normalizeMultiValueState(mixed $state): array
     {
+        if (is_int($state) || is_float($state)) {
+            return filled($state) ? [(string) (int) $state] : [];
+        }
+
         if (is_string($state)) {
             $trimmed = trim($state);
 

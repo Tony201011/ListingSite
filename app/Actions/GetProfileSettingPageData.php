@@ -2,12 +2,14 @@
 
 namespace App\Actions;
 
+use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\UserVideo;
 
 class GetProfileSettingPageData
 {
+    use ResolvesProfileCategoryIds;
     public function execute(?User $user): array
     {
         $user = $user?->load('providerProfile');
@@ -23,8 +25,20 @@ class GetProfileSettingPageData
             $profile?->your_length_id,
         ]);
 
+        $tagIds = collect([
+            ...(array) ($profile?->primary_identity ?? []),
+            ...(array) ($profile?->attributes ?? []),
+            ...(array) ($profile?->services_style ?? []),
+            ...(array) ($profile?->services_provided ?? []),
+        ])->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->all();
+
+        $allIds = array_unique(array_merge($ids, $tagIds));
+
         $categories = Category::query()
-            ->whereIn('id', $ids)
+            ->whereIn('id', array_filter($allIds))
             ->pluck('name', 'id');
 
         $userInfo = [
@@ -37,6 +51,7 @@ class GetProfileSettingPageData
             'body_type_name' => $categories[$profile?->body_type_id] ?? null,
             'bust_size_name' => $categories[$profile?->bust_size_id] ?? null,
             'your_length_name' => $categories[$profile?->your_length_id] ?? null,
+            'resolved_tags' => $this->resolveTagIds($profile, $categories),
         ];
 
         $profileImages = $user?->profileImages()
@@ -61,5 +76,21 @@ class GetProfileSettingPageData
             'photoVerification' => $photoVerification,
             'userInfo' => $userInfo,
         ];
+    }
+
+    private function resolveTagIds(mixed $profile, \Illuminate\Support\Collection $categories): array
+    {
+        if ($profile === null) {
+            return [];
+        }
+
+        $allValues = array_merge(
+            (array) ($profile->primary_identity ?? []),
+            (array) ($profile->attributes ?? []),
+            (array) ($profile->services_style ?? []),
+            (array) ($profile->services_provided ?? []),
+        );
+
+        return $this->resolveIds($allValues, $categories);
     }
 }
