@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Models\Category;
 use App\Models\SiteSetting;
 use App\Models\User;
 
@@ -28,14 +29,14 @@ class GetMyProfileStepTwoData
             'body_type' => $profile?->body_type_id,
             'bust_size' => $profile?->bust_size_id,
             'your_length' => $profile?->your_length_id,
-            'availability' => $profile?->availability,
-            'contact_method' => $profile?->contact_method,
-            'phone_contact' => $profile?->phone_contact_preference,
-            'time_waster' => $profile?->time_waster_shield,
-            'primary_identity' => $profile?->primary_identity ?? [],
-            'attributes' => $profile?->attributes ?? [],
-            'services_style' => $profile?->services_style ?? [],
-            'services_provided' => $profile?->services_provided ?? [],
+            'availability' => $this->resolveNameFromCategory($profile?->availability, 'availability'),
+            'contact_method' => $this->resolveNameFromCategory($profile?->contact_method, 'contact-method'),
+            'phone_contact' => $this->resolveNameFromCategory($profile?->phone_contact_preference, 'phone-contact-preferences'),
+            'time_waster' => $this->resolveNameFromCategory($profile?->time_waster_shield, 'time-waster-shield'),
+            'primary_identity' => $this->resolveNamesFromCategories($profile?->primary_identity ?? [], 'primary-identity'),
+            'attributes' => $this->resolveNamesFromCategories($profile?->attributes ?? [], 'attributes'),
+            'services_style' => $this->resolveNamesFromCategories($profile?->services_style ?? [], 'services-style'),
+            'services_provided' => $this->resolveNamesFromCategories($profile?->services_provided ?? [], 'services-you-provide'),
         ];
 
         return [
@@ -59,5 +60,46 @@ class GetMyProfileStepTwoData
             'phoneContactOptions' => $this->getProfileCategoryOptions->execute('phone-contact-preferences'),
             'timeWasterOptions' => $this->getProfileCategoryOptions->execute('time-waster-shield'),
         ];
+    }
+
+    private function resolveNameFromCategory(mixed $value, string $parentSlug): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        $strValue = (string) $value;
+
+        $query = Category::query()
+            ->where('is_active', true)
+            ->where('website_type', 'adult')
+            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug));
+
+        if ((clone $query)->where('name', $strValue)->exists()) {
+            return $strValue;
+        }
+
+        if (is_numeric($value)) {
+            $name = (clone $query)->whereKey((int) $value)->value('name');
+            if ($name !== null) {
+                return $name;
+            }
+        }
+
+        return (clone $query)->where('slug', $strValue)->value('name');
+    }
+
+    private function resolveNamesFromCategories(mixed $values, string $parentSlug): array
+    {
+        if (! is_array($values)) {
+            return [];
+        }
+
+        return collect($values)
+            ->flatten(1)
+            ->map(fn ($val) => $this->resolveNameFromCategory($val, $parentSlug))
+            ->filter()
+            ->values()
+            ->all();
     }
 }

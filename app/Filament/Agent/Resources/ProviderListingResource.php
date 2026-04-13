@@ -317,25 +317,37 @@ class ProviderListingResource extends Resource
                                         ->label('Availability')
                                         ->options(fn (): array => self::profileCategoryNameOptions('availability'))
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryName($state, 'availability'));
+                                        }),
 
                                     Select::make('contact_method')
                                         ->label('Contact Method')
                                         ->options(fn (): array => self::profileCategoryNameOptions('contact-method'))
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryName($state, 'contact-method'));
+                                        }),
 
                                     Select::make('phone_contact_preference')
                                         ->label('Phone Contact Preference')
                                         ->options(fn (): array => self::profileCategoryNameOptions('phone-contact-preferences'))
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryName($state, 'phone-contact-preferences'));
+                                        }),
 
                                     Select::make('time_waster_shield')
                                         ->label('Time Waster Shield')
                                         ->options(fn (): array => self::profileCategoryNameOptions('time-waster-shield'))
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryName($state, 'time-waster-shield'));
+                                        }),
 
                                     Select::make('primary_identity')
                                         ->label('Primary Identity')
@@ -343,6 +355,9 @@ class ProviderListingResource extends Resource
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryNames($state, 'primary-identity'));
+                                        })
                                         ->columnSpanFull(),
 
                                     Select::make('attributes')
@@ -351,6 +366,9 @@ class ProviderListingResource extends Resource
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryNames($state, 'attributes'));
+                                        })
                                         ->columnSpanFull(),
 
                                     Select::make('services_style')
@@ -359,6 +377,9 @@ class ProviderListingResource extends Resource
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryNames($state, 'services-style'));
+                                        })
                                         ->columnSpanFull(),
 
                                     Select::make('services_provided')
@@ -367,6 +388,9 @@ class ProviderListingResource extends Resource
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
+                                        ->afterStateHydrated(function ($component, $state): void {
+                                            $component->state(self::resolveProfileCategoryNames($state, 'services-you-provide'));
+                                        })
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(2)
@@ -1143,6 +1167,52 @@ class ProviderListingResource extends Resource
             ->whereHas('parent', fn ($query) => $query->where('slug', $parentSlug))
             ->orderBy('name')
             ->pluck('name', 'name')
+            ->all();
+    }
+
+    private static function resolveProfileCategoryName(mixed $value, string $parentSlug): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        $strValue = (string) $value;
+
+        $query = Category::query()
+            ->where('is_active', true)
+            ->where('website_type', 'adult')
+            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug));
+
+        if ((clone $query)->where('name', $strValue)->exists()) {
+            return $strValue;
+        }
+
+        if (is_numeric($value)) {
+            $name = (clone $query)->whereKey((int) $value)->value('name');
+            if ($name !== null) {
+                return $name;
+            }
+        }
+
+        return (clone $query)->where('slug', $strValue)->value('name');
+    }
+
+    private static function resolveProfileCategoryNames(mixed $state, string $parentSlug): array
+    {
+        if (is_string($state)) {
+            $decoded = json_decode($state, true);
+            $state = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
+        }
+
+        if (! is_array($state)) {
+            return [];
+        }
+
+        return collect($state)
+            ->flatten(1)
+            ->map(fn ($val) => self::resolveProfileCategoryName($val, $parentSlug))
+            ->filter()
+            ->values()
             ->all();
     }
 
