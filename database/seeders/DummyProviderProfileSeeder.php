@@ -110,6 +110,7 @@ class DummyProviderProfileSeeder extends Seeder
 
             $slug = Str::slug($name) . '-' . $i;
 
+            // 3 out of 5 providers are approved; 1 pending; 1 rejected
             $profileStatuses = ['approved', 'approved', 'approved', 'pending', 'rejected'];
 
             ProviderProfile::updateOrCreate(
@@ -124,15 +125,9 @@ class DummyProviderProfileSeeder extends Seeder
                     'primary_identity' => count($attributeIds) > 0
                         ? [$this->pickFrom($attributeIds, $i)]
                         : [],
-                    'attributes' => count($attributeIds) > 1
-                        ? array_slice($attributeIds, $i % max(1, count($attributeIds) - 2), 3)
-                        : [],
-                    'services_style' => count($servicesStyleIds) > 0
-                        ? array_slice($servicesStyleIds, $i % max(1, count($servicesStyleIds) - 3), 4)
-                        : [],
-                    'services_provided' => count($servicesProvidedIds) > 0
-                        ? array_slice($servicesProvidedIds, $i % max(1, count($servicesProvidedIds) - 2), 3)
-                        : [],
+                    'attributes' => $this->pickMultiple($attributeIds, $i, 3),
+                    'services_style' => $this->pickMultiple($servicesStyleIds, $i, 4),
+                    'services_provided' => $this->pickMultiple($servicesProvidedIds, $i, 3),
                     'age_group_id' => count($ageGroupIds) > 0 ? $this->pickFrom($ageGroupIds, $i) : null,
                     'hair_color_id' => count($hairColorIds) > 0 ? $this->pickFrom($hairColorIds, $i) : null,
                     'hair_length_id' => count($hairLengthIds) > 0 ? $this->pickFrom($hairLengthIds, $i) : null,
@@ -226,7 +221,7 @@ class DummyProviderProfileSeeder extends Seeder
     {
         $names = self::FEMALE_NAMES;
 
-        return $names[($index - 1) % count($names)] . ' ' . chr(65 + (int) (($index - 1) / count($names)));
+        return $names[($index - 1) % count($names)] . sprintf('%03d', $index);
     }
 
     private function pickFrom(array $items, int $index): mixed
@@ -236,6 +231,24 @@ class DummyProviderProfileSeeder extends Seeder
         }
 
         return $items[$index % count($items)];
+    }
+
+    /**
+     * Pick $count items from $items starting at $index, wrapping around the array.
+     */
+    private function pickMultiple(array $items, int $index, int $count): array
+    {
+        if (empty($items)) {
+            return [];
+        }
+
+        $result = [];
+        $total = count($items);
+        for ($j = 0; $j < min($count, $total); $j++) {
+            $result[] = $items[($index + $j) % $total];
+        }
+
+        return array_values(array_unique($result));
     }
 
     private function buildDummyThumbnailSvg(int $index, string $name): string
