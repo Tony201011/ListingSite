@@ -4,6 +4,7 @@ namespace App\Actions\Auth;
 
 use App\Actions\Support\ActionResult;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -79,6 +80,8 @@ class VerifyProviderSignupOtp
         ]);
 
         $this->sendProviderAccountEmails->execute($user);
+
+        Auth::login($user);
 
         $this->expireOtpSession($pendingKey);
 
