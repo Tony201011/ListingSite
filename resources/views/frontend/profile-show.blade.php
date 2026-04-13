@@ -109,7 +109,7 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                         <div class="flex items-center justify-center mt-1">
                             <span class="text-base font-semibold text-gray-400 flex items-center gap-1">
                                 <i class="fa-solid fa-location-dot text-pink-400"></i>
-                                {{ $profile['city'] }}
+                                {{ $profile['suburb'] }}
                             </span>
                         </div>
                     @endif
