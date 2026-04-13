@@ -115,6 +115,29 @@ class DummyProviderProfileSeeder extends Seeder
             ->values()
             ->all();
 
+        // If the postcodes table is empty, read directly from the CSV file used by PostcodeSeeder.
+        if (empty($suburbs)) {
+            $csvPath = database_path('seeders/2 (2).csv');
+            if (file_exists($csvPath) && is_readable($csvPath)) {
+                $handle = fopen($csvPath, 'r');
+                fgetcsv($handle); // skip header
+                $csvSuburbs = [];
+                while (($data = fgetcsv($handle)) !== false) {
+                    $state   = trim($data[0] ?? '');
+                    $suburb  = trim($data[2] ?? '');
+                    $postcode = trim($data[3] ?? '');
+                    if ($suburb !== '' && $postcode !== '' && $state !== '') {
+                        $csvSuburbs[] = "{$suburb}, {$state} {$postcode}";
+                    }
+                }
+                fclose($handle);
+                if (! empty($csvSuburbs)) {
+                    shuffle($csvSuburbs);
+                    $suburbs = array_slice($csvSuburbs, 0, 500);
+                }
+            }
+        }
+
         if (empty($suburbs)) {
             $suburbs = [
                 // NSW
