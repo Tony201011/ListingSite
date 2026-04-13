@@ -33,6 +33,10 @@ class GetProfileShowData
             ->first();
 
 
+
+
+
+
         abort_if($providerProfile === null, 404);
 
         $categoryIds = array_filter([
