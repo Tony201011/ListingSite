@@ -2,12 +2,14 @@
 
 namespace App\Actions;
 
-use App\Models\Category;
+use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\SiteSetting;
 use App\Models\User;
 
 class GetMyProfileStepTwoData
 {
+    use ResolvesProfileCategoryValues;
+
     public function __construct(
         private GetProfileCategoryOptions $getProfileCategoryOptions
     ) {}
@@ -29,14 +31,14 @@ class GetMyProfileStepTwoData
             'body_type' => $profile?->body_type_id,
             'bust_size' => $profile?->bust_size_id,
             'your_length' => $profile?->your_length_id,
-            'availability' => $this->resolveNameFromCategory($profile?->availability, 'availability'),
-            'contact_method' => $this->resolveNameFromCategory($profile?->contact_method, 'contact-method'),
-            'phone_contact' => $this->resolveNameFromCategory($profile?->phone_contact_preference, 'phone-contact-preferences'),
-            'time_waster' => $this->resolveNameFromCategory($profile?->time_waster_shield, 'time-waster-shield'),
-            'primary_identity' => $this->resolveNamesFromCategories($profile?->primary_identity ?? [], 'primary-identity'),
-            'attributes' => $this->resolveNamesFromCategories($profile?->attributes ?? [], 'attributes'),
-            'services_style' => $this->resolveNamesFromCategories($profile?->services_style ?? [], 'services-style'),
-            'services_provided' => $this->resolveNamesFromCategories($profile?->services_provided ?? [], 'services-you-provide'),
+            'availability' => self::resolveProfileCategoryName($profile?->availability, 'availability'),
+            'contact_method' => self::resolveProfileCategoryName($profile?->contact_method, 'contact-method'),
+            'phone_contact' => self::resolveProfileCategoryName($profile?->phone_contact_preference, 'phone-contact-preferences'),
+            'time_waster' => self::resolveProfileCategoryName($profile?->time_waster_shield, 'time-waster-shield'),
+            'primary_identity' => self::resolveProfileCategoryNames($profile?->primary_identity ?? [], 'primary-identity'),
+            'attributes' => self::resolveProfileCategoryNames($profile?->attributes ?? [], 'attributes'),
+            'services_style' => self::resolveProfileCategoryNames($profile?->services_style ?? [], 'services-style'),
+            'services_provided' => self::resolveProfileCategoryNames($profile?->services_provided ?? [], 'services-you-provide'),
         ];
 
         return [
@@ -60,75 +62,5 @@ class GetMyProfileStepTwoData
             'phoneContactOptions' => $this->getProfileCategoryOptions->execute('phone-contact-preferences'),
             'timeWasterOptions' => $this->getProfileCategoryOptions->execute('time-waster-shield'),
         ];
-    }
-
-    private function resolveNameFromCategory(mixed $value, string $parentSlug): ?string
-    {
-        if (blank($value)) {
-            return null;
-        }
-
-        $strValue = (string) $value;
-
-        return Category::query()
-            ->where('is_active', true)
-            ->where('website_type', 'adult')
-            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug))
-            ->where(function ($q) use ($strValue, $value): void {
-                $q->where('name', $strValue)->orWhere('slug', $strValue);
-                if (is_numeric($value)) {
-                    $q->orWhereKey((int) $value);
-                }
-            })
-            ->value('name');
-    }
-
-    private function resolveNamesFromCategories(mixed $values, string $parentSlug): array
-    {
-        if (! is_array($values)) {
-            return [];
-        }
-
-        $values = collect($values)->flatten(1)->filter()->values()->all();
-
-        if (empty($values)) {
-            return [];
-        }
-
-        $numericIds = collect($values)->filter(fn ($v) => is_numeric($v))->map(fn ($v) => (int) $v)->all();
-        $stringValues = collect($values)->filter(fn ($v) => ! is_numeric($v))->map(fn ($v) => (string) $v)->all();
-
-        $categories = Category::query()
-            ->where('is_active', true)
-            ->where('website_type', 'adult')
-            ->whereHas('parent', fn ($q) => $q->where('slug', $parentSlug))
-            ->where(function ($q) use ($numericIds, $stringValues): void {
-                $q->whereIn('name', $stringValues)->orWhereIn('slug', $stringValues);
-                if (! empty($numericIds)) {
-                    $q->orWhereIn('id', $numericIds);
-                }
-            })
-            ->get(['id', 'name', 'slug']);
-
-        $idMap = $categories->pluck('name', 'id')->all();
-        $nameMap = $categories->pluck('name', 'name')->all();
-        $slugMap = $categories->pluck('name', 'slug')->all();
-
-        return collect($values)
-            ->map(function ($val) use ($idMap, $nameMap, $slugMap) {
-                $strVal = (string) $val;
-                if (isset($nameMap[$strVal])) {
-                    return $nameMap[$strVal];
-                }
-                if (is_numeric($val) && isset($idMap[(int) $val])) {
-                    return $idMap[(int) $val];
-                }
-
-                return $slugMap[$strVal] ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
     }
 }
