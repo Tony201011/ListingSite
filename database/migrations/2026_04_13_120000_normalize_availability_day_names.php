@@ -5,11 +5,11 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
+    private const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
     public function up(): void
     {
-        $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-        foreach ($days as $day) {
+        foreach (self::DAYS as $day) {
             DB::table('availabilities')
                 ->where('day', strtolower($day))
                 ->update(['day' => $day]);
@@ -18,9 +18,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-        foreach ($days as $day) {
+        foreach (self::DAYS as $day) {
             DB::table('availabilities')
                 ->where('day', $day)
                 ->update(['day' => strtolower($day)]);
