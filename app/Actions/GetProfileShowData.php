@@ -15,6 +15,7 @@ class GetProfileShowData
         $providerProfile = ProviderProfile::query()
             ->where('slug', $slug)
             ->with([
+                'user.user',
                 'user.profileImages',
                 'user.primaryProfileImage',
                 'user.rates.group',
