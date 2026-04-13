@@ -6,6 +6,7 @@ use App\Models\Availability;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Postcode;
 use App\Models\ProfileImage;
 use App\Models\ProfileMessage;
 use App\Models\ProviderListing;
@@ -105,6 +106,19 @@ class DummyProviderProfileSeeder extends Seeder
         $servicesProvidedIds = Category::query()->where('slug', 'services-you-provide')
             ->first()?->children()->pluck('id')->values()->all() ?? [];
 
+        $suburbs = Postcode::query()
+            ->select(['suburb', 'state', 'postcode'])
+            ->inRandomOrder()
+            ->limit(500)
+            ->get()
+            ->map(fn ($row) => "{$row->suburb}, {$row->state} {$row->postcode}")
+            ->values()
+            ->all();
+
+        if (empty($suburbs)) {
+            $suburbs = ['Bondi, NSW 2026', 'Surry Hills, NSW 2010', 'Newtown, NSW 2042', 'Manly, NSW 2095', 'Parramatta, NSW 2150'];
+        }
+
         for ($i = 1; $i <= self::TOTAL; $i++) {
             $email = "provider{$i}@yopmail.com";
             $name = $this->pickName($i);
@@ -118,7 +132,7 @@ class DummyProviderProfileSeeder extends Seeder
                     'role' => User::ROLE_PROVIDER,
                     'is_blocked' => false,
                     'mobile' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 7) % 1000, ($i * 13) % 1000),
-                    'suburb' => $this->pickFrom(['Bondi, NSW 2026', 'Surry Hills, NSW 2010', 'Newtown, NSW 2042', 'Manly, NSW 2095', 'Parramatta, NSW 2150'], $i),
+                    'suburb' => $this->pickFrom($suburbs, $i),
                     'mobile_verified' => true,
                     'email_verified_at' => now(),
                     'account_status' => 'active',
