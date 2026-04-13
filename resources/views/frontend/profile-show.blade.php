@@ -188,52 +188,6 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                         <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
                             <hr class="mb-4">
-                            <!-- Gallery Video Link on next line -->
-                            {{-- <div class="mt-2" x-data="{ open: false, currentIdx: 0, videos: [
-                                'https://www.w3schools.com/html/mov_bbb.mp4',
-                                'https://www.w3schools.com/html/movie.mp4',
-                                'https://www.w3schools.com/html/mov_bbb.mp4',
-                                'https://www.w3schools.com/html/movie.mp4',
-                                'https://www.w3schools.com/html/mov_bbb.mp4',
-                            ] }"> --}}
-                                {{-- <button @click="open = true" class="px-4 py-1 rounded-full bg-pink-600 text-white font-bold text-base focus:outline-none hover:bg-pink-700 transition">Gallery Video</button> --}}
-                                <!-- Gallery Video Modal -->
-                                {{-- <div x-show="open" x-cloak x-effect="open ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-                                    <!-- Top Bar: Video Counter and Actions -->
-                                    <div class="absolute top-0 left-0 w-full flex items-center justify-between px-4 py-2 bg-[#222] bg-opacity-95 z-20" style="min-height: 36px;">
-                                        <span class="text-white text-lg font-normal tracking-wide select-none" x-text="(currentIdx + 1) + ' / ' + videos.length"></span>
-                                        <div class="flex items-center gap-2">
-                                            <button class="px-3 py-1 rounded-full bg-pink-600 text-white text-base font-semibold hover:bg-pink-700 transition focus:outline-none" @click.stop="$dispatch('gallery-action', { idx: currentIdx })">Action</button>
-                                            <button @click.stop="open = false" class="text-gray-300 text-2xl font-bold hover:text-pink-500 transition focus:outline-none bg-white bg-opacity-10 rounded-full w-9 h-9 flex items-center justify-center shadow" aria-label="Close gallery">&times;</button>
-                                        </div>
-                                    </div>
-                                    <!-- Overlay for closing -->
-                                    <div class="absolute inset-0" @click="open = false"></div>
-                                    <!-- Modal Content -->
-                                    <div class="fixed inset-0 flex items-start justify-center h-full w-full z-30 shadow-2xl">
-                                        <div class="flex items-start w-full h-full pt-16">
-                                            <!-- Main Video -->
-                                            <div class="flex-1 flex items-start justify-center pl-6">
-                                                <template x-for="(vid, idx) in videos" :key="'main-' + idx">
-                                                    <video x-show="currentIdx === idx" controls class="rounded-xl max-h-[60vh] max-w-full shadow-lg border-4 border-white object-contain bg-black">
-                                                        <source :src="vid" type="video/mp4">
-                                                        Your browser does not support the video tag.
-                                                    <video
-                                                        :src="video.src"
-                                                        controls
-                                                        x-pauseothers
-                                                        class="rounded-xl w-full h-64 bg-black cursor-pointer object-cover border-4 border-transparent hover:border-pink-300 transition"
-                                                        @click="$dispatch('open-video-modal', { idx })"
-                                                        muted
-                                                    ></video>
-                                                        <source :src="vid" type="video/mp4">
-                                                    </video>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> --}}
-                            {{-- </div> --}}
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
                             x-data="{ pauseOthers(current) { $root.querySelectorAll('video').forEach(function(v){ if(v !== current) v.pause(); }); } }">

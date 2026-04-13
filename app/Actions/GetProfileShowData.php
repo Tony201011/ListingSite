@@ -24,11 +24,13 @@ class GetProfileShowData
                 'user.onlineUser',
                 'user.availableNow',
                 'user.profileMessage',
+
                 'city',
                 'state',
                 'country',
             ])
             ->first();
+
 
         abort_if($providerProfile === null, 404);
 
@@ -124,6 +126,8 @@ class GetProfileShowData
             ['label' => 'Bust size', 'value' => $categoryNames->get($providerProfile->bust_size_id) ?? '—'],
             ['label' => 'Length', 'value' => $categoryNames->get($providerProfile->your_length_id) ?? '—'],
         ];
+
+        dd($profile);
 
         return [
             'profile' => $profile,
