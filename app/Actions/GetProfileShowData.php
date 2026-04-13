@@ -255,6 +255,7 @@ class GetProfileShowData
             'available_expires_at' => $user?->availableNow?->isCurrentlyAvailable()
                 ? $user->availableNow->available_expires_at
                 : null,
+            'suburb' => $user?->suburb ?? '',
             'contact_method' => $providerProfile->contact_method ?? '',
             'phone_contact_preference' => $providerProfile->phone_contact_preference ?? '',
         ];
