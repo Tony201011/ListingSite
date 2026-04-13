@@ -13,6 +13,8 @@ use App\Models\ProviderProfile;
 use App\Models\Rate;
 use App\Models\RateGroup;
 use App\Models\State;
+use App\Models\Tour;
+use App\Models\TourCity;
 use App\Models\User;
 use App\Models\UserVideo;
 use Illuminate\Database\Seeder;
@@ -90,6 +92,11 @@ class DummyProviderProfileSeeder extends Seeder
             ->first()?->children()->pluck('id')->values()->all() ?? [];
         $yourLengthIds = Category::query()->where('slug', 'your-length')
             ->first()?->children()->pluck('id')->values()->all() ?? [];
+
+        $tourCityNames = TourCity::pluck('name')->values()->all();
+        if (empty($tourCityNames)) {
+            $tourCityNames = ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Canberra', 'Hobart', 'Darwin'];
+        }
 
         $attributeIds = Category::query()->where('slug', 'attributes')
             ->first()?->children()->pluck('id')->values()->all() ?? [];
@@ -262,6 +269,22 @@ class DummyProviderProfileSeeder extends Seeder
                 UserVideo::updateOrCreate(
                     ['user_id' => $user->id, 'video_path' => $videoUrl],
                     ['original_name' => "video-{$i}-{$vidIndex}.mp4"],
+                );
+            }
+
+            // 8. Tours (2 per provider)
+            for ($tourIndex = 1; $tourIndex <= 2; $tourIndex++) {
+                $city = $this->pickFrom($tourCityNames, $i + $tourIndex);
+                $from = now()->addDays(($i % 30) + $tourIndex)->setTime(10, 0);
+                $to = (clone $from)->addDays(rand(2, 7))->setTime(18, 0);
+
+                Tour::updateOrCreate(
+                    ['user_id' => $user->id, 'city' => $city, 'from' => $from],
+                    [
+                        'to' => $to,
+                        'description' => "I will be visiting {$city}. Contact me to arrange a meeting during my stay.",
+                        'enabled' => true,
+                    ],
                 );
             }
         }
