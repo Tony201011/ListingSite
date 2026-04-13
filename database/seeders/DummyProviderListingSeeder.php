@@ -23,9 +23,9 @@ class DummyProviderListingSeeder extends Seeder
             ->all();
 
         $providers = User::query()
-            ->where('email', 'regexp', '^provider[0-9]+@example\\.com$')
+            ->where('email', 'regexp', '^provider[0-9]+@yopmail\\.com$')
             ->orderBy('id')
-            ->take(100)
+            ->take(1000)
             ->get();
 
         foreach ($providers as $index => $provider) {
