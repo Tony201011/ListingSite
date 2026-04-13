@@ -11,7 +11,7 @@ use Laravel\Scout\Builder as ScoutBuilder;
 
 class BuildProfileFilterViewData
 {
-    private const PROFILES_PER_PAGE = 12;
+    private const DEFAULT_PROFILES_PER_PAGE = 12;
 
     private const DEFAULT_MIN_AGE = 18;
 
@@ -195,6 +195,17 @@ class BuildProfileFilterViewData
         );
     }
 
+    private function resolveProfilesPerPage(): int
+    {
+        $value = (int) cache()->remember(
+            'site_setting.home_page_records',
+            now()->addHour(),
+            fn () => SiteSetting::query()->value('home_page_records') ?? self::DEFAULT_PROFILES_PER_PAGE
+        );
+
+        return $value >= 1 ? $value : self::DEFAULT_PROFILES_PER_PAGE;
+    }
+
     private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
     {
         $map = [];
@@ -368,7 +379,7 @@ class BuildProfileFilterViewData
         $paginator = $query
             ->orderByDesc('is_featured')
             ->orderByDesc('created_at')
-            ->paginate(self::PROFILES_PER_PAGE)
+            ->paginate($this->resolveProfilesPerPage())
             ->appends($appendParams);
 
         $paginator->getCollection()->transform(fn (ProviderProfile $profile) => $this->transformProfile($profile));
