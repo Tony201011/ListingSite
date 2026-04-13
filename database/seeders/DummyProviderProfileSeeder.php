@@ -7,7 +7,6 @@ use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\ProfileImage;
-use App\Models\ProfileMessage;
 use App\Models\ProviderListing;
 use App\Models\ProviderProfile;
 use App\Models\Rate;
@@ -255,12 +254,6 @@ class DummyProviderProfileSeeder extends Seeder
 
             // Set user profile_image to the primary image URL
             $user->update(['profile_image' => "https://picsum.photos/seed/profile-{$i}-1/400/400"]);
-
-            // 6b. Profile message
-            ProfileMessage::updateOrCreate(
-                ['user_id' => $user->id],
-                ['message' => "Hi there! I'm {$name}. Feel free to send me a message to discuss your requirements or arrange a meeting. I'm responsive and discreet."],
-            );
 
             // 7. User videos (2 per provider)
             for ($vidIndex = 1; $vidIndex <= 2; $vidIndex++) {
