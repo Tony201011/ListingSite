@@ -24,7 +24,7 @@ class DummyProviderProfileSeeder extends Seeder
 {
     private const TOTAL = 1000;
 
-    private const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    private const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     private const RATE_DESCRIPTIONS = ['30 min', '1 hour', '2 hours', 'Overnight'];
 

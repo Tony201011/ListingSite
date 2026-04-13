@@ -53,7 +53,8 @@ class UpdateAvailabilityRequest extends FormRequest
             $availability = $this->input('availability', []);
 
             foreach ($availability as $day => $dayData) {
-                if (! in_array($day, $this->days, true)) {
+                $normalizedDay = ucfirst(strtolower($day));
+                if (! in_array($normalizedDay, $this->days, true)) {
                     $validator->errors()->add("availability.$day", 'Invalid day provided.');
 
                     continue;
