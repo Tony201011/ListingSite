@@ -32,7 +32,8 @@
             <div x-data="Object.assign(escortSearch({
                     initialMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}',
                     initialTerm: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}',
-                    suggestionsUrl: '{{ route('api.search.suggestions') }}'
+                    suggestionsUrl: '{{ route('api.search.suggestions') }}',
+                    suburbSuggestionsUrl: '{{ route('api.suburbs.search') }}'
                 }), {
                     userLat: '{{ $userLat ?? '' }}',
                     userLng: '{{ $userLng ?? '' }}',
@@ -91,19 +92,20 @@
                                 class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-gray-700 bg-gray-900 shadow-xl"
                             >
                                 <ul class="divide-y divide-gray-800">
-                                    <template x-for="(item, index) in suggestions" :key="item.slug">
+                                    <template x-for="(item, index) in suggestions" :key="index">
                                         <li>
                                             <a
-                                                :href="'/profile/' + item.slug"
+                                                :href="item.type === 'profile' ? '/profile/' + item.slug : '#'"
+                                                @click.prevent="selectSuggestion(item, $event)"
                                                 class="flex items-center gap-3 px-4 py-2.5 text-left text-sm transition"
                                                 :class="index === highlightedIndex ? 'bg-pink-600/20 text-pink-300' : 'text-gray-200 hover:bg-gray-800'"
                                                 @mouseenter="highlightedIndex = index"
                                                 @mouseleave="highlightedIndex = -1"
                                             >
-                                                <i class="fa-solid fa-user text-gray-500 text-xs shrink-0"></i>
+                                                <i :class="item.type === 'suburb' ? 'fa-solid fa-location-dot' : 'fa-solid fa-user'" class="text-gray-500 text-xs shrink-0"></i>
                                                 <span class="truncate" x-text="item.name"></span>
-                                                <span class="ml-auto shrink-0 text-xs text-gray-500" x-show="item.location" x-text="item.location"></span>
-                                                <span class="shrink-0 text-xs text-gray-600" x-show="item.age" x-text="item.age + 'y'"></span>
+                                                <span class="ml-auto shrink-0 text-xs text-gray-500" x-show="item.label" x-text="item.label"></span>
+                                                <span class="shrink-0 text-xs text-gray-600" x-show="item.type === 'profile' && item.age" x-text="item.age + 'y'"></span>
                                             </a>
                                         </li>
                                     </template>
@@ -422,13 +424,32 @@
                 }
                 this.abortController = new AbortController();
 
-                fetch(config.suggestionsUrl + '?q=' + encodeURIComponent(q), {
+                const isSuburbMode = this.searchMode === 'suburb';
+                const url = (isSuburbMode ? config.suburbSuggestionsUrl : config.suggestionsUrl)
+                    + '?q=' + encodeURIComponent(q);
+
+                fetch(url, {
                     signal: this.abortController.signal,
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 })
-                .then(r => r.ok ? r.json() : Promise.resolve({ suggestions: [] }))
+                .then(r => r.ok ? r.json() : Promise.resolve(isSuburbMode ? [] : { suggestions: [] }))
                 .then(data => {
-                    this.suggestions = data.suggestions || [];
+                    if (isSuburbMode) {
+                        this.suggestions = (Array.isArray(data) ? data : []).map(item => ({
+                            type: 'suburb',
+                            name: (item.suburb || '') + ', ' + (item.state || ''),
+                            label: item.postcode || '',
+                            value: item.suburb || '',
+                        }));
+                    } else {
+                        this.suggestions = (data.suggestions || []).map(item => ({
+                            type: 'profile',
+                            name: item.name || '',
+                            slug: item.slug || '',
+                            label: item.location || '',
+                            age: item.age,
+                        }));
+                    }
                     this.showSuggestions = this.suggestions.length > 0;
                     this.highlightedIndex = -1;
                 })
@@ -437,6 +458,17 @@
                         this.closeSuggestions();
                     }
                 });
+            },
+
+            selectSuggestion(item, event) {
+                if (item.type === 'suburb') {
+                    this.term = item.value;
+                    this.closeSuggestions();
+                    const form = event.target.closest('form');
+                    if (form) form.submit();
+                } else {
+                    window.location.href = '/profile/' + item.slug;
+                }
             },
 
             closeSuggestions() {
@@ -456,7 +488,7 @@
 
             selectHighlighted(event) {
                 if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
-                    window.location.href = '/profile/' + this.suggestions[this.highlightedIndex].slug;
+                    this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
                     return;
                 }
                 // Default: submit the form

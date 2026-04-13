@@ -15,7 +15,8 @@ class SearchSuburbs
         return Postcode::query()
             ->where(function ($q) use ($query) {
                 $q->where('suburb', 'LIKE', $query.'%')
-                    ->orWhere('postcode', 'LIKE', $query.'%');
+                    ->orWhere('postcode', 'LIKE', $query.'%')
+                    ->orWhere('city_region', 'LIKE', $query.'%');
             })
             ->orderBy('suburb')
             ->get([
@@ -23,6 +24,7 @@ class SearchSuburbs
                 'suburb',
                 'state',
                 'postcode',
+                'city_region',
                 'latitude',
                 'longitude',
             ])
