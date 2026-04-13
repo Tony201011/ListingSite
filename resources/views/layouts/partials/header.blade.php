@@ -105,14 +105,6 @@
                     || in_array($path, ['/my-profile', '/edit-profile', '/admin', '/login', '/signin', '/signup', '/register'], true);
             })->values();
 
-            $pricingIndex = $mainNavLinks->search(function ($item): bool {
-                $label = strtolower(trim((string) ($item['label'] ?? '')));
-                $url = trim((string) ($item['url'] ?? ''));
-                $path = '/' . ltrim((string) (parse_url($url, PHP_URL_PATH) ?: $url), '/');
-
-                return $label === 'pricing' || $path === '/pricing';
-            });
-
             $authNavItem = [
                 'label' => $primaryAuthLabel,
                 'url' => $primaryAuthUrl,
@@ -124,13 +116,7 @@
                 'is_logout' => true,
             ];
 
-            if ($pricingIndex === false) {
-                $mainNavLinks = collect([$authNavItem, $logoutNavItem])->concat($mainNavLinks)->values();
-            } else {
-                $before = $mainNavLinks->slice(0, $pricingIndex + 1);
-                $after = $mainNavLinks->slice($pricingIndex + 1);
-                $mainNavLinks = $before->concat([$authNavItem, $logoutNavItem])->concat($after)->values();
-            }
+            $mainNavLinks = $mainNavLinks->concat([$authNavItem, $logoutNavItem])->values();
         }
 
         $mobileExtraLinks = collect($headerWidget?->mobile_extra_links ?? [
