@@ -159,7 +159,6 @@ function signupForm(config = {}) {
             }
             this.suburbSelected = false;
             this.initialSuburb = '';
-            this.validateSuburb();
             this.searchSuburbs();
         },
 
@@ -172,13 +171,13 @@ function signupForm(config = {}) {
         },
 
         searchSuburbs() {
+            clearTimeout(this.debounceTimer);
+
             if (!this.suburb || this.suburb.trim().length < 2) {
                 this.searchResults = [];
                 this.showResults = false;
                 return;
             }
-
-            clearTimeout(this.debounceTimer);
 
             this.debounceTimer = setTimeout(() => {
                 this.searching = true;
