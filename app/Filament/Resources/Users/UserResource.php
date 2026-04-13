@@ -603,6 +603,7 @@ class UserResource extends Resource
                                                     'Saturday' => 'Saturday',
                                                     'Sunday' => 'Sunday',
                                                 ])
+                                                ->native(false)
                                                 ->required(),
 
                                             Toggle::make('enabled')
