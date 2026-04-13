@@ -44,8 +44,6 @@ class HomeController extends Controller
             $request->validated()
         );
 
-        dd($viewData);
-
         return view('frontend.profile-show', $viewData);
     }
 }
