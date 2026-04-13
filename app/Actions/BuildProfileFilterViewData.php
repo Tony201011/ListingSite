@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
@@ -11,6 +12,7 @@ use Laravel\Scout\Builder as ScoutBuilder;
 
 class BuildProfileFilterViewData
 {
+    use ResolvesProfileCategoryIds;
     private const DEFAULT_PROFILES_PER_PAGE = 12;
 
     private const DEFAULT_MIN_AGE = 18;
@@ -383,7 +385,17 @@ class BuildProfileFilterViewData
             ->paginate($this->resolveProfilesPerPage())
             ->appends($appendParams);
 
-        $paginator->getCollection()->transform(fn (ProviderProfile $profile) => $this->transformProfile($profile));
+        $serviceIds = $paginator->getCollection()
+            ->flatMap(fn (ProviderProfile $p) => array_filter((array) ($p->services_provided ?? []), 'is_numeric'))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->all();
+
+        $categoryNames = $serviceIds
+            ? Category::query()->whereIn('id', $serviceIds)->pluck('name', 'id')
+            : collect();
+
+        $paginator->getCollection()->transform(fn (ProviderProfile $profile) => $this->transformProfile($profile, $categoryNames));
 
         return $paginator;
     }
@@ -415,7 +427,7 @@ class BuildProfileFilterViewData
         }
     }
 
-    private function transformProfile(ProviderProfile $profile): array
+    private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
     {
         $primaryImage = $profile->user?->profileImages?->first();
         $imageUrl = $primaryImage?->thumbnail_url ?? $primaryImage?->image_url ?? null;
@@ -423,7 +435,10 @@ class BuildProfileFilterViewData
         $firstRate = $profile->user?->rates?->first();
         $rateDisplay = $this->formatRate($firstRate);
 
-        $services = array_values(array_filter((array) ($profile->services_provided ?? [])));
+        $services = $this->resolveIds(
+            array_values(array_filter((array) ($profile->services_provided ?? []))),
+            $categoryNames
+        );
 
         $isOnline = $profile->user?->onlineUser?->isCurrentlyOnline() ?? false;
 
