@@ -25,7 +25,7 @@ class ProviderProfilePolicy
     {
         if (! $profile) {
             if ($user->role === User::ROLE_PROVIDER) {
-                return true;
+                return $user->providerProfile !== null;
             }
 
             return $this->viewAny($user);
@@ -38,7 +38,7 @@ class ProviderProfilePolicy
     {
         if (! $profile) {
             if ($user->role === User::ROLE_PROVIDER) {
-                return true;
+                return $user->providerProfile !== null;
             }
 
             return $this->create($user);
