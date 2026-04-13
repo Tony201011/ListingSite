@@ -47,6 +47,8 @@ class DatabaseSeeder extends Seeder
             S3BucketSettingSeeder::class,
             MetaKeywordSeeder::class,
             MetaDescriptionSeeder::class,
+            PostcodeSeeder::class,
+            PricingPackageSeeder::class,
         ]);
     }
 }
