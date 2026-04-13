@@ -437,15 +437,15 @@
                     if (isSuburbMode) {
                         this.suggestions = (Array.isArray(data) ? data : []).map(item => ({
                             type: 'suburb',
-                            name: item.suburb + ', ' + item.state,
-                            label: item.postcode,
-                            value: item.suburb,
+                            name: (item.suburb || '') + ', ' + (item.state || ''),
+                            label: item.postcode || '',
+                            value: item.suburb || '',
                         }));
                     } else {
                         this.suggestions = (data.suggestions || []).map(item => ({
                             type: 'profile',
-                            name: item.name,
-                            slug: item.slug,
+                            name: item.name || '',
+                            slug: item.slug || '',
                             label: item.location || '',
                             age: item.age,
                         }));
@@ -464,7 +464,8 @@
                 if (item.type === 'suburb') {
                     this.term = item.value;
                     this.closeSuggestions();
-                    event.target.closest('form').submit();
+                    const form = event.target.closest('form');
+                    if (form) form.submit();
                 } else {
                     window.location.href = '/profile/' + item.slug;
                 }
