@@ -8,6 +8,7 @@ use App\Filament\Agent\Resources\ProviderListingResource\Pages\ListProviderListi
 use App\Filament\Agent\Resources\ProviderListingResource\Pages\ViewProviderListing;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
+use App\Models\Postcode;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use BackedEnum;
@@ -117,10 +118,26 @@ class ProviderListingResource extends Resource
                                         ->placeholder('+61...')
                                         ->maxLength(20),
 
-                                    TextInput::make('suburb')
+                                    Select::make('suburb')
                                         ->label('Suburb')
-                                        ->placeholder('Enter suburb')
-                                        ->maxLength(255),
+                                        ->searchable()
+                                        ->getSearchResultsUsing(function (string $search): array {
+                                            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+
+                                            return Postcode::query()
+                                                ->where(function ($q) use ($escaped) {
+                                                    $q->where('suburb', 'LIKE', $escaped.'%')
+                                                        ->orWhere('postcode', 'LIKE', $escaped.'%');
+                                                })
+                                                ->orderBy('suburb')
+                                                ->limit(50)
+                                                ->get()
+                                                ->mapWithKeys(fn ($p) => [
+                                                    "{$p->suburb}, {$p->state} {$p->postcode}" => "{$p->suburb}, {$p->state} {$p->postcode}",
+                                                ])
+                                                ->all();
+                                        })
+                                        ->getOptionLabelUsing(fn ($value): string => (string) $value),
 
                                     TextInput::make('password')
                                         ->label('Password')
