@@ -127,7 +127,7 @@ class GetProfileShowData
             ['label' => 'Length', 'value' => $categoryNames->get($providerProfile->your_length_id) ?? '—'],
         ];
 
-        dd($profile);
+      //  dd($profile);
 
         return [
             'profile' => $profile,
