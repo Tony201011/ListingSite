@@ -68,6 +68,13 @@ class SiteSettingResource extends Resource
                 ->maxValue(20000)
                 ->default(500)
                 ->helperText('Maximum distance in kilometres users can filter profiles by. Default is 500 km.'),
+            Forms\Components\TextInput::make('home_page_records')
+                ->label('Home Page Records Per Page')
+                ->numeric()
+                ->minValue(1)
+                ->maxValue(100)
+                ->default(12)
+                ->helperText('Number of profiles displayed per page on the home page. Default is 12.'),
         ]);
     }
 
@@ -82,6 +89,7 @@ class SiteSettingResource extends Resource
                 Tables\Columns\IconColumn::make('short_url')->label('Short URL')->boolean(),
                 Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
                 Tables\Columns\TextColumn::make('max_search_distance')->label('Max Distance (km)'),
+                Tables\Columns\TextColumn::make('home_page_records')->label('Home Page Records'),
                 Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
             ])
             ->recordActions([

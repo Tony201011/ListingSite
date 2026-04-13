@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('site_settings', function (Blueprint $table) {
+            $table->unsignedSmallInteger('home_page_records')->default(12)->after('max_search_distance');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('site_settings', function (Blueprint $table) {
+            $table->dropColumn('home_page_records');
+        });
+    }
+};
