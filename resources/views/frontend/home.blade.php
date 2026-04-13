@@ -324,7 +324,7 @@
                             @if($profile['city'] || $profile['suburb'])
                                 <span class="inline-flex items-center gap-1">
                                     <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
-                                    {{ $profile['city'] ?: $profile['suburb'] }}
+                                    {{ $profile['suburb'] }}
                                 </span>
                             @endif
                             @if(!empty($profile['service_1']))
