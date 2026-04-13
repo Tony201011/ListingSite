@@ -31,24 +31,30 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             LocationImportSeeder::class,
+            LocationSeeder::class,
             CategorySeeder::class,
+            TourCitySeeder::class,
+            SiteSettingSeeder::class,
+            DummyAgentSeeder::class,
             DummyProviderListingSeeder::class,
+            VerificationExampleImageSeeder::class,
             BlogPostSeeder::class,
             TermConditionSeeder::class,
             PrivacyPolicySeeder::class,
             RefundPolicySeeder::class,
+            AntiSpamPolicySeeder::class,
+            NaughtyCornerPageSeeder::class,
             PricingPageSeeder::class,
             PricingPackageSeeder::class,
             HelpPageSeeder::class,
             GlobalBannerSeeder::class,
             FaqSeeder::class,
-            AntiSpamPolicySeeder::class,
             SmtpSettingSeeder::class,
             S3BucketSettingSeeder::class,
+            CookieSettingSeeder::class,
             MetaKeywordSeeder::class,
             MetaDescriptionSeeder::class,
             PostcodeSeeder::class,
-            PricingPackageSeeder::class,
         ]);
     }
 }
