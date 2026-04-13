@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
             AntiSpamPolicySeeder::class,
             SmtpSettingSeeder::class,
             S3BucketSettingSeeder::class,
+            GoogleRecaptchaSettingSeeder::class,
             MetaKeywordSeeder::class,
             MetaDescriptionSeeder::class,
             PostcodeSeeder::class,
