@@ -15,7 +15,6 @@ use App\Models\State;
 use App\Models\User;
 use App\Models\UserVideo;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DummyProviderProfileSeeder extends Seeder
@@ -38,7 +37,18 @@ class DummyProviderProfileSeeder extends Seeder
 
     private const TIME_WASTER_OPTIONS = ['no', 'yes'];
 
-    private const WEBSITE_TYPES = ['adult', 'porn'];
+    private const SAMPLE_VIDEOS = [
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Subaru_Outback_with_Kelly_Slater.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
+    ];
 
     private const FEMALE_NAMES = [
         'Amber', 'Bella', 'Chloe', 'Diana', 'Elena', 'Fiona', 'Grace', 'Hannah', 'Iris', 'Jade',
@@ -160,8 +170,7 @@ class DummyProviderProfileSeeder extends Seeder
 
             // 3. ProviderListing
             $categoryId = count($categoryIds) > 0 ? $categoryIds[$i % count($categoryIds)] : null;
-            $thumbnailPath = "provider-listings/dummy-{$i}.svg";
-            Storage::disk('public')->put($thumbnailPath, $this->buildDummyThumbnailSvg($i, $name));
+            $thumbnailUrl = "https://picsum.photos/seed/listing-{$i}/512/512";
 
             ProviderListing::updateOrCreate(
                 ['user_id' => $user->id],
@@ -171,7 +180,7 @@ class DummyProviderProfileSeeder extends Seeder
                     'category_id' => $categoryId,
                     'website_type' => $this->pickFrom(self::WEBSITE_TYPES, $i),
                     'audience_score' => rand(60, 98),
-                    'thumbnail' => $thumbnailPath,
+                    'thumbnail' => $thumbnailUrl,
                     'is_live' => $i % 3 === 0,
                     'is_vip' => $i <= 10,
                     'is_active' => true,
@@ -220,31 +229,27 @@ class DummyProviderProfileSeeder extends Seeder
             // 6. Profile images (3 per provider; first is primary and also stored as user avatar)
             for ($imgIndex = 1; $imgIndex <= 3; $imgIndex++) {
                 $isPrimary = $imgIndex === 1;
-                $imagePath = "profile-images/dummy-{$i}-{$imgIndex}.svg";
-                $thumbPath = "profile-thumbnails/dummy-{$i}-{$imgIndex}.svg";
-                $svgContent = $this->buildProfileImageSvg($i, $imgIndex, $name);
-                Storage::disk('public')->put($imagePath, $svgContent);
-                Storage::disk('public')->put($thumbPath, $svgContent);
+                $imageUrl = "https://picsum.photos/seed/profile-{$i}-{$imgIndex}/400/400";
+                $thumbUrl = "https://picsum.photos/seed/thumb-{$i}-{$imgIndex}/200/200";
 
                 ProfileImage::updateOrCreate(
-                    ['user_id' => $user->id, 'image_path' => $imagePath],
+                    ['user_id' => $user->id, 'image_path' => $imageUrl],
                     [
-                        'thumbnail_path' => $thumbPath,
+                        'thumbnail_path' => $thumbUrl,
                         'is_primary' => $isPrimary,
                     ],
                 );
             }
 
-            // Set user profile_image to the primary image path
-            $user->update(['profile_image' => "profile-images/dummy-{$i}-1.svg"]);
+            // Set user profile_image to the primary image URL
+            $user->update(['profile_image' => "https://picsum.photos/seed/profile-{$i}-1/400/400"]);
 
             // 7. User videos (2 per provider)
             for ($vidIndex = 1; $vidIndex <= 2; $vidIndex++) {
-                $videoPath = "user-videos/dummy-{$i}-{$vidIndex}.svg";
-                Storage::disk('public')->put($videoPath, $this->buildVideoPlaceholderSvg($i, $vidIndex, $name));
+                $videoUrl = $this->pickFrom(self::SAMPLE_VIDEOS, $i + $vidIndex);
 
                 UserVideo::updateOrCreate(
-                    ['user_id' => $user->id, 'video_path' => $videoPath],
+                    ['user_id' => $user->id, 'video_path' => $videoUrl],
                     ['original_name' => "video-{$i}-{$vidIndex}.mp4"],
                 );
             }
@@ -283,95 +288,5 @@ class DummyProviderProfileSeeder extends Seeder
         }
 
         return array_values(array_unique($result));
-    }
-
-    private function buildDummyThumbnailSvg(int $index, string $name): string
-    {
-        $colors = [
-            ['#1F2937', '#4B5563'],
-            ['#7C2D12', '#C2410C'],
-            ['#1E3A8A', '#2563EB'],
-            ['#14532D', '#16A34A'],
-            ['#581C87', '#9333EA'],
-            ['#831843', '#DB2777'],
-            ['#713F12', '#D97706'],
-            ['#134E4A', '#0D9488'],
-        ];
-
-        [$start, $end] = $colors[$index % count($colors)];
-        $initials = strtoupper(substr($name, 0, 2));
-
-        return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-    <defs>
-        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="{$start}" />
-            <stop offset="100%" stop-color="{$end}" />
-        </linearGradient>
-    </defs>
-    <rect width="512" height="512" fill="url(#bg)" rx="24" />
-    <text x="50%" y="44%" text-anchor="middle" font-size="120" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="700">{$initials}</text>
-    <text x="50%" y="62%" text-anchor="middle" font-size="44" fill="#E5E7EB" font-family="Arial, sans-serif">Provider #{$index}</text>
-</svg>
-SVG;
-    }
-
-    private function buildProfileImageSvg(int $index, int $imgIndex, string $name): string
-    {
-        $colors = [
-            ['#BE185D', '#F472B6'],
-            ['#6D28D9', '#A78BFA'],
-            ['#0369A1', '#38BDF8'],
-            ['#065F46', '#34D399'],
-            ['#92400E', '#FCD34D'],
-            ['#1D4ED8', '#93C5FD'],
-            ['#7C3AED', '#C4B5FD'],
-            ['#B91C1C', '#FCA5A5'],
-        ];
-
-        [$start, $end] = $colors[($index + $imgIndex) % count($colors)];
-        $initials = strtoupper(substr($name, 0, 2));
-
-        return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
-    <defs>
-        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="{$start}" />
-            <stop offset="100%" stop-color="{$end}" />
-        </linearGradient>
-    </defs>
-    <rect width="400" height="400" fill="url(#bg)" rx="200" />
-    <text x="50%" y="44%" text-anchor="middle" font-size="100" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="700">{$initials}</text>
-    <text x="50%" y="64%" text-anchor="middle" font-size="36" fill="#F0F0F0" font-family="Arial, sans-serif">Photo {$imgIndex}</text>
-</svg>
-SVG;
-    }
-
-    private function buildVideoPlaceholderSvg(int $index, int $vidIndex, string $name): string
-    {
-        $colors = [
-            ['#1E293B', '#334155'],
-            ['#431407', '#7C2D12'],
-            ['#0C1445', '#1E3A8A'],
-            ['#052E16', '#14532D'],
-            ['#2E1065', '#4C1D95'],
-        ];
-
-        [$start, $end] = $colors[($index + $vidIndex) % count($colors)];
-        $initials = strtoupper(substr($name, 0, 2));
-
-        return <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
-    <defs>
-        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="{$start}" />
-            <stop offset="100%" stop-color="{$end}" />
-        </linearGradient>
-    </defs>
-    <rect width="640" height="360" fill="url(#bg)" />
-    <polygon points="260,140 260,220 360,180" fill="#FFFFFF" opacity="0.85" />
-    <text x="50%" y="80%" text-anchor="middle" font-size="32" fill="#E5E7EB" font-family="Arial, sans-serif">{$initials} — Video {$vidIndex}</text>
-</svg>
-SVG;
     }
 }

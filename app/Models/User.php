@@ -84,6 +84,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             return null;
         }
 
+        if (str_starts_with($this->profile_image, 'http')) {
+            return $this->profile_image;
+        }
+
         return Storage::disk(config('media.avatar_disk'))->url($this->profile_image);
     }
 

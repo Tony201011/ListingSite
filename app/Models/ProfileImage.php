@@ -33,7 +33,9 @@ class ProfileImage extends Model
     {
         return Attribute::make(
             get: fn () => $this->image_path
-                ? Storage::disk(config('media.delivery_disk'))->url($this->image_path)
+                ? (str_starts_with($this->image_path, 'http')
+                    ? $this->image_path
+                    : Storage::disk(config('media.delivery_disk'))->url($this->image_path))
                 : null
         );
     }
@@ -42,7 +44,9 @@ class ProfileImage extends Model
     {
         return Attribute::make(
             get: fn () => $this->thumbnail_path
-                ? Storage::disk(config('media.delivery_disk'))->url($this->thumbnail_path)
+                ? (str_starts_with($this->thumbnail_path, 'http')
+                    ? $this->thumbnail_path
+                    : Storage::disk(config('media.delivery_disk'))->url($this->thumbnail_path))
                 : null
         );
     }
