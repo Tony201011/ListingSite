@@ -3,6 +3,8 @@
 namespace App\Filament\Clusters\Settings\Resources\StatusSettings\Pages;
 
 use App\Filament\Clusters\Settings\Resources\StatusSettings\StatusSettingResource;
+use App\Models\SiteSetting;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
 
 class ManageStatusSettings extends ManageRecords
@@ -11,6 +13,11 @@ class ManageStatusSettings extends ManageRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            CreateAction::make()
+                ->label('Add Status Settings')
+                ->createAnother(false)
+                ->visible(fn (): bool => SiteSetting::query()->doesntExist()),
+        ];
     }
 }
