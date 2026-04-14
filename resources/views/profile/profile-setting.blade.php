@@ -102,9 +102,9 @@
 
                     <section class="mb-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-2">About me</h2>
-                        <p class="text-gray-600 leading-relaxed">
-                            {{ $userInfo['provider_profile']?->profile_text ?? 'No profile message set yet. Click the "Profile message" button above to add a profile message.' }}
-                        </p>
+                        <div class="text-gray-600 leading-relaxed">
+                            {!! $userInfo['provider_profile']?->profile_text ?? 'No profile message set yet. Click the &quot;Profile message&quot; button above to add a profile message.' !!}
+                        </div>
                     </section>
 
                     <section class="mb-6">
