@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Concerns\LoadsProviderMediaBeforeFill;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\ProfileMessage;
 use App\Models\ProviderProfile;
@@ -16,6 +17,8 @@ use Illuminate\Support\Str;
 
 class EditUser extends EditRecord
 {
+    use LoadsProviderMediaBeforeFill;
+
     protected static string $resource = UserResource::class;
 
     protected function handleRecordUpdate(Model $record, array $data): Model

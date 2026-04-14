@@ -442,7 +442,6 @@ class ProviderListingResource extends Resource
                                 ->icon('heroicon-o-camera')
                                 ->schema([
                                     Repeater::make('profileImages')
-                                        ->relationship()
                                         ->label('Images')
                                         ->schema([
                                             Hidden::make('id'),
@@ -492,7 +491,6 @@ class ProviderListingResource extends Resource
                                 ->icon('heroicon-o-film')
                                 ->schema([
                                     Repeater::make('userVideos')
-                                        ->relationship()
                                         ->label('Videos')
                                         ->schema([
                                             Hidden::make('id'),
