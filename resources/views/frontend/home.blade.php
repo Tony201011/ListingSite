@@ -256,22 +256,22 @@
             @forelse($profiles as $profile)
                 <article
                     class="view-card group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300"
-                    :class="viewMode === 'list' ? 'md:flex md:flex-row' : ''"
+                    :class="viewMode === 'list' ? 'sm:flex sm:flex-row' : ''"
                 >
                     <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
                     {{-- Image --}}
-                    <div class="view-card-media relative overflow-hidden rounded-t-2xl" :class="viewMode === 'list' ? 'md:w-56 md:shrink-0 md:rounded-none md:rounded-l-2xl' : ''">
+                    <div class="view-card-media relative overflow-hidden" :class="viewMode === 'list' ? 'sm:w-44 sm:shrink-0' : 'rounded-t-2xl'">
                         @if($profile['image'])
                             <img
                                 src="{{ $profile['image'] }}"
                                 alt="{{ $profile['name'] }}"
                                 class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'"
+                                :class="viewMode === 'list' ? 'h-48 sm:h-full' : 'h-52'"
                                 loading="lazy"
                             >
                         @else
-                            <div class="flex items-center justify-center bg-gray-100 text-gray-400" :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'">
+                            <div class="flex items-center justify-center bg-gray-100 text-gray-400" :class="viewMode === 'list' ? 'h-48 sm:h-full' : 'h-52'">
                                 <i class="fa-solid fa-image text-4xl"></i>
                             </div>
                         @endif
@@ -293,7 +293,7 @@
                     </div>
 
                     {{-- Content --}}
-                    <div class="p-3.5" :class="viewMode === 'list' ? 'flex flex-col justify-between flex-1 p-4' : ''">
+                    <div :class="viewMode === 'list' ? 'flex flex-col justify-between flex-1 p-4' : 'p-3.5'">
                         {{-- Date + Actions row --}}
                         <div class="mb-2 flex items-center justify-between">
                             <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
