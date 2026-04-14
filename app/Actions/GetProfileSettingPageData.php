@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\GetProfileMessage;
 use App\Concerns\ResolvesProfileCategoryIds;
 use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\Category;
@@ -12,6 +13,10 @@ class GetProfileSettingPageData
 {
     use ResolvesProfileCategoryIds;
     use ResolvesProfileCategoryValues;
+
+    public function __construct(
+        private GetProfileMessage $getProfileMessage
+    ) {}
 
     public function execute(?User $user): array
     {
@@ -81,6 +86,7 @@ class GetProfileSettingPageData
             'videos' => $videos,
             'photoVerification' => $photoVerification,
             'userInfo' => $userInfo,
+            'profileMessage' => $this->getProfileMessage->execute($user),
         ];
     }
 

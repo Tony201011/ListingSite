@@ -136,6 +136,28 @@
                         </div>
                     </section>
 
+                    <section class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-xl font-bold text-gray-900">Profile message</h2>
+                            <a
+                                href="{{ url('/profile-message') }}"
+                                class="text-sm font-medium text-pink-600 hover:text-pink-700 transition"
+                            >
+                                Edit
+                            </a>
+                        </div>
+                        @if ($profileMessage)
+                            <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed">
+                                {!! $profileMessage !!}
+                            </div>
+                        @else
+                            <p class="text-gray-400 text-sm italic">
+                                No profile message set yet.
+                                <a href="{{ url('/profile-message') }}" class="text-pink-600 hover:text-pink-700 underline">Add one now</a>.
+                            </p>
+                        @endif
+                    </section>
+
                     <section>
                         <h2 class="text-xl font-bold text-gray-900 mb-2">Contact me for</h2>
                         <ul class="space-y-1 text-gray-600">
