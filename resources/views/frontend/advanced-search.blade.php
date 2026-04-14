@@ -413,18 +413,13 @@
                 @endforelse
             </div>
 
-            {{-- Showing results + Pagination --}}
+            {{-- Pagination --}}
             <div class="mt-8">
-                <p class="mb-3 text-center text-sm text-gray-500">
-                    @if($profiles->total() > 0)
-                        Showing {{ $profiles->firstItem() }} to {{ $profiles->lastItem() }} of {{ $profiles->total() }} results
-                    @else
-                        0 results
-                    @endif
-                    @if($hasActiveFilters)
-                        <a href="{{ route('advanced-search') }}" class="ml-2 text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
-                    @endif
-                </p>
+                @if($hasActiveFilters)
+                    <p class="mb-3 text-center text-sm text-gray-500">
+                        <a href="{{ route('advanced-search') }}" class="text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
+                    </p>
+                @endif
                 <div class="flex justify-center">
                     {{ $profiles->links() }}
                 </div>
