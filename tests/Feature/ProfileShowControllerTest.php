@@ -342,13 +342,13 @@ class ProfileShowControllerTest extends TestCase
         $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
 
         $nearby = $response->viewData('nearbyProfiles');
-        if (count($nearby) > 0) {
-            $this->assertArrayHasKey('slug', $nearby[0]);
-            $this->assertArrayHasKey('name', $nearby[0]);
-            $this->assertArrayHasKey('image', $nearby[0]);
-            $this->assertArrayHasKey('city', $nearby[0]);
-            $this->assertArrayHasKey('rate', $nearby[0]);
-        }
+        $this->assertNotEmpty($nearby, 'Expected at least one nearby profile to be returned');
+
+        $this->assertArrayHasKey('slug', $nearby[0]);
+        $this->assertArrayHasKey('name', $nearby[0]);
+        $this->assertArrayHasKey('image', $nearby[0]);
+        $this->assertArrayHasKey('city', $nearby[0]);
+        $this->assertArrayHasKey('rate', $nearby[0]);
     }
 
     // ---------------------------------------------------------------
