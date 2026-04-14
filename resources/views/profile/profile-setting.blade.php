@@ -96,9 +96,11 @@
                         </span>
                     </div>
 
-                    <p class="text-pink-600 font-medium mb-6">
-                        {{ $userInfo['user']?->name ?? '' }}
-                    </p>
+                    @if($userInfo['introduction_line'] ?? null)
+                        <p class="text-pink-600 font-medium mb-4">
+                            {!! $userInfo['introduction_line'] !!}
+                        </p>
+                    @endif
 
                     <section class="mb-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-2">About me</h2>
@@ -118,32 +120,120 @@
                             <div><span class="font-semibold text-pink-700">Bust size:</span> {{ $userInfo['bust_size_name'] ?? '-' }}</div>
                             <div><span class="font-semibold text-pink-700">Length:</span> {{ $userInfo['your_length_name'] ?? '-' }}</div>
                         </div>
-
-                        <div class="flex flex-wrap gap-2 mt-4">
-                            @php
-                                $tags = collect($userInfo['resolved_tags'] ?? []);
-                            @endphp
-
-                            @forelse($tags as $tag)
-                                <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">
-                                    {{ $tag }}
-                                </span>
-                            @empty
-                                <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">
-                                    No tags added
-                                </span>
-                            @endforelse
-                        </div>
                     </section>
 
-                    <section>
+                    @php
+                        $primaryIdentityTags = $userInfo['primary_identity_tags'] ?? [];
+                        $attributesTags = $userInfo['attributes_tags'] ?? [];
+                        $servicesStyleTags = $userInfo['services_style_tags'] ?? [];
+                        $servicesProvidedTags = $userInfo['services_provided_tags'] ?? [];
+                    @endphp
+
+                    @if(count($primaryIdentityTags) > 0)
+                        <section class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Primary identity</h2>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($primaryIdentityTags as $tag)
+                                    <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">{{ $tag }}</span>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
+                    @if(count($attributesTags) > 0)
+                        <section class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Attributes</h2>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($attributesTags as $tag)
+                                    <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">{{ $tag }}</span>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
+                    @if(count($servicesStyleTags) > 0)
+                        <section class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Services &amp; style</h2>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($servicesStyleTags as $tag)
+                                    <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">{{ $tag }}</span>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
+                    @if(count($servicesProvidedTags) > 0)
+                        <section class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Services provided</h2>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($servicesProvidedTags as $tag)
+                                    <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">{{ $tag }}</span>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
+                    @php
+                        $hasContactPreferences = ($userInfo['availability_name'] ?? null)
+                            || ($userInfo['contact_method_name'] ?? null)
+                            || ($userInfo['phone_contact_preference_name'] ?? null)
+                            || ($userInfo['time_waster_shield_name'] ?? null);
+                        $websiteUrl = $userInfo['website'] ?? null;
+                        $websiteIsSafe = $websiteUrl && preg_match('/^https?:\/\//i', $websiteUrl);
+                    @endphp
+
+                    <section class="mb-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-2">Contact me for</h2>
-                        <ul class="space-y-1 text-gray-600">
-                            <li>• {{ $userInfo['availability_name'] ?? '-' }}</li>
-                            <li>• {{ $userInfo['contact_method_name'] ?? '-' }}</li>
-                            <li>• {{ $userInfo['phone_contact_preference_name'] ?? '-' }}</li>
+                        <ul class="space-y-1 text-gray-600 text-sm">
+                            @if($userInfo['availability_name'] ?? null)
+                                <li>• <span class="font-semibold text-pink-700">Availability:</span> {{ $userInfo['availability_name'] }}</li>
+                            @endif
+                            @if($userInfo['contact_method_name'] ?? null)
+                                <li>• <span class="font-semibold text-pink-700">Contact method:</span> {{ $userInfo['contact_method_name'] }}</li>
+                            @endif
+                            @if($userInfo['phone_contact_preference_name'] ?? null)
+                                <li>• <span class="font-semibold text-pink-700">Phone contact:</span> {{ $userInfo['phone_contact_preference_name'] }}</li>
+                            @endif
+                            @if($userInfo['time_waster_shield_name'] ?? null)
+                                <li>• <span class="font-semibold text-pink-700">Time waster shield:</span> {{ $userInfo['time_waster_shield_name'] }}</li>
+                            @endif
+                            @if(!$hasContactPreferences)
+                                <li class="text-gray-400">No contact preferences set yet.</li>
+                            @endif
                         </ul>
                     </section>
+
+                    @if(($userInfo['twitter_handle'] ?? null) || $websiteIsSafe || ($userInfo['onlyfans_username'] ?? null))
+                        <section>
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Links</h2>
+                            <ul class="space-y-1 text-sm">
+                                @if($userInfo['twitter_handle'] ?? null)
+                                    <li>
+                                        <span class="font-semibold text-pink-700">Twitter/X:</span>
+                                        <a href="https://twitter.com/{{ ltrim($userInfo['twitter_handle'], '@') }}" target="_blank" rel="noopener noreferrer" class="text-pink-600 hover:underline">
+                                            @{{ ltrim($userInfo['twitter_handle'], '@') }}
+                                        </a>
+                                    </li>
+                                @endif
+                                @if($websiteIsSafe)
+                                    <li>
+                                        <span class="font-semibold text-pink-700">Website:</span>
+                                        <a href="{{ $websiteUrl }}" target="_blank" rel="noopener noreferrer" class="text-pink-600 hover:underline">
+                                            {{ $websiteUrl }}
+                                        </a>
+                                    </li>
+                                @endif
+                                @if($userInfo['onlyfans_username'] ?? null)
+                                    <li>
+                                        <span class="font-semibold text-pink-700">OnlyFans:</span>
+                                        <a href="https://onlyfans.com/{{ $userInfo['onlyfans_username'] }}" target="_blank" rel="noopener noreferrer" class="text-pink-600 hover:underline">
+                                            {{ $userInfo['onlyfans_username'] }}
+                                        </a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </section>
+                    @endif
                 </div>
 
                 @if($photoVerification)
