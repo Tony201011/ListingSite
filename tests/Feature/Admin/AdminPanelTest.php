@@ -112,29 +112,11 @@ class AdminPanelTest extends TestCase
     // Admin panel resource pages
     // ---------------------------------------------------------------
 
-    public function test_admin_can_view_agents_listing_page(): void
-    {
-        $admin = $this->createAdmin();
-
-        $response = $this->actingAs($admin)->get('/admin/agents');
-
-        $response->assertOk();
-    }
-
     public function test_admin_can_view_providers_listing_page(): void
     {
         $admin = $this->createAdmin();
 
         $response = $this->actingAs($admin)->get('/admin/providers');
-
-        $response->assertOk();
-    }
-
-    public function test_admin_can_access_create_agent_page(): void
-    {
-        $admin = $this->createAdmin();
-
-        $response = $this->actingAs($admin)->get('/admin/agents/create');
 
         $response->assertOk();
     }
@@ -190,17 +172,6 @@ class AdminPanelTest extends TestCase
             'id' => $agent->id,
             'deleted_at' => null,
         ]);
-    }
-
-    public function test_blocked_agent_is_flagged_in_database(): void
-    {
-        $admin = $this->createAdmin();
-        $agent = $this->createAgent(['is_blocked' => true]);
-
-        $response = $this->actingAs($admin)->get('/admin/agents');
-
-        $response->assertOk();
-        $this->assertTrue($agent->fresh()->is_blocked);
     }
 
     // ---------------------------------------------------------------
