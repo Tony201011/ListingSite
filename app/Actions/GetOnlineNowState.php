@@ -3,14 +3,18 @@
 namespace App\Actions;
 
 use App\Models\OnlineUser;
+use App\Models\SiteSetting;
 use App\Models\User;
 
 class GetOnlineNowState
 {
     public function execute(?User $user): array
     {
+        $settings = SiteSetting::getStatusSettings();
+        $maxUses = $settings['online_status_max_uses'];
+
         $onlineStatus = false;
-        $remainingUses = 4;
+        $remainingUses = $maxUses;
         $expiresAt = null;
 
         if (! $user) {
@@ -23,7 +27,7 @@ class GetOnlineNowState
         $onlineUser->save();
 
         $onlineStatus = $onlineUser->isCurrentlyOnline();
-        $remainingUses = max(0, 4 - $onlineUser->usage_count);
+        $remainingUses = max(0, $maxUses - $onlineUser->usage_count);
         $expiresAt = optional($onlineUser->online_expires_at)?->toIso8601String();
 
         return compact('onlineStatus', 'remainingUses', 'expiresAt');
