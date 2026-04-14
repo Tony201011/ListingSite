@@ -83,7 +83,7 @@
                     <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
                         <p class="text-sm font-medium text-gray-500">Daily usage rule</p>
                         <p class="mt-2 text-base font-semibold text-gray-900">
-                            Use this feature up to 4 times a day for 60 minutes.
+                            Use this feature up to {{ $onlineMaxUses }} {{ Str::plural('time', $onlineMaxUses) }} a day for {{ $onlineDurationMinutes % 60 === 0 ? ($onlineDurationMinutes / 60).' '.Str::plural('hour', $onlineDurationMinutes / 60) : $onlineDurationMinutes.' '.Str::plural('minute', $onlineDurationMinutes) }}.
                         </p>
                     </div>
 
@@ -211,7 +211,7 @@
                 </p>
 
                 <p class="mb-6 text-sm font-medium text-pink-600">
-                    Promote your availability twice a day for two hours.
+                    Promote your availability {{ $availableMaxUses }} {{ Str::plural('time', $availableMaxUses) }} a day for {{ $availableDurationMinutes % 60 === 0 ? ($availableDurationMinutes / 60).' '.Str::plural('hour', $availableDurationMinutes / 60) : $availableDurationMinutes.' '.Str::plural('minute', $availableDurationMinutes) }}.
                 </p>
 
                 <div class="mb-6 grid gap-4 sm:grid-cols-2">

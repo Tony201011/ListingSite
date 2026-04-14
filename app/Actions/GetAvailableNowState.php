@@ -3,14 +3,18 @@
 namespace App\Actions;
 
 use App\Models\AvailableNow;
+use App\Models\SiteSetting;
 use App\Models\User;
 
 class GetAvailableNowState
 {
     public function execute(?User $user): array
     {
+        $settings = SiteSetting::getStatusSettings();
+        $maxUses = $settings['available_now_max_uses'];
+
         $status = false;
-        $remainingUses = 2;
+        $remainingUses = $maxUses;
         $expiresAt = null;
 
         if (! $user) {
@@ -23,7 +27,7 @@ class GetAvailableNowState
         $available->save();
 
         $status = $available->isCurrentlyAvailable();
-        $remainingUses = max(0, 2 - $available->usage_count);
+        $remainingUses = max(0, $maxUses - $available->usage_count);
         $expiresAt = optional($available->available_expires_at)?->toIso8601String();
 
         return compact('status', 'remainingUses', 'expiresAt');

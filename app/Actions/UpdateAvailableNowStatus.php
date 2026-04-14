@@ -4,21 +4,26 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\AvailableNow;
+use App\Models\SiteSetting;
 use App\Models\User;
 
 class UpdateAvailableNowStatus
 {
     public function execute(User $user, string $status): ActionResult
     {
+        $settings = SiteSetting::getStatusSettings();
+        $maxUses = $settings['available_now_max_uses'];
+        $durationMinutes = $settings['available_now_duration_minutes'];
+
         $available = $this->getOrCreateAvailableNow($user->id);
 
         $this->syncExpiredStatus($available);
 
         if ($status === 'online') {
-            return $this->goOnline($available);
+            return $this->goOnline($available, $maxUses, $durationMinutes);
         }
 
-        return $this->goOffline($available);
+        return $this->goOffline($available, $maxUses);
     }
 
     protected function getOrCreateAvailableNow(int $userId): AvailableNow
@@ -51,21 +56,21 @@ class UpdateAvailableNowStatus
         }
     }
 
-    protected function goOnline(AvailableNow $available): ActionResult
+    protected function goOnline(AvailableNow $available, int $maxUses, int $durationMinutes): ActionResult
     {
         if ($available->isCurrentlyAvailable()) {
             return ActionResult::success([
                 'status' => 'online',
-                'remaining_uses' => max(0, 2 - $available->usage_count),
+                'remaining_uses' => max(0, $maxUses - $available->usage_count),
                 'expires_at' => optional($available->available_expires_at)?->toIso8601String(),
             ], 'You are already available now.');
         }
 
-        if ($available->usage_count >= 2) {
+        if ($available->usage_count >= $maxUses) {
             return new ActionResult(
                 false,
                 422,
-                'You have already used Available Now 2 times today.',
+                "You have already used Available Now {$maxUses} times today.",
                 [
                     'status' => 'offline',
                     'remaining_uses' => 0,
@@ -79,17 +84,17 @@ class UpdateAvailableNowStatus
         $available->usage_date = today();
         $available->usage_count += 1;
         $available->available_started_at = now();
-        $available->available_expires_at = now()->addHours(2);
+        $available->available_expires_at = now()->addMinutes($durationMinutes);
         $available->save();
 
         return ActionResult::success([
             'status' => 'online',
-            'remaining_uses' => max(0, 2 - $available->usage_count),
+            'remaining_uses' => max(0, $maxUses - $available->usage_count),
             'expires_at' => optional($available->available_expires_at)?->toIso8601String(),
-        ], 'You are now available for enquiries for 2 hours.');
+        ], "You are now available for enquiries for {$durationMinutes} minutes.");
     }
 
-    protected function goOffline(AvailableNow $available): ActionResult
+    protected function goOffline(AvailableNow $available, int $maxUses): ActionResult
     {
         $available->status = 'offline';
         $available->available_started_at = null;
@@ -98,7 +103,7 @@ class UpdateAvailableNowStatus
 
         return ActionResult::success([
             'status' => 'offline',
-            'remaining_uses' => max(0, 2 - $available->usage_count),
+            'remaining_uses' => max(0, $maxUses - $available->usage_count),
             'expires_at' => null,
         ], 'You are now unavailable.');
     }

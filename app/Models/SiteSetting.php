@@ -20,6 +20,10 @@ class SiteSetting extends Model
         'short_url',      // new field for short URL feature
         'max_search_distance',
         'home_page_records',
+        'online_status_max_uses',
+        'online_status_duration_minutes',
+        'available_now_max_uses',
+        'available_now_duration_minutes',
     ];
 
     protected $casts = [
@@ -30,12 +34,31 @@ class SiteSetting extends Model
         'short_url' => 'boolean',
         'max_search_distance' => 'integer',
         'home_page_records' => 'integer',
+        'online_status_max_uses' => 'integer',
+        'online_status_duration_minutes' => 'integer',
+        'available_now_max_uses' => 'integer',
+        'available_now_duration_minutes' => 'integer',
     ];
 
     protected static function booted(): void
     {
         static::saved(function (): void {
             cache()->forget('site_setting.home_page_records');
+            cache()->forget('site_setting.status_settings');
+        });
+    }
+
+    public static function getStatusSettings(): array
+    {
+        return cache()->remember('site_setting.status_settings', now()->addMinutes(10), function () {
+            $setting = static::first();
+
+            return [
+                'online_status_max_uses' => $setting?->online_status_max_uses ?? 4,
+                'online_status_duration_minutes' => $setting?->online_status_duration_minutes ?? 60,
+                'available_now_max_uses' => $setting?->available_now_max_uses ?? 2,
+                'available_now_duration_minutes' => $setting?->available_now_duration_minutes ?? 120,
+            ];
         });
     }
 }
