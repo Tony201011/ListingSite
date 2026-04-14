@@ -41,7 +41,7 @@ class StatusSettingResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false;
+        return SiteSetting::query()->doesntExist();
     }
 
     public static function form(Schema $schema): Schema

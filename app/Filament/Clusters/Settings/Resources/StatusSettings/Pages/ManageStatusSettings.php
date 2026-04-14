@@ -38,6 +38,11 @@ class ManageStatusSettings extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            CreateAction::make()
+                ->label('Add Status Settings')
+                ->createAnother(false)
+                ->visible(fn (): bool => SiteSetting::query()->doesntExist()),
+        ];
     }
 }
