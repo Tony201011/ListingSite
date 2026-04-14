@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Models\BabeRankReadMorePage;
 use App\Models\HelpPage;
 use App\Models\NaughtyCornerPage;
 use App\Models\PricingPackage;
@@ -71,6 +72,14 @@ class GetFrontendSimplePage
     public function naughtyCorner(): ?NaughtyCornerPage
     {
         return NaughtyCornerPage::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    public function babeRankReadMore(): ?BabeRankReadMorePage
+    {
+        return BabeRankReadMorePage::query()
             ->where('is_active', true)
             ->latest('updated_at')
             ->first();
