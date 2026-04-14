@@ -183,6 +183,22 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                         @endforeach
                     </div>
 
+                    <!-- Profile Message Section -->
+                    @if(!empty($profile['profile_message']))
+                    <section class="mt-12">
+                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-bullhorn text-pink-600 text-xl mr-2"></i>
+                                <h2 class="text-2xl font-semibold text-pink-600">Message from {{ $profile['name'] }}</h2>
+                            </div>
+                            <div class="border-b border-gray-200 mb-4"></div>
+                            <div class="prose max-w-none text-gray-700 leading-relaxed">
+                                {!! $profile['profile_message'] !!}
+                            </div>
+                        </div>
+                    </section>
+                    @endif
+
                     <!-- Videos Section -->
 
 @include('components.gallery-modal')
