@@ -139,9 +139,9 @@
                     <section>
                         <h2 class="text-xl font-bold text-gray-900 mb-2">Contact me for</h2>
                         <ul class="space-y-1 text-gray-600">
-                            <li>• {{ $profile?->availability ?? '-' }}</li>
-                            <li>• {{ $profile?->contact_method ?? '-' }}</li>
-                            <li>• {{ $profile?->phone_contact_preference ?? '-' }}</li>
+                            <li>• {{ $userInfo['availability_name'] ?? '-' }}</li>
+                            <li>• {{ $userInfo['contact_method_name'] ?? '-' }}</li>
+                            <li>• {{ $userInfo['phone_contact_preference_name'] ?? '-' }}</li>
                         </ul>
                     </section>
                 </div>
