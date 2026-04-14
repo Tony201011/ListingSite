@@ -16,11 +16,23 @@ class UpdateTourRequest extends FormRequest
     {
         return [
             'city' => ['required', 'string', 'max:255'],
-            'from' => ['required', 'date', 'after_or_equal:now'],
-            'to' => ['required', 'date', 'after:from'],
+            'from' => ['required', 'date', 'after_or_equal:today'],
+            'to' => ['required', 'date'],
             'description' => ['nullable', 'string'],
             'enabled' => ['sometimes', 'boolean'],
         ];
+    }
+
+    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    {
+        $validator->after(function (\Illuminate\Validation\Validator $v) {
+            $from = strtotime((string) $this->input('from'));
+            $to = strtotime((string) $this->input('to'));
+
+            if ($from !== false && $to !== false && $to <= $from) {
+                $v->errors()->add('to', 'To date must be after the from date.');
+            }
+        });
     }
 
     protected function prepareForValidation(): void
