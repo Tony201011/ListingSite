@@ -34,7 +34,11 @@
 @section('title', $profile['name'] . ' Profile')
 
 @php
-$profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
+$profileTags = array_values(array_unique(array_merge(
+    is_array($profile['primary_identity'] ?? null) ? $profile['primary_identity'] : [],
+    is_array($profile['attributes'] ?? null) ? $profile['attributes'] : [],
+    is_array($profile['services_style'] ?? null) ? $profile['services_style'] : [],
+)));
 @endphp
 
 @section('content')
