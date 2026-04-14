@@ -173,6 +173,15 @@
                         </section>
                     @endif
 
+                    @php
+                        $hasContactPreferences = ($userInfo['availability_name'] ?? null)
+                            || ($userInfo['contact_method_name'] ?? null)
+                            || ($userInfo['phone_contact_preference_name'] ?? null)
+                            || ($userInfo['time_waster_shield_name'] ?? null);
+                        $websiteUrl = $userInfo['website'] ?? null;
+                        $websiteIsSafe = $websiteUrl && preg_match('/^https?:\/\//i', $websiteUrl);
+                    @endphp
+
                     <section class="mb-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-2">Contact me for</h2>
                         <ul class="space-y-1 text-gray-600 text-sm">
@@ -188,13 +197,13 @@
                             @if($userInfo['time_waster_shield_name'] ?? null)
                                 <li>• <span class="font-semibold text-pink-700">Time waster shield:</span> {{ $userInfo['time_waster_shield_name'] }}</li>
                             @endif
-                            @if(!($userInfo['availability_name'] ?? null) && !($userInfo['contact_method_name'] ?? null) && !($userInfo['phone_contact_preference_name'] ?? null) && !($userInfo['time_waster_shield_name'] ?? null))
+                            @if(!$hasContactPreferences)
                                 <li class="text-gray-400">No contact preferences set yet.</li>
                             @endif
                         </ul>
                     </section>
 
-                    @if(($userInfo['twitter_handle'] ?? null) || ($userInfo['website'] ?? null) || ($userInfo['onlyfans_username'] ?? null))
+                    @if(($userInfo['twitter_handle'] ?? null) || $websiteIsSafe || ($userInfo['onlyfans_username'] ?? null))
                         <section>
                             <h2 class="text-xl font-bold text-gray-900 mb-2">Links</h2>
                             <ul class="space-y-1 text-sm">
@@ -206,11 +215,11 @@
                                         </a>
                                     </li>
                                 @endif
-                                @if($userInfo['website'] ?? null)
+                                @if($websiteIsSafe)
                                     <li>
                                         <span class="font-semibold text-pink-700">Website:</span>
-                                        <a href="{{ $userInfo['website'] }}" target="_blank" rel="noopener noreferrer" class="text-pink-600 hover:underline">
-                                            {{ $userInfo['website'] }}
+                                        <a href="{{ $websiteUrl }}" target="_blank" rel="noopener noreferrer" class="text-pink-600 hover:underline">
+                                            {{ $websiteUrl }}
                                         </a>
                                     </li>
                                 @endif
