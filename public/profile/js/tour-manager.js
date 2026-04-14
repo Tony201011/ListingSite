@@ -2,7 +2,6 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('tourManager', (config = {}) => {
 
         let editorInstance = null;
-        let editorInitializing = false;
 
         return {
             tours: config.tours || [],
@@ -117,17 +116,25 @@ document.addEventListener('alpine:init', () => {
 
             initEditor() {
                 const el = this.$refs.descriptionEditor;
-                if (!el || editorInstance || editorInitializing) return;
-                editorInitializing = true;
+                if (!el || editorInstance) return;
 
-                ClassicEditor.create(el).then(editor => {
-                    editorInstance = editor;
+                editorInstance = new Quill(el, {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            [{ header: [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline'],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            ['link', 'blockquote'],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Tour description'
+                });
 
-                    editor.model.document.on('change:data', () => {
-                        this.newTour.description = editor.getData();
-                    });
-
-                }).catch(console.error);
+                editorInstance.on('text-change', () => {
+                    this.newTour.description = editorInstance.root.innerHTML;
+                });
             },
 
             async searchCity() {
@@ -204,7 +211,8 @@ document.addEventListener('alpine:init', () => {
                 this.newTour = { ...tour };
 
                 if (editorInstance) {
-                    editorInstance.setData(tour.description || '');
+                    editorInstance.setContents([]);
+                    editorInstance.clipboard.dangerouslyPasteHTML(0, tour.description || '');
                 }
             },
 
@@ -212,7 +220,9 @@ document.addEventListener('alpine:init', () => {
                 this.newTour = { city: '', from: '', to: '', description: '', enabled: true };
                 this.editingIndex = null;
 
-                if (editorInstance) editorInstance.setData('');
+                if (editorInstance) {
+                    editorInstance.setContents([]);
+                }
             },
 
             async confirmRemove(tour) {

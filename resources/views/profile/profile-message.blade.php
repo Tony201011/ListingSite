@@ -1,8 +1,9 @@
 @extends('layouts.frontend')
 
 @push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
 <style>
-    .ck-editor__editable {
+    .ql-editor {
         min-height: 250px;
         font-size: 1rem !important;
         line-height: 1.6 !important;
@@ -11,51 +12,62 @@
         font-family: inherit !important;
     }
 
-    .ck-editor__editable.ck-placeholder::before {
+    .ql-editor.ql-blank::before {
         color: #9ca3af !important;
         font-style: normal !important;
-        opacity: 1;
     }
 
-    .ck-content h1 {
+    .ql-editor h1 {
         font-size: 2em !important;
         font-weight: 700 !important;
         margin-bottom: 0.5em !important;
     }
 
-    .ck-content h2 {
+    .ql-editor h2 {
         font-size: 1.5em !important;
         font-weight: 600 !important;
         margin-bottom: 0.5em !important;
     }
 
-    .ck-content h3 {
+    .ql-editor h3 {
         font-size: 1.25em !important;
         font-weight: 600 !important;
         margin-bottom: 0.5em !important;
     }
 
-    .ck-content a {
+    .ql-editor a {
         color: #e04ecb !important;
         text-decoration: underline !important;
     }
 
-    .ck-content a:hover {
+    .ql-editor a:hover {
         color: #c13ab0 !important;
     }
 
-    .ck-content ul,
-    .ck-content ol {
+    .ql-editor ul,
+    .ql-editor ol {
         padding-left: 2em !important;
         margin-bottom: 1em !important;
     }
 
-    .ck-content blockquote {
+    .ql-editor blockquote {
         border-left: 4px solid #e04ecb !important;
         padding-left: 1em !important;
         margin-left: 0 !important;
         font-style: italic !important;
         color: #4b5563 !important;
+    }
+
+    .ql-toolbar.ql-snow {
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        border-color: #d1d5db !important;
+    }
+
+    .ql-container.ql-snow {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        border-color: #d1d5db !important;
     }
 </style>
 @endpush
@@ -116,6 +128,6 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@40.2.0/build/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="{{ asset('profile/js/profile-message-editor.js') }}?v={{ filemtime(public_path('profile/js/profile-message-editor.js')) }}"></script>
 @endpush
