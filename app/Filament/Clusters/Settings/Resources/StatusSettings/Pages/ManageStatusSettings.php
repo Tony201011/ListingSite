@@ -12,6 +12,10 @@ class ManageStatusSettings extends EditRecord
 {
     protected static string $resource = StatusSettingResource::class;
 
+    /**
+     * The $record parameter is intentionally ignored; this page always loads the
+     * singleton SiteSetting record so no record ID is required in the URL.
+     */
     public function mount(int|string $record = null): void
     {
         $siteSetting = SiteSetting::first();
@@ -22,6 +26,8 @@ class ManageStatusSettings extends EditRecord
                 ->warning()
                 ->send();
 
+            // redirect() sets the Livewire redirect flag but does not halt execution,
+            // so we return early to prevent parent::mount() from running without a record.
             $this->redirect(SiteSettingResource::getUrl());
 
             return;
