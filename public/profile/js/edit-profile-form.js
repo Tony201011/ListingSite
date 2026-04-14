@@ -1,4 +1,4 @@
-// Store CKEditor instances outside Alpine's reactive proxy to avoid conflicts
+// Store Quill instances outside Alpine's reactive proxy to avoid conflicts
 const editorInstances = new Map();
 
 document.addEventListener('alpine:init', () => {
@@ -52,83 +52,60 @@ document.addEventListener('alpine:init', () => {
             return editorInstances.get(key);
         },
 
-        async initEditors() {
-            await this.$nextTick();
+        initEditors() {
+            this.$nextTick(() => {
+                this.createEditor(
+                    'introduction_line_editor',
+                    'introduction_line',
+                    'Write your introduction line here...'
+                );
 
-            if (typeof ClassicEditor === 'undefined') {
-                console.error('CKEditor is not loaded.');
-                this.syncHiddenEditorInputs();
-                return;
-            }
-
-            await this.createEditor(
-                'introduction_line_editor',
-                'introduction_line',
-                'Write your introduction line here...'
-            );
-
-            await this.createEditor(
-                'profile_text_editor',
-                'profile_text',
-                'Write your profile description here...'
-            );
+                this.createEditor(
+                    'profile_text_editor',
+                    'profile_text',
+                    'Write your profile description here...'
+                );
+            });
         },
 
-        async createEditor(elementId, modelKey, placeholder) {
+        createEditor(elementId, modelKey, placeholder) {
             const element = document.querySelector(`#${elementId}`);
 
             if (!element || editorInstances.has(elementId)) {
                 return;
             }
 
-            try {
-                const editor = await ClassicEditor.create(element, {
+            const quill = new Quill(element, {
+                theme: 'snow',
+                modules: {
                     toolbar: [
-                        'heading',
-                        '|',
-                        'bold',
-                        'italic',
-                        'underline',
-                        '|',
-                        'bulletedList',
-                        'numberedList',
-                        '|',
-                        'link',
-                        'blockQuote',
-                        '|',
-                        'undo',
-                        'redo'
-                    ],
-                    heading: {
-                        options: [
-                            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-                            { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-                            { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-                            { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
-                        ]
-                    },
-                    placeholder
-                });
+                        [{ header: [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        ['link', 'blockquote'],
+                        ['clean']
+                    ]
+                },
+                placeholder
+            });
 
-                editorInstances.set(elementId, editor);
-                editor.setData(this[modelKey] || '');
+            editorInstances.set(elementId, quill);
 
-                editor.model.document.on('change:data', () => {
-                    this[modelKey] = editor.getData();
-
-                    if (modelKey === 'introduction_line' && this.$refs.introductionLineInput) {
-                        this.$refs.introductionLineInput.value = this[modelKey];
-                    }
-
-                    if (modelKey === 'profile_text' && this.$refs.profileTextInput) {
-                        this.$refs.profileTextInput.value = this[modelKey];
-                    }
-                });
-            } catch (error) {
-                console.error(`CKEditor initialization error for ${elementId}:`, error);
-                this.error('Unable to load the editor.');
-                this.syncHiddenEditorInputs();
+            if (this[modelKey]) {
+                quill.clipboard.dangerouslyPasteHTML(0, this[modelKey]);
             }
+
+            quill.on('text-change', () => {
+                this[modelKey] = quill.root.innerHTML;
+
+                if (modelKey === 'introduction_line' && this.$refs.introductionLineInput) {
+                    this.$refs.introductionLineInput.value = this[modelKey];
+                }
+
+                if (modelKey === 'profile_text' && this.$refs.profileTextInput) {
+                    this.$refs.profileTextInput.value = this[modelKey];
+                }
+            });
         },
 
         syncHiddenEditorInputs() {
@@ -136,11 +113,11 @@ document.addEventListener('alpine:init', () => {
             const profileEditor = this.getEditor('profile_text_editor');
 
             if (introductionEditor) {
-                this.introduction_line = introductionEditor.getData();
+                this.introduction_line = introductionEditor.root.innerHTML;
             }
 
             if (profileEditor) {
-                this.profile_text = profileEditor.getData();
+                this.profile_text = profileEditor.root.innerHTML;
             }
 
             if (this.$refs.introductionLineInput) {

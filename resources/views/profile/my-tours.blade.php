@@ -62,12 +62,10 @@
             </div>
 
             <div class="mt-3">
-                <textarea
+                <div
                     x-ref="descriptionEditor"
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
-                    placeholder="Tour description"
-                    rows="4"
-                ></textarea>
+                    class="w-full bg-white"
+                ></div>
             </div>
 
             <!-- Enabled toggle -->
@@ -276,16 +274,25 @@
 </div>
 
 @push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
 <style>
-    .ck-editor__editable {
+    .ql-editor {
         min-height: 150px !important;
         font-size: 1rem !important;
         color: #1f2937 !important;
         background-color: #ffffff !important;
-        border-radius: 0.5rem !important;
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
     }
-    .ck.ck-editor {
-        width: 100% !important;
+    .ql-toolbar.ql-snow {
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        border-color: #e5e7eb !important;
+    }
+    .ql-container.ql-snow {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        border-color: #e5e7eb !important;
     }
     [x-cloak] {
         display: none !important;
@@ -300,7 +307,7 @@
 @endpush
 
 @push('scripts')
-<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="{{ asset('profile/js/tour-manager.js') }}?v={{ filemtime(public_path('profile/js/tour-manager.js')) }}"></script>
 @endpush
 @endsection

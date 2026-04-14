@@ -1,5 +1,5 @@
-// Store CKEditor instances outside Alpine's reactive proxy to avoid conflicts
-const editorInstances = new WeakMap();
+// Store Quill instance outside Alpine's reactive proxy to avoid conflicts
+let quillEditorInstance = null;
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('profileMessageEditor', (config = {}) => ({
@@ -14,56 +14,40 @@ document.addEventListener('alpine:init', () => {
         },
 
         getEditor() {
-            return editorInstances.get(this.$refs.editor);
+            return quillEditorInstance;
         },
 
-        async initEditor() {
-            await this.$nextTick();
+        initEditor() {
+            this.$nextTick(() => {
+                const el = this.$refs.editor;
 
-            if (!this.$refs.editor || editorInstances.has(this.$refs.editor)) {
-                return;
-            }
+                if (!el || quillEditorInstance) {
+                    return;
+                }
 
-            try {
-                const editor = await ClassicEditor.create(this.$refs.editor, {
-                    toolbar: [
-                        'heading',
-                        '|',
-                        'bold',
-                        'italic',
-                        'underline',
-                        '|',
-                        'bulletedList',
-                        'numberedList',
-                        '|',
-                        'link',
-                        'blockQuote',
-                        '|',
-                        'undo',
-                        'redo'
-                    ],
-                    heading: {
-                        options: [
-                            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-                            { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-                            { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-                            { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                quillEditorInstance = new Quill(el, {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            [{ header: [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline'],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            ['link', 'blockquote'],
+                            ['clean']
                         ]
                     },
                     placeholder: 'Write your profile message...'
                 });
 
-                editorInstances.set(this.$refs.editor, editor);
-                editor.setData(this.content || '');
+                if (this.content) {
+                    quillEditorInstance.clipboard.dangerouslyPasteHTML(0, this.content);
+                }
 
-                editor.model.document.on('change:data', () => {
-                    this.content = editor.getData();
+                quillEditorInstance.on('text-change', () => {
+                    this.content = quillEditorInstance.root.innerHTML;
                     this.errors = {};
                 });
-            } catch (error) {
-                console.error('CKEditor initialization error:', error);
-                this.error('Unable to load the editor.');
-            }
+            });
         },
 
         async saveMessage() {
@@ -104,12 +88,6 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
-                // Update editor with saved content so it stays visible
-                const ed = this.getEditor();
-                if (ed) {
-                    ed.setData(this.content);
-                }
-
                 this.toast(data.message || 'Profile message saved successfully.');
             } catch (error) {
                 console.error('Save error:', error);
@@ -122,7 +100,7 @@ document.addEventListener('alpine:init', () => {
         clearEditor() {
             const ed = this.getEditor();
             if (ed) {
-                ed.setData('');
+                ed.setContents([]);
             }
 
             this.content = '';
