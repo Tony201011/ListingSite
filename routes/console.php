@@ -12,3 +12,8 @@ Schedule::command('accounts:purge-deleted')
     ->dailyAt('02:00')
     ->withoutOverlapping()
     ->onOneServer();
+
+Schedule::command('set-and-forget:process')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->onOneServer();

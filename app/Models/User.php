@@ -172,4 +172,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return $this->hasMany(ProfileView::class);
     }
+
+    public function setAndForget(): HasOne
+    {
+        return $this->hasOne(SetAndForget::class);
+    }
 }

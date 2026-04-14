@@ -219,6 +219,7 @@ Route::middleware('provider.auth')->group(function () {
 
         /*** forget end here */
         Route::get('/set-and-forget', [ForgetController::class, 'setForget'])->name('set-and-forget');
+        Route::post('/set-and-forget', [ForgetController::class, 'save'])->name('set-and-forget.save');
         /*** forget end here */
 
         /**** babe rank start here */
