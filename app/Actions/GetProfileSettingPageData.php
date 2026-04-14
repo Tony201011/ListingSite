@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Concerns\ResolvesProfileCategoryIds;
+use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\UserVideo;
@@ -10,6 +11,8 @@ use App\Models\UserVideo;
 class GetProfileSettingPageData
 {
     use ResolvesProfileCategoryIds;
+    use ResolvesProfileCategoryValues;
+
     public function execute(?User $user): array
     {
         $user = $user?->load('providerProfile');
@@ -52,6 +55,9 @@ class GetProfileSettingPageData
             'bust_size_name' => $categories[$profile?->bust_size_id] ?? null,
             'your_length_name' => $categories[$profile?->your_length_id] ?? null,
             'resolved_tags' => $this->resolveTagIds($profile, $categories),
+            'availability_name' => self::resolveProfileCategoryName($profile?->availability, 'availability'),
+            'contact_method_name' => self::resolveProfileCategoryName($profile?->contact_method, 'contact-method'),
+            'phone_contact_preference_name' => self::resolveProfileCategoryName($profile?->phone_contact_preference, 'phone-contact-preferences'),
         ];
 
         $profileImages = $user?->profileImages()
