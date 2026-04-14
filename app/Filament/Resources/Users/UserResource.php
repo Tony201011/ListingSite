@@ -500,7 +500,6 @@ class UserResource extends Resource
                                         ->columns(2)
                                         ->defaultItems(0)
                                         ->addActionLabel('Add Photo')
-                                        ->collapsible()
                                         ->cloneable()
                                         ->deleteAction(fn ($action) => $action->requiresConfirmation())
                                         ->columnSpanFull(),
@@ -533,7 +532,6 @@ class UserResource extends Resource
                                         ->columns(2)
                                         ->defaultItems(0)
                                         ->addActionLabel('Add Video')
-                                        ->collapsible()
                                         ->cloneable()
                                         ->deleteAction(fn ($action) => $action->requiresConfirmation())
                                         ->columnSpanFull(),
