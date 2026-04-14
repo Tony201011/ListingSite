@@ -567,15 +567,20 @@ class UserResource extends Resource
                                                     }
 
                                                     $url = self::mediaUrl((string) $path);
+                                                    $ext = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
+                                                    $mimeMap = ['mp4' => 'video/mp4', 'webm' => 'video/webm', 'ogg' => 'video/ogg', 'mov' => 'video/quicktime'];
+                                                    $mime = $mimeMap[$ext] ?? 'video/mp4';
+                                                    $name = e(basename((string) $path));
 
                                                     return new HtmlString(
                                                         '<div style="max-width:320px;">'
                                                         . '<video controls preload="metadata" style="width:100%;max-height:180px;border-radius:0.375rem;">'
-                                                        . '<source src="' . e($url) . '">'
+                                                        . '<source src="' . e($url) . '" type="' . $mime . '">'
+                                                        . 'Your browser does not support the video element. <a href="' . e($url) . '" target="_blank" rel="noopener noreferrer">' . $name . '</a>'
                                                         . '</video>'
                                                         . '<a href="' . e($url) . '" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;margin-top:4px;color:inherit;text-decoration:underline;">'
                                                         . '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>'
-                                                        . ' ' . e(basename($path))
+                                                        . ' ' . $name
                                                         . '</a>'
                                                         . '</div>'
                                                     );
