@@ -43,6 +43,7 @@ class HomeController extends Controller
             $slug,
             $request->validated()
         );
+        $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
 
         return view('frontend.profile-show', $viewData);
     }

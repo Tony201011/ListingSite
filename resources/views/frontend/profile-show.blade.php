@@ -38,7 +38,9 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
 @endphp
 
 @section('content')
-<div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800">
+<div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800"
+    x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
+>
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
             <a href="{{ url('/') }}" class="hover:text-gray-700">Home</a>
@@ -369,9 +371,16 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
                         </div>
                         @endif
                         <div class="flex gap-4 mt-4">
-                            <button class="flex items-center gap-2 border border-gray-300 bg-white rounded-xl px-6 py-3 transition hover:bg-pink-50 text-pink-700 font-semibold text-lg w-1/2 justify-center" style="border-width:2px;">
-                                <i class="fa-regular fa-heart text-2xl"></i>
-                                <span class="font-semibold">Save favourite</span>
+                            <button
+                                type="button"
+                                @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
+                                :class="isFavourite('{{ $profile['slug'] }}') ? 'bg-pink-50 text-pink-700 border-pink-400' : 'bg-white text-pink-700 border-gray-300 hover:bg-pink-50'"
+                                class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-1/2 justify-center"
+                                style="border-width:2px;"
+                                title="Save favourite"
+                            >
+                                <i :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart text-pink-600' : 'fa-regular fa-heart'" class="text-2xl"></i>
+                                <span class="font-semibold" x-text="isFavourite('{{ $profile['slug'] }}') ? 'Saved' : 'Save favourite'"></span>
                             </button>
                         </div>
                     </div>
@@ -635,6 +644,33 @@ $profileTags = !empty($profile['attributes']) ? $profile['attributes'] : [];
 </div>
 
 <script>
+function favouriteBookmark(config) {
+    return {
+        favourites: config.favourites || [],
+
+        isFavourite(slug) {
+            return this.favourites.includes(slug);
+        },
+
+        async toggleFavourite(slug) {
+            const res = await fetch('/favourite/' + encodeURIComponent(slug), {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.active) {
+                if (!this.favourites.includes(slug)) this.favourites.push(slug);
+            } else {
+                this.favourites = this.favourites.filter(s => s !== slug);
+            }
+        },
+    };
+}
+
 function submitReport(event) {
     event.preventDefault();
     const form = document.getElementById('report-form');
