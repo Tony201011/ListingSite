@@ -76,6 +76,7 @@ class MyProfileControllerTest extends TestCase
                 'stepPhotoVerificationCompleted' => false,
                 'profileUrl' => null,
                 'shortUrlFull' => null,
+                'babeRank' => 0,
             ]);
 
         $this->app->instance(GetMyProfilePageData::class, $getMyProfilePageData);
@@ -101,6 +102,7 @@ class MyProfileControllerTest extends TestCase
                 'stepPhotoVerificationCompleted' => false,
                 'profileUrl' => 'http://example.com/profile/provider-1',
                 'shortUrlFull' => null,
+                'babeRank' => 42,
             ]);
 
         $this->app->instance(GetMyProfilePageData::class, $getMyProfilePageData);

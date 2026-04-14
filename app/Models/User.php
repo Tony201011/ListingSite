@@ -167,4 +167,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return $this->hasOne(ShortUrl::class);
     }
+
+    public function profileViews(): HasMany
+    {
+        return $this->hasMany(ProfileView::class);
+    }
 }

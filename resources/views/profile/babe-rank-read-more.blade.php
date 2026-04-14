@@ -41,6 +41,25 @@
 
             <div class="my-5 flex justify-center">
                 <div class="w-full max-w-[300px]">
+                    @php
+                        $rankValue = max(0, min(100, $rank ?? 0));
+                        $cx = 100; $cy = 120;
+                        $outerR = 75; $innerR = 58.125;
+                        $startOuterX = $cx - $outerR; // 25
+                        $startInnerX = $cx - $innerR; // 41.875
+                        if ($rankValue > 0) {
+                            $degrees = 180 - ($rankValue / 100) * 180;
+                            $rad = deg2rad($degrees);
+                            $outerX = round($cx + $outerR * cos($rad), 6);
+                            $outerY = round($cy - $outerR * sin($rad), 6);
+                            $innerX = round($cx + $innerR * cos($rad), 6);
+                            $innerY = round($cy - $innerR * sin($rad), 6);
+                            $largeArc = ($rankValue >= 50) ? 1 : 0;
+                            $gaugeFillPath = "M{$startInnerX},{$cy}L{$startOuterX},{$cy}A{$outerR},{$outerR},0,{$largeArc},1,{$outerX},{$outerY}L{$innerX},{$innerY}A{$innerR},{$innerR},0,{$largeArc},0,{$startInnerX},{$cy}Z";
+                        } else {
+                            $gaugeFillPath = null;
+                        }
+                    @endphp
                     <svg viewBox="0 0 200 150" class="h-auto w-full" aria-hidden="true">
                         <defs>
                             <filter id="inner-shadow-gauge">
@@ -60,12 +79,14 @@
                             filter="url(#inner-shadow-gauge)"
                         ></path>
 
+                        @if($gaugeFillPath)
                         <path
                             fill="#df6bbf"
                             stroke="none"
-                            d="M41.875,120L25,120A75,75,0,0,1,26.328456195348352,105.94640140607062L42.904553551394976,109.10846108970473A58.125,58.125,0,0,0,41.875,120Z"
+                            d="{{ $gaugeFillPath }}"
                             filter="url(#inner-shadow-gauge)"
                         ></path>
+                        @endif
 
                         <text
                             x="100"
@@ -76,7 +97,7 @@
                             fill="#df6bbf"
                             font-weight="bold"
                         >
-                            6
+                            {{ $rankValue }}
                         </text>
                     </svg>
                 </div>
