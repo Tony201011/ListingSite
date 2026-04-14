@@ -33,7 +33,7 @@
                     @input="clearMessages"
                     class="flex-1 px-3 py-2.5 focus:outline-none"
                     placeholder="your-custom-slug"
-                    {{ $siteSetting ? '' : 'disabled' }}
+                    @disabled(! $siteSetting)
                 >
             </div>
 
@@ -46,7 +46,7 @@
                 @click="saveSlug"
                 :disabled="saving"
                 class="mt-4 px-5 py-2.5 rounded-lg bg-pink-600 text-white disabled:opacity-60 disabled:cursor-not-allowed"
-                {{ $siteSetting ? '' : 'disabled' }}
+                @disabled(! $siteSetting)
             >
                 <span x-show="!saving">Save URL</span>
                 <span x-show="saving">Saving...</span>
