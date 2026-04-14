@@ -554,7 +554,8 @@ class UserResource extends Resource
                                             TextInput::make('original_name')
                                                 ->label('File Name')
                                                 ->maxLength(255)
-                                                ->required(),
+                                                ->required()
+                                                ->columnSpanFull(),
 
                                             Placeholder::make('video_preview')
                                                 ->label('Current Video')
