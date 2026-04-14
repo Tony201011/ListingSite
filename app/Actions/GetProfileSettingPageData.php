@@ -47,6 +47,7 @@ class GetProfileSettingPageData
         $userInfo = [
             'user' => $user,
             'provider_profile' => $profile,
+            'introduction_line' => $profile?->introduction_line,
             'age_group_name' => $categories[$profile?->age_group_id] ?? null,
             'hair_color_name' => $categories[$profile?->hair_color_id] ?? null,
             'hair_length_name' => $categories[$profile?->hair_length_id] ?? null,
@@ -54,10 +55,17 @@ class GetProfileSettingPageData
             'body_type_name' => $categories[$profile?->body_type_id] ?? null,
             'bust_size_name' => $categories[$profile?->bust_size_id] ?? null,
             'your_length_name' => $categories[$profile?->your_length_id] ?? null,
-            'resolved_tags' => $this->resolveTagIds($profile, $categories),
+            'primary_identity_tags' => $this->resolveIds((array) ($profile?->primary_identity ?? []), $categories),
+            'attributes_tags' => $this->resolveIds((array) ($profile?->attributes ?? []), $categories),
+            'services_style_tags' => $this->resolveIds((array) ($profile?->services_style ?? []), $categories),
+            'services_provided_tags' => $this->resolveIds((array) ($profile?->services_provided ?? []), $categories),
             'availability_name' => self::resolveProfileCategoryName($profile?->availability, 'availability'),
             'contact_method_name' => self::resolveProfileCategoryName($profile?->contact_method, 'contact-method'),
             'phone_contact_preference_name' => self::resolveProfileCategoryName($profile?->phone_contact_preference, 'phone-contact-preferences'),
+            'time_waster_shield_name' => self::resolveProfileCategoryName($profile?->time_waster_shield, 'time-waster-shield'),
+            'twitter_handle' => $profile?->twitter_handle,
+            'website' => $profile?->website,
+            'onlyfans_username' => $profile?->onlyfans_username,
         ];
 
         $profileImages = $user?->profileImages()
@@ -82,21 +90,5 @@ class GetProfileSettingPageData
             'photoVerification' => $photoVerification,
             'userInfo' => $userInfo,
         ];
-    }
-
-    private function resolveTagIds(mixed $profile, \Illuminate\Support\Collection $categories): array
-    {
-        if ($profile === null) {
-            return [];
-        }
-
-        $allValues = array_merge(
-            (array) ($profile->primary_identity ?? []),
-            (array) ($profile->attributes ?? []),
-            (array) ($profile->services_style ?? []),
-            (array) ($profile->services_provided ?? []),
-        );
-
-        return $this->resolveIds($allValues, $categories);
     }
 }
