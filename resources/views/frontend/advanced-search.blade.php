@@ -127,6 +127,7 @@
                 {{-- Distance / Near Me filter --}}
                 <input type="hidden" name="user_lat" :value="userLat">
                 <input type="hidden" name="user_lng" :value="userLng">
+                <input type="hidden" name="distance" :value="locationEnabled ? distance : ''">
                 <div>
                     <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Distance (Near Me)</label>
                     <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
