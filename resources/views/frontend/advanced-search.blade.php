@@ -240,7 +240,11 @@
         >
             <div class="mb-4 flex flex-wrap items-center gap-3">
                 <span class="text-sm text-gray-600">
-                    {{ $profiles->total() }} {{ $profiles->total() === 1 ? 'profile' : 'profiles' }} found
+                    @if($profiles->total() > 0)
+                        Showing {{ $profiles->firstItem() }} to {{ $profiles->lastItem() }} of {{ $profiles->total() }} results
+                    @else
+                        0 results
+                    @endif
                 </span>
                 @if($hasActiveFilters)
                     <a href="{{ route('advanced-search') }}" class="text-xs text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
@@ -421,7 +425,7 @@
             </div>
 
             {{-- Pagination --}}
-            <div class="mt-8">
+            <div class="mt-8 flex justify-center">
                 {{ $profiles->links() }}
             </div>
         </div>

@@ -199,7 +199,11 @@
 
             <div class="ml-auto flex items-center gap-2 text-xs text-gray-600">
                 <span class="hidden sm:inline text-gray-500">
-                    {{ $profiles->total() }} {{ $profiles->total() === 1 ? 'profile' : 'profiles' }}
+                    @if($profiles->total() > 0)
+                        Showing {{ $profiles->firstItem() }} to {{ $profiles->lastItem() }} of {{ $profiles->total() }} results
+                    @else
+                        0 results
+                    @endif
                     @if($hasActiveFilters)
                         <a href="{{ url('/') }}" class="ml-2 text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
                     @endif
@@ -367,7 +371,7 @@
         </div>
 
         {{-- Pagination --}}
-        <div class="mt-10">
+        <div class="mt-10 flex justify-center">
             {{ $profiles->links() }}
         </div>
     </div>
