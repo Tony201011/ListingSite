@@ -33,7 +33,7 @@ class AccountStatusChart extends ChartWidget
     protected function getData(): array
     {
         $query = User::query()
-            ->whereIn('role', [User::ROLE_PROVIDER, User::ROLE_AGENT]);
+            ->where('role', User::ROLE_PROVIDER);
 
         if ($this->filter && $this->filter !== 'all') {
             $query->whereYear('created_at', (int) $this->filter);
@@ -51,7 +51,6 @@ class AccountStatusChart extends ChartWidget
             ->keyBy('role');
 
         $providers = $stats->get(User::ROLE_PROVIDER);
-        $agents = $stats->get(User::ROLE_AGENT);
 
         return [
             'datasets' => [
@@ -71,25 +70,6 @@ class AccountStatusChart extends ChartWidget
                         'rgba(34, 197, 94, 1)',
                         'rgba(251, 191, 36, 1)',
                         'rgba(239, 68, 68, 1)',
-                    ],
-                    'borderWidth' => 1,
-                ],
-                [
-                    'label' => 'Agents',
-                    'data' => [
-                        (int) ($agents?->active_verified ?? 0),
-                        (int) ($agents?->active_unverified ?? 0),
-                        (int) ($agents?->blocked ?? 0),
-                    ],
-                    'backgroundColor' => [
-                        'rgba(59, 130, 246, 0.7)',
-                        'rgba(168, 85, 247, 0.7)',
-                        'rgba(249, 115, 22, 0.7)',
-                    ],
-                    'borderColor' => [
-                        'rgba(59, 130, 246, 1)',
-                        'rgba(168, 85, 247, 1)',
-                        'rgba(249, 115, 22, 1)',
                     ],
                     'borderWidth' => 1,
                 ],

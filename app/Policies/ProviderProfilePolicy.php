@@ -10,14 +10,12 @@ class ProviderProfilePolicy
     public function viewAny(User $user): bool
     {
         return $user->role === User::ROLE_ADMIN
-            || ($user->role === User::ROLE_AGENT && ! $user->is_blocked)
             || $user->role === User::ROLE_PROVIDER;
     }
 
     public function create(User $user): bool
     {
         return $user->role === User::ROLE_ADMIN
-            || ($user->role === User::ROLE_AGENT && ! $user->is_blocked)
             || $user->role === User::ROLE_PROVIDER;
     }
 
@@ -70,10 +68,6 @@ class ProviderProfilePolicy
     {
         if ($user->role === User::ROLE_ADMIN) {
             return true;
-        }
-
-        if ($user->role === User::ROLE_AGENT && ! $user->is_blocked) {
-            return $profile->agent_id === $user->id;
         }
 
         return $profile->user_id === $user->id;

@@ -458,7 +458,6 @@ class BuildProfileFilterViewData
             'verified' => $profile->is_verified,
             'image' => $imageUrl ?? '',
             'slug' => $profile->slug,
-            'is_agent_profile' => filled($profile->agent_id),
         ];
     }
 

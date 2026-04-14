@@ -36,7 +36,6 @@ class DatabaseSeeder extends Seeder
             TourCitySeeder::class,
             PostcodeSeeder::class,
             SiteSettingSeeder::class,
-            DummyAgentSeeder::class,
             DummyProviderProfileSeeder::class,
             DummyProviderListingSeeder::class,
             VerificationExampleImageSeeder::class,

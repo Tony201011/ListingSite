@@ -31,7 +31,7 @@ class SigninProvider
             ])->withInput();
         }
 
-        $guard = $user->role === User::ROLE_AGENT ? 'agent' : 'web';
+        $guard = 'web';
 
         if (Auth::guard($guard)->attempt([
             'email' => $request->email,
@@ -41,7 +41,6 @@ class SigninProvider
 
             $destination = match ($user->role) {
                 User::ROLE_ADMIN => '/admin',
-                User::ROLE_AGENT => '/agent',
                 default => '/my-profile',
             };
 

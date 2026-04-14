@@ -82,7 +82,6 @@ class LoginLogResource extends Resource
                     ->relationship('user', 'role')
                     ->options([
                         'admin' => 'Admin',
-                        'agent' => 'Agent',
                         'provider' => 'Provider',
                     ]),
             ])
