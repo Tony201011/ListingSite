@@ -251,7 +251,7 @@
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">BABE RANK</h3>
                     <p class="mb-3 text-3xl font-bold text-gray-900">
-                        7 <span class="text-base font-normal text-gray-500">out of 100</span>
+                        {{ $babeRank }} <span class="text-base font-normal text-gray-500">out of 100</span>
                     </p>
                     <a href="{{ url('/babe-rank-read-more') }}" class="text-sm font-medium text-pink-600 hover:text-pink-700">
                         Read more about BabeRank

@@ -39,6 +39,7 @@ class BabeRankControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('profile.my-babe-rank');
+        $response->assertViewHasAll(['rank', 'profileScore', 'viewsToday', 'shortCode']);
     }
 
     public function test_babe_rank_read_more_view_is_returned_for_authenticated_provider(): void
@@ -49,6 +50,7 @@ class BabeRankControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('profile.babe-rank-read-more');
+        $response->assertViewHasAll(['rank', 'profileScore', 'viewsToday', 'shortCode']);
     }
 
     public function test_guest_cannot_access_my_babe_rank(): void

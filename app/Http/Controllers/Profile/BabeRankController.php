@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\CalculateBabeRank;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class BabeRankController extends Controller
 {
+    public function __construct(private CalculateBabeRank $calculateBabeRank) {}
+
     public function myBabeRank()
     {
-        return view('profile.my-babe-rank');
+        $data = $this->calculateBabeRank->execute(Auth::user());
+
+        return view('profile.my-babe-rank', $data);
     }
 
     public function babeRank()
     {
-        return view('profile.babe-rank-read-more');
+        $data = $this->calculateBabeRank->execute(Auth::user());
+
+        return view('profile.babe-rank-read-more', $data);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Actions\BuildProfileFilterViewData;
 use App\Actions\GetProfileShowData;
+use App\Actions\RecordProfileView;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdvancedSearchRequest;
 use App\Http\Requests\HomeIndexRequest;
@@ -16,7 +17,8 @@ class HomeController extends Controller
     public function __construct(
         private BuildProfileFilterViewData $buildProfileFilterViewData,
         private GetProfileShowData $getProfileShowData,
-        private FavouriteBookmarkService $favouriteBookmarkService
+        private FavouriteBookmarkService $favouriteBookmarkService,
+        private RecordProfileView $recordProfileView,
     ) {}
 
     public function index(HomeIndexRequest $request): View
@@ -44,6 +46,8 @@ class HomeController extends Controller
             $request->validated()
         );
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
+
+        $this->recordProfileView->execute($slug, $request);
 
         return view('frontend.profile-show', $viewData);
     }

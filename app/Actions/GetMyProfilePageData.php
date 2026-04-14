@@ -6,6 +6,8 @@ use App\Models\User;
 
 class GetMyProfilePageData
 {
+    public function __construct(private CalculateBabeRank $calculateBabeRank) {}
+
     public function execute(?User $user): array
     {
         $profile = $user?->providerProfile;
@@ -52,6 +54,8 @@ class GetMyProfilePageData
             ? url($shortUrlRecord->short_url)
             : null;
 
+        $rankData = $this->calculateBabeRank->execute($user);
+
         return [
             'user' => $user,
             'profile' => $profile,
@@ -60,6 +64,7 @@ class GetMyProfilePageData
             'stepPhotoVerificationCompleted' => $stepPhotoVerificationCompleted,
             'profileUrl' => $profileUrl,
             'shortUrlFull' => $shortUrlFull,
+            'babeRank' => $rankData['rank'],
         ];
     }
 }
