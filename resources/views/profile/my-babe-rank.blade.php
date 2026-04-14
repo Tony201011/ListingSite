@@ -41,7 +41,7 @@
             </ul>
 
             <div class="mt-6">
-                <a href="{{ route('babe-rank') }}" class="text-sm font-medium text-pink-600 hover:underline">
+                <a href="{{ route('babe-rank-read-more') }}" class="text-sm font-medium text-pink-600 hover:underline">
                     Read more about how Babe Rank works &rarr;
                 </a>
             </div>
