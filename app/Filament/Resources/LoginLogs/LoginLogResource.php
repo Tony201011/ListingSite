@@ -85,7 +85,7 @@ class LoginLogResource extends Resource
                         'provider' => 'Provider',
                     ]),
             ])
-            ->defaultSort('logged_in_at', 'desc')
+            ->defaultSort('created_at', 'desc')
             ->striped()
             ->emptyStateHeading('No login records yet')
             ->emptyStateDescription('User login activity will appear here once users sign in.');
