@@ -3,6 +3,7 @@
 namespace App\Filament\Agent\Resources\ProviderListingResource\Pages;
 
 use App\Filament\Agent\Resources\ProviderListingResource;
+use App\Filament\Concerns\LoadsProviderMediaBeforeFill;
 use App\Models\ProfileMessage;
 use App\Models\ProviderProfile;
 use Filament\Actions\Action;
@@ -16,6 +17,8 @@ use Illuminate\Support\Str;
 
 class EditProviderListing extends EditRecord
 {
+    use LoadsProviderMediaBeforeFill;
+
     protected static string $resource = ProviderListingResource::class;
 
     protected function handleRecordUpdate(Model $record, array $data): Model

@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Filament\Concerns;
+
+trait LoadsProviderMediaBeforeFill
+{
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $record = $this->getRecord();
+
+        $record->load(['profileImages', 'userVideos']);
+
+        $data['profileImages'] = $record->profileImages
+            ->map(fn ($image) => [
+                'id' => $image->id,
+                'image_path' => $image->image_path,
+                'thumbnail_path' => $image->thumbnail_path,
+                'is_primary' => (bool) $image->is_primary,
+            ])
+            ->toArray();
+
+        $data['userVideos'] = $record->userVideos
+            ->map(fn ($video) => [
+                'id' => $video->id,
+                'original_name' => $video->original_name,
+                'video_path' => $video->video_path,
+            ])
+            ->toArray();
+
+        return $data;
+    }
+}
