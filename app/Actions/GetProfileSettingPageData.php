@@ -6,6 +6,7 @@ use App\Actions\GetProfileMessage;
 use App\Concerns\ResolvesProfileCategoryIds;
 use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\Category;
+use App\Models\SiteSetting;
 use App\Models\User;
 use App\Models\UserVideo;
 
@@ -81,12 +82,17 @@ class GetProfileSettingPageData
             ->whereNull('deleted_at')
             ->exists();
 
+        $shortUrlEnabled = SiteSetting::query()
+            ->latest('updated_at')
+            ->value('short_url') ?? false;
+
         return [
             'profileImages' => $profileImages,
             'videos' => $videos,
             'photoVerification' => $photoVerification,
             'userInfo' => $userInfo,
             'profileMessage' => $this->getProfileMessage->execute($user),
+            'shortUrlEnabled' => $shortUrlEnabled,
         ];
     }
 

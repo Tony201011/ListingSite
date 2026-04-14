@@ -82,6 +82,24 @@ class UrlControllerTest extends TestCase
         $response->assertRedirect('/signin');
     }
 
+    public function test_short_url_redirects_to_profile_setting_when_feature_is_disabled(): void
+    {
+        $user = $this->createProvider();
+
+        $getShortUrlPageData = Mockery::mock(GetShortUrlPageData::class);
+        $getShortUrlPageData->shouldReceive('execute')
+            ->once()
+            ->andReturn([
+                'redirect' => '/profile-setting',
+            ]);
+
+        $this->app->instance(GetShortUrlPageData::class, $getShortUrlPageData);
+
+        $response = $this->actingAs($user)->get(route('short-url'));
+
+        $response->assertRedirect('/profile-setting');
+    }
+
     public function test_update_short_url_returns_json_response(): void
     {
         $user = $this->createProvider();
