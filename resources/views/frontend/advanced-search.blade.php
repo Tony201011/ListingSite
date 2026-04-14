@@ -56,9 +56,18 @@
                             this.userLng = pos.coords.longitude;
                             this.locationEnabled = true;
                         },
-                        () => {
-                            this.geoError = 'Unable to retrieve your location. Please allow location access.';
-                        }
+                        (err) => {
+                            if (err.code === 1) {
+                                this.geoError = 'Location access denied. Please allow location in your browser settings and try again.';
+                            } else if (err.code === 2) {
+                                this.geoError = 'Location unavailable. Please check your device location settings.';
+                            } else if (err.code === 3) {
+                                this.geoError = 'Location request timed out. Please try again.';
+                            } else {
+                                this.geoError = 'Unable to retrieve your location. Please allow location access.';
+                            }
+                        },
+                        { timeout: 10000, maximumAge: 60000 }
                     );
                 },
                 clearLocation() {
