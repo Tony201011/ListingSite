@@ -1,6 +1,11 @@
 @extends('layouts.frontend')
 
 @section('content')
+@php
+    $pageTitle = $page?->title ?: 'My Babe Rank';
+    $pageSubtitle = $page?->subtitle ?: 'What is your Babe Rank';
+    $pageContent = $page?->content;
+@endphp
 <div class="min-h-screen bg-white">
     <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-5">
@@ -13,31 +18,15 @@
         </div>
 
         <h1 class="mb-8 border-l-4 border-[#e04ecb] pl-4 text-3xl font-bold text-gray-900 sm:text-4xl">
-            My Babe Rank
+            {{ $pageTitle }}
         </h1>
 
-        <section class="mb-8">
-            <h2 class="mb-4 text-2xl font-semibold text-[#e04ecb] sm:text-3xl">
-                What is your Babe Rank
-            </h2>
-
-            <p class="text-base leading-7 text-gray-700 sm:text-lg">
-                Your Babe Rank is a score between 1 and 100, and it represents how "real" (or in other words how active)
-                you are on Realbabes, you could see it as a kind of 'real-o-meter'. The higher your Babe Rank, the higher
-                your profile will show up in our listings and more often featured on our homepage. Get a higher Babe Rank
-                to get your profile to the top!
-            </p>
-        </section>
-
         <section class="mb-10">
+            @if($pageSubtitle)
             <h2 class="mb-4 text-2xl font-semibold text-[#e04ecb] sm:text-3xl">
-                How can I make my Babe Rank go up?
+                {{ $pageSubtitle }}
             </h2>
-
-            <p class="mb-5 text-base leading-7 text-gray-700 sm:text-lg">
-                That's easy! Just be active on Realbabes, and your rank will increase! Just a few examples on how to
-                increase your babe rank you can see under this image.
-            </p>
+            @endif
 
             <div class="my-5 flex justify-center">
                 <div class="w-full max-w-[300px]">
@@ -102,94 +91,97 @@
                     </svg>
                 </div>
             </div>
+
+            @if(!empty($pageContent))
+                <article class="text-gray-700 leading-relaxed max-w-none [&_*]:text-gray-700 [&_h1]:text-gray-900 [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_h4]:text-gray-900 [&_h5]:text-gray-900 [&_h6]:text-gray-900 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-semibold [&_h4]:font-semibold [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_h1]:mt-6 [&_h2]:mt-5 [&_h3]:mt-4 [&_h1]:mb-3 [&_h2]:mb-3 [&_h3]:mb-2 [&_p]:mb-4 [&_li]:mb-1 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-pink-600 hover:[&_a]:text-pink-700">
+                    {!! $pageContent !!}
+                </article>
+            @else
+                <p class="text-base leading-7 text-gray-700 sm:text-lg">
+                    Your Babe Rank is a score between 1 and 100, and it represents how "real" (or in other words how active)
+                    you are on Realbabes, you could see it as a kind of 'real-o-meter'. The higher your Babe Rank, the higher
+                    your profile will show up in our listings and more often featured on our homepage. Get a higher Babe Rank
+                    to get your profile to the top!
+                </p>
+
+                <hr class="my-10 border-t-2 border-gray-100">
+
+                <h2 class="mb-4 text-2xl font-semibold text-[#e04ecb] sm:text-3xl">
+                    Examples how to increase your rank
+                </h2>
+
+                <ul class="mb-5 space-y-3">
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Upload more photos regularly. The ranking formula loves fresh new pictures.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Also more photos is good, don't stop with just 5 or 6. 10 to 20 is much better!
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Update your profile text from time to time. You also get rewards for having an extensive profile,
+                        in which you tell plenty about yourself. Short two liners won't make your rank go up.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Have links on your profile to your website and social media.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Set your short url. (We really recommend you use your realbabes short url in your communication with clients).
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Using the 'Available NOW' or 'Online NOW' features from time to time.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Get a POWERBOOST with a banner link exchange on your website.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Have your profile on 'visible'. Having your profile set to invisible can make your ranking go down.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Make your profile pretty so it is easy to read, with no spelling mistakes.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Going on tour? Using our touring features will help your ranking as well.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Newbies, who just signed up, don't worry you get bonus points for having a new profile. So you won't
+                        end on the bottom, but these bonus points slowly disappear after a while. So keep active to not let
+                        your rank go down.
+                    </li>
+                    <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
+                        <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
+                        Logging in to our website regularly helps as well. Not logging in for months, mmmmmm the formula
+                        doesn't like that!!
+                    </li>
+                </ul>
+
+                <p class="text-base leading-7 text-gray-700 sm:text-lg">
+                    There are many more variables that affect your Babe Rank, some of them we will keep secret and some others
+                    we will reveal in the near future. Some of your actions will have an instant impact, some others will have
+                    a delayed effect from a few hours to even a few days.
+                </p>
+
+                <div class="mt-8 rounded-lg border-l-4 border-[#e04ecb] bg-gray-50 p-6">
+                    <p class="mb-2 text-lg font-semibold text-gray-900 sm:text-xl">
+                        Just remember, be active &amp; real and your rank will go up
+                    </p>
+                    <p class="text-base text-[#e04ecb] sm:text-lg">
+                        You can also buy Babe Rank Boosters with your credits
+                    </p>
+                </div>
+            @endif
         </section>
-
-        <hr class="my-10 border-t-2 border-gray-100">
-
-        <section class="mb-10">
-            <h2 class="mb-4 text-2xl font-semibold text-[#e04ecb] sm:text-3xl">
-                Examples how to increase your rank
-            </h2>
-
-            <p class="mb-5 text-base leading-7 text-gray-700 sm:text-lg">
-                Babe Rank is a special formula created by us, you could compare it with how Google ranks websites in her
-                search results. By being more active, more real, more engaged your rank will go up instantly!
-            </p>
-
-            <p class="mb-3 text-base font-medium text-gray-900 sm:text-lg">
-                Some examples of what you can do are:
-            </p>
-
-            <ul class="mb-5 space-y-3">
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Upload more photos regularly. The ranking formula loves fresh new pictures.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Also more photos is good, don't stop with just 5 or 6. 10 to 20 is much better!
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Update your profile text from time to time. You also get rewards for having an extensive profile,
-                    in which you tell plenty about yourself. Short two liners won't make your rank go up.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Have links on your profile to your website and social media.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Set your short url. (We really recommend you use your realbabes short url in your communication with clients).
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Using the 'Available NOW' or 'Online NOW' features from time to time.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Get a POWERBOOST with a banner link exchange on your website.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Have your profile on 'visible'. Having your profile set to invisible can make your ranking go down.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Make your profile pretty so it is easy to read, with no spelling mistakes.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Going on tour? Using our touring features will help your ranking as well.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Newbies, who just signed up, don't worry you get bonus points for having a new profile. So you won't
-                    end on the bottom, but these bonus points slowly disappear after a while. So keep active to not let
-                    your rank go down.
-                </li>
-                <li class="relative pl-6 text-base leading-7 text-gray-700 sm:text-lg">
-                    <span class="absolute left-0 top-0 text-xl font-bold text-[#e04ecb]">•</span>
-                    Logging in to our website regularly helps as well. Not logging in for months, mmmmmm the formula
-                    doesn't like that!!
-                </li>
-            </ul>
-
-            <p class="text-base leading-7 text-gray-700 sm:text-lg">
-                There are many more variables that affect your Babe Rank, some of them we will keep secret and some others
-                we will reveal in the near future. Some of your actions will have an instant impact, some others will have
-                a delayed effect from a few hours to even a few days.
-            </p>
-        </section>
-
-        <div class="mt-8 rounded-lg border-l-4 border-[#e04ecb] bg-gray-50 p-6">
-            <p class="mb-2 text-lg font-semibold text-gray-900 sm:text-xl">
-                Just remember, be active &amp; real and your rank will go up
-            </p>
-            <p class="text-base text-[#e04ecb] sm:text-lg">
-                You can also buy Babe Rank Boosters with your credits
-            </p>
-        </div>
     </div>
 </div>
 @endsection
+
