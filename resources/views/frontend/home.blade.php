@@ -367,9 +367,7 @@
                     <a href="{{ url('/') }}" class="text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
                 </p>
             @endif
-            <div class="flex justify-center">
-                {{ $profiles->links() }}
-            </div>
+            {{ $profiles->links() }}
         </div>
     </div>
 </div>
