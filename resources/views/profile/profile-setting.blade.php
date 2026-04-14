@@ -108,15 +108,31 @@
                     </section>
 
                     <section class="mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 mb-3">My stats</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700">
-                            <div><span class="font-semibold text-pink-700">Age group:</span> {{ $userInfo['age_group_name'] ?? '-' }}</div>
-                            <div><span class="font-semibold text-pink-700">Ethnicity:</span> {{ $userInfo['ethnicity_name'] ?? '-' }}</div>
-                            <div><span class="font-semibold text-pink-700">Hair color:</span> {{ $userInfo['hair_color_name'] ?? '-' }}</div>
-                            <div><span class="font-semibold text-pink-700">Hair length:</span> {{ $userInfo['hair_length_name'] ?? '-' }}</div>
-                            <div><span class="font-semibold text-pink-700">Body type:</span> {{ $userInfo['body_type_name'] ?? '-' }}</div>
-                            <div><span class="font-semibold text-pink-700">Bust size:</span> {{ $userInfo['bust_size_name'] ?? '-' }}</div>
-                            <div><span class="font-semibold text-pink-700">Length:</span> {{ $userInfo['your_length_name'] ?? '-' }}</div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-xl font-bold text-gray-900">My stats</h2>
+                            <a href="{{ route('edit-profile') }}" class="text-sm font-medium text-pink-600 hover:text-pink-700 transition">Edit</a>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                            @php
+                                $stats = [
+                                    ['icon' => 'fa-solid fa-hourglass-half', 'label' => 'Age group', 'value' => $userInfo['age_group_name'] ?? null],
+                                    ['icon' => 'fa-solid fa-globe', 'label' => 'Ethnicity', 'value' => $userInfo['ethnicity_name'] ?? null],
+                                    ['icon' => 'fa-solid fa-palette', 'label' => 'Hair color', 'value' => $userInfo['hair_color_name'] ?? null],
+                                    ['icon' => 'fa-solid fa-scissors', 'label' => 'Hair length', 'value' => $userInfo['hair_length_name'] ?? null],
+                                    ['icon' => 'fa-solid fa-child-reaching', 'label' => 'Body type', 'value' => $userInfo['body_type_name'] ?? null],
+                                    ['icon' => 'fa-solid fa-braille', 'label' => 'Bust size', 'value' => $userInfo['bust_size_name'] ?? null],
+                                    ['icon' => 'fa-solid fa-ruler-vertical', 'label' => 'Length', 'value' => $userInfo['your_length_name'] ?? null],
+                                ];
+                            @endphp
+                            @foreach($stats as $stat)
+                            <div class="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3">
+                                <i class="{{ $stat['icon'] }} text-pink-500 w-5 text-center flex-shrink-0"></i>
+                                <div class="min-w-0">
+                                    <p class="text-xs text-gray-500 truncate">{{ $stat['label'] }}</p>
+                                    <p class="font-semibold text-gray-900 truncate">{{ $stat['value'] ?? '—' }}</p>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
 
                         <div class="flex flex-wrap gap-2 mt-4">
@@ -129,7 +145,7 @@
                                     {{ $tag }}
                                 </span>
                             @empty
-                                <span class="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">
+                                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-xs font-semibold italic">
                                     No tags added
                                 </span>
                             @endforelse
@@ -159,11 +175,23 @@
                     </section>
 
                     <section>
-                        <h2 class="text-xl font-bold text-gray-900 mb-2">Contact me for</h2>
-                        <ul class="space-y-1 text-gray-600">
-                            <li>• {{ $userInfo['availability_name'] ?? '-' }}</li>
-                            <li>• {{ $userInfo['contact_method_name'] ?? '-' }}</li>
-                            <li>• {{ $userInfo['phone_contact_preference_name'] ?? '-' }}</li>
+                        <h2 class="text-xl font-bold text-gray-900 mb-3">Contact me for</h2>
+                        <ul class="space-y-2">
+                            @php
+                                $contactItems = array_filter([
+                                    $userInfo['availability_name'] ?? null,
+                                    $userInfo['contact_method_name'] ?? null,
+                                    $userInfo['phone_contact_preference_name'] ?? null,
+                                ]);
+                            @endphp
+                            @forelse($contactItems as $item)
+                                <li class="flex items-start gap-2 text-sm text-gray-700">
+                                    <span class="text-pink-500 font-bold mt-0.5" aria-hidden="true">&raquo;</span>
+                                    <span>{{ $item }}</span>
+                                </li>
+                            @empty
+                                <li class="text-sm text-gray-400 italic">No contact preferences set.</li>
+                            @endforelse
                         </ul>
                     </section>
                 </div>
