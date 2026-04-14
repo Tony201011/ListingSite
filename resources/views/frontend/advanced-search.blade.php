@@ -334,11 +334,6 @@
                                         <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
                                     </span>
                                 @endif
-                                @if($profile['is_agent_profile'])
-                                    <span class="inline-flex items-center gap-1 bg-violet-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                                        <i class="fa-solid fa-user-tie text-[9px]"></i> Agent
-                                    </span>
-                                @endif
                             </div>
                         </div>
 

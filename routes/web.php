@@ -63,15 +63,15 @@ Route::get('/media/{path}', [MediaController::class, 'show'])
     ->name('media.show');
 
 Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
-    ->middleware('auth:web,agent')
+    ->middleware('auth:web')
     ->name('verification.notice');
 
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-    ->middleware(['auth:web,agent', 'signed'])
+    ->middleware(['auth:web', 'signed'])
     ->name('verification.verify');
 
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
-    ->middleware(['auth:web,agent', 'throttle:'.config('security.throttles.verification_send', '6,1')])
+    ->middleware(['auth:web', 'throttle:'.config('security.throttles.verification_send', '6,1')])
     ->name('verification.send');
 
 Route::redirect('/login', '/signin');

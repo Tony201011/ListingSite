@@ -58,7 +58,7 @@ class SitePassword
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
 
-            if ($user && in_array($user->role, [User::ROLE_ADMIN, User::ROLE_AGENT], true)) {
+            if ($user && $user->role === User::ROLE_ADMIN) {
                 return $next($request);
             }
 

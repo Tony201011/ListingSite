@@ -16,7 +16,6 @@ class ProviderProfile extends Model
 
     protected $fillable = [
         'user_id',
-        'agent_id',
         'name',
         'slug',
         'age',
@@ -79,11 +78,6 @@ class ProviderProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function agent(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'agent_id');
     }
 
     public function country(): BelongsTo

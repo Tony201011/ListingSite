@@ -22,10 +22,6 @@ class CheckProfileSteps
             return redirect('/admin');
         }
 
-        if ($user->role === \App\Models\User::ROLE_AGENT) {
-            return $next($request);
-        }
-
         $profile = $user->providerProfile;
 
         $stepOneCompleted = $profile &&
