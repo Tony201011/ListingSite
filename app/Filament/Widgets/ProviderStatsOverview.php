@@ -15,7 +15,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
 
     public static function canView(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'agent'], true);
+        return Filament::getCurrentPanel()?->getId() === 'agent';
     }
 
     /**
