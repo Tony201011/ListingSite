@@ -52,6 +52,7 @@ class ProfileSettingControllerTest extends TestCase
                 'videos' => collect(),
                 'photoVerification' => false,
                 'userInfo' => ['user' => $user],
+                'profileMessage' => null,
             ]);
 
         $this->app->instance(GetProfileSettingPageData::class, $getProfileSettingPageData);
@@ -71,6 +72,7 @@ class ProfileSettingControllerTest extends TestCase
             'videos' => collect(),
             'photoVerification' => true,
             'userInfo' => ['user' => $user],
+            'profileMessage' => null,
         ];
 
         $getProfileSettingPageData = Mockery::mock(GetProfileSettingPageData::class);
