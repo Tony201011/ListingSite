@@ -214,7 +214,7 @@ class SearchTest extends TestCase
     public function test_advanced_search_filters_by_escort_name(): void
     {
         $this->createApprovedProvider(['name' => 'Scarlett Night', 'slug' => 'scarlett-night']);
-        $this->createApprovedProvider(['name' => 'Different Diana', 'slug' => 'different-diana']);
+        $this->createApprovedProvider(['name' => 'Unrelated Provider', 'slug' => 'unrelated-provider']);
 
         $response = $this->get(route('advanced-search').'?escort_name=Scarlett+Night');
 
@@ -267,15 +267,15 @@ class SearchTest extends TestCase
 
     public function test_advanced_search_filters_by_age_range(): void
     {
-        $this->createApprovedProvider(['name' => 'Young Adv', 'slug' => 'young-adv', 'age' => 20]);
-        $this->createApprovedProvider(['name' => 'Old Adv', 'slug' => 'old-adv', 'age' => 38]);
+        $this->createApprovedProvider(['name' => 'Young Provider', 'slug' => 'young-adv', 'age' => 20]);
+        $this->createApprovedProvider(['name' => 'Older Provider', 'slug' => 'old-adv', 'age' => 38]);
 
         $response = $this->get(route('advanced-search').'?min_age=18&max_age=25');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertTrue($names->contains('Young Adv'));
-        $this->assertFalse($names->contains('Old Adv'));
+        $this->assertTrue($names->contains('Young Provider'));
+        $this->assertFalse($names->contains('Older Provider'));
     }
 
     public function test_advanced_search_age_filter_flag_set_when_values_differ_from_defaults(): void
@@ -491,12 +491,12 @@ class SearchTest extends TestCase
         // Create 10 approved profiles
         for ($i = 1; $i <= 10; $i++) {
             $this->createApprovedProvider([
-                'name' => "BulkEscort{$i}",
-                'slug' => "bulk-escort-{$i}",
+                'name' => "SuggestionLimit{$i}",
+                'slug' => "suggestion-limit-{$i}",
             ]);
         }
 
-        $response = $this->getJson(route('api.search.suggestions').'?q=BulkEscort');
+        $response = $this->getJson(route('api.search.suggestions').'?q=SuggestionLimit');
 
         $response->assertOk();
         $suggestions = $response->json('suggestions');
