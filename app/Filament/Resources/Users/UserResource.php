@@ -19,6 +19,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -35,6 +36,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -45,6 +47,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class UserResource extends Resource
@@ -468,8 +472,23 @@ class UserResource extends Resource
                                         ->schema([
                                             Hidden::make('id'),
 
+                                            Placeholder::make('image_preview')
+                                                ->label('Current Image')
+                                                ->content(function (Get $get): HtmlString {
+                                                    $path = $get('image_path');
+
+                                                    if (! filled($path)) {
+                                                        return new HtmlString('<span class="text-sm text-gray-500 italic">No image uploaded</span>');
+                                                    }
+
+                                                    $url = self::mediaUrl((string) $path);
+
+                                                    return new HtmlString('<img src="' . e($url) . '" alt="Current image" style="max-height:220px;max-width:100%;object-fit:contain;" />');
+                                                })
+                                                ->columnSpanFull(),
+
                                             FileUpload::make('image_path')
-                                                ->label('Main Image')
+                                                ->label('Replace Image')
                                                 ->image()
                                                 ->imagePreviewHeight('220')
                                                 ->panelAspectRatio('2:1')
@@ -480,8 +499,23 @@ class UserResource extends Resource
                                                 ->fetchFileInformation(false)
                                                 ->columnSpanFull(),
 
+                                            Placeholder::make('thumbnail_preview')
+                                                ->label('Current Thumbnail')
+                                                ->content(function (Get $get): HtmlString {
+                                                    $path = $get('thumbnail_path');
+
+                                                    if (! filled($path)) {
+                                                        return new HtmlString('<span class="text-sm text-gray-500 italic">No thumbnail uploaded</span>');
+                                                    }
+
+                                                    $url = self::mediaUrl((string) $path);
+
+                                                    return new HtmlString('<img src="' . e($url) . '" alt="Current thumbnail" style="max-height:160px;max-width:100%;object-fit:contain;" />');
+                                                })
+                                                ->columnSpanFull(),
+
                                             FileUpload::make('thumbnail_path')
-                                                ->label('Thumbnail')
+                                                ->label('Replace Thumbnail')
                                                 ->image()
                                                 ->imagePreviewHeight('160')
                                                 ->panelAspectRatio('2:1')
@@ -521,6 +555,26 @@ class UserResource extends Resource
                                                 ->label('File Name')
                                                 ->maxLength(255)
                                                 ->required(),
+
+                                            Placeholder::make('video_preview')
+                                                ->label('Current Video')
+                                                ->content(function (Get $get): HtmlString {
+                                                    $path = $get('video_path');
+
+                                                    if (! filled($path)) {
+                                                        return new HtmlString('<span class="text-sm text-gray-500 italic">No video uploaded</span>');
+                                                    }
+
+                                                    $url = self::mediaUrl((string) $path);
+
+                                                    return new HtmlString(
+                                                        '<a href="' . e($url) . '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-primary-600 hover:underline">'
+                                                        . '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                                                        . ' ' . e(basename($path))
+                                                        . '</a>'
+                                                    );
+                                                })
+                                                ->columnSpanFull(),
 
                                             TextInput::make('video_path')
                                                 ->label('Video Path')
@@ -1202,6 +1256,15 @@ class UserResource extends Resource
             ->orderBy('name')
             ->pluck('name', 'name')
             ->all();
+    }
+
+    private static function mediaUrl(string $path): string
+    {
+        if (str_starts_with($path, 'http')) {
+            return $path;
+        }
+
+        return Storage::disk(config('media.delivery_disk'))->url($path);
     }
 
     private static function categoryName(mixed $id): string
