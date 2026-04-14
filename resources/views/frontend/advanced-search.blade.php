@@ -239,17 +239,6 @@
             })"
         >
             <div class="mb-4 flex flex-wrap items-center gap-3">
-                <span class="text-sm text-gray-600">
-                    @if($profiles->total() > 0)
-                        Showing {{ $profiles->firstItem() }} to {{ $profiles->lastItem() }} of {{ $profiles->total() }} results
-                    @else
-                        0 results
-                    @endif
-                </span>
-                @if($hasActiveFilters)
-                    <a href="{{ route('advanced-search') }}" class="text-xs text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
-                @endif
-
                 <div class="ml-auto flex items-center gap-2">
                     <button
                         type="button"
@@ -424,9 +413,21 @@
                 @endforelse
             </div>
 
-            {{-- Pagination --}}
-            <div class="mt-8 flex justify-center">
-                {{ $profiles->links() }}
+            {{-- Showing results + Pagination --}}
+            <div class="mt-8">
+                <p class="mb-3 text-center text-sm text-gray-500">
+                    @if($profiles->total() > 0)
+                        Showing {{ $profiles->firstItem() }} to {{ $profiles->lastItem() }} of {{ $profiles->total() }} results
+                    @else
+                        0 results
+                    @endif
+                    @if($hasActiveFilters)
+                        <a href="{{ route('advanced-search') }}" class="ml-2 text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
+                    @endif
+                </p>
+                <div class="flex justify-center">
+                    {{ $profiles->links() }}
+                </div>
             </div>
         </div>
     </div>
