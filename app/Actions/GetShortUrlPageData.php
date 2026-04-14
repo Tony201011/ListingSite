@@ -10,13 +10,19 @@ class GetShortUrlPageData
 {
     public function execute(?User $user): array
     {
+        if (! $user) {
+            return [
+                'redirect' => '/signin',
+            ];
+        }
+
         $siteSetting = SiteSetting::query()
             ->latest('updated_at')
             ->value('short_url') ?? false;
 
-        if (! $user) {
+        if (! $siteSetting) {
             return [
-                'redirect' => '/signin',
+                'redirect' => '/profile-setting',
             ];
         }
 

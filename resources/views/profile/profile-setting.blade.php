@@ -61,13 +61,16 @@
                         ['label' => 'My rates', 'url' => url('/my-rate'), 'isNew' => true],
                         ['label' => 'My tours', 'url' => url('/my-tours')],
                         ['label' => 'Availability', 'url' => url('/my-availability')],
-                        ['label' => 'Short URL', 'url' => url('/short-url')],
                         ['label' => 'Status', 'url' => route('status')],
                         ['label' => 'Set & Forget', 'url' => url('/set-and-forget')],
                         ['label' => 'My Babe Rank', 'url' => url('/my-babe-rank')],
                         ['label' => 'Profile message', 'url' => url('/profile-message')],
                         ['label' => 'Help & FAQ', 'url' => route('faq'), 'isPrimary' => true],
                     ];
+
+                    if ($shortUrlEnabled) {
+                        array_splice($actions, 7, 0, [['label' => 'Short URL', 'url' => url('/short-url')]]);
+                    }
                 @endphp
 
                 @foreach ($actions as $action)
