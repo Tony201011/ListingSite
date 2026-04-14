@@ -17,8 +17,8 @@ class SaveMyProfileRequest extends FormRequest
     {
         return [
             'suburb' => ['required', 'string', 'max:255'],
-            'introduction_line' => ['required', 'string', 'max:500'],
-            'profile_text' => ['required', 'string', 'max:5000'],
+            'introduction_line' => ['required', 'string', 'max:1000'],
+            'profile_text' => ['required', 'string', 'max:15000'],
 
             'age_group' => ['required', 'integer', new CategoryOfType('age-group')],
             'hair_color' => ['required', 'integer', new CategoryOfType('hair-color')],
