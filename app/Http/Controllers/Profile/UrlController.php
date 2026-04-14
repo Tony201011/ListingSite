@@ -41,4 +41,18 @@ class UrlController extends Controller
 
         return response()->json($result->toPayload(), $result->status());
     }
+
+    public function redirectShortUrl(string $shortUrl): RedirectResponse
+    {
+        $record = ShortUrl::query()
+            ->where('short_url', $shortUrl)
+            ->with('user.providerProfile')
+            ->first();
+
+        if ($record === null || $record->user === null || $record->user->providerProfile === null) {
+            abort(404);
+        }
+
+        return redirect()->route('profile.show', ['slug' => $record->user->providerProfile->slug]);
+    }
 }

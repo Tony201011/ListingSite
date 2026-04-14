@@ -258,3 +258,8 @@ Route::middleware('provider.auth')->group(function () {
 });
 
 require __DIR__.'/escort-review.php';
+
+// Short URL redirect — must be last to avoid shadowing other routes
+Route::get('/{short_url}', [UrlController::class, 'redirectShortUrl'])
+    ->name('short-url.redirect')
+    ->where('short_url', '[a-zA-Z0-9_-]+');

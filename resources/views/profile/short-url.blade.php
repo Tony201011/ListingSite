@@ -17,7 +17,13 @@
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Short URL</h1>
             <p class="text-gray-600 mb-4">Set a clean URL that is easy to share.</p>
 
-            <div class="flex items-center rounded-lg border border-gray-200 overflow-hidden bg-white">
+            @if(! $siteSetting)
+                <div class="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800">
+                    This feature is currently disabled. Please contact the site administrator to enable it.
+                </div>
+            @endif
+
+            <div class="flex items-center rounded-lg border border-gray-200 overflow-hidden bg-white {{ $siteSetting ? '' : 'opacity-50' }}">
                 <span class="px-3 py-2.5 bg-gray-50 text-gray-500 text-sm border-r">
                     {{ config('app.url') }}/
                 </span>
@@ -27,6 +33,7 @@
                     @input="clearMessages"
                     class="flex-1 px-3 py-2.5 focus:outline-none"
                     placeholder="your-custom-slug"
+                    {{ $siteSetting ? '' : 'disabled' }}
                 >
             </div>
 
@@ -38,7 +45,8 @@
             <button
                 @click="saveSlug"
                 :disabled="saving"
-                class="mt-4 px-5 py-2.5 rounded-lg bg-pink-600 text-white"
+                class="mt-4 px-5 py-2.5 rounded-lg bg-pink-600 text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                {{ $siteSetting ? '' : 'disabled' }}
             >
                 <span x-show="!saving">Save URL</span>
                 <span x-show="saving">Saving...</span>
