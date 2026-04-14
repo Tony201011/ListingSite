@@ -88,12 +88,13 @@ $profileTags = array_values(array_unique(array_merge(
             $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . '/profile/' . $profile['slug'];
 
             $introTagline = '';
-            if (!empty($profile['age']) && !empty($profile['introduction_line'])) {
-                $introTagline = $profile['age'] . ' - ' . $profile['introduction_line'];
+            $introText = strip_tags($profile['introduction_line'] ?? '');
+            if (!empty($profile['age']) && !empty($introText)) {
+                $introTagline = $profile['age'] . ' - ' . $introText;
             } elseif (!empty($profile['age'])) {
                 $introTagline = (string) $profile['age'];
-            } elseif (!empty($profile['introduction_line'])) {
-                $introTagline = $profile['introduction_line'];
+            } elseif (!empty($introText)) {
+                $introTagline = $introText;
             }
         @endphp
 
@@ -120,7 +121,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     @endif
                     @if(!empty($introTagline))
-                    <div class="mt-1 text-lg text-gray-700 font-medium">{!! $introTagline !!}</div>
+                    <div class="mt-1 text-lg text-gray-700 font-medium">{{ $introTagline }}</div>
                     @endif
                 </div>
 
