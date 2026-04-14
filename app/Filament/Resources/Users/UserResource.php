@@ -254,7 +254,7 @@ class UserResource extends Resource
                                         ->formatStateUsing(fn ($state) => $state ?? '')
                                         ->dehydrateStateUsing(fn ($state) => $state ?? ''),
                                 ])
-                                ->columns(2)
+                                ->columns(3)
                                 ->collapsible(),
 
                             Section::make('Current Status')
