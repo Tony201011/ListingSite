@@ -46,7 +46,7 @@ class BabeRankControllerTest extends TestCase
     {
         $user = $this->createProvider();
 
-        $response = $this->actingAs($user)->get(route('babe-rank'));
+        $response = $this->actingAs($user)->get(route('babe-rank-read-more'));
 
         $response->assertOk();
         $response->assertViewIs('profile.babe-rank-read-more');
@@ -62,7 +62,7 @@ class BabeRankControllerTest extends TestCase
 
     public function test_guest_cannot_access_babe_rank(): void
     {
-        $response = $this->get(route('babe-rank'));
+        $response = $this->get(route('babe-rank-read-more'));
 
         $response->assertRedirect();
     }

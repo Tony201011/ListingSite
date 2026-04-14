@@ -224,7 +224,7 @@ Route::middleware('provider.auth')->group(function () {
 
         /**** babe rank start here */
         Route::get('/my-babe-rank', [BabeRankController::class, 'myBabeRank'])->name('my-babe-rank');
-        Route::get('/babe-rank', [BabeRankController::class, 'babeRank'])->name('babe-rank');
+        Route::get('/babe-rank-read-more', [BabeRankController::class, 'babeRank'])->name('babe-rank-read-more');
         /**** babe rank end here */
 
         /**** profile message route start here */
