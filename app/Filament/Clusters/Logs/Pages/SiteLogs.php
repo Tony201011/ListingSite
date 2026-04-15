@@ -4,7 +4,9 @@ namespace App\Filament\Clusters\Logs\Pages;
 
 use App\Filament\Clusters\Logs;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\File;
@@ -37,8 +39,7 @@ class SiteLogs extends Page
     public function mount(): void
     {
         $this->logFilePath = storage_path('logs/laravel.log');
-        $tailedLogContents = $this->tailLogFile($this->logFilePath);
-        $this->logLines = $this->normalizeLogLines($tailedLogContents);
+        $this->loadLogLines();
     }
 
     public static function canAccess(): bool
@@ -46,14 +47,45 @@ class SiteLogs extends Page
         return Filament::getCurrentPanel()?->getId() === 'admin';
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('clearFile')
+                ->label('Clear File')
+                ->icon('heroicon-o-trash')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->action(fn () => $this->clearLogFile()),
+        ];
+    }
+
+    public function clearLogFile(): void
+    {
+        File::ensureDirectoryExists(dirname($this->logFilePath));
+        File::put($this->logFilePath, '');
+
+        $this->loadLogLines();
+
+        Notification::make()
+            ->title('Log file cleared successfully.')
+            ->success()
+            ->send();
+    }
+
+    private function loadLogLines(): void
+    {
+        $tailedLogContents = $this->tailLogFile($this->logFilePath);
+        $this->logLines = $this->normalizeLogLines($tailedLogContents);
+    }
+
     private function tailLogFile(string $path, int $lines = 500): string
     {
         if (! File::exists($path)) {
-            return 'No application log file was found.';
+            return '';
         }
 
         if (File::size($path) === 0) {
-            return 'The application log file is currently empty.';
+            return '';
         }
 
         $handle = fopen($path, 'rb');
