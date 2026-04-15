@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Models\ProviderProfile;
 use App\Models\ProfileView;
+use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class HomeControllerTest extends TestCase
