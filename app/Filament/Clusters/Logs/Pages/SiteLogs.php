@@ -36,6 +36,8 @@ class SiteLogs extends Page
     /** @var array<int, string> */
     public array $logLines = [];
 
+    public ?string $logStatusMessage = null;
+
     public function mount(): void
     {
         $this->logFilePath = storage_path('logs/laravel.log');
@@ -74,20 +76,27 @@ class SiteLogs extends Page
 
     private function loadLogLines(): void
     {
+        if (! File::exists($this->logFilePath)) {
+            $this->logStatusMessage = 'No application log file was found.';
+            $this->logLines = [];
+
+            return;
+        }
+
+        if (File::size($this->logFilePath) === 0) {
+            $this->logStatusMessage = 'The application log file is currently empty.';
+            $this->logLines = [];
+
+            return;
+        }
+
         $tailedLogContents = $this->tailLogFile($this->logFilePath);
+        $this->logStatusMessage = null;
         $this->logLines = $this->normalizeLogLines($tailedLogContents);
     }
 
     private function tailLogFile(string $path, int $lines = 500): string
     {
-        if (! File::exists($path)) {
-            return '';
-        }
-
-        if (File::size($path) === 0) {
-            return '';
-        }
-
         $handle = fopen($path, 'rb');
 
         if (! $handle) {

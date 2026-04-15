@@ -21,7 +21,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="2" class="px-3 py-2 text-gray-500 dark:text-gray-400">No log entries available.</td>
+                                <td colspan="2" class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $this->logStatusMessage ?? 'No log entries available.' }}</td>
                             </tr>
                         @endforelse
                     </tbody>
