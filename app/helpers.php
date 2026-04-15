@@ -22,7 +22,8 @@ if (! function_exists('resolve_meta_page_candidates')) {
         $candidates[] = $path;
 
         if (str_contains($path, '/')) {
-            $candidates[] = explode('/', $path)[0];
+            $segments = explode('/', $path);
+            $candidates[] = $segments[0];
         }
 
         $routeName = request()->route()?->getName();
