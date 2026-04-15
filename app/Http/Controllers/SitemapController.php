@@ -29,11 +29,23 @@ class SitemapController extends Controller
         return $this->xmlResponse($this->sitemapService->buildProfileSitemapXml($page));
     }
 
+    public function robots(): Response
+    {
+        $content = "User-agent: *\n";
+        $content .= "Disallow:\n";
+        $content .= 'Sitemap: '.url('/sitemap.xml')."\n";
+
+        return response($content, 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
     private function xmlResponse(string $xml): Response
     {
         return response($xml, 200, [
             'Content-Type' => 'application/xml; charset=UTF-8',
-            'Cache-Control' => 'no-cache, must-revalidate',
+            'Cache-Control' => 'public, max-age=300, stale-while-revalidate=60',
         ]);
     }
 }

@@ -37,6 +37,15 @@ class SitemapControllerTest extends TestCase
         $response->assertSee('/sitemaps/profiles-1.xml', false);
     }
 
+    public function test_robots_txt_exposes_absolute_sitemap_url(): void
+    {
+        $response = $this->get('/robots.txt');
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'text/plain; charset=UTF-8');
+        $response->assertSee('Sitemap: '.url('/sitemap.xml'), false);
+    }
+
     public function test_static_sitemap_contains_core_public_pages(): void
     {
         $response = $this->get('/sitemaps/static.xml');
