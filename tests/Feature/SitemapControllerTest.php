@@ -37,6 +37,20 @@ class SitemapControllerTest extends TestCase
         $response->assertSee('/sitemaps/profiles-1.xml', false);
     }
 
+    public function test_sitemap_index_includes_all_profile_sitemap_pages(): void
+    {
+        config()->set('sitemap.profile_urls_per_page', 2);
+        $this->createProfile('page-one-first');
+        $this->createProfile('page-one-second');
+        $this->createProfile('page-two-first');
+
+        $response = $this->get('/sitemap.xml');
+
+        $response->assertOk();
+        $response->assertSee('/sitemaps/profiles-1.xml', false);
+        $response->assertSee('/sitemaps/profiles-2.xml', false);
+    }
+
     public function test_robots_txt_exposes_absolute_sitemap_url(): void
     {
         $response = $this->get('/robots.txt');
@@ -80,6 +94,19 @@ class SitemapControllerTest extends TestCase
 
         $updated->assertOk();
         $updated->assertSee(route('profile.show', ['slug' => 'new-approved']), false);
+    }
+
+    public function test_profile_sitemap_excludes_non_canonical_profile_slugs(): void
+    {
+        $this->createProfile('canonical-slug');
+        $this->createProfile('Mixed Slug');
+
+        $response = $this->get('/sitemaps/profiles-1.xml');
+
+        $response->assertOk();
+        $response->assertSee(route('profile.show', ['slug' => 'canonical-slug']), false);
+        $response->assertDontSee(route('profile.show', ['slug' => 'Mixed Slug']), false);
+        $response->assertDontSee(route('profile.show', ['slug' => 'mixed-slug']), false);
     }
 
     public function test_sitemap_is_accessible_when_site_password_is_enabled(): void
