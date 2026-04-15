@@ -205,7 +205,7 @@
                     :src="photos[sliderIndex].image_url"
                     :alt="'Photo ' + photos[sliderIndex].id"
                     class="max-h-[85vh] max-w-full object-contain rounded-lg"
-                    loading="lazy"
+                    loading="eager"
                     decoding="async"
                 >
 
