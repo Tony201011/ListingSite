@@ -15,113 +15,95 @@ class MetaDescriptionSeeder extends Seeder
     public function run(): void
     {
         $metaDescriptions = [
-            // Settings Pages
+            // Public frontend pages
             [
-                'page_name' => 's3-bucket',
-                'meta_description' => 'Configure and manage your Amazon S3 bucket settings for cloud storage, file uploads, and media management. Enable secure and scalable cloud storage for your application with our comprehensive S3 configuration options.',
+                'page_name' => 'home',
+                'meta_description' => 'Discover verified listings, browse profiles, and connect with providers quickly from our premium directory homepage.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'smtp-settings',
-                'meta_description' => 'Set up and configure SMTP settings for reliable email delivery. Manage mail servers, ports, encryption, and authentication to ensure seamless communication with your users through email notifications.',
+                'page_name' => 'advanced-search',
+                'meta_description' => 'Use advanced filters to find the right provider by location, category, availability, and profile details.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'social-login',
-                'meta_description' => 'Enable social login functionality for your application. Configure OAuth providers including Google, Facebook, GitHub, and more to simplify user authentication and improve user experience.',
-                'is_active' => true,
-            ],
-
-            // Policy Pages
-            [
-                'page_name' => 'terms-conditions',
-                'meta_description' => 'Read our comprehensive terms and conditions that govern the use of our services. Understand your rights, responsibilities, and the legal agreement between you and our platform.',
+                'page_name' => 'terms-and-conditions',
+                'meta_description' => 'Read our terms and conditions to understand platform rules, responsibilities, and service usage requirements.',
                 'is_active' => true,
             ],
             [
                 'page_name' => 'privacy-policy',
-                'meta_description' => 'Learn how we collect, use, and protect your personal data. Our privacy policy outlines our commitment to data protection, GDPR compliance, and your privacy rights when using our services.',
+                'meta_description' => 'Learn how we collect, use, and protect your data through our transparent privacy policy.',
                 'is_active' => true,
             ],
             [
                 'page_name' => 'refund-policy',
-                'meta_description' => 'Understand our refund policy and the process for requesting refunds. Learn about eligibility criteria, timeframes, and how we ensure customer satisfaction with fair refund terms.',
+                'meta_description' => 'Review refund eligibility, timelines, and the process for requesting a refund.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'anti-spam',
-                'meta_description' => 'Learn about our anti-spam policy and how we protect users from unwanted communications. Discover our commitment to maintaining a spam-free environment and protecting user inboxes.',
-                'is_active' => true,
-            ],
-
-            // Content Pages
-            [
-                'page_name' => 'home',
-                'meta_description' => 'Welcome to your comprehensive application dashboard. Access all your settings, monitor analytics, manage content, and control every aspect of your application from one central location.',
+                'page_name' => 'anti-spam-policy',
+                'meta_description' => 'See how our anti-spam policy helps protect users from abuse, unwanted messages, and harmful content.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'about',
-                'meta_description' => 'Learn more about our company, our mission to provide exceptional service, and the dedicated team working behind the scenes to make your experience better every day.',
+                'page_name' => 'about-us',
+                'meta_description' => 'Learn about our mission, values, and commitment to building a trusted listing experience.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'contact',
-                'meta_description' => 'Get in touch with our support team for any questions or assistance. We are here to help with inquiries, feedback, and support requests to ensure your satisfaction.',
+                'page_name' => 'contact-us',
+                'meta_description' => 'Contact our team for support, account assistance, and general inquiries.',
                 'is_active' => true,
             ],
             [
                 'page_name' => 'faq',
-                'meta_description' => 'Find answers to frequently asked questions about our services, features, billing, and technical support. Browse our comprehensive FAQ section for quick solutions to common queries.',
-                'is_active' => true,
-            ],
-
-            // Listing Pages
-            [
-                'page_name' => 'provider-listing',
-                'meta_description' => 'Browse our comprehensive directory of service providers. Find trusted professionals, compare services, and choose the best provider for your needs from our verified listings.',
+                'meta_description' => 'Find answers to common questions about accounts, listings, billing, and support.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'categories',
-                'meta_description' => 'Explore our organized categories to find exactly what you need. Browse through well-structured classifications to discover services, products, and content tailored to your interests.',
+                'page_name' => 'help',
+                'meta_description' => 'Access help resources and guides to get the most from your account and listings.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'content-listings',
-                'meta_description' => 'Discover our curated content listings featuring the best articles, posts, and resources. Browse through organized content to find valuable information and engaging material.',
+                'page_name' => 'naughty-corner',
+                'meta_description' => 'Explore curated content and updates from the Naughty Corner section.',
                 'is_active' => true,
             ],
-
-            // Additional Pages
             [
-                'page_name' => 'dashboard',
-                'meta_description' => 'Access your personalized dashboard to monitor activities, track performance, and manage your account settings. Get a comprehensive overview of your application at a glance.',
+                'page_name' => 'membership',
+                'meta_description' => 'Compare membership options, features, and benefits to choose the plan that suits you best.',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'pricing',
+                'meta_description' => 'Review current pricing plans, inclusions, and package details before subscribing.',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'blog',
+                'meta_description' => 'Read the latest news, updates, and helpful articles from our blog.',
                 'is_active' => true,
             ],
             [
                 'page_name' => 'profile',
-                'meta_description' => 'Manage your profile information, update personal details, and customize your account settings. Keep your profile up-to-date for the best experience on our platform.',
+                'meta_description' => 'View provider profile details, services, and contact information.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'settings',
-                'meta_description' => 'Configure your application preferences and system settings. Customize your experience with comprehensive options for notifications, privacy, and general configuration.',
+                'page_name' => 'signin',
+                'meta_description' => 'Sign in to access your account, manage your profile, and update your listings.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'notifications',
-                'meta_description' => 'Manage your notification preferences and stay updated with important alerts. Customize how and when you receive updates about activities, messages, and system events.',
+                'page_name' => 'signup',
+                'meta_description' => 'Create your account to join the platform, publish your profile, and reach more users.',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'search',
-                'meta_description' => 'Search through our extensive database to find content, services, and information. Use our powerful search functionality to quickly locate exactly what you need.',
-                'is_active' => true,
-            ],
-            [
-                'page_name' => 'help-center',
-                'meta_description' => 'Visit our help center for comprehensive guides, tutorials, and support resources. Find solutions to common issues and learn how to make the most of our platform.',
+                'page_name' => 'reset-password',
+                'meta_description' => 'Reset your password securely to regain access to your account.',
                 'is_active' => true,
             ],
         ];
