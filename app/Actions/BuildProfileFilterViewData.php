@@ -356,14 +356,12 @@ class BuildProfileFilterViewData
         }
 
         if ($distanceFilter !== null && $userLat !== null && $userLng !== null) {
-            $latitudeExpression = $this->resolveDistanceLatitudeExpression();
-            $longitudeExpression = $this->resolveDistanceLongitudeExpression();
+            $latitudeExpression = $this->resolveDistanceCoordinateExpression('latitude');
+            $longitudeExpression = $this->resolveDistanceCoordinateExpression('longitude');
 
             // Use provider profile coordinates when available, otherwise resolve from the
             // provider user's suburb via postcodes table coordinates.
-            $query->join('users', 'users.id', '=', 'provider_profiles.user_id')
-                ->select('provider_profiles.*')
-                ->whereRaw("{$latitudeExpression} IS NOT NULL")
+            $query->whereRaw("{$latitudeExpression} IS NOT NULL")
                 ->whereRaw("{$longitudeExpression} IS NOT NULL")
                 ->whereRaw(
                     "(6371 * acos(
@@ -458,39 +456,26 @@ class BuildProfileFilterViewData
         }
     }
 
-    private function resolveDistanceLatitudeExpression(): string
+    private function resolveDistanceCoordinateExpression(string $column): string
     {
-        return "COALESCE(
-            provider_profiles.latitude,
-            (
-                SELECT p.latitude
-                FROM postcodes p
-                WHERE p.latitude IS NOT NULL
-                    AND p.longitude IS NOT NULL
-                    AND (
-                        LOWER(TRIM(p.suburb)) = LOWER(TRIM(users.suburb))
-                        OR LOWER(TRIM(users.suburb)) LIKE CONCAT(LOWER(TRIM(p.suburb)), ',%')
-                    )
-                ORDER BY p.id ASC
-                LIMIT 1
-            )
-        )";
-    }
+        if (! in_array($column, ['latitude', 'longitude'], true)) {
+            throw new \InvalidArgumentException("Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'.");
+        }
 
-    private function resolveDistanceLongitudeExpression(): string
-    {
+        // If multiple postcode rows exist for the same suburb, choose a deterministic
+        // fallback coordinate by smallest postcode, then smallest row id.
         return "COALESCE(
-            provider_profiles.longitude,
+            provider_profiles.{$column},
             (
-                SELECT p.longitude
+                SELECT p.{$column}
                 FROM postcodes p
+                JOIN users u ON u.id = provider_profiles.user_id
                 WHERE p.latitude IS NOT NULL
                     AND p.longitude IS NOT NULL
-                    AND (
-                        LOWER(TRIM(p.suburb)) = LOWER(TRIM(users.suburb))
-                        OR LOWER(TRIM(users.suburb)) LIKE CONCAT(LOWER(TRIM(p.suburb)), ',%')
-                    )
-                ORDER BY p.id ASC
+                    AND p.suburb = u.suburb
+                ORDER BY
+                    p.postcode ASC,
+                    p.id ASC
                 LIMIT 1
             )
         )";
