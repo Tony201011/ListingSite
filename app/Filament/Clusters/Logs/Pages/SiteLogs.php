@@ -154,6 +154,6 @@ class SiteLogs extends Page
     {
         $normalizedLogContents = str_replace(["\r\n", "\r"], "\n", $contents);
 
-        return $normalizedLogContents === '' ? [] : explode("\n", $normalizedLogContents);
+        return $normalizedLogContents === '' ? [] : array_reverse(explode("\n", $normalizedLogContents));
     }
 }
