@@ -388,6 +388,12 @@
         scroll-behavior: smooth;
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+
     .view-card {
         transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
     }
@@ -439,7 +445,8 @@
         window.addEventListener('scroll', toggleScrollTopButton, { passive: true });
 
         scrollTopButton.addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
         });
 
         toggleScrollTopButton();
