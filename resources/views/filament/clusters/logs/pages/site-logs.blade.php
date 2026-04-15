@@ -6,7 +6,7 @@
             </p>
 
             @php
-                $logLines = preg_split('/\r\n|\r|\n/', $this->logContents) ?: [];
+                $logLines = preg_split('/\r\n|\r|\n/', (string) $this->logContents) ?: [];
             @endphp
 
             <div class="max-h-[70vh] overflow-auto rounded-lg border border-gray-200 dark:border-gray-700">
