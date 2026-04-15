@@ -19,7 +19,7 @@ class EmailLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
-    protected static ?string $navigationLabel = 'Email Log';
+    protected static ?string $navigationLabel = 'Email Logs';
 
     protected static ?string $modelLabel = 'Email Log';
 

@@ -21,7 +21,7 @@ class AvailabilityLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static ?string $navigationLabel = 'Availability Log';
+    protected static ?string $navigationLabel = 'Availability Logs';
 
     protected static ?string $modelLabel = 'Availability Log';
 

@@ -19,7 +19,7 @@ class HideShowProfileLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEye;
 
-    protected static ?string $navigationLabel = 'Show Hide Profile';
+    protected static ?string $navigationLabel = 'Show & Hide Profile Logs';
 
     protected static ?string $modelLabel = 'Show Hide Profile';
 
