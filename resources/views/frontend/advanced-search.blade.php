@@ -316,6 +316,8 @@
                                     class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                     :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'"
                                     loading="lazy"
+                                    decoding="async"
+                                    fetchpriority="low"
                                 >
                             @else
                                 <div class="flex items-center justify-center bg-gray-100 text-gray-400" :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'">

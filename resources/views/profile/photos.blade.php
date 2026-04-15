@@ -85,6 +85,8 @@
                                 :src="photo.thumbnail_url"
                                 :alt="'Photo ' + photo.id"
                                 class="w-full h-full object-cover hover:scale-105 transition duration-300"
+                                loading="lazy"
+                                decoding="async"
                             >
                         </div>
 
@@ -203,6 +205,8 @@
                     :src="photos[sliderIndex].image_url"
                     :alt="'Photo ' + photos[sliderIndex].id"
                     class="max-h-[85vh] max-w-full object-contain rounded-lg"
+                    loading="eager"
+                    decoding="async"
                 >
 
                 <div class="mt-4 text-white text-sm sm:text-base font-medium">

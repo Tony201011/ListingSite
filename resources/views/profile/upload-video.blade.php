@@ -131,7 +131,7 @@
                                         </svg>
                                     </button>
 
-                                    <video :src="video.previewUrl" controls class="aspect-video w-full bg-black object-cover"></video>
+                                    <video :src="video.previewUrl" controls preload="none" class="aspect-video w-full bg-black object-cover"></video>
 
                                     <div class="p-3 text-left">
                                         <p class="break-all text-sm font-medium text-gray-700" x-text="video.name"></p>

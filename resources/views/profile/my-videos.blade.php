@@ -62,7 +62,7 @@
                         </button>
 
                         <div class="aspect-video bg-black">
-                            <video :src="video.video_url" controls class="w-full h-full object-cover"></video>
+                            <video :src="video.video_url" controls preload="none" class="w-full h-full object-cover"></video>
                         </div>
 
                         <div class="p-3 flex items-center justify-between">

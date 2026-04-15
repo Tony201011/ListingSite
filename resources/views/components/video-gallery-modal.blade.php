@@ -108,6 +108,7 @@
                                         :src="video.src"
                                         frameborder="0"
                                         allowfullscreen
+                                        loading="lazy"
                                         class="aspect-video w-full max-h-[80vh]"
                                     ></iframe>
                                 </template>
@@ -116,6 +117,7 @@
                                     <video
                                         :src="video.src"
                                         controls
+                                        preload="none"
                                         class="aspect-video w-full max-h-[80vh]"
                                     ></video>
                                 </template>
