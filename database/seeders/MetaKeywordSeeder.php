@@ -15,103 +15,89 @@ class MetaKeywordSeeder extends Seeder
     public function run(): void
     {
         $metaKeywords = [
-            // Settings Pages
             [
-                'page_name' => 's3-bucket',
-                'meta_keyword' => 's3, bucket, storage, cloud, aws, amazon s3, file upload, cloud storage, media storage, s3 settings, bucket configuration',
+                'page_name' => 'home',
+                'meta_keyword' => 'escorts australia, hot escorts, escort directory, independent escorts, verified profiles, adult services, local escorts, premium listings',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'smtp-settings',
-                'meta_keyword' => 'smtp, email, mail settings, email configuration, smtp server, email delivery, mail server, email settings, smtp settings',
+                'page_name' => 'advanced-search',
+                'meta_keyword' => 'escort search, find escorts, escort filters, suburb search, city escorts, age filter, price filter, nearby escorts',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'social-login',
-                'meta_keyword' => 'social login, oauth, authentication, google login, facebook login, github login, social authentication, login settings',
+                'page_name' => 'about-us',
+                'meta_keyword' => 'about hot escort, escort platform australia, trusted listings, escort community, adult directory team, service mission',
                 'is_active' => true,
             ],
-
-            // Policy Pages
             [
-                'page_name' => 'terms-conditions',
-                'meta_keyword' => 'terms, conditions, terms of service, terms and conditions, user agreement, legal terms, service terms, website terms',
+                'page_name' => 'contact-us',
+                'meta_keyword' => 'contact hot escort, customer support, escort listing support, help desk, contact form, platform assistance',
                 'is_active' => true,
             ],
             [
                 'page_name' => 'privacy-policy',
-                'meta_keyword' => 'privacy, privacy policy, data protection, gdpr, privacy settings, data privacy, personal data, privacy terms',
+                'meta_keyword' => 'privacy policy, data protection, personal data, user privacy, cookies policy, account privacy, information security',
                 'is_active' => true,
             ],
             [
                 'page_name' => 'refund-policy',
-                'meta_keyword' => 'refund, refund policy, money back, cancellation, return policy, refund terms, refund process, refund request',
+                'meta_keyword' => 'refund policy, billing policy, payment refunds, cancellation terms, credits refund, membership refunds',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'anti-spam',
-                'meta_keyword' => 'anti-spam, spam policy, spam prevention, email spam, spam protection, anti-spam policy, spam filtering',
-                'is_active' => true,
-            ],
-
-            // Content Pages
-            [
-                'page_name' => 'home',
-                'meta_keyword' => 'home, dashboard, welcome, main page, homepage, index, application home, main dashboard',
+                'page_name' => 'terms-and-conditions',
+                'meta_keyword' => 'terms and conditions, user agreement, legal terms, platform rules, escort listing policies, site terms',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'about',
-                'meta_keyword' => 'about, about us, company, information, about page, our story, team, mission, vision',
-                'is_active' => true,
-            ],
-            [
-                'page_name' => 'contact',
-                'meta_keyword' => 'contact, contact us, support, help, get in touch, customer support, contact form, email us',
+                'page_name' => 'anti-spam-policy',
+                'meta_keyword' => 'anti spam policy, spam prevention, abuse reporting, fake profile prevention, message safety, content moderation',
                 'is_active' => true,
             ],
             [
                 'page_name' => 'faq',
-                'meta_keyword' => 'faq, frequently asked questions, help, questions, answers, support, knowledge base, help center',
-                'is_active' => true,
-            ],
-
-            // Listing Pages
-            [
-                'page_name' => 'provider-listing',
-                'meta_keyword' => 'providers, service providers, listing, provider list, service listing, providers directory, provider catalog',
+                'meta_keyword' => 'escort faq, frequently asked questions, booking help, profile help, account support, payment questions',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'categories',
-                'meta_keyword' => 'categories, category list, classification, groups, types, category listing, service categories',
+                'page_name' => 'help',
+                'meta_keyword' => 'help center, support guide, escort listing help, account help, profile management help, user support',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'content-listings',
-                'meta_keyword' => 'content, listings, content list, content management, content listing, published content, content directory',
-                'is_active' => true,
-            ],
-
-            // Additional Pages
-            [
-                'page_name' => 'dashboard',
-                'meta_keyword' => 'dashboard, admin dashboard, control panel, admin panel, statistics, analytics, overview',
+                'page_name' => 'naughty-corner',
+                'meta_keyword' => 'naughty corner, adult blog, sexy stories, mature content, nightlife content, erotic articles',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'profile',
-                'meta_keyword' => 'profile, user profile, account, personal information, profile settings, user account, profile page',
+                'page_name' => 'membership',
+                'meta_keyword' => 'escort membership, premium membership, listing plans, member benefits, subscription plans, provider membership',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'settings',
-                'meta_keyword' => 'settings, configuration, preferences, app settings, system settings, general settings, options',
+                'page_name' => 'pricing',
+                'meta_keyword' => 'escort pricing, listing packages, ad pricing, premium listing cost, subscription pricing, plan comparison',
                 'is_active' => true,
             ],
             [
-                'page_name' => 'notifications',
-                'meta_keyword' => 'notifications, alerts, updates, notification settings, email notifications, push notifications',
+                'page_name' => 'blog',
+                'meta_keyword' => 'escort blog, dating tips, nightlife guide, adult lifestyle, safety tips, relationship advice',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'signin',
+                'meta_keyword' => 'escort login, member login, provider login, secure sign in, account access, user authentication',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'signup',
+                'meta_keyword' => 'escort signup, join platform, create account, provider registration, member registration, new account',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'site-password',
+                'meta_keyword' => 'site access password, protected access, members only, private content access, secure entry',
                 'is_active' => true,
             ],
         ];
