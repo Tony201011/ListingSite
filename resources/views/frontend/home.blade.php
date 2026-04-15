@@ -22,7 +22,7 @@
 <div class="min-h-screen bg-gray-100 text-gray-800">
 
     {{-- Hero / Search Section --}}
-    <div class="relative overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-900">
+    <div class="relative overflow-x-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-900">
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(236,72,153,0.15)_0%,_transparent_65%)] pointer-events-none"></div>
         <div class="relative mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 text-center">
             <h1 class="mb-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
