@@ -12,13 +12,14 @@
     $distanceFilter = (int) ($distanceFilter ?? $maxSearchDistance);
     $userLat = $userLat ?? null;
     $userLng = $userLng ?? null;
+    $girlsMode = (string) ($girlsMode ?? 'all');
     $selectedCategoryItems = $selectedCategoryItems ?? collect();
     $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
 @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-50 text-gray-800">
-    <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-100 text-gray-800">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="mb-4 flex items-center gap-2 text-xs text-gray-500">
             <a href="{{ url('/') }}" class="hover:text-gray-700">Home</a>
             <span>›</span>
@@ -239,7 +240,36 @@
                 bookmarks: {{ Js::from($userBookmarks ?? []) }}
             })"
         >
-            <div class="mb-4 flex flex-wrap items-center gap-3">
+            <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
+                @php
+                    $currentQuery = request()->query();
+                    $newGirlsQuery = array_merge($currentQuery, ['girls' => 'new']);
+                    $allGirlsQuery = array_merge($currentQuery, ['girls' => 'all']);
+                    $popularGirlsQuery = array_merge($currentQuery, ['girls' => 'popular']);
+                    $girlsUrl = fn (array $query): string => route('advanced-search').'?'.http_build_query($query);
+                @endphp
+                <div class="flex items-center gap-2">
+                    <a
+                        href="{{ $girlsUrl($newGirlsQuery) }}"
+                        class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'new' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
+                    >
+                        New girls
+                    </a>
+                    <a
+                        href="{{ $girlsUrl($allGirlsQuery) }}"
+                        class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'all' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
+                    >
+                        All girls
+                    </a>
+                    <a
+                        href="{{ $girlsUrl($popularGirlsQuery) }}"
+                        class="inline-flex items-center gap-1 rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'popular' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
+                    >
+                        <i class="fa-solid fa-fire text-[10px]"></i>
+                        Popular
+                    </a>
+                </div>
+
                 <div class="ml-auto flex items-center gap-2">
                     <button
                         type="button"
@@ -418,9 +448,7 @@
                         <a href="{{ route('advanced-search') }}" class="text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
                     </p>
                 @endif
-                <div class="flex justify-center">
-                    {{ $profiles->links() }}
-                </div>
+                {{ $profiles->links() }}
             </div>
         </div>
     </div>
