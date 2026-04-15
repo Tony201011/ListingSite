@@ -7,7 +7,6 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Throwable;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -32,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (Throwable $exception, Request $request) {
+        $exceptions->render(function (\Throwable $exception, Request $request) {
             $statusCode = $exception instanceof HttpExceptionInterface
                 ? $exception->getStatusCode()
                 : 500;
@@ -66,7 +65,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->view('errors.fatal', [
                     'fatalMessage' => $message,
                 ], 500);
-            } catch (Throwable) {
+            } catch (\Throwable) {
                 return null;
             }
         });
