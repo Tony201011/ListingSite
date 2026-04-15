@@ -24,6 +24,9 @@ class SiteSetting extends Model
         'online_status_duration_minutes',
         'available_now_max_uses',
         'available_now_duration_minutes',
+        'fatal_error_page_enabled',
+        'fatal_error_default_message',
+        'fatal_error_query_param',
     ];
 
     protected $casts = [
@@ -38,6 +41,7 @@ class SiteSetting extends Model
         'online_status_duration_minutes' => 'integer',
         'available_now_max_uses' => 'integer',
         'available_now_duration_minutes' => 'integer',
+        'fatal_error_page_enabled' => 'boolean',
     ];
 
     protected static function booted(): void

@@ -75,6 +75,19 @@ class SiteSettingResource extends Resource
                 ->maxValue(100)
                 ->default(12)
                 ->helperText('Number of profiles displayed per page on the home page. Default is 12.'),
+            Forms\Components\Toggle::make('fatal_error_page_enabled')
+                ->label('Enable Fatal Error Maintenance Page')
+                ->default(false)
+                ->helperText('When enabled, unhandled server errors show a maintenance-style page with your configured message.'),
+            Forms\Components\Textarea::make('fatal_error_default_message')
+                ->label('Fatal Error Default Message')
+                ->rows(3)
+                ->maxLength(1000)
+                ->helperText('Default message shown on the fatal error page.'),
+            Forms\Components\TextInput::make('fatal_error_query_param')
+                ->label('Fatal Error Query Parameter')
+                ->maxLength(100)
+                ->helperText('Optional query key used to override the message on error pages (example: fatal_message).'),
         ]);
     }
 
@@ -90,6 +103,8 @@ class SiteSettingResource extends Resource
                 Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
                 Tables\Columns\TextColumn::make('max_search_distance')->label('Max Distance (km)'),
                 Tables\Columns\TextColumn::make('home_page_records')->label('Home Page Records'),
+                Tables\Columns\IconColumn::make('fatal_error_page_enabled')->label('Fatal Error Page')->boolean(),
+                Tables\Columns\TextColumn::make('fatal_error_query_param')->label('Fatal Query Param'),
                 Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
             ])
             ->recordActions([
