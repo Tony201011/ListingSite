@@ -102,8 +102,14 @@
 
                     <section class="mb-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-2">About me</h2>
-                        <div class="text-gray-600 leading-relaxed">
-                            {!! $userInfo['provider_profile']?->profile_text ?? 'No profile message set yet. Click the &quot;Profile message&quot; button above to add a profile message.' !!}
+                        @php
+                            $safeProfileText = strip_tags(
+                                (string) ($userInfo['provider_profile']?->profile_text ?? ''),
+                                '<p><br><ul><ol><li><strong><em><a><blockquote>'
+                            );
+                        @endphp
+                        <div class="text-gray-600 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
+                            {!! $safeProfileText !== '' ? $safeProfileText : 'No profile message set yet. Click the &quot;Profile message&quot; button above to add a profile message.' !!}
                         </div>
                     </section>
 
