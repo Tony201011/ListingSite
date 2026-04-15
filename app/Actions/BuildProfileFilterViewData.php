@@ -132,6 +132,9 @@ class BuildProfileFilterViewData
         $locationQuery = (string) ($validated['location'] ?? '');
         $escortNameQuery = (string) ($validated['escort_name'] ?? '');
         $girlsMode = (string) ($validated['girls'] ?? 'all');
+        if (! in_array($girlsMode, ['all', 'new', 'popular'], true)) {
+            $girlsMode = 'all';
+        }
 
         $userLat = isset($validated['user_lat']) && $validated['user_lat'] !== '' ? (float) $validated['user_lat'] : null;
         $userLng = isset($validated['user_lng']) && $validated['user_lng'] !== '' ? (float) $validated['user_lng'] : null;
@@ -379,31 +382,33 @@ class BuildProfileFilterViewData
             'user_lat' => $userLat,
             'user_lng' => $userLng,
             'distance' => $distanceFilter,
-            'girls' => $girlsMode !== 'all' ? $girlsMode : null,
         ]);
+        $appendParams['girls'] = $girlsMode;
 
         foreach ($selectedCategoryIds as $categoryId) {
             $appendParams['categories'][] = $categoryId;
         }
 
-        if ($girlsMode === 'popular') {
-            $query
-                ->addSelect([
+        switch ($girlsMode) {
+            case 'popular':
+                $query->addSelect([
                     'popularity_score' => ProfileView::query()
                         ->selectRaw('count(*)')
                         ->whereColumn('profile_views.user_id', 'provider_profiles.user_id'),
-                ])
-                ->orderByDesc('popularity_score')
-                ->orderByDesc('is_featured')
-                ->orderByDesc('created_at');
-        } elseif ($girlsMode === 'new') {
-            $query
-                ->orderByDesc('created_at')
-                ->orderByDesc('is_featured');
-        } else {
-            $query
-                ->orderByDesc('is_featured')
-                ->orderByDesc('created_at');
+                ])->orderByDesc('popularity_score');
+                break;
+
+            case 'new':
+                $query->orderByDesc('created_at');
+                break;
+
+            default:
+                $query->orderByDesc('is_featured')->orderByDesc('created_at');
+                break;
+        }
+
+        if ($girlsMode !== 'all') {
+            $query->orderByDesc('is_featured')->orderByDesc('created_at');
         }
 
         $paginator = $query

@@ -191,24 +191,25 @@
             @php
                 $currentQuery = request()->query();
                 $newGirlsQuery = array_merge($currentQuery, ['girls' => 'new']);
-                $allGirlsQuery = array_filter(array_merge($currentQuery, ['girls' => 'all']), fn ($value, $key) => ! ($key === 'girls' && $value === 'all'), ARRAY_FILTER_USE_BOTH);
+                $allGirlsQuery = array_merge($currentQuery, ['girls' => 'all']);
                 $popularGirlsQuery = array_merge($currentQuery, ['girls' => 'popular']);
+                $girlsUrl = fn (array $query): string => url('/').'?'.http_build_query($query);
             @endphp
             <div class="flex items-center gap-2">
                 <a
-                    href="{{ url('/').($newGirlsQuery ? '?'.http_build_query($newGirlsQuery) : '') }}"
+                    href="{{ $girlsUrl($newGirlsQuery) }}"
                     class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'new' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                 >
                     New girls
                 </a>
                 <a
-                    href="{{ url('/').($allGirlsQuery ? '?'.http_build_query($allGirlsQuery) : '') }}"
+                    href="{{ $girlsUrl($allGirlsQuery) }}"
                     class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'all' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                 >
                     All girls
                 </a>
                 <a
-                    href="{{ url('/').($popularGirlsQuery ? '?'.http_build_query($popularGirlsQuery) : '') }}"
+                    href="{{ $girlsUrl($popularGirlsQuery) }}"
                     class="inline-flex items-center gap-1 rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'popular' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                 >
                     <i class="fa-solid fa-fire text-[10px]"></i>
