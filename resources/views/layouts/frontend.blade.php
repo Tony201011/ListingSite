@@ -19,12 +19,10 @@
     <title>@yield('title', 'Premium Directory')</title>
 
     @php
-        use Illuminate\Support\Facades\Storage;
-
         $activeFavIcon = \App\Models\FavIcon::where('is_active', true)->latest()->first();
     @endphp
     @if($activeFavIcon)
-        <link rel="icon" type="image/x-icon" href="{{ Storage::disk('public')->url($activeFavIcon->icon_path) }}">
+        <link rel="icon" type="image/x-icon" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($activeFavIcon->icon_path) }}">
     @else
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     @endif
