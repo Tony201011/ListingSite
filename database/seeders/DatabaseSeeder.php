@@ -49,6 +49,7 @@ class DatabaseSeeder extends Seeder
             PricingPackageSeeder::class,
             HelpPageSeeder::class,
             GlobalBannerSeeder::class,
+            FooterTextSeeder::class,
             FaqSeeder::class,
             SmtpSettingSeeder::class,
             S3BucketSettingSeeder::class,
