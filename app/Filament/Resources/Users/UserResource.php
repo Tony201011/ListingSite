@@ -812,20 +812,14 @@ class UserResource extends Resource
 
                                     TextEntry::make('providerProfile.introduction_line')
                                         ->label('Introduction Line')
-                                        ->formatStateUsing(fn (?string $state): string => strip_tags(
-                                            (string) Str::of((string) $state)->replace('<br>', '<br />'),
-                                            '<p><br><ul><ol><li><strong><em><a><blockquote>'
-                                        ))
+                                        ->formatStateUsing(fn (?string $state): string => strip_tags((string) $state, '<p><br><ul><ol><li><strong><em><blockquote>'))
                                         ->html()
                                         ->placeholder('-')
                                         ->columnSpanFull(),
 
                                     TextEntry::make('providerProfile.profile_text')
                                         ->label('Profile Text')
-                                        ->formatStateUsing(fn (?string $state): string => strip_tags(
-                                            (string) Str::of((string) $state)->replace('<br>', '<br />'),
-                                            '<p><br><ul><ol><li><strong><em><a><blockquote>'
-                                        ))
+                                        ->formatStateUsing(fn (?string $state): string => strip_tags((string) $state, '<p><br><ul><ol><li><strong><em><blockquote>'))
                                         ->html()
                                         ->placeholder('-')
                                         ->columnSpanFull(),

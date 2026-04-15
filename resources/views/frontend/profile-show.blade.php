@@ -181,7 +181,7 @@ $profileTags = array_values(array_unique(array_merge(
                     @php
                         $safeAbout = strip_tags(
                             (string) ($profile['about'] ?? $profile['description'] ?? ''),
-                            '<p><br><ul><ol><li><strong><em><a><blockquote>'
+                            '<p><br><ul><ol><li><strong><em><blockquote>'
                         );
                     @endphp
                     <div class="text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">

@@ -105,7 +105,7 @@
                         @php
                             $safeProfileText = strip_tags(
                                 (string) ($userInfo['provider_profile']?->profile_text ?? ''),
-                                '<p><br><ul><ol><li><strong><em><a><blockquote>'
+                                '<p><br><ul><ol><li><strong><em><blockquote>'
                             );
                         @endphp
                         <div class="text-gray-600 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
