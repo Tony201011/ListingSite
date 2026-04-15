@@ -423,10 +423,29 @@
         </div>
     </div>
 </div>
+
+<button
+    id="smooth-scroll-top"
+    type="button"
+    class="pointer-events-none fixed bottom-6 right-6 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-pink-600 text-white opacity-0 shadow-lg transition-all duration-300 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2"
+    aria-label="Scroll to top"
+>
+    <i class="fa-solid fa-arrow-up text-sm"></i>
+</button>
 @endsection
 
 @push('styles')
 <style>
+    html {
+        scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+
     .view-card {
         transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
     }
@@ -462,6 +481,28 @@
 
 @push('scripts')
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const scrollTopButton = document.getElementById('smooth-scroll-top');
+        if (!scrollTopButton) {
+            return;
+        }
+
+        const toggleScrollTopButton = function () {
+            const shouldShow = window.scrollY > 300;
+            scrollTopButton.classList.toggle('opacity-0', !shouldShow);
+            scrollTopButton.classList.toggle('pointer-events-none', !shouldShow);
+        };
+
+        window.addEventListener('scroll', toggleScrollTopButton, { passive: true });
+
+        scrollTopButton.addEventListener('click', function () {
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+        });
+
+        toggleScrollTopButton();
+    });
+
     function favouriteBookmark(config) {
         return {
             viewMode: 'grid',
