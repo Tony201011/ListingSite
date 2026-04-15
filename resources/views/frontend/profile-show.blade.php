@@ -144,7 +144,7 @@ $profileTags = array_values(array_unique(array_merge(
 
                     <div class="grid grid-cols-2 gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
                         <!-- Next Button (right corner) -->
@@ -184,7 +184,7 @@ $profileTags = array_values(array_unique(array_merge(
                 </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach(array_slice($galleryImages, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-48 object-cover gallery-img-clickable cursor-pointer">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-48 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
 
@@ -199,7 +199,7 @@ $profileTags = array_values(array_unique(array_merge(
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
                             x-data="{ pauseOthers(current) { $root.querySelectorAll('video').forEach(function(v){ if(v !== current) v.pause(); }); } }">
                             @forelse($profile['videos'] ?? [] as $videoUrl)
-                            <video controls class="rounded-xl w-full h-64 bg-black"
+                            <video controls preload="none" class="rounded-xl w-full h-64 bg-black"
                                 x-on:play="pauseOthers($el)">
                                 <source src="{{ $videoUrl }}" type="video/mp4">
                                 Your browser does not support the video tag.
@@ -582,7 +582,7 @@ $profileTags = array_values(array_unique(array_merge(
                 @foreach($nearbyProfiles as $nearby)
                     <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         @if(!empty($nearby['image']))
-                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="h-48 w-full object-cover">
+                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="h-48 w-full object-cover" loading="lazy" decoding="async">
                         @else
                         <div class="h-48 w-full bg-gray-200 flex items-center justify-center">
                             <i class="fa-solid fa-user text-gray-400 text-4xl"></i>
@@ -767,5 +767,4 @@ function submitReport(event) {
     }
 </style>
 @endpush
-
 
