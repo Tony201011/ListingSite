@@ -19,7 +19,7 @@ class SmsLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
 
-    protected static ?string $navigationLabel = 'SMS Log';
+    protected static ?string $navigationLabel = 'SMS Logs';
 
     protected static ?string $modelLabel = 'SMS Log';
 

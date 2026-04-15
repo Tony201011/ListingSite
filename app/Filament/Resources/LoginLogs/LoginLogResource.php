@@ -19,7 +19,7 @@ class LoginLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowRightOnRectangle;
 
-    protected static ?string $navigationLabel = 'Login Log';
+    protected static ?string $navigationLabel = 'Login Logs';
 
     protected static ?string $modelLabel = 'Login Log';
 

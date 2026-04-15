@@ -19,7 +19,7 @@ class OnlineLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSignal;
 
-    protected static ?string $navigationLabel = 'Online/Offline Log';
+    protected static ?string $navigationLabel = 'Online/Offline Logs';
 
     protected static ?string $modelLabel = 'Online/Offline Log';
 
