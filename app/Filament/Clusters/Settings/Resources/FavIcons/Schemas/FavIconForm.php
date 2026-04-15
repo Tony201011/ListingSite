@@ -12,6 +12,7 @@ class FavIconForm
         return $schema
             ->components([
                 \Filament\Forms\Components\FileUpload::make('icon_path')
+                    ->disk('public')
                     ->directory('favicons')
                     ->image()
                     ->required(),
