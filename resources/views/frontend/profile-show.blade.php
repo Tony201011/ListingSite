@@ -178,8 +178,14 @@ $profileTags = array_values(array_unique(array_merge(
                 <div class="mt-8 mb-8">
                     <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
                     <hr class="mb-4">
-                    <div class="text-base text-gray-900 leading-relaxed">
-                        {!! $profile['about'] ?? $profile['description'] ?? 'No about me provided.' !!}
+                    @php
+                        $safeAbout = strip_tags(
+                            (string) ($profile['about'] ?? $profile['description'] ?? ''),
+                            '<p><br><ul><ol><li><strong><em><blockquote>'
+                        );
+                    @endphp
+                    <div class="text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
+                        {!! $safeAbout !== '' ? $safeAbout : 'No about me provided.' !!}
                     </div>
                 </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -767,4 +773,3 @@ function submitReport(event) {
     }
 </style>
 @endpush
-
