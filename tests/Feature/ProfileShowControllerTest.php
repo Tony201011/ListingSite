@@ -23,11 +23,11 @@ class ProfileShowControllerTest extends TestCase
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
         ProviderProfile::query()->create(array_merge([
-            'user_id'        => $user->id,
-            'name'           => 'Jade',
-            'slug'           => 'jade010-10',
+            'user_id' => $user->id,
+            'name' => 'Jade',
+            'slug' => 'jade010-10',
             'profile_status' => 'approved',
-            'age'            => 24,
+            'age' => 24,
         ], $profileOverrides));
 
         return $user;
@@ -94,9 +94,9 @@ class ProfileShowControllerTest extends TestCase
 
         $pendingUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
-            'user_id'        => $pendingUser->id,
-            'name'           => 'Pending Escort',
-            'slug'           => 'pending-profile',
+            'user_id' => $pendingUser->id,
+            'name' => 'Pending Escort',
+            'slug' => 'pending-profile',
             'profile_status' => 'pending',
         ]);
 
@@ -173,10 +173,10 @@ class ProfileShowControllerTest extends TestCase
         $user = $this->createApprovedProvider();
 
         Rate::query()->create([
-            'user_id'     => $user->id,
+            'user_id' => $user->id,
             'description' => '1 hour',
-            'incall'      => '',
-            'outcall'     => '$350',
+            'incall' => '',
+            'outcall' => '$350',
         ]);
 
         $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
@@ -369,10 +369,10 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider();
 
         $category = Category::query()->create([
-            'name'         => 'Brunette',
-            'slug'         => 'brunette',
+            'name' => 'Brunette',
+            'slug' => 'brunette',
             'website_type' => 'adult',
-            'is_active'    => true,
+            'is_active' => true,
         ]);
 
         $response = $this->get(route('profile.show', ['slug' => 'jade010-10', 'categories' => [$category->id]]));
@@ -394,10 +394,10 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider();
 
         $category = Category::query()->create([
-            'name'         => 'Inactive Cat',
-            'slug'         => 'inactive-cat',
+            'name' => 'Inactive Cat',
+            'slug' => 'inactive-cat',
             'website_type' => 'adult',
-            'is_active'    => false,
+            'is_active' => false,
         ]);
 
         $response = $this->get(route('profile.show', ['slug' => 'jade010-10', 'categories' => [$category->id]]));
@@ -414,7 +414,7 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider();
 
         SiteSetting::query()->create([
-            'site_password'         => 'secret123',
+            'site_password' => 'secret123',
             'site_password_enabled' => true,
         ]);
 
@@ -428,7 +428,7 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider();
 
         SiteSetting::query()->create([
-            'site_password'         => 'secret123',
+            'site_password' => 'secret123',
             'site_password_enabled' => true,
         ]);
 
@@ -443,7 +443,7 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider();
 
         SiteSetting::query()->create([
-            'site_password'         => 'secret123',
+            'site_password' => 'secret123',
             'site_password_enabled' => true,
         ]);
 

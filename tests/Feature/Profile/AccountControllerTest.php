@@ -3,7 +3,6 @@
 namespace Tests\Feature\Profile;
 
 use App\Actions\DeleteUserAccount;
-use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;

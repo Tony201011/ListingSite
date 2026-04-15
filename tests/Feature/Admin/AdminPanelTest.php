@@ -66,7 +66,7 @@ class AdminPanelTest extends TestCase
     // canAccessPanel logic
     // ---------------------------------------------------------------
 
-    public function test_admin_can_access_admin_panel_via_canAccessPanel(): void
+    public function test_admin_can_access_admin_panel_via_can_access_panel(): void
     {
         $admin = $this->createAdmin();
         $panel = app(\Filament\Panel::class)::make()->id('admin');
@@ -74,7 +74,7 @@ class AdminPanelTest extends TestCase
         $this->assertTrue($admin->canAccessPanel($panel));
     }
 
-    public function test_provider_cannot_access_admin_panel_via_canAccessPanel(): void
+    public function test_provider_cannot_access_admin_panel_via_can_access_panel(): void
     {
         $provider = $this->createProvider();
         $panel = app(\Filament\Panel::class)::make()->id('admin');

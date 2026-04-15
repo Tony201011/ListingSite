@@ -4,7 +4,6 @@ namespace App\Actions;
 
 use App\Models\LoginLog;
 use App\Models\Rate;
-use App\Models\ShortUrl;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 

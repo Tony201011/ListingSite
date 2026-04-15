@@ -2,14 +2,14 @@
 
 namespace App\Providers;
 
-use App\Models\FooterText;
-use App\Models\Postcode;
-use App\Models\FooterWidget;
-use App\Models\HeaderWidget;
-use App\Models\S3BucketSetting;
-use App\Models\SmtpSetting;
 use App\Listeners\LogPasswordResetNotificationEmail;
 use App\Listeners\RecordUserLogin;
+use App\Models\FooterText;
+use App\Models\FooterWidget;
+use App\Models\HeaderWidget;
+use App\Models\Postcode;
+use App\Models\S3BucketSetting;
+use App\Models\SmtpSetting;
 use App\Notifications\BrandedAgentResetPasswordNotification;
 use Filament\Auth\Notifications\ResetPassword as FilamentResetPasswordNotification;
 use Filament\Support\Facades\FilamentView;
@@ -127,7 +127,7 @@ class AppServiceProvider extends ServiceProvider
             if (! Schema::hasTable('smtp_settings')) {
                 return;
             }
-        } catch (\Illuminate\Database\QueryException | \PDOException) {
+        } catch (\Illuminate\Database\QueryException|\PDOException) {
             return;
         }
 
@@ -172,7 +172,7 @@ class AppServiceProvider extends ServiceProvider
             if (! Schema::hasTable('s3_bucket_settings')) {
                 return;
             }
-        } catch (\Illuminate\Database\QueryException | \PDOException) {
+        } catch (\Illuminate\Database\QueryException|\PDOException) {
             return;
         }
 

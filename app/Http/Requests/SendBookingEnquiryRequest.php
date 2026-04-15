@@ -19,7 +19,7 @@ class SendBookingEnquiryRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'regex:/^[\d\s\-\+\(\)]{6,20}$/', 'max:20'],
-            'datetime' => ['nullable', 'date', 'after:' . now()->subYear()->format('Y-m-d')],
+            'datetime' => ['nullable', 'date', 'after:'.now()->subYear()->format('Y-m-d')],
             'services' => ['nullable', 'string', 'max:255'],
             'duration' => ['nullable', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],

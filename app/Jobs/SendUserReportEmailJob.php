@@ -55,7 +55,7 @@ class SendUserReportEmailJob implements ShouldQueue
         $providerEmail = $report->providerProfile?->user?->email;
         $providerName = $report->providerProfile?->name ?? 'Provider';
 
-        $subject = 'New Profile Report: ' . $providerName;
+        $subject = 'New Profile Report: '.$providerName;
 
         // Send to admin
         try {

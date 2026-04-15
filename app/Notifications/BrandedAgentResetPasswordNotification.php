@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Models\EmailLog;
 use Filament\Auth\Notifications\ResetPassword as FilamentResetPasswordNotification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Log;

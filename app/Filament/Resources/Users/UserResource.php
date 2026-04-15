@@ -483,7 +483,7 @@ class UserResource extends Resource
 
                                                     $url = self::mediaUrl((string) $path);
 
-                                                    return new HtmlString('<img src="' . e($url) . '" alt="Current image" style="max-height:220px;max-width:100%;object-fit:contain;" />');
+                                                    return new HtmlString('<img src="'.e($url).'" alt="Current image" style="max-height:220px;max-width:100%;object-fit:contain;" />');
                                                 })
                                                 ->columnSpanFull(),
 
@@ -510,7 +510,7 @@ class UserResource extends Resource
 
                                                     $url = self::mediaUrl((string) $path);
 
-                                                    return new HtmlString('<img src="' . e($url) . '" alt="Current thumbnail" style="max-height:160px;max-width:100%;object-fit:contain;" />');
+                                                    return new HtmlString('<img src="'.e($url).'" alt="Current thumbnail" style="max-height:160px;max-width:100%;object-fit:contain;" />');
                                                 })
                                                 ->columnSpanFull(),
 
@@ -574,15 +574,15 @@ class UserResource extends Resource
 
                                                     return new HtmlString(
                                                         '<div style="max-width:320px;">'
-                                                        . '<video controls preload="metadata" style="width:100%;max-height:180px;border-radius:0.375rem;">'
-                                                        . '<source src="' . e($url) . '" type="' . $mime . '">'
-                                                        . 'Your browser does not support the video element. <a href="' . e($url) . '" target="_blank" rel="noopener noreferrer">' . $name . '</a>'
-                                                        . '</video>'
-                                                        . '<a href="' . e($url) . '" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;margin-top:4px;color:inherit;text-decoration:underline;">'
-                                                        . '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>'
-                                                        . ' ' . $name
-                                                        . '</a>'
-                                                        . '</div>'
+                                                        .'<video controls preload="metadata" style="width:100%;max-height:180px;border-radius:0.375rem;">'
+                                                        .'<source src="'.e($url).'" type="'.$mime.'">'
+                                                        .'Your browser does not support the video element. <a href="'.e($url).'" target="_blank" rel="noopener noreferrer">'.$name.'</a>'
+                                                        .'</video>'
+                                                        .'<a href="'.e($url).'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;margin-top:4px;color:inherit;text-decoration:underline;">'
+                                                        .'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>'
+                                                        .' '.$name
+                                                        .'</a>'
+                                                        .'</div>'
                                                     );
                                                 })
                                                 ->columnSpanFull(),

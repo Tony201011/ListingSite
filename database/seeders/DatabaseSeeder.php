@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             SmtpSettingSeeder::class,
             S3BucketSettingSeeder::class,
             GoogleRecaptchaSettingSeeder::class,
-          //  CookieSettingSeeder::class,
+            //  CookieSettingSeeder::class,
             MetaKeywordSeeder::class,
             MetaDescriptionSeeder::class,
         ]);
