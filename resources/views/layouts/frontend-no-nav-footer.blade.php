@@ -6,6 +6,8 @@
     <title>@yield('title', 'Premium Directory')</title>
 
     @php
+        use Illuminate\Support\Facades\Storage;
+
         $activeFavIcon = \App\Models\FavIcon::where('is_active', true)->latest()->first();
     @endphp
     @if($activeFavIcon)
