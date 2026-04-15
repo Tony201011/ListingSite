@@ -21,7 +21,9 @@ class SitePassword
             $request->is('storage/*') ||
             $request->is('livewire/*') ||
             $request->is('favicon.ico') ||
-            $request->is('robots.txt')
+            $request->is('robots.txt') ||
+            $request->is('sitemap.xml') ||
+            $request->is('sitemaps/*')
         ) {
             return $next($request);
         }
