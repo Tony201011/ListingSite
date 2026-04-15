@@ -6,7 +6,8 @@
             </p>
 
             @php
-                $logLines = preg_split('/\r\n|\r|\n/', (string) $this->logContents) ?: [];
+                $normalizedLogContents = str_replace(["\r\n", "\r"], "\n", (string) $this->logContents);
+                $logLines = $normalizedLogContents === '' ? [] : explode("\n", $normalizedLogContents);
             @endphp
 
             <div class="max-h-[70vh] overflow-auto rounded-lg border border-gray-200 dark:border-gray-700">
@@ -21,7 +22,7 @@
                         @forelse ($logLines as $index => $line)
                             <tr class="align-top">
                                 <td class="px-3 py-2 font-mono text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
-                                <td class="px-3 py-2 font-mono whitespace-pre-wrap break-words text-gray-900 dark:text-gray-100">{{ $line }}</td>
+                                <td class="px-3 py-2 font-mono whitespace-pre-wrap [overflow-wrap:anywhere] text-gray-900 dark:text-gray-100">{{ $line }}</td>
                             </tr>
                         @empty
                             <tr>
