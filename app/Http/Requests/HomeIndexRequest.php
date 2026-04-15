@@ -45,7 +45,7 @@ class HomeIndexRequest extends FormRequest
             'escort_name' => ['nullable', 'string', 'max:255'],
             'user_lat' => ['nullable', 'numeric', 'between:-90,90'],
             'user_lng' => ['nullable', 'numeric', 'between:-180,180'],
-            'distance' => ['nullable', 'integer', 'min:1', 'max:20000'],
+            'distance' => ['nullable', 'integer', 'min:0', 'max:20000'],
             'girls' => ['nullable', Rule::in(['all', 'new', 'popular'])],
         ];
     }
