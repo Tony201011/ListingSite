@@ -256,7 +256,7 @@ class BuildProfileFilterViewData
         }
 
         $query = ProviderProfile::query()
-            ->whereNull('deleted_at')
+            ->whereNull('provider_profiles.deleted_at')
             ->where('profile_status', 'approved')
             ->whereHas('user')
             ->with([
@@ -272,7 +272,7 @@ class BuildProfileFilterViewData
                 // No Scout results – force an empty result set.
                 $query->whereRaw('0 = 1');
             } else {
-                $query->whereIn('id', $scoutMatchedIds);
+                $query->whereIn('provider_profiles.id', $scoutMatchedIds);
             }
         } elseif ($hasLocationQuery) {
             // Scout is not configured or unavailable – fall back to LIKE queries for location.
@@ -284,7 +284,7 @@ class BuildProfileFilterViewData
 
         // Always apply escort name as an exact LIKE filter to avoid fuzzy matching.
         if ($escortNameQuery !== '') {
-            $query->where('name', 'like', '%'.$escortNameQuery.'%');
+            $query->where('provider_profiles.name', 'like', '%'.$escortNameQuery.'%');
         }
 
         if ($minAge > 18 || $maxAge < 40) {
@@ -356,15 +356,18 @@ class BuildProfileFilterViewData
         }
 
         if ($distanceFilter !== null && $userLat !== null && $userLng !== null) {
-            // Haversine formula – filter profiles whose lat/lng is within $distanceFilter km.
-            // Profiles without coordinates are excluded when a distance filter is active.
-            $query->whereNotNull('latitude')
-                ->whereNotNull('longitude')
+            $latitudeExpression = $this->resolveDistanceCoordinateExpression('latitude');
+            $longitudeExpression = $this->resolveDistanceCoordinateExpression('longitude');
+
+            // Use provider profile coordinates when available, otherwise resolve from the
+            // provider user's suburb via postcodes table coordinates.
+            $query->whereRaw("{$latitudeExpression} IS NOT NULL")
+                ->whereRaw("{$longitudeExpression} IS NOT NULL")
                 ->whereRaw(
-                    '(6371 * acos(
-                        cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) +
-                        sin(radians(?)) * sin(radians(latitude))
-                    )) <= ?',
+                    "(6371 * acos(
+                        cos(radians(?)) * cos(radians({$latitudeExpression})) * cos(radians({$longitudeExpression}) - radians(?)) +
+                        sin(radians(?)) * sin(radians({$latitudeExpression}))
+                    )) <= ?",
                     [$userLat, $userLng, $userLat, $distanceFilter]
                 );
         }
@@ -393,17 +396,17 @@ class BuildProfileFilterViewData
                         ->selectRaw('count(*)')
                         ->whereColumn('profile_views.user_id', 'provider_profiles.user_id'),
                 ])->orderByDesc('popularity_score')
-                    ->orderByDesc('is_featured')
-                    ->orderByDesc('created_at');
+                    ->orderByDesc('provider_profiles.is_featured')
+                    ->orderByDesc('provider_profiles.created_at');
                 break;
 
             case 'new':
-                $query->orderByDesc('created_at')
-                    ->orderByDesc('is_featured');
+                $query->orderByDesc('provider_profiles.created_at')
+                    ->orderByDesc('provider_profiles.is_featured');
                 break;
 
             default:
-                $query->orderByDesc('is_featured')->orderByDesc('created_at');
+                $query->orderByDesc('provider_profiles.is_featured')->orderByDesc('provider_profiles.created_at');
                 break;
         }
 
@@ -451,6 +454,31 @@ class BuildProfileFilterViewData
             // Typesense is unreachable or not yet indexed – fall back gracefully.
             return null;
         }
+    }
+
+    private function resolveDistanceCoordinateExpression(string $column): string
+    {
+        if (! in_array($column, ['latitude', 'longitude'], true)) {
+            throw new \InvalidArgumentException("Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'.");
+        }
+
+        // If multiple postcode rows exist for the same suburb, choose a deterministic
+        // fallback coordinate by smallest postcode, then smallest row id.
+        return "COALESCE(
+            provider_profiles.{$column},
+            (
+                SELECT p.{$column}
+                FROM postcodes p
+                JOIN users u ON u.id = provider_profiles.user_id
+                WHERE p.latitude IS NOT NULL
+                    AND p.longitude IS NOT NULL
+                    AND p.suburb = u.suburb
+                ORDER BY
+                    p.postcode ASC,
+                    p.id ASC
+                LIMIT 1
+            )
+        )";
     }
 
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
