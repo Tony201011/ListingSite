@@ -157,7 +157,7 @@
                             </span>
                             <input
                                 type="range"
-                                min="1"
+                                min="0"
                                 :max="maxDistance"
                                 step="1"
                                 x-model.number="distance"

@@ -144,7 +144,7 @@ class BuildProfileFilterViewData
         $distanceFilter = null;
         if ($userLat !== null && $userLng !== null) {
             $requestedDistance = isset($validated['distance']) && $validated['distance'] !== '' ? (int) $validated['distance'] : $maxSearchDistance;
-            $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
+            $distanceFilter = min(max(0, $requestedDistance), $maxSearchDistance);
         }
 
         $categoryToParentSlug = $this->buildCategoryToParentSlugMap($parents, $childrenByParent);
