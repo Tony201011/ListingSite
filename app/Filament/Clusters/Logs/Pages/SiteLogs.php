@@ -31,16 +31,14 @@ class SiteLogs extends Page
 
     public string $logFilePath = '';
 
-    public string $logContents = '';
-
     /** @var array<int, string> */
     public array $logLines = [];
 
     public function mount(): void
     {
         $this->logFilePath = storage_path('logs/laravel.log');
-        $this->logContents = $this->tailLogFile($this->logFilePath);
-        $this->logLines = $this->normalizeLogLines($this->logContents);
+        $tailedLogContents = $this->tailLogFile($this->logFilePath);
+        $this->logLines = $this->normalizeLogLines($tailedLogContents);
     }
 
     public static function canAccess(): bool
