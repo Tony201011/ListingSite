@@ -164,7 +164,7 @@
                                 type="range"
                                 min="1"
                                 :max="maxDistance"
-                                step="10"
+                                step="1"
                                 x-model.number="distance"
                                 class="w-full"
                             >
