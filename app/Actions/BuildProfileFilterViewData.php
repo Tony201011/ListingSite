@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
+use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -130,6 +131,7 @@ class BuildProfileFilterViewData
 
         $locationQuery = (string) ($validated['location'] ?? '');
         $escortNameQuery = (string) ($validated['escort_name'] ?? '');
+        $girlsMode = (string) ($validated['girls'] ?? 'all');
 
         $userLat = isset($validated['user_lat']) && $validated['user_lat'] !== '' ? (float) $validated['user_lat'] : null;
         $userLng = isset($validated['user_lng']) && $validated['user_lng'] !== '' ? (float) $validated['user_lng'] : null;
@@ -164,6 +166,7 @@ class BuildProfileFilterViewData
             $userLat,
             $userLng,
             $distanceFilter,
+            $girlsMode,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -187,6 +190,7 @@ class BuildProfileFilterViewData
             'maxPrice',
             'locationQuery',
             'escortNameQuery',
+            'girlsMode',
             'profiles',
             'hasAgeFilter',
             'hasPriceFilter',
@@ -236,6 +240,7 @@ class BuildProfileFilterViewData
         ?float $userLat = null,
         ?float $userLng = null,
         ?int $distanceFilter = null,
+        string $girlsMode = 'all',
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
 
@@ -374,15 +379,34 @@ class BuildProfileFilterViewData
             'user_lat' => $userLat,
             'user_lng' => $userLng,
             'distance' => $distanceFilter,
+            'girls' => $girlsMode !== 'all' ? $girlsMode : null,
         ]);
 
         foreach ($selectedCategoryIds as $categoryId) {
             $appendParams['categories'][] = $categoryId;
         }
 
+        if ($girlsMode === 'popular') {
+            $query
+                ->addSelect([
+                    'popularity_score' => ProfileView::query()
+                        ->selectRaw('count(*)')
+                        ->whereColumn('profile_views.user_id', 'provider_profiles.user_id'),
+                ])
+                ->orderByDesc('popularity_score')
+                ->orderByDesc('is_featured')
+                ->orderByDesc('created_at');
+        } elseif ($girlsMode === 'new') {
+            $query
+                ->orderByDesc('created_at')
+                ->orderByDesc('is_featured');
+        } else {
+            $query
+                ->orderByDesc('is_featured')
+                ->orderByDesc('created_at');
+        }
+
         $paginator = $query
-            ->orderByDesc('is_featured')
-            ->orderByDesc('created_at')
             ->paginate($this->resolveProfilesPerPage())
             ->appends($appendParams);
 
