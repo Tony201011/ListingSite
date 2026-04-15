@@ -19,7 +19,7 @@ class FatalErrorPageTest extends TestCase
         config(['app.debug' => false]);
 
         if (! Route::has('fatal.error.test')) {
-            Route::get('/_fatal-error-test', function () {
+            Route::get('/fatal/error/test', function () {
                 throw new RuntimeException('Forced fatal error for test');
             })->name('fatal.error.test');
         }
@@ -33,7 +33,7 @@ class FatalErrorPageTest extends TestCase
             'fatal_error_query_param' => 'fatal_message',
         ]);
 
-        $response = $this->get('/_fatal-error-test');
+        $response = $this->get('/fatal/error/test');
 
         $response->assertStatus(500);
         $response->assertDontSee('Site Under Maintenance');
@@ -48,7 +48,7 @@ class FatalErrorPageTest extends TestCase
             'fatal_error_query_param' => 'fatal_message',
         ]);
 
-        $response = $this->get('/_fatal-error-test');
+        $response = $this->get('/fatal/error/test');
 
         $response->assertStatus(500);
         $response->assertSee('Site Under Maintenance');
@@ -63,7 +63,7 @@ class FatalErrorPageTest extends TestCase
             'fatal_error_query_param' => 'fatal_message',
         ]);
 
-        $response = $this->get('/_fatal-error-test?fatal_message=Temporary+database+issue');
+        $response = $this->get('/fatal/error/test?fatal_message=Temporary+database+issue');
 
         $response->assertStatus(500);
         $response->assertSee('Temporary database issue');
