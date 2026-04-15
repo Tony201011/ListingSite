@@ -123,8 +123,8 @@ class DummyProviderProfileSeeder extends Seeder
                 fgetcsv($handle); // skip header
                 $csvSuburbs = [];
                 while (($data = fgetcsv($handle)) !== false) {
-                    $state   = trim($data[0] ?? '');
-                    $suburb  = trim($data[2] ?? '');
+                    $state = trim($data[0] ?? '');
+                    $suburb = trim($data[2] ?? '');
                     $postcode = trim($data[3] ?? '');
                     if ($suburb !== '' && $postcode !== '' && $state !== '') {
                         $csvSuburbs[] = "{$suburb}, {$state} {$postcode}";
@@ -263,7 +263,7 @@ class DummyProviderProfileSeeder extends Seeder
             $stateId = $cityModel ? $cityModel->state_id : (count($states) > 0 ? $states[$i % count($states)] : null);
             $countryId = $cityModel ? ($cityModel->state?->country_id ?? null) : (count($countries) > 0 ? $countries[$i % count($countries)] : null);
 
-            $slug = Str::slug($name) . '-' . $i;
+            $slug = Str::slug($name).'-'.$i;
 
             // 3 out of 5 providers are approved; 1 pending; 1 rejected
             $profileStatuses = ['approved', 'approved', 'approved', 'pending', 'rejected'];
@@ -276,7 +276,7 @@ class DummyProviderProfileSeeder extends Seeder
                     'age' => rand(21, 45),
                     'description' => "Hi, I'm {$name}. I am a professional and discreet companion offering premium companionship services. I love to meet new people and create unforgettable experiences.",
                     'introduction_line' => "Welcome to my profile! I'm {$name}, your perfect companion.",
-                    'profile_text' => "I provide a warm and genuine experience. Available for incalls and outcalls throughout the city. Contact me to arrange an unforgettable time together.",
+                    'profile_text' => 'I provide a warm and genuine experience. Available for incalls and outcalls throughout the city. Contact me to arrange an unforgettable time together.',
                     'primary_identity' => count($attributeIds) > 0
                         ? [$this->pickFrom($attributeIds, $i)]
                         : [],
@@ -294,9 +294,9 @@ class DummyProviderProfileSeeder extends Seeder
                     'contact_method' => $this->pickFrom(self::CONTACT_METHOD_OPTIONS, $i),
                     'phone_contact_preference' => $this->pickFrom(self::PHONE_PREF_OPTIONS, $i),
                     'time_waster_shield' => $this->pickFrom(self::TIME_WASTER_OPTIONS, $i),
-                    'twitter_handle' => '@' . Str::lower(str_replace(' ', '', $name)) . $i,
+                    'twitter_handle' => '@'.Str::lower(str_replace(' ', '', $name)).$i,
                     'website' => null,
-                    'onlyfans_username' => Str::lower(str_replace(' ', '', $name)) . $i,
+                    'onlyfans_username' => Str::lower(str_replace(' ', '', $name)).$i,
                     'country_id' => $countryId,
                     'state_id' => $stateId,
                     'city_id' => $cityId,
@@ -427,7 +427,7 @@ class DummyProviderProfileSeeder extends Seeder
     {
         $names = self::FEMALE_NAMES;
 
-        return $names[($index - 1) % count($names)] . sprintf('%03d', $index);
+        return $names[($index - 1) % count($names)].sprintf('%03d', $index);
     }
 
     private function pickFrom(array $items, int $index): mixed

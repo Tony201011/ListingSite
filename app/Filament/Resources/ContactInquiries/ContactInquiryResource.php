@@ -18,7 +18,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -154,7 +153,7 @@ class ContactInquiryResource extends Resource
                     ->icon('heroicon-o-paper-airplane')
                     ->color('primary')
                     ->visible(fn (ContactInquiry $record): bool => filled($record->email))
-                    ->modalHeading(fn (ContactInquiry $record): string => 'Reply to ' . ($record->name ?? $record->email))
+                    ->modalHeading(fn (ContactInquiry $record): string => 'Reply to '.($record->name ?? $record->email))
                     ->modalSubmitActionLabel('Send Reply')
                     ->form([
                         Textarea::make('admin_reply')

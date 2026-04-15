@@ -59,7 +59,7 @@ class SendContactInquiryReplyEmailJob implements ShouldQueue
                 ['inquiry' => $inquiry],
                 function ($message) use ($inquiry): void {
                     $message->to($inquiry->email, $inquiry->name ?? null)
-                        ->subject('Re: ' . ($inquiry->subject ?: 'Your Inquiry'));
+                        ->subject('Re: '.($inquiry->subject ?: 'Your Inquiry'));
                 }
             );
 
@@ -70,7 +70,7 @@ class SendContactInquiryReplyEmailJob implements ShouldQueue
 
             EmailLog::create([
                 'recipient' => $inquiry->email,
-                'subject' => 'Re: ' . ($inquiry->subject ?: 'Your Inquiry'),
+                'subject' => 'Re: '.($inquiry->subject ?: 'Your Inquiry'),
                 'type' => 'contact_inquiry_reply',
                 'status' => 'sent',
                 'sent_at' => now(),
@@ -85,7 +85,7 @@ class SendContactInquiryReplyEmailJob implements ShouldQueue
 
             EmailLog::create([
                 'recipient' => $inquiry->email,
-                'subject' => 'Re: ' . ($inquiry->subject ?: 'Your Inquiry'),
+                'subject' => 'Re: '.($inquiry->subject ?: 'Your Inquiry'),
                 'type' => 'contact_inquiry_reply',
                 'status' => 'failed',
                 'error' => $e->getMessage(),

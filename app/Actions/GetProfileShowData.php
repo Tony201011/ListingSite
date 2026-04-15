@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 class GetProfileShowData
 {
     use ResolvesProfileCategoryIds;
+
     public function execute(string $slug, array $validated): array
     {
         $providerProfile = ProviderProfile::query()
@@ -30,11 +31,6 @@ class GetProfileShowData
                 'country',
             ])
             ->first();
-
-
-
-
-
 
         abort_if($providerProfile === null, 404);
 
@@ -131,7 +127,7 @@ class GetProfileShowData
             ['label' => 'Length', 'value' => $categoryNames->get($providerProfile->your_length_id) ?? '—'],
         ];
 
-      //  dd($profile);
+        //  dd($profile);
 
         return [
             'profile' => $profile,

@@ -2,7 +2,6 @@
 
 namespace App\Actions;
 
-use App\Actions\GetProfileMessage;
 use App\Concerns\ResolvesProfileCategoryIds;
 use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\Category;

@@ -17,7 +17,7 @@ class ManageStatusSettings extends EditRecord
      * The $record parameter is intentionally ignored; this page always loads the
      * singleton SiteSetting record so no record ID is required in the URL.
      */
-    public function mount(int|string $record = null): void
+    public function mount(int|string|null $record = null): void
     {
         $siteSetting = SiteSetting::first();
 

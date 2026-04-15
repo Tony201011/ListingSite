@@ -13,6 +13,7 @@ use Laravel\Scout\Builder as ScoutBuilder;
 class BuildProfileFilterViewData
 {
     use ResolvesProfileCategoryIds;
+
     private const DEFAULT_PROFILES_PER_PAGE = 12;
 
     private const DEFAULT_MIN_AGE = 18;
