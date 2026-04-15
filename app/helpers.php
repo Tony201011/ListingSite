@@ -23,7 +23,8 @@ if (! function_exists('resolve_meta_page_candidates')) {
 
         if (str_contains($path, '/')) {
             $segments = explode('/', $path);
-            $candidates[] = $segments[0];
+            $firstSegment = $segments[0];
+            $candidates[] = $firstSegment;
         }
 
         $routeName = request()->route()?->getName();
