@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\File;
 
 class SiteLogs extends Page
 {
+    private const CHUNK_SIZE = 4096;
+
+    private const MAX_BUFFER_BYTES = 1024 * 1024;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $navigationLabel = 'Site Logs';
@@ -46,15 +50,57 @@ class SiteLogs extends Page
             return 'No application log file was found.';
         }
 
-        $contents = File::get($path);
-
-        if ($contents === '') {
+        if (File::size($path) === 0) {
             return 'The application log file is currently empty.';
         }
 
-        return collect(preg_split("/\r\n|\n|\r/", $contents))
-            ->filter(fn (?string $line): bool => $line !== null)
-            ->take(-$lines)
+        $handle = fopen($path, 'rb');
+
+        if (! $handle) {
+            return 'Unable to read the application log file. Please verify file permissions.';
+        }
+
+        $buffer = '';
+        $lineBreaks = 0;
+        $size = File::size($path);
+        $position = $size;
+
+        try {
+            while ($position > 0 && $lineBreaks < $lines) {
+                $readSize = min(self::CHUNK_SIZE, $position);
+
+                if (strlen($buffer) + $readSize > self::MAX_BUFFER_BYTES) {
+                    $readSize = self::MAX_BUFFER_BYTES - strlen($buffer);
+                }
+
+                if ($readSize <= 0) {
+                    break;
+                }
+
+                $position -= $readSize;
+                fseek($handle, $position);
+                $chunk = fread($handle, $readSize);
+
+                if ($chunk === false) {
+                    break;
+                }
+
+                $buffer = $chunk.$buffer;
+                $lineBreaks += substr_count($chunk, "\n");
+            }
+        } finally {
+            fclose($handle);
+        }
+
+        $normalizedBuffer = str_replace(["\r\n", "\r"], "\n", rtrim($buffer, "\r\n"));
+        $logLines = explode("\n", $normalizedBuffer);
+
+        if ($position > 0) {
+            array_shift($logLines);
+        }
+
+        return collect($logLines)
+            ->slice(-$lines)
             ->implode(PHP_EOL);
     }
 }
