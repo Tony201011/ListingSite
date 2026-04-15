@@ -106,6 +106,7 @@ class SitemapControllerTest extends TestCase
         $response->assertOk();
         $response->assertSee(route('profile.show', ['slug' => 'canonical-slug']), false);
         $response->assertDontSee(route('profile.show', ['slug' => 'Mixed Slug']), false);
+        $response->assertDontSee(route('profile.show', ['slug' => 'mixed-slug']), false);
     }
 
     public function test_sitemap_is_accessible_when_site_password_is_enabled(): void

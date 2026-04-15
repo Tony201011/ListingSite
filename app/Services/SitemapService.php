@@ -14,8 +14,8 @@ use App\Models\RefundPolicy;
 use App\Models\TermCondition;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class SitemapService
 {
@@ -80,14 +80,12 @@ class SitemapService
             ->forPage($page, $this->profileSitemapPageSize())
             ->get(['slug', 'updated_at']);
 
-        $urls = $profiles
-            ->filter(fn (ProviderProfile $profile) => $this->isCanonicalSlug($profile->slug))
-            ->map(fn (ProviderProfile $profile) => $this->urlEntry(
-                route('profile.show', ['slug' => $profile->slug]),
-                $profile->updated_at,
-                'daily',
-                '0.8',
-            ));
+        $urls = $profiles->map(fn (ProviderProfile $profile) => $this->urlEntry(
+            route('profile.show', ['slug' => $profile->slug]),
+            $profile->updated_at,
+            'daily',
+            '0.8',
+        ));
 
         return $this->buildUrlSetXml($urls);
     }
@@ -99,13 +97,16 @@ class SitemapService
         return max(1, (int) ceil($total / $this->profileSitemapPageSize()));
     }
 
-    private function approvedProfilesQuery()
+    private function approvedProfilesQuery(): Builder
     {
         return ProviderProfile::query()
             ->whereNull('deleted_at')
             ->where('profile_status', 'approved')
             ->whereNotNull('slug')
             ->where('slug', '!=', '')
+            ->whereRaw('slug = lower(slug)')
+            ->whereRaw('slug = trim(slug)')
+            ->where('slug', 'not like', '% %')
             ->whereHas('user');
     }
 
@@ -149,20 +150,11 @@ class SitemapService
         return $maxUpdatedAt ? Carbon::parse($maxUpdatedAt) : now();
     }
 
-    private function latestModelTimestamp($query): CarbonInterface
+    private function latestModelTimestamp(Builder $query): CarbonInterface
     {
         $maxUpdatedAt = $query->max('updated_at');
 
         return $maxUpdatedAt ? Carbon::parse($maxUpdatedAt) : now();
-    }
-
-    private function isCanonicalSlug(?string $slug): bool
-    {
-        if (! is_string($slug) || $slug === '') {
-            return false;
-        }
-
-        return Str::slug($slug) === $slug;
     }
 
     private function buildUrlSetXml(Collection $urls): string
