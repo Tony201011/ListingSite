@@ -132,9 +132,6 @@ class BuildProfileFilterViewData
         $locationQuery = (string) ($validated['location'] ?? '');
         $escortNameQuery = (string) ($validated['escort_name'] ?? '');
         $girlsMode = (string) ($validated['girls'] ?? 'all');
-        if (! in_array($girlsMode, ['all', 'new', 'popular'], true)) {
-            $girlsMode = 'all';
-        }
 
         $userLat = isset($validated['user_lat']) && $validated['user_lat'] !== '' ? (float) $validated['user_lat'] : null;
         $userLng = isset($validated['user_lng']) && $validated['user_lng'] !== '' ? (float) $validated['user_lng'] : null;

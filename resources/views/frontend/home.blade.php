@@ -13,7 +13,7 @@
     $distanceFilter = (int) ($distanceFilter ?? $maxSearchDistance);
     $userLat = $userLat ?? null;
     $userLng = $userLng ?? null;
-    $girlsMode = in_array(($girlsMode ?? 'all'), ['all', 'new', 'popular'], true) ? $girlsMode : 'all';
+    $girlsMode = (string) ($girlsMode ?? 'all');
     $selectedCategoryItems = $selectedCategoryItems ?? collect();
     $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
 @endphp
