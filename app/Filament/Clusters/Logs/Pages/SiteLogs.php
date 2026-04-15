@@ -33,10 +33,14 @@ class SiteLogs extends Page
 
     public string $logContents = '';
 
+    /** @var array<int, string> */
+    public array $logLines = [];
+
     public function mount(): void
     {
         $this->logFilePath = storage_path('logs/laravel.log');
         $this->logContents = $this->tailLogFile($this->logFilePath);
+        $this->logLines = $this->normalizeLogLines($this->logContents);
     }
 
     public static function canAccess(): bool
@@ -102,5 +106,15 @@ class SiteLogs extends Page
         return collect($logLines)
             ->slice(-$lines)
             ->implode(PHP_EOL);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function normalizeLogLines(string $contents): array
+    {
+        $normalizedLogContents = str_replace(["\r\n", "\r"], "\n", $contents);
+
+        return $normalizedLogContents === '' ? [] : explode("\n", $normalizedLogContents);
     }
 }

@@ -5,11 +5,6 @@
                 File: {{ $this->logFilePath }}
             </p>
 
-            @php
-                $normalizedLogContents = str_replace(["\r\n", "\r"], "\n", (string) $this->logContents);
-                $logLines = $normalizedLogContents === '' ? [] : explode("\n", $normalizedLogContents);
-            @endphp
-
             <div class="max-h-[70vh] overflow-auto rounded-lg border border-gray-200 dark:border-gray-700">
                 <table class="min-w-full divide-y divide-gray-200 text-xs dark:divide-gray-700">
                     <thead class="sticky top-0 bg-gray-50 dark:bg-gray-900">
@@ -19,7 +14,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-950">
-                        @forelse ($logLines as $index => $line)
+                        @forelse ($this->logLines as $index => $line)
                             <tr class="align-top">
                                 <td class="px-3 py-2 font-mono text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
                                 <td class="px-3 py-2 font-mono whitespace-pre-wrap [overflow-wrap:anywhere] text-gray-900 dark:text-gray-100">{{ $line }}</td>
