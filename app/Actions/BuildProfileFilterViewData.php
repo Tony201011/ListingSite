@@ -395,20 +395,19 @@ class BuildProfileFilterViewData
                     'popularity_score' => ProfileView::query()
                         ->selectRaw('count(*)')
                         ->whereColumn('profile_views.user_id', 'provider_profiles.user_id'),
-                ])->orderByDesc('popularity_score');
+                ])->orderByDesc('popularity_score')
+                    ->orderByDesc('is_featured')
+                    ->orderByDesc('created_at');
                 break;
 
             case 'new':
-                $query->orderByDesc('created_at');
+                $query->orderByDesc('created_at')
+                    ->orderByDesc('is_featured');
                 break;
 
             default:
                 $query->orderByDesc('is_featured')->orderByDesc('created_at');
                 break;
-        }
-
-        if ($girlsMode !== 'all') {
-            $query->orderByDesc('is_featured')->orderByDesc('created_at');
         }
 
         $paginator = $query
