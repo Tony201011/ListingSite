@@ -50,6 +50,8 @@ class DatabaseSeeder extends Seeder
             HelpPageSeeder::class,
             GlobalBannerSeeder::class,
             FooterWidgetSeeder::class,
+            FooterTextSeeder::class,
+            HeaderWidgetSeeder::class,
             FaqSeeder::class,
             SmtpSettingSeeder::class,
             S3BucketSettingSeeder::class,
