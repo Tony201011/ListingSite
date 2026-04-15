@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class HomeControllerTest extends TestCase
@@ -65,6 +67,7 @@ class HomeControllerTest extends TestCase
             'maxPrice',
             'locationQuery',
             'escortNameQuery',
+            'girlsMode',
             'hasAgeFilter',
             'hasPriceFilter',
             'hasDistanceFilter',
@@ -84,6 +87,7 @@ class HomeControllerTest extends TestCase
         $response->assertViewHas('maxPrice', 400);
         $response->assertViewHas('locationQuery', '');
         $response->assertViewHas('escortNameQuery', '');
+        $response->assertViewHas('girlsMode', 'all');
         $response->assertViewHas('hasAgeFilter', false);
         $response->assertViewHas('hasPriceFilter', false);
     }
@@ -145,6 +149,43 @@ class HomeControllerTest extends TestCase
         $profiles = $response->viewData('profiles');
         $items = collect($profiles->items());
         $this->assertSame('Featured', $items->first()['name']);
+    }
+
+    public function test_home_page_new_girls_mode_orders_by_latest_created_profile(): void
+    {
+        $olderUser = $this->createApprovedProvider(['name' => 'Older Escort', 'slug' => 'older-escort']);
+        $newerUser = $this->createApprovedProvider(['name' => 'Newer Escort', 'slug' => 'newer-escort']);
+
+        ProviderProfile::query()->where('user_id', $olderUser->id)->update([
+            'created_at' => Carbon::now()->subDays(2),
+        ]);
+        ProviderProfile::query()->where('user_id', $newerUser->id)->update([
+            'created_at' => Carbon::now()->subHour(),
+        ]);
+
+        $response = $this->get('/?girls=new');
+
+        $response->assertViewHas('girlsMode', 'new');
+        $profiles = $response->viewData('profiles');
+        $items = collect($profiles->items());
+        $this->assertSame('Newer Escort', $items->first()['name']);
+    }
+
+    public function test_home_page_popular_mode_orders_by_profile_view_count(): void
+    {
+        $popularUser = $this->createApprovedProvider(['name' => 'Popular Escort', 'slug' => 'popular-escort']);
+        $lessPopularUser = $this->createApprovedProvider(['name' => 'Less Popular Escort', 'slug' => 'less-popular-escort']);
+
+        ProfileView::query()->create(['user_id' => $popularUser->id, 'viewer_ip' => '1.1.1.1']);
+        ProfileView::query()->create(['user_id' => $popularUser->id, 'viewer_ip' => '1.1.1.2']);
+        ProfileView::query()->create(['user_id' => $lessPopularUser->id, 'viewer_ip' => '1.1.1.3']);
+
+        $response = $this->get('/?girls=popular');
+
+        $response->assertViewHas('girlsMode', 'popular');
+        $profiles = $response->viewData('profiles');
+        $items = collect($profiles->items());
+        $this->assertSame('Popular Escort', $items->first()['name']);
     }
 
     // ---------------------------------------------------------------
@@ -278,6 +319,13 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/?min_price=not_a_number');
 
         $response->assertSessionHasErrors(['min_price']);
+    }
+
+    public function test_home_page_rejects_invalid_girls_mode(): void
+    {
+        $response = $this->get('/?girls=invalid-mode');
+
+        $response->assertSessionHasErrors(['girls']);
     }
 
     // ---------------------------------------------------------------
