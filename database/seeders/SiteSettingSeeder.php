@@ -18,16 +18,18 @@ class SiteSettingSeeder extends Seeder
             'cookies_text' => 'We use cookies for analytics and personalization.',
         ];
 
-        if (Schema::hasColumns('site_settings', [
-            'fatal_error_page_enabled',
-            'fatal_error_default_message',
-            'fatal_error_query_param',
-        ])) {
-            $attributes = array_merge($attributes, [
-                'fatal_error_page_enabled' => false,
-                'fatal_error_default_message' => 'Site is under maintenance. Please try again shortly.',
-                'fatal_error_query_param' => 'fatal_message',
-            ]);
+        $columns = Schema::getColumnListing('site_settings');
+
+        if (in_array('fatal_error_page_enabled', $columns, true)) {
+            $attributes['fatal_error_page_enabled'] = false;
+        }
+
+        if (in_array('fatal_error_default_message', $columns, true)) {
+            $attributes['fatal_error_default_message'] = 'Site is under maintenance. Please try again shortly.';
+        }
+
+        if (in_array('fatal_error_query_param', $columns, true)) {
+            $attributes['fatal_error_query_param'] = 'fatal_message';
         }
 
         SiteSetting::create($attributes);
