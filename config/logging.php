@@ -62,6 +62,7 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
+            'tap' => [App\Logging\ReadableLogFormatter::class],
             'replace_placeholders' => true,
         ],
 
@@ -70,6 +71,7 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
+            'tap' => [App\Logging\ReadableLogFormatter::class],
             'replace_placeholders' => true,
         ],
 
@@ -99,6 +101,7 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => StreamHandler::class,
             'formatter' => env('LOG_STDERR_FORMATTER'),
+            'tap' => [App\Logging\ReadableLogFormatter::class],
             'with' => [
                 'stream' => 'php://stderr',
             ],
