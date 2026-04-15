@@ -13,7 +13,7 @@ class FooterTextSeeder extends Seeder
     public function run(): void
     {
         FooterText::updateOrCreate(
-            ['is_active' => true],
+            ['id' => 1],
             [
                 'copyright_text' => '© {year} Hotescorts Directory. All rights reserved.',
                 'disclaimer_text' => 'This platform is for adults only (18+) and provides advertising listings only.',
