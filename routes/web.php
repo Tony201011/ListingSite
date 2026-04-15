@@ -38,6 +38,7 @@ use App\Http\Controllers\Profile\ShowHideProfileController;
 use App\Http\Controllers\Profile\StatusTabsController;
 use App\Http\Controllers\Profile\SuburbController;
 use App\Http\Controllers\Profile\UrlController;
+use App\Http\Controllers\SitemapController;
 /***profile Controllers start*/
 
 /**subscription controller start */
@@ -115,6 +116,11 @@ Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.l
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/pricing', [FrontendPageController::class, 'pricing'])->name('pricing');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemaps/static.xml', [SitemapController::class, 'static'])->name('sitemap.static');
+Route::get('/sitemaps/profiles-{page}.xml', [SitemapController::class, 'profiles'])
+    ->whereNumber('page')
+    ->name('sitemap.profiles');
 
 Route::get('/403', function () {
     abort(403);
