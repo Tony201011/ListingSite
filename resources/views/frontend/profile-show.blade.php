@@ -537,23 +537,36 @@ $profileTags = array_values(array_unique(array_merge(
                 <a href="{{ url('/') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">View all →</a>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach($nearbyProfiles as $nearby)
-                    <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                        @if(!empty($nearby['image']))
-                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="lazy-img h-48 w-full object-cover" loading="lazy" decoding="async">
-                        @else
-                        <div class="h-48 w-full bg-gray-200 flex items-center justify-center">
-                            <i class="fa-solid fa-user text-gray-400 text-4xl"></i>
-                        </div>
-                        @endif
-                        <div class="p-3">
-                            <h3 class="text-lg font-semibold text-gray-900">{{ $nearby['name'] }}</h3>
-                            <p class="text-xs text-gray-500">{{ $nearby['city'] }} • {{ $nearby['service_1'] }}</p>
-                            <p class="mt-2 text-base font-bold text-gray-900">{{ $nearby['rate'] }}</p>
-                        </div>
-                    </a>
-                @endforeach
+            <div class="relative">
+                <button id="nearby-prev" aria-label="Scroll left"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-md text-pink-500 hover:bg-pink-50 transition -ml-3">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <div id="nearby-carousel" class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-4 pb-2" style="scroll-behavior:smooth;-ms-overflow-style:none;scrollbar-width:none;">
+                    @foreach($nearbyProfiles as $nearby)
+                        <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}"
+                           class="flex-none w-56 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md snap-start">
+                            @if(!empty($nearby['image']))
+                            <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="lazy-img h-48 w-full object-cover" loading="lazy" decoding="async">
+                            @else
+                            <div class="h-48 w-full bg-gray-200 flex items-center justify-center">
+                                <i class="fa-solid fa-user text-gray-400 text-4xl"></i>
+                            </div>
+                            @endif
+                            <div class="p-3">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ $nearby['name'] }}</h3>
+                                <p class="text-xs text-gray-500">{{ $nearby['city'] }} • {{ $nearby['service_1'] }}</p>
+                                <p class="mt-2 text-base font-bold text-gray-900">{{ $nearby['rate'] }}</p>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+
+                <button id="nearby-next" aria-label="Scroll right"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-md text-pink-500 hover:bg-pink-50 transition -mr-3">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
             </div>
         </section>
     </div>
@@ -634,5 +647,33 @@ $profileTags = array_values(array_unique(array_merge(
         reportUrl: '{{ route('profile.report') }}',
         profileId: {{ $profile['id'] }}
     };
+</script>
+
+<script>
+(function () {
+    var carousel = document.getElementById('nearby-carousel');
+    var prevBtn  = document.getElementById('nearby-prev');
+    var nextBtn  = document.getElementById('nearby-next');
+
+    if (!carousel || !prevBtn || !nextBtn) return;
+
+    var scrollAmount = 240;
+
+    prevBtn.addEventListener('click', function () {
+        carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+
+    nextBtn.addEventListener('click', function () {
+        carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+
+    function updateButtons() {
+        prevBtn.style.display = carousel.scrollLeft <= 0 ? 'none' : 'flex';
+        nextBtn.style.display = carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1 ? 'none' : 'flex';
+    }
+
+    carousel.addEventListener('scroll', updateButtons);
+    updateButtons();
+})();
 </script>
 @endpush
