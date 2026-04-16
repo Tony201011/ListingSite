@@ -777,7 +777,7 @@ $profileTags = array_values(array_unique(array_merge(
     function updateButtons() {
         // Use Math.ceil on scrollLeft to handle fractional pixel values on high-DPI
         // displays, so the next button only hides when we are truly at the end.
-        prevBtn.style.display = carousel.scrollLeft < 1 ? 'none' : 'flex';
+        prevBtn.style.display = Math.floor(carousel.scrollLeft) <= 0 ? 'none' : 'flex';
         nextBtn.style.display = Math.ceil(carousel.scrollLeft) + carousel.clientWidth >= carousel.scrollWidth ? 'none' : 'flex';
     }
 
