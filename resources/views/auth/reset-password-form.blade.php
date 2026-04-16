@@ -237,8 +237,4 @@
     <script src="{{ asset('auth/js/password-tools.js') }}"></script>
     <script src="{{ asset('auth/js/reset-password.js') }}"></script>
 @endpush
-
-<style>
-    [x-cloak] { display: none !important; }
-</style>
 @endsection

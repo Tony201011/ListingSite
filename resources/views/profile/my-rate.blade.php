@@ -186,10 +186,6 @@
     </div>
 </div>
 
-<!-- Scripts -->
-<script src="//unpkg.com/alpinejs" defer></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<meta name="csrf-token" content="{{ csrf_token() }}">
 @push('scripts')
 <script src="{{ asset('profile/js/rates-manager.js') }}?v={{ filemtime(public_path('profile/js/rates-manager.js')) }}"></script>
 @endpush

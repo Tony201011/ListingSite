@@ -31,11 +31,6 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <style>
-        [x-cloak] { display: none !important; }
-        .hero-gradient { background: linear-gradient(180deg, rgba(17,24,39,0.7) 0%, rgba(17,24,39,1) 100%); }
-    </style>
-
     @stack('styles')
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans" x-data="{ mobileMenu: false }">
@@ -85,48 +80,6 @@
 
     @stack('scripts')
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const passwordInputs = document.querySelectorAll('input[type="password"]:not([data-no-toggle="true"])');
-
-            passwordInputs.forEach(function (input) {
-                if (input.dataset.toggleBound === 'true') {
-                    return;
-                }
-
-                input.dataset.toggleBound = 'true';
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'relative';
-
-                const parent = input.parentNode;
-                parent.insertBefore(wrapper, input);
-                wrapper.appendChild(input);
-
-                if (!input.classList.contains('pr-10')) {
-                    input.classList.add('pr-10');
-                }
-
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.setAttribute('aria-label', 'Show password');
-                button.className = 'absolute inset-y-0 right-0 inline-flex items-center px-3 text-gray-500 hover:text-gray-700';
-                button.innerHTML = '<i class="fa-regular fa-eye"></i>';
-
-                button.addEventListener('click', function () {
-                    const isPassword = input.type === 'password';
-                    input.type = isPassword ? 'text' : 'password';
-                    button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
-
-                    const icon = button.querySelector('i');
-                    if (icon) {
-                        icon.className = isPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
-                    }
-                });
-
-                wrapper.appendChild(button);
-            });
-        });
-    </script>
+    <script src="{{ asset('js/password-toggle.js') }}"></script>
 </body>
 </html>

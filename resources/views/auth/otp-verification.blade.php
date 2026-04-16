@@ -111,8 +111,4 @@
 @push('scripts')
     <script src="{{ asset('auth/js/otp-verification.js') }}"></script>
 @endpush
-
-<style>
-    [x-cloak] { display: none !important; }
-</style>
 @endsection

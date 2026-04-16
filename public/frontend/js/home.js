@@ -28,6 +28,45 @@ function escortSearch(config) {
         showSuggestions: false,
         highlightedIndex: -1,
         abortController: null,
+        userLat: config.userLat || '',
+        userLng: config.userLng || '',
+        distance: config.distance || 500,
+        maxDistance: config.maxDistance || 500,
+        locationEnabled: config.locationEnabled || false,
+        geoError: '',
+
+        requestLocation() {
+            this.geoError = '';
+            if (!navigator.geolocation) {
+                this.geoError = 'Geolocation not supported.';
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    this.userLat = pos.coords.latitude;
+                    this.userLng = pos.coords.longitude;
+                    this.locationEnabled = true;
+                },
+                (err) => {
+                    if (err.code === 1) {
+                        this.geoError = 'Location access denied. Please allow location in your browser settings and try again.';
+                    } else if (err.code === 2) {
+                        this.geoError = 'Location unavailable. Please check your device location settings.';
+                    } else if (err.code === 3) {
+                        this.geoError = 'Location request timed out. Please try again.';
+                    } else {
+                        this.geoError = 'Unable to get location. Please allow access.';
+                    }
+                },
+                { timeout: 10000, maximumAge: 60000 }
+            );
+        },
+
+        clearLocation() {
+            this.userLat = '';
+            this.userLng = '';
+            this.locationEnabled = false;
+        },
 
         fetchSuggestions() {
             const q = this.term.trim();
@@ -108,7 +147,6 @@ function escortSearch(config) {
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
                 return;
             }
-            // Default: submit the form
             event.target.closest('form').submit();
         },
     };
