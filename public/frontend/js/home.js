@@ -152,65 +152,6 @@ function escortSearch(config) {
     };
 }
 
-function locationPopup(config) {
-    return {
-        show: false,
-        loading: false,
-        error: '',
-        maxDistance: config.maxDistance || 500,
-        formAction: config.formAction || '/',
-
-        init() {
-            // Only show when no location is already active in the current URL
-            if (config.locationAlreadyActive) {
-                return;
-            }
-            const pref = localStorage.getItem('locationPermission');
-            if (!pref) {
-                this.show = true;
-            }
-        },
-
-        allow() {
-            this.error = '';
-            if (!navigator.geolocation) {
-                this.error = 'Geolocation is not supported by your browser.';
-                return;
-            }
-            this.loading = true;
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    localStorage.setItem('locationPermission', 'granted');
-                    this.show = false;
-                    this.loading = false;
-                    const url = new URL(this.formAction, window.location.origin);
-                    url.searchParams.set('user_lat', pos.coords.latitude);
-                    url.searchParams.set('user_lng', pos.coords.longitude);
-                    url.searchParams.set('distance', this.maxDistance);
-                    window.location.href = url.toString();
-                },
-                (err) => {
-                    this.loading = false;
-                    if (err.code === 1) {
-                        this.error = 'Location access denied. Please allow location in your browser settings.';
-                        localStorage.setItem('locationPermission', 'denied');
-                    } else if (err.code === 2) {
-                        this.error = 'Location unavailable. Please check your device location settings.';
-                    } else {
-                        this.error = 'Unable to get location. Please try again.';
-                    }
-                },
-                { timeout: 10000, maximumAge: 60000 }
-            );
-        },
-
-        deny() {
-            localStorage.setItem('locationPermission', 'denied');
-            this.show = false;
-        },
-    };
-}
-
 function favouriteBookmark(config) {
     return {
         favourites: config.favourites || [],
