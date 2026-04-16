@@ -26,7 +26,7 @@
         <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div x-data="escortSearch({
                     initialMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}',
-                    initialTerm: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}',
+                    initialTerm: {!! Js::from($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) !!},
                     suggestionsUrl: '{{ route('api.search.suggestions') }}',
                     suburbSuggestionsUrl: '{{ route('api.suburbs.search') }}',
                     userLat: '{{ $userLat ?? '' }}',
