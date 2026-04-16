@@ -65,7 +65,7 @@ class GetProfileShowData
         $prevProfile = $this->getAdjacentProfile($providerProfile->id, 'prev');
         $nextProfile = $this->getAdjacentProfile($providerProfile->id, 'next');
 
-        $nearbyProfiles = $this->getNearbyProfiles($providerProfile->id);
+        $nearbyProfiles = $this->getNearbyProfiles($providerProfile->id, $providerProfile->city_id);
 
         $selectedCategoryIds = collect($validated['categories'] ?? [])
             ->map(fn ($id) => (int) $id)
@@ -321,11 +321,12 @@ class GetProfileShowData
         ];
     }
 
-    private function getNearbyProfiles(int $currentId): array
+    private function getNearbyProfiles(int $currentId, ?int $cityId): array
     {
         return ProviderProfile::query()
             ->where('id', '!=', $currentId)
             ->where('profile_status', 'approved')
+            ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
             ->with([
                 'user.primaryProfileImage',
