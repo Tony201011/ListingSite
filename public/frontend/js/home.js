@@ -121,7 +121,7 @@ function escortSearch(config) {
                 this.term = item.value;
                 this.closeSuggestions();
                 const form = event.target.closest('form');
-                if (form) form.submit();
+                if (form) this.$nextTick(() => form.submit());
             } else {
                 window.location.href = '/profile/' + item.slug;
             }
