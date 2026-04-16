@@ -2,74 +2,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
-<style>
-    .ql-editor {
-        min-height: 250px;
-        font-size: 1rem !important;
-        line-height: 1.6 !important;
-        color: #1f2937 !important;
-        background-color: #ffffff !important;
-        font-family: inherit !important;
-    }
-
-    .ql-editor.ql-blank::before {
-        color: #9ca3af !important;
-        font-style: normal !important;
-    }
-
-    .ql-editor h1 {
-        font-size: 2em !important;
-        font-weight: 700 !important;
-        margin-bottom: 0.5em !important;
-    }
-
-    .ql-editor h2 {
-        font-size: 1.5em !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.5em !important;
-    }
-
-    .ql-editor h3 {
-        font-size: 1.25em !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.5em !important;
-    }
-
-    .ql-editor a {
-        color: #e04ecb !important;
-        text-decoration: underline !important;
-    }
-
-    .ql-editor a:hover {
-        color: #c13ab0 !important;
-    }
-
-    .ql-editor ul,
-    .ql-editor ol {
-        padding-left: 2em !important;
-        margin-bottom: 1em !important;
-    }
-
-    .ql-editor blockquote {
-        border-left: 4px solid #e04ecb !important;
-        padding-left: 1em !important;
-        margin-left: 0 !important;
-        font-style: italic !important;
-        color: #4b5563 !important;
-    }
-
-    .ql-toolbar.ql-snow {
-        border-top-left-radius: 0.5rem;
-        border-top-right-radius: 0.5rem;
-        border-color: #d1d5db !important;
-    }
-
-    .ql-container.ql-snow {
-        border-bottom-left-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
-        border-color: #d1d5db !important;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/quill-editor.css') }}">
 @endpush
 
 @section('content')

@@ -1,34 +1,6 @@
 @extends('layouts.frontend')
 @push('styles')
-<style>
-@media (max-width: 640px) {
-  .mobile-nav-btn-wrapper {
-    position: sticky !important;
-    top: 80vh !important;
-    left: unset !important;
-    right: unset !important;
-    transform: none !important;
-    margin: 0 auto !important;
-    width: max-content;
-    z-index: 30;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .mobile-transparent-nav-btn {
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(2px);
-    color: #fff !important;
-    border: 1px solid rgba(255, 192, 203, 0.3) !important;
-    box-shadow: none !important;
-  }
-  .mobile-transparent-nav-btn span,
-  .mobile-transparent-nav-btn i {
-    color: #fff !important;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
-  }
-}
-</style>
+<link rel="stylesheet" href="{{ asset('frontend/css/profile-show.css') }}">
 @endpush
 
 @section('title', $profile['name'] . ' Profile')
@@ -216,28 +188,9 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     </section>
 
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.store('videoControl', {
-            pauseOthers(current) {
-                document.querySelectorAll('video').forEach(video => {
-                    if (video !== current) video.pause();
-                });
-            }
-        });
-    });
-</script>
-
-<script>
-    // Attach @play handler to all videos on the page (inline and in modals)
-    document.addEventListener('alpine:init', () => {
-        Alpine.directive('pauseothers', (el) => {
-            el.addEventListener('play', () => {
-                Alpine.store('videoControl').pauseOthers(el);
-            });
-        });
-    });
-</script>
+@push('scripts')
+<script src="{{ asset('frontend/js/profile-show.js') }}"></script>
+@endpush
 
                     <!-- My Upcoming Tours Section (Card Style) -->
                     <section id="upcoming-tours" class="mt-12 scroll-mt-32">
@@ -671,105 +624,9 @@ $profileTags = array_values(array_unique(array_merge(
 </div>
 
 <script>
-function favouriteBookmark(config) {
-    return {
-        favourites: config.favourites || [],
-
-        isFavourite(slug) {
-            return this.favourites.includes(slug);
-        },
-
-        async toggleFavourite(slug) {
-            const res = await fetch('/favourite/' + encodeURIComponent(slug), {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data.active) {
-                if (!this.favourites.includes(slug)) this.favourites.push(slug);
-            } else {
-                this.favourites = this.favourites.filter(s => s !== slug);
-            }
-        },
+    window.__profileShowConfig = {
+        reportUrl: '{{ route('profile.report') }}',
+        profileId: {{ $profile['id'] }}
     };
-}
-
-function submitReport(event) {
-    event.preventDefault();
-    const form = document.getElementById('report-form');
-    const btn = document.getElementById('report-submit-btn');
-    const errorEl = document.getElementById('report-error');
-    const successEl = document.getElementById('report-success');
-
-    btn.disabled = true;
-    btn.textContent = 'Submitting...';
-    errorEl.classList.add('hidden');
-    successEl.classList.add('hidden');
-
-    const formData = new FormData(form);
-
-    fetch('{{ route('profile.report') }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': formData.get('_token'),
-            'Accept': 'application/json',
-        },
-        body: formData,
-    })
-    .then(async response => {
-        const data = await response.json();
-        if (response.ok) {
-            successEl.classList.remove('hidden');
-            form.reset();
-            form.querySelector('[name="provider_profile_id"]').value = '{{ $profile['id'] }}';
-            setTimeout(() => {
-                document.getElementById('report-modal').classList.add('hidden');
-                successEl.classList.add('hidden');
-            }, 3000);
-        } else {
-            const messages = data.errors
-                ? Object.values(data.errors).flat().join(' ')
-                : (data.message || 'An error occurred. Please try again.');
-            errorEl.textContent = messages;
-            errorEl.classList.remove('hidden');
-        }
-    })
-    .catch(() => {
-        errorEl.textContent = 'A network error occurred. Please try again.';
-        errorEl.classList.remove('hidden');
-    })
-    .finally(() => {
-        btn.disabled = false;
-        btn.textContent = 'Submit Report';
-    });
-}
 </script>
-@endpush
-
-@push('styles')
-<style>
-    html {
-        scroll-behavior: smooth;
-    }
-</style>
-<style>
-    .gallery-scroll {
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-x: contain;
-        scrollbar-width: thin;
-    }
-
-    .gallery-scroll::-webkit-scrollbar {
-        height: 8px;
-    }
-
-    .gallery-scroll::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 9999px;
-    }
-</style>
 @endpush

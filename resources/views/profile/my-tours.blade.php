@@ -275,27 +275,18 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
+<link rel="stylesheet" href="{{ asset('css/quill-editor.css') }}">
 <style>
     .ql-editor {
         min-height: 150px !important;
-        font-size: 1rem !important;
-        color: #1f2937 !important;
-        background-color: #ffffff !important;
         border-bottom-left-radius: 0.5rem;
         border-bottom-right-radius: 0.5rem;
     }
     .ql-toolbar.ql-snow {
-        border-top-left-radius: 0.5rem;
-        border-top-right-radius: 0.5rem;
         border-color: #e5e7eb !important;
     }
     .ql-container.ql-snow {
-        border-bottom-left-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
         border-color: #e5e7eb !important;
-    }
-    [x-cloak] {
-        display: none !important;
     }
     input, textarea, td, th {
         color: #111827 !important;

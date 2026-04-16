@@ -1,5 +1,9 @@
 @extends('layouts.frontend')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('subscription/css/credit-history.css') }}">
+@endpush
+
 @section('content')
 <!-- Credits History Page -->
 <div style="background: #ffffff; min-height: 100vh;">
@@ -67,84 +71,4 @@
     </div>
 </div>
 
-<style>
-/* Global Styles */
-body, html {
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
-
-/* Link hover */
-a:hover {
-    text-decoration: underline !important;
-}
-
-/* Credits table styles */
-.credits-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 1rem;
-}
-.credits-table th {
-    background: #f8f8f8;
-    padding: 15px 12px;
-    text-align: left;
-    font-weight: 600;
-    color: #555;
-    border-bottom: 2px solid #ddd;
-}
-.credits-table td {
-    padding: 14px 12px;
-    border-bottom: 1px solid #eaeaea;
-    color: #222;
-}
-/* Alternating row colors for readability */
-.credits-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    div[style*="padding: 40px 20px"] {
-        padding: 20px 15px !important;
-    }
-
-    h1 {
-        font-size: 1.8rem !important;
-    }
-
-    h2 {
-        font-size: 1.5rem !important;
-    }
-
-    /* Adjust table padding and font size */
-    .credits-table th,
-    .credits-table td {
-        padding: 10px 8px !important;
-        font-size: 0.9rem !important;
-    }
-
-    /* Make back link and title stack */
-    div[style*="display: flex"][style*="justify-content: space-between"] {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 8px;
-    }
-}
-
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.5rem !important;
-    }
-    h2 {
-        font-size: 1.3rem !important;
-    }
-    /* Footer links line height */
-    div[style*="padding: 30px 0 15px 0"] {
-        line-height: 1.8;
-    }
-}
-</style>
 @endsection

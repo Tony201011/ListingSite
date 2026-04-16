@@ -1,13 +1,5 @@
 @extends('layouts.frontend')
 
-@push('styles')
-<style>
-    [x-cloak] {
-        display: none !important;
-    }
-</style>
-@endpush
-
 @section('content')
 @php
     $verificationPhotos = is_array($lastTwoPhotos ?? null) ? $lastTwoPhotos : [];
