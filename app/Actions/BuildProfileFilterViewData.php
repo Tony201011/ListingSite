@@ -266,16 +266,13 @@ class BuildProfileFilterViewData
                 'city',
             ]);
 
-        if ($scoutMatchedIds !== null) {
-            // If Scout returned IDs, constrain the query to those profiles.
-            if ($scoutMatchedIds->isEmpty()) {
-                // No Scout results – force an empty result set.
-                $query->whereRaw('0 = 1');
-            } else {
-                $query->whereIn('provider_profiles.id', $scoutMatchedIds);
-            }
+        if ($scoutMatchedIds !== null && ! $scoutMatchedIds->isEmpty()) {
+            // Scout returned matching IDs – constrain the query to those profiles.
+            $query->whereIn('provider_profiles.id', $scoutMatchedIds);
         } elseif ($hasLocationQuery) {
-            // Scout is not configured or unavailable – fall back to LIKE queries for location.
+            // Scout is not configured, unavailable, or returned no results –
+            // fall back to LIKE queries for city/suburb so results are never
+            // incorrectly empty due to indexing gaps.
             $query->where(function ($q) use ($locationQuery) {
                 $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
                     ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%'.$locationQuery.'%'));

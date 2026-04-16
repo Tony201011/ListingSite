@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Smooth scroll for anchor links with .smooth-scroll class
+    document.querySelectorAll('a.smooth-scroll[href^="#"]').forEach(function (anchor) {
+        anchor.addEventListener('click', function (e) {
+            const targetId = this.getAttribute('href').slice(1);
+            const target = document.getElementById(targetId);
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
     // Lazy-load fade-in via Intersection Observer
     const lazyImages = document.querySelectorAll('img.lazy-img');
     if (lazyImages.length && 'IntersectionObserver' in window) {
