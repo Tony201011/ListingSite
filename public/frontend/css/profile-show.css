@@ -82,3 +82,10 @@ html {
 #nearby-carousel::-webkit-scrollbar {
     display: none;
 }
+
+/* Prevent horizontal carousel scroll from propagating to the page (avoids
+   accidental window.scrollY changes that hide the profile Prev/Next buttons). */
+#nearby-carousel {
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pinch-zoom;
+}

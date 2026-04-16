@@ -775,11 +775,21 @@ $profileTags = array_values(array_unique(array_merge(
     });
 
     function updateButtons() {
-        prevBtn.style.display = carousel.scrollLeft <= 0 ? 'none' : 'flex';
-        nextBtn.style.display = carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1 ? 'none' : 'flex';
+        // Use Math.ceil on scrollLeft to handle fractional pixel values on high-DPI
+        // displays, so the next button only hides when we are truly at the end.
+        prevBtn.style.display = carousel.scrollLeft < 1 ? 'none' : 'flex';
+        nextBtn.style.display = Math.ceil(carousel.scrollLeft) + carousel.clientWidth >= carousel.scrollWidth ? 'none' : 'flex';
     }
 
     carousel.addEventListener('scroll', updateButtons);
+
+    // Re-evaluate whenever the carousel is resized (e.g. lazy images finish
+    // loading and affect the scroll dimensions).
+    if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(function () {
+            requestAnimationFrame(updateButtons);
+        }).observe(carousel);
+    }
 
     // Defer the initial check so the carousel has fully rendered and images
     // have affected scrollWidth before we decide whether to show/hide arrows.
