@@ -1,0 +1,41 @@
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+.view-card {
+    transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+
+.view-card:hover {
+    transform: translateY(-2px);
+}
+
+.view-card-image {
+    transform-origin: center center;
+}
+
+/* Pagination light theme */
+nav[aria-label="Pagination"] span,
+nav[aria-label="Pagination"] a {
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+    color: #374151 !important;
+}
+
+nav[aria-label="Pagination"] a:hover {
+    background-color: #f9fafb !important;
+    color: #111827 !important;
+}
+
+nav[aria-label="Pagination"] [aria-current="page"] span,
+nav[aria-label="Pagination"] span[aria-current="page"] {
+    background-color: #db2777 !important;
+    border-color: #db2777 !important;
+    color: #fff !important;
+}
