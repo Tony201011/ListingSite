@@ -30,49 +30,16 @@
             </h1>
             <p class="mb-8 text-sm text-gray-400 tracking-widest uppercase">100% Real &amp; Genuine Escorts · Australia-Wide</p>
 
-            <div x-data="Object.assign(escortSearch({
+            <div x-data="escortSearch({
                     initialMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}',
                     initialTerm: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}',
                     suggestionsUrl: '{{ route('api.search.suggestions') }}',
-                    suburbSuggestionsUrl: '{{ route('api.suburbs.search') }}'
-                }), {
+                    suburbSuggestionsUrl: '{{ route('api.suburbs.search') }}',
                     userLat: '{{ $userLat ?? '' }}',
                     userLng: '{{ $userLng ?? '' }}',
                     distance: {{ $distanceFilter }},
                     maxDistance: {{ $maxSearchDistance }},
-                    locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }},
-                    geoError: '',
-                    requestLocation() {
-                        this.geoError = '';
-                        if (!navigator.geolocation) {
-                            this.geoError = 'Geolocation not supported.';
-                            return;
-                        }
-                        navigator.geolocation.getCurrentPosition(
-                            (pos) => {
-                                this.userLat = pos.coords.latitude;
-                                this.userLng = pos.coords.longitude;
-                                this.locationEnabled = true;
-                            },
-                            (err) => {
-                                if (err.code === 1) {
-                                    this.geoError = 'Location access denied. Please allow location in your browser settings and try again.';
-                                } else if (err.code === 2) {
-                                    this.geoError = 'Location unavailable. Please check your device location settings.';
-                                } else if (err.code === 3) {
-                                    this.geoError = 'Location request timed out. Please try again.';
-                                } else {
-                                    this.geoError = 'Unable to get location. Please allow access.';
-                                }
-                            },
-                            { timeout: 10000, maximumAge: 60000 }
-                        );
-                    },
-                    clearLocation() {
-                        this.userLat = '';
-                        this.userLng = '';
-                        this.locationEnabled = false;
-                    }
+                    locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }}
                 })" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
                 <form method="GET" action="{{ url('/') }}" @submit="closeSuggestions()">
                     <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
@@ -250,17 +217,17 @@
         <div x-cloak class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             @forelse($profiles as $profile)
                 <article
-                    class="view-card group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300"
+                    class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
                 >
                     <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
                     {{-- Image --}}
-                    <div class="view-card-media relative overflow-hidden rounded-t-2xl">
+                    <div class="relative overflow-hidden rounded-t-2xl">
                         @if($profile['image'])
                             <img
                                 src="{{ $profile['image'] }}"
                                 alt="{{ $profile['name'] }}"
-                                class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-105 h-52"
+                                class="w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105 h-52"
                                 loading="lazy"
                                 decoding="async"
                                 fetchpriority="low"
@@ -374,9 +341,19 @@
 </div>
 
 <button
-    id="smooth-scroll-top"
+    x-data="{ visible: false }"
+    x-show="visible"
+    x-cloak
+    x-transition:enter="transition duration-300"
+    x-transition:enter-start="opacity-0 scale-90"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition duration-200"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-90"
+    @scroll.window.passive="visible = window.scrollY > 300"
+    @click="window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })"
     type="button"
-    class="pointer-events-none fixed bottom-6 right-6 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-pink-600 text-white opacity-0 shadow-lg transition-all duration-300 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2"
+    class="fixed bottom-6 right-6 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-pink-600 text-white shadow-lg transition-all duration-300 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2"
     aria-label="Scroll to top"
 >
     <i class="fa-solid fa-arrow-up text-sm"></i>
@@ -384,9 +361,203 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}">
+<style>
+    /* Pagination light theme */
+    nav[aria-label="Pagination"] span,
+    nav[aria-label="Pagination"] a {
+        background-color: #ffffff !important;
+        border-color: #d1d5db !important;
+        color: #374151 !important;
+    }
+    nav[aria-label="Pagination"] a:hover {
+        background-color: #f9fafb !important;
+        color: #111827 !important;
+    }
+    nav[aria-label="Pagination"] [aria-current="page"] span,
+    nav[aria-label="Pagination"] span[aria-current="page"] {
+        background-color: #db2777 !important;
+        border-color: #db2777 !important;
+        color: #fff !important;
+    }
+</style>
 @endpush
 
 @push('scripts')
-<script src="{{ asset('frontend/js/home.js') }}"></script>
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('escortSearch', (config) => ({
+            searchMode: config.initialMode || 'suburb',
+            term: config.initialTerm || '',
+            suggestions: [],
+            showSuggestions: false,
+            highlightedIndex: -1,
+            abortController: null,
+            userLat: config.userLat || '',
+            userLng: config.userLng || '',
+            distance: config.distance || 500,
+            maxDistance: config.maxDistance || 500,
+            locationEnabled: config.locationEnabled || false,
+            geoError: '',
+
+            requestLocation() {
+                this.geoError = '';
+                if (!navigator.geolocation) {
+                    this.geoError = 'Geolocation not supported.';
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        this.userLat = pos.coords.latitude;
+                        this.userLng = pos.coords.longitude;
+                        this.locationEnabled = true;
+                    },
+                    (err) => {
+                        if (err.code === 1) {
+                            this.geoError = 'Location access denied. Please allow location in your browser settings and try again.';
+                        } else if (err.code === 2) {
+                            this.geoError = 'Location unavailable. Please check your device location settings.';
+                        } else if (err.code === 3) {
+                            this.geoError = 'Location request timed out. Please try again.';
+                        } else {
+                            this.geoError = 'Unable to get location. Please allow access.';
+                        }
+                    },
+                    { timeout: 10000, maximumAge: 60000 }
+                );
+            },
+
+            clearLocation() {
+                this.userLat = '';
+                this.userLng = '';
+                this.locationEnabled = false;
+            },
+
+            fetchSuggestions() {
+                const q = this.term.trim();
+                if (q.length < 2) {
+                    this.closeSuggestions();
+                    return;
+                }
+                if (this.abortController) {
+                    this.abortController.abort();
+                }
+                this.abortController = new AbortController();
+                const isSuburbMode = this.searchMode === 'suburb';
+                const url = (isSuburbMode ? config.suburbSuggestionsUrl : config.suggestionsUrl)
+                    + '?q=' + encodeURIComponent(q);
+                fetch(url, {
+                    signal: this.abortController.signal,
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                })
+                .then(r => r.ok ? r.json() : Promise.resolve(isSuburbMode ? [] : { suggestions: [] }))
+                .then(data => {
+                    if (isSuburbMode) {
+                        this.suggestions = (Array.isArray(data) ? data : []).map(item => ({
+                            type: 'suburb',
+                            name: (item.suburb || '') + ', ' + (item.state || ''),
+                            label: item.postcode || '',
+                            value: item.suburb || '',
+                        }));
+                    } else {
+                        this.suggestions = (data.suggestions || []).map(item => ({
+                            type: 'profile',
+                            name: item.name || '',
+                            slug: item.slug || '',
+                            label: item.location || '',
+                            age: item.age,
+                        }));
+                    }
+                    this.showSuggestions = this.suggestions.length > 0;
+                    this.highlightedIndex = -1;
+                })
+                .catch(err => {
+                    if (err.name !== 'AbortError') {
+                        this.closeSuggestions();
+                    }
+                });
+            },
+
+            selectSuggestion(item, event) {
+                if (item.type === 'suburb') {
+                    this.term = item.value;
+                    this.closeSuggestions();
+                    const form = event.target.closest('form');
+                    if (form) form.submit();
+                } else {
+                    window.location.href = '/profile/' + item.slug;
+                }
+            },
+
+            closeSuggestions() {
+                this.showSuggestions = false;
+                this.highlightedIndex = -1;
+            },
+
+            highlightNext() {
+                if (!this.showSuggestions) return;
+                this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.suggestions.length - 1);
+            },
+
+            highlightPrev() {
+                if (!this.showSuggestions) return;
+                this.highlightedIndex = Math.max(this.highlightedIndex - 1, -1);
+            },
+
+            selectHighlighted(event) {
+                if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
+                    this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
+                    return;
+                }
+                event.target.closest('form').submit();
+            },
+        }));
+
+        Alpine.data('favouriteBookmark', (config) => ({
+            favourites: config.favourites || [],
+            bookmarks: config.bookmarks || [],
+
+            isFavourite(slug) {
+                return this.favourites.includes(slug);
+            },
+
+            isBookmark(slug) {
+                return this.bookmarks.includes(slug);
+            },
+
+            async toggleFavourite(slug) {
+                const res = await fetch('/favourite/' + encodeURIComponent(slug), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.active) {
+                    if (!this.favourites.includes(slug)) this.favourites.push(slug);
+                } else {
+                    this.favourites = this.favourites.filter(s => s !== slug);
+                }
+            },
+
+            async toggleBookmark(slug) {
+                const res = await fetch('/bookmark/' + encodeURIComponent(slug), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.active) {
+                    if (!this.bookmarks.includes(slug)) this.bookmarks.push(slug);
+                } else {
+                    this.bookmarks = this.bookmarks.filter(s => s !== slug);
+                }
+            },
+        }));
+    });
+</script>
 @endpush
