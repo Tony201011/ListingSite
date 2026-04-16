@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Smooth scroll for anchor links with .smooth-scroll class
     document.querySelectorAll('a.smooth-scroll[href^="#"]').forEach(function (anchor) {
         anchor.addEventListener('click', function (e) {
-            var targetId = this.getAttribute('href').slice(1);
-            var target = document.getElementById(targetId);
+            const targetId = this.getAttribute('href').slice(1);
+            const target = document.getElementById(targetId);
             if (target) {
                 e.preventDefault();
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
