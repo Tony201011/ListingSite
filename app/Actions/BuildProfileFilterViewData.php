@@ -501,6 +501,8 @@ class BuildProfileFilterViewData
             'age' => $profile->age,
             'rate' => $rateDisplay,
             'rate_numeric' => $this->extractNumericRate($firstRate),
+            'in_call' => trim((string) ($firstRate?->incall ?? '')),
+            'out_call' => trim((string) ($firstRate?->outcall ?? '')),
             'city' => $profile->city?->name ?? '',
             'suburb' => $profile->user?->suburb ?? '',
             'height' => '',
