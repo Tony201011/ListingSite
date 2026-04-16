@@ -1,3 +1,44 @@
+document.addEventListener('DOMContentLoaded', function () {
+    // Lazy-load fade-in via Intersection Observer
+    const lazyImages = document.querySelectorAll('img.lazy-img');
+    if (lazyImages.length && 'IntersectionObserver' in window) {
+        const imgObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                const img = entry.target;
+                if (img.complete) {
+                    img.classList.add('is-loaded');
+                } else {
+                    img.addEventListener('load', function () {
+                        img.classList.add('is-loaded');
+                    }, { once: true });
+                    img.addEventListener('error', function () {
+                        img.classList.add('is-loaded');
+                    }, { once: true });
+                }
+                imgObserver.unobserve(img);
+            });
+        }, { rootMargin: '150px' });
+
+        lazyImages.forEach(function (img) { imgObserver.observe(img); });
+    } else {
+        // Fallback: show all images immediately
+        lazyImages.forEach(function (img) { img.classList.add('is-loaded'); });
+    }
+
+    // Scroll-to-top button
+    const scrollBtn = document.getElementById('scroll-to-top');
+    if (scrollBtn) {
+        window.addEventListener('scroll', function () {
+            scrollBtn.classList.toggle('visible', window.scrollY > 400);
+        }, { passive: true });
+
+        scrollBtn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+});
+
 document.addEventListener('alpine:init', () => {
     Alpine.store('videoControl', {
         pauseOthers(current) {
