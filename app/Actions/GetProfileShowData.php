@@ -330,6 +330,8 @@ class GetProfileShowData
             ->whereHas('user')
             ->with([
                 'user.primaryProfileImage',
+                'user.rates',
+                'user.onlineUser',
                 'city',
             ])
             ->orderByDesc('is_featured')
@@ -342,13 +344,25 @@ class GetProfileShowData
 
                 $services = array_values(array_filter((array) ($profile->services_provided ?? [])));
 
+                $firstRate = $profile->user?->rates?->first();
+                $rateDisplay = $this->formatRate($firstRate);
+
                 return [
                     'slug' => $profile->slug ?? '',
                     'name' => $profile->name ?? '',
                     'image' => $imageUrl ?? '',
                     'city' => $profile->city?->name ?? '',
+                    'suburb' => $profile->user?->suburb ?? '',
                     'service_1' => $services[0] ?? '',
-                    'rate' => 'Contact for rate',
+                    'service_2' => $services[1] ?? '',
+                    'description' => $profile->description ?? '',
+                    'rate' => $rateDisplay,
+                    'in_call' => trim((string) ($firstRate?->incall ?? '')),
+                    'out_call' => trim((string) ($firstRate?->outcall ?? '')),
+                    'age' => $profile->age,
+                    'verified' => $profile->is_verified,
+                    'active' => $profile->user?->onlineUser?->isCurrentlyOnline() ?? false,
+                    'date' => $profile->created_at->format('d/m/Y'),
                 ];
             })
             ->values()
