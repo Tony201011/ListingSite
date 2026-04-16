@@ -38,17 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
         lazyImages.forEach(function (img) { img.classList.add('is-loaded'); });
     }
 
-    // Scroll-to-top button
-    const scrollBtn = document.getElementById('scroll-to-top');
-    if (scrollBtn) {
-        window.addEventListener('scroll', function () {
-            scrollBtn.classList.toggle('visible', window.scrollY > 400);
-        }, { passive: true });
-
-        scrollBtn.addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
 });
 
 document.addEventListener('alpine:init', () => {

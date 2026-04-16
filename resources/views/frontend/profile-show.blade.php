@@ -645,9 +645,23 @@ $profileTags = array_values(array_unique(array_merge(
     </div>
 </div>
 
-<button id="scroll-to-top" aria-label="Scroll to top"
-    class="w-12 h-12 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg flex items-center justify-center transition">
-    <i class="fa-solid fa-arrow-up text-lg"></i>
+<button
+    x-data="{ visible: false }"
+    x-show="visible"
+    x-cloak
+    x-transition:enter="transition duration-300"
+    x-transition:enter-start="opacity-0 scale-90"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition duration-200"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-90"
+    @scroll.window.passive="visible = window.scrollY > 300"
+    @click="window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })"
+    type="button"
+    class="fixed bottom-6 right-6 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-pink-600 text-white shadow-lg transition-all duration-300 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2"
+    aria-label="Scroll to top"
+>
+    <i class="fa-solid fa-arrow-up text-sm"></i>
 </button>
 
 @endsection

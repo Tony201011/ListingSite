@@ -78,36 +78,6 @@ html {
     opacity: 1;
 }
 
-/* Scroll-to-top button */
-#scroll-to-top {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 40;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: translateY(8px);
-}
-
-#scroll-to-top.visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-}
-
-@media (max-width: 640px) {
-    #scroll-to-top {
-        right: 50%;
-        transform: translateX(50%) translateY(8px);
-        bottom: 5.5rem;
-    }
-
-    #scroll-to-top.visible {
-        transform: translateX(50%) translateY(0);
-    }
-}
-
 /* Nearby listings carousel – hide native scrollbar */
 #nearby-carousel::-webkit-scrollbar {
     display: none;
