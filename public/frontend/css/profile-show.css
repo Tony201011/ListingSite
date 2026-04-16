@@ -107,3 +107,8 @@ html {
         transform: translateX(50%) translateY(0);
     }
 }
+
+/* Nearby listings carousel – hide native scrollbar */
+#nearby-carousel::-webkit-scrollbar {
+    display: none;
+}
