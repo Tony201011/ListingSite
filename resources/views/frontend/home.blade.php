@@ -279,7 +279,7 @@
                                     <i :class="isBookmark('{{ $profile['slug'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
                                 </button>
                                 @if($profile['age'])
-                                    <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none">{{ $profile['age'] }}</span>
+                                    <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none" aria-label="Age: {{ $profile['age'] }}">{{ $profile['age'] }}</span>
                                 @endif
                             </div>
                         </div>
@@ -299,13 +299,13 @@
                             <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
                                 @if(!empty($profile['in_call']))
                                     <span class="inline-flex items-center gap-1 text-gray-600">
-                                        <i class="fa-solid fa-house text-emerald-500 text-[10px]"></i>
+                                        <i class="fa-solid fa-house text-emerald-500 text-[10px]" aria-hidden="true"></i>
                                         <span class="font-medium">In:</span> {{ $profile['in_call'] }}
                                     </span>
                                 @endif
                                 @if(!empty($profile['out_call']))
                                     <span class="inline-flex items-center gap-1 text-gray-600">
-                                        <i class="fa-solid fa-car text-blue-500 text-[10px]"></i>
+                                        <i class="fa-solid fa-car text-blue-500 text-[10px]" aria-hidden="true"></i>
                                         <span class="font-medium">Out:</span> {{ $profile['out_call'] }}
                                     </span>
                                 @endif
