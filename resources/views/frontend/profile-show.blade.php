@@ -116,7 +116,7 @@ $profileTags = array_values(array_unique(array_merge(
 
                     <div class="grid grid-cols-2 gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-40 sm:h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-40 sm:h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
                         <!-- Next Button (right corner) -->
@@ -162,7 +162,7 @@ $profileTags = array_values(array_unique(array_merge(
                 </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach(array_slice($galleryImages, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-48 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-48 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
 
@@ -541,7 +541,7 @@ $profileTags = array_values(array_unique(array_merge(
                 @foreach($nearbyProfiles as $nearby)
                     <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         @if(!empty($nearby['image']))
-                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="h-48 w-full object-cover" loading="lazy" decoding="async">
+                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="lazy-img h-48 w-full object-cover" loading="lazy" decoding="async">
                         @else
                         <div class="h-48 w-full bg-gray-200 flex items-center justify-center">
                             <i class="fa-solid fa-user text-gray-400 text-4xl"></i>
@@ -558,6 +558,12 @@ $profileTags = array_values(array_unique(array_merge(
         </section>
     </div>
 </div>
+
+<button id="scroll-to-top" aria-label="Scroll to top"
+    class="w-12 h-12 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg flex items-center justify-center transition">
+    <i class="fa-solid fa-arrow-up text-lg"></i>
+</button>
+
 @endsection
 
 @push('scripts')
