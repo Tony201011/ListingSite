@@ -578,11 +578,6 @@ $profileTags = array_values(array_unique(array_merge(
                                 {{-- Date + Age row --}}
                                 <div class="mb-2 flex items-center justify-between">
                                     <span class="text-[11px] text-gray-400">{{ $nearby['date'] }}</span>
-                                    <div class="flex items-center gap-2 text-gray-400">
-                                        @if(!empty($nearby['age']))
-                                            <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none" aria-label="Age: {{ $nearby['age'] }}">{{ $nearby['age'] }}</span>
-                                        @endif
-                                    </div>
                                 </div>
 
                                 {{-- Name --}}
