@@ -113,7 +113,7 @@ $profileTags = array_values(array_unique(array_merge(
                               x-transition:leave="transition duration-200"
                               x-transition:leave-start="opacity-100 scale-100"
                               x-transition:leave-end="opacity-0 scale-90"
-                              @scroll.window.passive="visible = window.scrollY > 300"
+                              @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
                               class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn"
                               style="margin-left: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
@@ -140,7 +140,7 @@ $profileTags = array_values(array_unique(array_merge(
                                     x-transition:leave="transition duration-200"
                                     x-transition:leave-start="opacity-100 scale-100"
                                     x-transition:leave-end="opacity-0 scale-90"
-                                    @scroll.window.passive="visible = window.scrollY > 300"
+                                    @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
                                     class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn"
                                     style="margin-right: 0.5rem;">
                             <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
