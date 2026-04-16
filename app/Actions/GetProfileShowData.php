@@ -323,7 +323,7 @@ class GetProfileShowData
 
     private function getNearbyProfiles(int $currentId, ?int $cityId): array
     {
-        return ProviderProfile::query()
+        $profiles = ProviderProfile::query()
             ->where('id', '!=', $currentId)
             ->where('profile_status', 'approved')
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
@@ -337,12 +337,27 @@ class GetProfileShowData
             ->orderByDesc('is_featured')
             ->orderByDesc('created_at')
             ->limit(4)
-            ->get()
-            ->map(function (ProviderProfile $profile) {
+            ->get();
+
+        $serviceIds = $profiles
+            ->flatMap(fn (ProviderProfile $p) => array_filter((array) ($p->services_provided ?? []), 'is_numeric'))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->all();
+
+        $categoryNames = $serviceIds
+            ? Category::query()->whereIn('id', $serviceIds)->pluck('name', 'id')
+            : collect();
+
+        return $profiles
+            ->map(function (ProviderProfile $profile) use ($categoryNames) {
                 $primaryImage = $profile->user?->primaryProfileImage;
                 $imageUrl = $primaryImage?->image_url ?? null;
 
-                $services = array_values(array_filter((array) ($profile->services_provided ?? [])));
+                $services = $this->resolveIds(
+                    array_values(array_filter((array) ($profile->services_provided ?? []))),
+                    $categoryNames
+                );
 
                 $firstRate = $profile->user?->rates?->first();
                 $rateDisplay = $this->formatRate($firstRate);
