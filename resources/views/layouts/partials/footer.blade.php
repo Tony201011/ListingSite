@@ -82,7 +82,7 @@
         };
 @endphp
 
-<footer class="border-t border-gray-800 bg-gray-950 px-4 pt-10 pb-6" style="{{ $footerStyle }}">
+<footer id="main-footer" class="border-t border-gray-800 bg-gray-950 px-4 pt-10 pb-6" style="{{ $footerStyle }}">
 
     <div class="mx-auto max-w-7xl">
         @if($showPromoSection)
