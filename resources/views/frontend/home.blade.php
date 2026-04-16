@@ -21,15 +21,9 @@
 @section('content')
 <div class="min-h-screen bg-gray-100 text-gray-800">
 
-    {{-- Hero / Search Section --}}
-    <div class="relative overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-900">
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(236,72,153,0.15)_0%,_transparent_65%)] pointer-events-none"></div>
-        <div class="relative mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 text-center">
-            <h1 class="mb-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                Popular <span class="text-pink-500">Hot</span>escorts
-            </h1>
-            <p class="mb-8 text-sm text-gray-400 tracking-widest uppercase">100% Real &amp; Genuine Escorts · Australia-Wide</p>
-
+    {{-- Search Bar --}}
+    <div class="bg-gray-950 border-b border-gray-800">
+        <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div x-data="escortSearch({
                     initialMode: '{{ $escortNameQuery !== '' ? 'username' : 'suburb' }}',
                     initialTerm: '{{ e($escortNameQuery !== '' ? $escortNameQuery : $locationQuery) }}',
@@ -48,9 +42,9 @@
                     <input type="hidden" name="user_lng" :value="userLng">
                     <input type="hidden" name="distance" :value="locationEnabled ? distance : ''">
 
-                    <div class="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        {{-- Text input --}}
                         <div class="relative flex-1">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
                             <input
                                 type="text"
                                 x-model="term"
@@ -59,8 +53,8 @@
                                 @keydown.arrow-down.prevent="highlightNext()"
                                 @keydown.arrow-up.prevent="highlightPrev()"
                                 @keydown.enter.prevent="selectHighlighted($event)"
-                                :placeholder="searchMode === 'username' ? 'Search by escort name…' : 'Search by suburb or city…'"
-                                class="w-full rounded-xl border border-gray-700 bg-gray-800/80 py-3 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/50"
+                                :placeholder="searchMode === 'username' ? 'Search by escort name…' : 'Enter a location to find local escorts'"
+                                class="w-full rounded border-0 bg-white py-3 px-4 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                                 autocomplete="off"
                             >
 
@@ -68,7 +62,7 @@
                             <div
                                 x-show="showSuggestions && suggestions.length > 0"
                                 x-cloak
-                                class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-gray-700 bg-gray-900 shadow-xl"
+                                class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded border border-gray-700 bg-gray-900 shadow-xl"
                             >
                                 <ul class="divide-y divide-gray-800">
                                     <template x-for="(item, index) in suggestions" :key="index">
@@ -91,54 +85,24 @@
                                 </ul>
                             </div>
                         </div>
-                        <button type="submit" class="shrink-0 rounded-xl bg-pink-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-900/40 transition hover:bg-pink-700 active:scale-95">
-                            Find Escort
-                        </button>
-                    </div>
 
-                    <div class="mt-3 flex flex-wrap justify-center gap-2">
+                        {{-- Find Escorts button --}}
+                        <button type="submit" class="shrink-0 rounded bg-fuchsia-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-700 active:scale-95">
+                            Find Escorts
+                        </button>
+
+                        {{-- Advanced search link --}}
+                        <a href="{{ route('advanced-search') }}" class="shrink-0 text-sm font-medium text-fuchsia-400 transition hover:text-fuchsia-300">
+                            Advanced search
+                        </a>
+
+                        {{-- Search by Name / Search by Location toggle --}}
                         <button
                             type="button"
                             @click="searchMode = searchMode === 'suburb' ? 'username' : 'suburb'; term = ''; closeSuggestions()"
-                            class="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs font-medium text-gray-300 transition hover:border-pink-500 hover:text-pink-400"
-                            x-text="searchMode === 'suburb' ? '🔎 Search by Name' : '📍 Search by Suburb'"
+                            class="shrink-0 rounded bg-gray-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-600"
+                            x-text="searchMode === 'suburb' ? 'Search by Name' : 'Search by Location'"
                         ></button>
-                        <a href="{{ route('advanced-search') }}" class="rounded-lg border border-pink-700/50 bg-pink-600/10 px-4 py-2 text-xs font-medium text-pink-400 transition hover:bg-pink-600/20 hover:text-pink-300">
-                            <i class="fa-solid fa-sliders mr-1"></i> Advanced Search / Filter
-                        </a>
-                    </div>
-
-                    {{-- Near Me / Distance filter --}}
-                    <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
-                        <button
-                            type="button"
-                            x-show="!locationEnabled"
-                            @click="requestLocation()"
-                            class="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-xs font-medium text-gray-300 transition hover:border-pink-500 hover:text-pink-400"
-                        >
-                            <i class="fa-solid fa-location-crosshairs mr-1 text-pink-400"></i> Near Me
-                        </button>
-                        <div x-show="locationEnabled" x-cloak class="flex flex-wrap items-center justify-center gap-2">
-                            <span class="text-xs text-green-400">
-                                <i class="fa-solid fa-circle-check text-[10px]"></i> Within <strong x-text="distance"></strong> km
-                            </span>
-                            <input
-                                type="range"
-                                min="0"
-                                :max="maxDistance"
-                                step="1"
-                                x-model.number="distance"
-                                class="w-32"
-                            >
-                            <button
-                                type="button"
-                                @click="clearLocation()"
-                                class="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-400 hover:text-gray-200"
-                            >
-                                <i class="fa-solid fa-xmark text-[10px]"></i>
-                            </button>
-                        </div>
-                        <span x-show="geoError" x-cloak class="text-xs text-red-400" x-text="geoError"></span>
                     </div>
                 </form>
             </div>
