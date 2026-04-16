@@ -563,9 +563,9 @@ $profileTags = array_values(array_unique(array_merge(
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
 
-                <div id="nearby-carousel" class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-4 pb-2" style="scroll-behavior:smooth;-ms-overflow-style:none;scrollbar-width:none;">
+                <div id="nearby-carousel" class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-4 pb-2 [&::-webkit-scrollbar]:hidden" style="scroll-behavior:smooth;-ms-overflow-style:none;scrollbar-width:none;">
                     @foreach($nearbyProfiles as $nearby)
-                        <article class="group relative flex-none w-64 overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 snap-start">
+                        <article class="group relative flex-none w-[calc(50%-8px)] lg:w-[calc(25%-12px)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 snap-start">
                             <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
                             {{-- Image --}}
@@ -764,14 +764,17 @@ $profileTags = array_values(array_unique(array_merge(
 
     if (!carousel || !prevBtn || !nextBtn) return;
 
-    var scrollAmount = 240;
+    function getPageWidth() {
+        // Scroll by the full visible width of the carousel (one "page" of cards).
+        return carousel.clientWidth || 800;
+    }
 
     prevBtn.addEventListener('click', function () {
-        carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        carousel.scrollBy({ left: -getPageWidth(), behavior: 'smooth' });
     });
 
     nextBtn.addEventListener('click', function () {
-        carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        carousel.scrollBy({ left: getPageWidth(), behavior: 'smooth' });
     });
 
     function updateButtons() {
