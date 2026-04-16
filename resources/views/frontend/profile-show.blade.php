@@ -746,7 +746,16 @@ $profileTags = array_values(array_unique(array_merge(
     }
 
     carousel.addEventListener('scroll', updateButtons);
-    updateButtons();
+
+    // Defer the initial check so the carousel has fully rendered and images
+    // have affected scrollWidth before we decide whether to show/hide arrows.
+    if (document.readyState === 'complete') {
+        requestAnimationFrame(updateButtons);
+    } else {
+        window.addEventListener('load', function () {
+            requestAnimationFrame(updateButtons);
+        });
+    }
 })();
 </script>
 @endpush
