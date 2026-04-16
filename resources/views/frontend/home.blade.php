@@ -35,7 +35,7 @@
                     maxDistance: {{ $maxSearchDistance }},
                     locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }}
                 })" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
-                <form method="GET" action="{{ url('/') }}" @submit="closeSuggestions()">
+                <form method="GET" action="{{ url('/') }}" @submit="handleFormSubmit($event)">
                     <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
                     <input type="hidden" name="escort_name" :value="searchMode === 'username' ? term : ''">
                     <input type="hidden" name="user_lat" :value="userLat">
