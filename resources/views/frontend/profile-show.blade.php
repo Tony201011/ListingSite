@@ -14,7 +14,7 @@ $profileTags = array_values(array_unique(array_merge(
 @endphp
 
 @section('content')
-<div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800"
+<div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800 profile-page-content"
     x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -101,10 +101,10 @@ $profileTags = array_values(array_unique(array_merge(
 
 
                 <!-- Gallery (left, spans 2 columns) -->
-                <div class="md:col-span-2 flex flex-col gap-4 relative">
+                <div class="md:col-span-2 flex flex-col gap-4 relative order-2 md:order-1">
                     <!-- Previous Button (left corner) -->
                           <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
-                              class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper"
+                              class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn"
                               style="margin-left: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
                             <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
@@ -116,12 +116,12 @@ $profileTags = array_values(array_unique(array_merge(
 
                     <div class="grid grid-cols-2 gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-40 sm:h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
                         <!-- Next Button (right corner) -->
                                 <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
-                                    class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper"
+                                    class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn"
                                     style="margin-right: 0.5rem;">
                             <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
                                 <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
@@ -263,7 +263,7 @@ $profileTags = array_values(array_unique(array_merge(
                 </div>
                 </div>
                 <!-- Info/Sidebar (right) -->
-                <div class="flex flex-col gap-6">
+                <div class="flex flex-col gap-6 order-1 md:order-2">
                     <div class="bg-white rounded-2xl shadow p-6 border border-gray-100 mb-6">
                         <div class="flex items-center justify-between mb-4">
                             <span class="font-bold text-lg text-black">Info</span>
