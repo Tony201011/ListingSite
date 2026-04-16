@@ -14,7 +14,7 @@ $profileTags = array_values(array_unique(array_merge(
 @endphp
 
 @section('content')
-<div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800 profile-page-content"
+<div class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
     x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
