@@ -3,6 +3,7 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
 <link rel="stylesheet" href="{{ asset('css/quill-editor.css') }}">
+<link rel="stylesheet" href="{{ asset('profile/css/edit-profile.css') }}">
 @endpush
 
 @section('content')

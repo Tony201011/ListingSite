@@ -630,7 +630,3 @@ $profileTags = array_values(array_unique(array_merge(
     };
 </script>
 @endpush
-
-@push('styles')
-<link rel="stylesheet" href="{{ asset('frontend/css/profile-show.css') }}">
-@endpush

@@ -288,6 +288,12 @@
     .ql-container.ql-snow {
         border-color: #e5e7eb !important;
     }
+    input, textarea, td, th {
+        color: #111827 !important;
+    }
+    .text-gray-500, .text-gray-600, .text-gray-700 {
+        color: #4b5563 !important;
+    }
 </style>
 @endpush
 
