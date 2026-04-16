@@ -10,31 +10,45 @@ html {
 
 @media (max-width: 640px) {
     .mobile-nav-btn-wrapper {
-        position: sticky !important;
-        top: 80vh !important;
+        position: fixed !important;
+        bottom: 1.5rem !important;
+        top: unset !important;
         left: unset !important;
         right: unset !important;
         transform: none !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
         width: max-content;
-        z-index: 30;
+        z-index: 50;
         display: flex;
         justify-content: center;
         align-items: center;
     }
 
+    .mobile-prev-btn {
+        left: 0.75rem !important;
+    }
+
+    .mobile-next-btn {
+        right: 0.75rem !important;
+    }
+
     .mobile-transparent-nav-btn {
-        background-color: rgba(255, 255, 255, 0.2) !important;
-        backdrop-filter: blur(2px);
+        background-color: rgba(225, 58, 139, 0.85) !important;
+        backdrop-filter: blur(4px);
         color: #fff !important;
-        border: 1px solid rgba(255, 192, 203, 0.3) !important;
-        box-shadow: none !important;
+        border: 1px solid rgba(255, 192, 203, 0.5) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     }
 
     .mobile-transparent-nav-btn span,
     .mobile-transparent-nav-btn i {
         color: #fff !important;
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Bottom padding so fixed nav buttons (approx 4rem height + 1.5rem bottom offset) don't overlap page content */
+    .profile-page-content {
+        padding-bottom: 6rem;
     }
 }
 
