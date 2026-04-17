@@ -151,27 +151,18 @@ function escortSearch(config) {
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
                 return;
             }
-            if (this.searchMode === 'username' && this.suggestions.length > 0) {
-                const profile = this.suggestions.find(s => s.type === 'profile');
-                if (profile) {
-                    window.location.href = '/profile/' + profile.slug;
-                    return;
-                }
-            }
-            event.target.closest('form').submit();
+            this.closeSuggestions();
+            event.target.closest('form')?.submit();
         },
 
         handleFormSubmit(event) {
-            if (this.searchMode === 'username' && this.suggestions.length > 0) {
-                const profile = this.suggestions.find(s => s.type === 'profile');
-                if (profile) {
-                    event.preventDefault();
-                    window.location.href = '/profile/' + profile.slug;
-                    return;
-                }
+            if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
+                event.preventDefault();
+                this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
+                return;
             }
             this.closeSuggestions();
-        },
+        }
     };
 }
 
