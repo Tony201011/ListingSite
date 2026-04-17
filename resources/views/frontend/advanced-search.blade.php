@@ -79,28 +79,180 @@
                     this.locationEnabled = false;
                 }
             }" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()">
-                <div>
+                <div
+                    x-data="{
+                        term: {!! \Illuminate\Support\Js::from(request('location', '')) !!},
+                        suggestions: [],
+                        showSuggestions: false,
+                        highlightedIndex: -1,
+                        abortController: null,
+                        fetchSuggestions() {
+                            const q = this.term.trim();
+                            if (q.length < 2) { this.closeSuggestions(); return; }
+                            if (this.abortController) this.abortController.abort();
+                            this.abortController = new AbortController();
+                            fetch('{{ route('api.suburbs.search') }}?q=' + encodeURIComponent(q), {
+                                signal: this.abortController.signal,
+                                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                            .then(r => r.ok ? r.json() : Promise.resolve([]))
+                            .then(data => {
+                                this.suggestions = (Array.isArray(data) ? data : []).map(item => ({
+                                    name: (item.suburb || '') + ', ' + (item.state || ''),
+                                    value: item.suburb || '',
+                                    label: item.postcode || ''
+                                }));
+                                this.showSuggestions = this.suggestions.length > 0;
+                                this.highlightedIndex = -1;
+                            })
+                            .catch(err => { if (err.name !== 'AbortError') this.closeSuggestions(); });
+                        },
+                        selectSuggestion(item) {
+                            this.term = item.value;
+                            this.closeSuggestions();
+                        },
+                        closeSuggestions() { this.showSuggestions = false; this.highlightedIndex = -1; },
+                        highlightNext() { if (!this.showSuggestions) return; this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.suggestions.length - 1); },
+                        highlightPrev() { if (!this.showSuggestions) return; this.highlightedIndex = Math.max(this.highlightedIndex - 1, -1); },
+                        selectHighlighted() {
+                            if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
+                                this.selectSuggestion(this.suggestions[this.highlightedIndex]);
+                            } else {
+                                this.closeSuggestions();
+                            }
+                        }
+                    }"
+                    @keydown.escape="closeSuggestions()"
+                    @click.outside="closeSuggestions()"
+                    class="relative"
+                >
                     <label for="location" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Location</label>
                     <input
                         id="location"
                         name="location"
                         type="text"
-                        value="{{ request('location') }}"
+                        x-model="term"
+                        @input.debounce.300ms="fetchSuggestions()"
+                        @focus="fetchSuggestions()"
+                        @keydown.arrow-down.prevent="highlightNext()"
+                        @keydown.arrow-up.prevent="highlightPrev()"
+                        @keydown.enter.prevent="selectHighlighted()"
                         placeholder="Type location & select result from list"
                         class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
+                        autocomplete="off"
                     >
+                    <div
+                        x-show="showSuggestions && suggestions.length > 0"
+                        x-cloak
+                        class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded border border-gray-200 bg-white shadow-xl"
+                    >
+                        <ul class="divide-y divide-gray-100">
+                            <template x-for="(item, index) in suggestions" :key="index">
+                                <li>
+                                    <button
+                                        type="button"
+                                        @click="selectSuggestion(item)"
+                                        class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition"
+                                        :class="index === highlightedIndex ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-gray-50'"
+                                        @mouseenter="highlightedIndex = index"
+                                        @mouseleave="highlightedIndex = -1"
+                                    >
+                                        <i class="fa-solid fa-location-dot text-gray-400 text-xs shrink-0"></i>
+                                        <span class="truncate" x-text="item.name"></span>
+                                        <span class="ml-auto shrink-0 text-xs text-gray-400" x-show="item.label" x-text="item.label"></span>
+                                    </button>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
                 </div>
 
-                <div>
+                <div
+                    x-data="{
+                        term: {!! \Illuminate\Support\Js::from(request('escort_name', '')) !!},
+                        suggestions: [],
+                        showSuggestions: false,
+                        highlightedIndex: -1,
+                        abortController: null,
+                        fetchSuggestions() {
+                            const q = this.term.trim();
+                            if (q.length < 2) { this.closeSuggestions(); return; }
+                            if (this.abortController) this.abortController.abort();
+                            this.abortController = new AbortController();
+                            fetch('{{ route('api.search.suggestions') }}?q=' + encodeURIComponent(q), {
+                                signal: this.abortController.signal,
+                                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                            .then(r => r.ok ? r.json() : Promise.resolve({ suggestions: [] }))
+                            .then(data => {
+                                this.suggestions = (data.suggestions || []).map(item => ({
+                                    name: item.name || '',
+                                    value: item.name || '',
+                                    label: item.location || ''
+                                }));
+                                this.showSuggestions = this.suggestions.length > 0;
+                                this.highlightedIndex = -1;
+                            })
+                            .catch(err => { if (err.name !== 'AbortError') this.closeSuggestions(); });
+                        },
+                        selectSuggestion(item) {
+                            this.term = item.value;
+                            this.closeSuggestions();
+                        },
+                        closeSuggestions() { this.showSuggestions = false; this.highlightedIndex = -1; },
+                        highlightNext() { if (!this.showSuggestions) return; this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.suggestions.length - 1); },
+                        highlightPrev() { if (!this.showSuggestions) return; this.highlightedIndex = Math.max(this.highlightedIndex - 1, -1); },
+                        selectHighlighted() {
+                            if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
+                                this.selectSuggestion(this.suggestions[this.highlightedIndex]);
+                            } else {
+                                this.closeSuggestions();
+                            }
+                        }
+                    }"
+                    @keydown.escape="closeSuggestions()"
+                    @click.outside="closeSuggestions()"
+                    class="relative"
+                >
                     <label for="escort_name" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Escort Name</label>
                     <input
                         id="escort_name"
                         name="escort_name"
                         type="text"
-                        value="{{ request('escort_name') }}"
+                        x-model="term"
+                        @input.debounce.300ms="fetchSuggestions()"
+                        @focus="fetchSuggestions()"
+                        @keydown.arrow-down.prevent="highlightNext()"
+                        @keydown.arrow-up.prevent="highlightPrev()"
+                        @keydown.enter.prevent="selectHighlighted()"
                         placeholder="Search by escort name…"
                         class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
+                        autocomplete="off"
                     >
+                    <div
+                        x-show="showSuggestions && suggestions.length > 0"
+                        x-cloak
+                        class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded border border-gray-200 bg-white shadow-xl"
+                    >
+                        <ul class="divide-y divide-gray-100">
+                            <template x-for="(item, index) in suggestions" :key="index">
+                                <li>
+                                    <button
+                                        type="button"
+                                        @click="selectSuggestion(item)"
+                                        class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition"
+                                        :class="index === highlightedIndex ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-gray-50'"
+                                        @mouseenter="highlightedIndex = index"
+                                        @mouseleave="highlightedIndex = -1"
+                                    >
+                                        <i class="fa-solid fa-user text-gray-400 text-xs shrink-0"></i>
+                                        <span class="truncate" x-text="item.name"></span>
+                                        <span class="ml-auto shrink-0 text-xs text-gray-400" x-show="item.label" x-text="item.label"></span>
+                                    </button>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
                 </div>
 
                 <div>
