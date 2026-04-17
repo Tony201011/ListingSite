@@ -17,6 +17,11 @@ class Logs extends Cluster
 
     protected static ?int $navigationSort = 5;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return SiteSetting::isLoggingEnabled();
+    }
+
     public static function canAccess(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin'
