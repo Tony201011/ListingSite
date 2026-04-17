@@ -8,6 +8,7 @@
     $hasAgeFilter = $hasAgeFilter ?? false;
     $hasPriceFilter = $hasPriceFilter ?? false;
     $hasDistanceFilter = $hasDistanceFilter ?? false;
+    $distanceSearchEnabled = $distanceSearchEnabled ?? true;
     $maxSearchDistance = (int) ($maxSearchDistance ?? 500);
     $distanceFilter = (int) ($distanceFilter ?? $maxSearchDistance);
     $userLat = $userLat ?? null;
@@ -43,9 +44,10 @@
                 maxDistance: {{ $maxSearchDistance }},
                 userLat: '{{ $userLat ?? '' }}',
                 userLng: '{{ $userLng ?? '' }}',
-                locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }},
+                locationEnabled: {{ ($distanceSearchEnabled && $userLat !== null && $userLng !== null) ? 'true' : 'false' }},
+                distanceSearchEnabled: {{ $distanceSearchEnabled ? 'true' : 'false' }},
                 geoError: '',
-            }" x-init="if (!locationEnabled) requestLocation()">
+            }" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()">
                 requestLocation() {
                     this.geoError = '';
                     if (!navigator.geolocation) {
@@ -127,9 +129,14 @@
                 </div>
 
                 {{-- Distance / Near Me filter --}}
-                <input type="hidden" name="user_lat" :value="userLat">
-                <input type="hidden" name="user_lng" :value="userLng">
-                <input type="hidden" name="distance" :value="locationEnabled ? distance : ''">
+                <template x-if="distanceSearchEnabled">
+                    <span>
+                        <input type="hidden" name="user_lat" :value="userLat">
+                        <input type="hidden" name="user_lng" :value="userLng">
+                        <input type="hidden" name="distance" :value="locationEnabled ? distance : ''">
+                    </span>
+                </template>
+                @if($distanceSearchEnabled)
                 <div>
                     <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Distance (Near Me)</label>
                     <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
@@ -173,6 +180,7 @@
                         <p x-show="!locationEnabled" class="text-xs text-gray-400">Click "Use My Location" to filter by distance.</p>
                     </div>
                 </div>
+                @endif
 
                 @forelse(($filterGroups ?? []) as $group)
                     <div>

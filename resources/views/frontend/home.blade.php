@@ -9,6 +9,7 @@
     $hasAgeFilter = $hasAgeFilter ?? false;
     $hasPriceFilter = $hasPriceFilter ?? false;
     $hasDistanceFilter = $hasDistanceFilter ?? false;
+    $distanceSearchEnabled = $distanceSearchEnabled ?? true;
     $maxSearchDistance = (int) ($maxSearchDistance ?? 500);
     $distanceFilter = (int) ($distanceFilter ?? $maxSearchDistance);
     $userLat = $userLat ?? null;
@@ -33,14 +34,19 @@
                     userLng: '{{ $userLng ?? '' }}',
                     distance: {{ Js::from($distanceFilter ?? $maxSearchDistance) }},
                     maxDistance: {{ Js::from($maxSearchDistance) }},
-                    locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }}
-                })" x-init="if (!locationEnabled) requestLocation()" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
+                    locationEnabled: {{ ($distanceSearchEnabled && $userLat !== null && $userLng !== null) ? 'true' : 'false' }},
+                    distanceSearchEnabled: {{ $distanceSearchEnabled ? 'true' : 'false' }}
+                })" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
                 <form method="GET" action="{{ url('/') }}" @submit="handleFormSubmit($event)">
                     <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
                     <input type="hidden" name="escort_name" :value="searchMode === 'username' ? term : ''">
-                    <input type="hidden" name="user_lat" :value="userLat">
-                    <input type="hidden" name="user_lng" :value="userLng">
-                    <input type="hidden" name="distance" :value="locationEnabled ? distance : ''">
+                    <template x-if="distanceSearchEnabled">
+                        <span>
+                            <input type="hidden" name="user_lat" :value="userLat">
+                            <input type="hidden" name="user_lng" :value="userLng">
+                            <input type="hidden" name="distance" :value="locationEnabled ? distance : ''">
+                        </span>
+                    </template>
 
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                         {{-- Text input --}}
