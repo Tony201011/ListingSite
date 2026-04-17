@@ -117,7 +117,7 @@ function escortSearch(config) {
             });
         },
 
-        selectSuggestion(item, event) {
+        selectSuggestion(item, event, autoSubmit = true) {
             this.term = item.value || item.name || this.term;
             this.searchMode = item.type === 'suburb' ? 'suburb' : 'username';
             this.closeSuggestions();
@@ -134,6 +134,12 @@ function escortSearch(config) {
             const escortNameInput = form.querySelector('input[name="escort_name"]');
             if (locationInput) locationInput.value = item.type === 'suburb' ? (item.value || item.name || '') : '';
             if (escortNameInput) escortNameInput.value = item.type !== 'suburb' ? (item.value || item.name || '') : '';
+
+            // Auto-submit when a suggestion is selected so the search is passed
+            // into the query string immediately (like selecting from a native <select>).
+            if (autoSubmit) {
+                form.submit();
+            }
         },
 
         closeSuggestions() {
@@ -153,7 +159,9 @@ function escortSearch(config) {
 
         selectHighlighted(event) {
             if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
-                this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
+                // Pass false so selectSuggestion doesn't also call form.submit();
+                // we submit explicitly below so the caller controls timing.
+                this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
                 // For keyboard selection (Enter key), submit the form immediately.
                 event.target.closest('form')?.submit();
                 return;
@@ -165,7 +173,9 @@ function escortSearch(config) {
         handleFormSubmit(event) {
             if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
                 event.preventDefault();
-                this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
+                // Pass false so selectSuggestion doesn't also call form.submit();
+                // we submit explicitly below so the caller controls timing.
+                this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
                 // Submit using the form's native method so the event handler is
                 // not re-triggered (form.submit() does not fire the submit event).
                 event.target.closest('form')?.submit();
