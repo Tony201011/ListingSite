@@ -38,7 +38,7 @@ class SiteLogs extends Page
 
     public ?string $dateTo = null;
 
-    /** @var array<int, string> */
+    /** @var array<int, array{timestamp: string, level: string, channel: string, message: string, raw: string}> */
     public array $logLines = [];
 
     public ?string $logStatusMessage = null;
@@ -109,16 +109,18 @@ class SiteLogs extends Page
     }
 
     /**
-     * @param  array<int, string>  $logLines
-     * @return array<int, string>
+     * @param  array<int, array{timestamp: string, level: string, channel: string, message: string, raw: string}>  $logLines
+     * @return array<int, array{timestamp: string, level: string, channel: string, message: string, raw: string}>
      */
     private function filterLogLinesByDate(array $logLines): array
     {
         $from = $this->dateFrom ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->dateFrom.' 00:00:00') : null;
         $to = $this->dateTo ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->dateTo.' 23:59:59') : null;
 
-        return array_values(array_filter($logLines, function (string $line) use ($from, $to): bool {
-            $timestamp = $this->parseLogLineTimestamp($line);
+        return array_values(array_filter($logLines, function (array $entry) use ($from, $to): bool {
+            $timestamp = $entry['timestamp'] !== ''
+                ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $entry['timestamp']) ?: null
+                : null;
 
             if ($timestamp === null) {
                 return $from === null && $to === null;
@@ -136,13 +138,30 @@ class SiteLogs extends Page
         }));
     }
 
-    private function parseLogLineTimestamp(string $line): ?\DateTimeImmutable
+    /**
+     * @return array{timestamp: string, level: string, channel: string, message: string, raw: string}
+     */
+    private function parseLogLine(string $line): array
     {
-        if (! preg_match('/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/', $line, $matches)) {
-            return null;
+        $pattern = '/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] ([\w-]+)\.([\w-]+): (.+)$/s';
+
+        if (preg_match($pattern, $line, $m)) {
+            return [
+                'timestamp' => $m[1],
+                'channel' => $m[2],
+                'level' => strtoupper($m[3]),
+                'message' => $m[4],
+                'raw' => $line,
+            ];
         }
 
-        return \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches[1]) ?: null;
+        return [
+            'timestamp' => '',
+            'channel' => '',
+            'level' => '',
+            'message' => $line,
+            'raw' => $line,
+        ];
     }
 
     private function tailLogFile(string $path, int $lines = 500): string
@@ -198,12 +217,18 @@ class SiteLogs extends Page
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int, array{timestamp: string, level: string, channel: string, message: string, raw: string}>
      */
     private function normalizeLogLines(string $contents): array
     {
         $normalizedLogContents = str_replace(["\r\n", "\r"], "\n", $contents);
 
-        return $normalizedLogContents === '' ? [] : array_reverse(explode("\n", $normalizedLogContents));
+        if ($normalizedLogContents === '') {
+            return [];
+        }
+
+        $lines = array_reverse(explode("\n", $normalizedLogContents));
+
+        return array_values(array_map(fn (string $line) => $this->parseLogLine($line), $lines));
     }
 }

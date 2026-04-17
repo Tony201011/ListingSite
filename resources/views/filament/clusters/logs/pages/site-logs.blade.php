@@ -92,23 +92,51 @@
                             <thead class="bg-gray-50 dark:bg-gray-900">
                                 <tr>
                                     <th class="w-12 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">#</th>
-                                    <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Log Line</th>
+                                    <th class="w-40 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Timestamp</th>
+                                    <th class="w-24 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Level</th>
+                                    <th class="w-24 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Channel</th>
+                                    <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Message</th>
                                     <th class="w-10 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200"></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-950">
-                                @forelse ($this->logLines as $index => $line)
-                                    <tr class="align-top">
+                                @forelse ($this->logLines as $index => $entry)
+                                    <tr class="align-top {{ $index % 2 === 1 ? 'bg-gray-50 dark:bg-gray-900/40' : '' }}">
                                         <td class="w-12 px-3 py-2 font-mono text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
+                                        <td class="w-40 px-3 py-2 font-mono text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                            {{ $entry['timestamp'] ?: '—' }}
+                                        </td>
+                                        <td class="w-24 px-3 py-2">
+                                            @if ($entry['level'] !== '')
+                                                @php
+                                                    $levelColor = match ($entry['level']) {
+                                                        'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY' => 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
+                                                        'WARNING' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400',
+                                                        'NOTICE' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
+                                                        'INFO' => 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400',
+                                                        'DEBUG' => 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                                                        default => 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                                                    };
+                                                @endphp
+                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {{ $levelColor }}">
+                                                    {{ $entry['level'] }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400 dark:text-gray-600">—</span>
+                                            @endif
+                                        </td>
+                                        <td class="w-24 px-3 py-2 text-gray-700 dark:text-gray-300">
+                                            {{ $entry['channel'] ?: '—' }}
+                                        </td>
                                         <td class="px-3 py-2 font-mono text-gray-900 dark:text-gray-100">
-                                            <span class="block max-w-prose truncate">{{ $line }}</span>
+                                            <span class="block max-w-prose truncate">{{ $entry['message'] }}</span>
                                         </td>
                                         <td class="w-10 px-3 py-2">
-                                            @if (strlen($line) > 0)
+                                            @if ($entry['raw'] !== '')
                                                 <button
                                                     type="button"
                                                     title="View full log entry"
-                                                    @click="modalContent = {{ Js::from($line) }}; modalOpen = true"
+                                                    @click="modalContent = {{ Js::from($entry['raw']) }}; modalOpen = true"
                                                     class="inline-flex items-center justify-center rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -121,7 +149,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $this->logStatusMessage ?? 'No log entries available.' }}</td>
+                                        <td colspan="6" class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $this->logStatusMessage ?? 'No log entries available.' }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
