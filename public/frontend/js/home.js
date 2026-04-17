@@ -119,23 +119,21 @@ function escortSearch(config) {
 
         selectSuggestion(item, event) {
             this.term = item.value || item.name || this.term;
+            this.searchMode = item.type === 'suburb' ? 'suburb' : 'username';
             this.closeSuggestions();
-            const form = event.currentTarget.closest('form') || document.querySelector('form');
+
+            // Explicitly sync the hidden inputs so the correct value is present
+            // when the form is submitted (e.g. via the "Find Escorts" button).
+            const form = (event && (event.currentTarget || event.target)
+                ? (event.currentTarget || event.target).closest('form')
+                : null) || document.querySelector('form');
             if (!form) {
                 return;
             }
-
-            if (item.type === 'suburb') {
-                this.searchMode = 'suburb';
-                const locationInput = form.querySelector('input[name="location"]');
-                if (locationInput) locationInput.value = item.value || item.name || '';
-            } else {
-                this.searchMode = 'username';
-                const escortNameInput = form.querySelector('input[name="escort_name"]');
-                if (escortNameInput) escortNameInput.value = item.value || item.name || '';
-            }
-
-            form.submit();
+            const locationInput = form.querySelector('input[name="location"]');
+            const escortNameInput = form.querySelector('input[name="escort_name"]');
+            if (locationInput) locationInput.value = item.type === 'suburb' ? (item.value || item.name || '') : '';
+            if (escortNameInput) escortNameInput.value = item.type !== 'suburb' ? (item.value || item.name || '') : '';
         },
 
         closeSuggestions() {
@@ -156,6 +154,8 @@ function escortSearch(config) {
         selectHighlighted(event) {
             if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
+                // For keyboard selection (Enter key), submit the form immediately.
+                event.target.closest('form')?.submit();
                 return;
             }
             this.closeSuggestions();
@@ -166,6 +166,9 @@ function escortSearch(config) {
             if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
                 event.preventDefault();
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
+                // Submit using the form's native method so the event handler is
+                // not re-triggered (form.submit() does not fire the submit event).
+                event.target.submit();
                 return;
             }
             this.closeSuggestions();
