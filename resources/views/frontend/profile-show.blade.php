@@ -81,7 +81,7 @@ $profileTags = array_values(array_unique(array_merge(
                         ONLINE NOW
                     </div>
                     @endif
-                    <h1 class="text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">
                         {{ $profile['name'] }}
                     </h1>
                     @if(!empty($profile['city']))
@@ -124,7 +124,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     </a>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
                             <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-40 sm:h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
@@ -180,7 +180,7 @@ $profileTags = array_values(array_unique(array_merge(
                         {!! $safeAbout !== '' ? $safeAbout : 'No about me provided.' !!}
                     </div>
                 </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach(array_slice($galleryImages, 2) as $img)
                             <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-48 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
@@ -291,7 +291,7 @@ $profileTags = array_values(array_unique(array_merge(
                             <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-xs font-semibold text-blue-700"><i class="fa-solid fa-badge-check text-blue-500 mr-1"></i> PHOTOS VERIFIED</span>
                             @endif
                         </div>
-                        <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm mb-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm mb-3">
                             @if(!empty($profile['age']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-hourglass-half text-pink-600 w-5 text-center"></i>
@@ -370,12 +370,12 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                         </div>
                         @endif
-                        <div class="flex gap-4 mt-4">
+                        <div class="flex flex-col sm:flex-row gap-4 mt-4">
                             <button
                                 type="button"
                                 @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
                                 :class="isFavourite('{{ $profile['slug'] }}') ? 'bg-pink-50 text-pink-700 border-pink-400' : 'bg-white text-pink-700 border-gray-300 hover:bg-pink-50'"
-                                class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-1/2 justify-center"
+                                class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-full sm:w-1/2 justify-center"
                                 style="border-width:2px;"
                                 title="Save favourite"
                             >
@@ -389,7 +389,7 @@ $profileTags = array_values(array_unique(array_merge(
                             <i class="fa-solid fa-user-gear text-pink-500"></i> My profile
                         </h3>
                         <hr class="mb-4">
-                        <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
                             @if(!empty($profile['ethnicity']))
                             <div class="flex items-center space-x-2">
                                 <i class="fa-solid fa-globe text-pink-600 w-5 text-center"></i>
@@ -464,16 +464,10 @@ $profileTags = array_values(array_unique(array_merge(
                             @endif
                         </div>
                         @if(!empty($profileTags))
-                        <div class="flex flex-col gap-y-2 mt-6">
-                            <div class="flex flex-wrap gap-x-2">
-                                @foreach(array_chunk($profileTags, 2) as $row)
-                                    <div class="flex gap-x-2 mb-1">
-                                        @foreach($row as $tag)
-                                            <span class="px-4 py-1 bg-pink-600 text-white rounded-full text-base font-bold" style="line-height:1.2;">{{ $tag }}</span>
-                                        @endforeach
-                                    </div>
-                                @endforeach
-                            </div>
+                        <div class="flex flex-wrap gap-2 mt-6">
+                            @foreach($profileTags as $tag)
+                                <span class="px-4 py-1 bg-pink-600 text-white rounded-full text-sm font-semibold" style="line-height:1.2;">{{ $tag }}</span>
+                            @endforeach
                         </div>
                         @endif
                     </div>
@@ -483,7 +477,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </h3>
                         <hr class="mb-3">
                         <div class="overflow-x-auto rounded-lg">
-                            <table class="min-w-full text-sm">
+                            <table class="min-w-full w-full text-sm">
                                 <thead>
                                     <tr>
                                         <th class="px-4 py-2 text-left font-bold text-black">Session</th>
@@ -517,7 +511,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </h3>
                         <hr class="mb-3">
                         <div class="overflow-x-auto rounded-lg">
-                            <table class="min-w-full text-sm">
+                            <table class="min-w-full w-full text-sm">
                                 <thead>
                                     <tr>
                                         <th class="px-4 py-2 text-left font-bold text-black">Day</th>
