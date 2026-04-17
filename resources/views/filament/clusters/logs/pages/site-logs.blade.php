@@ -13,9 +13,11 @@
                 @click.self="modalOpen = false"
             >
                 <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-                <div class="relative z-10 w-full max-w-3xl rounded-xl bg-white shadow-2xl dark:bg-gray-900">
+
+                <div class="relative z-10 w-full max-w-4xl rounded-xl bg-white shadow-2xl dark:bg-gray-900">
                     <div class="flex items-center justify-between border-b border-gray-200 px-5 py-3 dark:border-gray-700">
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Full Log Entry</h3>
+
                         <button
                             @click="modalOpen = false"
                             class="rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
@@ -25,8 +27,9 @@
                             </svg>
                         </button>
                     </div>
-                    <div class="max-h-[70vh] overflow-auto p-5">
-                        <pre class="whitespace-pre-wrap break-all font-mono text-xs text-gray-900 dark:text-gray-100" x-text="modalContent"></pre>
+
+                    <div class="max-h-[75vh] overflow-auto p-5">
+                        <pre class="whitespace-pre-wrap break-words font-mono text-xs leading-5 text-gray-900 dark:text-gray-100" x-text="modalContent"></pre>
                     </div>
                 </div>
             </div>
@@ -40,6 +43,7 @@
                             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Filter logs by date</h2>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Use the date range to narrow the log output.</p>
                         </div>
+
                         <div class="flex flex-wrap items-center gap-2">
                             <a
                                 href="{{ url()->current() }}"
@@ -88,25 +92,30 @@
 
                 <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-950">
                     <div class="overflow-x-auto">
-                        <table class="w-full divide-y divide-gray-200 text-xs dark:divide-gray-700">
+                        <table class="min-w-full table-fixed divide-y divide-gray-200 text-xs dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-900">
                                 <tr>
-                                    <th class="w-12 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">#</th>
-                                    <th class="w-40 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Timestamp</th>
-                                    <th class="w-24 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Level</th>
-                                    <th class="w-24 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Channel</th>
-                                    <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Message</th>
-                                    <th class="w-10 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-200"></th>
+                                    <th class="w-14 px-3 py-3 text-left font-medium text-gray-700 dark:text-gray-200">#</th>
+                                    <th class="w-44 px-3 py-3 text-left font-medium text-gray-700 dark:text-gray-200">Timestamp</th>
+                                    <th class="w-28 px-3 py-3 text-left font-medium text-gray-700 dark:text-gray-200">Level</th>
+                                    <th class="w-28 px-3 py-3 text-left font-medium text-gray-700 dark:text-gray-200">Channel</th>
+                                    <th class="px-3 py-3 text-left font-medium text-gray-700 dark:text-gray-200">Message</th>
+                                    <th class="w-14 px-3 py-3 text-center font-medium text-gray-700 dark:text-gray-200">View</th>
                                 </tr>
                             </thead>
+
                             <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-950">
                                 @forelse ($this->logLines as $index => $entry)
                                     <tr class="align-top {{ $index % 2 === 1 ? 'bg-gray-50 dark:bg-gray-900/40' : '' }}">
-                                        <td class="w-12 px-3 py-2 font-mono text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
-                                        <td class="w-40 px-3 py-2 font-mono text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                        <td class="px-3 py-3 font-mono text-gray-500 dark:text-gray-400">
+                                            {{ $index + 1 }}
+                                        </td>
+
+                                        <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-700 dark:text-gray-300">
                                             {{ $entry['timestamp'] ?: '—' }}
                                         </td>
-                                        <td class="w-24 px-3 py-2">
+
+                                        <td class="px-3 py-3">
                                             @if ($entry['level'] !== '')
                                                 @php
                                                     $levelColor = match ($entry['level']) {
@@ -118,20 +127,30 @@
                                                         default => 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
                                                     };
                                                 @endphp
-                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {{ $levelColor }}">
+
+                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $levelColor }}">
                                                     {{ $entry['level'] }}
                                                 </span>
                                             @else
                                                 <span class="text-gray-400 dark:text-gray-600">—</span>
                                             @endif
                                         </td>
-                                        <td class="w-24 px-3 py-2 text-gray-700 dark:text-gray-300">
-                                            {{ $entry['channel'] ?: '—' }}
+
+                                        <td class="px-3 py-3 text-gray-700 dark:text-gray-300">
+                                            <div class="truncate">
+                                                {{ $entry['channel'] ?: '—' }}
+                                            </div>
                                         </td>
-                                        <td class="px-3 py-2 font-mono text-gray-900 dark:text-gray-100">
-                                            <span class="block break-words whitespace-normal">{{ explode("\n", $entry['message'])[0] }}</span>
+
+                                        <td class="px-3 py-3 font-mono text-gray-900 dark:text-gray-100">
+                                            <div class="max-w-full overflow-hidden">
+                                                <p class="line-clamp-2 break-words whitespace-normal leading-5">
+                                                    {{ trim($entry['message']) !== '' ? $entry['message'] : '—' }}
+                                                </p>
+                                            </div>
                                         </td>
-                                        <td class="w-10 px-3 py-2">
+
+                                        <td class="px-3 py-3 text-center">
                                             @if ($entry['raw'] !== '')
                                                 <button
                                                     type="button"
@@ -144,12 +163,16 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
                                                 </button>
+                                            @else
+                                                <span class="text-gray-300 dark:text-gray-700">—</span>
                                             @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $this->logStatusMessage ?? 'No log entries available.' }}</td>
+                                        <td colspan="6" class="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $this->logStatusMessage ?? 'No log entries available.' }}
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
