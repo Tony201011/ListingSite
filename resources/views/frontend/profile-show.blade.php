@@ -167,19 +167,21 @@ $profileTags = array_values(array_unique(array_merge(
                     </div>
                 </div>
                 @endif
-                <div class="mt-8 mb-8">
-                    <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
-                    <hr class="mb-4">
-                    @php
+@php
                         $safeAbout = strip_tags(
                             (string) ($profile['about'] ?? $profile['description'] ?? ''),
                             '<p><br><ul><ol><li><strong><em><blockquote>'
                         );
                     @endphp
-                    <div class="text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
-                        {!! $safeAbout !== '' ? $safeAbout : 'No about me provided.' !!}
-                    </div>
-                </div>
+                    @if(!empty($safeAbout))
+                        <div class="mt-8 mb-8">
+                            <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
+                            <hr class="mb-4">
+                            <div class="text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
+                                {!! $safeAbout !!}
+                            </div>
+                        </div>
+                    @endif
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach(array_slice($galleryImages, 2) as $img)
                             <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-48 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
@@ -189,6 +191,7 @@ $profileTags = array_values(array_unique(array_merge(
                     <!-- Videos Section -->
 
 @include('components.gallery-modal')
+                    @if(!empty($profile['videos'] ?? []))
                     <section class="mt-12 overflow-hidden">
                         <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
@@ -196,23 +199,23 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
                             x-data="{ pauseOthers(current) { $root.querySelectorAll('video').forEach(function(v){ if(v !== current) v.pause(); }); } }">
-                            @forelse($profile['videos'] ?? [] as $videoUrl)
+                            @foreach($profile['videos'] ?? [] as $videoUrl)
                             <video controls preload="none" class="rounded-xl w-full h-64 bg-black"
                                 x-on:play="pauseOthers($el)">
                                 <source src="{{ $videoUrl }}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
-                            @empty
-                            <p class="text-gray-400 col-span-2">No videos available.</p>
-                            @endforelse
+                            @endforeach
                         </div>
                     </section>
+                    @endif
 
 @push('scripts')
 <script src="{{ asset('frontend/js/profile-show.js') }}"></script>
 @endpush
 
                     <!-- My Upcoming Tours Section (Card Style) -->
+                    @if(!empty($profile['tours'] ?? []))
                     <section id="upcoming-tours" class="mt-12 scroll-mt-32">
                         <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
                             <div class="flex items-center mb-1">
@@ -222,17 +225,16 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                             <div class="border-b border-gray-200 mb-6"></div>
                             <div class="space-y-4">
-                                @forelse($profile['tours'] ?? [] as $tour)
+                                @foreach($profile['tours'] ?? [] as $tour)
                                 <div class="flex items-center">
                                     <span class="font-bold text-pink-600 text-base mr-4">{{ $tour['city'] }}</span>
                                     <span class="font-semibold text-gray-900 text-base">{{ $tour['from'] }} - {{ $tour['to'] }}</span>
                                 </div>
-                                @empty
-                                <p class="text-gray-400">No upcoming tours scheduled.</p>
-                                @endforelse
+                                @endforeach
                             </div>
                         </div>
                     </section>
+                    @endif
 
                     <!-- Profile Message Section -->
                     @if(!empty($profile['profile_message']))
@@ -317,6 +319,7 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                             @endif
                         </div>
+                        @if(!empty($primaryPhone) || !empty($profile['website']) || !empty($profile['onlyfans']) || !empty($profile['contact_method']))
                         <div class="mt-4">
                             <span class="block text-lg font-bold mb-1 text-black">Contact</span>
                             <div class="mb-2 text-sm p-2 text-gray-700">
@@ -349,6 +352,7 @@ $profileTags = array_values(array_unique(array_merge(
                             <a href="{{ $profile['onlyfans'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['onlyfans'] }}</a>
                             @endif
                         </div>
+                        @endif
                         <!-- Social Media Links -->
                         @if(!empty($profile['twitter']) || !empty($profile['whatsapp']))
                         <div class="mt-2">
@@ -384,6 +388,7 @@ $profileTags = array_values(array_unique(array_merge(
                             </button>
                         </div>
                     </div>
+                    @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
                     <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
                         <h3 class="mb-2 text-lg font-bold text-pink-600 flex items-center gap-2">
                             <i class="fa-solid fa-user-gear text-pink-500"></i> My profile
@@ -471,6 +476,8 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                         @endif
                     </div>
+                    @endif
+                    @if(!empty($profile['price_list'] ?? []))
                     <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
                         <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
                             <i class="fa-regular fa-clock text-pink-600"></i> Rates
@@ -504,6 +511,8 @@ $profileTags = array_values(array_unique(array_merge(
                             </table>
                         </div>
                     </div>
+                    @endif
+                    @if(!empty($profile['availability_list'] ?? []))
                     <!-- My Availability Section -->
                     <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mt-6">
                         <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
