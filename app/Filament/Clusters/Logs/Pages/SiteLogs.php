@@ -33,6 +33,10 @@ class SiteLogs extends Page
 
     public string $logFilePath = '';
 
+    public ?string $dateFrom = null;
+
+    public ?string $dateTo = null;
+
     /** @var array<int, string> */
     public array $logLines = [];
 
@@ -41,6 +45,9 @@ class SiteLogs extends Page
     public function mount(): void
     {
         $this->logFilePath = storage_path('logs/laravel.log');
+        $this->dateFrom = request()->query('date_from');
+        $this->dateTo = request()->query('date_to');
+
         $this->loadLogLines();
     }
 
@@ -93,6 +100,47 @@ class SiteLogs extends Page
         $tailedLogContents = $this->tailLogFile($this->logFilePath);
         $this->logStatusMessage = null;
         $this->logLines = $this->normalizeLogLines($tailedLogContents);
+
+        if ($this->dateFrom || $this->dateTo) {
+            $this->logLines = $this->filterLogLinesByDate($this->logLines);
+        }
+    }
+
+    /**
+     * @param array<int, string> $logLines
+     * @return array<int, string>
+     */
+    private function filterLogLinesByDate(array $logLines): array
+    {
+        $from = $this->dateFrom ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->dateFrom.' 00:00:00') : null;
+        $to = $this->dateTo ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->dateTo.' 23:59:59') : null;
+
+        return array_values(array_filter($logLines, function (string $line) use ($from, $to): bool {
+            $timestamp = $this->parseLogLineTimestamp($line);
+
+            if ($timestamp === null) {
+                return $from === null && $to === null;
+            }
+
+            if ($from !== null && $timestamp < $from) {
+                return false;
+            }
+
+            if ($to !== null && $timestamp > $to) {
+                return false;
+            }
+
+            return true;
+        }));
+    }
+
+    private function parseLogLineTimestamp(string $line): ?\DateTimeImmutable
+    {
+        if (! preg_match('/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/', $line, $matches)) {
+            return null;
+        }
+
+        return \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $matches[1]) ?: null;
     }
 
     private function tailLogFile(string $path, int $lines = 500): string
