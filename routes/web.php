@@ -166,6 +166,8 @@ Route::middleware('provider.auth')->group(function () {
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
     Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
     Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');
+    Route::get('/change-email', [ProviderRegisterController::class, 'changeEmail'])->name('change-email');
+    Route::post('/change-email', [ProviderRegisterController::class, 'updateEmail'])->name('change-email.update');
 
     Route::middleware(['profile.steps'])->group(function () {
         /**** video route start here */

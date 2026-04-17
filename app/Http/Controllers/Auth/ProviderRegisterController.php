@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Actions\Auth\BuildAuthPageData;
+use App\Actions\Auth\ChangeProviderEmail;
 use App\Actions\Auth\ChangeProviderPassword;
 use App\Actions\Auth\LogoutProvider;
 use App\Actions\Auth\ResendProviderSignupOtp;
@@ -13,6 +14,7 @@ use App\Actions\Auth\VerifyProviderSignupOtp;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProviderSigninRequest;
 use App\Http\Requests\ProviderSignupRequest;
+use App\Http\Requests\UpdateEmailRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\VerifyOtpRequest;
 use Illuminate\Http\JsonResponse;
@@ -30,7 +32,8 @@ class ProviderRegisterController extends Controller
         private ResendProviderSignupOtp $resendProviderSignupOtp,
         private VerifyProviderSignupOtp $verifyProviderSignupOtp,
         private LogoutProvider $logoutProvider,
-        private ChangeProviderPassword $changeProviderPassword
+        private ChangeProviderPassword $changeProviderPassword,
+        private ChangeProviderEmail $changeProviderEmail
     ) {}
 
     public function showSignupForm(): View
@@ -94,6 +97,21 @@ class ProviderRegisterController extends Controller
             $this->changeProviderPassword->execute(
                 $request->user(),
                 $request->validated('new_password')
+            )
+        );
+    }
+
+    public function changeEmail(): View
+    {
+        return view('auth.change-email');
+    }
+
+    public function updateEmail(UpdateEmailRequest $request): JsonResponse
+    {
+        return response()->json(
+            $this->changeProviderEmail->execute(
+                $request->user(),
+                $request->validated('new_email')
             )
         );
     }
