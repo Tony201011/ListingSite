@@ -28,6 +28,7 @@ class SiteSetting extends Model
         'fatal_error_page_enabled',
         'fatal_error_default_message',
         'fatal_error_query_param',
+        'logging_enabled',
     ];
 
     protected $casts = [
@@ -44,6 +45,7 @@ class SiteSetting extends Model
         'available_now_max_uses' => 'integer',
         'available_now_duration_minutes' => 'integer',
         'fatal_error_page_enabled' => 'boolean',
+        'logging_enabled' => 'boolean',
     ];
 
     protected static function booted(): void
@@ -52,6 +54,11 @@ class SiteSetting extends Model
             cache()->forget('site_setting.home_page_records');
             cache()->forget('site_setting.status_settings');
         });
+    }
+
+    public static function isLoggingEnabled(): bool
+    {
+        return (bool) (static::first()?->logging_enabled ?? true);
     }
 
     public static function getStatusSettings(): array

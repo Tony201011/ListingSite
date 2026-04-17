@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EmailLogs;
 use App\Filament\Clusters\Logs;
 use App\Filament\Resources\EmailLogs\Pages\ListEmailLogs;
 use App\Models\EmailLog;
+use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
@@ -33,7 +34,8 @@ class EmailLogResource extends Resource
 
     public static function canAccess(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'admin';
+        return Filament::getCurrentPanel()?->getId() === 'admin'
+            && SiteSetting::isLoggingEnabled();
     }
 
     public static function canCreate(): bool

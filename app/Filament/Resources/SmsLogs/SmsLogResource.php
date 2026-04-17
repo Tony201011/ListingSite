@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SmsLogs;
 
 use App\Filament\Clusters\Logs;
 use App\Filament\Resources\SmsLogs\Pages\ListSmsLogs;
+use App\Models\SiteSetting;
 use App\Models\SmsLog;
 use BackedEnum;
 use Filament\Facades\Filament;
@@ -33,7 +34,8 @@ class SmsLogResource extends Resource
 
     public static function canAccess(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'admin';
+        return Filament::getCurrentPanel()?->getId() === 'admin'
+            && SiteSetting::isLoggingEnabled();
     }
 
     public static function canCreate(): bool
