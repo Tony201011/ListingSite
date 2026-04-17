@@ -68,7 +68,7 @@
                                     <template x-for="(item, index) in suggestions" :key="index">
                                         <li>
                                             <a
-                                                :href="item.type === 'profile' ? '/profile/' + item.slug : '#'"
+                                                href="#"
                                                 @click.prevent="selectSuggestion(item, $event)"
                                                 class="flex items-center gap-3 px-4 py-2.5 text-left text-sm transition"
                                                 :class="index === highlightedIndex ? 'bg-pink-600/20 text-pink-300' : 'text-gray-200 hover:bg-gray-800'"

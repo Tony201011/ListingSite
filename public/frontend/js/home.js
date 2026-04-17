@@ -101,6 +101,7 @@ function escortSearch(config) {
                     this.suggestions = (data.suggestions || []).map(item => ({
                         type: 'profile',
                         name: item.name || '',
+                        value: item.name || '',
                         slug: item.slug || '',
                         label: item.location || '',
                         age: item.age,
@@ -117,18 +118,24 @@ function escortSearch(config) {
         },
 
         selectSuggestion(item, event) {
-            if (item.type === 'suburb') {
-                this.term = item.value;
-                this.closeSuggestions();
-                const form = event.target.closest('form');
-                if (form) {
-                    const locationInput = form.querySelector('input[name="location"]');
-                    if (locationInput) locationInput.value = item.value;
-                    form.submit();
-                }
-            } else {
-                window.location.href = '/profile/' + item.slug;
+            this.term = item.value || item.name || this.term;
+            this.closeSuggestions();
+            const form = event.target.closest('form');
+            if (!form) {
+                return;
             }
+
+            if (item.type === 'suburb') {
+                this.searchMode = 'suburb';
+                const locationInput = form.querySelector('input[name="location"]');
+                if (locationInput) locationInput.value = item.value || item.name || '';
+            } else {
+                this.searchMode = 'username';
+                const escortNameInput = form.querySelector('input[name="escort_name"]');
+                if (escortNameInput) escortNameInput.value = item.value || item.name || '';
+            }
+
+            form.submit();
         },
 
         closeSuggestions() {
