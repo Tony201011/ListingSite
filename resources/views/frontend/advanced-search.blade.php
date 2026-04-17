@@ -47,7 +47,6 @@
                 locationEnabled: {{ ($distanceSearchEnabled && $userLat !== null && $userLng !== null) ? 'true' : 'false' }},
                 distanceSearchEnabled: {{ $distanceSearchEnabled ? 'true' : 'false' }},
                 geoError: '',
-            }" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()">
                 requestLocation() {
                     this.geoError = '';
                     if (!navigator.geolocation) {
@@ -79,7 +78,7 @@
                     this.userLng = '';
                     this.locationEnabled = false;
                 }
-            }">
+            }" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()">
                 <div>
                     <label for="location" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Location</label>
                     <input
