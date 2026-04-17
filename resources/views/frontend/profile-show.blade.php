@@ -552,12 +552,21 @@ $profileTags = array_values(array_unique(array_merge(
 
         <section x-data="{
                 page: 0,
-                pageSize: 4,
+                pageSize: 1,
                 total: {{ count($nearbyProfiles) }},
                 get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
+                init() { this.updatePageSize(); },
+                updatePageSize() {
+                    this.pageSize = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 1;
+                    if (this.page > this.pages - 1) {
+                        this.page = this.pages - 1;
+                    }
+                },
                 prev() { if (this.page > 0) this.page--; },
                 next() { if (this.page < this.pages - 1) this.page++; }
             }"
+            x-init="init()"
+            @resize.window="updatePageSize()"
             class="mt-12 overflow-hidden"
         >
             <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -579,11 +588,11 @@ $profileTags = array_values(array_unique(array_merge(
                 </button>
 
                 <div class="overflow-hidden px-4 pb-2">
-                    <div class="flex gap-4 transition-transform duration-500"
+                    <div class="flex flex-nowrap gap-4 transition-transform duration-500"
                         :style="`transform: translateX(-${page * 100}%);`
                     ">
                         @foreach($nearbyProfiles as $nearby)
-                            <article class="group relative flex-none w-[calc(50%-8px)] lg:w-[calc(25%-12px)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5">
+                            <article class="group relative flex-none min-w-[calc(50%-8px)] lg:min-w-[calc(25%-12px)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5">
                                 <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
                                 <div class="relative overflow-hidden rounded-t-2xl">
