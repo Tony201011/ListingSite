@@ -542,6 +542,7 @@ $profileTags = array_values(array_unique(array_merge(
                             </table>
                         </div>
                     </div>
+                    @endif
 
 
                       <button
