@@ -67,10 +67,10 @@
                                 <ul class="divide-y divide-gray-800">
                                     <template x-for="(item, index) in suggestions" :key="index">
                                         <li>
-                                            <a
-                                                href="#"
-                                                @click.prevent="selectSuggestion(item, $event)"
-                                                class="flex items-center gap-3 px-4 py-2.5 text-left text-sm transition"
+                                            <button
+                                                type="button"
+                                                @click="selectSuggestion(item, $event)"
+                                                class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition"
                                                 :class="index === highlightedIndex ? 'bg-pink-600/20 text-pink-300' : 'text-gray-200 hover:bg-gray-800'"
                                                 @mouseenter="highlightedIndex = index"
                                                 @mouseleave="highlightedIndex = -1"
@@ -78,7 +78,7 @@
                                                 <i :class="item.type === 'suburb' ? 'fa-solid fa-location-dot' : 'fa-solid fa-user'" class="text-gray-500 text-xs shrink-0"></i>
                                                 <span class="truncate" x-text="item.name"></span>
                                                 <span class="ml-auto shrink-0 text-xs text-gray-500" x-show="item.type === 'suburb' && item.label" x-text="item.label"></span>
-                                            </a>
+                                            </button>
                                         </li>
                                     </template>
                                 </ul>
