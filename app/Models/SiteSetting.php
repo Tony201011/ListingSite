@@ -53,12 +53,15 @@ class SiteSetting extends Model
         static::saved(function (): void {
             cache()->forget('site_setting.home_page_records');
             cache()->forget('site_setting.status_settings');
+            cache()->forget('site_setting.logging_enabled');
         });
     }
 
     public static function isLoggingEnabled(): bool
     {
-        return (bool) (static::first()?->logging_enabled ?? true);
+        return cache()->remember('site_setting.logging_enabled', now()->addMinutes(10), function () {
+            return (bool) (static::first()?->logging_enabled ?? true);
+        });
     }
 
     public static function getStatusSettings(): array
