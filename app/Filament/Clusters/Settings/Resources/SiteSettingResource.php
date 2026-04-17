@@ -92,6 +92,10 @@ class SiteSettingResource extends Resource
                 ->label('Fatal Error Query Parameter')
                 ->maxLength(100)
                 ->helperText('Optional query key used to override the message on error pages (example: fatal_message).'),
+            Forms\Components\Toggle::make('logging_enabled')
+                ->label('Enable Logs')
+                ->default(true)
+                ->helperText('When enabled, the Logs section is visible in the admin navigation. When disabled, all log pages are hidden.'),
         ]);
     }
 
@@ -110,6 +114,7 @@ class SiteSettingResource extends Resource
                 Tables\Columns\TextColumn::make('home_page_records')->label('Home Page Records'),
                 Tables\Columns\IconColumn::make('fatal_error_page_enabled')->label('Fatal Error Page')->boolean(),
                 Tables\Columns\TextColumn::make('fatal_error_query_param')->label('Fatal Query Param'),
+                Tables\Columns\IconColumn::make('logging_enabled')->label('Logs Enabled')->boolean(),
                 Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
             ])
             ->recordActions([

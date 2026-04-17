@@ -5,6 +5,7 @@ namespace App\Filament\Resources\OnlineLogs;
 use App\Filament\Clusters\Logs;
 use App\Filament\Resources\OnlineLogs\Pages\ListOnlineLogs;
 use App\Models\OnlineUser;
+use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
@@ -33,7 +34,8 @@ class OnlineLogResource extends Resource
 
     public static function canAccess(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'admin';
+        return Filament::getCurrentPanel()?->getId() === 'admin'
+            && SiteSetting::isLoggingEnabled();
     }
 
     public static function canCreate(): bool

@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Logs\Pages;
 
 use App\Filament\Clusters\Logs;
+use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -53,7 +54,8 @@ class SiteLogs extends Page
 
     public static function canAccess(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'admin';
+        return Filament::getCurrentPanel()?->getId() === 'admin'
+            && SiteSetting::isLoggingEnabled();
     }
 
     protected function getHeaderActions(): array
@@ -107,7 +109,7 @@ class SiteLogs extends Page
     }
 
     /**
-     * @param array<int, string> $logLines
+     * @param  array<int, string>  $logLines
      * @return array<int, string>
      */
     private function filterLogLinesByDate(array $logLines): array
