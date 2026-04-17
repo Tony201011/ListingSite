@@ -245,6 +245,7 @@
         {{-- Results --}}
         <div class="mt-6"
             x-data="favouriteBookmark({
+                viewMode: 'grid',
                 favourites: {{ Js::from($userFavourites ?? []) }},
                 bookmarks: {{ Js::from($userBookmarks ?? []) }}
             })"

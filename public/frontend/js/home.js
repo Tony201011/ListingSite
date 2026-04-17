@@ -188,6 +188,7 @@ function escortSearch(config) {
 
 function favouriteBookmark(config) {
     return {
+        viewMode: config.viewMode || 'grid',
         favourites: config.favourites || [],
         bookmarks: config.bookmarks || [],
 
