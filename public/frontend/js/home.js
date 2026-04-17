@@ -168,7 +168,7 @@ function escortSearch(config) {
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event);
                 // Submit using the form's native method so the event handler is
                 // not re-triggered (form.submit() does not fire the submit event).
-                event.target.submit();
+                event.target.closest('form')?.submit();
                 return;
             }
             this.closeSuggestions();
