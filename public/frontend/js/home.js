@@ -93,9 +93,9 @@ function escortSearch(config) {
                 if (isSuburbMode) {
                     this.suggestions = (Array.isArray(data) ? data : []).map(item => ({
                         type: 'suburb',
-                        name: (item.suburb || '') + ', ' + (item.state || ''),
+                        name: [item.suburb, item.state].filter(Boolean).join(', '),
                         label: item.postcode || '',
-                        value: item.suburb || '',
+                        value: [item.suburb, item.state].filter(Boolean).join(', '),
                     }));
                 } else {
                     this.suggestions = (data.suggestions || []).map(item => ({

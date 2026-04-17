@@ -8,6 +8,7 @@ use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Laravel\Scout\Builder as ScoutBuilder;
 
@@ -132,6 +133,7 @@ class BuildProfileFilterViewData
         $locationQuery = (string) ($validated['location'] ?? '');
         $escortNameQuery = (string) ($validated['escort_name'] ?? '');
         $girlsMode = (string) ($validated['girls'] ?? 'all');
+        $locationStateQuery = trim((string) ($validated['location_state'] ?? ''));
 
         $userLat = isset($validated['user_lat']) && $validated['user_lat'] !== '' ? (float) $validated['user_lat'] : null;
         $userLng = isset($validated['user_lng']) && $validated['user_lng'] !== '' ? (float) $validated['user_lng'] : null;
@@ -158,6 +160,7 @@ class BuildProfileFilterViewData
 
         $profiles = $this->queryProfiles(
             $locationQuery,
+            $locationStateQuery,
             $escortNameQuery,
             $minAge,
             $maxAge,
@@ -233,6 +236,7 @@ class BuildProfileFilterViewData
 
     private function queryProfiles(
         string $locationQuery,
+        string $locationStateQuery,
         string $escortNameQuery,
         int $minAge,
         int $maxAge,
@@ -270,10 +274,12 @@ class BuildProfileFilterViewData
                 'city',
             ]);
 
-        if ($scoutMatchedIds !== null && ! $scoutMatchedIds->isEmpty()) {
+        $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
+
+        if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
             // Scout returned matching IDs – constrain the query to those profiles.
             $query->whereIn('provider_profiles.id', $scoutMatchedIds);
-        } elseif ($hasLocationQuery) {
+        } elseif ($hasLocationQuery && $exactLocation === null) {
             // Scout is not configured, unavailable, or returned no results –
             // fall back to LIKE queries for city/suburb so results are never
             // incorrectly empty due to indexing gaps.
@@ -281,6 +287,10 @@ class BuildProfileFilterViewData
                 $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
                     ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%'.$locationQuery.'%'));
             });
+        }
+
+        if ($exactLocation !== null) {
+            $this->applyExactLocationFilter($query, $exactLocation);
         }
 
         // Always apply escort name as an exact LIKE filter to avoid fuzzy matching.
@@ -455,6 +465,102 @@ class BuildProfileFilterViewData
             // Typesense is unreachable or not yet indexed – fall back gracefully.
             return null;
         }
+    }
+
+    private function resolveExactLocation(?string $locationQuery, ?string $locationStateQuery): ?array
+    {
+        $locationQuery = trim($locationQuery);
+        $locationStateQuery = trim($locationStateQuery);
+
+        if ($locationQuery === '') {
+            return null;
+        }
+
+        if (str_contains($locationQuery, ',')) {
+            [$suburb, $state] = array_map(fn ($value) => trim($value), explode(',', $locationQuery, 2));
+            if ($suburb === '' || $state === '') {
+                return null;
+            }
+
+            return [
+                'suburb' => $suburb,
+                'state' => $this->normalizeStateAbbreviation($state) ?? $state,
+            ];
+        }
+
+        if ($locationStateQuery !== '') {
+            return [
+                'suburb' => $locationQuery,
+                'state' => $this->normalizeStateAbbreviation($locationStateQuery) ?? $locationStateQuery,
+            ];
+        }
+
+        return null;
+    }
+
+    private function applyExactLocationFilter(Builder $query, array $exactLocation): void
+    {
+        $suburb = $exactLocation['suburb'];
+        $state = $exactLocation['state'];
+
+        $query->where(function (Builder $query) use ($suburb, $state): void {
+            $query->whereHas('user', function (Builder $query) use ($suburb, $state): void {
+                $query->where('suburb', $suburb)
+                    ->whereExists(function ($query) use ($state): void {
+                        $query->selectRaw('1')
+                            ->from('postcodes')
+                            ->whereColumn('postcodes.suburb', 'users.suburb')
+                            ->where('postcodes.state', $state);
+                    });
+            })->orWhereHas('city', function (Builder $query) use ($suburb, $state): void {
+                $query->where('name', $suburb)
+                    ->whereHas('state', function (Builder $query) use ($state): void {
+                        $query->where('name', $this->resolveStateName($state));
+                    });
+            });
+        });
+    }
+
+    private function resolveStateName(string $state): string
+    {
+        $map = [
+            'ACT' => 'Australian Capital Territory',
+            'NSW' => 'New South Wales',
+            'VIC' => 'Victoria',
+            'QLD' => 'Queensland',
+            'WA' => 'Western Australia',
+            'SA' => 'South Australia',
+            'TAS' => 'Tasmania',
+            'NT' => 'Northern Territory',
+        ];
+
+        return $map[strtoupper(trim($state))] ?? $state;
+    }
+
+    private function normalizeStateAbbreviation(string $state): ?string
+    {
+        $map = [
+            'ACT' => 'ACT',
+            'NSW' => 'NSW',
+            'VIC' => 'VIC',
+            'QLD' => 'QLD',
+            'WA' => 'WA',
+            'SA' => 'SA',
+            'TAS' => 'TAS',
+            'NT' => 'NT',
+            'AUSTRALIAN CAPITAL TERRITORY' => 'ACT',
+            'NEW SOUTH WALES' => 'NSW',
+            'VICTORIA' => 'VIC',
+            'QUEENSLAND' => 'QLD',
+            'WESTERN AUSTRALIA' => 'WA',
+            'SOUTH AUSTRALIA' => 'SA',
+            'TASMANIA' => 'TAS',
+            'NORTHERN TERRITORY' => 'NT',
+        ];
+
+        $uppercase = strtoupper(trim($state));
+
+        return $map[$uppercase] ?? null;
     }
 
     private function resolveDistanceCoordinateExpression(string $column): string

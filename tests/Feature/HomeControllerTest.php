@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
@@ -29,6 +30,32 @@ class HomeControllerTest extends TestCase
             'profile_status' => 'approved',
             'age' => 25,
         ], $profileOverrides));
+
+        return $user;
+    }
+
+    private function createApprovedProviderWithSuburb(string $suburb, string $state, array $profileOverrides = []): User
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'suburb' => $suburb,
+        ]);
+
+        ProviderProfile::query()->create(array_merge([
+            'user_id' => $user->id,
+            'name' => 'Test Escort',
+            'slug' => 'test-escort-'.$user->id,
+            'profile_status' => 'approved',
+            'age' => 25,
+        ], $profileOverrides));
+
+        Postcode::query()->create([
+            'suburb' => $suburb,
+            'state' => $state,
+            'postcode' => '0000',
+            'latitude' => 0,
+            'longitude' => 0,
+        ]);
 
         return $user;
     }
@@ -240,6 +267,18 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/?location=Sydney');
 
         $response->assertViewHas('locationQuery', 'Sydney');
+    }
+
+    public function test_home_page_filters_by_exact_suburb_and_state_for_location_search(): void
+    {
+        $this->createApprovedProviderWithSuburb('Sydney', 'NSW', ['name' => 'Sydney Escort', 'slug' => 'sydney-escort']);
+        $this->createApprovedProviderWithSuburb('Adelaide', 'SA', ['name' => 'Adelaide Escort', 'slug' => 'adelaide-escort']);
+
+        $response = $this->get('/?location=Sydney%2C+NSW');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(1, $profiles->total());
+        $this->assertSame('Sydney Escort', collect($profiles->items())->first()['name']);
     }
 
     // ---------------------------------------------------------------
