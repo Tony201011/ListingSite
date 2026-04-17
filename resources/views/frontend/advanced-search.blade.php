@@ -45,6 +45,7 @@
                 userLng: '{{ $userLng ?? '' }}',
                 locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }},
                 geoError: '',
+            }" x-init="if (!locationEnabled) requestLocation()">
                 requestLocation() {
                     this.geoError = '';
                     if (!navigator.geolocation) {

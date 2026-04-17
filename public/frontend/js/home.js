@@ -30,7 +30,7 @@ function escortSearch(config) {
         abortController: null,
         userLat: config.userLat || '',
         userLng: config.userLng || '',
-        distance: config.distance || 500,
+        distance: config.distance ?? config.maxDistance,
         maxDistance: config.maxDistance || 500,
         locationEnabled: config.locationEnabled || false,
         geoError: '',

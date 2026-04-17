@@ -31,10 +31,10 @@
                     suburbSuggestionsUrl: '{{ route('api.suburbs.search') }}',
                     userLat: '{{ $userLat ?? '' }}',
                     userLng: '{{ $userLng ?? '' }}',
-                    distance: {{ $distanceFilter }},
-                    maxDistance: {{ $maxSearchDistance }},
+                    distance: {{ Js::from($distanceFilter ?? $maxSearchDistance) }},
+                    maxDistance: {{ Js::from($maxSearchDistance) }},
                     locationEnabled: {{ ($userLat !== null && $userLng !== null) ? 'true' : 'false' }}
-                })" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
+                })" x-init="if (!locationEnabled) requestLocation()" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
                 <form method="GET" action="{{ url('/') }}" @submit="handleFormSubmit($event)">
                     <input type="hidden" name="location" :value="searchMode === 'suburb' ? term : ''">
                     <input type="hidden" name="escort_name" :value="searchMode === 'username' ? term : ''">
