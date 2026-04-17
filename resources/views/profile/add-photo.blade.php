@@ -200,7 +200,7 @@
                                         class="group relative aspect-square cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-gray-100"
                                         @click="openSlider(index)"
                                     >
-                                        <img :src="preview" :alt="'Preview ' + (index + 1)" class="h-full w-full object-cover">
+                                        <img :src="preview" :alt="'Preview ' + (index + 1)" class="h-full w-full object-cover" loading="lazy" decoding="async">
 
                                         <button
                                             type="button"
@@ -290,6 +290,8 @@
                 :src="filePreviews[sliderIndex]"
                 :alt="'Slide ' + (sliderIndex + 1)"
                 class="max-h-full max-w-full rounded-lg object-contain"
+                loading="lazy"
+                decoding="async"
             >
         </template>
     </div>

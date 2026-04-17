@@ -140,7 +140,7 @@
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div class="lg:col-span-2">
-                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&auto=format&fit=crop" alt="Profile image" class="h-[420px] w-full rounded-xl object-cover">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&auto=format&fit=crop" alt="Profile image" class="h-[420px] w-full rounded-xl object-cover" loading="lazy" decoding="async">
                     <div class="mt-4">
                         <h3 class="text-lg font-semibold text-gray-900">About me</h3>
                         <p class="mt-2 text-sm text-gray-600">Friendly and genuine companion. Private outcall and in-call options available. Message first for bookings and availability.</p>
@@ -193,7 +193,7 @@
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 @foreach($relatedListings as $listing)
                     <article class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                        <img src="{{ $listing['image'] }}" alt="{{ $listing['name'] }}" class="h-40 w-full object-cover">
+                        <img src="{{ $listing['image'] }}" alt="{{ $listing['name'] }}" class="h-40 w-full object-cover" loading="lazy" decoding="async">
                         <div class="p-2.5">
                             <h4 class="truncate text-sm font-semibold text-gray-900">{{ $listing['name'] }}</h4>
                             <p class="text-xs text-gray-500">{{ $listing['age'] }} years • {{ $listing['city'] }}</p>

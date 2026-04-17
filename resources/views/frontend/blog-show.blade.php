@@ -17,7 +17,7 @@
 
             @if(!empty($post['featured_image']))
                 <div class="mb-6 overflow-hidden rounded-xl border border-gray-200">
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($post['featured_image']) }}" alt="{{ $post['title'] }}" class="w-full h-auto">
+                    <img src="{{ \Illuminate\Support\Facades\Storage::url($post['featured_image']) }}" alt="{{ $post['title'] }}" class="w-full h-auto" loading="lazy" decoding="async">
                 </div>
             @endif
 

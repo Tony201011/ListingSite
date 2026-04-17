@@ -71,6 +71,8 @@
                                     src="{{ $verificationPhotos[0]['url'] }}"
                                     alt="Uploaded verification photo 1"
                                     class="mb-3 h-80 w-full rounded-lg border-2 border-pink-300 object-cover"
+                                    loading="lazy"
+                                    decoding="async"
                                 >
 
                                 <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -147,6 +149,8 @@
                                     src="{{ $verificationPhotos[1]['url'] }}"
                                     alt="Uploaded verification photo 2"
                                     class="mb-3 h-80 w-full rounded-lg border-2 border-pink-300 object-cover"
+                                    loading="lazy"
+                                    decoding="async"
                                 >
 
                                 <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -257,6 +261,8 @@
                         src="{{ $exampleImage->image_url }}"
                         alt="{{ $exampleImage->caption ?? 'Example ' . $loop->iteration }}"
                         class="h-80 w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                     >
                     @if($exampleImage->caption)
                     <p class="px-3 py-2 text-xs text-gray-600">{{ $exampleImage->caption }}</p>
@@ -429,7 +435,7 @@
                                         </svg>
                                     </button>
 
-                                    <img :src="capturedImage" alt="Captured photo" class="h-28 w-28 rounded-lg border-2 border-pink-300 object-cover">
+                                    <img :src="capturedImage" alt="Captured photo" class="h-28 w-28 rounded-lg border-2 border-pink-300 object-cover" loading="lazy" decoding="async">
                                 </div>
 
                                 <div class="mt-4 flex flex-col gap-3 sm:flex-row">

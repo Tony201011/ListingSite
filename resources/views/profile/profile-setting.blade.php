@@ -257,6 +257,8 @@
                                     :src="photo.thumbnail_url"
                                     :alt="'Profile Image ' + photo.id"
                                     class="w-full h-full object-cover transition duration-500 ease-out group-hover:scale-110"
+                                    loading="lazy"
+                                    decoding="async"
                                 >
 
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
@@ -539,6 +541,8 @@
                         :src="photos[sliderIndex].image_url"
                         :alt="'Photo ' + photos[sliderIndex].id"
                         class="max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl"
+                        loading="lazy"
+                        decoding="async"
                     >
                 </div>
 
