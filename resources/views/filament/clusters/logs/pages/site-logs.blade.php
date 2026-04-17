@@ -5,39 +5,42 @@
         class="space-y-6"
     >
         {{-- Full log modal --}}
-        <template x-teleport="body">
-            <div
-                x-show="modalOpen"
-                x-transition.opacity
-                class="fixed inset-0 z-50 flex items-center justify-center p-4"
-                style="display:none"
-                @click.self="modalOpen = false"
-            >
-                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div
+            x-show="modalOpen"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style="display:none"
+            @click.self="modalOpen = false"
+        >
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
-                <div class="relative z-10 w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900">
-                    <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                            Full Log Entry
-                        </h3>
+            <div class="relative z-10 w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900">
+                <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        Full Log Entry
+                    </h3>
 
-                        <button
-                            type="button"
-                            @click="modalOpen = false"
-                            class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        @click="modalOpen = false"
+                        class="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
-                    <div class="max-h-[75vh] overflow-auto p-5">
-                        <pre class="whitespace-pre-wrap break-words font-mono text-xs leading-5 text-gray-900 dark:text-gray-100" x-text="modalContent"></pre>
-                    </div>
+                <div class="max-h-[75vh] overflow-auto p-5">
+                    <pre class="whitespace-pre-wrap break-words font-mono text-xs leading-5 text-gray-900 dark:text-gray-100" x-text="modalContent"></pre>
                 </div>
             </div>
-        </template>
+        </div>
 
         <x-filament::section heading="Application Log">
             <div class="space-y-6">
@@ -122,44 +125,44 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full table-fixed border-collapse text-sm">
+                        <table class="min-w-full table-fixed text-sm">
                             <thead class="bg-gray-50 dark:bg-gray-900">
                                 <tr>
-                                    <th class="w-16 border border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="w-16 border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 first:border-l dark:border-gray-700 dark:text-gray-300">
                                         #
                                     </th>
-                                    <th class="w-48 border border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="w-48 border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         Timestamp
                                     </th>
-                                    <th class="w-28 border border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="w-28 border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         Level
                                     </th>
-                                    <th class="w-32 border border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="w-32 border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         Channel
                                     </th>
-                                    <th class="border border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         Message
                                     </th>
-                                    <th class="w-24 border border-gray-200 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="w-24 border-b border-r border-t border-gray-200 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         View
                                     </th>
                                 </tr>
                             </thead>
 
-                            <tbody class="bg-white dark:bg-gray-950">
+                            <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-950">
                                 @forelse ($this->logLines as $index => $entry)
                                     <tr class="align-top hover:bg-gray-50 dark:hover:bg-gray-900/40">
-                                        <td class="border border-gray-200 px-4 py-4 font-mono text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                                        <td class="border-r border-gray-200 px-4 py-4 font-mono text-xs text-gray-500 first:border-l dark:border-gray-700 dark:text-gray-400">
                                             {{ $index + 1 }}
                                         </td>
 
-                                        <td class="border border-gray-200 px-4 py-4 font-mono text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                                        <td class="border-r border-gray-200 px-4 py-4 font-mono text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300">
                                             <div class="whitespace-nowrap">
                                                 {{ $entry['timestamp'] ?: '—' }}
                                             </div>
                                         </td>
 
-                                        <td class="border border-gray-200 px-4 py-4 dark:border-gray-700">
+                                        <td class="border-r border-gray-200 px-4 py-4 dark:border-gray-700">
                                             @if ($entry['level'] !== '')
                                                 @php
                                                     $levelColor = match ($entry['level']) {
@@ -180,13 +183,13 @@
                                             @endif
                                         </td>
 
-                                        <td class="border border-gray-200 px-4 py-4 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                                        <td class="border-r border-gray-200 px-4 py-4 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300">
                                             <div class="truncate">
                                                 {{ $entry['channel'] ?: '—' }}
                                             </div>
                                         </td>
 
-                                        <td class="border border-gray-200 px-4 py-4 dark:border-gray-700">
+                                        <td class="border-r border-gray-200 px-4 py-4 dark:border-gray-700">
                                             <div class="max-w-full overflow-hidden">
                                                 <p
                                                     class="font-mono text-xs leading-5 text-gray-900 dark:text-gray-100"
@@ -203,7 +206,7 @@
                                             </div>
                                         </td>
 
-                                        <td class="border border-gray-200 px-4 py-4 text-center dark:border-gray-700">
+                                        <td class="border-r border-gray-200 px-4 py-4 text-center dark:border-gray-700">
                                             @if ($entry['raw'] !== '')
                                                 <button
                                                     type="button"
@@ -223,7 +226,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="border border-gray-200 px-4 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                                        <td colspan="6" class="border-t border-gray-200 px-4 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
                                             {{ $this->logStatusMessage ?? 'No log entries available.' }}
                                         </td>
                                     </tr>
