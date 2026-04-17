@@ -550,114 +550,126 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
         </div>
 
-        <section class="mt-12 overflow-hidden">
+        <section x-data="{
+                page: 0,
+                pageSize: 4,
+                total: {{ count($nearbyProfiles) }},
+                get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
+                prev() { if (this.page > 0) this.page--; },
+                next() { if (this.page < this.pages - 1) this.page++; }
+            }"
+            class="mt-12 overflow-hidden"
+        >
             <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h2 class="text-2xl font-semibold mb-2 text-pink-600">Nearby listings</h2>
-                <hr class="mb-4">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-semibold text-pink-600">Nearby listings</h2>
+                    <span class="text-sm text-gray-500">Showing {{ count($nearbyProfiles) }} profiles</span>
+                </div>
                 <a href="{{ url('/') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">View all →</a>
             </div>
 
             <div class="relative">
-                <button id="nearby-prev" aria-label="Scroll left"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-md text-pink-500 hover:bg-pink-50 transition -ml-3">
+                <button type="button"
+                    @click="prev()"
+                    :disabled="page === 0"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-md text-pink-500 hover:bg-pink-50 transition -ml-3"
+                    :class="page === 0 ? 'opacity-50 cursor-not-allowed' : ''"
+                >
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
 
-                <div id="nearby-carousel" class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-4 pb-2 [&::-webkit-scrollbar]:hidden" style="scroll-behavior:smooth;-ms-overflow-style:none;scrollbar-width:none;">
-                    @foreach($nearbyProfiles as $nearby)
-                        <article class="group relative flex-none w-[calc(50%-8px)] lg:w-[calc(25%-12px)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 snap-start">
-                            <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
+                <div class="overflow-hidden px-4 pb-2">
+                    <div class="flex gap-4 transition-transform duration-500"
+                        :style="`transform: translateX(-${page * 100}%);`
+                    ">
+                        @foreach($nearbyProfiles as $nearby)
+                            <article class="group relative flex-none w-[calc(50%-8px)] lg:w-[calc(25%-12px)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5">
+                                <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
-                            {{-- Image --}}
-                            <div class="relative overflow-hidden rounded-t-2xl">
-                                @if(!empty($nearby['image']))
-                                    <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105 h-52" loading="lazy" decoding="async">
-                                @else
-                                    <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
-                                        <i class="fa-solid fa-image text-4xl"></i>
-                                    </div>
-                                @endif
-
-                                {{-- Photo Verified / Online badges --}}
-                                <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
-                                    @if(!empty($nearby['verified']))
-                                        <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                                            <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
-                                        </span>
+                                <div class="relative overflow-hidden rounded-t-2xl">
+                                    @if(!empty($nearby['image']))
+                                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105 h-52" loading="lazy" decoding="async">
+                                    @else
+                                        <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
+                                            <i class="fa-solid fa-image text-4xl"></i>
+                                        </div>
                                     @endif
-                                    @if(!empty($nearby['active']))
-                                        <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
 
-                            {{-- Content --}}
-                            <div class="p-3.5">
-                                {{-- Date + Age row --}}
-                                <div class="mb-2 flex items-center justify-between">
-                                    <span class="text-[11px] text-gray-400">{{ $nearby['date'] }}</span>
-                                </div>
-
-                                {{-- Name --}}
-                                <h3 class="text-sm font-medium text-gray-800 truncate">
-                                    {{ $nearby['name'] }}@if(!empty($nearby['suburb'])) <span class="text-gray-400 font-normal">({{ $nearby['suburb'] }})</span>@endif
-                                </h3>
-
-                                {{-- Rate --}}
-                                <p class="mt-0.5 text-2xl font-bold text-gray-900">
-                                    {{ $nearby['rate'] }}
-                                </p>
-
-                                {{-- In Call / Out Call --}}
-                                @if(!empty($nearby['in_call']) || !empty($nearby['out_call']))
-                                    <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
-                                        @if(!empty($nearby['in_call']))
-                                            <span class="inline-flex items-center gap-1 text-gray-600">
-                                                <i class="fa-solid fa-house text-emerald-500 text-[10px]" aria-hidden="true"></i>
-                                                <span class="font-medium">In:</span> {{ $nearby['in_call'] }}
+                                    <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
+                                        @if(!empty($nearby['verified']))
+                                            <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                                <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
                                             </span>
                                         @endif
-                                        @if(!empty($nearby['out_call']))
-                                            <span class="inline-flex items-center gap-1 text-gray-600">
-                                                <i class="fa-solid fa-car text-blue-500 text-[10px]" aria-hidden="true"></i>
-                                                <span class="font-medium">Out:</span> {{ $nearby['out_call'] }}
+                                        @if(!empty($nearby['active']))
+                                            <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
                                             </span>
                                         @endif
                                     </div>
-                                @endif
-
-                                {{-- Location + Service --}}
-                                <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
-                                    @if(!empty($nearby['city']) || !empty($nearby['suburb']))
-                                        <span class="inline-flex items-center gap-1">
-                                            <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
-                                            {{ $nearby['suburb'] ?: $nearby['city'] }}
-                                        </span>
-                                    @endif
-                                    @if(!empty($nearby['service_1']))
-                                        <span class="inline-flex items-center gap-1">
-                                            <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
-                                            {{ $nearby['service_1'] }}
-                                        </span>
-                                    @endif
                                 </div>
 
-                                {{-- Categories / Description --}}
-                                @if(!empty($nearby['service_2']) || !empty($nearby['description']))
-                                    <div class="mt-2 text-[12px] text-gray-600 line-clamp-2">
-                                        <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
-                                        {{ !empty($nearby['service_2']) ? $nearby['service_2'] : $nearby['description'] }}
+                                <div class="p-3.5">
+                                    <div class="mb-2 flex items-center justify-between">
+                                        <span class="text-[11px] text-gray-400">{{ $nearby['date'] }}</span>
                                     </div>
-                                @endif
-                            </div>
-                        </article>
-                    @endforeach
+
+                                    <h3 class="text-sm font-medium text-gray-800 truncate">
+                                        {{ $nearby['name'] }}@if(!empty($nearby['suburb'])) <span class="text-gray-400 font-normal">({{ $nearby['suburb'] }})</span>@endif
+                                    </h3>
+
+                                    <p class="mt-0.5 text-2xl font-bold text-gray-900">{{ $nearby['rate'] }}</p>
+
+                                    @if(!empty($nearby['in_call']) || !empty($nearby['out_call']))
+                                        <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+                                            @if(!empty($nearby['in_call']))
+                                                <span class="inline-flex items-center gap-1 text-gray-600">
+                                                    <i class="fa-solid fa-house text-emerald-500 text-[10px]" aria-hidden="true"></i>
+                                                    <span class="font-medium">In:</span> {{ $nearby['in_call'] }}
+                                                </span>
+                                            @endif
+                                            @if(!empty($nearby['out_call']))
+                                                <span class="inline-flex items-center gap-1 text-gray-600">
+                                                    <i class="fa-solid fa-car text-blue-500 text-[10px]" aria-hidden="true"></i>
+                                                    <span class="font-medium">Out:</span> {{ $nearby['out_call'] }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
+                                        @if(!empty($nearby['city']) || !empty($nearby['suburb']))
+                                            <span class="inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
+                                                {{ $nearby['suburb'] ?: $nearby['city'] }}
+                                            </span>
+                                        @endif
+                                        @if(!empty($nearby['service_1']))
+                                            <span class="inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
+                                                {{ $nearby['service_1'] }}
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    @if(!empty($nearby['service_2']) || !empty($nearby['description']))
+                                        <div class="mt-2 text-[12px] text-gray-600 line-clamp-2">
+                                            <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
+                                            {{ !empty($nearby['service_2']) ? $nearby['service_2'] : $nearby['description'] }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
                 </div>
 
-                <button id="nearby-next" aria-label="Scroll right"
-                    class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-md text-pink-500 hover:bg-pink-50 transition -mr-3">
+                <button type="button"
+                    @click="next()"
+                    :disabled="page >= pages - 1"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-md text-pink-500 hover:bg-pink-50 transition -mr-3"
+                    :class="page >= pages - 1 ? 'opacity-50 cursor-not-allowed' : ''"
+                >
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
             </div>
@@ -737,53 +749,5 @@ $profileTags = array_values(array_unique(array_merge(
     };
 </script>
 
-<script>
-(function () {
-    var carousel = document.getElementById('nearby-carousel');
-    var prevBtn  = document.getElementById('nearby-prev');
-    var nextBtn  = document.getElementById('nearby-next');
 
-    if (!carousel || !prevBtn || !nextBtn) return;
-
-    function getPageWidth() {
-        // Scroll by the full visible width of the carousel (one "page" of cards).
-        return carousel.clientWidth || 800;
-    }
-
-    prevBtn.addEventListener('click', function () {
-        carousel.scrollBy({ left: -getPageWidth(), behavior: 'smooth' });
-    });
-
-    nextBtn.addEventListener('click', function () {
-        carousel.scrollBy({ left: getPageWidth(), behavior: 'smooth' });
-    });
-
-    function updateButtons() {
-        // Use Math.ceil on scrollLeft to handle fractional pixel values on high-DPI
-        // displays, so the next button only hides when we are truly at the end.
-        prevBtn.style.display = Math.floor(carousel.scrollLeft) <= 0 ? 'none' : 'flex';
-        nextBtn.style.display = Math.ceil(carousel.scrollLeft) + carousel.clientWidth >= carousel.scrollWidth ? 'none' : 'flex';
-    }
-
-    carousel.addEventListener('scroll', updateButtons);
-
-    // Re-evaluate whenever the carousel is resized (e.g. lazy images finish
-    // loading and affect the scroll dimensions).
-    if (typeof ResizeObserver !== 'undefined') {
-        new ResizeObserver(function () {
-            requestAnimationFrame(updateButtons);
-        }).observe(carousel);
-    }
-
-    // Defer the initial check so the carousel has fully rendered and images
-    // have affected scrollWidth before we decide whether to show/hide arrows.
-    if (document.readyState === 'complete') {
-        requestAnimationFrame(updateButtons);
-    } else {
-        window.addEventListener('load', function () {
-            requestAnimationFrame(updateButtons);
-        });
-    }
-})();
-</script>
 @endpush
