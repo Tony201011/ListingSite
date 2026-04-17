@@ -129,7 +129,7 @@
                                             {{ $entry['channel'] ?: '—' }}
                                         </td>
                                         <td class="px-3 py-2 font-mono text-gray-900 dark:text-gray-100">
-                                            <span class="block break-words whitespace-normal">{{ $entry['message'] }}</span>
+                                            <span class="block break-words whitespace-normal">{{ Str::of($entry['message'])->lines()->first() }}</span>
                                         </td>
                                         <td class="w-10 px-3 py-2">
                                             @if ($entry['raw'] !== '')
