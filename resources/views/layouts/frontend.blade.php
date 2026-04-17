@@ -33,7 +33,17 @@
 
     @stack('styles')
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans" x-data="{ mobileMenu: false }">
+<body class="bg-gray-900 text-gray-100 font-sans" x-data="{
+        mobileMenu: false,
+        showScrollTop: false,
+        prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+        init() {
+            this.showScrollTop = window.scrollY > 300;
+            window.addEventListener('scroll', () => {
+                this.showScrollTop = window.scrollY > 300;
+            }, { passive: true });
+        }
+    }">
 
     @include('layouts.partials.header')
 
@@ -75,6 +85,19 @@
     @endif
 
     @include('layouts.partials.footer')
+
+    <button
+        id="smooth-scroll-top"
+        x-show="showScrollTop"
+        x-cloak
+        x-transition
+        type="button"
+        class="fixed bottom-6 right-6 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-pink-600 text-white shadow-lg transition-all duration-300 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2"
+        @click="window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' })"
+        aria-label="Scroll to top"
+    >
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+    </button>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
