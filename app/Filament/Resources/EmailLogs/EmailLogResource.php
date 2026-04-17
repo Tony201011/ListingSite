@@ -105,6 +105,8 @@ class EmailLogResource extends Resource
                         'password_reset_success' => 'Password Reset Success',
                         'provider_blocked' => 'Provider Blocked',
                         'provider_unblocked' => 'Provider Unblocked',
+                        'user_report' => 'User Report',
+                        'user_report_provider' => 'User Report (Provider)',
                         'test_mail' => 'Test Mail',
                         'other' => 'Other',
                     ]),
