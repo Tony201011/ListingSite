@@ -227,8 +227,32 @@ class SiteLogs extends Page
             return [];
         }
 
-        $lines = array_reverse(explode("\n", $normalizedLogContents));
+        $rawLines = explode("\n", $normalizedLogContents);
 
-        return array_values(array_map(fn (string $line) => $this->parseLogLine($line), $lines));
+        // Group continuation lines (stack traces, etc.) with their parent entry.
+        // A new entry always starts with "[YYYY-MM-DD HH:MM:SS]".
+        $entryPattern = '/^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/';
+        $grouped = [];
+        $current = null;
+
+        foreach ($rawLines as $line) {
+            if (preg_match($entryPattern, $line)) {
+                if ($current !== null) {
+                    $grouped[] = $current;
+                }
+                $current = $line;
+            } elseif ($current !== null) {
+                $current .= "\n".$line;
+            } else {
+                // Lines before the first structured entry (e.g. orphaned stack traces)
+                $grouped[] = $line;
+            }
+        }
+
+        if ($current !== null) {
+            $grouped[] = $current;
+        }
+
+        return array_values(array_map(fn (string $entry) => $this->parseLogLine($entry), array_reverse($grouped)));
     }
 }
