@@ -592,7 +592,7 @@ $profileTags = array_values(array_unique(array_merge(
                         :style="`transform: translateX(-${page * 100}%);`
                     ">
                         @foreach($nearbyProfiles as $nearby)
-                            <article class="group relative flex-none min-w-[calc(50%-8px)] lg:min-w-[calc(25%-12px)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5">
+                            <article class="group relative flex-none w-full sm:w-[calc(50%-8px)] lg:w-[calc(25%-12px)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5">
                                 <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
                                 <div class="relative overflow-hidden rounded-t-2xl">
