@@ -68,6 +68,10 @@ class SiteSettingResource extends Resource
                 ->maxValue(20000)
                 ->default(500)
                 ->helperText('Maximum distance in kilometres users can filter profiles by. Default is 500 km.'),
+            Forms\Components\Toggle::make('distance_search_enabled')
+                ->label('Enable Distance Search')
+                ->default(true)
+                ->helperText('When enabled, users can filter profiles by distance using their location.'),
             Forms\Components\TextInput::make('home_page_records')
                 ->label('Home Page Records Per Page')
                 ->numeric()
@@ -102,6 +106,7 @@ class SiteSettingResource extends Resource
                 Tables\Columns\IconColumn::make('short_url')->label('Short URL')->boolean(),
                 Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
                 Tables\Columns\TextColumn::make('max_search_distance')->label('Max Distance (km)'),
+                Tables\Columns\IconColumn::make('distance_search_enabled')->label('Distance Search')->boolean(),
                 Tables\Columns\TextColumn::make('home_page_records')->label('Home Page Records'),
                 Tables\Columns\IconColumn::make('fatal_error_page_enabled')->label('Fatal Error Page')->boolean(),
                 Tables\Columns\TextColumn::make('fatal_error_query_param')->label('Fatal Query Param'),

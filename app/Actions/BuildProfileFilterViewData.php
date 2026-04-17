@@ -136,13 +136,16 @@ class BuildProfileFilterViewData
         $userLat = isset($validated['user_lat']) && $validated['user_lat'] !== '' ? (float) $validated['user_lat'] : null;
         $userLng = isset($validated['user_lng']) && $validated['user_lng'] !== '' ? (float) $validated['user_lng'] : null;
 
-        $maxSearchDistance = (int) (SiteSetting::query()->value('max_search_distance') ?? self::DEFAULT_MAX_DISTANCE);
+        $setting = SiteSetting::query()->first(['max_search_distance', 'distance_search_enabled']);
+        $distanceSearchEnabled = (bool) ($setting?->distance_search_enabled ?? true);
+
+        $maxSearchDistance = (int) ($setting?->max_search_distance ?? self::DEFAULT_MAX_DISTANCE);
         if ($maxSearchDistance < 1) {
             $maxSearchDistance = self::DEFAULT_MAX_DISTANCE;
         }
 
         $distanceFilter = null;
-        if ($userLat !== null && $userLng !== null) {
+        if ($distanceSearchEnabled && $userLat !== null && $userLng !== null) {
             $requestedDistance = isset($validated['distance']) && $validated['distance'] !== '' ? (int) $validated['distance'] : $maxSearchDistance;
             $distanceFilter = min(max(0, $requestedDistance), $maxSearchDistance);
         }
@@ -197,6 +200,7 @@ class BuildProfileFilterViewData
             'maxSearchDistance',
             'distanceFilter',
             'hasDistanceFilter',
+            'distanceSearchEnabled',
             'userLat',
             'userLng',
         );

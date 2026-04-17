@@ -19,6 +19,7 @@ class SiteSetting extends Model
         'contact_email',
         'short_url',      // new field for short URL feature
         'max_search_distance',
+        'distance_search_enabled',
         'home_page_records',
         'online_status_max_uses',
         'online_status_duration_minutes',
@@ -36,6 +37,7 @@ class SiteSetting extends Model
         'site_password' => 'encrypted',
         'short_url' => 'boolean',
         'max_search_distance' => 'integer',
+        'distance_search_enabled' => 'boolean',
         'home_page_records' => 'integer',
         'online_status_max_uses' => 'integer',
         'online_status_duration_minutes' => 'integer',
