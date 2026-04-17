@@ -428,26 +428,7 @@
                     </a>
                 </div>
 
-                <div class="ml-auto flex items-center gap-2">
-                    <button
-                        type="button"
-                        class="rounded-lg border px-2.5 py-1.5 transition"
-                        :class="viewMode === 'list' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'"
-                        @click="viewMode = 'list'"
-                        title="List view"
-                    >
-                        <i class="fa-solid fa-list text-xs"></i>
-                    </button>
-                    <button
-                        type="button"
-                        class="rounded-lg border px-2.5 py-1.5 transition"
-                        :class="viewMode === 'grid' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'"
-                        @click="viewMode = 'grid'"
-                        title="Grid view"
-                    >
-                        <i class="fa-solid fa-table-cells text-xs"></i>
-                    </button>
-                </div>
+
             </div>
 
             {{-- Active filter pills --}}
@@ -487,28 +468,26 @@
             @endif
 
             {{-- Profile cards --}}
-            <div x-cloak class="grid gap-4" :class="viewMode === 'grid' ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'">
+            <div x-cloak class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 @forelse($profiles as $profile)
                     <article
                         class="view-card group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300"
-                        :class="viewMode === 'list' ? 'md:flex md:flex-row' : ''"
                     >
                         <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
                         {{-- Image --}}
-                        <div class="view-card-media relative overflow-hidden rounded-t-2xl" :class="viewMode === 'list' ? 'md:w-56 md:shrink-0 md:rounded-none md:rounded-l-2xl' : ''">
+                        <div class="view-card-media relative overflow-hidden rounded-t-2xl">
                             @if($profile['image'])
                                 <img
                                     src="{{ $profile['image'] }}"
                                     alt="{{ $profile['name'] }}"
-                                    class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'"
+                                    class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-105 h-52"
                                     loading="lazy"
                                     decoding="async"
                                     fetchpriority="low"
                                 >
                             @else
-                                <div class="flex items-center justify-center bg-gray-100 text-gray-400" :class="viewMode === 'list' ? 'h-56 md:h-full' : 'h-52'">
+                                <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
                                     <i class="fa-solid fa-image text-4xl"></i>
                                 </div>
                             @endif
@@ -529,7 +508,7 @@
                         </div>
 
                         {{-- Content --}}
-                        <div class="p-3.5" :class="viewMode === 'list' ? 'flex flex-col justify-between flex-1 p-4' : ''">
+                        <div class="p-3.5">
                             <div class="mb-2 flex items-center justify-between">
                                 <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
                                 <div class="flex items-center gap-2 text-gray-400 relative z-20">
@@ -557,11 +536,11 @@
                                 </div>
                             </div>
 
-                            <h3 class="text-sm font-medium text-gray-800 truncate" :class="viewMode === 'list' ? 'md:text-base' : ''">
+                            <h3 class="text-sm font-medium text-gray-800 truncate">
                                 {{ $profile['name'] }}@if($profile['suburb']) <span class="text-gray-400 font-normal">({{ $profile['suburb'] }})</span>@endif
                             </h3>
 
-                            <p class="mt-0.5 text-2xl font-bold text-gray-900" :class="viewMode === 'list' ? 'md:text-3xl' : ''">
+                            <p class="mt-0.5 text-2xl font-bold text-gray-900">
                                 {{ $profile['rate'] }}
                             </p>
 
