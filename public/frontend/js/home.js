@@ -120,7 +120,7 @@ function escortSearch(config) {
         selectSuggestion(item, event) {
             this.term = item.value || item.name || this.term;
             this.closeSuggestions();
-            const form = event.target.closest('form');
+            const form = event.target.closest('form') || document.querySelector('form');
             if (!form) {
                 return;
             }
