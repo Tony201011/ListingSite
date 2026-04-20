@@ -490,13 +490,9 @@ class UserResource extends Resource
                                             FileUpload::make('image_path')
                                                 ->label('Replace Image')
                                                 ->image()
-                                                ->imagePreviewHeight('220')
-                                                ->panelAspectRatio('2:1')
-                                                ->panelLayout('integrated')
                                                 ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/images')
-                                                ->preserveFilenames()
-                                                ->fetchFileInformation(false)
+                                                ->storeFileNamesIn('original_name')
                                                 ->columnSpanFull(),
 
                                             Placeholder::make('thumbnail_preview')
@@ -517,13 +513,9 @@ class UserResource extends Resource
                                             FileUpload::make('thumbnail_path')
                                                 ->label('Replace Thumbnail')
                                                 ->image()
-                                                ->imagePreviewHeight('160')
-                                                ->panelAspectRatio('2:1')
-                                                ->panelLayout('integrated')
                                                 ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/thumbnails')
-                                                ->preserveFilenames()
-                                                ->fetchFileInformation(false)
+                                                ->storeFileNamesIn('original_name')
                                                 ->columnSpanFull(),
 
                                             Toggle::make('is_primary')
