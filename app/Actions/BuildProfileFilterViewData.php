@@ -169,7 +169,7 @@ class BuildProfileFilterViewData
                     ->where('state', $resolvedLocation['state'])
                     ->whereNotNull('latitude')
                     ->whereNotNull('longitude')
-                    ->orderBy('postcode')
+                    ->orderBy('postcode') // prefer the lowest (typically central) postcode for the suburb
                     ->first(['latitude', 'longitude']);
 
                 if ($locPostcode !== null) {
