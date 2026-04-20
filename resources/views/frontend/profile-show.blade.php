@@ -585,17 +585,8 @@ $profileTags = array_values(array_unique(array_merge(
                 <a href="{{ url('/') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">View all →</a>
             </div>
 
-            <div class="relative">
-                <button type="button"
-                    @click="prev()"
-                    :disabled="page === 0"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-md text-pink-500 hover:bg-pink-50 transition -ml-3"
-                    :class="page === 0 ? 'opacity-50 cursor-not-allowed' : ''"
-                >
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-
-                <div class="overflow-hidden px-4 pb-2">
+            <div class="relative group">
+                <div class="overflow-hidden px-16 pb-2">
                     <div class="flex flex-nowrap gap-4 transition-transform duration-500"
                         :style="`transform: translateX(-${page * 100}%);`
                     ">
@@ -681,13 +672,26 @@ $profileTags = array_values(array_unique(array_merge(
                     </div>
                 </div>
 
+                <!-- Left Arrow -->
+                <button type="button"
+                    @click="prev()"
+                    :disabled="page === 0"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
+                    :class="page === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
+                    title="Previous"
+                >
+                    <i class="fa-solid fa-chevron-left text-lg"></i>
+                </button>
+
+                <!-- Right Arrow -->
                 <button type="button"
                     @click="next()"
                     :disabled="page >= pages - 1"
-                    class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-md text-pink-500 hover:bg-pink-50 transition -mr-3"
-                    :class="page >= pages - 1 ? 'opacity-50 cursor-not-allowed' : ''"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
+                    :class="page >= pages - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
+                    title="Next"
                 >
-                    <i class="fa-solid fa-chevron-right"></i>
+                    <i class="fa-solid fa-chevron-right text-lg"></i>
                 </button>
             </div>
         </section>
