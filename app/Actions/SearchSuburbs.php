@@ -71,6 +71,6 @@ class SearchSuburbs
             }
         }
 
-        return $results;
+        return array_slice($results, 0, 20);
     }
 }

@@ -102,7 +102,7 @@ class SuburbSearchTest extends TestCase
 
         $response->assertOk();
         $results = $response->json();
-        $perthEntries = array_filter($results, fn ($r) => strtolower($r['suburb']) === 'perth' && strtolower($r['state']) === 'wa');
+        $perthEntries = array_filter($results, fn ($r) => $r['suburb'] === 'Perth' && $r['state'] === 'WA');
         $this->assertCount(1, $perthEntries);
     }
 }
