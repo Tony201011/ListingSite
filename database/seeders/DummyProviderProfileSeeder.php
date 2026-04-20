@@ -44,16 +44,16 @@ class DummyProviderProfileSeeder extends Seeder
     private const WEBSITE_TYPES = ['adult', 'porn'];
 
     private const SAMPLE_VIDEOS = [
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Subaru_Outback_with_Kelly_Slater.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
+        'https://www.w3schools.com/html/mov_bbb.mp4',
+        'https://www.w3schools.com/html/movie.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_10mb.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_20mb.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_30mb.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_50mb.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
     ];
 
     private const FEMALE_NAMES = [

@@ -203,11 +203,28 @@ $profileTags = array_values(array_unique(array_merge(
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
                             x-data="{ pauseOthers(current) { $root.querySelectorAll('video').forEach(function(v){ if(v !== current) v.pause(); }); } }">
                             @foreach($profile['videos'] ?? [] as $videoUrl)
-                            <video controls preload="none" class="rounded-xl w-full h-64 bg-black"
-                                x-on:play="pauseOthers($el)">
-                                <source src="{{ $videoUrl }}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
+                            <div class="relative">
+                                <video controls preload="metadata" class="rounded-xl w-full h-64 bg-black object-cover"
+                                    x-on:play="pauseOthers($el)"
+                                    x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='block'"
+                                    poster="https://picsum.photos/400/225?random=1">
+                                    <source src="{{ $videoUrl }}" type="video/mp4">
+                                    <source src="{{ $videoUrl }}" type="video/webm">
+                                    <source src="{{ $videoUrl }}" type="video/ogg">
+                                    Your browser does not support the video tag.
+                                </video>
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
+                                    <div class="bg-red-500 bg-opacity-75 text-white px-4 py-2 rounded">
+                                        <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+                                        Video unavailable
+                                    </div>
+                                </div>
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div class="bg-black bg-opacity-50 rounded-full p-3 opacity-75">
+                                        <i class="fa-solid fa-play text-white text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
                             @endforeach
                         </div>
                     </section>
