@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ProviderProfile;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -130,7 +131,7 @@ class SearchTest extends TestCase
         $response = $this->get('/');
 
         $profiles = $response->viewData('profiles');
-        $this->assertInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class, $profiles);
+        $this->assertInstanceOf(LengthAwarePaginator::class, $profiles);
     }
 
     public function test_home_page_pagination_works_with_page_param(): void
@@ -139,7 +140,7 @@ class SearchTest extends TestCase
 
         $response->assertStatus(200);
         $profiles = $response->viewData('profiles');
-        $this->assertInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class, $profiles);
+        $this->assertInstanceOf(LengthAwarePaginator::class, $profiles);
     }
 
     // ===============================================================
@@ -519,5 +520,42 @@ class SearchTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonStructure(['suggestions']);
+    }
+
+    // ===============================================================
+    // Distance search – location text filter is skipped when
+    // lat/lng + distance are all provided (regression for "no results"
+    // when searching near a regional city like Mount Gambier, SA).
+    // ===============================================================
+
+    // ===============================================================
+    // Distance search – location text filter bypass
+    // Note: the distance-radius query uses MySQL-specific functions
+    // (SUBSTRING_INDEX, COALESCE subquery) that cannot run in the
+    // SQLite test environment.  The end-to-end behaviour where
+    // profiles within the radius are returned even when a location
+    // label like "Mount Gambier, SA" is also present can only be
+    // verified against MySQL.
+    //
+    // The test below confirms that the exact-location text filter IS
+    // applied when distance search is NOT active, which is the
+    // complementary half of the fix.
+    // ===============================================================
+
+    public function test_location_only_search_restricts_to_exact_suburb(): void
+    {
+        // Profile in Mount Gambier, SA
+        $this->createApprovedProvider(['name' => 'Local Escort', 'slug' => 'local-escort'], ['suburb' => 'Mount Gambier, SA 5290']);
+        // Profile somewhere else
+        $this->createApprovedProvider(['name' => 'Remote Escort', 'slug' => 'remote-escort'], ['suburb' => 'Sydney, NSW 2000']);
+
+        // Searching by location only (no lat/lng/distance) applies exact text filter.
+        $response = $this->get('/?location=Mount+Gambier%2C+SA');
+
+        $response->assertOk();
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Local Escort'));
+        $this->assertFalse($names->contains('Remote Escort'));
     }
 }

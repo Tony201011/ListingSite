@@ -17,10 +17,15 @@ class BuildProfileFilterViewData
     use ResolvesProfileCategoryIds;
 
     private const DEFAULT_PROFILES_PER_PAGE = 12;
+
     private const DEFAULT_MIN_AGE = 18;
+
     private const DEFAULT_MAX_AGE = 40;
+
     private const DEFAULT_MIN_PRICE = 150;
+
     private const DEFAULT_MAX_PRICE = 400;
+
     private const DEFAULT_MAX_DISTANCE = 500;
 
     private const SLUG_TO_COLUMN = [
@@ -268,18 +273,25 @@ class BuildProfileFilterViewData
 
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
-        if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
-            $query->whereIn('provider_profiles.id', $scoutMatchedIds);
-        } elseif ($hasLocationQuery && $exactLocation === null) {
-            $query->where(function ($q) use ($locationQuery) {
-                $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
-                    ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', $locationQuery.',%')
-                        ->orWhere('suburb', $locationQuery));
-            });
-        }
+        // When distance search is active the coordinates already define the geographic
+        // boundary, so applying an additional location-text filter would AND the two
+        // conditions together and produce zero results for locations with no profiles.
+        $distanceSearchActive = $distanceFilter !== null && $userLat !== null && $userLng !== null;
 
-        if ($exactLocation !== null) {
-            $this->applyExactLocationFilter($query, $exactLocation);
+        if (! $distanceSearchActive) {
+            if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
+                $query->whereIn('provider_profiles.id', $scoutMatchedIds);
+            } elseif ($hasLocationQuery && $exactLocation === null) {
+                $query->where(function ($q) use ($locationQuery) {
+                    $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
+                        ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', $locationQuery.',%')
+                            ->orWhere('suburb', $locationQuery));
+                });
+            }
+
+            if ($exactLocation !== null) {
+                $this->applyExactLocationFilter($query, $exactLocation);
+            }
         }
 
         if ($escortNameQuery !== '') {
@@ -321,6 +333,7 @@ class BuildProfileFilterViewData
                         $column = self::SLUG_TO_COLUMN[$slug] ?? null;
                         if ($column !== null) {
                             $q->whereIn($column, $ids);
+
                             continue;
                         }
 
