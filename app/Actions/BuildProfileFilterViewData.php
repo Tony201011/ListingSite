@@ -413,9 +413,10 @@ class BuildProfileFilterViewData
                 // via HAVING) OR lack coordinates but match the exact location text, so that
                 // profiles without stored coordinates still appear in location-based searches.
                 $query->where(function (Builder $q) use ($latitudeExpression, $longitudeExpression, $exactLocation): void {
-                    $q->whereRaw("({$latitudeExpression}) IS NOT NULL AND ({$longitudeExpression}) IS NOT NULL")
+                    $q->whereRaw("{$latitudeExpression} IS NOT NULL")
+                        ->whereRaw("{$longitudeExpression} IS NOT NULL")
                         ->orWhere(function (Builder $inner) use ($latitudeExpression, $longitudeExpression, $exactLocation): void {
-                            $inner->whereRaw("({$latitudeExpression}) IS NULL OR ({$longitudeExpression}) IS NULL");
+                            $inner->whereRaw("{$latitudeExpression} IS NULL OR {$longitudeExpression} IS NULL");
                             $this->applyExactLocationFilter($inner, $exactLocation);
                         });
                 });
@@ -427,7 +428,9 @@ class BuildProfileFilterViewData
                     ->having('distance_km', '<=', $distanceFilter);
             }
 
-            $query->orderBy('distance_km', 'asc');
+            // Sort profiles with a known distance first (ascending), then profiles
+            // without resolvable coordinates (NULL distance_km) at the end.
+            $query->orderByRaw('(distance_km IS NULL) ASC, distance_km ASC');
 
             $distanceOrderingApplied = true;
         }
