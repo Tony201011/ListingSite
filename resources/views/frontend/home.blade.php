@@ -151,8 +151,6 @@
                     Popular
                 </a>
             </div>
-
-
         </div>
 
         {{-- Active filter pills --}}
@@ -170,8 +168,8 @@
                 @endif
                 @foreach(collect($selectedCategoryItems) as $item)
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
-                            {{ $item['name'] }}
-                        </span>
+                        {{ $item['name'] }}
+                    </span>
                 @endforeach
                 @if($hasDistanceFilter)
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
@@ -218,7 +216,6 @@
                                     <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
                                 </span>
                             @endif
-
                         </div>
                     </div>
 
@@ -283,6 +280,9 @@
                                 <span class="inline-flex items-center gap-1">
                                     <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
                                     {{ $profile['suburb'] }}
+                                    @if(isset($profile['distance_km']) && $profile['distance_km'] !== null)
+                                        <span class="text-gray-400">({{ $profile['distance_km'] }} km)</span>
+                                    @endif
                                 </span>
                             @endif
                             @if(!empty($profile['service_1']))
@@ -324,7 +324,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @push('styles')

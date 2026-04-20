@@ -17,14 +17,11 @@ class BuildProfileFilterViewData
     use ResolvesProfileCategoryIds;
 
     private const DEFAULT_PROFILES_PER_PAGE = 12;
-
     private const DEFAULT_MIN_AGE = 18;
-
     private const DEFAULT_MAX_AGE = 40;
-
     private const DEFAULT_MIN_PRICE = 150;
-
     private const DEFAULT_MAX_PRICE = 400;
+    private const DEFAULT_MAX_DISTANCE = 500;
 
     private const SLUG_TO_COLUMN = [
         'hair-color' => 'hair_color_id',
@@ -48,8 +45,6 @@ class BuildProfileFilterViewData
         'phone-contact-preferences' => 'phone_contact_preference',
         'time-waster-shield' => 'time_waster_shield',
     ];
-
-    private const DEFAULT_MAX_DISTANCE = 500;
 
     public function execute(array $validated): array
     {
@@ -148,7 +143,10 @@ class BuildProfileFilterViewData
 
         $distanceFilter = null;
         if ($distanceSearchEnabled && $userLat !== null && $userLng !== null) {
-            $requestedDistance = isset($validated['distance']) && $validated['distance'] !== '' ? (int) $validated['distance'] : $maxSearchDistance;
+            $requestedDistance = isset($validated['distance']) && $validated['distance'] !== ''
+                ? (int) $validated['distance']
+                : $maxSearchDistance;
+
             $distanceFilter = min(max(0, $requestedDistance), $maxSearchDistance);
         }
 
@@ -252,12 +250,6 @@ class BuildProfileFilterViewData
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
 
-        // When a location query is present, use Typesense via Laravel Scout to resolve
-        // matching profile IDs, then constrain the Eloquent query to those IDs.
-        // This provides fast, typo-tolerant full-text search while keeping all
-        // relational filters (age, price, categories) on the Eloquent side.
-        // NOTE: escort_name is intentionally excluded from Scout to avoid fuzzy/typo-tolerant
-        // matching, which would return unrelated names (e.g. searching "2620" returning "2621").
         $scoutMatchedIds = null;
         if ($hasLocationQuery) {
             $scoutMatchedIds = $this->resolveScoutIds($locationQuery);
@@ -277,18 +269,8 @@ class BuildProfileFilterViewData
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
         if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
-            // Scout returned matching IDs – constrain the query to those profiles.
             $query->whereIn('provider_profiles.id', $scoutMatchedIds);
         } elseif ($hasLocationQuery && $exactLocation === null) {
-            // Scout is not configured, unavailable, or returned no results –
-            // fall back to LIKE queries for city/suburb so results are never
-            // incorrectly empty due to indexing gaps.
-            //
-            // users.suburb is stored in "Suburb, STATE postcode" format (e.g.
-            // "Sydney, NSW 2000").  We match on the suburb-name prefix so that
-            // a search for "Sydney" matches "Sydney, NSW 2000" or "Sydney, VIC 3xxx"
-            // but does NOT match unrelated entries like "West Sydney, NSW 2145"
-            // that merely contain the search term as a substring.
             $query->where(function ($q) use ($locationQuery) {
                 $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
                     ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', $locationQuery.',%')
@@ -300,7 +282,6 @@ class BuildProfileFilterViewData
             $this->applyExactLocationFilter($query, $exactLocation);
         }
 
-        // Always apply escort name as an exact LIKE filter to avoid fuzzy matching.
         if ($escortNameQuery !== '') {
             $query->where('provider_profiles.name', 'like', '%'.$escortNameQuery.'%');
         }
@@ -326,6 +307,7 @@ class BuildProfileFilterViewData
 
         if (! empty($selectedCategoryIds)) {
             $selectedBySlug = [];
+
             foreach ($selectedCategoryIds as $categoryId) {
                 $slug = $categoryToParentSlug[$categoryId] ?? null;
                 if ($slug !== null) {
@@ -339,7 +321,6 @@ class BuildProfileFilterViewData
                         $column = self::SLUG_TO_COLUMN[$slug] ?? null;
                         if ($column !== null) {
                             $q->whereIn($column, $ids);
-
                             continue;
                         }
 
@@ -348,6 +329,7 @@ class BuildProfileFilterViewData
                             $names = array_values(array_filter(
                                 array_map(fn ($id) => $categoryNameById[$id] ?? null, $ids)
                             ));
+
                             if (! empty($names)) {
                                 $q->where(function ($inner) use ($jsonColumn, $names): void {
                                     foreach ($names as $name) {
@@ -364,6 +346,7 @@ class BuildProfileFilterViewData
                             $names = array_values(array_filter(
                                 array_map(fn ($id) => $categoryNameById[$id] ?? null, $ids)
                             ));
+
                             if (! empty($names)) {
                                 $q->whereIn($stringColumn, $names);
                             }
@@ -373,21 +356,25 @@ class BuildProfileFilterViewData
             }
         }
 
+        $distanceOrderingApplied = false;
+
         if ($distanceFilter !== null && $userLat !== null && $userLng !== null) {
             $latitudeExpression = $this->resolveDistanceCoordinateExpression('latitude');
             $longitudeExpression = $this->resolveDistanceCoordinateExpression('longitude');
 
-            // Use provider profile coordinates when available, otherwise resolve from the
-            // provider user's suburb via postcodes table coordinates.
-            $query->whereRaw("{$latitudeExpression} IS NOT NULL")
+            $distanceSql = "(6371 * acos(
+                cos(radians(?)) * cos(radians({$latitudeExpression})) * cos(radians({$longitudeExpression}) - radians(?)) +
+                sin(radians(?)) * sin(radians({$latitudeExpression}))
+            ))";
+
+            $query->select('provider_profiles.*')
+                ->selectRaw("{$distanceSql} as distance_km", [$userLat, $userLng, $userLat])
+                ->whereRaw("{$latitudeExpression} IS NOT NULL")
                 ->whereRaw("{$longitudeExpression} IS NOT NULL")
-                ->whereRaw(
-                    "(6371 * acos(
-                        cos(radians(?)) * cos(radians({$latitudeExpression})) * cos(radians({$longitudeExpression}) - radians(?)) +
-                        sin(radians(?)) * sin(radians({$latitudeExpression}))
-                    )) <= ?",
-                    [$userLat, $userLng, $userLat, $distanceFilter]
-                );
+                ->having('distance_km', '<=', $distanceFilter)
+                ->orderBy('distance_km', 'asc');
+
+            $distanceOrderingApplied = true;
         }
 
         $appendParams = array_filter([
@@ -401,6 +388,7 @@ class BuildProfileFilterViewData
             'user_lng' => $userLng,
             'distance' => $distanceFilter,
         ]);
+
         $appendParams['girls'] = $girlsMode;
 
         foreach ($selectedCategoryIds as $categoryId) {
@@ -413,18 +401,37 @@ class BuildProfileFilterViewData
                     'popularity_score' => ProfileView::query()
                         ->selectRaw('count(*)')
                         ->whereColumn('profile_views.user_id', 'provider_profiles.user_id'),
-                ])->orderByDesc('popularity_score')
-                    ->orderByDesc('provider_profiles.is_featured')
-                    ->orderByDesc('provider_profiles.created_at');
+                ]);
+
+                if (! $distanceOrderingApplied) {
+                    $query->orderByDesc('popularity_score')
+                        ->orderByDesc('provider_profiles.is_featured')
+                        ->orderByDesc('provider_profiles.created_at');
+                } else {
+                    $query->orderByDesc('popularity_score')
+                        ->orderByDesc('provider_profiles.is_featured')
+                        ->orderByDesc('provider_profiles.created_at');
+                }
                 break;
 
             case 'new':
-                $query->orderByDesc('provider_profiles.created_at')
-                    ->orderByDesc('provider_profiles.is_featured');
+                if (! $distanceOrderingApplied) {
+                    $query->orderByDesc('provider_profiles.created_at')
+                        ->orderByDesc('provider_profiles.is_featured');
+                } else {
+                    $query->orderByDesc('provider_profiles.created_at')
+                        ->orderByDesc('provider_profiles.is_featured');
+                }
                 break;
 
             default:
-                $query->orderByDesc('provider_profiles.is_featured')->orderByDesc('provider_profiles.created_at');
+                if (! $distanceOrderingApplied) {
+                    $query->orderByDesc('provider_profiles.is_featured')
+                        ->orderByDesc('provider_profiles.created_at');
+                } else {
+                    $query->orderByDesc('provider_profiles.is_featured')
+                        ->orderByDesc('provider_profiles.created_at');
+                }
                 break;
         }
 
@@ -442,18 +449,13 @@ class BuildProfileFilterViewData
             ? Category::query()->whereIn('id', $serviceIds)->pluck('name', 'id')
             : collect();
 
-        $paginator->getCollection()->transform(fn (ProviderProfile $profile) => $this->transformProfile($profile, $categoryNames));
+        $paginator->getCollection()->transform(
+            fn (ProviderProfile $profile) => $this->transformProfile($profile, $categoryNames)
+        );
 
         return $paginator;
     }
 
-    /**
-     * Use Laravel Scout (Typesense) to resolve profile IDs matching the text queries.
-     * Returns null when Scout is unavailable or throws an exception, signalling that
-     * the caller should fall back to Eloquent LIKE queries.
-     *
-     * @return \Illuminate\Support\Collection<int>|null
-     */
     private function resolveScoutIds(string $locationQuery): ?Collection
     {
         try {
@@ -463,13 +465,10 @@ class BuildProfileFilterViewData
             $scoutQuery = ProviderProfile::search($searchTerm)
                 ->where('profile_status', 'approved');
 
-            // Retrieve up to 1000 matching IDs so that downstream Eloquent
-            // pagination can work correctly against the full filtered set.
             $results = $scoutQuery->take(1000)->keys();
 
             return collect($results)->map(fn ($id) => (int) $id);
         } catch (\Throwable) {
-            // Typesense is unreachable or not yet indexed – fall back gracefully.
             return null;
         }
     }
@@ -485,6 +484,7 @@ class BuildProfileFilterViewData
 
         if (str_contains($locationQuery, ',')) {
             [$suburb, $state] = array_map(fn ($value) => trim($value), explode(',', $locationQuery, 2));
+
             if ($suburb === '' || $state === '') {
                 return null;
             }
@@ -513,14 +513,7 @@ class BuildProfileFilterViewData
         $query->where(function (Builder $query) use ($suburb, $state): void {
             $query->whereHas('user', function (Builder $query) use ($suburb, $state): void {
                 $query->where(function (Builder $query) use ($suburb, $state): void {
-                    // Primary: suburb stored in the full "Suburb, STATE postcode" format
-                    // (e.g. "Sydney, NSW 2000") — the format written by the signup and
-                    // edit-profile suburb autocomplete.
                     $query->where('suburb', 'like', $suburb.', '.$state.'%')
-                        // Legacy: plain suburb name only; use postcodes to verify the state.
-                        // Note: this check confirms the suburb name exists in the target state
-                        // but cannot guarantee the user is actually from that state when the
-                        // same suburb name appears in multiple states.
                         ->orWhere(function (Builder $query) use ($suburb, $state): void {
                             $query->where('suburb', $suburb)
                                 ->whereExists(function ($query) use ($state): void {
@@ -585,22 +578,11 @@ class BuildProfileFilterViewData
     private function resolveDistanceCoordinateExpression(string $column): string
     {
         if (! in_array($column, ['latitude', 'longitude'], true)) {
-            throw new \InvalidArgumentException("Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'.");
+            throw new \InvalidArgumentException(
+                "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
+            );
         }
 
-        // If multiple postcode rows exist for the same suburb, choose a deterministic
-        // fallback coordinate by smallest postcode, then smallest row id.
-        // We also narrow the postcode lookup by the provider's state so that suburbs
-        // shared across multiple states (e.g. "Brighton" in NSW, VIC and SA) always
-        // resolve to the correct coordinates.
-        //
-        // users.suburb stores the full "Suburb, STATE postcode" format chosen by the
-        // autocomplete (e.g. "Sydney, NSW 2000").  We extract the suburb name as the
-        // text before the first comma and the state abbreviation as the first word
-        // after the comma.  For legacy rows that contain only a plain suburb name
-        // (no comma) the SUBSTRING_INDEX calls safely return the whole value so the
-        // suburb comparison still works; the state will be an invalid abbreviation in
-        // that case and we fall back to the state_id-based check instead.
         return "COALESCE(
             provider_profiles.{$column},
             (
@@ -611,10 +593,8 @@ class BuildProfileFilterViewData
                     AND p.longitude IS NOT NULL
                     AND p.suburb = TRIM(SUBSTRING_INDEX(u.suburb, ',', 1))
                     AND (
-                        -- State derived from the suburb string (new format: Suburb, STATE postcode)
                         p.state = TRIM(SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), ' ', 1))
                         OR (
-                            -- Fallback: derive state from the profile's state_id relationship
                             provider_profiles.state_id IS NULL
                             OR p.state = (
                                 CASE (SELECT name FROM states WHERE id = provider_profiles.state_id)
@@ -663,6 +643,7 @@ class BuildProfileFilterViewData
             'out_call' => trim((string) ($firstRate?->outcall ?? '')),
             'city' => $profile->city?->name ?? '',
             'suburb' => $profile->user?->suburb ?? '',
+            'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
             'height' => '',
             'service_1' => $services[0] ?? '',
             'service_2' => $services[1] ?? '',
