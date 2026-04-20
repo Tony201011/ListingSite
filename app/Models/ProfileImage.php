@@ -16,6 +16,7 @@ class ProfileImage extends Model
     protected $fillable = [
         'user_id',
         'image_path',
+        'thumbnail_path',
         'is_primary',
     ];
 
@@ -25,6 +26,7 @@ class ProfileImage extends Model
 
     protected $appends = [
         'image_url',
+        'thumbnail_url',
     ];
 
     protected function imageUrl(): Attribute
@@ -40,6 +42,23 @@ class ProfileImage extends Model
                 }
 
                 return Storage::disk(config('media.delivery_disk'))->url($this->image_path);
+            }
+        );
+    }
+
+    protected function thumbnailUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (! $this->thumbnail_path) {
+                    return $this->image_url;
+                }
+
+                if (str_starts_with($this->thumbnail_path, 'http')) {
+                    return $this->thumbnail_path;
+                }
+
+                return Storage::disk(config('media.delivery_disk'))->url($this->thumbnail_path);
             }
         );
     }

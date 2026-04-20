@@ -14,7 +14,6 @@ trait LoadsProviderMediaBeforeFill
             ->map(fn ($image) => [
                 'id' => $image->id,
                 'image_path' => $image->image_path,
-                'thumbnail_path' => $image->thumbnail_path,
                 'is_primary' => (bool) $image->is_primary,
             ])
             ->toArray();

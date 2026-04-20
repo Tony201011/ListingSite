@@ -7,8 +7,8 @@
         bookingOpen: @js($errors->any() || session('success') || session('error')),
         photos: @js($profileImages->map(fn ($photo) => [
             'id' => $photo->id,
-            'thumbnail_url' => $photo->thumbnail_url ?? '',
-            'image_url' => $photo->image_url ?? ($photo->thumbnail_url ?? ''),
+            'thumbnail_url' => $photo->thumbnail_url ?? $photo->image_url ?? '',
+            'image_url' => $photo->image_url ?? '',
             'is_primary' => (bool) $photo->is_primary,
         ])->values()),
         videos: @js($videos->map(fn ($video) => [
@@ -254,7 +254,7 @@
                                 class="group relative aspect-[3/4] rounded-lg bg-gray-100 border border-gray-200 overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-pink-500"
                             >
                                 <img
-                                    :src="photo.thumbnail_url"
+                                    :src="photo.image_url"
                                     :alt="'Profile Image ' + photo.id"
                                     class="w-full h-full object-cover transition duration-500 ease-out group-hover:scale-110"
                                     loading="lazy"

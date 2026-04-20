@@ -9,7 +9,7 @@
                 'image_path' => $photo->image_path,
                 'thumbnail_path' => $photo->thumbnail_path,
                 'image_url' => $photo->image_url,
-                'thumbnail_url' => $photo->thumbnail_url,
+                'thumbnail_url' => $photo->image_url,
                 'is_primary' => (bool) ($photo->is_primary ?? false),
             ])->values()),
             setCoverUrl: @js(url('/photos/__ID__/set-cover')),
@@ -82,7 +82,7 @@
                             @click="openSlider(index)"
                         >
                             <img
-                                :src="photo.thumbnail_url"
+                                :src="photo.image_url"
                                 :alt="'Photo ' + photo.id"
                                 class="w-full h-full object-cover hover:scale-105 transition duration-300"
                                 loading="lazy"

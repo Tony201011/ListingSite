@@ -468,6 +468,7 @@ class UserResource extends Resource
                                 ->icon('heroicon-o-camera')
                                 ->schema([
                                     Repeater::make('profileImages')
+                                        ->relationship('profileImages')
                                         ->label('Images')
                                         ->schema([
                                             Hidden::make('id'),
