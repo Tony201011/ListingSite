@@ -6,7 +6,7 @@
       "states": [
         {
           "name": "New South Wales",
-          "cities": ["Sydney", "Newcastle", "Wollongong"]
+          "cities": ["Sydney", "Newcastle", "Wollongong", "Central Coast"]
         },
         {
           "name": "Victoria",
@@ -14,7 +14,7 @@
         },
         {
           "name": "Queensland",
-          "cities": ["Brisbane", "Gold Coast", "Cairns"]
+          "cities": ["Brisbane", "Gold Coast", "Cairns", "Townsville"]
         },
         {
           "name": "Western Australia",
@@ -35,6 +35,34 @@
         {
           "name": "Australian Capital Territory",
           "cities": ["Canberra"]
+        }
+      ]
+    },
+    {
+      "name": "India",
+      "code": "IN",
+      "states": [
+        {
+          "name": "Maharashtra",
+          "cities": ["Mumbai", "Pune"]
+        },
+        {
+          "name": "Gujarat",
+          "cities": ["Ahmedabad", "Surat"]
+        }
+      ]
+    },
+    {
+      "name": "United States",
+      "code": "US",
+      "states": [
+        {
+          "name": "California",
+          "cities": ["Los Angeles", "San Diego"]
+        },
+        {
+          "name": "Texas",
+          "cities": ["Houston", "Dallas"]
         }
       ]
     }
