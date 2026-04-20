@@ -963,18 +963,19 @@ class UserResource extends Resource
                                         ->weight('bold')
                                         ->placeholder('-'),
 
-                                    \Filament\Infolists\Components\Placeholder::make('video_player')
-                                        ->label('Video Preview')
-                                        ->content(function ($record): HtmlString {
-                                            if (! $record || ! filled($record->video_path ?? null)) {
+                                    TextEntry::make('video_path')
+                                        ->label('Video')
+                                        ->placeholder('-')
+                                        ->formatStateUsing(function ($state): HtmlString {
+                                            if (! filled($state)) {
                                                 return new HtmlString('<span style="color: #999; font-style: italic;">No video available</span>');
                                             }
 
-                                            $url = self::mediaUrl((string) $record->video_path);
-                                            $ext = strtolower(pathinfo((string) $record->video_path, PATHINFO_EXTENSION));
+                                            $url = self::mediaUrl((string) $state);
+                                            $ext = strtolower(pathinfo((string) $state, PATHINFO_EXTENSION));
                                             $mimeMap = ['mp4' => 'video/mp4', 'webm' => 'video/webm', 'ogg' => 'video/ogg', 'mov' => 'video/quicktime', 'avi' => 'video/x-msvideo', 'mkv' => 'video/x-matroska'];
                                             $mime = $mimeMap[$ext] ?? 'video/mp4';
-                                            $name = e(basename((string) $record->video_path));
+                                            $name = e(basename((string) $state));
 
                                             return new HtmlString(
                                                 '<div style="border: 2px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden; background: #000; margin: 8px 0;">'
@@ -988,6 +989,7 @@ class UserResource extends Resource
                                                 .'</div>'
                                             );
                                         })
+                                        ->html()
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(2),
