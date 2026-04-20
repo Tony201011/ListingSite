@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
 use App\Models\ProviderProfile;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class GetProfileShowData
@@ -176,11 +177,11 @@ class GetProfileShowData
             } elseif (! $avail->enabled) {
                 $time = 'Unavailable';
             } else {
-                $from = $avail->from_time ? \Carbon\Carbon::parse($avail->from_time)->format('H:i') : '';
+                $from = $avail->from_time ? Carbon::parse($avail->from_time)->format('H:i') : '';
                 if ($avail->till_late) {
                     $to = 'Late';
                 } elseif ($avail->to_time) {
-                    $to = \Carbon\Carbon::parse($avail->to_time)->format('H:i');
+                    $to = Carbon::parse($avail->to_time)->format('H:i');
                 } else {
                     $to = '';
                 }
@@ -254,7 +255,7 @@ class GetProfileShowData
             'available_expires_at' => $user?->availableNow?->isCurrentlyAvailable()
                 ? $user->availableNow->available_expires_at
                 : null,
-            'suburb' => $user?->suburb ?? '',
+            'suburb' => $this->extractSuburbName($user?->suburb ?? ''),
             'contact_method' => $providerProfile->contact_method ?? '',
             'phone_contact_preference' => $providerProfile->phone_contact_preference ?? '',
         ];
@@ -367,7 +368,7 @@ class GetProfileShowData
                     'name' => $profile->name ?? '',
                     'image' => $imageUrl ?? '',
                     'city' => $profile->city?->name ?? '',
-                    'suburb' => $profile->user?->suburb ?? '',
+                    'suburb' => $this->extractSuburbName($profile->user?->suburb ?? ''),
                     'service_1' => $services[0] ?? '',
                     'service_2' => $services[1] ?? '',
                     'description' => $profile->description ?? '',
