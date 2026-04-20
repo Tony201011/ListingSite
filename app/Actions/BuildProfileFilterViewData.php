@@ -279,18 +279,19 @@ class BuildProfileFilterViewData
         $distanceSearchActive = $distanceFilter !== null && $userLat !== null && $userLng !== null;
 
         if (! $distanceSearchActive) {
-            if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
+            if ($exactLocation !== null) {
+                // Exact location was parsed (e.g. "Sydney, NSW") — use the structured filter only.
+                // Do not also apply a scout/text filter; ANDing the two would produce zero results
+                // when the scout index returns IDs that don't overlap with the location-filtered set.
+                $this->applyExactLocationFilter($query, $exactLocation);
+            } elseif ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
                 $query->whereIn('provider_profiles.id', $scoutMatchedIds);
-            } elseif ($hasLocationQuery && $exactLocation === null) {
+            } elseif ($hasLocationQuery) {
                 $query->where(function ($q) use ($locationQuery) {
                     $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
                         ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', $locationQuery.',%')
                             ->orWhere('suburb', $locationQuery));
                 });
-            }
-
-            if ($exactLocation !== null) {
-                $this->applyExactLocationFilter($query, $exactLocation);
             }
         }
 
