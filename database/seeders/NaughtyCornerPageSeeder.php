@@ -4,9 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\NaughtyCornerPage;
 use Illuminate\Database\Seeder;
-
-
-
 class NaughtyCornerPageSeeder extends Seeder
 {
     public function run(): void
