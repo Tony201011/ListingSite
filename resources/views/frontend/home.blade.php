@@ -280,7 +280,7 @@
                             @if($profile['city'] || $profile['suburb'])
                                 <span class="inline-flex items-center gap-1">
                                     <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
-                                    {{ $profile['suburb'] }}
+                                    {{ $profile['suburb'] ?: $profile['city'] }}
                                     @if(isset($profile['distance_km']) && $profile['distance_km'] !== null)
                                         <span class="text-gray-400">({{ $profile['distance_km'] }} km)</span>
                                     @endif
