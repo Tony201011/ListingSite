@@ -550,6 +550,9 @@
                                     <span class="inline-flex items-center gap-1">
                                         <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
                                         {{ $profile['city'] ?: $profile['suburb'] }}
+                                        @if(isset($profile['distance_km']) && $profile['distance_km'] !== null)
+                                            <span class="text-gray-400">({{ $profile['distance_km'] }} km)</span>
+                                        @endif
                                     </span>
                                 @endif
                                 @if(!empty($profile['service_1']))
