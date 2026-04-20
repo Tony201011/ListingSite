@@ -71,21 +71,21 @@ $profileTags = array_values(array_unique(array_merge(
         @endphp
 
         <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-8">
+                <div class="text-center mb-12">
                     @if($availableNow)
-                    <div class="inline-block mb-2 px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
+                    <div class="inline-block mb-4 px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
                         AVAILABLE NOW{{ $availableTillText }}
                     </div>
                     @elseif($isOnline)
-                    <div class="inline-block mb-2 px-6 py-2 rounded bg-green-500 text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
+                    <div class="inline-block mb-4 px-6 py-2 rounded bg-green-500 text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
                         ONLINE NOW
                     </div>
                     @endif
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-pink-600" style="color:#e13a8b;">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-pink-600 mb-3" style="color:#e13a8b;">
                         {{ $profile['name'] }}
                     </h1>
                     @if(!empty($profile['city']))
-                        <div class="flex items-center justify-center mt-1">
+                        <div class="flex items-center justify-center mt-2 mb-3">
                             <span class="text-base font-semibold text-gray-400 flex items-center gap-1">
                                 <i class="fa-solid fa-location-dot text-pink-400"></i>
                                 {{ $profile['suburb'] }}
@@ -93,7 +93,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     @endif
                     @if(!empty($introTagline))
-                    <div class="mt-1 text-lg text-gray-700 font-medium">{{ $introTagline }}</div>
+                    <div class="mt-3 text-lg text-gray-700 font-medium">{{ $introTagline }}</div>
                     @endif
                 </div>
 
