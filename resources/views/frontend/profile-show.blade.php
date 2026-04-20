@@ -592,7 +592,7 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
 
             <div class="relative group">
-                <div class="overflow-hidden px-16 pb-2">
+                <div class="overflow-hidden px-4 sm:px-6 pb-2">
                     <div class="flex flex-nowrap gap-4 transition-transform duration-500"
                         :style="`transform: translateX(-${page * 100}%);`
                     ">
