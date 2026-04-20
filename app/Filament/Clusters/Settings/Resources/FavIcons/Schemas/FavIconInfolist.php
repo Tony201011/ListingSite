@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Settings\Resources\FavIcons\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -12,7 +13,11 @@ class FavIconInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('icon_path'),
+                ImageEntry::make('icon_path')
+                    ->label('Icon')
+                    ->disk('public')
+                    ->height(64)
+                    ->width(64),
                 IconEntry::make('is_active')
                     ->boolean(),
                 TextEntry::make('created_at')
