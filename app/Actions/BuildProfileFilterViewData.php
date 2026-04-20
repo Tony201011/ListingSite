@@ -612,7 +612,9 @@ class BuildProfileFilterViewData
         $words = explode(' ', trim($suburb));
         while (count($words) > 1) {
             array_pop($words);
-            $prefix = implode(' ', $words);
+            // Escape LIKE wildcards in the prefix so that any literal '%' or '_'
+            // characters in the suburb name are matched exactly, not as wildcards.
+            $prefix = addcslashes(implode(' ', $words), '%_\\');
 
             $result = Postcode::query()
                 ->where('suburb', 'like', $prefix.'%')
