@@ -161,20 +161,27 @@ class BuildProfileFilterViewData
         // and use them as the distance-search centre instead of the user's GPS position.
         // This ensures that "location=Melbourne, VIC&distance=500" searches around Melbourne
         // rather than around wherever the user's device happens to be located.
+        //
+        // For location names that are facility/place names rather than suburb names (e.g.
+        // "SYDNEY GATEWAY FACILITY, NSW"), the exact suburb lookup is tried first; if that
+        // fails a progressive prefix fallback removes trailing words until a known suburb is
+        // matched, so the distance centre still resolves to a meaningful coordinate.
+        $geocodedLocation = null;
         if ($distanceSearchEnabled && $distanceFilter !== null && $locationQuery !== '') {
             $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
             if ($resolvedLocation !== null) {
-                $locPostcode = Postcode::query()
-                    ->where('suburb', $resolvedLocation['suburb'])
-                    ->where('state', $resolvedLocation['state'])
-                    ->whereNotNull('latitude')
-                    ->whereNotNull('longitude')
-                    ->orderBy('postcode') // prefer the lowest (typically central) postcode for the suburb
-                    ->first(['latitude', 'longitude']);
+                $locPostcode = $this->resolveSuburbPostcode(
+                    $resolvedLocation['suburb'],
+                    $resolvedLocation['state']
+                );
 
                 if ($locPostcode !== null) {
                     $userLat = (float) $locPostcode->latitude;
                     $userLng = (float) $locPostcode->longitude;
+                    $geocodedLocation = [
+                        'suburb' => $locPostcode->suburb,
+                        'state' => $resolvedLocation['state'],
+                    ];
                 }
             }
         }
@@ -200,6 +207,7 @@ class BuildProfileFilterViewData
             $userLng,
             $distanceFilter,
             $girlsMode,
+            $geocodedLocation,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -276,6 +284,7 @@ class BuildProfileFilterViewData
         ?float $userLng = null,
         ?int $distanceFilter = null,
         string $girlsMode = 'all',
+        ?array $geocodedLocation = null,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
 
@@ -408,16 +417,24 @@ class BuildProfileFilterViewData
             $query->select('provider_profiles.*')
                 ->selectRaw("{$distanceSql} as distance_km", [$userLat, $userLng, $userLat]);
 
-            if ($exactLocation !== null) {
+            // When a location was geocoded via the postcodes table, use the resolved suburb
+            // name for the text-based fallback (profiles without stored coordinates).  This
+            // ensures that a facility/place name like "SYDNEY GATEWAY FACILITY, NSW" — which
+            // resolves to "SYDNEY" via the fuzzy geocoder — still matches profiles whose
+            // suburb field contains "Sydney, NSW …".  If no geocoding was performed, fall
+            // back to the parsed input location (original behaviour).
+            $locationForFallback = $geocodedLocation ?? $exactLocation;
+
+            if ($locationForFallback !== null) {
                 // Include profiles that either have resolvable coordinates (distance filtered
                 // via HAVING) OR lack coordinates but match the exact location text, so that
                 // profiles without stored coordinates still appear in location-based searches.
-                $query->where(function (Builder $q) use ($latitudeExpression, $longitudeExpression, $exactLocation): void {
+                $query->where(function (Builder $q) use ($latitudeExpression, $longitudeExpression, $locationForFallback): void {
                     $q->whereRaw("{$latitudeExpression} IS NOT NULL")
                         ->whereRaw("{$longitudeExpression} IS NOT NULL")
-                        ->orWhere(function (Builder $inner) use ($latitudeExpression, $longitudeExpression, $exactLocation): void {
+                        ->orWhere(function (Builder $inner) use ($latitudeExpression, $longitudeExpression, $locationForFallback): void {
                             $inner->whereRaw("{$latitudeExpression} IS NULL OR {$longitudeExpression} IS NULL");
-                            $this->applyExactLocationFilter($inner, $exactLocation);
+                            $this->applyExactLocationFilter($inner, $locationForFallback);
                         });
                 });
 
@@ -558,6 +575,58 @@ class BuildProfileFilterViewData
                 'suburb' => $locationQuery,
                 'state' => $this->normalizeStateAbbreviation($locationStateQuery) ?? $locationStateQuery,
             ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Look up a postcode record by suburb + state with a progressive prefix fallback.
+     *
+     * An exact case-insensitive match is tried first.  If the suburb name is not found
+     * (e.g. because it is a facility or place name like "SYDNEY GATEWAY FACILITY") the
+     * method removes the last word and retries as a prefix LIKE query, repeating until
+     * a match is found or only one word remains.  This means a search centred on
+     * "SYDNEY GATEWAY FACILITY, NSW" will resolve to the "SYDNEY" suburb coordinates
+     * rather than falling back to the user's raw GPS position.
+     *
+     * The Postcode record is returned with the `suburb` attribute set to whatever the
+     * database actually matched, so callers can use it as the canonical location label.
+     */
+    private function resolveSuburbPostcode(string $suburb, string $state): ?Postcode
+    {
+        // 1. Exact match (MySQL collation is case-insensitive by default).
+        $result = Postcode::query()
+            ->where('suburb', $suburb)
+            ->where('state', $state)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderBy('postcode')
+            ->first(['latitude', 'longitude', 'suburb']);
+
+        if ($result !== null) {
+            return $result;
+        }
+
+        // 2. Progressive prefix fallback: remove trailing words one at a time.
+        $words = explode(' ', trim($suburb));
+        while (count($words) > 1) {
+            array_pop($words);
+            // Escape LIKE wildcards in the prefix so that any literal '%' or '_'
+            // characters in the suburb name are matched exactly, not as wildcards.
+            $prefix = addcslashes(implode(' ', $words), '%_\\');
+
+            $result = Postcode::query()
+                ->where('suburb', 'like', $prefix.'%')
+                ->where('state', $state)
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->orderBy('postcode')
+                ->first(['latitude', 'longitude', 'suburb']);
+
+            if ($result !== null) {
+                return $result;
+            }
         }
 
         return null;
