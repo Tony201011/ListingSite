@@ -571,6 +571,10 @@ class BuildProfileFilterViewData
 
         // If multiple postcode rows exist for the same suburb, choose a deterministic
         // fallback coordinate by smallest postcode, then smallest row id.
+        // We also narrow the postcode lookup by the provider's state (derived from
+        // state_id → states.name → abbreviation) so that suburbs shared across
+        // multiple states (e.g. "Brighton" in NSW, VIC and SA) always resolve to
+        // the correct coordinates.
         return "COALESCE(
             provider_profiles.{$column},
             (
@@ -580,6 +584,22 @@ class BuildProfileFilterViewData
                 WHERE p.latitude IS NOT NULL
                     AND p.longitude IS NOT NULL
                     AND p.suburb = u.suburb
+                    AND (
+                        provider_profiles.state_id IS NULL
+                        OR p.state = (
+                            CASE (SELECT name FROM states WHERE id = provider_profiles.state_id)
+                                WHEN 'Australian Capital Territory' THEN 'ACT'
+                                WHEN 'New South Wales' THEN 'NSW'
+                                WHEN 'Victoria' THEN 'VIC'
+                                WHEN 'Queensland' THEN 'QLD'
+                                WHEN 'Western Australia' THEN 'WA'
+                                WHEN 'South Australia' THEN 'SA'
+                                WHEN 'Tasmania' THEN 'TAS'
+                                WHEN 'Northern Territory' THEN 'NT'
+                                ELSE NULL
+                            END
+                        )
+                    )
                 ORDER BY
                     p.postcode ASC,
                     p.id ASC
