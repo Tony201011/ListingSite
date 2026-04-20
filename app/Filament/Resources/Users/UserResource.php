@@ -464,7 +464,7 @@ class UserResource extends Resource
                         ->icon('heroicon-o-photo')
                         ->schema([
                             Section::make('Profile Images')
-                                ->description('Upload provider gallery images and thumbnails.')
+                                ->description('Upload provider gallery images.')
                                 ->icon('heroicon-o-camera')
                                 ->schema([
                                     Repeater::make('profileImages')
@@ -492,29 +492,6 @@ class UserResource extends Resource
                                                 ->image()
                                                 ->disk(config('media.upload_disk', 'public'))
                                                 ->directory('providers/images')
-                                                ->storeFileNamesIn('original_name')
-                                                ->columnSpanFull(),
-
-                                            Placeholder::make('thumbnail_preview')
-                                                ->label('Current Thumbnail')
-                                                ->content(function (Get $get): HtmlString {
-                                                    $path = $get('thumbnail_path');
-
-                                                    if (! filled($path)) {
-                                                        return new HtmlString('<span class="text-sm text-gray-500 italic">No thumbnail uploaded</span>');
-                                                    }
-
-                                                    $url = self::mediaUrl((string) $path);
-
-                                                    return new HtmlString('<img src="'.e($url).'" alt="Current thumbnail" style="max-height:160px;max-width:100%;object-fit:contain;" />');
-                                                })
-                                                ->columnSpanFull(),
-
-                                            FileUpload::make('thumbnail_path')
-                                                ->label('Replace Thumbnail')
-                                                ->image()
-                                                ->disk(config('media.upload_disk', 'public'))
-                                                ->directory('providers/thumbnails')
                                                 ->storeFileNamesIn('original_name')
                                                 ->columnSpanFull(),
 
@@ -926,14 +903,19 @@ class UserResource extends Resource
                             RepeatableEntry::make('profileImages')
                                 ->label('')
                                 ->schema([
-                                    ImageEntry::make('image_url')
+                                    TextEntry::make('image_path')
                                         ->label('Image')
-                                        ->height(220)
-                                        ->columnSpan(2),
+                                        ->columnSpan(3)
+                                        ->formatStateUsing(function ($state): HtmlString {
+                                            if (! filled($state)) {
+                                                return new HtmlString('<span style="color: #999; font-style: italic;">No image</span>');
+                                            }
 
-                                    ImageEntry::make('thumbnail_url')
-                                        ->label('Thumbnail')
-                                        ->height(120),
+                                            $url = self::mediaUrl((string) $state);
+
+                                            return new HtmlString('<img src="'.e($url).'" alt="Profile image" style="max-height:220px;max-width:100%;border-radius:0.375rem;object-fit:contain;" />');
+                                        })
+                                        ->html(),
 
                                     IconEntry::make('is_primary')
                                         ->label('Primary')
@@ -953,19 +935,19 @@ class UserResource extends Resource
                                         ->weight('bold')
                                         ->placeholder('-'),
 
-                                    TextEntry::make('video_path')
+                                    TextEntry::make('video_url')
                                         ->label('Video')
-                                        ->placeholder('-')
+                                        ->columnSpanFull()
                                         ->formatStateUsing(function ($state): HtmlString {
                                             if (! filled($state)) {
                                                 return new HtmlString('<span style="color: #999; font-style: italic;">No video available</span>');
                                             }
 
-                                            $url = self::mediaUrl((string) $state);
-                                            $ext = strtolower(pathinfo((string) $state, PATHINFO_EXTENSION));
+                                            $url = (string) $state;
+                                            $ext = strtolower(pathinfo($url, PATHINFO_EXTENSION));
                                             $mimeMap = ['mp4' => 'video/mp4', 'webm' => 'video/webm', 'ogg' => 'video/ogg', 'mov' => 'video/quicktime', 'avi' => 'video/x-msvideo', 'mkv' => 'video/x-matroska'];
                                             $mime = $mimeMap[$ext] ?? 'video/mp4';
-                                            $name = e(basename((string) $state));
+                                            $name = e(basename($url));
 
                                             return new HtmlString(
                                                 '<div style="border: 2px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden; background: #000; margin: 8px 0;">'
