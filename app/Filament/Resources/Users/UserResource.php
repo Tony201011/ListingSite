@@ -9,7 +9,6 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
-use App\Models\PhotoVerification;
 use App\Models\Postcode;
 use App\Models\User;
 use BackedEnum;
@@ -517,6 +516,7 @@ class UserResource extends Resource
                                 ->icon('heroicon-o-film')
                                 ->schema([
                                     Repeater::make('userVideos')
+                                        ->relationship()
                                         ->label('Videos')
                                         ->schema([
                                             Hidden::make('id'),
@@ -1335,15 +1335,6 @@ class UserResource extends Resource
             ->values();
 
         return $names->isEmpty() ? '-' : $names->implode(', ');
-    }
-
-    private static function verificationHasOtherApproved(PhotoVerification $record): bool
-    {
-        return (bool) $record->user?->photoVerification()
-            ->where('status', 'approved')
-            ->where('id', '!=', $record->id)
-            ->whereNull('deleted_at')
-            ->exists();
     }
 
     private static function normalizeMultiValueState(mixed $state): array
