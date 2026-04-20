@@ -611,7 +611,7 @@ class BuildProfileFilterViewData
                     AND p.longitude IS NOT NULL
                     AND p.suburb = TRIM(SUBSTRING_INDEX(u.suburb, ',', 1))
                     AND (
-                        -- State derived from the suburb string (new format: \"Suburb, STATE postcode\")
+                        -- State derived from the suburb string (new format: Suburb, STATE postcode)
                         p.state = TRIM(SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), ' ', 1))
                         OR (
                             -- Fallback: derive state from the profile's state_id relationship
