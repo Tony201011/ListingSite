@@ -963,10 +963,31 @@ class UserResource extends Resource
                                         ->weight('bold')
                                         ->placeholder('-'),
 
-                                    TextEntry::make('video_url')
-                                        ->label('Video URL')
-                                        ->placeholder('-')
-                                        ->copyable()
+                                    \Filament\Infolists\Components\Placeholder::make('video_player')
+                                        ->label('Video Preview')
+                                        ->content(function ($record): HtmlString {
+                                            if (! $record || ! filled($record->video_path ?? null)) {
+                                                return new HtmlString('<span style="color: #999; font-style: italic;">No video available</span>');
+                                            }
+
+                                            $url = self::mediaUrl((string) $record->video_path);
+                                            $ext = strtolower(pathinfo((string) $record->video_path, PATHINFO_EXTENSION));
+                                            $mimeMap = ['mp4' => 'video/mp4', 'webm' => 'video/webm', 'ogg' => 'video/ogg', 'mov' => 'video/quicktime', 'avi' => 'video/x-msvideo', 'mkv' => 'video/x-matroska'];
+                                            $mime = $mimeMap[$ext] ?? 'video/mp4';
+                                            $name = e(basename((string) $record->video_path));
+
+                                            return new HtmlString(
+                                                '<div style="border: 2px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden; background: #000; margin: 8px 0;">'
+                                                .'<video controls preload="metadata" style="width: 100%; height: auto; max-height: 300px; display: block;">'
+                                                .'<source src="'.e($url).'" type="'.$mime.'">'
+                                                .'Your browser does not support the video element. <a href="'.e($url).'" target="_blank" rel="noopener noreferrer">'.e($name).'</a>'
+                                                .'</video>'
+                                                .'<div style="padding: 10px 12px; background: #f9fafb; border-top: 1px solid #e5e7eb; font-size: 0.75rem; color: #666; word-break: break-all;">'
+                                                .'<strong>URL:</strong> <a href="'.e($url).'" target="_blank" rel="noopener noreferrer" style="color: #0066cc; text-decoration: none;">'.e($name).'</a>'
+                                                .'</div>'
+                                                .'</div>'
+                                            );
+                                        })
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(2),
