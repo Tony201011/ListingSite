@@ -11,14 +11,15 @@
         "intervention/image": "^3.11",
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^11.31",
-        "laravel/scout": "*",
+        "laravel/scout": "^11.1",
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.32",
+        "spatie/laravel-sitemap": "^8.0",
         "staudenmeir/belongs-to-through": "^2.16",
         "symfony/http-client": "^7.4",
         "symfony/mailgun-mailer": "^7.4",
         "twilio/sdk": "^8.11",
-        "typesense/typesense-php": "*"
+        "typesense/typesense-php": "^6.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.7",
