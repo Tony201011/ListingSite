@@ -95,14 +95,20 @@ class AppServiceProvider extends ServiceProvider
 
             $escortCities = Schema::hasTable('postcodes')
                 ? Cache::remember('header_escort_suburbs', now()->addHour(), function () {
+                    // users.suburb stores the full "Suburb, STATE postcode" format
+                    // (e.g. "Sydney, NSW 2000") written by the signup/edit-profile
+                    // autocomplete.  We join postcodes on the suburb name prefix so that
+                    // the header links include the state (e.g. "/?location=Sydney, NSW")
+                    // and therefore only return providers from the correct state.
                     return Postcode::query()
-                        ->select('suburb')
-                        ->distinct()
-                        ->whereIn('suburb', function ($q) {
-                            $q->select('suburb')
+                        ->select(['suburb', 'state'])
+                        ->groupBy(['suburb', 'state'])
+                        ->whereExists(function ($q) {
+                            $q->selectRaw('1')
                                 ->from('users')
                                 ->whereNotNull('suburb')
                                 ->where('suburb', '!=', '')
+                                ->whereRaw('users.suburb LIKE CONCAT(postcodes.suburb, \', \', postcodes.state, \'%\')')
                                 ->whereExists(function ($q2) {
                                     $q2->selectRaw('1')
                                         ->from('provider_profiles')
