@@ -33,6 +33,7 @@ function escortSearch(config) {
         distance: config.distance ?? config.maxDistance,
         maxDistance: config.maxDistance || 500,
         locationEnabled: config.locationEnabled || false,
+        distanceSearchEnabled: config.distanceSearchEnabled ?? true,
         geoError: '',
 
         requestLocation() {
