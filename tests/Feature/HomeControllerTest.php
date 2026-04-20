@@ -36,9 +36,14 @@ class HomeControllerTest extends TestCase
 
     private function createApprovedProviderWithSuburb(string $suburb, string $state, array $profileOverrides = []): User
     {
+        // The signup/edit-profile autocomplete stores suburb in "Suburb, STATE postcode"
+        // format (e.g. "Sydney, NSW 2000").  Use a recognisable dummy postcode so that
+        // both the new-format LIKE match and the legacy postcode EXISTS check work.
+        $storedSuburb = "{$suburb}, {$state} 0000";
+
         $user = User::factory()->create([
             'role' => User::ROLE_PROVIDER,
-            'suburb' => $suburb,
+            'suburb' => $storedSuburb,
         ]);
 
         ProviderProfile::query()->create(array_merge([
@@ -279,6 +284,33 @@ class HomeControllerTest extends TestCase
         $profiles = $response->viewData('profiles');
         $this->assertSame(1, $profiles->total());
         $this->assertSame('Sydney Escort', collect($profiles->items())->first()['name']);
+    }
+
+    public function test_home_page_location_filter_excludes_same_suburb_name_from_different_state(): void
+    {
+        // "Sydney" exists as a suburb name in both NSW and another state.
+        // Searching for "Sydney, NSW" must NOT return the profile from the other state.
+        $this->createApprovedProviderWithSuburb('Sydney', 'NSW', ['name' => 'Sydney NSW Escort', 'slug' => 'sydney-nsw-escort']);
+        $this->createApprovedProviderWithSuburb('Sydney', 'VIC', ['name' => 'Sydney VIC Escort', 'slug' => 'sydney-vic-escort']);
+
+        $response = $this->get('/?location=Sydney%2C+NSW');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(1, $profiles->total());
+        $this->assertSame('Sydney NSW Escort', collect($profiles->items())->first()['name']);
+    }
+
+    public function test_home_page_location_filter_excludes_same_suburb_name_from_different_state_reversed(): void
+    {
+        // Mirror of the above: "Melbourne, VIC" must not return "Melbourne, NSW".
+        $this->createApprovedProviderWithSuburb('Melbourne', 'VIC', ['name' => 'Melbourne VIC Escort', 'slug' => 'melbourne-vic-escort']);
+        $this->createApprovedProviderWithSuburb('Melbourne', 'NSW', ['name' => 'Melbourne NSW Escort', 'slug' => 'melbourne-nsw-escort']);
+
+        $response = $this->get('/?location=Melbourne%2C+VIC');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(1, $profiles->total());
+        $this->assertSame('Melbourne VIC Escort', collect($profiles->items())->first()['name']);
     }
 
     // ---------------------------------------------------------------

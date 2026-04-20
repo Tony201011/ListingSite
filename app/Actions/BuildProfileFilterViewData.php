@@ -283,9 +283,16 @@ class BuildProfileFilterViewData
             // Scout is not configured, unavailable, or returned no results –
             // fall back to LIKE queries for city/suburb so results are never
             // incorrectly empty due to indexing gaps.
+            //
+            // users.suburb is stored in "Suburb, STATE postcode" format (e.g.
+            // "Sydney, NSW 2000").  We match on the suburb-name prefix so that
+            // a search for "Sydney" matches "Sydney, NSW 2000" or "Sydney, VIC 3xxx"
+            // but does NOT match unrelated entries like "West Sydney, NSW 2145"
+            // that merely contain the search term as a substring.
             $query->where(function ($q) use ($locationQuery) {
                 $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
-                    ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%'.$locationQuery.'%'));
+                    ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', $locationQuery.',%')
+                        ->orWhere('suburb', $locationQuery));
             });
         }
 
@@ -505,13 +512,25 @@ class BuildProfileFilterViewData
 
         $query->where(function (Builder $query) use ($suburb, $state): void {
             $query->whereHas('user', function (Builder $query) use ($suburb, $state): void {
-                $query->where('suburb', $suburb)
-                    ->whereExists(function ($query) use ($state): void {
-                        $query->selectRaw('1')
-                            ->from('postcodes')
-                            ->whereColumn('postcodes.suburb', 'users.suburb')
-                            ->where('postcodes.state', $state);
-                    });
+                $query->where(function (Builder $query) use ($suburb, $state): void {
+                    // Primary: suburb stored in the full "Suburb, STATE postcode" format
+                    // (e.g. "Sydney, NSW 2000") — the format written by the signup and
+                    // edit-profile suburb autocomplete.
+                    $query->where('suburb', 'like', $suburb.', '.$state.'%')
+                        // Legacy: plain suburb name only; use postcodes to verify the state.
+                        // Note: this check confirms the suburb name exists in the target state
+                        // but cannot guarantee the user is actually from that state when the
+                        // same suburb name appears in multiple states.
+                        ->orWhere(function (Builder $query) use ($suburb, $state): void {
+                            $query->where('suburb', $suburb)
+                                ->whereExists(function ($query) use ($state): void {
+                                    $query->selectRaw('1')
+                                        ->from('postcodes')
+                                        ->whereColumn('postcodes.suburb', 'users.suburb')
+                                        ->where('postcodes.state', $state);
+                                });
+                        });
+                });
             })->orWhereHas('city', function (Builder $query) use ($suburb, $state): void {
                 $query->where('name', $suburb)
                     ->whereHas('state', function (Builder $query) use ($state): void {
@@ -571,10 +590,17 @@ class BuildProfileFilterViewData
 
         // If multiple postcode rows exist for the same suburb, choose a deterministic
         // fallback coordinate by smallest postcode, then smallest row id.
-        // We also narrow the postcode lookup by the provider's state (derived from
-        // state_id → states.name → abbreviation) so that suburbs shared across
-        // multiple states (e.g. "Brighton" in NSW, VIC and SA) always resolve to
-        // the correct coordinates.
+        // We also narrow the postcode lookup by the provider's state so that suburbs
+        // shared across multiple states (e.g. "Brighton" in NSW, VIC and SA) always
+        // resolve to the correct coordinates.
+        //
+        // users.suburb stores the full "Suburb, STATE postcode" format chosen by the
+        // autocomplete (e.g. "Sydney, NSW 2000").  We extract the suburb name as the
+        // text before the first comma and the state abbreviation as the first word
+        // after the comma.  For legacy rows that contain only a plain suburb name
+        // (no comma) the SUBSTRING_INDEX calls safely return the whole value so the
+        // suburb comparison still works; the state will be an invalid abbreviation in
+        // that case and we fall back to the state_id-based check instead.
         return "COALESCE(
             provider_profiles.{$column},
             (
@@ -583,21 +609,26 @@ class BuildProfileFilterViewData
                 JOIN users u ON u.id = provider_profiles.user_id
                 WHERE p.latitude IS NOT NULL
                     AND p.longitude IS NOT NULL
-                    AND p.suburb = u.suburb
+                    AND p.suburb = TRIM(SUBSTRING_INDEX(u.suburb, ',', 1))
                     AND (
-                        provider_profiles.state_id IS NULL
-                        OR p.state = (
-                            CASE (SELECT name FROM states WHERE id = provider_profiles.state_id)
-                                WHEN 'Australian Capital Territory' THEN 'ACT'
-                                WHEN 'New South Wales' THEN 'NSW'
-                                WHEN 'Victoria' THEN 'VIC'
-                                WHEN 'Queensland' THEN 'QLD'
-                                WHEN 'Western Australia' THEN 'WA'
-                                WHEN 'South Australia' THEN 'SA'
-                                WHEN 'Tasmania' THEN 'TAS'
-                                WHEN 'Northern Territory' THEN 'NT'
-                                ELSE NULL
-                            END
+                        -- State derived from the suburb string (new format: \"Suburb, STATE postcode\")
+                        p.state = TRIM(SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), ' ', 1))
+                        OR (
+                            -- Fallback: derive state from the profile's state_id relationship
+                            provider_profiles.state_id IS NULL
+                            OR p.state = (
+                                CASE (SELECT name FROM states WHERE id = provider_profiles.state_id)
+                                    WHEN 'Australian Capital Territory' THEN 'ACT'
+                                    WHEN 'New South Wales' THEN 'NSW'
+                                    WHEN 'Victoria' THEN 'VIC'
+                                    WHEN 'Queensland' THEN 'QLD'
+                                    WHEN 'Western Australia' THEN 'WA'
+                                    WHEN 'South Australia' THEN 'SA'
+                                    WHEN 'Tasmania' THEN 'TAS'
+                                    WHEN 'Northern Territory' THEN 'NT'
+                                    ELSE NULL
+                                END
+                            )
                         )
                     )
                 ORDER BY
