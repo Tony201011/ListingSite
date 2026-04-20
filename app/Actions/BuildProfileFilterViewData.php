@@ -406,11 +406,31 @@ class BuildProfileFilterViewData
             ))";
 
             $query->select('provider_profiles.*')
-                ->selectRaw("{$distanceSql} as distance_km", [$userLat, $userLng, $userLat])
-                ->whereRaw("{$latitudeExpression} IS NOT NULL")
-                ->whereRaw("{$longitudeExpression} IS NOT NULL")
-                ->having('distance_km', '<=', $distanceFilter)
-                ->orderBy('distance_km', 'asc');
+                ->selectRaw("{$distanceSql} as distance_km", [$userLat, $userLng, $userLat]);
+
+            if ($exactLocation !== null) {
+                // Include profiles that either have resolvable coordinates (distance filtered
+                // via HAVING) OR lack coordinates but match the exact location text, so that
+                // profiles without stored coordinates still appear in location-based searches.
+                $query->where(function (Builder $q) use ($latitudeExpression, $longitudeExpression, $exactLocation): void {
+                    $q->whereRaw("{$latitudeExpression} IS NOT NULL")
+                        ->whereRaw("{$longitudeExpression} IS NOT NULL")
+                        ->orWhere(function (Builder $inner) use ($latitudeExpression, $longitudeExpression, $exactLocation): void {
+                            $inner->whereRaw("{$latitudeExpression} IS NULL OR {$longitudeExpression} IS NULL");
+                            $this->applyExactLocationFilter($inner, $exactLocation);
+                        });
+                });
+
+                $query->havingRaw('distance_km IS NULL OR distance_km <= ?', [$distanceFilter]);
+            } else {
+                $query->whereRaw("{$latitudeExpression} IS NOT NULL")
+                    ->whereRaw("{$longitudeExpression} IS NOT NULL")
+                    ->having('distance_km', '<=', $distanceFilter);
+            }
+
+            // Sort profiles with a known distance first (ascending), then profiles
+            // without resolvable coordinates (NULL distance_km) at the end.
+            $query->orderByRaw('(distance_km IS NULL) ASC, distance_km ASC');
 
             $distanceOrderingApplied = true;
         }

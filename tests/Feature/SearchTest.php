@@ -6,6 +6,7 @@ use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class SearchTest extends TestCase
@@ -557,5 +558,47 @@ class SearchTest extends TestCase
         $names = collect($profiles->items())->pluck('name');
         $this->assertTrue($names->contains('Local Escort'));
         $this->assertFalse($names->contains('Remote Escort'));
+    }
+
+    // ===============================================================
+    // Distance search + location text – profiles without coordinates
+    // should still appear via the exact-location fallback when both
+    // user_lat/user_lng/distance and location are provided.
+    //
+    // The haversine distance filter uses MySQL-specific SQL that cannot
+    // run in SQLite.  What we CAN verify in SQLite is that the exact-
+    // location fallback branch is activated: profiles whose suburb
+    // matches the parsed location are included even when coordinates
+    // cannot be resolved (i.e. distance_km stays NULL), while profiles
+    // in a different suburb are excluded.
+    // ===============================================================
+
+    public function test_distance_search_with_location_includes_profiles_without_coordinates(): void
+    {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            $this->markTestSkipped('Distance+location combined search uses MySQL-specific SQL (SUBSTRING_INDEX, COALESCE subquery).');
+        }
+
+        // Profile in Melbourne – no direct lat/lng on the profile row.
+        $this->createApprovedProvider(
+            ['name' => 'Melbourne Escort', 'slug' => 'melbourne-escort'],
+            ['suburb' => 'Melbourne, VIC 3000']
+        );
+        // Profile in Sydney – should be excluded.
+        $this->createApprovedProvider(
+            ['name' => 'Sydney Escort', 'slug' => 'sydney-escort'],
+            ['suburb' => 'Sydney, NSW 2000']
+        );
+
+        // When lat/lng + distance + location are all provided, profiles whose
+        // suburb matches the parsed location should appear even if they have no
+        // stored GPS coordinates (exact-location fallback).
+        $response = $this->get('/?user_lat=-37.8136&user_lng=144.9631&distance=500&location=Melbourne%2C+VIC');
+
+        $response->assertOk();
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Melbourne Escort'));
+        $this->assertFalse($names->contains('Sydney Escort'));
     }
 }
