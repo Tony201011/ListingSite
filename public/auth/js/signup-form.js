@@ -60,7 +60,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         selectSuburb(item) {
-            this.suburb = `${item.suburb}`;
+            this.suburb = `${item.suburb}, ${item.state} ${item.postcode}`;
             this.suburbSelected = true;
             this.showResults = false;
         }

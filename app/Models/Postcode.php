@@ -10,11 +10,12 @@ class Postcode extends Model
     use HasFactory;
 
     protected $fillable = [
-        'state',
-        'city_region',
-        'suburb',
         'postcode',
-        'longitude',
+        'suburb',
+        'state',
         'latitude',
+        'longitude',
+        'postcode_type',
+        'electoral_district',
     ];
 }
