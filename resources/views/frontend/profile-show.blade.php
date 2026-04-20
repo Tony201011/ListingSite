@@ -471,13 +471,20 @@ $profileTags = array_values(array_unique(array_merge(
                         @if(!empty($profileTags))
                         <div class="flex flex-wrap gap-2 mt-6">
                             @foreach($profileTags as $tag)
+                                @if(!empty($tag))
                                 <span class="px-4 py-1 bg-pink-600 text-white rounded-full text-sm font-semibold" style="line-height:1.2;">{{ $tag }}</span>
+                                @endif
                             @endforeach
                         </div>
                         @endif
                     </div>
                     @endif
-                    @if(!empty($profile['price_list'] ?? []))
+                    @php
+                        $nonEmptyRates = array_filter($profile['price_list'] ?? [], function ($rate) {
+                            return !empty($rate['outcall']) || !empty($rate['incall']);
+                        });
+                    @endphp
+                    @if(!empty($nonEmptyRates))
                     <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
                         <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
                             <i class="fa-regular fa-clock text-pink-600"></i> Rates
@@ -493,26 +500,27 @@ $profileTags = array_values(array_unique(array_merge(
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($profile['price_list'] ?? [] as $i => $rate)
+                                    @foreach($nonEmptyRates as $i => $rate)
                                     @php
-                                        $sessionLabel = $rate['description'] ?: ($rate['group'] ?: '—');
+                                        $sessionLabel = $rate['description'] ?: ($rate['group'] ?: 'Session');
                                     @endphp
                                     <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
                                         <td class="px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
-                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: '—' }}</td>
-                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: '—' }}</td>
+                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: 'N/A' }}</td>
+                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: 'N/A' }}</td>
                                     </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="3" class="px-4 py-2 text-gray-400 text-center">Contact for rates</td>
-                                    </tr>
-                                    @endforelse
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     @endif
-                    @if(!empty($profile['availability_list'] ?? []))
+                    @php
+                        $nonEmptyAvailability = array_filter($profile['availability_list'] ?? [], function ($avail) {
+                            return !empty($avail['time']) && $avail['time'] !== 'Unavailable';
+                        });
+                    @endphp
+                    @if(!empty($nonEmptyAvailability))
                     <!-- My Availability Section -->
                     <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mt-6">
                         <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
@@ -528,16 +536,12 @@ $profileTags = array_values(array_unique(array_merge(
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($profile['availability_list'] ?? [] as $i => $avail)
+                                    @foreach($nonEmptyAvailability as $i => $avail)
                                     <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
                                         <td class="px-4 py-2 font-normal text-black">{{ $avail['day'] }}</td>
                                         <td class="px-4 py-2 font-bold text-black">{{ $avail['time'] }}</td>
                                     </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="2" class="px-4 py-2 text-gray-400 text-center">No availability set</td>
-                                    </tr>
-                                    @endforelse
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
