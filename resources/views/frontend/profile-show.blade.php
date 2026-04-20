@@ -178,8 +178,9 @@ $profileTags = array_values(array_unique(array_merge(
                             <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
                             <hr class="mb-4">
                             <div class="text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
-                                {!! $safeAbout !!}
+                                {!! nl2br($safeAbout) !!}
                             </div>
+                            <br>
                         </div>
                     @endif
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -187,16 +188,18 @@ $profileTags = array_values(array_unique(array_merge(
                             <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-48 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
+                    <br>
 
                     <!-- Videos Section -->
 
 @include('components.gallery-modal')
                     @if(!empty($profile['videos'] ?? []))
                     <section class="mt-12 overflow-hidden">
-                        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
                             <hr class="mb-4">
                         </div>
+                        <br>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
                             x-data="{ pauseOthers(current) { $root.querySelectorAll('video').forEach(function(v){ if(v !== current) v.pause(); }); } }">
                             @foreach($profile['videos'] ?? [] as $videoUrl)
@@ -234,6 +237,7 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                         </div>
                     </section>
+                    <br>
                     @endif
 
                     <!-- Profile Message Section -->
@@ -246,10 +250,11 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                             <div class="border-b border-gray-200 mb-4"></div>
                             <div class="prose max-w-none text-gray-700 leading-relaxed">
-                                {!! $profile['profile_message'] !!}
+                                {!! nl2br($profile['profile_message']) !!}
                             </div>
                         </div>
                     </section>
+                    <br>
                     @endif
 
                     <!-- Contact Me For Section (Card Style) -->
@@ -271,6 +276,7 @@ $profileTags = array_values(array_unique(array_merge(
                                 @endforeach
                             </ul>
                         </div>
+                        <br>
                         @endif
                     </section>
 
@@ -575,10 +581,10 @@ $profileTags = array_values(array_unique(array_merge(
             }"
             x-init="init()"
             @resize.window="updatePageSize()"
-            class="mt-12 overflow-hidden"
+            class="mt-16 overflow-hidden"
         >
-            <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex items-center gap-3">
+            <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-col gap-1">
                     <h2 class="text-2xl font-semibold text-pink-600">Nearby listings</h2>
                     <span class="text-sm text-gray-500">Showing {{ count($nearbyProfiles) }} profiles</span>
                 </div>
