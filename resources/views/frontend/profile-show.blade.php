@@ -217,9 +217,12 @@ $profileTags = array_values(array_unique(array_merge(
                             }"
                             x-init="init()">
                             @foreach($profile['videos'] ?? [] as $videoUrl)
-                            <div class="relative">
+                            <div class="relative" x-data="{ playing: false }">
                                 <video controls preload="metadata" class="rounded-xl w-full h-64 bg-black object-cover"
-                                    x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='block'"
+                                    x-on:play="playing = true"
+                                    x-on:pause="playing = false"
+                                    x-on:ended="playing = false"
+                                    x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='block'; playing = false"
                                     poster="https://picsum.photos/400/225?random=1">
                                     <source src="{{ $videoUrl }}" type="video/mp4">
                                     <source src="{{ $videoUrl }}" type="video/webm">
@@ -232,7 +235,7 @@ $profileTags = array_values(array_unique(array_merge(
                                         Video unavailable
                                     </div>
                                 </div>
-                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div x-show="!playing" x-transition class="absolute inset-0 flex items-center justify-center pointer-events-none">
                                     <div class="bg-black bg-opacity-50 rounded-full p-3 opacity-75">
                                         <i class="fa-solid fa-play text-white text-xl"></i>
                                     </div>
