@@ -125,44 +125,44 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full table-fixed text-sm">
+                        <table class="w-full text-xs">
                             <thead class="bg-gray-50 dark:bg-gray-900">
                                 <tr>
-                                    <th class="w-16 border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 first:border-l dark:border-gray-700 dark:text-gray-300">
+                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 first:border-l dark:border-gray-700 dark:text-gray-300">
                                         #
                                     </th>
-                                    <th class="w-48 border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         Timestamp
                                     </th>
-                                    <th class="w-28 border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         Level
                                     </th>
-                                    <th class="w-32 border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         Channel
                                     </th>
-                                    <th class="border-b border-r border-t border-gray-200 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
                                         Message
                                     </th>
-                                    <th class="w-24 border-b border-r border-t border-gray-200 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-600 dark:border-gray-700 dark:text-gray-300">
-                                        View
+                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-center font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                        Actions
                                     </th>
                                 </tr>
                             </thead>
 
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-950">
                                 @forelse ($this->logLines as $index => $entry)
-                                    <tr class="align-top hover:bg-gray-50 dark:hover:bg-gray-900/40">
-                                        <td class="border-r border-gray-200 px-4 py-4 font-mono text-xs text-gray-500 first:border-l dark:border-gray-700 dark:text-gray-400">
+                                    <tr class="align-middle hover:bg-gray-50 dark:hover:bg-gray-900/40">
+                                        <td class="border-r border-gray-200 px-3 py-2 font-mono text-gray-500 first:border-l dark:border-gray-700 dark:text-gray-400">
                                             {{ $index + 1 }}
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-4 py-4 font-mono text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                                        <td class="border-r border-gray-200 px-3 py-2 font-mono text-gray-700 dark:border-gray-700 dark:text-gray-300">
                                             <div class="whitespace-nowrap">
                                                 {{ $entry['timestamp'] ?: '—' }}
                                             </div>
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-4 py-4 dark:border-gray-700">
+                                        <td class="border-r border-gray-200 px-3 py-2 dark:border-gray-700">
                                             @if ($entry['level'] !== '')
                                                 @php
                                                     $levelColor = match ($entry['level']) {
@@ -175,27 +175,27 @@
                                                     };
                                                 @endphp
 
-                                                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset {{ $levelColor }}">
+                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset {{ $levelColor }}">
                                                     {{ $entry['level'] }}
                                                 </span>
                                             @else
-                                                <span class="text-sm text-gray-400 dark:text-gray-600">—</span>
+                                                <span class="text-gray-400 dark:text-gray-600">—</span>
                                             @endif
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-4 py-4 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300">
-                                            <div class="truncate">
+                                        <td class="border-r border-gray-200 px-3 py-2 text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                                            <div class="truncate max-w-xs">
                                                 {{ $entry['channel'] ?: '—' }}
                                             </div>
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-4 py-4 dark:border-gray-700">
-                                            <div class="max-w-full overflow-hidden">
+                                        <td class="border-r border-gray-200 px-3 py-2 dark:border-gray-700">
+                                            <div class="max-w-md">
                                                 <p
-                                                    class="font-mono text-xs leading-5 text-gray-900 dark:text-gray-100"
+                                                    class="font-mono text-gray-900 dark:text-gray-100"
                                                     style="
                                                         display: -webkit-box;
-                                                        -webkit-line-clamp: 3;
+                                                        -webkit-line-clamp: 2;
                                                         -webkit-box-orient: vertical;
                                                         overflow: hidden;
                                                         word-break: break-word;
@@ -206,27 +206,27 @@
                                             </div>
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-4 py-4 text-center dark:border-gray-700">
+                                        <td class="border-r border-gray-200 px-3 py-2 text-center dark:border-gray-700">
                                             @if ($entry['raw'] !== '')
                                                 <button
                                                     type="button"
                                                     title="View full log entry"
                                                     @click="modalContent = {{ Js::from($entry['raw']) }}; modalOpen = true"
-                                                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-primary-200 bg-primary-50 text-primary-600 transition hover:bg-primary-100 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-400 dark:hover:bg-primary-900/30"
+                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-primary-200 bg-primary-50 text-primary-600 transition hover:bg-primary-100 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-400 dark:hover:bg-primary-900/30"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
                                                 </button>
                                             @else
-                                                <span class="text-sm text-gray-300 dark:text-gray-700">—</span>
+                                                <span class="text-gray-300 dark:text-gray-700">—</span>
                                             @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="border-t border-gray-200 px-4 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                                        <td colspan="6" class="border-t border-gray-200 px-3 py-4 text-center text-gray-500 dark:border-gray-700 dark:text-gray-400">
                                             {{ $this->logStatusMessage ?? 'No log entries available.' }}
                                         </td>
                                     </tr>
