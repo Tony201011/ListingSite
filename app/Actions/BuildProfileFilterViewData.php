@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
+use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
@@ -153,6 +154,29 @@ class BuildProfileFilterViewData
                 : $maxSearchDistance;
 
             $distanceFilter = min(max(0, $requestedDistance), $maxSearchDistance);
+        }
+
+        // When an explicit location is provided (e.g. "Melbourne, VIC") together with a
+        // distance filter, resolve that location's geocoordinates from the postcodes table
+        // and use them as the distance-search centre instead of the user's GPS position.
+        // This ensures that "location=Melbourne, VIC&distance=500" searches around Melbourne
+        // rather than around wherever the user's device happens to be located.
+        if ($distanceSearchEnabled && $distanceFilter !== null && $locationQuery !== '') {
+            $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
+            if ($resolvedLocation !== null) {
+                $locPostcode = Postcode::query()
+                    ->where('suburb', $resolvedLocation['suburb'])
+                    ->where('state', $resolvedLocation['state'])
+                    ->whereNotNull('latitude')
+                    ->whereNotNull('longitude')
+                    ->orderBy('postcode')
+                    ->first(['latitude', 'longitude']);
+
+                if ($locPostcode !== null) {
+                    $userLat = (float) $locPostcode->latitude;
+                    $userLng = (float) $locPostcode->longitude;
+                }
+            }
         }
 
         $categoryToParentSlug = $this->buildCategoryToParentSlugMap($parents, $childrenByParent);
