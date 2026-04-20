@@ -180,7 +180,8 @@
         @endif
 
         {{-- Profile Cards Grid --}}
-        <div x-cloak class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div x-cloak>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             @forelse($profiles as $profile)
                 <article
                     class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
@@ -321,6 +322,7 @@
                 </p>
             @endif
             {{ $profiles->links() }}
+        </div>
         </div>
     </div>
 </div>
