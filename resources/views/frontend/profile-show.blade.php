@@ -565,7 +565,7 @@ $profileTags = array_values(array_unique(array_merge(
                 get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
                 init() { this.updatePageSize(); },
                 updatePageSize() {
-                    this.pageSize = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 1;
+                    this.pageSize = window.innerWidth >= 1024 ? 8 : window.innerWidth >= 640 ? 4 : 2;
                     if (this.page > this.pages - 1) {
                         this.page = this.pages - 1;
                     }
