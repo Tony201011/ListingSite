@@ -201,11 +201,24 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                         <br>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
-                            x-data="{ pauseOthers(current) { $root.querySelectorAll('video').forEach(function(v){ if(v !== current) v.pause(); }); } }">
+                            x-data="{
+                                init() {
+                                    // Add global video pause handler
+                                    document.addEventListener('play', (e) => {
+                                        if (e.target.tagName === 'VIDEO') {
+                                            document.querySelectorAll('video').forEach(video => {
+                                                if (video !== e.target) {
+                                                    video.pause();
+                                                }
+                                            });
+                                        }
+                                    }, true);
+                                }
+                            }"
+                            x-init="init()">
                             @foreach($profile['videos'] ?? [] as $videoUrl)
                             <div class="relative">
                                 <video controls preload="metadata" class="rounded-xl w-full h-64 bg-black object-cover"
-                                    x-on:play="pauseOthers($el)"
                                     x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='block'"
                                     poster="https://picsum.photos/400/225?random=1">
                                     <source src="{{ $videoUrl }}" type="video/mp4">
@@ -608,6 +621,7 @@ $profileTags = array_values(array_unique(array_merge(
                 <a href="{{ url('/') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">View all →</a>
             </div>
 
+            @if(count($nearbyProfiles) > 0)
             <div class="relative group">
                 <div class="overflow-hidden px-4 sm:px-6 pb-2">
                     <div class="flex flex-nowrap gap-4 transition-transform duration-500"
@@ -717,6 +731,23 @@ $profileTags = array_values(array_unique(array_merge(
                     <i class="fa-solid fa-chevron-right text-lg"></i>
                 </button>
             </div>
+            @else
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+                <div class="flex flex-col items-center gap-4">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-users text-gray-400 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">No nearby listings found</h3>
+                        <p class="text-gray-600 text-sm mb-4">There are currently no other providers in your area.</p>
+                        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-medium transition">
+                            <i class="fa-solid fa-search"></i>
+                            Browse all listings
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
         </section>
     </div>
 </div>
