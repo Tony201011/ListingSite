@@ -566,8 +566,6 @@ class UserResource extends Resource
 
                                             Placeholder::make('video_preview')
                                                 ->label('Video Preview')
-                                                ->collapseAll()
-                                                ->expanded(true)
                                                 ->content(function (Get $get): HtmlString {
                                                     $path = $get('video_path');
 
