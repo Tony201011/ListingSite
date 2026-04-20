@@ -30,4 +30,20 @@ trait ResolvesProfileCategoryIds
 
         return array_values(array_unique($resolved));
     }
+
+    /**
+     * Extract just the suburb/locality name from a raw suburb string.
+     *
+     * The users.suburb column stores values in the form "SuburbName, STATE postcode"
+     * (e.g. "Melbourne, VIC 3000"). This helper strips the state and postcode portion
+     * so only the clean suburb name is returned for display purposes.
+     */
+    protected function extractSuburbName(string $suburb): string
+    {
+        if ($suburb === '') {
+            return '';
+        }
+
+        return str_contains($suburb, ',') ? trim(explode(',', $suburb, 2)[0]) : $suburb;
+    }
 }
