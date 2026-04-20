@@ -350,7 +350,6 @@ class GetProfileShowData
             : collect();
 
         return $profiles
-            ->take(4)
             ->map(function (ProviderProfile $profile) use ($categoryNames) {
                 $primaryImage = $profile->user?->primaryProfileImage;
                 $imageUrl = $primaryImage?->image_url ?? null;
