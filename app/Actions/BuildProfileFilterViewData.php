@@ -50,6 +50,16 @@ class BuildProfileFilterViewData
 
     public function execute(array $validated): array
     {
+        return $this->build($validated, false);
+    }
+
+    public function executeAdvancedSearch(array $validated): array
+    {
+        return $this->build($validated, true);
+    }
+
+    private function build(array $validated, bool $isAdvancedSearch = false): array
+    {
         $filterSlugs = [
             'hair-color',
             'hair-length',
@@ -142,26 +152,25 @@ class BuildProfileFilterViewData
 
         $hasExplicitDistance = isset($validated['distance']) && $validated['distance'] !== '';
         $distanceFilter = null;
-
-        if ($distanceSearchEnabled && $hasExplicitDistance) {
-            $requestedDistance = (int) $validated['distance'];
-            $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
-        }
-
-        $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
-
         $searchLat = null;
         $searchLng = null;
 
-        if ($resolvedLocation !== null) {
-            $locationCoordinates = $this->resolveLocationCoordinates(
-                $resolvedLocation['suburb'],
-                $resolvedLocation['state']
-            );
+        if ($isAdvancedSearch && $distanceSearchEnabled && $hasExplicitDistance) {
+            $requestedDistance = (int) $validated['distance'];
+            $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
 
-            if ($locationCoordinates !== null) {
-                $searchLat = $locationCoordinates['latitude'];
-                $searchLng = $locationCoordinates['longitude'];
+            $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
+
+            if ($resolvedLocation !== null) {
+                $locationCoordinates = $this->resolveLocationCoordinates(
+                    $resolvedLocation['suburb'],
+                    $resolvedLocation['state']
+                );
+
+                if ($locationCoordinates !== null) {
+                    $searchLat = $locationCoordinates['latitude'];
+                    $searchLng = $locationCoordinates['longitude'];
+                }
             }
         }
 
@@ -186,6 +195,7 @@ class BuildProfileFilterViewData
             $searchLng,
             $distanceFilter,
             $girlsMode,
+            $isAdvancedSearch,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -262,10 +272,11 @@ class BuildProfileFilterViewData
         ?float $searchLng = null,
         ?int $distanceFilter = null,
         string $girlsMode = 'all',
+        bool $isAdvancedSearch = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
-        $distanceSearchActive = $distanceFilter !== null && $searchLat !== null && $searchLng !== null;
+        $distanceSearchActive = $isAdvancedSearch && $distanceFilter !== null && $searchLat !== null && $searchLng !== null;
 
         $scoutMatchedIds = null;
         if ($hasLocationQuery && $exactLocation === null) {
