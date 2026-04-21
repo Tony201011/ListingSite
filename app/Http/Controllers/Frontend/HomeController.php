@@ -39,6 +39,11 @@ class HomeController extends Controller
         return view('frontend.advanced-search', $viewData);
     }
 
+
+
+
+
+
     public function showProfile(ShowProfileRequest $request, string $slug): View
     {
         $viewData = $this->getProfileShowData->execute(
