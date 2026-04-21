@@ -666,7 +666,7 @@ class BuildProfileFilterViewData
             'in_call' => trim((string) ($firstRate?->incall ?? '')),
             'out_call' => trim((string) ($firstRate?->outcall ?? '')),
             'city' => $profile->city?->name ?? '',
-            'suburb' => $profile->city?->name ?: $this->extractSuburbName($profile->user?->suburb ?? ''),
+            'suburb' =>  $this->extractSuburbName($profile->user?->suburb ?? ''),
             'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
             'height' => '',
             'service_1' => $services[0] ?? '',
