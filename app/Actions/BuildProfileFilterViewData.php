@@ -489,20 +489,23 @@ class BuildProfileFilterViewData
             END
         ";
 
+        $latitudeExpr = "COALESCE(provider_profiles.latitude, profile_postcodes.latitude)";
+        $longitudeExpr = "COALESCE(provider_profiles.longitude, profile_postcodes.longitude)";
+
         $distanceSql = "(6371 * acos(
             LEAST(1, GREATEST(-1,
                 cos(radians(?)) *
-                cos(radians(profile_postcodes.latitude)) *
-                cos(radians(profile_postcodes.longitude) - radians(?)) +
+                cos(radians({$latitudeExpr})) *
+                cos(radians({$longitudeExpr}) - radians(?)) +
                 sin(radians(?)) *
-                sin(radians(profile_postcodes.latitude))
+                sin(radians({$latitudeExpr}))
             ))
         ))";
 
         return DB::table('provider_profiles')
             ->join('users', 'users.id', '=', 'provider_profiles.user_id')
             ->leftJoin('states', 'states.id', '=', 'provider_profiles.state_id')
-            ->join('postcodes as profile_postcodes', function ($join) use ($stateCaseSql) {
+            ->leftJoin('postcodes as profile_postcodes', function ($join) use ($stateCaseSql) {
                 $join->whereRaw('UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(users.suburb, ",", 1)))')
                     ->whereRaw("
                         UPPER(TRIM(profile_postcodes.state)) = UPPER(TRIM(
@@ -521,8 +524,16 @@ class BuildProfileFilterViewData
             })
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
-            ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
-            ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
+            ->where(function ($q) {
+                $q->whereNotNull('provider_profiles.latitude')
+                    ->whereNotNull('provider_profiles.longitude')
+                    ->orWhere(function ($inner) {
+                        $inner->whereNotNull('profile_postcodes.latitude')
+                            ->whereNotNull('profile_postcodes.longitude');
+                    });
+            })
+            ->whereBetween(DB::raw($latitudeExpr), [$minLat, $maxLat])
+            ->whereBetween(DB::raw($longitudeExpr), [$minLng, $maxLng])
             ->select('provider_profiles.id as provider_profile_id')
             ->selectRaw("{$distanceSql} as distance_km", [$searchLat, $searchLng, $searchLat])
             ->having('distance_km', '<=', $distanceKm)
