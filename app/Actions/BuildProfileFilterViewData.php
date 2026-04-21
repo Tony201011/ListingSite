@@ -157,6 +157,10 @@ class BuildProfileFilterViewData
 
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
+        /*
+         * If user provides a specific location like "Sydney, NSW",
+         * use that location as the search centre for radius search.
+         */
         if ($resolvedLocation !== null) {
             $locationCoordinates = $this->resolveLocationCoordinates(
                 $resolvedLocation['suburb'],
@@ -269,6 +273,7 @@ class BuildProfileFilterViewData
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
+        $distanceSearchActive = $distanceFilter !== null && $searchLat !== null && $searchLng !== null;
 
         $scoutMatchedIds = null;
         if ($hasLocationQuery && $exactLocation === null) {
@@ -286,16 +291,23 @@ class BuildProfileFilterViewData
                 'city',
             ]);
 
-        if ($exactLocation !== null) {
-            $this->applyExactLocationFilter($query, $exactLocation);
-        } elseif ($hasLocationQuery) {
-            if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
-                $query->whereIn('provider_profiles.id', $scoutMatchedIds);
-            } else {
-                $query->where(function ($q) use ($locationQuery) {
-                    $q->whereHas('city', fn ($cityQ) => $cityQ->where('name', 'like', '%'.$locationQuery.'%'))
-                        ->orWhereHas('user', fn ($userQ) => $userQ->where('suburb', 'like', '%'.$locationQuery.'%'));
-                });
+        /*
+         * CRITICAL FIX:
+         * When distance search is active, do not exact-filter the result set to the typed suburb.
+         * The typed location is only the centre point.
+         */
+        if (! $distanceSearchActive) {
+            if ($exactLocation !== null) {
+                $this->applyExactLocationFilter($query, $exactLocation);
+            } elseif ($hasLocationQuery) {
+                if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
+                    $query->whereIn('provider_profiles.id', $scoutMatchedIds);
+                } else {
+                    $query->where(function ($q) use ($locationQuery) {
+                        $q->whereHas('city', fn ($cityQ) => $cityQ->where('name', 'like', '%'.$locationQuery.'%'))
+                            ->orWhereHas('user', fn ($userQ) => $userQ->where('suburb', 'like', '%'.$locationQuery.'%'));
+                    });
+                }
             }
         }
 
@@ -375,16 +387,18 @@ class BuildProfileFilterViewData
 
         $distanceOrderingApplied = false;
 
-        if ($distanceFilter !== null && $searchLat !== null && $searchLng !== null) {
-            $profileLatitudeExpression = $this->resolveStrictPostcodeCoordinateExpression('latitude');
-            $profileLongitudeExpression = $this->resolveStrictPostcodeCoordinateExpression('longitude');
+        if ($distanceSearchActive) {
+            $profileLatitudeExpression = $this->resolveSearchableCoordinateExpression('latitude');
+            $profileLongitudeExpression = $this->resolveSearchableCoordinateExpression('longitude');
 
             $distanceSql = "(6371 * acos(
-                cos(radians(?)) *
-                cos(radians({$profileLatitudeExpression})) *
-                cos(radians({$profileLongitudeExpression}) - radians(?)) +
-                sin(radians(?)) *
-                sin(radians({$profileLatitudeExpression}))
+                LEAST(1, GREATEST(-1,
+                    cos(radians(?)) *
+                    cos(radians({$profileLatitudeExpression})) *
+                    cos(radians({$profileLongitudeExpression}) - radians(?)) +
+                    sin(radians(?)) *
+                    sin(radians({$profileLatitudeExpression}))
+                ))
             ))";
 
             $query->select('provider_profiles.*')
@@ -539,37 +553,31 @@ class BuildProfileFilterViewData
     }
 
     private function applyExactLocationFilter(Builder $query, array $exactLocation): void
-{
-    $suburb = trim((string) $exactLocation['suburb']);
-    $state = strtoupper(trim((string) $exactLocation['state']));
-    $fullStateName = $this->resolveStateName($state);
+    {
+        $suburb = trim((string) $exactLocation['suburb']);
+        $state = strtoupper(trim((string) $exactLocation['state']));
+        $fullStateName = $this->resolveStateName($state);
 
-    $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
-        $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
-            $cityQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($suburb)])
-                ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
-                    $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
+        $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
+            $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
+                $cityQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($suburb)])
+                    ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
+                        $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
+                    });
+            })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
+                $userQuery->whereRaw(
+                    'LOWER(TRIM(SUBSTRING_INDEX(suburb, ",", 1))) = ?',
+                    [mb_strtolower($suburb)]
+                )->where(function (Builder $stateMatch) use ($state): void {
+                    $stateMatch->whereRaw('LOCATE(",", suburb) > 0')
+                        ->whereRaw(
+                            'UPPER(TRIM(SUBSTRING_INDEX(suburb, ",", -1))) = ?',
+                            [$state]
+                        );
                 });
-        })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
-            $userQuery->whereRaw(
-                'LOWER(TRIM(SUBSTRING_INDEX(suburb, ",", 1))) = ?',
-                [mb_strtolower($suburb)]
-            )->whereRaw(
-                'UPPER(TRIM(
-                    CASE
-                        WHEN suburb LIKE "%,%" THEN SUBSTRING_INDEX(
-                            TRIM(SUBSTRING_INDEX(suburb, ",", -1)),
-                            " ",
-                            1
-                        )
-                        ELSE NULL
-                    END
-                )) = ?',
-                [$state]
-            );
+            });
         });
-    });
-}
+    }
 
     private function resolveStateName(string $state): string
     {
@@ -613,35 +621,59 @@ class BuildProfileFilterViewData
         return $map[$uppercase] ?? null;
     }
 
-                private function resolveStrictPostcodeCoordinateExpression(string $column): string
-{
-    if (! in_array($column, ['latitude', 'longitude'], true)) {
-        throw new \InvalidArgumentException(
-            "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
-        );
-    }
+    private function resolveSearchableCoordinateExpression(string $column): string
+    {
+        if (! in_array($column, ['latitude', 'longitude'], true)) {
+            throw new \InvalidArgumentException(
+                "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
+            );
+        }
 
-    return "(
-        SELECT p.{$column}
-        FROM postcodes p
-        JOIN users u ON u.id = provider_profiles.user_id
-        WHERE p.latitude IS NOT NULL
-          AND p.longitude IS NOT NULL
-          AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
-          AND UPPER(TRIM(p.state)) = UPPER(TRIM(
-                CASE
-                    WHEN u.suburb LIKE '%,%' THEN SUBSTRING_INDEX(
-                        TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)),
-                        ' ',
-                        1
-                    )
-                    ELSE NULL
-                END
-          ))
-        ORDER BY p.postcode ASC, p.id ASC
-        LIMIT 1
-    )";
-}
+        $stateCaseSql = "
+            CASE (
+                SELECT s.name
+                FROM states s
+                WHERE s.id = provider_profiles.state_id
+                LIMIT 1
+            )
+                WHEN 'Australian Capital Territory' THEN 'ACT'
+                WHEN 'New South Wales' THEN 'NSW'
+                WHEN 'Victoria' THEN 'VIC'
+                WHEN 'Queensland' THEN 'QLD'
+                WHEN 'Western Australia' THEN 'WA'
+                WHEN 'South Australia' THEN 'SA'
+                WHEN 'Tasmania' THEN 'TAS'
+                WHEN 'Northern Territory' THEN 'NT'
+                ELSE NULL
+            END
+        ";
+
+        return "COALESCE(
+            provider_profiles.{$column},
+            (
+                SELECT p.{$column}
+                FROM postcodes p
+                JOIN users u ON u.id = provider_profiles.user_id
+                WHERE p.latitude IS NOT NULL
+                  AND p.longitude IS NOT NULL
+                  AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
+                  AND UPPER(TRIM(p.state)) = UPPER(TRIM(
+                        COALESCE(
+                            NULLIF(
+                                CASE
+                                    WHEN u.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), ' ', 1)
+                                    ELSE NULL
+                                END,
+                                ''
+                            ),
+                            {$stateCaseSql}
+                        )
+                  ))
+                ORDER BY p.postcode ASC, p.id ASC
+                LIMIT 1
+            )
+        )";
+    }
 
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
     {
@@ -666,8 +698,8 @@ class BuildProfileFilterViewData
             'in_call' => trim((string) ($firstRate?->incall ?? '')),
             'out_call' => trim((string) ($firstRate?->outcall ?? '')),
             'city' => $profile->city?->name ?? '',
-            'suburb' =>  $this->extractSuburbName($profile->user?->suburb ?? ''),
-          //  'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
+            'suburb' => $this->extractSuburbName($profile->user?->suburb ?? ''),
+            'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
             'height' => '',
             'service_1' => $services[0] ?? '',
             'service_2' => $services[1] ?? '',
