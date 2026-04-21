@@ -601,4 +601,44 @@ class SearchTest extends TestCase
         $this->assertTrue($names->contains('Melbourne Escort'));
         $this->assertFalse($names->contains('Sydney Escort'));
     }
+
+    // ===============================================================
+    // Fuzzy geocoding – facility/place names that are not suburb names
+    // (e.g. "SYDNEY GATEWAY FACILITY, NSW") should resolve to the
+    // nearest known suburb coordinates via a progressive prefix fallback,
+    // so the distance-search centre is placed in the correct state rather
+    // than falling back to the user's raw GPS position.
+    // ===============================================================
+
+    public function test_facility_location_name_resolves_geocoded_location_for_distance_search(): void
+    {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            $this->markTestSkipped('Distance search uses MySQL-specific SQL (SUBSTRING_INDEX, COALESCE subquery).');
+        }
+
+        // Create a postcodes row for "Sydney, NSW" so the fuzzy lookup finds
+        // it after stripping "GATEWAY FACILITY" from the input suburb.
+        DB::table('postcodes')->insert([
+            'suburb' => 'Sydney',
+            'state' => 'NSW',
+            'postcode' => '2000',
+            'latitude' => -33.8688,
+            'longitude' => 151.2093,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // The provided GPS (India) would yield no results on its own, but the
+        // geocoder should swap the centre to Sydney via the prefix fallback.
+        $response = $this->get('/?user_lat=30.650916387699&user_lng=76.85343528393472&distance=500&location=SYDNEY+GATEWAY+FACILITY%2C+NSW');
+
+        $response->assertOk();
+
+        // The view should expose the geocoded Sydney coordinates, not the India GPS.
+        $viewUserLat = $response->viewData('userLat');
+        $viewUserLng = $response->viewData('userLng');
+
+        $this->assertEqualsWithDelta(-33.8688, (float) $viewUserLat, 0.001, 'userLat should resolve to Sydney latitude, not India GPS');
+        $this->assertEqualsWithDelta(151.2093, (float) $viewUserLng, 0.001, 'userLng should resolve to Sydney longitude, not India GPS');
+    }
 }
