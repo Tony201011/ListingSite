@@ -54,10 +54,6 @@ class PrimarySuburbCategoriesResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                TextInput::make('city_region')
-                    ->required()
-                    ->maxLength(255),
-
                 TextInput::make('suburb')
                     ->label('Suburb')
                     ->required()
@@ -87,11 +83,6 @@ class PrimarySuburbCategoriesResource extends Resource
             ->columns([
                 TextColumn::make('state')
                     ->label('State')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('city_region')
-                    ->label('City Region')
                     ->searchable()
                     ->sortable(),
 
