@@ -539,31 +539,37 @@ class BuildProfileFilterViewData
     }
 
     private function applyExactLocationFilter(Builder $query, array $exactLocation): void
-    {
-        $suburb = trim((string) $exactLocation['suburb']);
-        $state = strtoupper(trim((string) $exactLocation['state']));
-        $fullStateName = $this->resolveStateName($state);
+{
+    $suburb = trim((string) $exactLocation['suburb']);
+    $state = strtoupper(trim((string) $exactLocation['state']));
+    $fullStateName = $this->resolveStateName($state);
 
-        $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
-            $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
-                $cityQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($suburb)])
-                    ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
-                        $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
-                    });
-            })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
-                $userQuery->whereRaw(
-                    'LOWER(TRIM(SUBSTRING_INDEX(suburb, ",", 1))) = ?',
-                    [mb_strtolower($suburb)]
-                )->where(function (Builder $stateMatch) use ($state): void {
-                    $stateMatch->whereRaw('LOCATE(",", suburb) > 0')
-                        ->whereRaw(
-                            'UPPER(TRIM(SUBSTRING_INDEX(suburb, ",", -1))) = ?',
-                            [$state]
-                        );
+    $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
+        $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
+            $cityQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($suburb)])
+                ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
+                    $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
                 });
-            });
+        })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
+            $userQuery->whereRaw(
+                'LOWER(TRIM(SUBSTRING_INDEX(suburb, ",", 1))) = ?',
+                [mb_strtolower($suburb)]
+            )->whereRaw(
+                'UPPER(TRIM(
+                    CASE
+                        WHEN suburb LIKE "%,%" THEN SUBSTRING_INDEX(
+                            TRIM(SUBSTRING_INDEX(suburb, ",", -1)),
+                            " ",
+                            1
+                        )
+                        ELSE NULL
+                    END
+                )) = ?',
+                [$state]
+            );
         });
-    }
+    });
+}
 
     private function resolveStateName(string $state): string
     {
