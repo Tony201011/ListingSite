@@ -157,10 +157,6 @@ class BuildProfileFilterViewData
 
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
-        /*
-         * Use postcode table coordinates for the typed location.
-         * Example: Sydney, NSW -> postcode table lat/lng becomes search centre.
-         */
         if ($resolvedLocation !== null) {
             $locationCoordinates = $this->resolveLocationCoordinates(
                 $resolvedLocation['suburb'],
@@ -282,7 +278,7 @@ class BuildProfileFilterViewData
 
         $query = ProviderProfile::query()
             ->whereNull('provider_profiles.deleted_at')
-            ->where('profile_status', 'approved')
+            ->where('provider_profiles.profile_status', 'approved')
             ->whereHas('user')
             ->with([
                 'user.profileImages' => fn ($q) => $q->where('is_primary', true),
@@ -291,10 +287,6 @@ class BuildProfileFilterViewData
                 'city',
             ]);
 
-        /*
-         * If distance search is active, location is only the center point.
-         * Do not restrict result rows to exact Sydney, NSW.
-         */
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
                 $this->applyExactLocationFilter($query, $exactLocation);
@@ -315,7 +307,7 @@ class BuildProfileFilterViewData
         }
 
         if ($minAge > self::DEFAULT_MIN_AGE || $maxAge < self::DEFAULT_MAX_AGE) {
-            $query->whereBetween('age', [$minAge, $maxAge]);
+            $query->whereBetween('provider_profiles.age', [$minAge, $maxAge]);
         }
 
         if ($minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE) {
@@ -387,23 +379,68 @@ class BuildProfileFilterViewData
         $distanceOrderingApplied = false;
 
         if ($distanceSearchActive) {
-            $profileLatitudeExpression = $this->resolveProfilePostcodeCoordinateExpression('latitude');
-            $profileLongitudeExpression = $this->resolveProfilePostcodeCoordinateExpression('longitude');
+            $stateCaseSql = "
+                CASE states.name
+                    WHEN 'Australian Capital Territory' THEN 'ACT'
+                    WHEN 'New South Wales' THEN 'NSW'
+                    WHEN 'Victoria' THEN 'VIC'
+                    WHEN 'Queensland' THEN 'QLD'
+                    WHEN 'Western Australia' THEN 'WA'
+                    WHEN 'South Australia' THEN 'SA'
+                    WHEN 'Tasmania' THEN 'TAS'
+                    WHEN 'Northern Territory' THEN 'NT'
+                    ELSE NULL
+                END
+            ";
+
+            $query->leftJoin('users', 'users.id', '=', 'provider_profiles.user_id')
+                ->leftJoin('states', 'states.id', '=', 'provider_profiles.state_id')
+                ->leftJoin('postcodes as profile_postcodes', function ($join) use ($stateCaseSql) {
+                    $join->whereRaw('UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(users.suburb, ",", 1)))')
+                        ->whereRaw("
+                            UPPER(TRIM(profile_postcodes.state)) = UPPER(TRIM(
+                                COALESCE(
+                                    NULLIF(
+                                        CASE
+                                            WHEN users.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(users.suburb, ',', -1)), ' ', 1)
+                                            ELSE NULL
+                                        END,
+                                        ''
+                                    ),
+                                    {$stateCaseSql}
+                                )
+                            ))
+                        ");
+                });
+
+            $latitudeExpr = 'profile_postcodes.latitude';
+            $longitudeExpr = 'profile_postcodes.longitude';
+
+            $latDelta = $distanceFilter / 111.0;
+            $lngDivisor = max(cos(deg2rad($searchLat)), 0.01);
+            $lngDelta = $distanceFilter / (111.0 * $lngDivisor);
+
+            $minLat = $searchLat - $latDelta;
+            $maxLat = $searchLat + $latDelta;
+            $minLng = $searchLng - $lngDelta;
+            $maxLng = $searchLng + $lngDelta;
 
             $distanceSql = "(6371 * acos(
                 LEAST(1, GREATEST(-1,
                     cos(radians(?)) *
-                    cos(radians({$profileLatitudeExpression})) *
-                    cos(radians({$profileLongitudeExpression}) - radians(?)) +
+                    cos(radians({$latitudeExpr})) *
+                    cos(radians({$longitudeExpr}) - radians(?)) +
                     sin(radians(?)) *
-                    sin(radians({$profileLatitudeExpression}))
+                    sin(radians({$latitudeExpr}))
                 ))
             ))";
 
             $query->select('provider_profiles.*')
                 ->selectRaw("{$distanceSql} as distance_km", [$searchLat, $searchLng, $searchLat])
-                ->whereRaw("{$profileLatitudeExpression} IS NOT NULL")
-                ->whereRaw("{$profileLongitudeExpression} IS NOT NULL")
+                ->whereNotNull('profile_postcodes.latitude')
+                ->whereNotNull('profile_postcodes.longitude')
+                ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
+                ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
                 ->havingRaw('distance_km <= ?', [$distanceFilter])
                 ->orderBy('distance_km', 'asc');
 
@@ -618,62 +655,6 @@ class BuildProfileFilterViewData
         $uppercase = strtoupper(trim($state));
 
         return $map[$uppercase] ?? null;
-    }
-
-    /*
-     * STRICT postcode-based profile coordinates.
-     * This deliberately avoids provider_profiles.latitude / longitude
-     * so distance is driven by postcode table data.
-     */
-    private function resolveProfilePostcodeCoordinateExpression(string $column): string
-    {
-        if (! in_array($column, ['latitude', 'longitude'], true)) {
-            throw new \InvalidArgumentException(
-                "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
-            );
-        }
-
-        $stateCaseSql = "
-            CASE (
-                SELECT s.name
-                FROM states s
-                WHERE s.id = provider_profiles.state_id
-                LIMIT 1
-            )
-                WHEN 'Australian Capital Territory' THEN 'ACT'
-                WHEN 'New South Wales' THEN 'NSW'
-                WHEN 'Victoria' THEN 'VIC'
-                WHEN 'Queensland' THEN 'QLD'
-                WHEN 'Western Australia' THEN 'WA'
-                WHEN 'South Australia' THEN 'SA'
-                WHEN 'Tasmania' THEN 'TAS'
-                WHEN 'Northern Territory' THEN 'NT'
-                ELSE NULL
-            END
-        ";
-
-        return "(
-            SELECT p.{$column}
-            FROM postcodes p
-            JOIN users u ON u.id = provider_profiles.user_id
-            WHERE p.latitude IS NOT NULL
-              AND p.longitude IS NOT NULL
-              AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
-              AND UPPER(TRIM(p.state)) = UPPER(TRIM(
-                    COALESCE(
-                        NULLIF(
-                            CASE
-                                WHEN u.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), ' ', 1)
-                                ELSE NULL
-                            END,
-                            ''
-                        ),
-                        {$stateCaseSql}
-                    )
-              ))
-            ORDER BY p.postcode ASC, p.id ASC
-            LIMIT 1
-        )";
     }
 
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
