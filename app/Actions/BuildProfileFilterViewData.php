@@ -556,26 +556,28 @@ class BuildProfileFilterViewData
     }
 
     private function applyExactLocationFilter(Builder $query, array $exactLocation): void
-    {
-        $suburb = trim((string) $exactLocation['suburb']);
-        $state = trim((string) $exactLocation['state']);
-        $fullStateName = $this->resolveStateName($state);
+{
+    $suburb = trim((string) $exactLocation['suburb']);
+    $state = strtoupper(trim((string) $exactLocation['state']));
+    $fullStateName = $this->resolveStateName($state);
 
-        $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
-            $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
-                $cityQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($suburb)])
-                    ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
-                        $stateQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($fullStateName)]);
-                    });
-            })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
-                $userQuery->where(function (Builder $inner) use ($suburb, $state): void {
-                    $inner->whereRaw('LOWER(suburb) = ?', [mb_strtolower($suburb)])
-                        ->orWhereRaw('LOWER(suburb) LIKE ?', [mb_strtolower($suburb.', '.$state).'%'])
-                        ->orWhereRaw('LOWER(suburb) LIKE ?', ['%'.mb_strtolower($suburb).'%']);
+    $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
+        $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
+            $cityQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($suburb)])
+                ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
+                    $stateQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($fullStateName)]);
                 });
+        })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
+            $userQuery->where(function (Builder $inner) use ($suburb, $state): void {
+                $inner->whereRaw('LOWER(TRIM(SUBSTRING_INDEX(suburb, \',\', 1))) = ?', [mb_strtolower($suburb)])
+                    ->where(function (Builder $stateMatch) use ($state): void {
+                        $stateMatch->whereRaw('LOCATE(\',\', suburb) > 0')
+                            ->whereRaw('UPPER(TRIM(SUBSTRING_INDEX(suburb, \',\', -1))) = ?', [$state]);
+                    });
             });
         });
-    }
+    });
+}
 
     private function resolveStateName(string $state): string
     {
@@ -620,27 +622,51 @@ class BuildProfileFilterViewData
     }
 
     private function resolveDistanceCoordinateExpression(string $column): string
-    {
-        if (! in_array($column, ['latitude', 'longitude'], true)) {
-            throw new \InvalidArgumentException(
-                "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
-            );
-        }
-
-        return "COALESCE(
-            provider_profiles.{$column},
-            (
-                SELECT p.{$column}
-                FROM postcodes p
-                JOIN users u ON u.id = provider_profiles.user_id
-                WHERE p.latitude IS NOT NULL
-                  AND p.longitude IS NOT NULL
-                  AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
-                ORDER BY p.postcode ASC, p.id ASC
-                LIMIT 1
-            )
-        )";
+{
+    if (! in_array($column, ['latitude', 'longitude'], true)) {
+        throw new \InvalidArgumentException(
+            "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
+        );
     }
+
+    return "COALESCE(
+        provider_profiles.{$column},
+        (
+            SELECT p.{$column}
+            FROM postcodes p
+            JOIN users u ON u.id = provider_profiles.user_id
+            WHERE p.latitude IS NOT NULL
+              AND p.longitude IS NOT NULL
+              AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
+              AND (
+                    (
+                        LOCATE(',', u.suburb) > 0
+                        AND UPPER(TRIM(p.state)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)))
+                    )
+                    OR (
+                        provider_profiles.state_id IS NOT NULL
+                        AND UPPER(TRIM(p.state)) = UPPER(TRIM(
+                            CASE (
+                                SELECT name FROM states WHERE id = provider_profiles.state_id
+                            )
+                                WHEN 'Australian Capital Territory' THEN 'ACT'
+                                WHEN 'New South Wales' THEN 'NSW'
+                                WHEN 'Victoria' THEN 'VIC'
+                                WHEN 'Queensland' THEN 'QLD'
+                                WHEN 'Western Australia' THEN 'WA'
+                                WHEN 'South Australia' THEN 'SA'
+                                WHEN 'Tasmania' THEN 'TAS'
+                                WHEN 'Northern Territory' THEN 'NT'
+                                ELSE ''
+                            END
+                        ))
+                    )
+              )
+            ORDER BY p.postcode ASC, p.id ASC
+            LIMIT 1
+        )
+    )";
+}
 
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
     {
