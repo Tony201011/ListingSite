@@ -131,8 +131,8 @@ class BuildProfileFilterViewData
             [$minPrice, $maxPrice] = [$maxPrice, $minPrice];
         }
 
-        $locationQuery = (string) ($validated['location'] ?? '');
-        $escortNameQuery = (string) ($validated['escort_name'] ?? '');
+        $locationQuery = trim((string) ($validated['location'] ?? ''));
+        $escortNameQuery = trim((string) ($validated['escort_name'] ?? ''));
         $girlsMode = (string) ($validated['girls'] ?? 'all');
         $locationStateQuery = trim((string) ($validated['location_state'] ?? ''));
 
@@ -148,33 +148,35 @@ class BuildProfileFilterViewData
         }
 
         $distanceFilter = null;
-        if ($distanceSearchEnabled && $userLat !== null && $userLng !== null) {
-            $requestedDistance = isset($validated['distance']) && $validated['distance'] !== ''
-                ? (int) $validated['distance']
-                : $maxSearchDistance;
+        $hasExplicitDistance = isset($validated['distance']) && $validated['distance'] !== '';
 
-            $distanceFilter = min(max(0, $requestedDistance), $maxSearchDistance);
+        // Only apply distance search when the user explicitly selected a distance.
+        if ($distanceSearchEnabled && $userLat !== null && $userLng !== null && $hasExplicitDistance) {
+            $requestedDistance = (int) $validated['distance'];
+            $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
         }
 
-        // When an explicit location is provided (e.g. "Melbourne, VIC") together with a
-        // distance filter, resolve that location's geocoordinates from the postcodes table
-        // and use them as the distance-search centre instead of the user's GPS position.
-        // This ensures that "location=Melbourne, VIC&distance=500" searches around Melbourne
-        // rather than around wherever the user's device happens to be located.
-        if ($distanceSearchEnabled && $distanceFilter !== null && $locationQuery !== '') {
-            $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
-            if ($resolvedLocation !== null) {
-                $locPostcode = Postcode::query()
-                    ->where('suburb', $resolvedLocation['suburb'])
-                    ->where('state', $resolvedLocation['state'])
-                    ->whereNotNull('latitude')
-                    ->whereNotNull('longitude')
-                    ->orderBy('postcode') // prefer the lowest (typically central) postcode for the suburb
-                    ->first(['latitude', 'longitude']);
+        // Resolve exact location such as "Melbourne, VIC" or suburb + state inputs.
+        $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
-                if ($locPostcode !== null) {
-                    $userLat = (float) $locPostcode->latitude;
-                    $userLng = (float) $locPostcode->longitude;
+        // If an exact location is provided, use that suburb/state as the search centre.
+        // This should override raw GPS for location-based distance search.
+        if ($distanceSearchEnabled && $resolvedLocation !== null) {
+            $locPostcode = Postcode::query()
+                ->where('suburb', $resolvedLocation['suburb'])
+                ->where('state', $resolvedLocation['state'])
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->orderBy('postcode')
+                ->first(['latitude', 'longitude']);
+
+            if ($locPostcode !== null) {
+                $userLat = (float) $locPostcode->latitude;
+                $userLng = (float) $locPostcode->longitude;
+
+                if ($hasExplicitDistance) {
+                    $requestedDistance = (int) $validated['distance'];
+                    $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
                 }
             }
         }
@@ -297,24 +299,18 @@ class BuildProfileFilterViewData
 
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
-        // When distance search is active the coordinates already define the geographic
-        // boundary, so applying an additional location-text filter would AND the two
-        // conditions together and produce zero results for locations with no profiles.
         $distanceSearchActive = $distanceFilter !== null && $userLat !== null && $userLng !== null;
 
-        if (! $distanceSearchActive) {
-            if ($exactLocation !== null) {
-                // Exact location was parsed (e.g. "Sydney, NSW") — use the structured filter only.
-                // Do not also apply a scout/text filter; ANDing the two would produce zero results
-                // when the scout index returns IDs that don't overlap with the location-filtered set.
-                $this->applyExactLocationFilter($query, $exactLocation);
-            } elseif ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
+        // Always apply exact location when available.
+        if ($exactLocation !== null) {
+            $this->applyExactLocationFilter($query, $exactLocation);
+        } elseif ($hasLocationQuery && ! $distanceSearchActive) {
+            if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
                 $query->whereIn('provider_profiles.id', $scoutMatchedIds);
-            } elseif ($hasLocationQuery) {
+            } else {
                 $query->where(function ($q) use ($locationQuery) {
                     $q->whereHas('city', fn ($q) => $q->where('name', 'like', '%'.$locationQuery.'%'))
-                        ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', $locationQuery.',%')
-                            ->orWhere('suburb', $locationQuery));
+                        ->orWhereHas('user', fn ($q) => $q->where('suburb', 'like', '%'.$locationQuery.'%'));
                 });
             }
         }
@@ -358,7 +354,6 @@ class BuildProfileFilterViewData
                         $column = self::SLUG_TO_COLUMN[$slug] ?? null;
                         if ($column !== null) {
                             $q->whereIn($column, $ids);
-
                             continue;
                         }
 
@@ -409,9 +404,6 @@ class BuildProfileFilterViewData
                 ->selectRaw("{$distanceSql} as distance_km", [$userLat, $userLng, $userLat]);
 
             if ($exactLocation !== null) {
-                // Include profiles that either have resolvable coordinates (distance filtered
-                // via HAVING) OR lack coordinates but match the exact location text, so that
-                // profiles without stored coordinates still appear in location-based searches.
                 $query->where(function (Builder $q) use ($latitudeExpression, $longitudeExpression, $exactLocation): void {
                     $q->whereRaw("{$latitudeExpression} IS NOT NULL")
                         ->whereRaw("{$longitudeExpression} IS NOT NULL")
@@ -428,8 +420,6 @@ class BuildProfileFilterViewData
                     ->having('distance_km', '<=', $distanceFilter);
             }
 
-            // Sort profiles with a known distance first (ascending), then profiles
-            // without resolvable coordinates (NULL distance_km) at the end.
             $query->orderByRaw('(distance_km IS NULL) ASC, distance_km ASC');
 
             $distanceOrderingApplied = true;
@@ -461,35 +451,19 @@ class BuildProfileFilterViewData
                         ->whereColumn('profile_views.user_id', 'provider_profiles.user_id'),
                 ]);
 
-                if (! $distanceOrderingApplied) {
-                    $query->orderByDesc('popularity_score')
-                        ->orderByDesc('provider_profiles.is_featured')
-                        ->orderByDesc('provider_profiles.created_at');
-                } else {
-                    $query->orderByDesc('popularity_score')
-                        ->orderByDesc('provider_profiles.is_featured')
-                        ->orderByDesc('provider_profiles.created_at');
-                }
+                $query->orderByDesc('popularity_score')
+                    ->orderByDesc('provider_profiles.is_featured')
+                    ->orderByDesc('provider_profiles.created_at');
                 break;
 
             case 'new':
-                if (! $distanceOrderingApplied) {
-                    $query->orderByDesc('provider_profiles.created_at')
-                        ->orderByDesc('provider_profiles.is_featured');
-                } else {
-                    $query->orderByDesc('provider_profiles.created_at')
-                        ->orderByDesc('provider_profiles.is_featured');
-                }
+                $query->orderByDesc('provider_profiles.created_at')
+                    ->orderByDesc('provider_profiles.is_featured');
                 break;
 
             default:
-                if (! $distanceOrderingApplied) {
-                    $query->orderByDesc('provider_profiles.is_featured')
-                        ->orderByDesc('provider_profiles.created_at');
-                } else {
-                    $query->orderByDesc('provider_profiles.is_featured')
-                        ->orderByDesc('provider_profiles.created_at');
-                }
+                $query->orderByDesc('provider_profiles.is_featured')
+                    ->orderByDesc('provider_profiles.created_at');
                 break;
         }
 
@@ -580,7 +554,8 @@ class BuildProfileFilterViewData
                                         ->whereColumn('postcodes.suburb', 'users.suburb')
                                         ->where('postcodes.state', $state);
                                 });
-                        });
+                        })
+                        ->orWhere('suburb', 'like', '%'.$suburb.'%');
                 });
             })->orWhereHas('city', function (Builder $query) use ($suburb, $state): void {
                 $query->where('name', $suburb)
