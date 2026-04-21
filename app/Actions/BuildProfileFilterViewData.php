@@ -157,10 +157,6 @@ class BuildProfileFilterViewData
 
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
-        /*
-         * If location is explicitly given (e.g. Sydney, NSW), use that as the search center.
-         * Browser GPS must not override the chosen search location.
-         */
         if ($resolvedLocation !== null) {
             $locationCoordinates = $this->resolveLocationCoordinates(
                 $resolvedLocation['suburb'],
@@ -290,10 +286,6 @@ class BuildProfileFilterViewData
                 'city',
             ]);
 
-        /*
-         * Exact text location filter only.
-         * Do not use loose suburb like '%Sydney%' because it causes false positives.
-         */
         if ($exactLocation !== null) {
             $this->applyExactLocationFilter($query, $exactLocation);
         } elseif ($hasLocationQuery) {
@@ -383,11 +375,6 @@ class BuildProfileFilterViewData
 
         $distanceOrderingApplied = false;
 
-        /*
-         * STRICT GEOSEARCH FIX:
-         * Build profile coordinates only from suburb + state matched postcode.
-         * Do not use provider_profiles.latitude / longitude because bad profile data can cause wrong results.
-         */
         if ($distanceFilter !== null && $searchLat !== null && $searchLng !== null) {
             $profileLatitudeExpression = $this->resolveStrictPostcodeCoordinateExpression('latitude');
             $profileLongitudeExpression = $this->resolveStrictPostcodeCoordinateExpression('longitude');
@@ -628,25 +615,6 @@ class BuildProfileFilterViewData
             );
         }
 
-        $stateCaseSql = "
-            CASE (
-                SELECT s.name
-                FROM states s
-                WHERE s.id = provider_profiles.state_id
-                LIMIT 1
-            )
-                WHEN 'Australian Capital Territory' THEN 'ACT'
-                WHEN 'New South Wales' THEN 'NSW'
-                WHEN 'Victoria' THEN 'VIC'
-                WHEN 'Queensland' THEN 'QLD'
-                WHEN 'Western Australia' THEN 'WA'
-                WHEN 'South Australia' THEN 'SA'
-                WHEN 'Tasmania' THEN 'TAS'
-                WHEN 'Northern Territory' THEN 'NT'
-                ELSE NULL
-            END
-        ";
-
         return "(
             SELECT p.{$column}
             FROM postcodes p
@@ -655,10 +623,14 @@ class BuildProfileFilterViewData
               AND p.longitude IS NOT NULL
               AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
               AND UPPER(TRIM(p.state)) = UPPER(TRIM(
-                    COALESCE(
-                        NULLIF(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), TRIM(SUBSTRING_INDEX(u.suburb, ',', 1))),
-                        {$stateCaseSql}
-                    )
+                    CASE
+                        WHEN u.suburb LIKE '%,%' THEN SUBSTRING_INDEX(
+                            TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)),
+                            ' ',
+                            1
+                        )
+                        ELSE NULL
+                    END
               ))
             ORDER BY p.postcode ASC, p.id ASC
             LIMIT 1
