@@ -11,7 +11,6 @@ use App\Models\SiteSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder as ScoutBuilder;
 
 class BuildProfileFilterViewData
@@ -159,10 +158,8 @@ class BuildProfileFilterViewData
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
         /*
-         * IMPORTANT FIX:
-         * If the user explicitly searched for a location like "Sydney, NSW",
-         * then that location becomes the centre point for the distance search.
-         * We must not keep using the raw browser GPS coordinates in that case.
+         * If location is explicitly given (e.g. Sydney, NSW), use that as the search center.
+         * Browser GPS must not override the chosen search location.
          */
         if ($resolvedLocation !== null) {
             $locationCoordinates = $this->resolveLocationCoordinates(
@@ -269,8 +266,8 @@ class BuildProfileFilterViewData
         array $selectedCategoryIds,
         array $categoryToParentSlug,
         array $categoryNameById,
-        ?float $userLat = null,
-        ?float $userLng = null,
+        ?float $searchLat = null,
+        ?float $searchLng = null,
         ?int $distanceFilter = null,
         string $girlsMode = 'all',
     ): LengthAwarePaginator {
@@ -294,9 +291,8 @@ class BuildProfileFilterViewData
             ]);
 
         /*
-         * FIX:
-         * If exact location is present, always apply exact location filter first.
-         * This keeps the result set tied to the searched location.
+         * Exact text location filter only.
+         * Do not use loose suburb like '%Sydney%' because it causes false positives.
          */
         if ($exactLocation !== null) {
             $this->applyExactLocationFilter($query, $exactLocation);
@@ -388,26 +384,26 @@ class BuildProfileFilterViewData
         $distanceOrderingApplied = false;
 
         /*
-         * STRICT DISTANCE FILTER:
-         * If distance search is active, rows without coordinates are excluded.
-         * This avoids unrelated locations appearing in the result.
+         * STRICT GEOSEARCH FIX:
+         * Build profile coordinates only from suburb + state matched postcode.
+         * Do not use provider_profiles.latitude / longitude because bad profile data can cause wrong results.
          */
-        if ($distanceFilter !== null && $userLat !== null && $userLng !== null) {
-            $latitudeExpression = $this->resolveDistanceCoordinateExpression('latitude');
-            $longitudeExpression = $this->resolveDistanceCoordinateExpression('longitude');
+        if ($distanceFilter !== null && $searchLat !== null && $searchLng !== null) {
+            $profileLatitudeExpression = $this->resolveStrictPostcodeCoordinateExpression('latitude');
+            $profileLongitudeExpression = $this->resolveStrictPostcodeCoordinateExpression('longitude');
 
             $distanceSql = "(6371 * acos(
                 cos(radians(?)) *
-                cos(radians({$latitudeExpression})) *
-                cos(radians({$longitudeExpression}) - radians(?)) +
+                cos(radians({$profileLatitudeExpression})) *
+                cos(radians({$profileLongitudeExpression}) - radians(?)) +
                 sin(radians(?)) *
-                sin(radians({$latitudeExpression}))
+                sin(radians({$profileLatitudeExpression}))
             ))";
 
             $query->select('provider_profiles.*')
-                ->selectRaw("{$distanceSql} as distance_km", [$userLat, $userLng, $userLat])
-                ->whereRaw("{$latitudeExpression} IS NOT NULL")
-                ->whereRaw("{$longitudeExpression} IS NOT NULL")
+                ->selectRaw("{$distanceSql} as distance_km", [$searchLat, $searchLng, $searchLat])
+                ->whereRaw("{$profileLatitudeExpression} IS NOT NULL")
+                ->whereRaw("{$profileLongitudeExpression} IS NOT NULL")
                 ->havingRaw('distance_km <= ?', [$distanceFilter])
                 ->orderBy('distance_km', 'asc');
 
@@ -421,8 +417,8 @@ class BuildProfileFilterViewData
             'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
             'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
             'max_price' => $maxPrice !== self::DEFAULT_MAX_PRICE ? $maxPrice : null,
-            'user_lat' => $userLat,
-            'user_lng' => $userLng,
+            'user_lat' => $searchLat,
+            'user_lng' => $searchLng,
             'distance' => $distanceFilter,
         ]);
 
@@ -556,28 +552,31 @@ class BuildProfileFilterViewData
     }
 
     private function applyExactLocationFilter(Builder $query, array $exactLocation): void
-{
-    $suburb = trim((string) $exactLocation['suburb']);
-    $state = strtoupper(trim((string) $exactLocation['state']));
-    $fullStateName = $this->resolveStateName($state);
+    {
+        $suburb = trim((string) $exactLocation['suburb']);
+        $state = strtoupper(trim((string) $exactLocation['state']));
+        $fullStateName = $this->resolveStateName($state);
 
-    $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
-        $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
-            $cityQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($suburb)])
-                ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
-                    $stateQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($fullStateName)]);
-                });
-        })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
-            $userQuery->where(function (Builder $inner) use ($suburb, $state): void {
-                $inner->whereRaw('LOWER(TRIM(SUBSTRING_INDEX(suburb, \',\', 1))) = ?', [mb_strtolower($suburb)])
-                    ->where(function (Builder $stateMatch) use ($state): void {
-                        $stateMatch->whereRaw('LOCATE(\',\', suburb) > 0')
-                            ->whereRaw('UPPER(TRIM(SUBSTRING_INDEX(suburb, \',\', -1))) = ?', [$state]);
+        $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
+            $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
+                $cityQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($suburb)])
+                    ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
+                        $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
                     });
+            })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
+                $userQuery->whereRaw(
+                    'LOWER(TRIM(SUBSTRING_INDEX(suburb, ",", 1))) = ?',
+                    [mb_strtolower($suburb)]
+                )->where(function (Builder $stateMatch) use ($state): void {
+                    $stateMatch->whereRaw('LOCATE(",", suburb) > 0')
+                        ->whereRaw(
+                            'UPPER(TRIM(SUBSTRING_INDEX(suburb, ",", -1))) = ?',
+                            [$state]
+                        );
+                });
             });
         });
-    });
-}
+    }
 
     private function resolveStateName(string $state): string
     {
@@ -621,52 +620,50 @@ class BuildProfileFilterViewData
         return $map[$uppercase] ?? null;
     }
 
-    private function resolveDistanceCoordinateExpression(string $column): string
-{
-    if (! in_array($column, ['latitude', 'longitude'], true)) {
-        throw new \InvalidArgumentException(
-            "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
-        );
-    }
+    private function resolveStrictPostcodeCoordinateExpression(string $column): string
+    {
+        if (! in_array($column, ['latitude', 'longitude'], true)) {
+            throw new \InvalidArgumentException(
+                "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
+            );
+        }
 
-    return "COALESCE(
-        provider_profiles.{$column},
-        (
+        $stateCaseSql = "
+            CASE (
+                SELECT s.name
+                FROM states s
+                WHERE s.id = provider_profiles.state_id
+                LIMIT 1
+            )
+                WHEN 'Australian Capital Territory' THEN 'ACT'
+                WHEN 'New South Wales' THEN 'NSW'
+                WHEN 'Victoria' THEN 'VIC'
+                WHEN 'Queensland' THEN 'QLD'
+                WHEN 'Western Australia' THEN 'WA'
+                WHEN 'South Australia' THEN 'SA'
+                WHEN 'Tasmania' THEN 'TAS'
+                WHEN 'Northern Territory' THEN 'NT'
+                ELSE NULL
+            END
+        ";
+
+        return "(
             SELECT p.{$column}
             FROM postcodes p
             JOIN users u ON u.id = provider_profiles.user_id
             WHERE p.latitude IS NOT NULL
               AND p.longitude IS NOT NULL
               AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
-              AND (
-                    (
-                        LOCATE(',', u.suburb) > 0
-                        AND UPPER(TRIM(p.state)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)))
+              AND UPPER(TRIM(p.state)) = UPPER(TRIM(
+                    COALESCE(
+                        NULLIF(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), TRIM(SUBSTRING_INDEX(u.suburb, ',', 1))),
+                        {$stateCaseSql}
                     )
-                    OR (
-                        provider_profiles.state_id IS NOT NULL
-                        AND UPPER(TRIM(p.state)) = UPPER(TRIM(
-                            CASE (
-                                SELECT name FROM states WHERE id = provider_profiles.state_id
-                            )
-                                WHEN 'Australian Capital Territory' THEN 'ACT'
-                                WHEN 'New South Wales' THEN 'NSW'
-                                WHEN 'Victoria' THEN 'VIC'
-                                WHEN 'Queensland' THEN 'QLD'
-                                WHEN 'Western Australia' THEN 'WA'
-                                WHEN 'South Australia' THEN 'SA'
-                                WHEN 'Tasmania' THEN 'TAS'
-                                WHEN 'Northern Territory' THEN 'NT'
-                                ELSE ''
-                            END
-                        ))
-                    )
-              )
+              ))
             ORDER BY p.postcode ASC, p.id ASC
             LIMIT 1
-        )
-    )";
-}
+        )";
+    }
 
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
     {
