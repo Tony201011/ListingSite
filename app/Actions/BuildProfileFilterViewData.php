@@ -50,16 +50,6 @@ class BuildProfileFilterViewData
 
     public function execute(array $validated): array
     {
-        return $this->build($validated, false);
-    }
-
-    public function executeAdvancedSearch(array $validated): array
-    {
-        return $this->build($validated, true);
-    }
-
-    private function build(array $validated, bool $isAdvancedSearch = false): array
-    {
         $filterSlugs = [
             'hair-color',
             'hair-length',
@@ -152,25 +142,26 @@ class BuildProfileFilterViewData
 
         $hasExplicitDistance = isset($validated['distance']) && $validated['distance'] !== '';
         $distanceFilter = null;
+
+        if ($distanceSearchEnabled && $hasExplicitDistance) {
+            $requestedDistance = (int) $validated['distance'];
+            $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
+        }
+
+        $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
+
         $searchLat = null;
         $searchLng = null;
 
-        if ($isAdvancedSearch && $distanceSearchEnabled && $hasExplicitDistance) {
-            $requestedDistance = (int) $validated['distance'];
-            $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
+        if ($resolvedLocation !== null) {
+            $locationCoordinates = $this->resolveLocationCoordinates(
+                $resolvedLocation['suburb'],
+                $resolvedLocation['state']
+            );
 
-            $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
-
-            if ($resolvedLocation !== null) {
-                $locationCoordinates = $this->resolveLocationCoordinates(
-                    $resolvedLocation['suburb'],
-                    $resolvedLocation['state']
-                );
-
-                if ($locationCoordinates !== null) {
-                    $searchLat = $locationCoordinates['latitude'];
-                    $searchLng = $locationCoordinates['longitude'];
-                }
+            if ($locationCoordinates !== null) {
+                $searchLat = $locationCoordinates['latitude'];
+                $searchLng = $locationCoordinates['longitude'];
             }
         }
 
@@ -195,7 +186,6 @@ class BuildProfileFilterViewData
             $searchLng,
             $distanceFilter,
             $girlsMode,
-            $isAdvancedSearch,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -272,11 +262,10 @@ class BuildProfileFilterViewData
         ?float $searchLng = null,
         ?int $distanceFilter = null,
         string $girlsMode = 'all',
-        bool $isAdvancedSearch = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
-        $distanceSearchActive = $isAdvancedSearch && $distanceFilter !== null && $searchLat !== null && $searchLng !== null;
+        $distanceSearchActive = $distanceFilter !== null && $searchLat !== null && $searchLng !== null;
 
         $scoutMatchedIds = null;
         if ($hasLocationQuery && $exactLocation === null) {
@@ -397,20 +386,8 @@ class BuildProfileFilterViewData
 
                 $query->whereIn('provider_profiles.id', $nearbyIds);
 
-                $distanceOrderSql = collect($distanceMap)
-                    ->map(function ($distance, $id) {
-                        $distance = (float) $distance;
-                        $id = (int) $id;
-                        return "WHEN {$id} THEN {$distance}";
-                    })
-                    ->implode(' ');
-
-                $query->orderByRaw("
-                    CASE provider_profiles.id
-                        {$distanceOrderSql}
-                        ELSE 999999
-                    END ASC
-                ");
+                $orderedIds = implode(',', $nearbyIds);
+                $query->orderByRaw("FIELD(provider_profiles.id, {$orderedIds})");
 
                 $distanceOrderingApplied = true;
             }
@@ -723,7 +700,7 @@ class BuildProfileFilterViewData
             'out_call' => trim((string) ($firstRate?->outcall ?? '')),
             'city' => $profile->city?->name ?? '',
             'suburb' => $profile->user?->suburb,
-            'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
+        //    'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
             'height' => '',
             'service_1' => $services[0] ?? '',
             'service_2' => $services[1] ?? '',

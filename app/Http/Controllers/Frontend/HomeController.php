@@ -32,7 +32,7 @@ class HomeController extends Controller
 
     public function advancedSearch(AdvancedSearchRequest $request): View
     {
-        $viewData = $this->buildProfileFilterViewData->executeAdvancedSearch($request->validated());
+        $viewData = $this->buildProfileFilterViewData->execute($request->validated());
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
         $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 
