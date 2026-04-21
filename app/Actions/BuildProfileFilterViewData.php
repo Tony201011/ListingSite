@@ -158,9 +158,8 @@ class BuildProfileFilterViewData
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
         /*
-         * IMPORTANT:
-         * If the user typed a location like "Sydney, NSW", use postcode table
-         * latitude/longitude for THAT location as the distance search centre.
+         * Use postcode table coordinates for the typed location.
+         * Example: Sydney, NSW -> postcode table lat/lng becomes search centre.
          */
         if ($resolvedLocation !== null) {
             $locationCoordinates = $this->resolveLocationCoordinates(
@@ -293,9 +292,8 @@ class BuildProfileFilterViewData
             ]);
 
         /*
-         * If radius search is active:
-         * - location is only the centre point
-         * - do NOT exact-filter profiles to Sydney, NSW only
+         * If distance search is active, location is only the center point.
+         * Do not restrict result rows to exact Sydney, NSW.
          */
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
@@ -623,8 +621,9 @@ class BuildProfileFilterViewData
     }
 
     /*
-     * Get profile latitude/longitude primarily from postcode table using suburb/state.
-     * provider_profiles.latitude / longitude is still used first if present.
+     * STRICT postcode-based profile coordinates.
+     * This deliberately avoids provider_profiles.latitude / longitude
+     * so distance is driven by postcode table data.
      */
     private function resolveProfilePostcodeCoordinateExpression(string $column): string
     {
@@ -653,30 +652,27 @@ class BuildProfileFilterViewData
             END
         ";
 
-        return "COALESCE(
-            provider_profiles.{$column},
-            (
-                SELECT p.{$column}
-                FROM postcodes p
-                JOIN users u ON u.id = provider_profiles.user_id
-                WHERE p.latitude IS NOT NULL
-                  AND p.longitude IS NOT NULL
-                  AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
-                  AND UPPER(TRIM(p.state)) = UPPER(TRIM(
-                        COALESCE(
-                            NULLIF(
-                                CASE
-                                    WHEN u.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), ' ', 1)
-                                    ELSE NULL
-                                END,
-                                ''
-                            ),
-                            {$stateCaseSql}
-                        )
-                  ))
-                ORDER BY p.postcode ASC, p.id ASC
-                LIMIT 1
-            )
+        return "(
+            SELECT p.{$column}
+            FROM postcodes p
+            JOIN users u ON u.id = provider_profiles.user_id
+            WHERE p.latitude IS NOT NULL
+              AND p.longitude IS NOT NULL
+              AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
+              AND UPPER(TRIM(p.state)) = UPPER(TRIM(
+                    COALESCE(
+                        NULLIF(
+                            CASE
+                                WHEN u.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)), ' ', 1)
+                                ELSE NULL
+                            END,
+                            ''
+                        ),
+                        {$stateCaseSql}
+                    )
+              ))
+            ORDER BY p.postcode ASC, p.id ASC
+            LIMIT 1
         )";
     }
 
