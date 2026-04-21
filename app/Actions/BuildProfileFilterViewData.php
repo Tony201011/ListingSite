@@ -11,6 +11,7 @@ use App\Models\SiteSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder as ScoutBuilder;
 
 class BuildProfileFilterViewData
@@ -131,14 +132,6 @@ class BuildProfileFilterViewData
         $girlsMode = (string) ($validated['girls'] ?? 'all');
         $locationStateQuery = trim((string) ($validated['location_state'] ?? ''));
 
-        $userLat = isset($validated['user_lat']) && $validated['user_lat'] !== ''
-            ? (float) $validated['user_lat']
-            : null;
-
-        $userLng = isset($validated['user_lng']) && $validated['user_lng'] !== ''
-            ? (float) $validated['user_lng']
-            : null;
-
         $setting = SiteSetting::query()->first(['max_search_distance', 'distance_search_enabled']);
         $distanceSearchEnabled = (bool) ($setting?->distance_search_enabled ?? true);
 
@@ -157,6 +150,9 @@ class BuildProfileFilterViewData
 
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
+        $searchLat = null;
+        $searchLng = null;
+
         if ($resolvedLocation !== null) {
             $locationCoordinates = $this->resolveLocationCoordinates(
                 $resolvedLocation['suburb'],
@@ -164,8 +160,8 @@ class BuildProfileFilterViewData
             );
 
             if ($locationCoordinates !== null) {
-                $userLat = $locationCoordinates['latitude'];
-                $userLng = $locationCoordinates['longitude'];
+                $searchLat = $locationCoordinates['latitude'];
+                $searchLng = $locationCoordinates['longitude'];
             }
         }
 
@@ -186,8 +182,8 @@ class BuildProfileFilterViewData
             $selectedCategoryIds,
             $categoryToParentSlug,
             $categoryNameById,
-            $userLat,
-            $userLng,
+            $searchLat,
+            $searchLng,
             $distanceFilter,
             $girlsMode,
         );
@@ -221,8 +217,8 @@ class BuildProfileFilterViewData
             'distanceFilter',
             'hasDistanceFilter',
             'distanceSearchEnabled',
-            'userLat',
-            'userLng',
+            'searchLat',
+            'searchLng',
         );
     }
 
@@ -376,93 +372,25 @@ class BuildProfileFilterViewData
             }
         }
 
+        $distanceMap = [];
         $distanceOrderingApplied = false;
 
         if ($distanceSearchActive) {
-            $stateCaseSql = "
-                CASE states.name
-                    WHEN 'Australian Capital Territory' THEN 'ACT'
-                    WHEN 'New South Wales' THEN 'NSW'
-                    WHEN 'Victoria' THEN 'VIC'
-                    WHEN 'Queensland' THEN 'QLD'
-                    WHEN 'Western Australia' THEN 'WA'
-                    WHEN 'South Australia' THEN 'SA'
-                    WHEN 'Tasmania' THEN 'TAS'
-                    WHEN 'Northern Territory' THEN 'NT'
-                    ELSE NULL
-                END
-            ";
+            $distanceRows = $this->findNearbyProfileDistances($searchLat, $searchLng, $distanceFilter);
 
-            $query->leftJoin('users', 'users.id', '=', 'provider_profiles.user_id')
-                ->leftJoin('states', 'states.id', '=', 'provider_profiles.state_id')
-                ->leftJoin('postcodes as profile_postcodes', function ($join) use ($stateCaseSql) {
-                    $join->whereRaw('UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(users.suburb, ",", 1)))')
-                        ->whereRaw("
-                            UPPER(TRIM(profile_postcodes.state)) = UPPER(TRIM(
-                                COALESCE(
-                                    NULLIF(
-                                        CASE
-                                            WHEN users.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(users.suburb, ',', -1)), ' ', 1)
-                                            ELSE NULL
-                                        END,
-                                        ''
-                                    ),
-                                    {$stateCaseSql}
-                                )
-                            ))
-                        ");
-                });
+            if (empty($distanceRows)) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $distanceMap = collect($distanceRows)->pluck('distance_km', 'provider_profile_id')->all();
+                $nearbyIds = array_keys($distanceMap);
 
-            $latitudeExpr = 'profile_postcodes.latitude';
-            $longitudeExpr = 'profile_postcodes.longitude';
+                $query->whereIn('provider_profiles.id', $nearbyIds);
 
-            $latDelta = $distanceFilter / 111.0;
-            $lngDivisor = max(cos(deg2rad($searchLat)), 0.01);
-            $lngDelta = $distanceFilter / (111.0 * $lngDivisor);
+                $orderedIds = implode(',', $nearbyIds);
+                $query->orderByRaw("FIELD(provider_profiles.id, {$orderedIds})");
 
-            $minLat = $searchLat - $latDelta;
-            $maxLat = $searchLat + $latDelta;
-            $minLng = $searchLng - $lngDelta;
-            $maxLng = $searchLng + $lngDelta;
-
-            $distanceSql = "(6371 * acos(
-                LEAST(1, GREATEST(-1,
-                    cos(radians(?)) *
-                    cos(radians({$latitudeExpr})) *
-                    cos(radians({$longitudeExpr}) - radians(?)) +
-                    sin(radians(?)) *
-                    sin(radians({$latitudeExpr}))
-                ))
-            ))";
-
-            $query->select('provider_profiles.*')
-                ->selectRaw("{$distanceSql} as distance_km", [$searchLat, $searchLng, $searchLat])
-                ->whereNotNull('profile_postcodes.latitude')
-                ->whereNotNull('profile_postcodes.longitude')
-                ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
-                ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
-                ->havingRaw('distance_km <= ?', [$distanceFilter])
-                ->orderBy('distance_km', 'asc');
-
-            $distanceOrderingApplied = true;
-        }
-
-        $appendParams = array_filter([
-            'location' => $locationQuery ?: null,
-            'escort_name' => $escortNameQuery ?: null,
-            'min_age' => $minAge !== self::DEFAULT_MIN_AGE ? $minAge : null,
-            'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
-            'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
-            'max_price' => $maxPrice !== self::DEFAULT_MAX_PRICE ? $maxPrice : null,
-            'user_lat' => $searchLat,
-            'user_lng' => $searchLng,
-            'distance' => $distanceFilter,
-        ]);
-
-        $appendParams['girls'] = $girlsMode;
-
-        foreach ($selectedCategoryIds as $categoryId) {
-            $appendParams['categories'][] = $categoryId;
+                $distanceOrderingApplied = true;
+            }
         }
 
         switch ($girlsMode) {
@@ -495,6 +423,22 @@ class BuildProfileFilterViewData
                 break;
         }
 
+        $appendParams = array_filter([
+            'location' => $locationQuery ?: null,
+            'escort_name' => $escortNameQuery ?: null,
+            'min_age' => $minAge !== self::DEFAULT_MIN_AGE ? $minAge : null,
+            'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
+            'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
+            'max_price' => $maxPrice !== self::DEFAULT_MAX_PRICE ? $maxPrice : null,
+            'distance' => $distanceFilter,
+        ]);
+
+        $appendParams['girls'] = $girlsMode;
+
+        foreach ($selectedCategoryIds as $categoryId) {
+            $appendParams['categories'][] = $categoryId;
+        }
+
         $paginator = $query
             ->paginate($this->resolveProfilesPerPage())
             ->appends($appendParams);
@@ -509,11 +453,86 @@ class BuildProfileFilterViewData
             ? Category::query()->whereIn('id', $serviceIds)->pluck('name', 'id')
             : collect();
 
-        $paginator->getCollection()->transform(
-            fn (ProviderProfile $profile) => $this->transformProfile($profile, $categoryNames)
-        );
+        $paginator->getCollection()->transform(function (ProviderProfile $profile) use ($categoryNames, $distanceMap) {
+            if (array_key_exists($profile->id, $distanceMap)) {
+                $profile->distance_km = $distanceMap[$profile->id];
+            }
+
+            return $this->transformProfile($profile, $categoryNames);
+        });
 
         return $paginator;
+    }
+
+    private function findNearbyProfileDistances(float $searchLat, float $searchLng, int $distanceKm): array
+    {
+        $latDelta = $distanceKm / 111.0;
+        $lngDivisor = max(cos(deg2rad($searchLat)), 0.01);
+        $lngDelta = $distanceKm / (111.0 * $lngDivisor);
+
+        $minLat = $searchLat - $latDelta;
+        $maxLat = $searchLat + $latDelta;
+        $minLng = $searchLng - $lngDelta;
+        $maxLng = $searchLng + $lngDelta;
+
+        $stateCaseSql = "
+            CASE states.name
+                WHEN 'Australian Capital Territory' THEN 'ACT'
+                WHEN 'New South Wales' THEN 'NSW'
+                WHEN 'Victoria' THEN 'VIC'
+                WHEN 'Queensland' THEN 'QLD'
+                WHEN 'Western Australia' THEN 'WA'
+                WHEN 'South Australia' THEN 'SA'
+                WHEN 'Tasmania' THEN 'TAS'
+                WHEN 'Northern Territory' THEN 'NT'
+                ELSE NULL
+            END
+        ";
+
+        $distanceSql = "(6371 * acos(
+            LEAST(1, GREATEST(-1,
+                cos(radians(?)) *
+                cos(radians(profile_postcodes.latitude)) *
+                cos(radians(profile_postcodes.longitude) - radians(?)) +
+                sin(radians(?)) *
+                sin(radians(profile_postcodes.latitude))
+            ))
+        ))";
+
+        return DB::table('provider_profiles')
+            ->join('users', 'users.id', '=', 'provider_profiles.user_id')
+            ->leftJoin('states', 'states.id', '=', 'provider_profiles.state_id')
+            ->join('postcodes as profile_postcodes', function ($join) use ($stateCaseSql) {
+                $join->whereRaw('UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(users.suburb, ",", 1)))')
+                    ->whereRaw("
+                        UPPER(TRIM(profile_postcodes.state)) = UPPER(TRIM(
+                            COALESCE(
+                                NULLIF(
+                                    CASE
+                                        WHEN users.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(users.suburb, ',', -1)), ' ', 1)
+                                        ELSE NULL
+                                    END,
+                                    ''
+                                ),
+                                {$stateCaseSql}
+                            )
+                        ))
+                    ");
+            })
+            ->whereNull('provider_profiles.deleted_at')
+            ->where('provider_profiles.profile_status', 'approved')
+            ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
+            ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
+            ->select('provider_profiles.id as provider_profile_id')
+            ->selectRaw("{$distanceSql} as distance_km", [$searchLat, $searchLng, $searchLat])
+            ->having('distance_km', '<=', $distanceKm)
+            ->orderBy('distance_km')
+            ->get()
+            ->map(fn ($row) => [
+                'provider_profile_id' => (int) $row->provider_profile_id,
+                'distance_km' => round((float) $row->distance_km, 1),
+            ])
+            ->all();
     }
 
     private function resolveScoutIds(string $locationQuery): ?Collection
