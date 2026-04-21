@@ -613,35 +613,35 @@ class BuildProfileFilterViewData
         return $map[$uppercase] ?? null;
     }
 
-    private function resolveStrictPostcodeCoordinateExpression(string $column): string
-    {
-        if (! in_array($column, ['latitude', 'longitude'], true)) {
-            throw new \InvalidArgumentException(
-                "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
-            );
-        }
-
-        return "(
-            SELECT p.{$column}
-            FROM postcodes p
-            JOIN users u ON u.id = provider_profiles.user_id
-            WHERE p.latitude IS NOT NULL
-              AND p.longitude IS NOT NULL
-              AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
-              AND UPPER(TRIM(p.state)) = UPPER(TRIM(
-                    CASE
-                        WHEN u.suburb LIKE '%,%' THEN SUBSTRING_INDEX(
-                            TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)),
-                            ' ',
-                            1
-                        )
-                        ELSE NULL
-                    END
-              ))
-            ORDER BY p.postcode ASC, p.id ASC
-            LIMIT 1
-        )";
+                private function resolveStrictPostcodeCoordinateExpression(string $column): string
+{
+    if (! in_array($column, ['latitude', 'longitude'], true)) {
+        throw new \InvalidArgumentException(
+            "Invalid distance coordinate column: '{$column}'. Expected 'latitude' or 'longitude'."
+        );
     }
+
+    return "(
+        SELECT p.{$column}
+        FROM postcodes p
+        JOIN users u ON u.id = provider_profiles.user_id
+        WHERE p.latitude IS NOT NULL
+          AND p.longitude IS NOT NULL
+          AND UPPER(TRIM(p.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(u.suburb, ',', 1)))
+          AND UPPER(TRIM(p.state)) = UPPER(TRIM(
+                CASE
+                    WHEN u.suburb LIKE '%,%' THEN SUBSTRING_INDEX(
+                        TRIM(SUBSTRING_INDEX(u.suburb, ',', -1)),
+                        ' ',
+                        1
+                    )
+                    ELSE NULL
+                END
+          ))
+        ORDER BY p.postcode ASC, p.id ASC
+        LIMIT 1
+    )";
+}
 
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
     {
@@ -666,7 +666,7 @@ class BuildProfileFilterViewData
             'in_call' => trim((string) ($firstRate?->incall ?? '')),
             'out_call' => trim((string) ($firstRate?->outcall ?? '')),
             'city' => $profile->city?->name ?? '',
-            'suburb' => $this->extractSuburbName($profile->user?->suburb ?? ''),
+            'suburb' => $profile->city?->name ?: $this->extractSuburbName($profile->user?->suburb ?? ''),
             'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
             'height' => '',
             'service_1' => $services[0] ?? '',
