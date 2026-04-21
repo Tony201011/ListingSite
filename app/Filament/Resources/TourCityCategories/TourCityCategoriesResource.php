@@ -61,7 +61,7 @@ class TourCityCategoriesResource extends Resource
                 TextInput::make('country_code')
                     ->label('Country Code')
                     ->required()
-                    ->maxLength(10),
+                    ->maxLength(2),
             ])
             ->columns(2);
     }

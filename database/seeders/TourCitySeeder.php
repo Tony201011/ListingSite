@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\TourCity;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class TourCitySeeder extends Seeder
 {
@@ -38,13 +38,14 @@ class TourCitySeeder extends Seeder
         ];
 
         foreach ($cities as $city) {
-            DB::table('tour_cities')->insert([
-                'name' => $city['name'],
-                'state' => $city['state'],
-                'country_code' => 'AU',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $tourCity = TourCity::withTrashed()->updateOrCreate(
+                ['name' => $city['name'], 'state' => $city['state']],
+                ['country_code' => 'AU']
+            );
+
+            if ($tourCity->trashed()) {
+                $tourCity->restore();
+            }
         }
     }
 }
