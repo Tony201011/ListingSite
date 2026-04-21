@@ -158,8 +158,9 @@ class BuildProfileFilterViewData
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
         /*
-         * If user provides a specific location like "Sydney, NSW",
-         * use that location as the search centre for radius search.
+         * IMPORTANT:
+         * If the user typed a location like "Sydney, NSW", use postcode table
+         * latitude/longitude for THAT location as the distance search centre.
          */
         if ($resolvedLocation !== null) {
             $locationCoordinates = $this->resolveLocationCoordinates(
@@ -292,9 +293,9 @@ class BuildProfileFilterViewData
             ]);
 
         /*
-         * CRITICAL FIX:
-         * When distance search is active, do not exact-filter the result set to the typed suburb.
-         * The typed location is only the centre point.
+         * If radius search is active:
+         * - location is only the centre point
+         * - do NOT exact-filter profiles to Sydney, NSW only
          */
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
@@ -388,8 +389,8 @@ class BuildProfileFilterViewData
         $distanceOrderingApplied = false;
 
         if ($distanceSearchActive) {
-            $profileLatitudeExpression = $this->resolveSearchableCoordinateExpression('latitude');
-            $profileLongitudeExpression = $this->resolveSearchableCoordinateExpression('longitude');
+            $profileLatitudeExpression = $this->resolveProfilePostcodeCoordinateExpression('latitude');
+            $profileLongitudeExpression = $this->resolveProfilePostcodeCoordinateExpression('longitude');
 
             $distanceSql = "(6371 * acos(
                 LEAST(1, GREATEST(-1,
@@ -621,7 +622,11 @@ class BuildProfileFilterViewData
         return $map[$uppercase] ?? null;
     }
 
-    private function resolveSearchableCoordinateExpression(string $column): string
+    /*
+     * Get profile latitude/longitude primarily from postcode table using suburb/state.
+     * provider_profiles.latitude / longitude is still used first if present.
+     */
+    private function resolveProfilePostcodeCoordinateExpression(string $column): string
     {
         if (! in_array($column, ['latitude', 'longitude'], true)) {
             throw new \InvalidArgumentException(
