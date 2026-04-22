@@ -1,23 +1,72 @@
 @extends('layouts.frontend')
+
 @push('styles')
 <link rel="stylesheet" href="{{ asset('frontend/css/profile-show.css') }}">
+
+<style>
+    [x-cloak] {
+        display: none !important;
+    }
+
+    .profile-page-content video {
+        display: block;
+    }
+
+    .mobile-safe-card {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .profile-content-html,
+    .profile-content-html * {
+        max-width: 100%;
+        word-wrap: break-word;
+    }
+
+    .profile-content-html img,
+    .profile-content-html iframe,
+    .profile-content-html video {
+        max-width: 100%;
+        height: auto;
+    }
+
+    @media (max-width: 767px) {
+        .mobile-nav-fixed {
+            position: static !important;
+            transform: none !important;
+            margin: 0 !important;
+            width: 100%;
+        }
+
+        .mobile-nav-fixed > div {
+            width: 100%;
+        }
+
+        .mobile-nav-fixed button {
+            width: 100%;
+            min-width: 0 !important;
+            min-height: 52px !important;
+        }
+    }
+</style>
 @endpush
 
 @section('title', $profile['name'] . ' Profile')
 
 @php
-$profileTags = array_values(array_unique(array_merge(
-    is_array($profile['primary_identity'] ?? null) ? $profile['primary_identity'] : [],
-    is_array($profile['attributes'] ?? null) ? $profile['attributes'] : [],
-    is_array($profile['services_style'] ?? null) ? $profile['services_style'] : [],
-)));
+    $profileTags = array_values(array_unique(array_merge(
+        is_array($profile['primary_identity'] ?? null) ? $profile['primary_identity'] : [],
+        is_array($profile['attributes'] ?? null) ? $profile['attributes'] : [],
+        is_array($profile['services_style'] ?? null) ? $profile['services_style'] : [],
+    )));
 @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
+<div
+    class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
     x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
 >
-    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
             <a href="{{ url('/') }}" class="hover:text-gray-700">Home</a>
             <span>›</span>
@@ -32,7 +81,6 @@ $profileTags = array_values(array_unique(array_merge(
             $whatsAppHref = preg_replace('/[^0-9]/', '', $phoneHref);
 
             $priceList = collect($profile['price_list'] ?? [])->values();
-
             $availabilityList = collect($profile['availability_list'] ?? [])->values();
 
             $profileStats = $profileStats ?? [
@@ -45,13 +93,16 @@ $profileTags = array_values(array_unique(array_merge(
                 ['label' => 'Length', 'value' => $profile['your_length'] ?? '—'],
             ];
 
-            $galleryImages = !empty($profile['images']) ? $profile['images'] : (!empty($profile['image']) ? [$profile['image']] : []);
+            $galleryImages = !empty($profile['images'])
+                ? $profile['images']
+                : (!empty($profile['image']) ? [$profile['image']] : []);
 
             $servicesProvided = !empty($profile['services_provided']) ? $profile['services_provided'] : [];
 
             $availableNow = $profile['available_now'] ?? false;
             $isOnline = $profile['active'] ?? false;
             $availableExpiresAt = $profile['available_expires_at'] ?? null;
+
             $availableTillText = $availableNow && $availableExpiresAt
                 ? ' - AVAILABLE TILL ' . \Carbon\Carbon::parse($availableExpiresAt)->format('g:ia')
                 : '';
@@ -61,6 +112,7 @@ $profileTags = array_values(array_unique(array_merge(
 
             $introTagline = '';
             $introText = strip_tags($profile['introduction_line'] ?? '');
+
             if (!empty($profile['age']) && !empty($introText)) {
                 $introTagline = $profile['age'] . ' - ' . $introText;
             } elseif (!empty($profile['age'])) {
@@ -68,142 +120,207 @@ $profileTags = array_values(array_unique(array_merge(
             } elseif (!empty($introText)) {
                 $introTagline = $introText;
             }
+
+            $safeAbout = strip_tags(
+                (string) ($profile['about'] ?? $profile['description'] ?? ''),
+                '<p><br><ul><ol><li><strong><em><blockquote>'
+            );
         @endphp
 
-        <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-12">
-                    @if($availableNow)
-                    <div class="inline-block mb-4 px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
+        <div class="mx-auto max-w-6xl">
+            <div class="mb-8 text-center sm:mb-12">
+                @if($availableNow)
+                    <div class="mb-4 inline-block rounded bg-[#e13a8b] px-4 py-2 text-sm font-extrabold tracking-wide text-white sm:px-6 sm:text-base" style="letter-spacing:0.5px;">
                         AVAILABLE NOW{{ $availableTillText }}
                     </div>
-                    @elseif($isOnline)
-                    <div class="inline-block mb-4 px-6 py-2 rounded bg-green-500 text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
+                @elseif($isOnline)
+                    <div class="mb-4 inline-block rounded bg-green-500 px-4 py-2 text-sm font-extrabold tracking-wide text-white sm:px-6 sm:text-base" style="letter-spacing:0.5px;">
                         ONLINE NOW
                     </div>
-                    @endif
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-pink-600 mb-3" style="color:#e13a8b;">
-                        {{ $profile['name'] }}
-                    </h1>
-                    @if(!empty($profile['city']))
-                        <div class="flex items-center justify-center mt-2 mb-3">
-                            <span class="text-base font-semibold text-gray-400 flex items-center gap-1">
-                                <i class="fa-solid fa-location-dot text-pink-400"></i>
-                                {{ $profile['suburb'] }}
-                            </span>
-                        </div>
-                    @endif
-                    @if(!empty($introTagline))
-                    <div class="mt-3 text-lg text-gray-700 font-medium">{{ $introTagline }}</div>
-                    @endif
-                </div>
+                @endif
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                <h1 class="mb-3 text-2xl font-extrabold text-pink-600 sm:text-4xl" style="color:#e13a8b;">
+                    {{ $profile['name'] }}
+                </h1>
 
+                @if(!empty($profile['city']))
+                    <div class="mt-2 mb-3 flex items-center justify-center">
+                        <span class="flex items-center gap-1 text-sm font-semibold text-gray-500 sm:text-base">
+                            <i class="fa-solid fa-location-dot text-pink-400"></i>
+                            {{ $profile['suburb'] }}
+                        </span>
+                    </div>
+                @endif
 
-                <!-- Gallery (left, spans 2 columns) -->
-                <div class="md:col-span-2 flex flex-col gap-4 relative order-2 md:order-1">
-                    <!-- Previous Button (left corner) -->
-                          <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
-                              x-data="{ visible: false }"
-                              x-show="visible"
-                              x-cloak
-                              x-transition:enter="transition duration-300"
-                              x-transition:enter-start="opacity-0 scale-90"
-                              x-transition:enter-end="opacity-100 scale-100"
-                              x-transition:leave="transition duration-200"
-                              x-transition:leave-start="opacity-100 scale-100"
-                              x-transition:leave-end="opacity-0 scale-90"
-                              @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
-                              class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn"
-                              style="margin-left: 0.5rem;">
-                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
-                                <span class="flex items-center"><i class="fa-solid fa-arrow-left text-xl mr-2"></i> <span class="text-xs font-semibold">PREVIOUS</span></span>
-                                <span class="text-base font-extrabold mt-0.5">{{ $prevProfile['name'] }}</span>
+                @if(!empty($introTagline))
+                    <div class="mt-3 text-base font-medium text-gray-700 sm:text-lg">{{ $introTagline }}</div>
+                @endif
+            </div>
+
+            {{-- Mobile prev / next --}}
+            <div class="mb-4 grid grid-cols-2 gap-3 md:hidden">
+                @if(!empty($prevProfile['slug']))
+                    <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}" class="block">
+                        <div class="rounded-xl border border-pink-200 bg-white p-1 shadow">
+                            <button class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white">
+                                <span class="flex items-center text-[11px] font-semibold">
+                                    <i class="fa-solid fa-arrow-left mr-2"></i> PREVIOUS
+                                </span>
+                                <span class="mt-0.5 line-clamp-1 text-sm font-extrabold">{{ $prevProfile['name'] }}</span>
                             </button>
                         </div>
                     </a>
+                @endif
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        @foreach(array_slice($galleryImages, 0, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
-                        @endforeach
-                    </div>
-                        <!-- Next Button (right corner) -->
-                                <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
-                                    x-data="{ visible: false }"
-                                    x-show="visible"
-                                    x-cloak
-                                    x-transition:enter="transition duration-300"
-                                    x-transition:enter-start="opacity-0 scale-90"
-                                    x-transition:enter-end="opacity-100 scale-100"
-                                    x-transition:leave="transition duration-200"
-                                    x-transition:leave-start="opacity-100 scale-100"
-                                    x-transition:leave-end="opacity-0 scale-90"
-                                    @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
-                                    class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn"
-                                    style="margin-right: 0.5rem;">
-                            <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
-                                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
-                                    <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-xl ml-2"></i></span>
-                                    <span class="text-base font-extrabold mt-0.5">{{ $nextProfile['name'] }}</span>
+                @if(!empty($nextProfile['slug']))
+                    <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}" class="block">
+                        <div class="rounded-xl border border-pink-200 bg-white p-1 shadow">
+                            <button class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white">
+                                <span class="flex items-center text-[11px] font-semibold">
+                                    NEXT <i class="fa-solid fa-arrow-right ml-2"></i>
+                                </span>
+                                <span class="mt-0.5 line-clamp-1 text-sm font-extrabold">{{ $nextProfile['name'] }}</span>
+                            </button>
+                        </div>
+                    </a>
+                @endif
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 items-start lg:grid-cols-3">
+                {{-- Gallery / content --}}
+                <div class="order-1 flex min-w-0 flex-col gap-6 lg:order-1 lg:col-span-2">
+
+                    {{-- Desktop prev --}}
+                    @if(!empty($prevProfile['slug']))
+                        <a
+                            href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
+                            x-data="{ visible: false }"
+                            x-show="visible"
+                            x-cloak
+                            x-transition:enter="transition duration-300"
+                            x-transition:enter-start="opacity-0 scale-90"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition duration-200"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-90"
+                            @scroll.window.passive="visible = window.innerWidth >= 768 && window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
+                            class="mobile-nav-fixed hidden md:fixed md:left-3 md:top-1/2 md:z-30 md:flex md:-translate-y-1/2 md:flex-col md:items-center"
+                        >
+                            <div class="rounded-xl border border-pink-200 bg-white p-0.5 shadow-lg">
+                                <button class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600">
+                                    <span class="flex items-center">
+                                        <i class="fa-solid fa-arrow-left mr-2 text-xl"></i>
+                                        <span class="text-xs font-semibold">PREVIOUS</span>
+                                    </span>
+                                    <span class="mt-0.5 text-base font-extrabold">{{ $prevProfile['name'] }}</span>
                                 </button>
                             </div>
                         </a>
-                <!-- Currently Touring Section -->
-                @if(!empty($profile['tours']))
-                <div class="mb-6">
-                    <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                        <div class="mb-6">
-                            <div class="flex items-center mb-2">
-                                <i class="fa-solid fa-location-dot text-pink-500 text-2xl mr-3"></i>
-                                <span class="text-2xl font-extrabold text-pink-600">Currently touring in {{ $profile['tours'][0]['city'] }}</span>
+                    @endif
+
+                    {{-- Desktop next --}}
+                    @if(!empty($nextProfile['slug']))
+                        <a
+                            href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
+                            x-data="{ visible: false }"
+                            x-show="visible"
+                            x-cloak
+                            x-transition:enter="transition duration-300"
+                            x-transition:enter-start="opacity-0 scale-90"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition duration-200"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-90"
+                            @scroll.window.passive="visible = window.innerWidth >= 768 && window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
+                            class="mobile-nav-fixed hidden md:fixed md:right-3 md:top-1/2 md:z-30 md:flex md:-translate-y-1/2 md:flex-col md:items-center"
+                        >
+                            <div class="rounded-xl border border-pink-200 bg-white p-0.5 shadow-lg">
+                                <button class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600">
+                                    <span class="flex items-center">
+                                        <span class="text-xs font-semibold">NEXT</span>
+                                        <i class="fa-solid fa-arrow-right ml-2 text-xl"></i>
+                                    </span>
+                                    <span class="mt-0.5 text-base font-extrabold">{{ $nextProfile['name'] }}</span>
+                                </button>
                             </div>
-                            <span class="font-bold text-lg text-gray-800">{{ $profile['tours'][0]['from'] }} - {{ $profile['tours'][0]['to'] }}</span>
-                        </div>
-                        <a href="#upcoming-tours" class="border border-pink-300 text-pink-400 px-6 py-3 rounded-md bg-transparent font-medium text-lg hover:bg-pink-50 transition block text-center smooth-scroll">
-                            See all my other tours
                         </a>
-                    </div>
-                </div>
-                @endif
-@php
-                        $safeAbout = strip_tags(
-                            (string) ($profile['about'] ?? $profile['description'] ?? ''),
-                            '<p><br><ul><ol><li><strong><em><blockquote>'
-                        );
-                    @endphp
-                    @if(!empty($safeAbout))
-                        <div class="mt-8 mb-8">
-                            <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
-                            <hr class="mb-4">
-                            <div class="text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
-                                {!! nl2br($safeAbout) !!}
-                            </div>
-                            <br>
+                    @endif
+
+                    {{-- Top gallery --}}
+                    @if(count($galleryImages) > 0)
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            @foreach(array_slice($galleryImages, 0, 2) as $img)
+                                <img
+                                    src="{{ $img }}"
+                                    alt="{{ $profile['name'] }} image"
+                                    class="lazy-img gallery-img-clickable aspect-[4/5] w-full cursor-pointer rounded-xl object-cover"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+                            @endforeach
                         </div>
                     @endif
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        @foreach(array_slice($galleryImages, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
-                        @endforeach
-                    </div>
-                    <br>
 
-                    <!-- Videos Section -->
+                    {{-- Currently touring --}}
+                    @if(!empty($profile['tours']))
+                        <div class="mb-0">
+                            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
+                                <div class="mb-5">
+                                    <div class="mb-2 flex items-start sm:items-center">
+                                        <i class="fa-solid fa-location-dot mr-3 mt-1 text-xl text-pink-500 sm:mt-0 sm:text-2xl"></i>
+                                        <span class="text-xl font-extrabold text-pink-600 sm:text-2xl">
+                                            Currently touring in {{ $profile['tours'][0]['city'] }}
+                                        </span>
+                                    </div>
+                                    <span class="text-base font-bold text-gray-800 sm:text-lg">
+                                        {{ $profile['tours'][0]['from'] }} - {{ $profile['tours'][0]['to'] }}
+                                    </span>
+                                </div>
 
-@include('components.gallery-modal')
-                    @if(!empty($profile['videos'] ?? []))
-                    <section class="mt-12 overflow-hidden">
-                        <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
-                            <hr class="mb-4">
+                                <a
+                                    href="#upcoming-tours"
+                                    class="smooth-scroll block rounded-md border border-pink-300 bg-transparent px-5 py-3 text-center text-base font-medium text-pink-400 transition hover:bg-pink-50 sm:px-6 sm:text-lg"
+                                >
+                                    See all my other tours
+                                </a>
+                            </div>
                         </div>
-                        <br>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    @endif
+
+                    {{-- About --}}
+                    @if(!empty($safeAbout))
+                        <div class="mobile-safe-card">
+                            <h2 class="mb-2 text-2xl font-semibold text-pink-600">About me</h2>
+                            <hr class="mb-4">
+                            <div class="profile-content-html text-base leading-relaxed text-gray-900">
+                                {!! nl2br($safeAbout) !!}
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- More gallery --}}
+                    @if(count($galleryImages) > 2)
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                            @foreach(array_slice($galleryImages, 2) as $img)
+                                <img
+                                    src="{{ $img }}"
+                                    alt="{{ $profile['name'] }} image"
+                                    class="lazy-img gallery-img-clickable aspect-[4/5] w-full cursor-pointer rounded-xl object-cover"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @include('components.gallery-modal')
+
+                    {{-- Videos --}}
+                    @if(!empty($profile['videos'] ?? []))
+                        <section
+                            class="mt-6 overflow-hidden"
                             x-data="{
                                 init() {
-                                    // Add global video pause handler
                                     document.addEventListener('play', (e) => {
                                         if (e.target.tagName === 'VIDEO') {
                                             document.querySelectorAll('video').forEach(video => {
@@ -215,210 +332,288 @@ $profileTags = array_values(array_unique(array_merge(
                                     }, true);
                                 }
                             }"
-                            x-init="init()">
-                            @foreach($profile['videos'] ?? [] as $videoUrl)
-                            <div class="relative" x-data="{ playing: false }">
-                                <video controls preload="metadata" class="rounded-xl w-full h-64 bg-black object-cover"
-                                    x-on:play="playing = true"
-                                    x-on:pause="playing = false"
-                                    x-on:ended="playing = false"
-                                    x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='block'; playing = false"
-                                    poster="https://picsum.photos/400/225?random=1">
-                                    <source src="{{ $videoUrl }}" type="video/mp4">
-                                    <source src="{{ $videoUrl }}" type="video/webm">
-                                    <source src="{{ $videoUrl }}" type="video/ogg">
-                                    Your browser does not support the video tag.
-                                </video>
-                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
-                                    <div class="bg-red-500 bg-opacity-75 text-white px-4 py-2 rounded">
-                                        <i class="fa-solid fa-exclamation-triangle mr-2"></i>
-                                        Video unavailable
-                                    </div>
-                                </div>
-                                <div x-show="!playing" x-transition class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div class="bg-black bg-opacity-50 rounded-full p-3 opacity-75">
-                                        <i class="fa-solid fa-play text-white text-xl"></i>
-                                    </div>
-                                </div>
+                            x-init="init()"
+                        >
+                            <div class="mb-6">
+                                <h2 class="text-2xl font-semibold text-pink-600">Videos</h2>
+                                <hr class="mt-2">
                             </div>
-                            @endforeach
-                        </div>
-                    </section>
-                    @endif
 
-@push('scripts')
-<script src="{{ asset('frontend/js/profile-show.js') }}"></script>
-@endpush
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                @foreach($profile['videos'] ?? [] as $videoUrl)
+                                    <div
+                                        class="relative overflow-hidden rounded-2xl bg-black shadow"
+                                        x-data="{ loading: true, playing: false, error: false }"
+                                    >
+                                        <div class="relative aspect-video w-full bg-black">
+                                            <video
+                                                controls
+                                                playsinline
+                                                preload="metadata"
+                                                class="h-full w-full object-cover"
+                                                x-on:loadstart="loading = true; error = false"
+                                                x-on:loadedmetadata="loading = false"
+                                                x-on:canplay="loading = false"
+                                                x-on:waiting="loading = true"
+                                                x-on:playing="loading = false; playing = true"
+                                                x-on:pause="playing = false"
+                                                x-on:ended="playing = false"
+                                                x-on:error="loading = false; playing = false; error = true"
+                                            >
+                                                <source src="{{ $videoUrl }}" type="video/mp4">
+                                                <source src="{{ $videoUrl }}" type="video/webm">
+                                                <source src="{{ $videoUrl }}" type="video/ogg">
+                                                Your browser does not support the video tag.
+                                            </video>
 
-                    <!-- My Upcoming Tours Section (Card Style) -->
-                    @if(!empty($profile['tours'] ?? []))
-                    <section id="upcoming-tours" class="mt-12 scroll-mt-32">
-                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                            <div class="flex items-center mb-1">
-                                <i class="fa-solid fa-location-dot text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-semibold mb-2 text-pink-600">My upcoming tours</h2>
-                                <hr class="mb-4">
-                            </div>
-                            <div class="border-b border-gray-200 mb-6"></div>
-                            <div class="space-y-4">
-                                @foreach($profile['tours'] ?? [] as $tour)
-                                <div class="flex items-center">
-                                    <span class="font-bold text-pink-600 text-base mr-4">{{ $tour['city'] }}</span>
-                                    <span class="font-semibold text-gray-900 text-base">{{ $tour['from'] }} - {{ $tour['to'] }}</span>
-                                </div>
+                                            {{-- loader --}}
+                                            <div
+                                                x-show="loading && !error"
+                                                x-transition.opacity
+                                                class="absolute inset-0 flex items-center justify-center bg-black/35"
+                                            >
+                                                <div class="flex flex-col items-center gap-3">
+                                                    <div class="h-10 w-10 animate-spin rounded-full border-4 border-white/30 border-t-white"></div>
+                                                    <span class="text-sm font-medium text-white">Loading video...</span>
+                                                </div>
+                                            </div>
+
+                                            {{-- play icon when paused only --}}
+                                            <div
+                                                x-show="!playing && !loading && !error"
+                                                x-transition.opacity
+                                                class="pointer-events-none absolute inset-0 flex items-center justify-center"
+                                            >
+                                                <div class="rounded-full bg-black/50 p-4">
+                                                    <i class="fa-solid fa-play text-xl text-white"></i>
+                                                </div>
+                                            </div>
+
+                                            {{-- error --}}
+                                            <div
+                                                x-show="error"
+                                                x-transition.opacity
+                                                class="absolute inset-0 flex items-center justify-center bg-black/70 p-4"
+                                            >
+                                                <div class="rounded-xl bg-red-500/90 px-4 py-3 text-center text-white shadow-lg">
+                                                    <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+                                                    Video unavailable
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endforeach
                             </div>
-                        </div>
-                    </section>
-                    <br>
+                        </section>
                     @endif
 
-                    <!-- Profile Message Section -->
+                    {{-- Upcoming tours --}}
+                    @if(!empty($profile['tours'] ?? []))
+                        <section id="upcoming-tours" class="mt-12 scroll-mt-32">
+                            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
+                                <div class="mb-1 flex items-center">
+                                    <i class="fa-solid fa-location-dot mr-2 text-xl text-pink-600"></i>
+                                    <h2 class="text-2xl font-semibold text-pink-600">My upcoming tours</h2>
+                                </div>
+                                <div class="mb-6 border-b border-gray-200"></div>
+
+                                <div class="space-y-4">
+                                    @foreach($profile['tours'] ?? [] as $tour)
+                                        <div class="flex flex-col gap-1 sm:flex-row sm:items-center">
+                                            <span class="mr-4 text-base font-bold text-pink-600">{{ $tour['city'] }}</span>
+                                            <span class="text-base font-semibold text-gray-900">{{ $tour['from'] }} - {{ $tour['to'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </section>
+                    @endif
+
+                    {{-- Profile message --}}
                     @if(!empty($profile['profile_message']))
-                    <section class="mt-12">
-                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                            <div class="flex items-center mb-3">
-                                <i class="fa-solid fa-bullhorn text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-semibold text-pink-600">Message from {{ $profile['name'] }}</h2>
+                        <section class="mt-12">
+                            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
+                                <div class="mb-3 flex items-center">
+                                    <i class="fa-solid fa-bullhorn mr-2 text-xl text-pink-600"></i>
+                                    <h2 class="text-xl font-semibold text-pink-600 sm:text-2xl">
+                                        Message from {{ $profile['name'] }}
+                                    </h2>
+                                </div>
+                                <div class="mb-4 border-b border-gray-200"></div>
+                                <div class="prose max-w-none break-words text-gray-700 leading-relaxed">
+                                    {!! nl2br($profile['profile_message']) !!}
+                                </div>
                             </div>
-                            <div class="border-b border-gray-200 mb-4"></div>
-                            <div class="prose max-w-none text-gray-700 leading-relaxed">
-                                {!! nl2br($profile['profile_message']) !!}
-                            </div>
-                        </div>
-                    </section>
-                    <br>
+                        </section>
                     @endif
 
-                    <!-- Contact Me For Section (Card Style) -->
+                    {{-- Contact me for --}}
                     <section id="contact-me-for" class="mt-12 scroll-mt-32">
                         @if(!empty($servicesProvided))
-                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                            <div class="flex items-center mb-1">
-                                <i class="fa-solid fa-comments text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-semibold mb-2 text-pink-600">Contact me for</h2>
-                                <hr class="mb-4">
+                            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
+                                <div class="mb-1 flex items-center">
+                                    <i class="fa-solid fa-comments mr-2 text-xl text-pink-600"></i>
+                                    <h2 class="text-2xl font-semibold text-pink-600">Contact me for</h2>
+                                </div>
+                                <div class="mb-6 w-24 border-b border-pink-300"></div>
+
+                                <ul class="list-none space-y-2 pl-0">
+                                    @foreach($servicesProvided as $item)
+                                        <li class="flex items-start gap-2 text-base sm:text-lg">
+                                            <span class="mt-0.5 text-xl text-pink-600">&raquo;</span>
+                                            <span class="text-gray-900">{{ $item }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
                             </div>
-                            <div class="border-b border-pink-300 mb-6 w-24"></div>
-                            <ul class="space-y-2 list-none pl-0">
-                                @foreach($servicesProvided as $item)
-                                    <li class="flex items-start gap-2 text-lg">
-                                        <span class="text-pink-600 text-xl mt-0.5">&raquo;</span>
-                                        <span class="text-gray-900">{{ $item }}</span>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <br>
                         @endif
                     </section>
 
-                                    <!-- Short Link Section -->
-                <div class="text-center mb-8 mt-8">
-                    <span class="text-lg font-medium" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
-                        Find me easily with this short link:
-                        <a href="{{ $profileUrl }}" class="hover:underline text-blue-500" style="background: none; color: #4fa3e3;">
-                            {{ $profileUrlDisplay }}
-                        </a>
-                    </span>
+                    {{-- Short link --}}
+                    <div class="mt-8 mb-2 text-center">
+                        <span class="text-base font-medium sm:text-lg" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
+                            Find me easily with this short link:
+                            <a href="{{ $profileUrl }}" class="break-all hover:underline" style="background: none; color: #4fa3e3;">
+                                {{ $profileUrlDisplay }}
+                            </a>
+                        </span>
+                    </div>
                 </div>
-                </div>
-                <!-- Info/Sidebar (right) -->
-                <div class="flex flex-col gap-6 order-1 md:order-2">
-                    <div class="bg-white rounded-2xl shadow p-6 border border-gray-100 mb-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="font-bold text-lg text-black">Info</span>
+
+                {{-- Sidebar --}}
+                <div class="order-2 flex min-w-0 flex-col gap-6 lg:sticky lg:top-6">
+                    <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-lg font-bold text-black">Info</span>
                             @if($profile['is_verified'])
-                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-xs font-semibold text-blue-700"><i class="fa-solid fa-badge-check text-blue-500 mr-1"></i> PHOTOS VERIFIED</span>
+                                <span class="inline-flex items-center rounded bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                                    <i class="fa-solid fa-badge-check mr-1 text-blue-500"></i>
+                                    PHOTOS VERIFIED
+                                </span>
                             @endif
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm mb-3">
+
+                        <div class="mb-3 grid grid-cols-1 gap-y-3 gap-x-6 text-sm sm:grid-cols-2">
                             @if(!empty($profile['age']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-hourglass-half text-pink-600 w-5 text-center"></i>
-                                <span>Age <span class="font-bold text-gray-900 ml-1">{{ $profile['age'] }}</span></span>
-                            </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-hourglass-half w-5 text-center text-pink-600"></i>
+                                    <span>Age <span class="ml-1 font-bold text-gray-900">{{ $profile['age'] }}</span></span>
+                                </div>
                             @endif
+
                             @if(!empty($profile['your_length']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
-                                <span>Length <span class="font-bold text-gray-900 ml-1">{{ $profile['your_length'] }}</span></span>
-                            </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-ruler-vertical w-5 text-center text-pink-600"></i>
+                                    <span>Length <span class="ml-1 font-bold text-gray-900">{{ $profile['your_length'] }}</span></span>
+                                </div>
                             @endif
+
                             @if(!empty($profile['bust_size']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-braille text-pink-600 w-5 text-center"></i>
-                                <span>Bust Size <span class="font-bold text-gray-900 ml-1">{{ $profile['bust_size'] }}</span></span>
-                            </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-braille w-5 text-center text-pink-600"></i>
+                                    <span>Bust Size <span class="ml-1 font-bold text-gray-900">{{ $profile['bust_size'] }}</span></span>
+                                </div>
                             @endif
+
                             @if(!empty($profile['rate']))
-                            <div class="flex items-center space-x-2 col-span-2">
-                                <i class="fa-solid fa-dollar-sign text-pink-600 w-5 text-center"></i>
-                                <span>Rate <span class="font-bold text-gray-900 ml-1">{{ $profile['rate'] }}</span></span>
-                            </div>
+                                <div class="col-span-1 flex items-center space-x-2 sm:col-span-2">
+                                    <i class="fa-solid fa-dollar-sign w-5 text-center text-pink-600"></i>
+                                    <span>Rate <span class="ml-1 font-bold text-gray-900">{{ $profile['rate'] }}</span></span>
+                                </div>
                             @endif
                         </div>
+
                         @if(!empty($primaryPhone) || !empty($profile['website']) || !empty($profile['onlyfans']) || !empty($profile['contact_method']))
-                        <div class="mt-4">
-                            <span class="block text-lg font-bold mb-1 text-black">Contact</span>
-                            <div class="mb-2 text-sm p-2 text-gray-700">
-                                Tell you saw advertisement in <span class="text-pink-600 font-semibold">HotEscort</span>, thanks!
-                                @if(!empty($profile['contact_method']))
-                                <br>Preferred contact method: <span class="font-semibold">{{ $profile['contact_method'] }}</span>
+                            <div class="mt-4">
+                                <span class="mb-1 block text-lg font-bold text-black">Contact</span>
+
+                                <div class="mb-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
+                                    Tell you saw advertisement in <span class="font-semibold text-pink-600">HotEscort</span>, thanks!
+                                    @if(!empty($profile['contact_method']))
+                                        <br>
+                                        Preferred contact method:
+                                        <span class="font-semibold">{{ $profile['contact_method'] }}</span>
+                                    @endif
+                                </div>
+
+                                @if(!empty($primaryPhone))
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <i class="fa-solid fa-mobile-screen text-2xl text-blue-600"></i>
+                                        <span class="text-xs font-bold text-black">PHONE:</span>
+                                    </div>
+                                    <a
+                                        href="tel:{{ $phoneHref }}"
+                                        aria-label="Call {{ $primaryPhone }}"
+                                        class="mb-2 block break-all text-xl font-bold tracking-wide text-black transition hover:text-pink-600 sm:text-2xl"
+                                    >
+                                        {{ $primaryPhone }}
+                                    </a>
+                                @endif
+
+                                @if(!empty($profile['website']))
+                                    <hr class="my-3">
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <i class="fa-solid fa-globe text-2xl text-blue-600"></i>
+                                        <span class="text-xs font-bold text-black">WEBSITE:</span>
+                                    </div>
+                                    <a
+                                        href="{{ $profile['website'] }}"
+                                        class="mb-2 block break-all text-base font-semibold text-pink-600 hover:underline"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {{ $profile['website'] }}
+                                    </a>
+                                @endif
+
+                                @if(!empty($profile['onlyfans']))
+                                    <hr class="my-3">
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <i class="fas fa-heart text-2xl text-pink-600"></i>
+                                        <span class="text-xs font-bold text-black">ONLYFANS:</span>
+                                    </div>
+                                    <a
+                                        href="{{ $profile['onlyfans'] }}"
+                                        class="mb-2 block break-all text-base font-semibold text-pink-600 hover:underline"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {{ $profile['onlyfans'] }}
+                                    </a>
                                 @endif
                             </div>
-                            @if(!empty($primaryPhone))
-                            <div class="flex items-center gap-2 mt-2">
-                                <i class="fa-solid fa-mobile-screen text-blue-600 text-2xl"></i>
-                                <span class="text-xs font-bold text-black">PHONE:</span>
-                            </div>
-                            <a href="tel:{{ $phoneHref }}" aria-label="Call {{ $primaryPhone }}" class="block text-2xl font-bold tracking-wide mb-2 text-black hover:text-pink-600 transition">{{ $primaryPhone }}</a>
-                            @endif
-                            @if(!empty($profile['website']))
-                            <hr class="my-3">
-                            <div class="flex items-center gap-2 mt-2">
-                                <i class="fa-solid fa-globe text-blue-600 text-2xl"></i>
-                                <span class="text-xs font-bold text-black">WEBSITE:</span>
-                            </div>
-                            <a href="{{ $profile['website'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['website'] }}</a>
-                            @endif
-                            @if(!empty($profile['onlyfans']))
-                            <hr class="my-3">
-                            <div class="flex items-center gap-2 mt-2">
-                                <i class="fas fa-heart text-pink-600 text-2xl"></i>
-                                <span class="text-xs font-bold text-black">ONLYFANS:</span>
-                            </div>
-                            <a href="{{ $profile['onlyfans'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['onlyfans'] }}</a>
-                            @endif
-                        </div>
                         @endif
-                        <!-- Social Media Links -->
+
+                        {{-- Social --}}
                         @if(!empty($profile['twitter']) || !empty($profile['whatsapp']))
-                        <div class="mt-2">
-                            <div class="flex items-center gap-2 mt-2">
-                                <i class="fa-solid fa-share-nodes text-blue-600 text-2xl"></i>
-                                <span class="text-xs font-bold text-black">SOCIAL MEDIA:</span>
+                            <div class="mt-2">
+                                <div class="mt-2 flex items-center gap-2">
+                                    <i class="fa-solid fa-share-nodes text-2xl text-blue-600"></i>
+                                    <span class="text-xs font-bold text-black">SOCIAL MEDIA:</span>
+                                </div>
+
+                                <div class="mt-2 flex gap-3">
+                                    @if(!empty($profile['twitter']))
+                                        <a href="{{ $profile['twitter'] }}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline" title="Twitter">
+                                            <i class="fab fa-twitter-square fa-2x"></i>
+                                        </a>
+                                    @endif
+
+                                    @if(!empty($profile['whatsapp']))
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile['whatsapp']) }}" target="_blank" rel="noopener noreferrer" class="text-green-500 hover:underline" title="WhatsApp">
+                                            <i class="fab fa-whatsapp-square fa-2x"></i>
+                                        </a>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="flex gap-3 mt-2">
-                                @if(!empty($profile['twitter']))
-                                <a href="{{ $profile['twitter'] }}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline" title="Twitter">
-                                    <i class="fab fa-twitter-square fa-2x"></i>
-                                </a>
-                                @endif
-                                @if(!empty($profile['whatsapp']))
-                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile['whatsapp']) }}" target="_blank" rel="noopener noreferrer" class="text-green-500 hover:underline" title="WhatsApp">
-                                    <i class="fab fa-whatsapp-square fa-2x"></i>
-                                </a>
-                                @endif
-                            </div>
-                        </div>
                         @endif
-                        <div class="flex flex-col sm:flex-row gap-4 mt-4">
+
+                        <div class="mt-4 flex flex-col gap-4">
                             <button
                                 type="button"
                                 @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
                                 :class="isFavourite('{{ $profile['slug'] }}') ? 'bg-pink-50 text-pink-700 border-pink-400' : 'bg-white text-pink-700 border-gray-300 hover:bg-pink-50'"
-                                class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-full sm:w-1/2 justify-center"
+                                class="flex w-full items-center justify-center gap-2 rounded-xl border px-6 py-3 text-base font-semibold transition sm:text-lg"
                                 style="border-width:2px;"
                                 title="Save favourite"
                             >
@@ -427,177 +622,196 @@ $profileTags = array_values(array_unique(array_merge(
                             </button>
                         </div>
                     </div>
+
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
-                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
-                        <h3 class="mb-2 text-lg font-bold text-pink-600 flex items-center gap-2">
-                            <i class="fa-solid fa-user-gear text-pink-500"></i> My profile
-                        </h3>
-                        <hr class="mb-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
-                            @if(!empty($profile['ethnicity']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-globe text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Ethnicity</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['ethnicity'] }}</span>
-                                </div>
-                            </div>
-                            @endif
-                            @if(!empty($profile['hair_color']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-palette text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Hair color</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['hair_color'] }}</span>
-                                </div>
-                            </div>
-                            @endif
-                            @if(!empty($profile['hair_length']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-scissors text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Hair length</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['hair_length'] }}</span>
-                                </div>
-                            </div>
-                            @endif
-                            @if(!empty($profile['body_type']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-child-reaching text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Body type</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['body_type'] }}</span>
-                                </div>
-                            </div>
-                            @endif
-                            @if(!empty($profile['age_group']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-hourglass-half text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Age group</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['age_group'] }}</span>
-                                </div>
-                            </div>
-                            @endif
-                            @if(!empty($profile['bust_size']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-braille text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Bust size</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['bust_size'] }}</span>
-                                </div>
-                            </div>
-                            @endif
-                            @if(!empty($profile['your_length']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Length</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['your_length'] }}</span>
-                                </div>
-                            </div>
-                            @endif
-                            @if(!empty($profile['city']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-location-dot text-pink-600 w-5 text-center"></i>
-                                <div>
-                                    <span>Location</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['city'] }}{{ !empty($profile['state']) ? ', ' . $profile['state'] : '' }}</span>
-                                </div>
-                            </div>
-                            @endif
-                        </div>
-                        @if(!empty($profileTags))
-                        <div class="flex flex-wrap gap-2 mt-6">
-                            @foreach($profileTags as $tag)
-                                @if(!empty($tag))
-                                <span class="px-4 py-1 bg-pink-600 text-white rounded-full text-sm font-semibold" style="line-height:1.2;">{{ $tag }}</span>
+                        <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow">
+                            <h3 class="mb-2 flex items-center gap-2 text-lg font-bold text-pink-600">
+                                <i class="fa-solid fa-user-gear text-pink-500"></i> My profile
+                            </h3>
+                            <hr class="mb-4">
+
+                            <div class="grid grid-cols-1 gap-y-3 gap-x-6 text-sm sm:grid-cols-2">
+                                @if(!empty($profile['ethnicity']))
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-globe w-5 text-center text-pink-600"></i>
+                                        <div>
+                                            <span>Ethnicity</span><br>
+                                            <span class="font-bold text-gray-900">{{ $profile['ethnicity'] }}</span>
+                                        </div>
+                                    </div>
                                 @endif
-                            @endforeach
+
+                                @if(!empty($profile['hair_color']))
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-palette w-5 text-center text-pink-600"></i>
+                                        <div>
+                                            <span>Hair color</span><br>
+                                            <span class="font-bold text-gray-900">{{ $profile['hair_color'] }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($profile['hair_length']))
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-scissors w-5 text-center text-pink-600"></i>
+                                        <div>
+                                            <span>Hair length</span><br>
+                                            <span class="font-bold text-gray-900">{{ $profile['hair_length'] }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($profile['body_type']))
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-child-reaching w-5 text-center text-pink-600"></i>
+                                        <div>
+                                            <span>Body type</span><br>
+                                            <span class="font-bold text-gray-900">{{ $profile['body_type'] }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($profile['age_group']))
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-hourglass-half w-5 text-center text-pink-600"></i>
+                                        <div>
+                                            <span>Age group</span><br>
+                                            <span class="font-bold text-gray-900">{{ $profile['age_group'] }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($profile['bust_size']))
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-braille w-5 text-center text-pink-600"></i>
+                                        <div>
+                                            <span>Bust size</span><br>
+                                            <span class="font-bold text-gray-900">{{ $profile['bust_size'] }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($profile['your_length']))
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-ruler-vertical w-5 text-center text-pink-600"></i>
+                                        <div>
+                                            <span>Length</span><br>
+                                            <span class="font-bold text-gray-900">{{ $profile['your_length'] }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($profile['city']))
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-location-dot w-5 text-center text-pink-600"></i>
+                                        <div>
+                                            <span>Location</span><br>
+                                            <span class="font-bold text-gray-900">{{ $profile['city'] }}{{ !empty($profile['state']) ? ', ' . $profile['state'] : '' }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            @if(!empty($profileTags))
+                                <div class="mt-6 flex flex-wrap gap-2">
+                                    @foreach($profileTags as $tag)
+                                        @if(!empty($tag))
+                                            <span class="rounded-full bg-pink-600 px-4 py-1 text-sm font-semibold text-white" style="line-height:1.2;">
+                                                {{ $tag }}
+                                            </span>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
-                        @endif
-                    </div>
                     @endif
+
                     @php
                         $nonEmptyRates = array_filter($profile['price_list'] ?? [], function ($rate) {
                             return !empty($rate['outcall']) || !empty($rate['incall']);
                         });
                     @endphp
+
                     @if(!empty($nonEmptyRates))
-                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
-                        <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
-                            <i class="fa-regular fa-clock text-pink-600"></i> Rates
-                        </h3>
-                        <hr class="mb-3">
-                        <div class="overflow-x-auto rounded-lg">
-                            <table class="min-w-full w-full text-sm">
-                                <thead>
-                                    <tr>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Session</th>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Outcall</th>
-                                        <th class="px-4 py-2 text-left font-bold text-black">In-call</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($nonEmptyRates as $i => $rate)
-                                    @php
-                                        $sessionLabel = $rate['description'] ?: ($rate['group'] ?: 'Session');
-                                    @endphp
-                                    <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
-                                        <td class="px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
-                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: 'N/A' }}</td>
-                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: 'N/A' }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow">
+                            <h3 class="mb-2 flex items-center gap-2 text-lg font-bold text-pink-600">
+                                <i class="fa-regular fa-clock text-pink-600"></i> Rates
+                            </h3>
+                            <hr class="mb-3">
+
+                            <div class="overflow-x-auto rounded-lg">
+                                <table class="min-w-full w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-4 py-2 text-left font-bold text-black">Session</th>
+                                            <th class="px-4 py-2 text-left font-bold text-black">Outcall</th>
+                                            <th class="px-4 py-2 text-left font-bold text-black">In-call</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($nonEmptyRates as $i => $rate)
+                                            @php
+                                                $sessionLabel = $rate['description'] ?: ($rate['group'] ?: 'Session');
+                                            @endphp
+                                            <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
+                                                <td class="px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
+                                                <td class="px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: 'N/A' }}</td>
+                                                <td class="px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: 'N/A' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
                     @endif
+
                     @php
                         $nonEmptyAvailability = array_filter($profile['availability_list'] ?? [], function ($avail) {
                             return !empty($avail['time']) && $avail['time'] !== 'Unavailable';
                         });
                     @endphp
+
                     @if(!empty($nonEmptyAvailability))
-                    <!-- My Availability Section -->
-                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mt-6">
-                        <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
-                            <i class="fa-regular fa-calendar-days text-pink-600"></i> My availability
-                        </h3>
-                        <hr class="mb-3">
-                        <div class="overflow-x-auto rounded-lg">
-                            <table class="min-w-full w-full text-sm">
-                                <thead>
-                                    <tr>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Day</th>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($nonEmptyAvailability as $i => $avail)
-                                    <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
-                                        <td class="px-4 py-2 font-normal text-black">{{ $avail['day'] }}</td>
-                                        <td class="px-4 py-2 font-bold text-black">{{ $avail['time'] }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <div class="mt-0 rounded-2xl border border-gray-100 bg-white p-4 shadow">
+                            <h3 class="mb-2 flex items-center gap-2 text-lg font-bold text-pink-600">
+                                <i class="fa-regular fa-calendar-days text-pink-600"></i> My availability
+                            </h3>
+                            <hr class="mb-3">
+
+                            <div class="overflow-x-auto rounded-lg">
+                                <table class="min-w-full w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-4 py-2 text-left font-bold text-black">Day</th>
+                                            <th class="px-4 py-2 text-left font-bold text-black">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($nonEmptyAvailability as $i => $avail)
+                                            <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
+                                                <td class="px-4 py-2 font-normal text-black">{{ $avail['day'] }}</td>
+                                                <td class="px-4 py-2 font-bold text-black">{{ $avail['time'] }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
                     @endif
 
-
-                      <button
-                            onclick="document.getElementById('report-modal').classList.remove('hidden')"
-                            class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-700 font-semibold hover:bg-gray-50 transition">
-                            <i class="fa-regular fa-flag"></i> Report User
-                        </button>
+                    <button
+                        onclick="document.getElementById('report-modal').classList.remove('hidden')"
+                        class="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 font-semibold text-gray-700 transition hover:bg-gray-50"
+                    >
+                        <i class="fa-regular fa-flag"></i> Report User
+                    </button>
                 </div>
             </div>
         </div>
 
-        <section x-data="{
+        {{-- Nearby listings --}}
+        <section
+            x-data="{
                 page: 0,
                 pageSize: 1,
                 total: {{ count($nearbyProfiles) }},
@@ -625,171 +839,208 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
 
             @if(count($nearbyProfiles) > 0)
-            <div class="relative group">
-                <div class="overflow-hidden px-4 sm:px-6 pb-2">
-                    <div class="flex flex-nowrap gap-4 transition-transform duration-500"
-                        :style="`transform: translateX(-${page * 100}%);`
-                    ">
-                        @foreach($nearbyProfiles as $nearby)
-                            <article class="group relative flex-none min-w-full sm:min-w-[calc(50%-0.75rem)] lg:min-w-[calc(25%-0.75rem)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5">
-                                <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
+                <div class="relative group">
+                    <div class="overflow-hidden px-1 sm:px-6 pb-2">
+                        <div
+                            class="flex flex-nowrap gap-4 transition-transform duration-500"
+                            :style="`transform: translateX(-${page * 100}%);`"
+                        >
+                            @foreach($nearbyProfiles as $nearby)
+                                <article class="group relative flex-none min-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md sm:min-w-[calc(50%-0.5rem)] lg:min-w-[calc(25%-0.75rem)]">
+                                    <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
-                                <div class="relative overflow-hidden rounded-t-2xl">
-                                    @if(!empty($nearby['image']))
-                                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105 h-52" loading="lazy" decoding="async">
-                                    @else
-                                        <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
-                                            <i class="fa-solid fa-image text-4xl"></i>
-                                        </div>
-                                    @endif
-
-                                    <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
-                                        @if(!empty($nearby['verified']))
-                                            <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                                                <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
-                                            </span>
+                                    <div class="relative overflow-hidden rounded-t-2xl">
+                                        @if(!empty($nearby['image']))
+                                            <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="h-52 w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async">
+                                        @else
+                                            <div class="flex h-52 items-center justify-center bg-gray-100 text-gray-400">
+                                                <i class="fa-solid fa-image text-4xl"></i>
+                                            </div>
                                         @endif
-                                        @if(!empty($nearby['active']))
-                                            <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
 
-                                <div class="p-3.5">
-                                    <div class="mb-2 flex items-center justify-between">
-                                        <span class="text-[11px] text-gray-400">{{ $nearby['date'] }}</span>
-                                    </div>
-
-                                    <h3 class="text-sm font-medium text-gray-800 truncate">
-                                        {{ $nearby['name'] }}@if(!empty($nearby['suburb'])) <span class="text-gray-400 font-normal">({{ $nearby['suburb'] }})</span>@endif
-                                    </h3>
-
-                                    <p class="mt-0.5 text-2xl font-bold text-gray-900">{{ $nearby['rate'] }}</p>
-
-                                    @if(!empty($nearby['in_call']) || !empty($nearby['out_call']))
-                                        <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
-                                            @if(!empty($nearby['in_call']))
-                                                <span class="inline-flex items-center gap-1 text-gray-600">
-                                                    <i class="fa-solid fa-house text-emerald-500 text-[10px]" aria-hidden="true"></i>
-                                                    <span class="font-medium">In:</span> {{ $nearby['in_call'] }}
+                                        <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
+                                            @if(!empty($nearby['verified']))
+                                                <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                                    <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
                                                 </span>
                                             @endif
-                                            @if(!empty($nearby['out_call']))
-                                                <span class="inline-flex items-center gap-1 text-gray-600">
-                                                    <i class="fa-solid fa-car text-blue-500 text-[10px]" aria-hidden="true"></i>
-                                                    <span class="font-medium">Out:</span> {{ $nearby['out_call'] }}
+                                            @if(!empty($nearby['active']))
+                                                <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                                    <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
                                                 </span>
                                             @endif
                                         </div>
-                                    @endif
-
-                                    <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
-                                        @if(!empty($nearby['city']) || !empty($nearby['suburb']))
-                                            <span class="inline-flex items-center gap-1">
-                                                <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
-                                                {{ $nearby['suburb'] ?: $nearby['city'] }}
-                                            </span>
-                                        @endif
-                                        @if(!empty($nearby['service_1']))
-                                            <span class="inline-flex items-center gap-1">
-                                                <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
-                                                {{ $nearby['service_1'] }}
-                                            </span>
-                                        @endif
                                     </div>
 
-                                    @if(!empty($nearby['service_2']) || !empty($nearby['description']))
-                                        <div class="mt-2 text-[12px] text-gray-600 line-clamp-2">
-                                            <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
-                                            {{ !empty($nearby['service_2']) ? $nearby['service_2'] : $nearby['description'] }}
+                                    <div class="p-3.5">
+                                        <div class="mb-2 flex items-center justify-between">
+                                            <span class="text-[11px] text-gray-400">{{ $nearby['date'] }}</span>
                                         </div>
-                                    @endif
-                                </div>
-                            </article>
-                        @endforeach
+
+                                        <h3 class="truncate text-sm font-medium text-gray-800">
+                                            {{ $nearby['name'] }}
+                                            @if(!empty($nearby['suburb']))
+                                                <span class="font-normal text-gray-400">({{ $nearby['suburb'] }})</span>
+                                            @endif
+                                        </h3>
+
+                                        <p class="mt-0.5 text-2xl font-bold text-gray-900">{{ $nearby['rate'] }}</p>
+
+                                        @if(!empty($nearby['in_call']) || !empty($nearby['out_call']))
+                                            <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+                                                @if(!empty($nearby['in_call']))
+                                                    <span class="inline-flex items-center gap-1 text-gray-600">
+                                                        <i class="fa-solid fa-house text-[10px] text-emerald-500" aria-hidden="true"></i>
+                                                        <span class="font-medium">In:</span> {{ $nearby['in_call'] }}
+                                                    </span>
+                                                @endif
+                                                @if(!empty($nearby['out_call']))
+                                                    <span class="inline-flex items-center gap-1 text-gray-600">
+                                                        <i class="fa-solid fa-car text-[10px] text-blue-500" aria-hidden="true"></i>
+                                                        <span class="font-medium">Out:</span> {{ $nearby['out_call'] }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endif
+
+                                        <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
+                                            @if(!empty($nearby['city']) || !empty($nearby['suburb']))
+                                                <span class="inline-flex items-center gap-1">
+                                                    <i class="fa-solid fa-location-dot text-[11px] text-pink-500"></i>
+                                                    {{ $nearby['suburb'] ?: $nearby['city'] }}
+                                                </span>
+                                            @endif
+
+                                            @if(!empty($nearby['service_1']))
+                                                <span class="inline-flex items-center gap-1">
+                                                    <i class="fa-solid fa-briefcase text-[11px] text-gray-400"></i>
+                                                    {{ $nearby['service_1'] }}
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        @if(!empty($nearby['service_2']) || !empty($nearby['description']))
+                                            <div class="mt-2 line-clamp-2 text-[12px] text-gray-600">
+                                                <i class="fa-solid fa-gem mr-1 text-[10px] text-blue-500"></i>
+                                                {{ !empty($nearby['service_2']) ? $nearby['service_2'] : $nearby['description'] }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
                     </div>
+
+                    <button
+                        type="button"
+                        @click="prev()"
+                        :disabled="page === 0"
+                        class="absolute left-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-2 border-pink-500 bg-white text-pink-600 shadow-lg transition hover:bg-pink-500 hover:text-white sm:h-12 sm:w-12"
+                        :class="page === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
+                        title="Previous"
+                    >
+                        <i class="fa-solid fa-chevron-left text-lg"></i>
+                    </button>
+
+                    <button
+                        type="button"
+                        @click="next()"
+                        :disabled="page >= pages - 1"
+                        class="absolute right-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-2 border-pink-500 bg-white text-pink-600 shadow-lg transition hover:bg-pink-500 hover:text-white sm:h-12 sm:w-12"
+                        :class="page >= pages - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
+                        title="Next"
+                    >
+                        <i class="fa-solid fa-chevron-right text-lg"></i>
+                    </button>
                 </div>
-
-                <!-- Left Arrow -->
-                <button type="button"
-                    @click="prev()"
-                    :disabled="page === 0"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
-                    :class="page === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
-                    title="Previous"
-                >
-                    <i class="fa-solid fa-chevron-left text-lg"></i>
-                </button>
-
-                <!-- Right Arrow -->
-                <button type="button"
-                    @click="next()"
-                    :disabled="page >= pages - 1"
-                    class="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
-                    :class="page >= pages - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
-                    title="Next"
-                >
-                    <i class="fa-solid fa-chevron-right text-lg"></i>
-                </button>
-            </div>
             @else
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-                <div class="flex flex-col items-center gap-4">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                        <i class="fa-solid fa-users text-gray-400 text-2xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">No nearby listings found</h3>
-                        <p class="text-gray-600 text-sm mb-4">There are currently no other providers in your area.</p>
-                        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-medium transition">
-                            <i class="fa-solid fa-search"></i>
-                            Browse all listings
-                        </a>
+                <div class="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                            <i class="fa-solid fa-users text-2xl text-gray-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-2 text-lg font-semibold text-gray-800">No nearby listings found</h3>
+                            <p class="mb-4 text-sm text-gray-600">There are currently no other providers in your area.</p>
+                            <a href="{{ url('/') }}" class="inline-flex items-center gap-2 rounded-lg bg-pink-500 px-6 py-2 font-medium text-white transition hover:bg-pink-600">
+                                <i class="fa-solid fa-search"></i>
+                                Browse all listings
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
             @endif
         </section>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
-<!-- Report User Modal -->
-<div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6 relative">
-        <button onclick="document.getElementById('report-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold leading-none">&times;</button>
-        <h2 class="text-xl font-bold text-pink-600 mb-1 flex items-center gap-2"><i class="fa-regular fa-flag"></i> Report Profile</h2>
-        <p class="text-sm text-gray-500 mb-4">Help us keep the community safe. All reports are reviewed by our admin team.</p>
+<script src="{{ asset('frontend/js/profile-show.js') }}"></script>
 
-        <div id="report-success" class="hidden mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium">
+<!-- Report User Modal -->
+<div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 px-4">
+    <div class="relative mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <button
+            onclick="document.getElementById('report-modal').classList.add('hidden')"
+            class="absolute right-4 top-4 text-2xl font-bold leading-none text-gray-400 hover:text-gray-700"
+        >
+            &times;
+        </button>
+
+        <h2 class="mb-1 flex items-center gap-2 text-xl font-bold text-pink-600">
+            <i class="fa-regular fa-flag"></i> Report Profile
+        </h2>
+
+        <p class="mb-4 text-sm text-gray-500">
+            Help us keep the community safe. All reports are reviewed by our admin team.
+        </p>
+
+        <div id="report-success" class="hidden mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-700">
             Thank you! Your report has been submitted and will be reviewed by our team.
         </div>
-        <div id="report-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
+
+        <div id="report-error" class="hidden mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"></div>
 
         <form id="report-form" onsubmit="submitReport(event)">
             @csrf
             <input type="hidden" name="provider_profile_id" value="{{ $profile['id'] }}">
 
             <div class="mb-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Your Name <span class="text-gray-400 font-normal">(optional)</span></label>
-                <input type="text" name="reporter_name" placeholder="Enter your name" maxlength="255"
-                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <label class="mb-1 block text-sm font-semibold text-gray-700">
+                    Your Name <span class="font-normal text-gray-400">(optional)</span>
+                </label>
+                <input
+                    type="text"
+                    name="reporter_name"
+                    placeholder="Enter your name"
+                    maxlength="255"
+                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                >
             </div>
 
             <div class="mb-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Your Email <span class="text-gray-400 font-normal">(optional)</span></label>
-                <input type="email" name="reporter_email" placeholder="Enter your email" maxlength="255"
-                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <label class="mb-1 block text-sm font-semibold text-gray-700">
+                    Your Email <span class="font-normal text-gray-400">(optional)</span>
+                </label>
+                <input
+                    type="email"
+                    name="reporter_email"
+                    placeholder="Enter your email"
+                    maxlength="255"
+                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                >
             </div>
 
             <div class="mb-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Reason <span class="text-red-500">*</span></label>
-                <select name="reason" required
-                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <label class="mb-1 block text-sm font-semibold text-gray-700">
+                    Reason <span class="text-red-500">*</span>
+                </label>
+                <select
+                    name="reason"
+                    required
+                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                >
                     <option value="" disabled selected>Select a reason</option>
                     <option value="spam">Spam</option>
                     <option value="fake_profile">Fake Profile</option>
@@ -801,18 +1052,31 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Additional Details <span class="text-gray-400 font-normal">(optional)</span></label>
-                <textarea name="description" rows="3" placeholder="Provide any additional details..." maxlength="2000"
-                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none"></textarea>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">
+                    Additional Details <span class="font-normal text-gray-400">(optional)</span>
+                </label>
+                <textarea
+                    name="description"
+                    rows="3"
+                    placeholder="Provide any additional details..."
+                    maxlength="2000"
+                    class="w-full resize-none rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                ></textarea>
             </div>
 
             <div class="flex gap-3">
-                <button type="button" onclick="document.getElementById('report-modal').classList.add('hidden')"
-                    class="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                <button
+                    type="button"
+                    onclick="document.getElementById('report-modal').classList.add('hidden')"
+                    class="flex-1 rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                >
                     Cancel
                 </button>
-                <button type="submit" id="report-submit-btn"
-                    class="flex-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl px-4 py-2 text-sm font-semibold transition">
+                <button
+                    type="submit"
+                    id="report-submit-btn"
+                    class="flex-1 rounded-xl bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700"
+                >
                     Submit Report
                 </button>
             </div>
@@ -826,6 +1090,4 @@ $profileTags = array_values(array_unique(array_merge(
         profileId: {{ $profile['id'] }}
     };
 </script>
-
-
 @endpush
