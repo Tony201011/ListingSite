@@ -67,6 +67,7 @@ class BabeRankReadMorePageResource extends Resource
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -87,7 +88,10 @@ class BabeRankReadMorePageResource extends Resource
                         'undo',
                         'redo',
                     ])
-                    ->helperText('This content is shown on the Babe Rank Read More page.')
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/babe-rank')
+                    ->fileAttachmentsVisibility('public')
+                    ->helperText('Add content and images here. This content is shown on the Babe Rank Read More page.')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')
