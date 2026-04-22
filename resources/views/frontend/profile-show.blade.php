@@ -962,6 +962,6 @@ $profileTags = array_values(array_unique(array_merge(
 @endsection
 
 @push('scripts')
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 <script src="{{ asset('frontend/js/profile-show.js') }}"></script>
 @endpush
