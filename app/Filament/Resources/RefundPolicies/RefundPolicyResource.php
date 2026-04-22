@@ -57,6 +57,7 @@ class RefundPolicyResource extends Resource
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -77,7 +78,10 @@ class RefundPolicyResource extends Resource
                         'undo',
                         'redo',
                     ])
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/refund')
+                    ->fileAttachmentsVisibility('public'),
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
