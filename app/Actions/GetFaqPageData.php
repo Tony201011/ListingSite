@@ -9,26 +9,26 @@ class GetFaqPageData
 {
     private const PER_PAGE = 8;
 
-    public function execute(int $pageNumber = 1): array
+    public function execute(int $page = 1): array
     {
         $paginator = Faq::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate(self::PER_PAGE, ['*'], 'page', $pageNumber);
+            ->paginate(self::PER_PAGE, ['*'], 'page', $page);
 
         $faqs = collect($paginator->items())
             ->map(fn (Faq $faq) => $this->mapFaq($faq))
             ->values()
             ->all();
 
-        $page = FaqPage::query()
+        $faqPage = FaqPage::query()
             ->where('is_active', true)
             ->latest('updated_at')
             ->first();
 
         return [
-            'page' => $page,
+            'page' => $faqPage,
             'faqs' => $faqs,
             'hasMore' => $paginator->hasMorePages(),
             'nextPage' => $paginator->currentPage() + 1,
