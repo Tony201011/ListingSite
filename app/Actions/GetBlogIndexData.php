@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Models\BlogPost;
+use Illuminate\Support\Facades\Storage;
 
 class GetBlogIndexData
 {
@@ -37,6 +38,7 @@ class GetBlogIndexData
             'excerpt' => $post->excerpt,
             'author' => $post->author,
             'date' => ($post->published_at ?? $post->created_at)?->format('j F Y'),
+            'image' => $post->featured_image ? Storage::url($post->featured_image) : null,
         ];
     }
 }

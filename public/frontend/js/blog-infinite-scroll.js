@@ -4,6 +4,7 @@ function blogInfiniteScroll(config = {}) {
         hasMore: Boolean(config.hasMore),
         nextPage: Number(config.nextPage || 2),
         endpoint: typeof config.endpoint === 'string' ? config.endpoint : '',
+        postBaseUrl: typeof config.postBaseUrl === 'string' ? config.postBaseUrl : '/blog',
         loading: false,
         error: false,
         observer: null,
@@ -90,6 +91,18 @@ function blogInfiniteScroll(config = {}) {
             } finally {
                 this.loading = false;
             }
-        }
+        },
+
+        destroy() {
+            if (this.observer) {
+                this.observer.disconnect();
+                this.observer = null;
+            }
+
+            if (this.scrollHandler) {
+                window.removeEventListener('scroll', this.scrollHandler);
+                this.scrollHandler = null;
+            }
+        },
     };
 }

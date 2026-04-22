@@ -4,6 +4,7 @@ export default function blogInfiniteScroll(config = {}) {
         hasMore: Boolean(config.hasMore),
         nextPage: Number(config.nextPage || 2),
         endpoint: typeof config.endpoint === 'string' ? config.endpoint : '',
+        postBaseUrl: typeof config.postBaseUrl === 'string' ? config.postBaseUrl : '/blog',
         loading: false,
         error: false,
         observer: null,
