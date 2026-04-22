@@ -32,10 +32,6 @@ class GetProfileShowData
             ])
             ->first();
 
-
-            dd($providerProfile);
-
-
         abort_if($providerProfile === null, 404);
 
         $categoryIds = array_filter([
@@ -115,7 +111,7 @@ class GetProfileShowData
                             ->all(),
                     ];
                 })
-                ->filter(fn ($group) => ! empty($group['items']))
+                ->filter(fn ($group) => !empty($group['items']))
                 ->sortBy('heading')
                 ->values()
                 ->all();
@@ -130,8 +126,6 @@ class GetProfileShowData
             ['label' => 'Bust size', 'value' => $categoryNames->get($providerProfile->bust_size_id) ?? '—'],
             ['label' => 'Length', 'value' => $categoryNames->get($providerProfile->your_length_id) ?? '—'],
         ];
-
-        //  dd($profile);
 
         return [
             'profile' => $profile,
@@ -148,18 +142,26 @@ class GetProfileShowData
     {
         $user = $providerProfile->user;
 
-        $images = $user?->profileImages
-            ?->sortByDesc('is_primary')
-            ->map(fn ($img) => $img->image_url)
+        $images = collect($user?->profileImages ?? [])
+            ->sortByDesc('is_primary')
+            ->map(fn ($img) => $this->normalizeMediaUrl($img->image_url ?? null))
             ->filter()
+            ->unique()
             ->values()
-            ->all() ?? [];
+            ->all();
 
-        $videos = $user?->userVideos
-            ?->map(fn ($v) => $v->video_url)
+        $primaryImage = $user?->primaryProfileImage;
+        $primaryImageUrl = $this->normalizeMediaUrl($primaryImage?->image_url ?? null);
+
+        if ($primaryImageUrl && !in_array($primaryImageUrl, $images, true)) {
+            array_unshift($images, $primaryImageUrl);
+        }
+
+        $videos = collect($user?->userVideos ?? [])
+            ->map(fn ($v) => $this->normalizeMediaUrl($v->video_url ?? null))
             ->filter()
             ->values()
-            ->all() ?? [];
+            ->all();
 
         $rates = $user?->rates ?? collect();
 
@@ -177,7 +179,7 @@ class GetProfileShowData
                 $time = 'By appointment';
             } elseif ($avail->all_day) {
                 $time = 'All day';
-            } elseif (! $avail->enabled) {
+            } elseif (!$avail->enabled) {
                 $time = 'Unavailable';
             } else {
                 $from = $avail->from_time ? Carbon::parse($avail->from_time)->format('H:i') : '';
@@ -211,9 +213,6 @@ class GetProfileShowData
         $firstRate = $rates->first();
         $rateDisplay = $this->formatRate($firstRate);
 
-        $primaryImage = $user?->primaryProfileImage;
-        $primaryImageUrl = $primaryImage?->image_url ?? ($images[0] ?? null);
-
         return [
             'id' => $providerProfile->id,
             'slug' => $providerProfile->slug,
@@ -232,7 +231,7 @@ class GetProfileShowData
             'onlyfans' => $providerProfile->onlyfans_username ? "https://onlyfans.com/{$providerProfile->onlyfans_username}" : '',
             'is_verified' => $providerProfile->is_verified,
             'is_featured' => $providerProfile->is_featured,
-            'image' => $primaryImageUrl ?? '',
+            'image' => $primaryImageUrl ?? ($images[0] ?? ''),
             'images' => $images,
             'videos' => $videos,
             'rate' => $rateDisplay,
@@ -355,7 +354,7 @@ class GetProfileShowData
         return $profiles
             ->map(function (ProviderProfile $profile) use ($categoryNames) {
                 $primaryImage = $profile->user?->primaryProfileImage;
-                $imageUrl = $primaryImage?->image_url ?? null;
+                $imageUrl = $this->normalizeMediaUrl($primaryImage?->image_url ?? null);
 
                 $services = $this->resolveIds(
                     array_values(array_filter((array) ($profile->services_provided ?? []))),
@@ -385,5 +384,20 @@ class GetProfileShowData
             })
             ->values()
             ->all();
+    }
+
+    private function normalizeMediaUrl(?string $path): ?string
+    {
+        $path = trim((string) $path);
+
+        if ($path === '') {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }
