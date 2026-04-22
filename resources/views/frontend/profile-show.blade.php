@@ -68,15 +68,17 @@ $profileTags = array_values(array_unique(array_merge(
     $nonEmptyAvailability = array_filter($profile['availability_list'] ?? [], function ($avail) {
         return !empty($avail['time']) && $avail['time'] !== 'Unavailable';
     });
+
+    $profileShowPageConfig = [
+        'favourites' => $userFavourites ?? [],
+        'reportUrl' => route('profile.report'),
+        'profileId' => $profile['id'] ?? null,
+    ];
 @endphp
 
 <div
     class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
-    x-data='profileShowPage(@json([
-        "favourites" => $userFavourites ?? [],
-        "reportUrl" => route("profile.report"),
-        "profileId" => $profile["id"] ?? null,
-    ]))'
+    x-data='profileShowPage(@json($profileShowPageConfig))'
     x-init="init()"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

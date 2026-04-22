@@ -337,6 +337,7 @@ class GetProfileShowData
             ])
             ->orderByDesc('is_featured')
             ->orderByDesc('created_at')
+            ->limit(4)
             ->get();
 
         $serviceIds = $profiles
