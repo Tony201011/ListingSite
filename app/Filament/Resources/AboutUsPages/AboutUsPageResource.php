@@ -57,6 +57,7 @@ class AboutUsPageResource extends Resource
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -78,7 +79,10 @@ class AboutUsPageResource extends Resource
                         'redo',
                     ])
                     ->helperText('Color option is enabled. Use heading levels (H2/H3) for larger text size. Font family follows your site theme.')
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/about-us')
+                    ->fileAttachmentsVisibility('public'),
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
