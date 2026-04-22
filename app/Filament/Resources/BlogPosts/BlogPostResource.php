@@ -93,6 +93,7 @@ class BlogPostResource extends Resource
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -113,6 +114,7 @@ class BlogPostResource extends Resource
                         'undo',
                         'redo',
                     ])
+                    ->helperText('Color option is enabled. Use heading levels (H2/H3) for larger text size. Font family follows your site theme.')
                     ->fileAttachmentsDisk('public')
                     ->fileAttachmentsDirectory('blog/content')
                     ->fileAttachmentsVisibility('public')
