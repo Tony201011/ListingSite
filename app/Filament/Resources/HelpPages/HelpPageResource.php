@@ -59,6 +59,7 @@ class HelpPageResource extends Resource
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -79,7 +80,11 @@ class HelpPageResource extends Resource
                         'undo',
                         'redo',
                     ])
-                    ->columnSpanFull(),
+                    ->helperText('This content is shown on the Help page.')
+                    ->columnSpanFull()
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/help')
+                    ->fileAttachmentsVisibility('public'),
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
