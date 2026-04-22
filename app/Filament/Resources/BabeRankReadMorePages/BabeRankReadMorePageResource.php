@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -56,9 +57,17 @@ class BabeRankReadMorePageResource extends Resource
                     ->maxLength(255),
                 TextInput::make('subtitle')
                     ->maxLength(255),
+                FileUpload::make('image')
+                    ->label('Image')
+                    ->image()
+                    ->disk('public')
+                    ->directory('pages/babe-rank')
+                    ->visibility('public')
+                    ->columnSpanFull(),
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -79,7 +88,10 @@ class BabeRankReadMorePageResource extends Resource
                         'undo',
                         'redo',
                     ])
-                    ->helperText('This content is shown on the Babe Rank Read More page.')
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/babe-rank')
+                    ->fileAttachmentsVisibility('public')
+                    ->helperText('Add content and images here. This content is shown on the Babe Rank Read More page.')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')

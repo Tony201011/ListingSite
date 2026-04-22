@@ -28,6 +28,18 @@
             </h2>
             @endif
 
+            @if(!empty($page?->image))
+            <div class="mb-6 flex justify-center">
+                <img
+                    src="{{ \Illuminate\Support\Facades\Storage::url($page->image) }}"
+                    alt="{{ $pageTitle }}"
+                    class="max-h-64 w-auto rounded-lg object-contain"
+                    loading="lazy"
+                    decoding="async"
+                >
+            </div>
+            @endif
+
             <div class="my-5 flex justify-center">
                 <div class="w-full max-w-[300px]">
                     @php
