@@ -58,6 +58,7 @@ class NaughtyCornerPageResource extends Resource
                     ->maxLength(255),
                 RichEditor::make('content')
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -78,6 +79,9 @@ class NaughtyCornerPageResource extends Resource
                         'undo',
                         'redo',
                     ])
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/naughty-corner')
+                    ->fileAttachmentsVisibility('public')
                     ->helperText('Add offer blocks, links, and images here. This content is shown on the Naughty Corner page.')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
