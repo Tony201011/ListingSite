@@ -56,6 +56,7 @@ class FaqResource extends Resource
                 RichEditor::make('answer')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -76,6 +77,9 @@ class FaqResource extends Resource
                         'undo',
                         'redo',
                     ])
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/faq')
+                    ->fileAttachmentsVisibility('public')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')
