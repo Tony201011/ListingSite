@@ -45,6 +45,8 @@ $profileTags = array_values(array_unique(array_merge(
                 ['label' => 'Length', 'value' => $profile['your_length'] ?? '—'],
             ];
 
+            dd($profile);
+
             $galleryImages = !empty($profile['images']) ? $profile['images'] : (!empty($profile['image']) ? [$profile['image']] : []);
 
             $servicesProvided = !empty($profile['services_provided']) ? $profile['services_provided'] : [];
