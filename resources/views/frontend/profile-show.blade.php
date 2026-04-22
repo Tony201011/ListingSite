@@ -119,6 +119,53 @@
         is_array($profile['attributes'] ?? null) ? $profile['attributes'] : [],
         is_array($profile['services_style'] ?? null) ? $profile['services_style'] : [],
     )));
+
+    $primaryPhone = trim((string) ($profile['phone'] ?? $profile['whatsapp'] ?? ''));
+    $phoneHref = preg_replace('/[^0-9+]/', '', $primaryPhone);
+
+    $galleryImages = !empty($profile['images'])
+        ? $profile['images']
+        : (!empty($profile['image']) ? [$profile['image']] : []);
+
+    $servicesProvided = !empty($profile['services_provided']) ? $profile['services_provided'] : [];
+
+    $availableNow = $profile['available_now'] ?? false;
+    $isOnline = $profile['active'] ?? false;
+    $availableExpiresAt = $profile['available_expires_at'] ?? null;
+
+    $availableTillText = $availableNow && $availableExpiresAt
+        ? ' - AVAILABLE TILL ' . \Carbon\Carbon::parse($availableExpiresAt)->format('g:ia')
+        : '';
+
+    $profileUrl = route('profile.show', ['slug' => $profile['slug']]);
+    $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . '/profile/' . $profile['slug'];
+
+    $introTagline = '';
+    $introText = strip_tags($profile['introduction_line'] ?? '');
+
+    if (!empty($profile['age']) && !empty($introText)) {
+        $introTagline = $profile['age'] . ' - ' . $introText;
+    } elseif (!empty($profile['age'])) {
+        $introTagline = (string) $profile['age'];
+    } elseif (!empty($introText)) {
+        $introTagline = $introText;
+    }
+
+    $safeAbout = strip_tags(
+        (string) ($profile['about'] ?? $profile['description'] ?? ''),
+        '<p><br><ul><ol><li><strong><em><blockquote>'
+    );
+
+    $nonEmptyRates = array_filter($profile['price_list'] ?? [], function ($rate) {
+        return !empty($rate['outcall']) || !empty($rate['incall']);
+    });
+
+    $nonEmptyAvailability = array_filter($profile['availability_list'] ?? [], function ($avail) {
+        return !empty($avail['time']) && $avail['time'] !== 'Unavailable';
+    });
+
+    $videos = $profile['videos'] ?? [];
+    $tours = $profile['tours'] ?? [];
 @endphp
 
 @section('content')
@@ -135,52 +182,6 @@
             <span>›</span>
             <span class="text-gray-700">{{ $profile['name'] }}</span>
         </div>
-
-        @php
-            $primaryPhone = trim((string) ($profile['phone'] ?? $profile['whatsapp'] ?? ''));
-            $phoneHref = preg_replace('/[^0-9+]/', '', $primaryPhone);
-
-            $galleryImages = !empty($profile['images'])
-                ? $profile['images']
-                : (!empty($profile['image']) ? [$profile['image']] : []);
-
-            $servicesProvided = !empty($profile['services_provided']) ? $profile['services_provided'] : [];
-
-            $availableNow = $profile['available_now'] ?? false;
-            $isOnline = $profile['active'] ?? false;
-            $availableExpiresAt = $profile['available_expires_at'] ?? null;
-
-            $availableTillText = $availableNow && $availableExpiresAt
-                ? ' - AVAILABLE TILL ' . \Carbon\Carbon::parse($availableExpiresAt)->format('g:ia')
-                : '';
-
-            $profileUrl = route('profile.show', ['slug' => $profile['slug']]);
-            $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . '/profile/' . $profile['slug'];
-
-            $introTagline = '';
-            $introText = strip_tags($profile['introduction_line'] ?? '');
-
-            if (!empty($profile['age']) && !empty($introText)) {
-                $introTagline = $profile['age'] . ' - ' . $introText;
-            } elseif (!empty($profile['age'])) {
-                $introTagline = (string) $profile['age'];
-            } elseif (!empty($introText)) {
-                $introTagline = $introText;
-            }
-
-            $safeAbout = strip_tags(
-                (string) ($profile['about'] ?? $profile['description'] ?? ''),
-                '<p><br><ul><ol><li><strong><em><blockquote>'
-            );
-
-            $nonEmptyRates = array_filter($profile['price_list'] ?? [], function ($rate) {
-                return !empty($rate['outcall']) || !empty($rate['incall']);
-            });
-
-            $nonEmptyAvailability = array_filter($profile['availability_list'] ?? [], function ($avail) {
-                return !empty($avail['time']) && $avail['time'] !== 'Unavailable';
-            });
-        @endphp
 
         <div class="mx-auto max-w-6xl">
             <div class="mb-8 text-center sm:mb-12">
@@ -216,7 +217,7 @@
                 @if(!empty($prevProfile['slug']))
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}" class="block">
                         <div class="rounded-xl border border-pink-200 bg-white p-1 shadow">
-                            <button class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white" type="button">
+                            <button type="button" class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white">
                                 <span class="flex items-center text-[11px] font-semibold">
                                     <i class="fa-solid fa-arrow-left mr-2"></i> PREVIOUS
                                 </span>
@@ -229,7 +230,7 @@
                 @if(!empty($nextProfile['slug']))
                     <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}" class="block">
                         <div class="rounded-xl border border-pink-200 bg-white p-1 shadow">
-                            <button class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white" type="button">
+                            <button type="button" class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white">
                                 <span class="flex items-center text-[11px] font-semibold">
                                     NEXT <i class="fa-solid fa-arrow-right ml-2"></i>
                                 </span>
@@ -259,7 +260,7 @@
                             class="mobile-nav-fixed hidden md:fixed md:left-3 md:top-1/2 md:z-30 md:flex md:-translate-y-1/2 md:flex-col md:items-center"
                         >
                             <div class="rounded-xl border border-pink-200 bg-white p-0.5 shadow-lg">
-                                <button class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600" type="button">
+                                <button type="button" class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600">
                                     <span class="flex items-center">
                                         <i class="fa-solid fa-arrow-left mr-2 text-xl"></i>
                                         <span class="text-xs font-semibold">PREVIOUS</span>
@@ -286,7 +287,7 @@
                             class="mobile-nav-fixed hidden md:fixed md:right-3 md:top-1/2 md:z-30 md:flex md:-translate-y-1/2 md:flex-col md:items-center"
                         >
                             <div class="rounded-xl border border-pink-200 bg-white p-0.5 shadow-lg">
-                                <button class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600" type="button">
+                                <button type="button" class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600">
                                     <span class="flex items-center">
                                         <span class="text-xs font-semibold">NEXT</span>
                                         <i class="fa-solid fa-arrow-right ml-2 text-xl"></i>
@@ -311,24 +312,21 @@
                         </div>
                     @endif
 
-                    @if(!empty($profile['tours']))
+                    @if(!empty($tours))
                         <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
                             <div class="mb-5">
                                 <div class="mb-2 flex items-start sm:items-center">
                                     <i class="fa-solid fa-location-dot mr-3 mt-1 text-xl text-pink-500 sm:mt-0 sm:text-2xl"></i>
                                     <span class="text-xl font-extrabold text-pink-600 sm:text-2xl">
-                                        Currently touring in {{ $profile['tours'][0]['city'] }}
+                                        Currently touring in {{ $tours[0]['city'] }}
                                     </span>
                                 </div>
                                 <span class="text-base font-bold text-gray-800 sm:text-lg">
-                                    {{ $profile['tours'][0]['from'] }} - {{ $profile['tours'][0]['to'] }}
+                                    {{ $tours[0]['from'] }} - {{ $tours[0]['to'] }}
                                 </span>
                             </div>
 
-                            <a
-                                href="#upcoming-tours"
-                                class="smooth-scroll block rounded-md border border-pink-300 bg-transparent px-5 py-3 text-center text-base font-medium text-pink-400 transition hover:bg-pink-50 sm:px-6 sm:text-lg"
-                            >
+                            <a href="#upcoming-tours" class="smooth-scroll block rounded-md border border-pink-300 bg-transparent px-5 py-3 text-center text-base font-medium text-pink-400 transition hover:bg-pink-50 sm:px-6 sm:text-lg">
                                 See all my other tours
                             </a>
                         </div>
@@ -360,7 +358,7 @@
 
                     @include('components.gallery-modal')
 
-                    @if(!empty($profile['videos'] ?? []))
+                    @if(!empty($videos))
                         <section class="mt-6 overflow-hidden">
                             <div class="mb-6">
                                 <h2 class="text-2xl font-semibold text-pink-600">Videos</h2>
@@ -368,21 +366,21 @@
                             </div>
 
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                @foreach($profile['videos'] ?? [] as $videoUrl)
+                                @foreach($videos as $videoUrl)
                                     @php
-                                        $videoExt = strtolower(pathinfo(parse_url($videoUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
-                                        $videoMime = match ($videoExt) {
-                                            'webm' => 'video/webm',
-                                            'ogg', 'ogv' => 'video/ogg',
-                                            default => 'video/mp4',
-                                        };
+                                        $videoPath = parse_url($videoUrl, PHP_URL_PATH) ?? '';
+                                        $videoExt = strtolower(pathinfo($videoPath, PATHINFO_EXTENSION));
+
+                                        if ($videoExt === 'webm') {
+                                            $videoMime = 'video/webm';
+                                        } elseif ($videoExt === 'ogg' || $videoExt === 'ogv') {
+                                            $videoMime = 'video/ogg';
+                                        } else {
+                                            $videoMime = 'video/mp4';
+                                        }
                                     @endphp
 
-                                    <div
-                                        class="video-card"
-                                        x-data="videoCard('{{ $videoUrl }}')"
-                                        x-init="init()"
-                                    >
+                                    <div class="video-card" x-data="videoCard('{{ $videoUrl }}')" x-init="init()">
                                         <div class="video-shell">
                                             <video
                                                 x-ref="video"
@@ -407,35 +405,20 @@
                                                 Your browser does not support the video tag.
                                             </video>
 
-                                            <div
-                                                class="video-loader"
-                                                x-show="showLoader"
-                                                x-transition.opacity
-                                                x-cloak
-                                            >
+                                            <div class="video-loader" x-show="showLoader" x-transition.opacity x-cloak>
                                                 <div class="flex flex-col items-center gap-3">
                                                     <div class="video-loader-spinner"></div>
                                                     <span class="text-sm font-medium text-white">Loading video...</span>
                                                 </div>
                                             </div>
 
-                                            <div
-                                                class="video-play-overlay"
-                                                x-show="showPlayOverlay"
-                                                x-transition.opacity
-                                                x-cloak
-                                            >
+                                            <div class="video-play-overlay" x-show="showPlayOverlay" x-transition.opacity x-cloak>
                                                 <div class="rounded-full bg-black/50 p-4">
                                                     <i class="fa-solid fa-play text-xl text-white"></i>
                                                 </div>
                                             </div>
 
-                                            <div
-                                                class="video-error"
-                                                x-show="error"
-                                                x-transition.opacity
-                                                x-cloak
-                                            >
+                                            <div class="video-error" x-show="error" x-transition.opacity x-cloak>
                                                 <div class="rounded-xl bg-red-500/90 px-4 py-3 text-white shadow-lg">
                                                     <i class="fa-solid fa-exclamation-triangle mr-2"></i>
                                                     Video unavailable
@@ -448,7 +431,7 @@
                         </section>
                     @endif
 
-                    @if(!empty($profile['tours'] ?? []))
+                    @if(!empty($tours))
                         <section id="upcoming-tours" class="mt-12 scroll-mt-32">
                             <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
                                 <div class="mb-1 flex items-center">
@@ -458,7 +441,7 @@
                                 <div class="mb-6 border-b border-gray-200"></div>
 
                                 <div class="space-y-4">
-                                    @foreach($profile['tours'] ?? [] as $tour)
+                                    @foreach($tours as $tour)
                                         <div class="flex flex-col gap-1 sm:flex-row sm:items-center">
                                             <span class="mr-4 text-base font-bold text-pink-600">{{ $tour['city'] }}</span>
                                             <span class="text-base font-semibold text-gray-900">{{ $tour['from'] }} - {{ $tour['to'] }}</span>
@@ -486,8 +469,8 @@
                         </section>
                     @endif
 
-                    <section id="contact-me-for" class="mt-12 scroll-mt-32">
-                        @if(!empty($servicesProvided))
+                    @if(!empty($servicesProvided))
+                        <section id="contact-me-for" class="mt-12 scroll-mt-32">
                             <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
                                 <div class="mb-1 flex items-center">
                                     <i class="fa-solid fa-comments mr-2 text-xl text-pink-600"></i>
@@ -504,8 +487,8 @@
                                     @endforeach
                                 </ul>
                             </div>
-                        @endif
-                    </section>
+                        </section>
+                    @endif
 
                     <div class="mt-8 mb-2 text-center">
                         <span class="text-base font-medium sm:text-lg" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
@@ -521,7 +504,7 @@
                     <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                             <span class="text-lg font-bold text-black">Info</span>
-                            @if($profile['is_verified'])
+                            @if(!empty($profile['is_verified']))
                                 <span class="inline-flex items-center rounded bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
                                     <i class="fa-solid fa-badge-check mr-1 text-blue-500"></i>
                                     PHOTOS VERIFIED
@@ -577,11 +560,7 @@
                                         <i class="fa-solid fa-mobile-screen text-2xl text-blue-600"></i>
                                         <span class="text-xs font-bold text-black">PHONE:</span>
                                     </div>
-                                    <a
-                                        href="tel:{{ $phoneHref }}"
-                                        aria-label="Call {{ $primaryPhone }}"
-                                        class="mb-2 block break-all text-xl font-bold tracking-wide text-black transition hover:text-pink-600 sm:text-2xl"
-                                    >
+                                    <a href="tel:{{ $phoneHref }}" aria-label="Call {{ $primaryPhone }}" class="mb-2 block break-all text-xl font-bold tracking-wide text-black transition hover:text-pink-600 sm:text-2xl">
                                         {{ $primaryPhone }}
                                     </a>
                                 @endif
@@ -592,12 +571,7 @@
                                         <i class="fa-solid fa-globe text-2xl text-blue-600"></i>
                                         <span class="text-xs font-bold text-black">WEBSITE:</span>
                                     </div>
-                                    <a
-                                        href="{{ $profile['website'] }}"
-                                        class="mb-2 block break-all text-base font-semibold text-pink-600 hover:underline"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
+                                    <a href="{{ $profile['website'] }}" class="mb-2 block break-all text-base font-semibold text-pink-600 hover:underline" target="_blank" rel="noopener noreferrer">
                                         {{ $profile['website'] }}
                                     </a>
                                 @endif
@@ -608,12 +582,7 @@
                                         <i class="fas fa-heart text-2xl text-pink-600"></i>
                                         <span class="text-xs font-bold text-black">ONLYFANS:</span>
                                     </div>
-                                    <a
-                                        href="{{ $profile['onlyfans'] }}"
-                                        class="mb-2 block break-all text-base font-semibold text-pink-600 hover:underline"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
+                                    <a href="{{ $profile['onlyfans'] }}" class="mb-2 block break-all text-base font-semibold text-pink-600 hover:underline" target="_blank" rel="noopener noreferrer">
                                         {{ $profile['onlyfans'] }}
                                     </a>
                                 @endif
@@ -780,7 +749,7 @@
                                     <tbody>
                                         @foreach($nonEmptyRates as $i => $rate)
                                             @php
-                                                $sessionLabel = $rate['description'] ?: ($rate['group'] ?: 'Session');
+                                                $sessionLabel = !empty($rate['description']) ? $rate['description'] : (!empty($rate['group']) ? $rate['group'] : 'Session');
                                             @endphp
                                             <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
                                                 <td class="px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
@@ -858,20 +827,11 @@
                                     Help us keep the community safe. All reports are reviewed by our admin team.
                                 </p>
 
-                                <div
-                                    x-show="success"
-                                    x-cloak
-                                    class="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-700"
-                                >
+                                <div x-show="success" x-cloak class="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-700">
                                     Thank you! Your report has been submitted and will be reviewed by our team.
                                 </div>
 
-                                <div
-                                    x-show="error"
-                                    x-text="error"
-                                    x-cloak
-                                    class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-                                ></div>
+                                <div x-show="error" x-text="error" x-cloak class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"></div>
 
                                 <form x-ref="form" @submit.prevent="submit()">
                                     @csrf
@@ -881,37 +841,21 @@
                                         <label class="mb-1 block text-sm font-semibold text-gray-700">
                                             Your Name <span class="font-normal text-gray-400">(optional)</span>
                                         </label>
-                                        <input
-                                            type="text"
-                                            name="reporter_name"
-                                            placeholder="Enter your name"
-                                            maxlength="255"
-                                            class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                                        >
+                                        <input type="text" name="reporter_name" placeholder="Enter your name" maxlength="255" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="mb-1 block text-sm font-semibold text-gray-700">
                                             Your Email <span class="font-normal text-gray-400">(optional)</span>
                                         </label>
-                                        <input
-                                            type="email"
-                                            name="reporter_email"
-                                            placeholder="Enter your email"
-                                            maxlength="255"
-                                            class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                                        >
+                                        <input type="email" name="reporter_email" placeholder="Enter your email" maxlength="255" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="mb-1 block text-sm font-semibold text-gray-700">
                                             Reason <span class="text-red-500">*</span>
                                         </label>
-                                        <select
-                                            name="reason"
-                                            required
-                                            class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                                        >
+                                        <select name="reason" required class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
                                             <option value="" disabled selected>Select a reason</option>
                                             <option value="spam">Spam</option>
                                             <option value="fake_profile">Fake Profile</option>
@@ -926,21 +870,11 @@
                                         <label class="mb-1 block text-sm font-semibold text-gray-700">
                                             Additional Details <span class="font-normal text-gray-400">(optional)</span>
                                         </label>
-                                        <textarea
-                                            name="description"
-                                            rows="3"
-                                            placeholder="Provide any additional details..."
-                                            maxlength="2000"
-                                            class="w-full resize-none rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                                        ></textarea>
+                                        <textarea name="description" rows="3" placeholder="Provide any additional details..." maxlength="2000" class="w-full resize-none rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"></textarea>
                                     </div>
 
                                     <div class="flex gap-3">
-                                        <button
-                                            type="button"
-                                            @click="hide()"
-                                            class="flex-1 rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                                        >
+                                        <button type="button" @click="hide()" class="flex-1 rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">
                                             Cancel
                                         </button>
 
@@ -990,10 +924,7 @@
             @if(count($nearbyProfiles) > 0)
                 <div class="group relative">
                     <div class="overflow-hidden px-1 pb-2 sm:px-6">
-                        <div
-                            class="flex flex-nowrap gap-4 transition-transform duration-500"
-                            :style="`transform: translateX(-${page * 100}%);`"
-                        >
+                        <div class="flex flex-nowrap gap-4 transition-transform duration-500" :style="`transform: translateX(-${page * 100}%);`">
                             @foreach($nearbyProfiles as $nearby)
                                 <article class="group relative min-w-full flex-none overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md sm:min-w-[calc(50%-0.5rem)] lg:min-w-[calc(25%-0.75rem)]">
                                     <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
@@ -1039,13 +970,13 @@
                                             <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
                                                 @if(!empty($nearby['in_call']))
                                                     <span class="inline-flex items-center gap-1 text-gray-600">
-                                                        <i class="fa-solid fa-house text-[10px] text-emerald-500" aria-hidden="true"></i>
+                                                        <i class="fa-solid fa-house text-[10px] text-emerald-500"></i>
                                                         <span class="font-medium">In:</span> {{ $nearby['in_call'] }}
                                                     </span>
                                                 @endif
                                                 @if(!empty($nearby['out_call']))
                                                     <span class="inline-flex items-center gap-1 text-gray-600">
-                                                        <i class="fa-solid fa-car text-[10px] text-blue-500" aria-hidden="true"></i>
+                                                        <i class="fa-solid fa-car text-[10px] text-blue-500"></i>
                                                         <span class="font-medium">Out:</span> {{ $nearby['out_call'] }}
                                                     </span>
                                                 @endif
