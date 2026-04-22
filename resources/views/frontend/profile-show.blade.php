@@ -72,11 +72,11 @@ $profileTags = array_values(array_unique(array_merge(
 
 <div
     class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
-    x-data="profileShowPage({
-        favourites: {{ Js::from($userFavourites ?? []) }},
-        reportUrl: '{{ route('profile.report') }}',
-        profileId: {{ $profile['id'] }}
-    })"
+    x-data='profileShowPage(@json([
+        "favourites" => $userFavourites ?? [],
+        "reportUrl" => route("profile.report"),
+        "profileId" => $profile["id"] ?? null,
+    ]))'
     x-init="init()"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -119,9 +119,7 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                <!-- Gallery -->
                 <div class="md:col-span-2 flex flex-col gap-4 relative order-2 md:order-1">
-                    <!-- Previous Button -->
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
                        x-data="{ visible: false }"
                        x-show="visible"
@@ -151,11 +149,11 @@ $profileTags = array_values(array_unique(array_merge(
                                 class="lazy-img rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer"
                                 loading="lazy"
                                 decoding="async"
+                                onerror="this.onerror=null;this.src='{{ asset('frontend/images/placeholder.jpg') }}';"
                             >
                         @endforeach
                     </div>
 
-                    <!-- Next Button -->
                     <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
                        x-data="{ visible: false }"
                        x-show="visible"
@@ -177,7 +175,6 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     </a>
 
-                    <!-- Currently Touring -->
                     @if(!empty($profile['tours']))
                         <div class="mb-6">
                             <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
@@ -214,6 +211,7 @@ $profileTags = array_values(array_unique(array_merge(
                                 class="lazy-img rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer"
                                 loading="lazy"
                                 decoding="async"
+                                onerror="this.onerror=null;this.src='{{ asset('frontend/images/placeholder.jpg') }}';"
                             >
                         @endforeach
                     </div>
@@ -280,7 +278,6 @@ $profileTags = array_values(array_unique(array_merge(
                         </section>
                     @endif
 
-                    <!-- My Upcoming Tours -->
                     @if(!empty($profile['tours'] ?? []))
                         <section id="upcoming-tours" class="mt-12 scroll-mt-32">
                             <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
@@ -304,7 +301,6 @@ $profileTags = array_values(array_unique(array_merge(
                         <br>
                     @endif
 
-                    <!-- Profile Message -->
                     @if(!empty($profile['profile_message']))
                         <section class="mt-12">
                             <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
@@ -321,7 +317,6 @@ $profileTags = array_values(array_unique(array_merge(
                         <br>
                     @endif
 
-                    <!-- Contact Me For -->
                     <section id="contact-me-for" class="mt-12 scroll-mt-32">
                         @if(!empty($servicesProvided))
                             <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
@@ -345,7 +340,6 @@ $profileTags = array_values(array_unique(array_merge(
                         @endif
                     </section>
 
-                    <!-- Short Link -->
                     <div class="text-center mb-8 mt-8">
                         <span class="text-lg font-medium" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
                             Find me easily with this short link:
@@ -356,7 +350,6 @@ $profileTags = array_values(array_unique(array_merge(
                     </div>
                 </div>
 
-                <!-- Sidebar -->
                 <div class="flex flex-col gap-6 order-1 md:order-2">
                     <div class="bg-white rounded-2xl shadow p-6 border border-gray-100 mb-6">
                         <div class="flex items-center justify-between mb-4">
@@ -653,11 +646,9 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
         </div>
 
-        <!-- Nearby Listings: 3 at a time on desktop, 2 on tablet, 1 on mobile -->
         <section
             x-data="nearbySlider({{ count($nearbyProfiles) }})"
             x-init="init()"
-            @resize.window="handleResize()"
             class="mt-16 overflow-hidden"
         >
             <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -694,6 +685,7 @@ $profileTags = array_values(array_unique(array_merge(
                                                     class="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105"
                                                     loading="lazy"
                                                     decoding="async"
+                                                    onerror="this.onerror=null;this.src='{{ asset('frontend/images/placeholder.jpg') }}';"
                                                 >
                                             @else
                                                 <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-72">
@@ -831,7 +823,6 @@ $profileTags = array_values(array_unique(array_merge(
         </section>
     </div>
 
-    <!-- Report User Modal -->
     <div
         id="report-modal"
         x-show="reportModalOpen"
@@ -962,6 +953,5 @@ $profileTags = array_values(array_unique(array_merge(
 @endsection
 
 @push('scripts')
-
 <script src="{{ asset('frontend/js/profile-show.js') }}"></script>
 @endpush
