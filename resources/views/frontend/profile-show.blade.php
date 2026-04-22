@@ -234,27 +234,38 @@ $profileTags = array_values(array_unique(array_merge(
                                 @foreach($profile['videos'] ?? [] as $videoUrl)
                                     <div class="relative" x-data="{ playing: false, error: false }">
                                         <video
+                                            src="{{ $videoUrl }}"
                                             controls
+                                            playsinline
                                             preload="metadata"
                                             class="rounded-xl w-full h-64 bg-black object-cover"
                                             x-pauseothers
-                                            x-on:play="playing = true"
+                                            x-on:loadeddata="error = false"
+                                            x-on:canplay="error = false"
+                                            x-on:play="playing = true; error = false"
                                             x-on:pause="playing = false"
                                             x-on:ended="playing = false"
                                             x-on:error="error = true; playing = false"
-                                            x-show="!error"
-                                            poster="https://picsum.photos/400/225?random=1"
                                         >
-                                            <source src="{{ $videoUrl }}" type="video/mp4">
-                                            <source src="{{ $videoUrl }}" type="video/webm">
-                                            <source src="{{ $videoUrl }}" type="video/ogg">
                                             Your browser does not support the video tag.
                                         </video>
 
-                                        <div x-show="error" class="absolute inset-0 flex items-center justify-center">
-                                            <div class="bg-red-500 bg-opacity-75 text-white px-4 py-2 rounded">
-                                                <i class="fa-solid fa-exclamation-triangle mr-2"></i>
-                                                Video unavailable
+                                        <div x-show="error" x-cloak class="absolute inset-0 flex items-center justify-center rounded-xl bg-black/70">
+                                            <div class="text-center px-4">
+                                                <div class="bg-red-500/90 text-white px-4 py-2 rounded mb-3 inline-flex items-center">
+                                                    <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+                                                    Video unavailable
+                                                </div>
+                                                <div>
+                                                    <a
+                                                        href="{{ $videoUrl }}"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        class="inline-flex items-center gap-2 text-sm font-semibold text-white underline"
+                                                    >
+                                                        Open video in new tab
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -633,7 +644,7 @@ $profileTags = array_values(array_unique(array_merge(
 
                     <button
                         type="button"
-                        @click="reportModalOpen = true"
+                        @click="openReportModal()"
                         class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-700 font-semibold hover:bg-gray-50 transition"
                     >
                         <i class="fa-regular fa-flag"></i> Report User
@@ -642,8 +653,13 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
         </div>
 
-        <!-- Nearby Listings: one full card at a time -->
-        <section x-data="nearbySlider({{ count($nearbyProfiles) }})" class="mt-16 overflow-hidden">
+        <!-- Nearby Listings: 3 at a time on desktop, 2 on tablet, 1 on mobile -->
+        <section
+            x-data="nearbySlider({{ count($nearbyProfiles) }})"
+            x-init="init()"
+            @resize.window="handleResize()"
+            class="mt-16 overflow-hidden"
+        >
             <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex flex-col gap-1">
                     <h2 class="text-2xl font-semibold text-pink-600">Nearby listings</h2>
@@ -653,15 +669,19 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
 
             @if(count($nearbyProfiles) > 0)
-                <div class="relative max-w-sm mx-auto">
-                    <div class="overflow-hidden rounded-2xl">
+                <div class="relative">
+                    <div x-ref="viewport" class="overflow-hidden rounded-2xl">
                         <div
-                            class="flex transition-transform duration-500 ease-in-out"
-                            :style="`transform: translateX(-${page * 100}%);`"
+                            x-ref="track"
+                            class="flex transition-transform duration-500 ease-in-out will-change-transform"
+                            :style="`transform: translateX(-${translateX}px);`"
                         >
                             @foreach($nearbyProfiles as $nearby)
-                                <div class="w-full flex-shrink-0 px-2">
-                                    <article class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300">
+                                <div
+                                    class="flex-shrink-0 px-2"
+                                    :style="`width: ${itemWidth}px;`"
+                                >
+                                    <article class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 h-full">
                                         <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}"
                                            class="absolute inset-0 z-10"
                                            aria-label="View profile for {{ $nearby['name'] }}"></a>
@@ -761,7 +781,7 @@ $profileTags = array_values(array_unique(array_merge(
                         type="button"
                         @click="prev()"
                         :disabled="isFirst"
-                        class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
+                        class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
                         :class="isFirst ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
                         title="Previous"
                     >
@@ -772,23 +792,23 @@ $profileTags = array_values(array_unique(array_merge(
                         type="button"
                         @click="next()"
                         :disabled="isLast"
-                        class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
+                        class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
                         :class="isLast ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
                         title="Next"
                     >
                         <i class="fa-solid fa-chevron-right text-lg"></i>
                     </button>
 
-                    <div class="mt-4 flex items-center justify-center gap-2">
-                        @foreach($nearbyProfiles as $index => $nearby)
+                    <div class="mt-4 flex items-center justify-center gap-2" x-show="totalPages > 1">
+                        <template x-for="index in totalPages" :key="index">
                             <button
                                 type="button"
-                                @click="goTo({{ $index }})"
-                                :class="page === {{ $index }} ? 'bg-pink-600 w-6' : 'bg-gray-300 w-2.5'"
+                                @click="goTo(index - 1)"
+                                :class="page === (index - 1) ? 'bg-pink-600 w-6' : 'bg-gray-300 w-2.5'"
                                 class="h-2.5 rounded-full transition-all duration-300"
-                                aria-label="Go to slide {{ $index + 1 }}"
+                                :aria-label="`Go to slide ${index}`"
                             ></button>
-                        @endforeach
+                        </template>
                     </div>
                 </div>
             @else
@@ -817,10 +837,18 @@ $profileTags = array_values(array_unique(array_merge(
         x-show="reportModalOpen"
         x-cloak
         x-transition.opacity
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+        x-on:keydown.escape.window="closeReportModal()"
+        @click.self="closeReportModal()"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 px-4"
     >
         <div
             @click.away="closeReportModal()"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 scale-95"
             class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6 relative"
         >
             <button
@@ -849,7 +877,7 @@ $profileTags = array_values(array_unique(array_merge(
                 class="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"
             ></div>
 
-            <form id="report-form" @submit.prevent="submitReport">
+            <form id="report-form" @submit.prevent="submitReport($event)">
                 @csrf
                 <input type="hidden" name="provider_profile_id" :value="profileId">
 

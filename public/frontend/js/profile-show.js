@@ -125,32 +125,56 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        openReportModal() {
+            this.reportError = '';
+            this.reportSuccess = '';
+            this.reportSubmitting = false;
+            this.reportModalOpen = true;
+            document.body.classList.add('overflow-hidden');
+        },
+
         closeReportModal() {
             this.reportModalOpen = false;
             this.reportSubmitting = false;
             this.reportError = '';
             this.reportSuccess = '';
+            document.body.classList.remove('overflow-hidden');
         },
 
         async submitReport(event) {
+            const form = event?.target;
+
+            if (!form) {
+                this.reportError = 'Unable to submit report. Please refresh and try again.';
+                return;
+            }
+
             this.reportSubmitting = true;
             this.reportError = '';
             this.reportSuccess = '';
 
-            const form = event.target;
             const formData = new FormData(form);
 
             try {
                 const response = await fetch(this.reportUrl, {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': formData.get('_token'),
+                        'X-CSRF-TOKEN': formData.get('_token') || '',
                         'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: formData,
                 });
 
-                const data = await response.json();
+                let data = {};
+                const contentType = response.headers.get('content-type') || '';
+
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    data = { message: text || 'Unexpected server response.' };
+                }
 
                 if (response.ok) {
                     this.reportSuccess = 'Thank you! Your report has been submitted and will be reviewed by our team.';
@@ -163,13 +187,14 @@ document.addEventListener('alpine:init', () => {
 
                     setTimeout(() => {
                         this.closeReportModal();
-                    }, 3000);
+                    }, 2000);
                 } else {
                     this.reportError = data.errors
                         ? Object.values(data.errors).flat().join(' ')
                         : (data.message || 'An error occurred. Please try again.');
                 }
             } catch (error) {
+                console.error('Report submission failed:', error);
                 this.reportError = 'A network error occurred. Please try again.';
             } finally {
                 this.reportSubmitting = false;
@@ -180,31 +205,83 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('nearbySlider', (total = 0) => ({
         page: 0,
         total: total,
+        itemsPerView: 1,
+        itemWidth: 0,
+        translateX: 0,
+
+        init() {
+            this.handleResize();
+
+            this.$nextTick(() => {
+                this.updateDimensions();
+            });
+        },
+
+        get totalPages() {
+            if (!this.total) return 0;
+            return Math.ceil(this.total / this.itemsPerView);
+        },
 
         get isFirst() {
             return this.page <= 0;
         },
 
         get isLast() {
-            return this.page >= this.total - 1;
+            return this.page >= this.totalPages - 1;
+        },
+
+        getItemsPerView() {
+            if (window.innerWidth >= 1024) return 3;
+            if (window.innerWidth >= 768) return 2;
+            return 1;
+        },
+
+        handleResize() {
+            const oldItemsPerView = this.itemsPerView;
+            this.itemsPerView = this.getItemsPerView();
+
+            this.$nextTick(() => {
+                this.updateDimensions();
+
+                if (oldItemsPerView !== this.itemsPerView && this.page > this.totalPages - 1) {
+                    this.page = Math.max(this.totalPages - 1, 0);
+                    this.updateTranslate();
+                }
+            });
+        },
+
+        updateDimensions() {
+            const viewport = this.$refs.viewport;
+            if (!viewport) return;
+
+            const viewportWidth = viewport.clientWidth;
+            this.itemWidth = viewportWidth / this.itemsPerView;
+            this.updateTranslate();
+        },
+
+        updateTranslate() {
+            const viewport = this.$refs.viewport;
+            if (!viewport) return;
+
+            this.translateX = this.page * viewport.clientWidth;
         },
 
         prev() {
-            if (!this.isFirst) {
-                this.page--;
-            }
+            if (this.isFirst) return;
+            this.page--;
+            this.updateTranslate();
         },
 
         next() {
-            if (!this.isLast) {
-                this.page++;
-            }
+            if (this.isLast) return;
+            this.page++;
+            this.updateTranslate();
         },
 
         goTo(index) {
-            if (index >= 0 && index < this.total) {
-                this.page = index;
-            }
+            if (index < 0 || index >= this.totalPages) return;
+            this.page = index;
+            this.updateTranslate();
         }
     }));
 });
