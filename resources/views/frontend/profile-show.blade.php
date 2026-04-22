@@ -10,6 +10,8 @@
 
     .profile-page-content video {
         display: block;
+        width: 100%;
+        height: 100%;
     }
 
     .mobile-safe-card {
@@ -28,6 +30,64 @@
     .profile-content-html video {
         max-width: 100%;
         height: auto;
+    }
+
+    .video-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1rem;
+        background: #000;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .video-shell {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+    }
+
+    .video-loader,
+    .video-error,
+    .video-play-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.25s ease;
+    }
+
+    .video-loader {
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 3;
+    }
+
+    .video-play-overlay {
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .video-error {
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 4;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .video-loader-spinner {
+        width: 42px;
+        height: 42px;
+        border-radius: 9999px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     @media (max-width: 767px) {
@@ -64,7 +124,8 @@
 @section('content')
 <div
     class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
-    x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
+    x-data="profilePage({ favourites: {{ Js::from($userFavourites ?? []) }} })"
+    x-init="init()"
 >
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
@@ -78,20 +139,6 @@
         @php
             $primaryPhone = trim((string) ($profile['phone'] ?? $profile['whatsapp'] ?? ''));
             $phoneHref = preg_replace('/[^0-9+]/', '', $primaryPhone);
-            $whatsAppHref = preg_replace('/[^0-9]/', '', $phoneHref);
-
-            $priceList = collect($profile['price_list'] ?? [])->values();
-            $availabilityList = collect($profile['availability_list'] ?? [])->values();
-
-            $profileStats = $profileStats ?? [
-                ['label' => 'Age group', 'value' => $profile['age_group'] ?? '—'],
-                ['label' => 'Ethnicity', 'value' => $profile['ethnicity'] ?? '—'],
-                ['label' => 'Hair color', 'value' => $profile['hair_color'] ?? '—'],
-                ['label' => 'Hair length', 'value' => $profile['hair_length'] ?? '—'],
-                ['label' => 'Body type', 'value' => $profile['body_type'] ?? '—'],
-                ['label' => 'Bust size', 'value' => $profile['bust_size'] ?? '—'],
-                ['label' => 'Length', 'value' => $profile['your_length'] ?? '—'],
-            ];
 
             $galleryImages = !empty($profile['images'])
                 ? $profile['images']
@@ -125,6 +172,14 @@
                 (string) ($profile['about'] ?? $profile['description'] ?? ''),
                 '<p><br><ul><ol><li><strong><em><blockquote>'
             );
+
+            $nonEmptyRates = array_filter($profile['price_list'] ?? [], function ($rate) {
+                return !empty($rate['outcall']) || !empty($rate['incall']);
+            });
+
+            $nonEmptyAvailability = array_filter($profile['availability_list'] ?? [], function ($avail) {
+                return !empty($avail['time']) && $avail['time'] !== 'Unavailable';
+            });
         @endphp
 
         <div class="mx-auto max-w-6xl">
@@ -157,12 +212,11 @@
                 @endif
             </div>
 
-            {{-- Mobile prev / next --}}
             <div class="mb-4 grid grid-cols-2 gap-3 md:hidden">
                 @if(!empty($prevProfile['slug']))
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}" class="block">
                         <div class="rounded-xl border border-pink-200 bg-white p-1 shadow">
-                            <button class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white">
+                            <button class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white" type="button">
                                 <span class="flex items-center text-[11px] font-semibold">
                                     <i class="fa-solid fa-arrow-left mr-2"></i> PREVIOUS
                                 </span>
@@ -175,7 +229,7 @@
                 @if(!empty($nextProfile['slug']))
                     <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}" class="block">
                         <div class="rounded-xl border border-pink-200 bg-white p-1 shadow">
-                            <button class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white">
+                            <button class="flex min-h-[52px] w-full flex-col items-center justify-center rounded-xl bg-pink-500 px-3 py-2 text-white" type="button">
                                 <span class="flex items-center text-[11px] font-semibold">
                                     NEXT <i class="fa-solid fa-arrow-right ml-2"></i>
                                 </span>
@@ -186,11 +240,9 @@
                 @endif
             </div>
 
-            <div class="grid grid-cols-1 gap-6 items-start lg:grid-cols-3">
-                {{-- Gallery / content --}}
-                <div class="order-1 flex min-w-0 flex-col gap-6 lg:order-1 lg:col-span-2">
+            <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+                <div class="order-1 flex min-w-0 flex-col gap-6 lg:col-span-2">
 
-                    {{-- Desktop prev --}}
                     @if(!empty($prevProfile['slug']))
                         <a
                             href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
@@ -207,7 +259,7 @@
                             class="mobile-nav-fixed hidden md:fixed md:left-3 md:top-1/2 md:z-30 md:flex md:-translate-y-1/2 md:flex-col md:items-center"
                         >
                             <div class="rounded-xl border border-pink-200 bg-white p-0.5 shadow-lg">
-                                <button class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600">
+                                <button class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600" type="button">
                                     <span class="flex items-center">
                                         <i class="fa-solid fa-arrow-left mr-2 text-xl"></i>
                                         <span class="text-xs font-semibold">PREVIOUS</span>
@@ -218,7 +270,6 @@
                         </a>
                     @endif
 
-                    {{-- Desktop next --}}
                     @if(!empty($nextProfile['slug']))
                         <a
                             href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
@@ -235,7 +286,7 @@
                             class="mobile-nav-fixed hidden md:fixed md:right-3 md:top-1/2 md:z-30 md:flex md:-translate-y-1/2 md:flex-col md:items-center"
                         >
                             <div class="rounded-xl border border-pink-200 bg-white p-0.5 shadow-lg">
-                                <button class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600">
+                                <button class="flex min-h-[60px] min-w-[110px] flex-col items-center rounded-xl bg-pink-500 px-4 py-2 font-bold text-white shadow-lg hover:bg-pink-600" type="button">
                                     <span class="flex items-center">
                                         <span class="text-xs font-semibold">NEXT</span>
                                         <i class="fa-solid fa-arrow-right ml-2 text-xl"></i>
@@ -246,7 +297,6 @@
                         </a>
                     @endif
 
-                    {{-- Top gallery --}}
                     @if(count($galleryImages) > 0)
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             @foreach(array_slice($galleryImages, 0, 2) as $img)
@@ -261,33 +311,29 @@
                         </div>
                     @endif
 
-                    {{-- Currently touring --}}
                     @if(!empty($profile['tours']))
-                        <div class="mb-0">
-                            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
-                                <div class="mb-5">
-                                    <div class="mb-2 flex items-start sm:items-center">
-                                        <i class="fa-solid fa-location-dot mr-3 mt-1 text-xl text-pink-500 sm:mt-0 sm:text-2xl"></i>
-                                        <span class="text-xl font-extrabold text-pink-600 sm:text-2xl">
-                                            Currently touring in {{ $profile['tours'][0]['city'] }}
-                                        </span>
-                                    </div>
-                                    <span class="text-base font-bold text-gray-800 sm:text-lg">
-                                        {{ $profile['tours'][0]['from'] }} - {{ $profile['tours'][0]['to'] }}
+                        <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
+                            <div class="mb-5">
+                                <div class="mb-2 flex items-start sm:items-center">
+                                    <i class="fa-solid fa-location-dot mr-3 mt-1 text-xl text-pink-500 sm:mt-0 sm:text-2xl"></i>
+                                    <span class="text-xl font-extrabold text-pink-600 sm:text-2xl">
+                                        Currently touring in {{ $profile['tours'][0]['city'] }}
                                     </span>
                                 </div>
-
-                                <a
-                                    href="#upcoming-tours"
-                                    class="smooth-scroll block rounded-md border border-pink-300 bg-transparent px-5 py-3 text-center text-base font-medium text-pink-400 transition hover:bg-pink-50 sm:px-6 sm:text-lg"
-                                >
-                                    See all my other tours
-                                </a>
+                                <span class="text-base font-bold text-gray-800 sm:text-lg">
+                                    {{ $profile['tours'][0]['from'] }} - {{ $profile['tours'][0]['to'] }}
+                                </span>
                             </div>
+
+                            <a
+                                href="#upcoming-tours"
+                                class="smooth-scroll block rounded-md border border-pink-300 bg-transparent px-5 py-3 text-center text-base font-medium text-pink-400 transition hover:bg-pink-50 sm:px-6 sm:text-lg"
+                            >
+                                See all my other tours
+                            </a>
                         </div>
                     @endif
 
-                    {{-- About --}}
                     @if(!empty($safeAbout))
                         <div class="mobile-safe-card">
                             <h2 class="mb-2 text-2xl font-semibold text-pink-600">About me</h2>
@@ -298,7 +344,6 @@
                         </div>
                     @endif
 
-                    {{-- More gallery --}}
                     @if(count($galleryImages) > 2)
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                             @foreach(array_slice($galleryImages, 2) as $img)
@@ -315,25 +360,8 @@
 
                     @include('components.gallery-modal')
 
-                    {{-- Videos --}}
                     @if(!empty($profile['videos'] ?? []))
-                        <section
-                            class="mt-6 overflow-hidden"
-                            x-data="{
-                                init() {
-                                    document.addEventListener('play', (e) => {
-                                        if (e.target.tagName === 'VIDEO') {
-                                            document.querySelectorAll('video').forEach(video => {
-                                                if (video !== e.target) {
-                                                    video.pause();
-                                                }
-                                            });
-                                        }
-                                    }, true);
-                                }
-                            }"
-                            x-init="init()"
-                        >
+                        <section class="mt-6 overflow-hidden">
                             <div class="mb-6">
                                 <h2 class="text-2xl font-semibold text-pink-600">Videos</h2>
                                 <hr class="mt-2">
@@ -341,61 +369,74 @@
 
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 @foreach($profile['videos'] ?? [] as $videoUrl)
+                                    @php
+                                        $videoExt = strtolower(pathinfo(parse_url($videoUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+                                        $videoMime = match ($videoExt) {
+                                            'webm' => 'video/webm',
+                                            'ogg', 'ogv' => 'video/ogg',
+                                            default => 'video/mp4',
+                                        };
+                                    @endphp
+
                                     <div
-                                        class="relative overflow-hidden rounded-2xl bg-black shadow"
-                                        x-data="{ loading: true, playing: false, error: false }"
+                                        class="video-card"
+                                        x-data="videoCard('{{ $videoUrl }}')"
+                                        x-init="init()"
                                     >
-                                        <div class="relative aspect-video w-full bg-black">
+                                        <div class="video-shell">
                                             <video
+                                                x-ref="video"
                                                 controls
                                                 playsinline
                                                 preload="metadata"
                                                 class="h-full w-full object-cover"
-                                                x-on:loadstart="loading = true; error = false"
-                                                x-on:loadedmetadata="loading = false"
-                                                x-on:canplay="loading = false"
-                                                x-on:waiting="loading = true"
-                                                x-on:playing="loading = false; playing = true"
-                                                x-on:pause="playing = false"
-                                                x-on:ended="playing = false"
-                                                x-on:error="loading = false; playing = false; error = true"
+                                                @loadstart="onLoadStart()"
+                                                @loadedmetadata="onReady()"
+                                                @loadeddata="onReady()"
+                                                @canplay="onReady()"
+                                                @canplaythrough="onReady()"
+                                                @playing="onPlaying()"
+                                                @pause="onPause()"
+                                                @waiting="onWaiting()"
+                                                @stalled="onWaiting()"
+                                                @suspend="onSuspend()"
+                                                @ended="onEnded()"
+                                                @error="onError()"
                                             >
-                                                <source src="{{ $videoUrl }}" type="video/mp4">
-                                                <source src="{{ $videoUrl }}" type="video/webm">
-                                                <source src="{{ $videoUrl }}" type="video/ogg">
+                                                <source src="{{ $videoUrl }}" type="{{ $videoMime }}">
                                                 Your browser does not support the video tag.
                                             </video>
 
-                                            {{-- loader --}}
                                             <div
-                                                x-show="loading && !error"
+                                                class="video-loader"
+                                                x-show="showLoader"
                                                 x-transition.opacity
-                                                class="absolute inset-0 flex items-center justify-center bg-black/35"
+                                                x-cloak
                                             >
                                                 <div class="flex flex-col items-center gap-3">
-                                                    <div class="h-10 w-10 animate-spin rounded-full border-4 border-white/30 border-t-white"></div>
+                                                    <div class="video-loader-spinner"></div>
                                                     <span class="text-sm font-medium text-white">Loading video...</span>
                                                 </div>
                                             </div>
 
-                                            {{-- play icon when paused only --}}
                                             <div
-                                                x-show="!playing && !loading && !error"
+                                                class="video-play-overlay"
+                                                x-show="showPlayOverlay"
                                                 x-transition.opacity
-                                                class="pointer-events-none absolute inset-0 flex items-center justify-center"
+                                                x-cloak
                                             >
                                                 <div class="rounded-full bg-black/50 p-4">
                                                     <i class="fa-solid fa-play text-xl text-white"></i>
                                                 </div>
                                             </div>
 
-                                            {{-- error --}}
                                             <div
+                                                class="video-error"
                                                 x-show="error"
                                                 x-transition.opacity
-                                                class="absolute inset-0 flex items-center justify-center bg-black/70 p-4"
+                                                x-cloak
                                             >
-                                                <div class="rounded-xl bg-red-500/90 px-4 py-3 text-center text-white shadow-lg">
+                                                <div class="rounded-xl bg-red-500/90 px-4 py-3 text-white shadow-lg">
                                                     <i class="fa-solid fa-exclamation-triangle mr-2"></i>
                                                     Video unavailable
                                                 </div>
@@ -407,7 +448,6 @@
                         </section>
                     @endif
 
-                    {{-- Upcoming tours --}}
                     @if(!empty($profile['tours'] ?? []))
                         <section id="upcoming-tours" class="mt-12 scroll-mt-32">
                             <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
@@ -429,7 +469,6 @@
                         </section>
                     @endif
 
-                    {{-- Profile message --}}
                     @if(!empty($profile['profile_message']))
                         <section class="mt-12">
                             <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
@@ -447,7 +486,6 @@
                         </section>
                     @endif
 
-                    {{-- Contact me for --}}
                     <section id="contact-me-for" class="mt-12 scroll-mt-32">
                         @if(!empty($servicesProvided))
                             <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
@@ -469,7 +507,6 @@
                         @endif
                     </section>
 
-                    {{-- Short link --}}
                     <div class="mt-8 mb-2 text-center">
                         <span class="text-base font-medium sm:text-lg" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
                             Find me easily with this short link:
@@ -480,7 +517,6 @@
                     </div>
                 </div>
 
-                {{-- Sidebar --}}
                 <div class="order-2 flex min-w-0 flex-col gap-6 lg:sticky lg:top-6">
                     <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow sm:p-6">
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -493,7 +529,7 @@
                             @endif
                         </div>
 
-                        <div class="mb-3 grid grid-cols-1 gap-y-3 gap-x-6 text-sm sm:grid-cols-2">
+                        <div class="mb-3 grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                             @if(!empty($profile['age']))
                                 <div class="flex items-center space-x-2">
                                     <i class="fa-solid fa-hourglass-half w-5 text-center text-pink-600"></i>
@@ -584,7 +620,6 @@
                             </div>
                         @endif
 
-                        {{-- Social --}}
                         @if(!empty($profile['twitter']) || !empty($profile['whatsapp']))
                             <div class="mt-2">
                                 <div class="mt-2 flex items-center gap-2">
@@ -630,7 +665,7 @@
                             </h3>
                             <hr class="mb-4">
 
-                            <div class="grid grid-cols-1 gap-y-3 gap-x-6 text-sm sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                                 @if(!empty($profile['ethnicity']))
                                     <div class="flex items-center space-x-2">
                                         <i class="fa-solid fa-globe w-5 text-center text-pink-600"></i>
@@ -726,12 +761,6 @@
                         </div>
                     @endif
 
-                    @php
-                        $nonEmptyRates = array_filter($profile['price_list'] ?? [], function ($rate) {
-                            return !empty($rate['outcall']) || !empty($rate['incall']);
-                        });
-                    @endphp
-
                     @if(!empty($nonEmptyRates))
                         <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow">
                             <h3 class="mb-2 flex items-center gap-2 text-lg font-bold text-pink-600">
@@ -765,14 +794,8 @@
                         </div>
                     @endif
 
-                    @php
-                        $nonEmptyAvailability = array_filter($profile['availability_list'] ?? [], function ($avail) {
-                            return !empty($avail['time']) && $avail['time'] !== 'Unavailable';
-                        });
-                    @endphp
-
                     @if(!empty($nonEmptyAvailability))
-                        <div class="mt-0 rounded-2xl border border-gray-100 bg-white p-4 shadow">
+                        <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow">
                             <h3 class="mb-2 flex items-center gap-2 text-lg font-bold text-pink-600">
                                 <i class="fa-regular fa-calendar-days text-pink-600"></i> My availability
                             </h3>
@@ -799,17 +822,143 @@
                         </div>
                     @endif
 
-                    <button
-                        onclick="document.getElementById('report-modal').classList.remove('hidden')"
-                        class="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 font-semibold text-gray-700 transition hover:bg-gray-50"
+                    <div
+                        x-data="reportModal({
+                            reportUrl: '{{ route('profile.report') }}',
+                            profileId: {{ $profile['id'] }}
+                        })"
                     >
-                        <i class="fa-regular fa-flag"></i> Report User
-                    </button>
+                        <button
+                            @click="show()"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 font-semibold text-gray-700 transition hover:bg-gray-50"
+                            type="button"
+                        >
+                            <i class="fa-regular fa-flag"></i> Report User
+                        </button>
+
+                        <div
+                            x-show="open"
+                            x-cloak
+                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 px-4"
+                        >
+                            <div @click.outside="hide()" class="relative mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                                <button
+                                    @click="hide()"
+                                    class="absolute right-4 top-4 text-2xl font-bold leading-none text-gray-400 hover:text-gray-700"
+                                    type="button"
+                                >
+                                    &times;
+                                </button>
+
+                                <h2 class="mb-1 flex items-center gap-2 text-xl font-bold text-pink-600">
+                                    <i class="fa-regular fa-flag"></i> Report Profile
+                                </h2>
+
+                                <p class="mb-4 text-sm text-gray-500">
+                                    Help us keep the community safe. All reports are reviewed by our admin team.
+                                </p>
+
+                                <div
+                                    x-show="success"
+                                    x-cloak
+                                    class="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-700"
+                                >
+                                    Thank you! Your report has been submitted and will be reviewed by our team.
+                                </div>
+
+                                <div
+                                    x-show="error"
+                                    x-text="error"
+                                    x-cloak
+                                    class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                                ></div>
+
+                                <form x-ref="form" @submit.prevent="submit()">
+                                    @csrf
+                                    <input type="hidden" name="provider_profile_id" value="{{ $profile['id'] }}">
+
+                                    <div class="mb-3">
+                                        <label class="mb-1 block text-sm font-semibold text-gray-700">
+                                            Your Name <span class="font-normal text-gray-400">(optional)</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="reporter_name"
+                                            placeholder="Enter your name"
+                                            maxlength="255"
+                                            class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                                        >
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="mb-1 block text-sm font-semibold text-gray-700">
+                                            Your Email <span class="font-normal text-gray-400">(optional)</span>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            name="reporter_email"
+                                            placeholder="Enter your email"
+                                            maxlength="255"
+                                            class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                                        >
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="mb-1 block text-sm font-semibold text-gray-700">
+                                            Reason <span class="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            name="reason"
+                                            required
+                                            class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                                        >
+                                            <option value="" disabled selected>Select a reason</option>
+                                            <option value="spam">Spam</option>
+                                            <option value="fake_profile">Fake Profile</option>
+                                            <option value="inappropriate_content">Inappropriate Content</option>
+                                            <option value="harassment">Harassment</option>
+                                            <option value="scam">Scam</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="mb-1 block text-sm font-semibold text-gray-700">
+                                            Additional Details <span class="font-normal text-gray-400">(optional)</span>
+                                        </label>
+                                        <textarea
+                                            name="description"
+                                            rows="3"
+                                            placeholder="Provide any additional details..."
+                                            maxlength="2000"
+                                            class="w-full resize-none rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                                        ></textarea>
+                                    </div>
+
+                                    <div class="flex gap-3">
+                                        <button
+                                            type="button"
+                                            @click="hide()"
+                                            class="flex-1 rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                                        >
+                                            Cancel
+                                        </button>
+
+                                        <button
+                                            type="submit"
+                                            class="flex-1 rounded-xl bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700 disabled:opacity-60"
+                                            :disabled="submitting"
+                                            x-text="submitting ? 'Submitting...' : 'Submit Report'"
+                                        ></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Nearby listings --}}
         <section
             x-data="{
                 page: 0,
@@ -839,19 +988,19 @@
             </div>
 
             @if(count($nearbyProfiles) > 0)
-                <div class="relative group">
-                    <div class="overflow-hidden px-1 sm:px-6 pb-2">
+                <div class="group relative">
+                    <div class="overflow-hidden px-1 pb-2 sm:px-6">
                         <div
                             class="flex flex-nowrap gap-4 transition-transform duration-500"
                             :style="`transform: translateX(-${page * 100}%);`"
                         >
                             @foreach($nearbyProfiles as $nearby)
-                                <article class="group relative flex-none min-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md sm:min-w-[calc(50%-0.5rem)] lg:min-w-[calc(25%-0.75rem)]">
+                                <article class="group relative min-w-full flex-none overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md sm:min-w-[calc(50%-0.5rem)] lg:min-w-[calc(25%-0.75rem)]">
                                     <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
                                     <div class="relative overflow-hidden rounded-t-2xl">
                                         @if(!empty($nearby['image']))
-                                            <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="h-52 w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async">
+                                            <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="h-52 w-full origin-center object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async">
                                         @else
                                             <div class="flex h-52 items-center justify-center bg-gray-100 text-gray-400">
                                                 <i class="fa-solid fa-image text-4xl"></i>
@@ -977,117 +1126,4 @@
 
 @push('scripts')
 <script src="{{ asset('frontend/js/profile-show.js') }}"></script>
-
-<!-- Report User Modal -->
-<div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 px-4">
-    <div class="relative mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <button
-            onclick="document.getElementById('report-modal').classList.add('hidden')"
-            class="absolute right-4 top-4 text-2xl font-bold leading-none text-gray-400 hover:text-gray-700"
-        >
-            &times;
-        </button>
-
-        <h2 class="mb-1 flex items-center gap-2 text-xl font-bold text-pink-600">
-            <i class="fa-regular fa-flag"></i> Report Profile
-        </h2>
-
-        <p class="mb-4 text-sm text-gray-500">
-            Help us keep the community safe. All reports are reviewed by our admin team.
-        </p>
-
-        <div id="report-success" class="hidden mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-700">
-            Thank you! Your report has been submitted and will be reviewed by our team.
-        </div>
-
-        <div id="report-error" class="hidden mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"></div>
-
-        <form id="report-form" onsubmit="submitReport(event)">
-            @csrf
-            <input type="hidden" name="provider_profile_id" value="{{ $profile['id'] }}">
-
-            <div class="mb-3">
-                <label class="mb-1 block text-sm font-semibold text-gray-700">
-                    Your Name <span class="font-normal text-gray-400">(optional)</span>
-                </label>
-                <input
-                    type="text"
-                    name="reporter_name"
-                    placeholder="Enter your name"
-                    maxlength="255"
-                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                >
-            </div>
-
-            <div class="mb-3">
-                <label class="mb-1 block text-sm font-semibold text-gray-700">
-                    Your Email <span class="font-normal text-gray-400">(optional)</span>
-                </label>
-                <input
-                    type="email"
-                    name="reporter_email"
-                    placeholder="Enter your email"
-                    maxlength="255"
-                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                >
-            </div>
-
-            <div class="mb-3">
-                <label class="mb-1 block text-sm font-semibold text-gray-700">
-                    Reason <span class="text-red-500">*</span>
-                </label>
-                <select
-                    name="reason"
-                    required
-                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                >
-                    <option value="" disabled selected>Select a reason</option>
-                    <option value="spam">Spam</option>
-                    <option value="fake_profile">Fake Profile</option>
-                    <option value="inappropriate_content">Inappropriate Content</option>
-                    <option value="harassment">Harassment</option>
-                    <option value="scam">Scam</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label class="mb-1 block text-sm font-semibold text-gray-700">
-                    Additional Details <span class="font-normal text-gray-400">(optional)</span>
-                </label>
-                <textarea
-                    name="description"
-                    rows="3"
-                    placeholder="Provide any additional details..."
-                    maxlength="2000"
-                    class="w-full resize-none rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                ></textarea>
-            </div>
-
-            <div class="flex gap-3">
-                <button
-                    type="button"
-                    onclick="document.getElementById('report-modal').classList.add('hidden')"
-                    class="flex-1 rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    id="report-submit-btn"
-                    class="flex-1 rounded-xl bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700"
-                >
-                    Submit Report
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    window.__profileShowConfig = {
-        reportUrl: '{{ route('profile.report') }}',
-        profileId: {{ $profile['id'] }}
-    };
-</script>
 @endpush
