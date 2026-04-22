@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BlogPosts;
 
 use App\Filament\Clusters\Pages;
+use App\Filament\Forms\Components\CkEditor;
 use App\Filament\Resources\BlogPosts\Pages\ManageBlogPosts;
 use App\Models\BlogPost;
 use BackedEnum;
@@ -11,7 +12,6 @@ use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -90,32 +90,8 @@ class BlogPostResource extends Resource
                     ->required()
                     ->rows(3)
                     ->columnSpanFull(),
-                RichEditor::make('content')
+                CkEditor::make('content')
                     ->required()
-                    ->toolbarButtons([
-                        'bold',
-                        'italic',
-                        'underline',
-                        'strike',
-                        'subscript',
-                        'superscript',
-                        'h2',
-                        'h3',
-                        'alignStart',
-                        'alignCenter',
-                        'alignEnd',
-                        'textColor',
-                        'codeBlock',
-                        'bulletList',
-                        'orderedList',
-                        'link',
-                        'blockquote',
-                        'undo',
-                        'redo',
-                    ])
-                    ->fileAttachmentsDisk('public')
-                    ->fileAttachmentsDirectory('blog/content')
-                    ->fileAttachmentsVisibility('public')
                     ->columnSpanFull(),
                 FileUpload::make('featured_image')
                     ->label('Featured Image')

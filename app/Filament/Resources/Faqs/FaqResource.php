@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\Faqs;
 
 use App\Filament\Clusters\Pages;
+use App\Filament\Forms\Components\CkEditor;
 use App\Filament\Resources\Faqs\Pages\ManageFaqs;
 use App\Models\Faq;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -53,29 +53,8 @@ class FaqResource extends Resource
                     ->numeric()
                     ->default(0)
                     ->required(),
-                RichEditor::make('answer')
+                CkEditor::make('answer')
                     ->required()
-                    ->toolbarButtons([
-                        'bold',
-                        'italic',
-                        'underline',
-                        'strike',
-                        'subscript',
-                        'superscript',
-                        'h2',
-                        'h3',
-                        'alignStart',
-                        'alignCenter',
-                        'alignEnd',
-                        'textColor',
-                        'codeBlock',
-                        'bulletList',
-                        'orderedList',
-                        'link',
-                        'blockquote',
-                        'undo',
-                        'redo',
-                    ])
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')

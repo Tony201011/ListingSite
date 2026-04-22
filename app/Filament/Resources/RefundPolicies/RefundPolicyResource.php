@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\RefundPolicies;
 
 use App\Filament\Clusters\Pages;
+use App\Filament\Forms\Components\CkEditor;
 use App\Filament\Resources\RefundPolicies\Pages\ManageRefundPolicies;
 use App\Models\RefundPolicy;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -54,29 +54,8 @@ class RefundPolicyResource extends Resource
                 TextInput::make('title')
                     ->required()
                     ->maxLength(255),
-                RichEditor::make('content')
+                CkEditor::make('content')
                     ->required()
-                    ->toolbarButtons([
-                        'bold',
-                        'italic',
-                        'underline',
-                        'strike',
-                        'subscript',
-                        'superscript',
-                        'h2',
-                        'h3',
-                        'alignStart',
-                        'alignCenter',
-                        'alignEnd',
-                        'textColor',
-                        'codeBlock',
-                        'bulletList',
-                        'orderedList',
-                        'link',
-                        'blockquote',
-                        'undo',
-                        'redo',
-                    ])
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')

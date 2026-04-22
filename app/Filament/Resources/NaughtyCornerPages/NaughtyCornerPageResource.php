@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\NaughtyCornerPages;
 
 use App\Filament\Clusters\Pages;
+use App\Filament\Forms\Components\CkEditor;
 use App\Filament\Resources\NaughtyCornerPages\Pages\ManageNaughtyCornerPages;
 use App\Models\NaughtyCornerPage;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -56,29 +56,7 @@ class NaughtyCornerPageResource extends Resource
                     ->maxLength(255),
                 TextInput::make('subtitle')
                     ->maxLength(255),
-                RichEditor::make('content')
-                    ->toolbarButtons([
-                        'bold',
-                        'italic',
-                        'underline',
-                        'strike',
-                        'subscript',
-                        'superscript',
-                        'h2',
-                        'h3',
-                        'alignStart',
-                        'alignCenter',
-                        'alignEnd',
-                        'textColor',
-                        'codeBlock',
-                        'bulletList',
-                        'orderedList',
-                        'link',
-                        'blockquote',
-                        'undo',
-                        'redo',
-                    ])
-                    ->helperText('Add offer blocks, links, and images here. This content is shown on the Naughty Corner page.')
+                CkEditor::make('content')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')
