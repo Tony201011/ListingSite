@@ -2,6 +2,9 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('frontend/css/profile-show.css') }}">
+<style>
+    [x-cloak] { display: none !important; }
+</style>
 @endpush
 
 @section('title', $profile['name'] . ' Profile')
@@ -33,7 +36,15 @@ $profileTags = array_values(array_unique(array_merge(
         ['label' => 'Length', 'value' => $profile['your_length'] ?? '—'],
     ];
 
-    $galleryImages = !empty($profile['images']) ? $profile['images'] : (!empty($profile['image']) ? [$profile['image']] : []);
+    $galleryImages = collect(is_array($profile['images'] ?? null) ? $profile['images'] : [])
+        ->filter(fn ($img) => !empty($img))
+        ->values()
+        ->toArray();
+
+    if (empty($galleryImages) && !empty($profile['image'])) {
+        $galleryImages = [$profile['image']];
+    }
+
     $servicesProvided = !empty($profile['services_provided']) ? $profile['services_provided'] : [];
 
     $availableNow = $profile['available_now'] ?? false;
@@ -74,6 +85,12 @@ $profileTags = array_values(array_unique(array_merge(
         'reportUrl' => route('profile.report'),
         'profileId' => $profile['id'] ?? null,
     ];
+
+    $nearbyProfilesForJs = collect($nearbyProfiles ?? [])->map(function ($nearby) {
+        return array_merge($nearby, [
+            'url' => route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())),
+        ]);
+    })->values();
 @endphp
 
 <div
@@ -136,7 +153,7 @@ $profileTags = array_values(array_unique(array_merge(
                        class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn"
                        style="margin-left: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
+                            <button type="button" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
                                 <span class="flex items-center"><i class="fa-solid fa-arrow-left text-xl mr-2"></i> <span class="text-xs font-semibold">PREVIOUS</span></span>
                                 <span class="text-base font-extrabold mt-0.5">{{ $prevProfile['name'] }}</span>
                             </button>
@@ -170,7 +187,7 @@ $profileTags = array_values(array_unique(array_merge(
                        class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn"
                        style="margin-right: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
+                            <button type="button" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
                                 <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-xl ml-2"></i></span>
                                 <span class="text-base font-extrabold mt-0.5">{{ $nextProfile['name'] }}</span>
                             </button>
@@ -649,7 +666,7 @@ $profileTags = array_values(array_unique(array_merge(
         </div>
 
         <section
-            x-data="nearbySlider({{ count($nearbyProfiles) }})"
+            x-data='nearbySlider({ items: @json($nearbyProfilesForJs) })'
             x-init="init()"
             class="mt-16 overflow-hidden"
         >
@@ -663,112 +680,107 @@ $profileTags = array_values(array_unique(array_merge(
 
             @if(count($nearbyProfiles) > 0)
                 <div class="relative">
-                    <div x-ref="viewport" class="overflow-hidden rounded-2xl">
-                        <div
-                            x-ref="track"
-                            class="flex transition-transform duration-500 ease-in-out will-change-transform"
-                            :style="`transform: translateX(-${translateX}px);`"
-                        >
-                            @foreach($nearbyProfiles as $nearby)
-                                <div
-                                    class="flex-shrink-0 px-2"
-                                    :style="`width: ${itemWidth}px;`"
-                                >
-                                    <article class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 h-full">
-                                        <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}"
-                                           class="absolute inset-0 z-10"
-                                           aria-label="View profile for {{ $nearby['name'] }}"></a>
+                    <div class="grid gap-4" :class="gridClass">
+                        <template x-for="item in visibleItems" :key="item.slug">
+                            <article class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 h-full">
+                                <a
+                                    :href="item.url"
+                                    class="absolute inset-0 z-10"
+                                    :aria-label="`View profile for ${item.name}`"
+                                ></a>
 
-                                        <div class="relative overflow-hidden rounded-t-2xl">
-                                            @if(!empty($nearby['image']))
-                                                <img
-                                                    src="{{ $nearby['image'] }}"
-                                                    alt="{{ $nearby['name'] }}"
-                                                    class="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105"
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                    onerror="this.onerror=null;this.src='{{ asset('frontend/images/placeholder.jpg') }}';"
-                                                >
-                                            @else
-                                                <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-72">
-                                                    <i class="fa-solid fa-image text-4xl"></i>
-                                                </div>
-                                            @endif
+                                <div class="relative overflow-hidden rounded-t-2xl">
+                                    <template x-if="item.image">
+                                        <img
+                                            :src="item.image"
+                                            :alt="item.name"
+                                            class="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105"
+                                            loading="lazy"
+                                            decoding="async"
+                                            onerror="this.onerror=null;this.src='{{ asset('frontend/images/placeholder.jpg') }}';"
+                                        >
+                                    </template>
 
-                                            <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
-                                                @if(!empty($nearby['verified']))
-                                                    <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                                                        <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
-                                                    </span>
-                                                @endif
-
-                                                @if(!empty($nearby['active']))
-                                                    <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                                                        <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
-                                                    </span>
-                                                @endif
-                                            </div>
+                                    <template x-if="!item.image">
+                                        <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-72">
+                                            <i class="fa-solid fa-image text-4xl"></i>
                                         </div>
+                                    </template>
 
-                                        <div class="p-4">
-                                            <div class="mb-2 flex items-center justify-between">
-                                                <span class="text-[11px] text-gray-400">{{ $nearby['date'] }}</span>
-                                            </div>
+                                    <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
+                                        <template x-if="item.verified">
+                                            <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                                <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
+                                            </span>
+                                        </template>
 
-                                            <h3 class="text-base font-semibold text-gray-800 truncate">
-                                                {{ $nearby['name'] }}
-                                                @if(!empty($nearby['suburb']))
-                                                    <span class="text-gray-400 font-normal">({{ $nearby['suburb'] }})</span>
-                                                @endif
-                                            </h3>
-
-                                            <p class="mt-1 text-2xl font-bold text-gray-900">{{ $nearby['rate'] }}</p>
-
-                                            @if(!empty($nearby['in_call']) || !empty($nearby['out_call']))
-                                                <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm">
-                                                    @if(!empty($nearby['in_call']))
-                                                        <span class="inline-flex items-center gap-1 text-gray-600">
-                                                            <i class="fa-solid fa-house text-emerald-500 text-[10px]"></i>
-                                                            <span class="font-medium">In:</span> {{ $nearby['in_call'] }}
-                                                        </span>
-                                                    @endif
-
-                                                    @if(!empty($nearby['out_call']))
-                                                        <span class="inline-flex items-center gap-1 text-gray-600">
-                                                            <i class="fa-solid fa-car text-blue-500 text-[10px]"></i>
-                                                            <span class="font-medium">Out:</span> {{ $nearby['out_call'] }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @endif
-
-                                            <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-sm text-gray-600">
-                                                @if(!empty($nearby['city']) || !empty($nearby['suburb']))
-                                                    <span class="inline-flex items-center gap-1">
-                                                        <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
-                                                        {{ $nearby['suburb'] ?: $nearby['city'] }}
-                                                    </span>
-                                                @endif
-
-                                                @if(!empty($nearby['service_1']))
-                                                    <span class="inline-flex items-center gap-1">
-                                                        <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
-                                                        {{ $nearby['service_1'] }}
-                                                    </span>
-                                                @endif
-                                            </div>
-
-                                            @if(!empty($nearby['service_2']) || !empty($nearby['description']))
-                                                <div class="mt-2 text-sm text-gray-600 line-clamp-2">
-                                                    <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
-                                                    {{ !empty($nearby['service_2']) ? $nearby['service_2'] : $nearby['description'] }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </article>
+                                        <template x-if="item.active">
+                                            <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
+                                            </span>
+                                        </template>
+                                    </div>
                                 </div>
-                            @endforeach
-                        </div>
+
+                                <div class="p-4">
+                                    <div class="mb-2 flex items-center justify-between">
+                                        <span class="text-[11px] text-gray-400" x-text="item.date || ''"></span>
+                                    </div>
+
+                                    <h3 class="text-base font-semibold text-gray-800 truncate">
+                                        <span x-text="item.name"></span>
+                                        <template x-if="item.suburb">
+                                            <span class="text-gray-400 font-normal" x-text="` (${item.suburb})`"></span>
+                                        </template>
+                                    </h3>
+
+                                    <p class="mt-1 text-2xl font-bold text-gray-900" x-text="item.rate || ''"></p>
+
+                                    <template x-if="item.in_call || item.out_call">
+                                        <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm">
+                                            <template x-if="item.in_call">
+                                                <span class="inline-flex items-center gap-1 text-gray-600">
+                                                    <i class="fa-solid fa-house text-emerald-500 text-[10px]"></i>
+                                                    <span class="font-medium">In:</span>
+                                                    <span x-text="item.in_call"></span>
+                                                </span>
+                                            </template>
+
+                                            <template x-if="item.out_call">
+                                                <span class="inline-flex items-center gap-1 text-gray-600">
+                                                    <i class="fa-solid fa-car text-blue-500 text-[10px]"></i>
+                                                    <span class="font-medium">Out:</span>
+                                                    <span x-text="item.out_call"></span>
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-sm text-gray-600">
+                                        <template x-if="item.city || item.suburb">
+                                            <span class="inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
+                                                <span x-text="item.suburb || item.city"></span>
+                                            </span>
+                                        </template>
+
+                                        <template x-if="item.service_1">
+                                            <span class="inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
+                                                <span x-text="item.service_1"></span>
+                                            </span>
+                                        </template>
+                                    </div>
+
+                                    <template x-if="item.service_2 || item.description">
+                                        <div class="mt-2 text-sm text-gray-600 line-clamp-2">
+                                            <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
+                                            <span x-text="item.service_2 || item.description"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </article>
+                        </template>
                     </div>
 
                     <button
