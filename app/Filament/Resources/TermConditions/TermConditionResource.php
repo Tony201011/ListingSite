@@ -57,6 +57,7 @@ class TermConditionResource extends Resource
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -77,6 +78,9 @@ class TermConditionResource extends Resource
                         'undo',
                         'redo',
                     ])
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/terms')
+                    ->fileAttachmentsVisibility('public')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')
