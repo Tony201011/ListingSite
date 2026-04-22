@@ -368,19 +368,20 @@
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 @foreach($videos as $videoUrl)
                                     @php
-                                        $videoPath = parse_url($videoUrl, PHP_URL_PATH) ?? '';
+                                        $videoPath = parse_url($videoUrl, PHP_URL_PATH) ?: '';
                                         $videoExt = strtolower(pathinfo($videoPath, PATHINFO_EXTENSION));
+                                        $videoMime = 'video/mp4';
 
                                         if ($videoExt === 'webm') {
                                             $videoMime = 'video/webm';
-                                        } elseif ($videoExt === 'ogg' || $videoExt === 'ogv') {
+                                        }
+
+                                        if (in_array($videoExt, ['ogg', 'ogv'])) {
                                             $videoMime = 'video/ogg';
-                                        } else {
-                                            $videoMime = 'video/mp4';
                                         }
                                     @endphp
 
-                                    <div class="video-card" x-data="videoCard('{{ $videoUrl }}')" x-init="init()">
+                                    <div class="video-card" x-data='videoCard(@json($videoUrl))' x-init="init()">
                                         <div class="video-shell">
                                             <video
                                                 x-ref="video"
