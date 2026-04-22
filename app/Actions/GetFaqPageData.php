@@ -3,25 +3,32 @@
 namespace App\Actions;
 
 use App\Models\Faq;
+use App\Models\FaqPage;
 
 class GetFaqPageData
 {
     private const PER_PAGE = 8;
 
-    public function execute(int $page = 1): array
+    public function execute(int $pageNumber = 1): array
     {
         $paginator = Faq::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate(self::PER_PAGE, ['*'], 'page', $page);
+            ->paginate(self::PER_PAGE, ['*'], 'page', $pageNumber);
 
         $faqs = collect($paginator->items())
             ->map(fn (Faq $faq) => $this->mapFaq($faq))
             ->values()
             ->all();
 
+        $page = FaqPage::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+
         return [
+            'page' => $page,
             'faqs' => $faqs,
             'hasMore' => $paginator->hasMorePages(),
             'nextPage' => $paginator->currentPage() + 1,
