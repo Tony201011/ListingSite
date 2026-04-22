@@ -48,6 +48,13 @@ class AppServiceProvider extends ServiceProvider
             fn (): string => '<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>',
         );
 
+        if (! app()->runningInConsole()) {
+            Config::set(
+                'filesystems.disks.public.url',
+                request()->getSchemeAndHttpHost().'/storage'
+            );
+        }
+
         $this->shareFooterText();
         $this->configureSmtpFromDatabase();
         $this->configureStorageFromDatabase();
