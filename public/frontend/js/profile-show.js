@@ -299,19 +299,16 @@
         }));
     }
 
-    function bootAlpineRegistration() {
-        if (window.Alpine) {
-            registerAlpineComponents(window.Alpine);
-        } else {
-            document.addEventListener('alpine:init', () => {
-                registerAlpineComponents(window.Alpine);
-            }, { once: true });
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootAlpineRegistration, { once: true });
+    // alpine:init fires before Alpine processes the DOM, which is the correct
+    // moment to register Alpine.data() components. DOMContentLoaded fires AFTER
+    // Alpine (a defer script) has already processed the DOM, so using it would
+    // cause profileShowPage to be registered too late.
+    if (window.Alpine) {
+        // Alpine already initialised (rare – handle gracefully)
+        registerAlpineComponents(window.Alpine);
     } else {
-        bootAlpineRegistration();
+        document.addEventListener('alpine:init', () => {
+            registerAlpineComponents(window.Alpine);
+        }, { once: true });
     }
 })();
