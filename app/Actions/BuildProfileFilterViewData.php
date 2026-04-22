@@ -386,8 +386,21 @@ class BuildProfileFilterViewData
 
                 $query->whereIn('provider_profiles.id', $nearbyIds);
 
-                $orderedIds = implode(',', $nearbyIds);
-                $query->orderByRaw("FIELD(provider_profiles.id, {$orderedIds})");
+                $distanceOrderSql = collect($distanceMap)
+                    ->map(function ($distance, $id) {
+                        $id = (int) $id;
+                        $distance = (float) $distance;
+
+                        return "WHEN {$id} THEN {$distance}";
+                    })
+                    ->implode(' ');
+
+                $query->orderByRaw("
+                    CASE provider_profiles.id
+                        {$distanceOrderSql}
+                        ELSE 999999
+                    END ASC
+                ");
 
                 $distanceOrderingApplied = true;
             }
@@ -700,7 +713,7 @@ class BuildProfileFilterViewData
             'out_call' => trim((string) ($firstRate?->outcall ?? '')),
             'city' => $profile->city?->name ?? '',
             'suburb' => $profile->user?->suburb,
-        //    'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
+            'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
             'height' => '',
             'service_1' => $services[0] ?? '',
             'service_2' => $services[1] ?? '',
@@ -741,7 +754,3 @@ class BuildProfileFilterViewData
         return $digits !== '' ? (int) $digits : 0;
     }
 }
-
-
-
-
