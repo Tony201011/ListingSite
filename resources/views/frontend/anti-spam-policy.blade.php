@@ -21,7 +21,7 @@
             </div>
         @else
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-gray-500">
-                Anti spam policy is not available yet.
+                Anti-spam policy is not available yet.
             </div>
         @endif
     </div>
