@@ -57,6 +57,7 @@ class PrivacyPolicyResource extends Resource
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -77,6 +78,9 @@ class PrivacyPolicyResource extends Resource
                         'undo',
                         'redo',
                     ])
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/privacy')
+                    ->fileAttachmentsVisibility('public')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')
