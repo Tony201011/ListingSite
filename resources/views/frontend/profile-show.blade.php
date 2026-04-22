@@ -48,7 +48,7 @@ $profileTags = array_values(array_unique(array_merge(
 
 
             $galleryImages = !empty($profile['images']) ? $profile['images'] : (!empty($profile['image']) ? [$profile['image']] : []);
-            dd($galleryImages);
+           // dd($galleryImages);
 
             $servicesProvided = !empty($profile['services_provided']) ? $profile['services_provided'] : [];
 
@@ -129,7 +129,7 @@ $profileTags = array_values(array_unique(array_merge(
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="lazy-img rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image">
                         @endforeach
                     </div>
                         <!-- Next Button (right corner) -->
