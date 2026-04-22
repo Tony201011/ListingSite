@@ -26,12 +26,15 @@ class GetProfileShowData
                 'user.onlineUser',
                 'user.availableNow',
                 'user.profileMessage',
-
                 'city',
                 'state',
                 'country',
             ])
             ->first();
+
+
+            dd($providerProfile);
+
 
         abort_if($providerProfile === null, 404);
 
