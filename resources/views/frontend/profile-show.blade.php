@@ -359,78 +359,78 @@
                     @include('components.gallery-modal')
 
                     @if(!empty($videos))
-                        <section class="mt-6 overflow-hidden">
-                            <div class="mb-6">
-                                <h2 class="text-2xl font-semibold text-pink-600">Videos</h2>
-                                <hr class="mt-2">
+    <section class="mt-6 overflow-hidden">
+        <div class="mb-6">
+            <h2 class="text-2xl font-semibold text-pink-600">Videos</h2>
+            <hr class="mt-2">
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            @foreach($videos as $videoUrl)
+                @php
+                    $videoPath = parse_url($videoUrl, PHP_URL_PATH) ?: '';
+                    $videoExt = strtolower(pathinfo($videoPath, PATHINFO_EXTENSION));
+
+                    $videoMime = match ($videoExt) {
+                        'webm' => 'video/webm',
+                        'ogg', 'ogv' => 'video/ogg',
+                        default => 'video/mp4',
+                    };
+                @endphp
+
+                <div class="video-card" x-data='videoCard(@json($videoUrl))' x-init="init()">
+                    <div class="video-shell">
+                        <video
+                            x-ref="video"
+                            controls
+                            playsinline
+                            preload="metadata"
+                            class="h-full w-full object-cover"
+                            @loadstart="onLoadStart()"
+                            @loadedmetadata="onReady()"
+                            @loadeddata="onReady()"
+                            @canplay="onReady()"
+                            @canplaythrough="onReady()"
+                            @playing="onPlaying()"
+                            @pause="onPause()"
+                            @waiting="onWaiting()"
+                            @stalled="onWaiting()"
+                            @suspend="onSuspend()"
+                            @ended="onEnded()"
+                            @error="onError()"
+                        >
+                            <source src="{{ $videoUrl }}" type="{{ $videoMime }}">
+                            Your browser does not support the video tag.
+                        </video>
+
+                        <!-- Loader -->
+                        <div class="video-loader" x-show="showLoader" x-transition.opacity x-cloak>
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="video-loader-spinner"></div>
+                                <span class="text-sm font-medium text-white">Loading video...</span>
                             </div>
+                        </div>
 
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                @foreach($videos as $videoUrl)
-                                    @php
-                                        $videoPath = parse_url($videoUrl, PHP_URL_PATH) ?: '';
-                                        $videoExt = strtolower(pathinfo($videoPath, PATHINFO_EXTENSION));
-                                        $videoMime = 'video/mp4';
-
-                                        if ($videoExt === 'webm') {
-                                            $videoMime = 'video/webm';
-                                        }
-
-                                        if (in_array($videoExt, ['ogg', 'ogv'])) {
-                                            $videoMime = 'video/ogg';
-                                        }
-                                    @endphp
-
-                                    <div class="video-card" x-data='videoCard(@json($videoUrl))' x-init="init()">
-                                        <div class="video-shell">
-                                            <video
-                                                x-ref="video"
-                                                controls
-                                                playsinline
-                                                preload="metadata"
-                                                class="h-full w-full object-cover"
-                                                @loadstart="onLoadStart()"
-                                                @loadedmetadata="onReady()"
-                                                @loadeddata="onReady()"
-                                                @canplay="onReady()"
-                                                @canplaythrough="onReady()"
-                                                @playing="onPlaying()"
-                                                @pause="onPause()"
-                                                @waiting="onWaiting()"
-                                                @stalled="onWaiting()"
-                                                @suspend="onSuspend()"
-                                                @ended="onEnded()"
-                                                @error="onError()"
-                                            >
-                                                <source src="{{ $videoUrl }}" type="{{ $videoMime }}">
-                                                Your browser does not support the video tag.
-                                            </video>
-
-                                            <div class="video-loader" x-show="showLoader" x-transition.opacity x-cloak>
-                                                <div class="flex flex-col items-center gap-3">
-                                                    <div class="video-loader-spinner"></div>
-                                                    <span class="text-sm font-medium text-white">Loading video...</span>
-                                                </div>
-                                            </div>
-
-                                            <div class="video-play-overlay" x-show="showPlayOverlay" x-transition.opacity x-cloak>
-                                                <div class="rounded-full bg-black/50 p-4">
-                                                    <i class="fa-solid fa-play text-xl text-white"></i>
-                                                </div>
-                                            </div>
-
-                                            <div class="video-error" x-show="error" x-transition.opacity x-cloak>
-                                                <div class="rounded-xl bg-red-500/90 px-4 py-3 text-white shadow-lg">
-                                                    <i class="fa-solid fa-exclamation-triangle mr-2"></i>
-                                                    Video unavailable
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
+                        <!-- Play Overlay -->
+                        <div class="video-play-overlay" x-show="showPlayOverlay" x-transition.opacity x-cloak>
+                            <div class="rounded-full bg-black/50 p-4">
+                                <i class="fa-solid fa-play text-xl text-white"></i>
                             </div>
-                        </section>
-                    @endif
+                        </div>
+
+                        <!-- Error -->
+                        <div class="video-error" x-show="error" x-transition.opacity x-cloak>
+                            <div class="rounded-xl bg-red-500/90 px-4 py-3 text-white shadow-lg">
+                                <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+                                Video unavailable
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
+@endif
 
                     @if(!empty($tours))
                         <section id="upcoming-tours" class="mt-12 scroll-mt-32">
