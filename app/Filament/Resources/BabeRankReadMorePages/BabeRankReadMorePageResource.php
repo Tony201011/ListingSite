@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -56,6 +57,13 @@ class BabeRankReadMorePageResource extends Resource
                     ->maxLength(255),
                 TextInput::make('subtitle')
                     ->maxLength(255),
+                FileUpload::make('image')
+                    ->label('Image')
+                    ->image()
+                    ->disk('public')
+                    ->directory('pages/babe-rank')
+                    ->visibility('public')
+                    ->columnSpanFull(),
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([

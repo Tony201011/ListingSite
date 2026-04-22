@@ -12,6 +12,7 @@ class BabeRankReadMorePage extends Model
     protected $fillable = [
         'title',
         'subtitle',
+        'image',
         'content',
         'is_active',
     ];
