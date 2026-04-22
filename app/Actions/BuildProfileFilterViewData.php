@@ -285,7 +285,25 @@ class BuildProfileFilterViewData
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
-                $this->applyExactLocationFilter($query, $exactLocation);
+                $suburb = $exactLocation['suburb'];
+                $state = $exactLocation['state'];
+                $fullStateName = $this->resolveStateName($state);
+
+                $query->where(function ($q) use ($exactLocation, $suburb, $state, $fullStateName) {
+                    $this->applyExactLocationFilter($q, $exactLocation);
+
+                    $q->orWhereHas('city', function ($cityQ) use ($suburb) {
+                        $cityQ->where('name', 'like', '%'.$suburb.'%');
+                    })->orWhereHas('user', function ($userQ) use ($suburb, $state, $fullStateName) {
+                        $userQ->where(function ($inner) use ($suburb, $state, $fullStateName) {
+                            $inner->where('suburb', 'like', '%'.$suburb.'%')
+                                ->orWhere('suburb', 'like', '%'.$suburb.', '.$state.'%')
+                                ->orWhere('suburb', 'like', '%'.$suburb.' '.$state.'%')
+                                ->orWhere('suburb', 'like', '%'.$suburb.', '.$fullStateName.'%')
+                                ->orWhere('suburb', 'like', '%'.$suburb.' '.$fullStateName.'%');
+                        });
+                    });
+                });
             } elseif ($hasLocationQuery) {
                 if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
                     $query->whereIn('provider_profiles.id', $scoutMatchedIds);
