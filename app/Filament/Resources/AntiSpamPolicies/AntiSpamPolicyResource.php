@@ -57,6 +57,7 @@ class AntiSpamPolicyResource extends Resource
                 RichEditor::make('content')
                     ->required()
                     ->toolbarButtons([
+                        'attachFiles',
                         'bold',
                         'italic',
                         'underline',
@@ -77,7 +78,10 @@ class AntiSpamPolicyResource extends Resource
                         'undo',
                         'redo',
                     ])
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('pages/anti-spam')
+                    ->fileAttachmentsVisibility('public'),
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
