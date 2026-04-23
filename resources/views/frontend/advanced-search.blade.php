@@ -39,8 +39,12 @@
                 maxAge: {{ (int) ($maxAge ?? 60) }},
                 ageMinLimit: 18,
                 ageMaxLimit: 100,
-                minPrice: {{ (int) ($minPrice ?? 150) }},
-                maxPrice: {{ (int) ($maxPrice ?? 400) }},
+
+                minPrice: {{ (int) ($minPrice ?? 0) }},
+                maxPrice: {{ (int) ($maxPrice ?? 1000) }},
+                priceMinLimit: 0,
+                priceMaxLimit: 1000,
+
                 distance: {{ $distanceFilter }},
                 maxDistance: {{ $maxSearchDistance }},
                 userLat: '{{ $userLat ?? '' }}',
@@ -48,19 +52,24 @@
                 locationEnabled: {{ ($distanceSearchEnabled && $userLat !== null && $userLng !== null) ? 'true' : 'false' }},
                 distanceSearchEnabled: {{ $distanceSearchEnabled ? 'true' : 'false' }},
                 geoError: '',
+
                 requestLocation() {
                     this.geoError = '';
                     if (!navigator.geolocation) {
                         this.geoError = 'Geolocation is not supported by your browser.';
                         return;
                     }
+
                     navigator.geolocation.getCurrentPosition(
                         (pos) => {
                             this.userLat = pos.coords.latitude;
                             this.userLng = pos.coords.longitude;
                             this.locationEnabled = true;
+                            this.geoError = '';
                         },
                         (err) => {
+                            if (this.locationEnabled) return;
+
                             if (err.code === 1) {
                                 this.geoError = 'Location access denied. Please allow location in your browser settings and try again.';
                             } else if (err.code === 2) {
@@ -74,11 +83,14 @@
                         { timeout: 10000, maximumAge: 60000 }
                     );
                 },
+
                 clearLocation() {
                     this.userLat = '';
                     this.userLng = '';
                     this.locationEnabled = false;
+                    this.geoError = '';
                 },
+
                 getAgeMinPercent() {
                     return ((this.minAge - this.ageMinLimit) / (this.ageMaxLimit - this.ageMinLimit)) * 100;
                 },
@@ -92,6 +104,21 @@
                 setMaxAge(value) {
                     const parsed = parseInt(value);
                     this.maxAge = parsed < this.minAge ? this.minAge : parsed;
+                },
+
+                getPriceMinPercent() {
+                    return ((this.minPrice - this.priceMinLimit) / (this.priceMaxLimit - this.priceMinLimit)) * 100;
+                },
+                getPriceMaxPercent() {
+                    return ((this.maxPrice - this.priceMinLimit) / (this.priceMaxLimit - this.priceMinLimit)) * 100;
+                },
+                setMinPrice(value) {
+                    const parsed = parseInt(value);
+                    this.minPrice = parsed > this.maxPrice ? this.maxPrice : parsed;
+                },
+                setMaxPrice(value) {
+                    const parsed = parseInt(value);
+                    this.maxPrice = parsed < this.minPrice ? this.minPrice : parsed;
                 }
             }" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()">
                 <div
@@ -203,7 +230,7 @@
                                 name="min_age"
                                 type="range"
                                 min="18"
-                                max="60"
+                                max="100"
                                 step="1"
                                 x-model.number="minAge"
                                 @input="setMinAge($event.target.value)"
@@ -215,7 +242,7 @@
                                 name="max_age"
                                 type="range"
                                 min="18"
-                                max="60"
+                                max="100"
                                 step="1"
                                 x-model.number="maxAge"
                                 @input="setMaxAge($event.target.value)"
@@ -225,20 +252,56 @@
 
                         <div class="mt-3 flex items-center justify-between text-[11px] text-gray-400">
                             <span>18</span>
-                            <span>60</span>
+                            <span>100</span>
                         </div>
                     </div>
                 </div>
 
                 <div>
                     <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Price Range</label>
-                    <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
-                        <div class="mb-2 flex items-center justify-between text-xs text-gray-500">
+                    <div class="rounded-lg border border-gray-200 bg-white px-3 py-4">
+                        <div class="mb-3 flex items-center justify-between text-xs text-gray-500">
                             <span>Min: $<strong x-text="minPrice"></strong></span>
                             <span>Max: $<strong x-text="maxPrice"></strong></span>
                         </div>
-                        <input id="min-price" name="min_price" type="range" min="100" max="1000" step="10" x-model.number="minPrice" @input="if (minPrice > maxPrice) maxPrice = minPrice" class="w-full">
-                        <input id="max-price" name="max_price" type="range" min="100" max="1000" step="10" x-model.number="maxPrice" @input="if (maxPrice < minPrice) minPrice = maxPrice" class="mt-2 w-full">
+
+                        <div class="relative h-10">
+                            <div class="absolute top-1/2 left-0 right-0 h-2 -translate-y-1/2 rounded-full bg-gray-200"></div>
+
+                            <div
+                                class="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-pink-500"
+                                :style="`left: ${getPriceMinPercent()}%; right: ${100 - getPriceMaxPercent()}%`"
+                            ></div>
+
+                            <input
+                                id="min-price"
+                                name="min_price"
+                                type="range"
+                                min="0"
+                                max="1000"
+                                step="10"
+                                x-model.number="minPrice"
+                                @input="setMinPrice($event.target.value)"
+                                class="range-thumb pointer-events-none absolute left-0 top-1/2 z-20 h-2 w-full -translate-y-1/2 appearance-none bg-transparent"
+                            >
+
+                            <input
+                                id="max-price"
+                                name="max_price"
+                                type="range"
+                                min="0"
+                                max="1000"
+                                step="10"
+                                x-model.number="maxPrice"
+                                @input="setMaxPrice($event.target.value)"
+                                class="range-thumb pointer-events-none absolute left-0 top-1/2 z-20 h-2 w-full -translate-y-1/2 appearance-none bg-transparent"
+                            >
+                        </div>
+
+                        <div class="mt-3 flex items-center justify-between text-[11px] text-gray-400">
+                            <span>$0</span>
+                            <span>$1000</span>
+                        </div>
                     </div>
                 </div>
 
@@ -272,11 +335,10 @@
                             >
                                 <i class="fa-solid fa-xmark text-[10px]"></i> Clear Location
                             </button>
-                            <span x-show="locationEnabled" x-cloak class="text-xs text-green-600">
-                                <i class="fa-solid fa-circle-check text-[10px]"></i> Location detected
-                            </span>
-                            <span x-show="geoError" x-cloak class="text-xs text-red-500" x-text="geoError"></span>
+
+                            <span x-show="geoError && !locationEnabled" x-cloak class="text-xs text-red-500" x-text="geoError"></span>
                         </div>
+
                         <div x-show="locationEnabled" x-cloak>
                             <div class="mb-1 flex items-center justify-between text-xs text-gray-500">
                                 <span>Within: <strong x-text="distance"></strong> km</span>
@@ -291,6 +353,7 @@
                                 class="w-full"
                             >
                         </div>
+
                         <p x-show="!locationEnabled" class="text-xs text-gray-400">Click "Use My Location" to filter by distance.</p>
                     </div>
                 </div>
