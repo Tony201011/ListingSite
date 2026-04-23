@@ -36,9 +36,9 @@
 
             <form method="GET" action="{{ route('advanced-search') }}" class="mt-6 space-y-4 text-sm text-gray-600" x-data="{
                 minAge: {{ (int) ($minAge ?? 18) }},
-                maxAge: {{ (int) ($maxAge ?? 40) }},
+                maxAge: {{ (int) ($maxAge ?? 60) }},
                 ageMinLimit: 18,
-                ageMaxLimit: 60,
+                ageMaxLimit: 100,
                 minPrice: {{ (int) ($minPrice ?? 150) }},
                 maxPrice: {{ (int) ($maxPrice ?? 400) }},
                 distance: {{ $distanceFilter }},
