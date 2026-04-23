@@ -45,51 +45,8 @@
                 priceMinLimit: 0,
                 priceMaxLimit: 1000,
 
-                distance: {{ $distanceFilter }},
+                distance: {{ (int) ($distanceFilter ?? $maxSearchDistance) }},
                 maxDistance: {{ $maxSearchDistance }},
-                userLat: '{{ $userLat ?? '' }}',
-                userLng: '{{ $userLng ?? '' }}',
-                locationEnabled: {{ ($distanceSearchEnabled && $userLat !== null && $userLng !== null) ? 'true' : 'false' }},
-                distanceSearchEnabled: {{ $distanceSearchEnabled ? 'true' : 'false' }},
-                geoError: '',
-
-                requestLocation() {
-                    this.geoError = '';
-                    if (!navigator.geolocation) {
-                        this.geoError = 'Geolocation is not supported by your browser.';
-                        return;
-                    }
-
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            this.userLat = pos.coords.latitude;
-                            this.userLng = pos.coords.longitude;
-                            this.locationEnabled = true;
-                            this.geoError = '';
-                        },
-                        (err) => {
-                            if (this.locationEnabled) return;
-
-                            if (err.code === 1) {
-                                this.geoError = 'Location access denied. Please allow location in your browser settings and try again.';
-                            } else if (err.code === 2) {
-                                this.geoError = 'Location unavailable. Please check your device location settings.';
-                            } else if (err.code === 3) {
-                                this.geoError = 'Location request timed out. Please try again.';
-                            } else {
-                                this.geoError = 'Unable to retrieve your location. Please allow location access.';
-                            }
-                        },
-                        { timeout: 10000, maximumAge: 60000 }
-                    );
-                },
-
-                clearLocation() {
-                    this.userLat = '';
-                    this.userLng = '';
-                    this.locationEnabled = false;
-                    this.geoError = '';
-                },
 
                 getAgeMinPercent() {
                     return ((this.minAge - this.ageMinLimit) / (this.ageMaxLimit - this.ageMinLimit)) * 100;
@@ -120,7 +77,7 @@
                     const parsed = parseInt(value);
                     this.maxPrice = parsed < this.minPrice ? this.minPrice : parsed;
                 }
-            }" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()">
+            }">
                 <div
                     x-data="{
                         term: {!! \Illuminate\Support\Js::from(request('location', '')) !!},
@@ -206,6 +163,24 @@
                                 </li>
                             </template>
                         </ul>
+                    </div>
+
+                    <div class="mt-4 rounded-lg border border-gray-200 bg-white px-3 py-4">
+                        <label for="distance" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Distance</label>
+                        <div class="mb-2 flex items-center justify-between text-xs text-gray-500">
+                            <span>Within: <strong x-text="distance"></strong> km</span>
+                            <span class="text-gray-400">Max: {{ $maxSearchDistance }} km</span>
+                        </div>
+                        <input
+                            id="distance"
+                            name="distance"
+                            type="range"
+                            min="1"
+                            max="{{ $maxSearchDistance }}"
+                            step="1"
+                            x-model.number="distance"
+                            class="w-full accent-pink-500"
+                        >
                     </div>
                 </div>
 
@@ -304,60 +279,6 @@
                         </div>
                     </div>
                 </div>
-
-                <template x-if="distanceSearchEnabled">
-                    <span>
-                        <input type="hidden" name="user_lat" :value="userLat">
-                        <input type="hidden" name="user_lng" :value="userLng">
-                        <input type="hidden" name="distance" :value="locationEnabled ? distance : ''">
-                    </span>
-                </template>
-
-                @if($distanceSearchEnabled)
-                <div>
-                    <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Distance (Near Me)</label>
-                    <div class="rounded-lg border border-gray-200 bg-white px-3 py-3">
-                        <div class="mb-3 flex flex-wrap items-center gap-2">
-                            <button
-                                type="button"
-                                x-show="!locationEnabled"
-                                @click="requestLocation()"
-                                class="inline-flex items-center gap-1.5 rounded-md bg-pink-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-700"
-                            >
-                                <i class="fa-solid fa-location-crosshairs text-[10px]"></i> Use My Location
-                            </button>
-                            <button
-                                type="button"
-                                x-show="locationEnabled"
-                                x-cloak
-                                @click="clearLocation()"
-                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:border-gray-400"
-                            >
-                                <i class="fa-solid fa-xmark text-[10px]"></i> Clear Location
-                            </button>
-
-                            <span x-show="geoError && !locationEnabled" x-cloak class="text-xs text-red-500" x-text="geoError"></span>
-                        </div>
-
-                        <div x-show="locationEnabled" x-cloak>
-                            <div class="mb-1 flex items-center justify-between text-xs text-gray-500">
-                                <span>Within: <strong x-text="distance"></strong> km</span>
-                                <span class="text-gray-400">Max: {{ $maxSearchDistance }} km</span>
-                            </div>
-                            <input
-                                type="range"
-                                min="1"
-                                :max="maxDistance"
-                                step="1"
-                                x-model.number="distance"
-                                class="w-full"
-                            >
-                        </div>
-
-                        <p x-show="!locationEnabled" class="text-xs text-gray-400">Click "Use My Location" to filter by distance.</p>
-                    </div>
-                </div>
-                @endif
 
                 @forelse(($filterGroups ?? []) as $group)
                     <div>
