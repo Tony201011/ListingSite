@@ -98,7 +98,6 @@ class HomeControllerTest extends TestCase
             'minPrice',
             'maxPrice',
             'locationQuery',
-            'escortNameQuery',
             'girlsMode',
             'hasAgeFilter',
             'hasPriceFilter',
@@ -118,7 +117,6 @@ class HomeControllerTest extends TestCase
         $response->assertViewHas('minPrice', 150);
         $response->assertViewHas('maxPrice', 400);
         $response->assertViewHas('locationQuery', '');
-        $response->assertViewHas('escortNameQuery', '');
         $response->assertViewHas('girlsMode', 'all');
         $response->assertViewHas('hasAgeFilter', false);
         $response->assertViewHas('hasPriceFilter', false);
@@ -260,7 +258,6 @@ class HomeControllerTest extends TestCase
     {
         $response = $this->get('/?escort_name=Ruby');
 
-        $response->assertViewHas('escortNameQuery', 'Ruby');
     }
 
     // ---------------------------------------------------------------
@@ -429,7 +426,6 @@ class HomeControllerTest extends TestCase
             'minPrice',
             'maxPrice',
             'locationQuery',
-            'escortNameQuery',
         ]);
     }
 

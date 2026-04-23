@@ -4,7 +4,6 @@
 
 @php
     $locationQuery = (string) ($locationQuery ?? '');
-    $escortNameQuery = (string) ($escortNameQuery ?? '');
     $hasAgeFilter = $hasAgeFilter ?? false;
     $hasPriceFilter = $hasPriceFilter ?? false;
     $hasDistanceFilter = $hasDistanceFilter ?? false;
@@ -15,7 +14,7 @@
     $userLng = $userLng ?? null;
     $girlsMode = (string) ($girlsMode ?? 'all');
     $selectedCategoryItems = $selectedCategoryItems ?? collect();
-    $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
+    $hasActiveFilters = $locationQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
 @endphp
 
 @section('content')
@@ -437,11 +436,6 @@
                     @if($locationQuery !== '')
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
                             <i class="fa-solid fa-location-dot text-pink-500 text-[10px]"></i> {{ $locationQuery }}
-                        </span>
-                    @endif
-                    @if($escortNameQuery !== '')
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
-                            <i class="fa-solid fa-user text-pink-500 text-[10px]"></i> {{ $escortNameQuery }}
                         </span>
                     @endif
                     @foreach(collect($selectedCategoryItems) as $item)
