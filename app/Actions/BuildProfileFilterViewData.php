@@ -128,7 +128,6 @@ class BuildProfileFilterViewData
         }
 
         $locationQuery = trim((string) ($validated['location'] ?? ''));
-        $escortNameQuery = trim((string) ($validated['escort_name'] ?? ''));
         $girlsMode = (string) ($validated['girls'] ?? 'all');
         $locationStateQuery = trim((string) ($validated['location_state'] ?? ''));
 
@@ -174,7 +173,6 @@ class BuildProfileFilterViewData
         $profiles = $this->queryProfiles(
             $locationQuery,
             $locationStateQuery,
-            $escortNameQuery,
             $minAge,
             $maxAge,
             $minPrice,
@@ -208,7 +206,6 @@ class BuildProfileFilterViewData
             'minPrice',
             'maxPrice',
             'locationQuery',
-            'escortNameQuery',
             'girlsMode',
             'profiles',
             'hasAgeFilter',
@@ -250,7 +247,6 @@ class BuildProfileFilterViewData
     private function queryProfiles(
         string $locationQuery,
         string $locationStateQuery,
-        string $escortNameQuery,
         int $minAge,
         int $maxAge,
         int $minPrice,
@@ -314,10 +310,6 @@ class BuildProfileFilterViewData
                     });
                 }
             }
-        }
-
-        if ($escortNameQuery !== '') {
-            $query->where('provider_profiles.name', 'like', '%'.$escortNameQuery.'%');
         }
 
         if ($minAge > self::DEFAULT_MIN_AGE || $maxAge < self::DEFAULT_MAX_AGE) {
@@ -456,7 +448,6 @@ class BuildProfileFilterViewData
 
         $appendParams = array_filter([
             'location' => $locationQuery ?: null,
-            'escort_name' => $escortNameQuery ?: null,
             'min_age' => $minAge !== self::DEFAULT_MIN_AGE ? $minAge : null,
             'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
             'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
