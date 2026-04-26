@@ -416,18 +416,29 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                         @endif
                         <div class="flex flex-col sm:flex-row gap-4 mt-4">
-                            <button
-                                type="button"
-                                @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
-                                :class="isFavourite('{{ $profile['slug'] }}') ? 'bg-pink-50 text-pink-700 border-pink-400' : 'bg-white text-pink-700 border-gray-300 hover:bg-pink-50'"
-                                class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-full sm:w-1/2 justify-center"
-                                style="border-width:2px;"
-                                title="Save favourite"
-                            >
-                                <i :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart text-pink-600' : 'fa-regular fa-heart'" class="text-2xl"></i>
-                                <span class="font-semibold" x-text="isFavourite('{{ $profile['slug'] }}') ? 'Saved' : 'Save favourite'"></span>
-                            </button>
-                        </div>
+    <button
+        type="button"
+        @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
+        :class="isFavourite('{{ $profile['slug'] }}') ? 'bg-pink-50 text-pink-700 border-pink-400' : 'bg-white text-pink-700 border-gray-300 hover:bg-pink-50'"
+        class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-full justify-center"
+        style="border-width:2px;"
+        title="Save favourite"
+        aria-label="Save favourite"
+    >
+        <i
+            :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart text-pink-600' : 'fa-regular fa-heart text-pink-600'"
+            class="fa-regular fa-heart text-pink-600 text-2xl"
+            aria-hidden="true"
+        ></i>
+
+        <span
+            class="font-semibold uppercase tracking-wide"
+            x-text="isFavourite('{{ $profile['slug'] }}') ? 'SAVED FAVOURITE' : 'SAVE FAVOURITE'"
+        >
+            SAVE FAVOURITE
+        </span>
+    </button>
+</div>
                     </div>
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
                     <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
