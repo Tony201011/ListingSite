@@ -606,6 +606,24 @@ class BuildProfileFilterViewData
             ];
         }
 
+        $matchedStates = Postcode::query()
+            ->whereRaw('UPPER(TRIM(suburb)) = ?', [mb_strtoupper($locationQuery)])
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->pluck('state')
+            ->map(fn ($state) => strtoupper(trim((string) $state)))
+            ->unique()
+            ->values();
+
+        if ($matchedStates->count() === 1) {
+            $state = $matchedStates->first();
+
+            return [
+                'suburb' => $locationQuery,
+                'state' => $this->normalizeStateAbbreviation($state) ?? $state,
+            ];
+        }
+
         return null;
     }
 
