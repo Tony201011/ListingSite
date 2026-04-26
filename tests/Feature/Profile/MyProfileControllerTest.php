@@ -61,16 +61,28 @@ class MyProfileControllerTest extends TestCase
         return $child->id;
     }
 
-    public function test_my_profile_view_is_returned_for_authenticated_provider(): void
+    public function test_my_profile_shows_profile_list(): void
     {
         $user = $this->createProvider();
+
+        $response = $this->actingAs($user)->get(route('my-profile'));
+
+        $response->assertOk();
+        $response->assertViewIs('profile.my-profiles');
+        $response->assertViewHas('profiles');
+    }
+
+    public function test_my_profile_show_view_is_returned_for_authenticated_provider(): void
+    {
+        $user = $this->createProvider();
+        $profile = $user->providerProfiles()->first();
 
         $getMyProfilePageData = Mockery::mock(GetMyProfilePageData::class);
         $getMyProfilePageData->shouldReceive('execute')
             ->once()
             ->andReturn([
                 'user' => $user,
-                'profile' => $user->providerProfile,
+                'profile' => $profile,
                 'stepOneCompleted' => false,
                 'stepTwoCompleted' => false,
                 'stepPhotoVerificationCompleted' => false,
@@ -81,22 +93,23 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(GetMyProfilePageData::class, $getMyProfilePageData);
 
-        $response = $this->actingAs($user)->get(route('my-profile'));
+        $response = $this->actingAs($user)->get(route('my-profile.show', $profile));
 
         $response->assertOk();
         $response->assertViewIs('profile.my-profile-1');
     }
 
-    public function test_my_profile_view_passes_page_data_from_action(): void
+    public function test_my_profile_show_passes_page_data_from_action(): void
     {
         $user = $this->createProvider();
+        $profile = $user->providerProfiles()->first();
 
         $getMyProfilePageData = Mockery::mock(GetMyProfilePageData::class);
         $getMyProfilePageData->shouldReceive('execute')
             ->once()
             ->andReturn([
                 'user' => $user,
-                'profile' => $user->providerProfile,
+                'profile' => $profile,
                 'stepOneCompleted' => true,
                 'stepTwoCompleted' => true,
                 'stepPhotoVerificationCompleted' => false,
@@ -107,13 +120,13 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(GetMyProfilePageData::class, $getMyProfilePageData);
 
-        $response = $this->actingAs($user)->get(route('my-profile'));
+        $response = $this->actingAs($user)->get(route('my-profile.show', $profile));
 
         $response->assertViewHas('stepOneCompleted', true);
         $response->assertViewHas('stepTwoCompleted', true);
     }
 
-    public function test_edit_profile_view_is_returned_for_authenticated_provider(): void
+    public function test_create_profile_form_is_returned_for_authenticated_provider(): void
     {
         $user = $this->createProvider();
 
@@ -122,7 +135,7 @@ class MyProfileControllerTest extends TestCase
             ->once()
             ->andReturn([
                 'user' => $user,
-                'profile' => $user->providerProfile,
+                'profile' => null,
                 'selected' => [],
                 'ageGroupOptions' => collect(),
                 'hairColorOptions' => collect(),
@@ -144,7 +157,45 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(GetMyProfileStepTwoData::class, $getMyProfileStepTwoData);
 
-        $response = $this->actingAs($user)->get(route('edit-profile'));
+        $response = $this->actingAs($user)->get(route('create-profile'));
+
+        $response->assertOk();
+        $response->assertViewIs('profile.my-profile-2');
+    }
+
+    public function test_edit_profile_view_is_returned_for_authenticated_provider(): void
+    {
+        $user = $this->createProvider();
+        $profile = $user->providerProfiles()->first();
+
+        $getMyProfileStepTwoData = Mockery::mock(GetMyProfileStepTwoData::class);
+        $getMyProfileStepTwoData->shouldReceive('execute')
+            ->once()
+            ->andReturn([
+                'user' => $user,
+                'profile' => $profile,
+                'selected' => [],
+                'ageGroupOptions' => collect(),
+                'hairColorOptions' => collect(),
+                'hairLengthOptions' => collect(),
+                'ethnicityOptions' => collect(),
+                'bodyTypeOptions' => collect(),
+                'bustSizeOptions' => collect(),
+                'yourLengthOptions' => collect(),
+                'primaryTags' => collect(),
+                'attrTags' => collect(),
+                'styleTags' => collect(),
+                'services' => collect(),
+                'availabilityOptions' => collect(),
+                'contactMethodOptions' => collect(),
+                'phoneContactOptions' => collect(),
+                'timeWasterOptions' => collect(),
+                'contactEmail' => 'contact@example.com',
+            ]);
+
+        $this->app->instance(GetMyProfileStepTwoData::class, $getMyProfileStepTwoData);
+
+        $response = $this->actingAs($user)->get(route('edit-profile', $profile));
 
         $response->assertOk();
         $response->assertViewIs('profile.my-profile-2');
@@ -153,6 +204,7 @@ class MyProfileControllerTest extends TestCase
     public function test_save_calls_action_and_returns_json_on_json_request(): void
     {
         $user = $this->createProvider();
+        $profile = $user->providerProfiles()->first();
 
         $ageGroupId = $this->createCategoryForType('age-group');
         $hairColorId = $this->createCategoryForType('hair-color');
@@ -165,11 +217,11 @@ class MyProfileControllerTest extends TestCase
         $saveMyProfile = Mockery::mock(SaveMyProfile::class);
         $saveMyProfile->shouldReceive('execute')
             ->once()
-            ->andReturn(ActionResult::success([], 'Profile updated successfully.'));
+            ->andReturn(ActionResult::success(['profile_id' => $profile->id], 'Profile updated successfully.'));
 
         $this->app->instance(SaveMyProfile::class, $saveMyProfile);
 
-        $response = $this->actingAs($user)->postJson(route('edit-profile.save'), [
+        $response = $this->actingAs($user)->postJson(route('edit-profile.save', $profile), [
             'suburb' => 'Sydney',
             'introduction_line' => 'Hello there',
             'profile_text' => 'My profile text',
@@ -200,6 +252,7 @@ class MyProfileControllerTest extends TestCase
     public function test_save_returns_error_when_action_fails(): void
     {
         $user = $this->createProvider();
+        $profile = $user->providerProfiles()->first();
 
         $ageGroupId = $this->createCategoryForType('age-group');
         $hairColorId = $this->createCategoryForType('hair-color');
@@ -216,7 +269,7 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(SaveMyProfile::class, $saveMyProfile);
 
-        $response = $this->actingAs($user)->postJson(route('edit-profile.save'), [
+        $response = $this->actingAs($user)->postJson(route('edit-profile.save', $profile), [
             'suburb' => 'Sydney',
             'introduction_line' => 'Hello there',
             'profile_text' => 'My profile text',
@@ -243,10 +296,69 @@ class MyProfileControllerTest extends TestCase
     public function test_save_returns_422_when_required_fields_are_missing(): void
     {
         $user = $this->createProvider();
+        $profile = $user->providerProfiles()->first();
 
-        $response = $this->actingAs($user)->postJson(route('edit-profile.save'), []);
+        $response = $this->actingAs($user)->postJson(route('edit-profile.save', $profile), []);
 
         $response->assertStatus(422);
+    }
+
+    public function test_create_profile_store_creates_new_profile_and_returns_json(): void
+    {
+        $user = $this->createProvider();
+
+        $ageGroupId = $this->createCategoryForType('age-group');
+        $hairColorId = $this->createCategoryForType('hair-color');
+        $hairLengthId = $this->createCategoryForType('hair-length');
+        $ethnicityId = $this->createCategoryForType('ethnicity');
+        $bodyTypeId = $this->createCategoryForType('body-type');
+        $bustSizeId = $this->createCategoryForType('bust-size');
+        $yourLengthId = $this->createCategoryForType('your-length');
+
+        $saveMyProfile = Mockery::mock(SaveMyProfile::class);
+        $saveMyProfile->shouldReceive('execute')
+            ->once()
+            ->andReturn(ActionResult::success(['profile_id' => 99], 'Profile created successfully.'));
+
+        $this->app->instance(SaveMyProfile::class, $saveMyProfile);
+
+        $response = $this->actingAs($user)->postJson(route('create-profile.store'), [
+            'suburb' => 'Melbourne',
+            'introduction_line' => 'My second profile',
+            'profile_text' => 'Another profile text',
+            'age_group' => $ageGroupId,
+            'hair_color' => $hairColorId,
+            'hair_length' => $hairLengthId,
+            'ethnicity' => $ethnicityId,
+            'body_type' => $bodyTypeId,
+            'bust_size' => $bustSizeId,
+            'your_length' => $yourLengthId,
+            'availability' => 'Weekdays',
+            'contact_method' => 'Phone',
+            'phone_contact' => 'Call',
+            'time_waster' => 'Basic',
+            'primary_identity' => ['Option A'],
+            'attributes' => ['Attr A'],
+            'services_style' => ['Style A'],
+            'services_provided' => ['Service A'],
+        ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'message' => 'Profile created successfully.',
+        ]);
+    }
+
+    public function test_provider_cannot_edit_another_users_profile(): void
+    {
+        $user = $this->createProvider();
+        $otherUser = $this->createProvider();
+        $otherProfile = $otherUser->providerProfiles()->first();
+
+        $response = $this->actingAs($user)->get(route('edit-profile', $otherProfile));
+
+        $response->assertStatus(403);
     }
 
     public function test_guest_cannot_access_my_profile(): void
@@ -256,16 +368,16 @@ class MyProfileControllerTest extends TestCase
         $response->assertRedirect();
     }
 
-    public function test_guest_cannot_access_edit_profile(): void
+    public function test_guest_cannot_access_create_profile(): void
     {
-        $response = $this->get(route('edit-profile'));
+        $response = $this->get(route('create-profile'));
 
         $response->assertRedirect();
     }
 
     public function test_guest_cannot_save_profile(): void
     {
-        $response = $this->postJson(route('edit-profile.save'), []);
+        $response = $this->postJson(route('create-profile.store'), []);
 
         $response->assertStatus(401);
     }

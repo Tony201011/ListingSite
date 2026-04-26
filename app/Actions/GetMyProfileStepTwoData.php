@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Concerns\ResolvesProfileCategoryValues;
+use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
 
@@ -14,9 +15,9 @@ class GetMyProfileStepTwoData
         private GetProfileCategoryOptions $getProfileCategoryOptions
     ) {}
 
-    public function execute(?User $user): array
+    public function execute(?User $user, ?ProviderProfile $profile = null): array
     {
-        $profile = $user?->providerProfile;
+        $profile ??= $user?->providerProfile;
 
         $contactEmail = SiteSetting::query()
             ->whereNotNull('contact_email')

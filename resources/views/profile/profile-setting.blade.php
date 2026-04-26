@@ -54,7 +54,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
                 @php
                     $actions = [
-                        ['label' => 'Edit profile', 'url' => route('edit-profile')],
+                        ['label' => 'Edit profile', 'url' => isset($userInfo['provider_profile']) ? route('edit-profile', $userInfo['provider_profile']) : route('create-profile')],
                         ['label' => 'Photos', 'url' => url('/photos')],
                         ['label' => 'Add photos', 'url' => url('/add-photo')],
                         ['label' => 'My videos', 'url' => url('/my-videos')],
@@ -116,7 +116,7 @@
                     <section class="mb-6">
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="text-xl font-bold text-gray-900">My stats</h2>
-                            <a href="{{ route('edit-profile') }}" class="text-sm font-medium text-pink-600 hover:text-pink-700 transition">Edit</a>
+                            <a href="{{ isset($userInfo['provider_profile']) ? route('edit-profile', $userInfo['provider_profile']) : route('create-profile') }}" class="text-sm font-medium text-pink-600 hover:text-pink-700 transition">Edit</a>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                             @php

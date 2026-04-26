@@ -2,15 +2,16 @@
 
 namespace App\Actions;
 
+use App\Models\ProviderProfile;
 use App\Models\User;
 
 class GetMyProfilePageData
 {
     public function __construct(private CalculateBabeRank $calculateBabeRank) {}
 
-    public function execute(?User $user): array
+    public function execute(?User $user, ?ProviderProfile $profile = null): array
     {
-        $profile = $user?->providerProfile;
+        $profile ??= $user?->providerProfile;
 
         $stepOneCompleted = false;
 

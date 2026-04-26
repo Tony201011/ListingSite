@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,18 +12,18 @@ class CheckProfileSteps
 {
     public function handle(Request $request, Closure $next): Response
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
         if (! $user) {
             return $next($request);
         }
 
-        if ($user->role === \App\Models\User::ROLE_ADMIN) {
+        if ($user->role === User::ROLE_ADMIN) {
             return redirect('/admin');
         }
 
-        $profile = $user->providerProfile;
+        $profile = $user->providerProfiles()->latest()->first();
 
         $stepOneCompleted = $profile &&
             ! empty($profile->introduction_line) &&
