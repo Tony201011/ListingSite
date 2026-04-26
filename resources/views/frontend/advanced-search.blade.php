@@ -91,6 +91,7 @@
                 <div
                     x-data="{
                         term: {!! \Illuminate\Support\Js::from(request('location', '')) !!},
+                        selectedState: {!! \Illuminate\Support\Js::from(request('location_state', '')) !!},
                         suggestions: [],
                         showSuggestions: false,
                         highlightedIndex: -1,
@@ -109,6 +110,7 @@
                                 this.suggestions = (Array.isArray(data) ? data : []).map(item => ({
                                     name: (item.suburb || '') + ', ' + (item.state || ''),
                                     value: item.suburb || '',
+                                    state: item.state || '',
                                     label: item.postcode || ''
                                 }));
                                 this.showSuggestions = this.suggestions.length > 0;
@@ -118,6 +120,7 @@
                         },
                         selectSuggestion(item) {
                             this.term = item.value;
+                            this.selectedState = item.state || '';
                             this.closeSuggestions();
                         },
                         closeSuggestions() { this.showSuggestions = false; this.highlightedIndex = -1; },
@@ -141,7 +144,7 @@
                         name="location"
                         type="text"
                         x-model="term"
-                        @input.debounce.300ms="fetchSuggestions()"
+                        @input.debounce.300ms="selectedState = ''; fetchSuggestions()"
                         @focus="fetchSuggestions()"
                         @keydown.arrow-down.prevent="highlightNext()"
                         @keydown.arrow-up.prevent="highlightPrev()"
