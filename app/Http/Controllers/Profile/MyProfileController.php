@@ -21,31 +21,86 @@ class MyProfileController extends Controller
         private SaveMyProfile $saveMyProfile
     ) {}
 
-    public function myProfile(): View|RedirectResponse
+    public function profileList(): View
     {
         $user = Auth::user();
 
-        $this->authorize('view', ProviderProfile::class);
+        $this->authorize('viewAny', ProviderProfile::class);
 
-        return view('profile.my-profile-1', $this->getMyProfilePageData->execute($user));
+        $profiles = $user->providerProfiles()->latest()->get();
+
+        return view('profile.my-profiles', [
+            'user' => $user,
+            'profiles' => $profiles,
+        ]);
     }
 
-    public function editProfile(): View|RedirectResponse
+    public function myProfile(ProviderProfile $profile): View|RedirectResponse
     {
         $user = Auth::user();
 
-        $this->authorize('view', ProviderProfile::class);
+        $this->authorize('viewOwned', $profile);
 
-        return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute($user));
+        return view('profile.my-profile-1', $this->getMyProfilePageData->execute($user, $profile));
     }
 
-    public function save(SaveMyProfileRequest $request): JsonResponse|RedirectResponse
+    public function createProfileForm(): View|RedirectResponse
     {
-        $this->authorize('update', ProviderProfile::class);
+        $user = Auth::user();
+
+        $this->authorize('create', ProviderProfile::class);
+
+        return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute($user, null));
+    }
+
+    public function storeProfile(SaveMyProfileRequest $request): JsonResponse|RedirectResponse
+    {
+        $this->authorize('create', ProviderProfile::class);
 
         $result = $this->saveMyProfile->execute(
             Auth::user(),
-            $request->validated()
+            $request->validated(),
+            null
+        );
+
+        if (! $result->isSuccess()) {
+            abort($result->status(), $result->message() ?? 'Forbidden');
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json($result->toPayload(), $result->status());
+        }
+
+        $profileId = $result->data()['profile_id'] ?? null;
+
+        if ($profileId) {
+            return redirect()
+                ->route('my-profile.show', ['profile' => $profileId])
+                ->with('success', $result->message() ?? 'Profile created successfully.');
+        }
+
+        return redirect()
+            ->route('my-profile')
+            ->with('success', $result->message() ?? 'Profile created successfully.');
+    }
+
+    public function editProfile(ProviderProfile $profile): View|RedirectResponse
+    {
+        $user = Auth::user();
+
+        $this->authorize('updateOwned', $profile);
+
+        return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute($user, $profile));
+    }
+
+    public function save(SaveMyProfileRequest $request, ProviderProfile $profile): JsonResponse|RedirectResponse
+    {
+        $this->authorize('updateOwned', $profile);
+
+        $result = $this->saveMyProfile->execute(
+            Auth::user(),
+            $request->validated(),
+            $profile
         );
 
         if (! $result->isSuccess()) {
@@ -57,7 +112,7 @@ class MyProfileController extends Controller
         }
 
         return redirect()
-            ->route('edit-profile')
+            ->route('edit-profile.show', ['profile' => $profile->id])
             ->with('success', $result->message() ?? 'Profile updated successfully.');
     }
 }

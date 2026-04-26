@@ -48,9 +48,17 @@
     })"
 >
     <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-l-6 border-[#e04ecb] pl-4">
-            Edit your profile
-        </h1>
+        <div class="mb-8 flex items-center justify-between">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 border-l-6 border-[#e04ecb] pl-4">
+                @if(isset($profile) && $profile)Edit Your Profile @else Create New Profile @endif
+            </h1>
+            <a
+                href="{{ route('my-profile') }}"
+                class="text-sm font-medium text-[#e04ecb] hover:text-[#c13ab0] transition-colors"
+            >
+                ← All Profiles
+            </a>
+        </div>
 
         <button
             type="button"

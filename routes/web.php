@@ -153,9 +153,12 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('provider.auth')->group(function () {
-    Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
-    Route::get('/edit-profile', [MyProfileController::class, 'editProfile'])->name('edit-profile');
-    Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
+    Route::get('/my-profile', [MyProfileController::class, 'profileList'])->name('my-profile');
+    Route::get('/my-profile/{profile}', [MyProfileController::class, 'myProfile'])->name('my-profile.show');
+    Route::get('/create-profile', [MyProfileController::class, 'createProfileForm'])->name('create-profile');
+    Route::post('/create-profile', [MyProfileController::class, 'storeProfile'])->name('create-profile.store');
+    Route::get('/edit-profile/{profile}', [MyProfileController::class, 'editProfile'])->name('edit-profile');
+    Route::post('/edit-profile/{profile}', [MyProfileController::class, 'save'])->name('edit-profile.save');
     Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
     Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
     Route::get('/add-photos', [PhotoController::class, 'index'])->name('add-photos');

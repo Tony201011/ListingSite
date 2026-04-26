@@ -14,9 +14,17 @@
             <span class="mr-1">&lt;</span> back
         </button>
 
-        <h1 class="mb-8 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Hotescorts dashboard
-        </h1>
+        <div class="mb-4 flex items-center justify-between">
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Profile Dashboard
+            </h1>
+            <a
+                href="{{ route('my-profile') }}"
+                class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0]"
+            >
+                ← All Profiles
+            </a>
+        </div>
 
         <div class="mb-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
             <div class="p-6 sm:p-8">
@@ -130,7 +138,7 @@
                         @endif
 
                         <a
-                            href="{{ route('edit-profile') }}"
+                            href="{{ route('edit-profile', $profile) }}"
                             class="text-sm text-gray-500 transition hover:text-gray-700"
                         >
                             or edit your profile text
@@ -152,7 +160,7 @@
                         </a>
 
                         <a
-                            href="{{ route('edit-profile') }}"
+                            href="{{ route('edit-profile', $profile) }}"
                             class="text-sm text-gray-500 transition hover:text-gray-700"
                         >
                             or edit your profile text
@@ -160,7 +168,7 @@
 
                     @elseif($stepTwoCompleted)
                         <a
-                            href="{{ route('edit-profile') }}"
+                            href="{{ route('edit-profile', $profile) }}"
                             class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
                         >
                             Complete profile text
@@ -175,7 +183,7 @@
 
                     @elseif(!$stepOneCompleted && !$stepTwoCompleted && !$stepPhotoVerificationCompleted)
                         <a
-                            href="{{ route('edit-profile') }}"
+                            href="{{ route('edit-profile', $profile) }}"
                             class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
                         >
                             Write profile text

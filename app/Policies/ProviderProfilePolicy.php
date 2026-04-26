@@ -22,10 +22,6 @@ class ProviderProfilePolicy
     public function view(User $user, ?ProviderProfile $profile = null): bool
     {
         if (! $profile) {
-            if ($user->role === User::ROLE_PROVIDER) {
-                return $user->providerProfile !== null;
-            }
-
             return $this->viewAny($user);
         }
 
@@ -35,10 +31,6 @@ class ProviderProfilePolicy
     public function update(User $user, ?ProviderProfile $profile = null): bool
     {
         if (! $profile) {
-            if ($user->role === User::ROLE_PROVIDER) {
-                return $user->providerProfile !== null;
-            }
-
             return $this->create($user);
         }
 

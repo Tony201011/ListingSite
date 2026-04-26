@@ -100,7 +100,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function providerProfile(): HasOne
     {
-        return $this->hasOne(ProviderProfile::class);
+        return $this->hasOne(ProviderProfile::class)->latestOfMany();
+    }
+
+    public function providerProfiles(): HasMany
+    {
+        return $this->hasMany(ProviderProfile::class);
     }
 
     public function sendPasswordResetNotification($token): void
@@ -125,7 +130,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function availabilities(): HasMany
     {
-        return $this->hasMany(\App\Models\Availability::class);
+        return $this->hasMany(Availability::class);
     }
 
     public function profileImages(): HasMany

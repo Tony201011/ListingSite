@@ -208,9 +208,9 @@ class AuthorizationTest extends TestCase
 
     // --- Profile ---
 
-    public function test_guest_cannot_update_profile(): void
+    public function test_guest_cannot_create_profile(): void
     {
-        $this->postJson(route('edit-profile.save'), [])->assertUnauthorized();
+        $this->postJson(route('create-profile.store'), [])->assertUnauthorized();
     }
 
     public function test_guest_cannot_delete_account(): void
@@ -448,22 +448,22 @@ class AuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_user_without_profile_cannot_view_my_profile(): void
+    public function test_user_without_profile_can_view_profile_list(): void
     {
         $user = $this->userWithoutProfile();
 
         $this->actingAs($user)
             ->getJson(route('my-profile'))
-            ->assertForbidden();
+            ->assertOk();
     }
 
-    public function test_user_without_profile_cannot_view_edit_profile(): void
+    public function test_user_without_profile_can_access_create_profile_form(): void
     {
         $user = $this->userWithoutProfile();
 
         $this->actingAs($user)
-            ->get(route('edit-profile'))
-            ->assertForbidden();
+            ->get(route('create-profile'))
+            ->assertOk();
     }
 
     // ===============================================================
@@ -886,11 +886,11 @@ class AuthorizationTest extends TestCase
         $this->assertTrue(app(ProviderProfilePolicy::class)->view($user));
     }
 
-    public function test_provider_profile_policy_blocks_view_without_profile(): void
+    public function test_provider_profile_policy_allows_view_without_profile(): void
     {
         $user = $this->userWithoutProfile();
 
-        $this->assertFalse(app(ProviderProfilePolicy::class)->view($user));
+        $this->assertTrue(app(ProviderProfilePolicy::class)->view($user));
     }
 
     public function test_provider_profile_policy_allows_update_with_profile(): void
@@ -900,11 +900,11 @@ class AuthorizationTest extends TestCase
         $this->assertTrue(app(ProviderProfilePolicy::class)->update($user));
     }
 
-    public function test_provider_profile_policy_blocks_update_without_profile(): void
+    public function test_provider_profile_policy_allows_update_without_profile(): void
     {
         $user = $this->userWithoutProfile();
 
-        $this->assertFalse(app(ProviderProfilePolicy::class)->update($user));
+        $this->assertTrue(app(ProviderProfilePolicy::class)->update($user));
     }
 
     public function test_provider_profile_policy_allows_create_for_provider_role(): void
@@ -1024,9 +1024,9 @@ class AuthorizationTest extends TestCase
         $this->get(route('my-profile'))->assertRedirect();
     }
 
-    public function test_guest_cannot_view_edit_profile_page(): void
+    public function test_guest_cannot_view_create_profile_page(): void
     {
-        $this->get(route('edit-profile'))->assertRedirect();
+        $this->get(route('create-profile'))->assertRedirect();
     }
 
     public function test_guest_cannot_view_delete_account_page(): void
