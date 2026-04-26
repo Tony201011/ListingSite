@@ -448,7 +448,192 @@
             </form>
         </div>
 
-        {{-- Rest of profile listing remains unchanged --}}
+                <div class="mt-6"
+            x-data="favouriteBookmark({
+                viewMode: 'grid',
+                favourites: {{ Js::from($userFavourites ?? []) }},
+                bookmarks: {{ Js::from($userBookmarks ?? []) }}
+            })"
+        >
+            <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
+                @php
+                    $currentQuery = request()->query();
+                    $girlsUrl = fn (string $mode): string => route('advanced-search', array_merge($currentQuery, ['girls' => $mode]));
+                @endphp
+                <div class="flex items-center gap-2">
+                    <a
+                        href="{{ $girlsUrl('new') }}"
+                        class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'new' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
+                    >
+                        New girls
+                    </a>
+                    <a
+                        href="{{ $girlsUrl('all') }}"
+                        class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'all' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
+                    >
+                        All girls
+                    </a>
+                    <a
+                        href="{{ $girlsUrl('popular') }}"
+                        class="inline-flex items-center gap-1 rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'popular' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
+                    >
+                        <i class="fa-solid fa-fire text-[10px]"></i>
+                        Popular
+                    </a>
+                </div>
+            </div>
+
+            @if($hasActiveFilters)
+                <div class="mb-4 flex flex-wrap gap-2">
+                    @if($locationQuery !== '')
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                            <i class="fa-solid fa-location-dot text-pink-500 text-[10px]"></i> {{ $locationQuery }}
+                        </span>
+                    @endif
+                    @foreach(collect($selectedCategoryItems) as $item)
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                            {{ $item['name'] }}
+                        </span>
+                    @endforeach
+                    @if($hasAgeFilter)
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                            Age: {{ $minAge }}–{{ $maxAge }}
+                        </span>
+                    @endif
+                    @if($hasPriceFilter)
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                            Price: ${{ $minPrice }}–${{ $maxPrice }}
+                        </span>
+                    @endif
+                    @if($hasDistanceFilter)
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                            <i class="fa-solid fa-location-crosshairs text-pink-500 text-[10px]"></i> Within {{ $distanceFilter }} km
+                        </span>
+                    @endif
+                </div>
+            @endif
+
+            <div x-cloak>
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    @forelse($profiles as $profile)
+                        <article
+                            class="view-card group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300"
+                        >
+                            <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
+
+                            <div class="view-card-media relative overflow-hidden rounded-t-2xl">
+                                @if($profile['image'])
+                                    <img
+                                        src="{{ $profile['image'] }}"
+                                        alt="{{ $profile['name'] }}"
+                                        class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-105 h-52"
+                                        loading="lazy"
+                                        decoding="async"
+                                        fetchpriority="low"
+                                    >
+                                @else
+                                    <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
+                                        <i class="fa-solid fa-image text-4xl"></i>
+                                    </div>
+                                @endif
+
+                                <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
+                                    @if($profile['verified'])
+                                        <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                            <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
+                                        </span>
+                                    @endif
+                                    @if($profile['active'])
+                                        <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="p-3.5">
+                                <div class="mb-2 flex items-center justify-between">
+                                    <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
+                                    <div class="flex items-center gap-2 text-gray-400 relative z-20">
+                                        <button
+                                            type="button"
+                                            @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
+                                            :class="isFavourite('{{ $profile['slug'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
+                                            class="transition-colors"
+                                            title="Favourite"
+                                        >
+                                            <i :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            @click.prevent="toggleBookmark('{{ $profile['slug'] }}')"
+                                            :class="isBookmark('{{ $profile['slug'] }}') ? 'text-blue-500' : 'hover:text-blue-500'"
+                                            class="transition-colors"
+                                            title="Bookmark"
+                                        >
+                                            <i :class="isBookmark('{{ $profile['slug'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
+                                        </button>
+                                        @if($profile['age'])
+                                            <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none">{{ $profile['age'] }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <h3 class="text-sm font-medium text-gray-800 truncate">
+                                    {{ $profile['name'] }}@if($profile['suburb']) <span class="text-gray-400 font-normal">({{ $profile['suburb'] }})</span>@endif
+                                </h3>
+
+                                <p class="mt-0.5 text-2xl font-bold text-gray-900">
+                                    {{ $profile['rate'] }}
+                                </p>
+
+                                <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
+                                    @if($profile['city'] || $profile['suburb'])
+                                        <span class="inline-flex items-center gap-1">
+                                            <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
+                                            {{ $profile['suburb'] ?: $profile['city'] }}
+                                            @if(isset($profile['distance_km']) && $profile['distance_km'] !== null)
+                                                <span class="text-gray-400">({{ $profile['distance_km'] }} km)</span>
+                                            @endif
+                                        </span>
+                                    @endif
+                                    @if(!empty($profile['service_1']))
+                                        <span class="inline-flex items-center gap-1">
+                                            <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
+                                            {{ $profile['service_1'] }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                @if(!empty($profile['service_2']) || !empty($profile['description']))
+                                    <div class="mt-2 text-[12px] text-gray-600 line-clamp-2">
+                                        <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
+                                        {{ !empty($profile['service_2']) ? $profile['service_2'] : $profile['description'] }}
+                                    </div>
+                                @endif
+                            </div>
+                        </article>
+                    @empty
+                        <div class="col-span-full rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
+                            <i class="fa-solid fa-magnifying-glass mb-4 text-3xl text-gray-400"></i>
+                            <p class="text-sm font-medium text-gray-600">No profiles found matching your criteria.</p>
+                            @if($hasActiveFilters)
+                                <a href="{{ route('advanced-search') }}" class="mt-4 inline-block rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white hover:bg-pink-700 transition">Clear filters</a>
+                            @endif
+                        </div>
+                    @endforelse
+                </div>
+
+                <div class="mt-8">
+                    @if($hasActiveFilters)
+                        <p class="mb-3 text-center text-sm text-gray-500">
+                            <a href="{{ route('advanced-search') }}" class="text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
+                        </p>
+                    @endif
+                    {{ $profiles->links() }}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
