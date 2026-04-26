@@ -16,6 +16,7 @@ $profileTags = array_values(array_unique(array_merge(
 @section('content')
 <div class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
     x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
+    x-init="init()"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
@@ -420,12 +421,20 @@ $profileTags = array_values(array_unique(array_merge(
                                 type="button"
                                 @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
                                 :class="isFavourite('{{ $profile['slug'] }}') ? 'bg-pink-50 text-pink-700 border-pink-400' : 'bg-white text-pink-700 border-gray-300 hover:bg-pink-50'"
-                                class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-full sm:w-1/2 justify-center"
+                                class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-full justify-center"
                                 style="border-width:2px;"
                                 title="Save favourite"
+                                aria-label="Save favourite"
                             >
-                                <i :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart text-pink-600' : 'fa-regular fa-heart'" class="text-2xl"></i>
-                                <span class="font-semibold" x-text="isFavourite('{{ $profile['slug'] }}') ? 'Saved' : 'Save favourite'"></span>
+                                <i
+                                    :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart text-pink-600' : 'fa-regular fa-heart text-pink-600'"
+                                    class="fa-regular fa-heart text-pink-600 text-2xl"
+                                    aria-hidden="true"
+                                ></i>
+                                <span
+                                    class="font-semibold uppercase tracking-wide text-pink-700"
+                                    x-text="isFavourite('{{ $profile['slug'] }}') ? 'SAVED FAVOURITE' : 'SAVE FAVOURITE'"
+                                >SAVE FAVOURITE</span>
                             </button>
                         </div>
                     </div>
@@ -821,6 +830,57 @@ $profileTags = array_values(array_unique(array_merge(
         </form>
     </div>
 </div>
+
+<script>
+    if (typeof window.favouriteBookmark !== 'function') {
+        window.favouriteBookmark = function favouriteBookmark(config = {}) {
+            return {
+                favourites: Array.isArray(config.favourites) ? config.favourites.map(String) : [],
+
+                init() {
+                    const stored = window.localStorage.getItem('profile_favourites');
+
+                    if (stored) {
+                        try {
+                            const parsed = JSON.parse(stored);
+
+                            if (Array.isArray(parsed)) {
+                                this.favourites = parsed.map(String);
+                            }
+                        } catch (error) {
+                            window.localStorage.removeItem('profile_favourites');
+                        }
+                    }
+                },
+
+                normalise(slug) {
+                    return String(slug || '').trim();
+                },
+
+                isFavourite(slug) {
+                    slug = this.normalise(slug);
+                    return this.favourites.map(String).includes(slug);
+                },
+
+                toggleFavourite(slug) {
+                    slug = this.normalise(slug);
+
+                    if (!slug) {
+                        return;
+                    }
+
+                    if (this.isFavourite(slug)) {
+                        this.favourites = this.favourites.filter(item => String(item) !== slug);
+                    } else {
+                        this.favourites.push(slug);
+                    }
+
+                    window.localStorage.setItem('profile_favourites', JSON.stringify(this.favourites));
+                }
+            };
+        };
+    }
+</script>
 
 <script>
     window.__profileShowConfig = {
