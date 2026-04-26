@@ -96,36 +96,68 @@
                         showSuggestions: false,
                         highlightedIndex: -1,
                         abortController: null,
+
                         fetchSuggestions() {
                             const q = this.term.trim();
-                            if (q.length < 2) { this.closeSuggestions(); return; }
-                            if (this.abortController) this.abortController.abort();
+
+                            if (q.length < 2) {
+                                this.closeSuggestions();
+                                return;
+                            }
+
+                            if (this.abortController) {
+                                this.abortController.abort();
+                            }
+
                             this.abortController = new AbortController();
+
                             fetch('{{ route('api.suburbs.search') }}?q=' + encodeURIComponent(q), {
                                 signal: this.abortController.signal,
-                                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
                             })
                             .then(r => r.ok ? r.json() : Promise.resolve([]))
                             .then(data => {
                                 this.suggestions = (Array.isArray(data) ? data : []).map(item => ({
-                                    name: (item.suburb || '') + ', ' + (item.state || ''),
+                                    name: ((item.suburb || '') + ', ' + (item.state || '')).replace(/^, |, $/g, ''),
                                     value: item.suburb || '',
                                     state: item.state || '',
                                     label: item.postcode || ''
                                 }));
+
                                 this.showSuggestions = this.suggestions.length > 0;
                                 this.highlightedIndex = -1;
                             })
-                            .catch(err => { if (err.name !== 'AbortError') this.closeSuggestions(); });
+                            .catch(err => {
+                                if (err.name !== 'AbortError') {
+                                    this.closeSuggestions();
+                                }
+                            });
                         },
+
                         selectSuggestion(item) {
                             this.term = item.value;
                             this.selectedState = item.state || '';
                             this.closeSuggestions();
                         },
-                        closeSuggestions() { this.showSuggestions = false; this.highlightedIndex = -1; },
-                        highlightNext() { if (!this.showSuggestions) return; this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.suggestions.length - 1); },
-                        highlightPrev() { if (!this.showSuggestions) return; this.highlightedIndex = Math.max(this.highlightedIndex - 1, -1); },
+
+                        closeSuggestions() {
+                            this.showSuggestions = false;
+                            this.highlightedIndex = -1;
+                        },
+
+                        highlightNext() {
+                            if (!this.showSuggestions) return;
+                            this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.suggestions.length - 1);
+                        },
+
+                        highlightPrev() {
+                            if (!this.showSuggestions) return;
+                            this.highlightedIndex = Math.max(this.highlightedIndex - 1, -1);
+                        },
+
                         selectHighlighted() {
                             if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
                                 this.selectSuggestion(this.suggestions[this.highlightedIndex]);
@@ -136,83 +168,89 @@
                     }"
                     @keydown.escape="closeSuggestions()"
                     @click.outside="closeSuggestions()"
-                    class="relative"
+                    class="space-y-4"
                 >
-                    <label for="location" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Location</label>
-                    <input
-                        id="location"
-                        name="location"
-                        type="text"
-                        x-model="term"
-                        @input.debounce.300ms="selectedState = ''; fetchSuggestions()"
-                        @focus="fetchSuggestions()"
-                        @keydown.arrow-down.prevent="highlightNext()"
-                        @keydown.arrow-up.prevent="highlightPrev()"
-                        @keydown.enter.prevent="selectHighlighted()"
-                        placeholder="Type location & select result from list"
-                        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
-                        autocomplete="off"
-                    >
+                    <div class="relative">
+                        <label for="location" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Location</label>
 
-                    <div
-                        x-show="showSuggestions && suggestions.length > 0"
-                        x-cloak
-                        class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded border border-gray-200 bg-white shadow-xl"
-                    >
-                        <ul class="divide-y divide-gray-100">
-                            <template x-for="(item, index) in suggestions" :key="index">
-                                <li>
-                                    <button
-                                        type="button"
-                                        @click="selectSuggestion(item)"
-                                        class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition"
-                                        :class="index === highlightedIndex ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-gray-50'"
-                                        @mouseenter="highlightedIndex = index"
-                                        @mouseleave="highlightedIndex = -1"
-                                    >
-                                        <i class="fa-solid fa-location-dot text-gray-400 text-xs shrink-0"></i>
-                                        <span class="truncate" x-text="item.name"></span>
-                                        <span class="ml-auto shrink-0 text-xs text-gray-400" x-show="item.label" x-text="item.label"></span>
-                                    </button>
-                                </li>
-                            </template>
-                        </ul>
+                        <input
+                            id="location"
+                            name="location"
+                            type="text"
+                            x-model="term"
+                            @input.debounce.300ms="selectedState = ''; fetchSuggestions()"
+                            @focus="fetchSuggestions()"
+                            @keydown.arrow-down.prevent="highlightNext()"
+                            @keydown.arrow-up.prevent="highlightPrev()"
+                            @keydown.enter.prevent="selectHighlighted()"
+                            placeholder="Type location & select result from list"
+                            class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
+                            autocomplete="off"
+                        >
+
+                        <input type="hidden" name="location_state" x-model="selectedState">
+
+                        <div
+                            x-show="showSuggestions && suggestions.length > 0"
+                            x-cloak
+                            x-transition
+                            class="absolute left-0 right-0 top-full z-[9999] mt-1 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl"
+                        >
+                            <ul class="divide-y divide-gray-100">
+                                <template x-for="(item, index) in suggestions" :key="index">
+                                    <li>
+                                        <button
+                                            type="button"
+                                            @mousedown.prevent="selectSuggestion(item)"
+                                            class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition"
+                                            :class="index === highlightedIndex ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-gray-50'"
+                                            @mouseenter="highlightedIndex = index"
+                                            @mouseleave="highlightedIndex = -1"
+                                        >
+                                            <i class="fa-solid fa-location-dot shrink-0 text-xs text-gray-400"></i>
+                                            <span class="truncate" x-text="item.name"></span>
+                                            <span class="ml-auto shrink-0 text-xs text-gray-400" x-show="item.label" x-text="item.label"></span>
+                                        </button>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-lg border border-gray-200 bg-white px-3 py-5">
+                    <label for="distance" class="mb-4 block text-xs font-bold uppercase tracking-wide text-gray-700">Distance</label>
+
+                    <div class="relative h-14">
+                        <div class="absolute left-0 right-0 top-8 h-2 -translate-y-1/2 rounded-full bg-gray-200"></div>
+
+                        <div
+                            class="absolute left-0 top-8 h-2 -translate-y-1/2 rounded-full bg-pink-500"
+                            :style="`width: ${getDistancePercent()}%`"
+                        ></div>
+
+                        <div
+                            class="slider-value-label absolute top-0 rounded bg-pink-500 px-2 py-0.5 text-[11px] font-semibold text-white shadow"
+                            :style="labelStyle(getDistancePercent())"
+                        >
+                            <span x-text="distance"></span> km
+                        </div>
+
+                        <input
+                            id="distance"
+                            name="distance"
+                            type="range"
+                            min="0"
+                            max="{{ $maxSearchDistance }}"
+                            step="1"
+                            x-model.number="distance"
+                            class="range-thumb absolute left-0 top-8 z-20 h-2 w-full -translate-y-1/2 appearance-none bg-transparent"
+                        >
                     </div>
 
-                    <div class="mt-4 rounded-lg border border-gray-200 bg-white px-3 py-5">
-                        <label for="distance" class="mb-4 block text-xs font-bold uppercase tracking-wide text-gray-700">Distance</label>
-
-                        <div class="relative h-14">
-                            <div class="absolute top-8 left-0 right-0 h-2 -translate-y-1/2 rounded-full bg-gray-200"></div>
-
-                            <div
-                                class="absolute top-8 left-0 h-2 -translate-y-1/2 rounded-full bg-pink-500"
-                                :style="`width: ${getDistancePercent()}%`"
-                            ></div>
-
-                            <div
-                                class="slider-value-label absolute top-0 rounded bg-pink-500 px-2 py-0.5 text-[11px] font-semibold text-white shadow"
-                                :style="labelStyle(getDistancePercent())"
-                            >
-                                <span x-text="distance"></span> km
-                            </div>
-
-                            <input
-                                id="distance"
-                                name="distance"
-                                type="range"
-                                min="0"
-                                max="{{ $maxSearchDistance }}"
-                                step="1"
-                                x-model.number="distance"
-                                class="range-thumb absolute left-0 top-8 z-20 h-2 w-full -translate-y-1/2 appearance-none bg-transparent"
-                            >
-                        </div>
-
-                        <div class="mt-2 flex items-center justify-between text-[11px] text-gray-400">
-                            <span>0 km</span>
-                            <span>{{ $maxSearchDistance }} km</span>
-                        </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-gray-400">
+                        <span>0 km</span>
+                        <span>{{ $maxSearchDistance }} km</span>
                     </div>
                 </div>
 
@@ -220,7 +258,7 @@
                     <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Age Range</label>
                     <div class="rounded-lg border border-gray-200 bg-white px-3 py-5">
                         <div class="relative h-14">
-                            <div class="absolute top-8 left-0 right-0 h-2 -translate-y-1/2 rounded-full bg-gray-200"></div>
+                            <div class="absolute left-0 right-0 top-8 h-2 -translate-y-1/2 rounded-full bg-gray-200"></div>
 
                             <div
                                 class="absolute top-8 h-2 -translate-y-1/2 rounded-full bg-pink-500"
@@ -277,7 +315,7 @@
                     <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Price Range</label>
                     <div class="rounded-lg border border-gray-200 bg-white px-3 py-5">
                         <div class="relative h-14">
-                            <div class="absolute top-8 left-0 right-0 h-2 -translate-y-1/2 rounded-full bg-gray-200"></div>
+                            <div class="absolute left-0 right-0 top-8 h-2 -translate-y-1/2 rounded-full bg-gray-200"></div>
 
                             <div
                                 class="absolute top-8 h-2 -translate-y-1/2 rounded-full bg-pink-500"
@@ -333,6 +371,7 @@
                 @forelse(($filterGroups ?? []) as $group)
                     <div>
                         <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">{{ $group['label'] }}</label>
+
                         @if(!empty($group['options']))
                             @php
                                 $groupSelectedIds = collect($group['options'])
@@ -342,9 +381,14 @@
                                     ->values()
                                     ->all();
                             @endphp
+
                             <div
                                 class="space-y-2"
-                                x-data="{ open: false, options: {{ \Illuminate\Support\Js::from($group['options']) }}, selected: {{ \Illuminate\Support\Js::from($groupSelectedIds) }} }"
+                                x-data="{
+                                    open: false,
+                                    options: {{ \Illuminate\Support\Js::from($group['options']) }},
+                                    selected: {{ \Illuminate\Support\Js::from($groupSelectedIds) }}
+                                }"
                                 @click.outside="open = false"
                                 @filter-opened.window="if ($event.detail !== '{{ $group['slug'] }}') open = false"
                             >
@@ -358,6 +402,7 @@
                                     @click="open = !open; if (open) $dispatch('filter-opened', '{{ $group['slug'] }}')"
                                 >
                                     <span class="text-gray-500" x-show="selected.length === 0">Please select...</span>
+
                                     <span class="inline-flex flex-wrap items-center gap-1" x-show="selected.length > 0">
                                         <template x-for="id in selected" :key="'chip-' + id">
                                             <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
@@ -370,9 +415,17 @@
 
                                 <div x-cloak x-show="open" x-transition class="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3">
                                     <template x-for="option in options.filter(o => !selected.includes(String(o.id)))" :key="'opt-' + option.id">
-                                        <button type="button" class="block w-full rounded px-2 py-1 text-left text-sm text-gray-700 hover:bg-gray-100" @click="selected = [...selected, String(option.id)]" x-text="option.name"></button>
+                                        <button
+                                            type="button"
+                                            class="block w-full rounded px-2 py-1 text-left text-sm text-gray-700 hover:bg-gray-100"
+                                            @click="selected = [...selected, String(option.id)]"
+                                            x-text="option.name"
+                                        ></button>
                                     </template>
-                                    <p class="text-xs text-gray-400" x-show="options.filter(o => !selected.includes(String(o.id))).length === 0">No options left.</p>
+
+                                    <p class="text-xs text-gray-400" x-show="options.filter(o => !selected.includes(String(o.id))).length === 0">
+                                        No options left.
+                                    </p>
                                 </div>
                             </div>
                         @else
@@ -384,8 +437,13 @@
                 @endforelse
 
                 <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
-                    <button type="submit" class="inline-flex items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]">Apply Filters</button>
-                    <a href="{{ route('advanced-search') }}" class="inline-flex items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]">Reset</a>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]">
+                        Apply Filters
+                    </button>
+
+                    <a href="{{ route('advanced-search') }}" class="inline-flex items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]">
+                        Reset
+                    </a>
                 </div>
             </form>
         </div>
@@ -399,6 +457,10 @@
 <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}">
 
 <style>
+    [x-cloak] {
+        display: none !important;
+    }
+
     .range-thumb::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
