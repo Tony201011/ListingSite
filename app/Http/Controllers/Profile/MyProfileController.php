@@ -112,7 +112,7 @@ class MyProfileController extends Controller
         }
 
         return redirect()
-            ->route('edit-profile.show', ['profile' => $profile->id])
+            ->route('my-profile.show', ['profile' => $profile->id])
             ->with('success', $result->message() ?? 'Profile updated successfully.');
     }
 }
