@@ -1,8 +1,8 @@
-function uploadVideoPage(config) {
-    return {
-        uploadUrl: config.uploadUrl,
-        redirectUrl: config.redirectUrl,
-        csrfToken: config.csrfToken,
+document.addEventListener('alpine:init', () => {
+    Alpine.data('uploadVideoPage', (config = {}) => ({
+        uploadUrl: config.uploadUrl || '',
+        redirectUrl: config.redirectUrl || '',
+        csrfToken: config.csrfToken || '',
 
         selectedVideos: [],
         uploading: false,
@@ -147,5 +147,5 @@ function uploadVideoPage(config) {
                 this.uploading = false;
             }
         }
-    };
-}
+    }));
+});
