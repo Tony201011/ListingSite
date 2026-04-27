@@ -7,13 +7,19 @@ document.addEventListener('alpine:init', () => {
         csrfToken: config.csrfToken || '',
 
         loading: false,
-        countdown: '60:00',
+        message: '',
+        messageType: 'success',
+        countdown: '00:00',
         timer: null,
 
         init() {
             if (this.enabled && this.expiresAt) {
                 this.startTimer();
             }
+
+            window.addEventListener('beforeunload', () => {
+                this.stopTimer();
+            });
         },
 
         startTimer() {
@@ -48,7 +54,7 @@ document.addEventListener('alpine:init', () => {
                 this.countdown = '00:00';
                 this.stopTimer();
 
-                this.toast('Session ended');
+                this.showMessage('Your session has ended.', 'success');
 
                 return;
             }
@@ -100,32 +106,22 @@ document.addEventListener('alpine:init', () => {
                     this.countdown = '00:00';
                 }
 
-                this.toast(data.message || 'Status updated');
+                this.showMessage(data.message || 'Status updated.');
 
             } catch (error) {
-                this.error(error.message || 'Something went wrong');
+                this.showMessage(error.message || 'Something went wrong.', 'error');
             } finally {
                 this.loading = false;
             }
         },
 
-        toast(message) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: message,
-                timer: 1800,
-                showConfirmButton: false
-            });
-        },
+        showMessage(msg, type = 'success') {
+            this.message = msg;
+            this.messageType = type;
 
-        error(message) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: message
-            });
+            setTimeout(() => {
+                this.message = '';
+            }, 3000);
         }
     }));
 });
