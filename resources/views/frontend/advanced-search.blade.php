@@ -573,9 +573,9 @@
                                         >
                                             <i :class="isBookmark('{{ $profile['slug'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
                                         </button>
-                                        @if($profile['age'])
+                                        {{-- @if($profile['age'])
                                             <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none">{{ $profile['age'] }}</span>
-                                        @endif
+                                        @endif --}}
                                     </div>
                                 </div>
 
