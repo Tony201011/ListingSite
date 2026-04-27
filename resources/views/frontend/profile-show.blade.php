@@ -566,9 +566,9 @@ $profileTags = array_values(array_unique(array_merge(
                     </div>
                     @endif
                     @php
-                        $nonEmptyAvailability = array_filter($profile['availability_list'] ?? [], function ($avail) {
+                        $nonEmptyAvailability = array_values(array_filter($profile['availability_list'] ?? [], function ($avail) {
                             return !empty($avail['time']) && $avail['time'] !== 'Unavailable';
-                        });
+                        }));
                     @endphp
                     @if(!empty($nonEmptyAvailability))
                     <!-- My Availability Section -->

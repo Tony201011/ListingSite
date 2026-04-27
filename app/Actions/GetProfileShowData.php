@@ -111,7 +111,7 @@ class GetProfileShowData
                             ->all(),
                     ];
                 })
-                ->filter(fn ($group) => !empty($group['items']))
+                ->filter(fn ($group) => ! empty($group['items']))
                 ->sortBy('heading')
                 ->values()
                 ->all();
@@ -153,7 +153,7 @@ class GetProfileShowData
         $primaryImage = $user?->primaryProfileImage;
         $primaryImageUrl = $this->normalizeMediaUrl($primaryImage?->image_url ?? null);
 
-        if ($primaryImageUrl && !in_array($primaryImageUrl, $images, true)) {
+        if ($primaryImageUrl && ! in_array($primaryImageUrl, $images, true)) {
             array_unshift($images, $primaryImageUrl);
         }
 
@@ -173,28 +173,32 @@ class GetProfileShowData
             'group' => $rate->group?->name ?? '',
         ])->values()->all();
 
-        $availabilities = $user?->availabilities ?? collect();
-        $availabilityList = $availabilities->map(function ($avail) {
-            if ($avail->by_appointment) {
-                $time = 'By appointment';
-            } elseif ($avail->all_day) {
-                $time = 'All day';
-            } elseif (!$avail->enabled) {
-                $time = 'Unavailable';
-            } else {
-                $from = $avail->from_time ? Carbon::parse($avail->from_time)->format('H:i') : '';
-                if ($avail->till_late) {
-                    $to = 'Late';
-                } elseif ($avail->to_time) {
-                    $to = Carbon::parse($avail->to_time)->format('H:i');
-                } else {
-                    $to = '';
-                }
-                $time = $from && $to ? "{$from} - {$to}" : ($from ?: 'Unavailable');
-            }
+        $dayOrder = ['Monday' => 0, 'Tuesday' => 1, 'Wednesday' => 2, 'Thursday' => 3, 'Friday' => 4, 'Saturday' => 5, 'Sunday' => 6];
 
-            return ['day' => $avail->day, 'time' => $time];
-        })->values()->all();
+        $availabilities = $user?->availabilities ?? collect();
+        $availabilityList = $availabilities
+            ->sortBy(fn ($avail) => $dayOrder[$avail->day] ?? 99)
+            ->map(function ($avail) {
+                if ($avail->by_appointment) {
+                    $time = 'By appointment';
+                } elseif ($avail->all_day) {
+                    $time = 'All day';
+                } elseif (! $avail->enabled) {
+                    $time = 'Unavailable';
+                } else {
+                    $from = $avail->from_time ? Carbon::parse($avail->from_time)->format('H:i') : '';
+                    if ($avail->till_late) {
+                        $to = 'Late';
+                    } elseif ($avail->to_time) {
+                        $to = Carbon::parse($avail->to_time)->format('H:i');
+                    } else {
+                        $to = '';
+                    }
+                    $time = $from && $to ? "{$from} - {$to}" : ($from ?: 'Available');
+                }
+
+                return ['day' => $avail->day, 'time' => $time];
+            })->values()->all();
 
         $tours = $user?->tours
             ?->where('enabled', true)
