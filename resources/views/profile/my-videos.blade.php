@@ -69,33 +69,7 @@
                             <span class="text-sm font-medium text-gray-700" x-text="video.original_name || ('Video #' + video.id)"></span>
                         </div>
 
-                        <!-- Delete confirm box -->
-                        <div
-                            x-show="confirmDeleteId === video.id"
-                            x-transition
-                            class="mx-3 mb-3 rounded-lg border border-red-200 bg-red-50 p-3"
-                        >
-                            <p class="text-xs text-red-700 mb-2">Are you sure you want to delete this video?</p>
-                            <div class="flex gap-2">
-                                <button
-                                    type="button"
-                                    @click="removeVideo(video.id)"
-                                    class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700"
-                                    :disabled="loading"
-                                >
-                                    Yes, delete
-                                </button>
 
-                                <button
-                                    type="button"
-                                    @click="confirmDeleteId = null"
-                                    class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-                                    :disabled="loading"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </template>
             </div>

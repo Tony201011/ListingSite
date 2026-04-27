@@ -51,7 +51,7 @@ class VideoUploadTest extends TestCase
                 'video_url' => "https://cdn.example.com/videos/{$uuid}.mp4",
             ];
         });
-        $mock->shouldReceive('deletePaths')->andReturnNull();
+        $mock->shouldReceive('deletePath')->andReturnNull();
         $this->app->instance(UserVideoStorageService::class, $mock);
     }
 

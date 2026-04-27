@@ -3,7 +3,6 @@ document.addEventListener('alpine:init', () => {
         loading: false,
         successMessage: '',
         errorMessage: '',
-        confirmDeleteId: null,
 
         videos: config.videos || [],
         deleteUrl: config.deleteUrl,

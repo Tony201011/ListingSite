@@ -15,7 +15,7 @@ class GetUserVideos
             return ActionResult::authorizationFailure('Unauthenticated.', 401);
         }
 
-        Gate::authorize('viewAny', UserVideo::class);
+        Gate::forUser($user)->authorize('viewAny', UserVideo::class);
 
         $videos = UserVideo::query()
             ->where('user_id', $user->id)
