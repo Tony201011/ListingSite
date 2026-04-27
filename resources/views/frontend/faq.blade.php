@@ -23,7 +23,6 @@
                     nextPage: @js($nextPage),
                     endpoint: @js($lazyLoadUrl)
                 })"
-                x-init="init()"
             >
                 <template x-for="(faq, index) in faqs" :key="faq.id ?? `faq-${index}`">
                     <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">

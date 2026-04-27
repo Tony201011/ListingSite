@@ -16,7 +16,6 @@ $profileTags = array_values(array_unique(array_merge(
 @section('content')
 <div class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
     x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
-    x-init="init()"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
@@ -217,8 +216,7 @@ $profileTags = array_values(array_unique(array_merge(
                                         }
                                     }, true);
                                 }
-                            }"
-                            x-init="init()">
+                            }">
                             @foreach($profile['videos'] ?? [] as $videoUrl)
                             <div class="relative" x-data="{ playing: false }">
                                 <video controls preload="metadata" class="rounded-xl w-full h-64 bg-black object-cover"
@@ -623,7 +621,6 @@ $profileTags = array_values(array_unique(array_merge(
                 prev() { if (this.page > 0) this.page--; },
                 next() { if (this.page < this.pages - 1) this.page++; }
             }"
-            x-init="init()"
             @resize.window="updatePageSize()"
             class="mt-16 overflow-hidden"
         >
@@ -886,6 +883,60 @@ $profileTags = array_values(array_unique(array_merge(
     window.__profileShowConfig = {
         reportUrl: '{{ route('profile.report') }}',
         profileId: {{ $profile['id'] }}
+    };
+
+    window.submitReport = async function submitReport(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const submitBtn = document.getElementById('report-submit-btn');
+        const successDiv = document.getElementById('report-success');
+        const errorDiv = document.getElementById('report-error');
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (successDiv) successDiv.classList.add('hidden');
+        if (errorDiv) { errorDiv.classList.add('hidden'); errorDiv.textContent = ''; }
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(window.__profileShowConfig.reportUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': formData.get('_token') || '',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData,
+            });
+
+            let data = {};
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                data = { message: await response.text() || 'Unexpected server response.' };
+            }
+
+            if (response.ok) {
+                if (successDiv) successDiv.classList.remove('hidden');
+                form.reset();
+                setTimeout(function () {
+                    const modal = document.getElementById('report-modal');
+                    if (modal) modal.classList.add('hidden');
+                    if (successDiv) successDiv.classList.add('hidden');
+                }, 2000);
+            } else {
+                const msg = data.errors
+                    ? Object.values(data.errors).flat().join(' ')
+                    : (data.message || 'An error occurred. Please try again.');
+                if (errorDiv) { errorDiv.textContent = msg; errorDiv.classList.remove('hidden'); }
+            }
+        } catch (error) {
+            if (errorDiv) { errorDiv.textContent = 'A network error occurred. Please try again.'; errorDiv.classList.remove('hidden'); }
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
     };
 </script>
 

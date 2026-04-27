@@ -9,7 +9,7 @@
             deleteUrl: @js(route('my-tours.destroy', ['tour' => '__ID__'])),
             csrfToken: @js(csrf_token())
         })"
-     x-init="init()">
+    >
     <div class="max-w-4xl mx-auto">
         @include('profile.partials.back-to-settings')
 
