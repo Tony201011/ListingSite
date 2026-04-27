@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Profile;
 use App\Actions\DeleteProfilePhoto;
 use App\Actions\GetUserPhotos;
 use App\Actions\SetPrimaryProfilePhoto;
+use App\Actions\UploadEditorImage;
 use App\Actions\UploadUserPhotos;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UploadEditorImageRequest;
 use App\Http\Requests\UploadPhotosRequest;
 use App\Models\ProfileImage;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +22,8 @@ class PhotoController extends Controller
         private GetUserPhotos $getUserPhotos,
         private UploadUserPhotos $uploadUserPhotos,
         private SetPrimaryProfilePhoto $setPrimaryProfilePhoto,
-        private DeleteProfilePhoto $deleteProfilePhoto
+        private DeleteProfilePhoto $deleteProfilePhoto,
+        private UploadEditorImage $uploadEditorImage
     ) {}
 
     public function index(): View
@@ -65,6 +68,29 @@ class PhotoController extends Controller
                 'error' => config('app.debug')
                     ? $e->getMessage()
                     : 'Something went wrong while uploading photos.',
+            ], 500);
+        }
+    }
+
+    public function uploadEditorImage(UploadEditorImageRequest $request): JsonResponse
+    {
+        $this->authorize('create', ProfileImage::class);
+
+        try {
+            $result = $this->uploadEditorImage->execute(
+                Auth::user(),
+                $request->file('image')
+            );
+
+            return response()->json($result->toPayload(), $result->status());
+        } catch (Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Upload failed.',
+                'error' => config('app.debug')
+                    ? $e->getMessage()
+                    : 'Something went wrong while uploading the image.',
             ], 500);
         }
     }
