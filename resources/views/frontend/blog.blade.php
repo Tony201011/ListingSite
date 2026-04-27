@@ -18,6 +18,7 @@
                 nextPage: @js($nextPage),
                 endpoint: @js($lazyLoadUrl)
             })"
+            x-init="init()"
         >
             <template x-for="post in posts" :key="post.slug">
                 <a
