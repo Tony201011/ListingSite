@@ -17,9 +17,15 @@ document.addEventListener('alpine:init', () => {
                 this.startTimer();
             }
 
-            window.addEventListener('beforeunload', () => {
-                this.stopTimer();
-            });
+            this._beforeUnloadHandler = () => this.stopTimer();
+            window.addEventListener('beforeunload', this._beforeUnloadHandler);
+        },
+
+        destroy() {
+            this.stopTimer();
+            if (this._beforeUnloadHandler) {
+                window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+            }
         },
 
         startTimer() {
