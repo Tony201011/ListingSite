@@ -50,8 +50,6 @@ class UploadEditorImage
                 'Image uploaded successfully.'
             );
         } catch (Throwable $e) {
-            $disk->delete($storagePath);
-
             return ActionResult::infrastructureFailure('Failed to upload image.');
         }
     }

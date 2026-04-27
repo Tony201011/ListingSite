@@ -117,6 +117,18 @@ document.addEventListener('alpine:init', () => {
                         const file = input.files[0];
                         if (!file) return;
 
+                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                        if (!allowedTypes.includes(file.type)) {
+                            this.error('Invalid file type. Please upload a jpg, jpeg, png, or webp image.');
+                            return;
+                        }
+
+                        const maxSizeBytes = 5 * 1024 * 1024;
+                        if (file.size > maxSizeBytes) {
+                            this.error('Image is too large. Maximum allowed size is 5 MB.');
+                            return;
+                        }
+
                         const formData = new FormData();
                         formData.append('image', file);
                         formData.append('_token', this.csrfToken);
@@ -141,7 +153,7 @@ document.addEventListener('alpine:init', () => {
                             quill.setSelection(range.index + 1);
                         } catch (err) {
                             console.error('Image upload error:', err);
-                            this.error('Failed to upload image. Please try again.');
+                            this.error(err.message || 'Failed to upload image. Please try again.');
                         }
                     });
                 });
