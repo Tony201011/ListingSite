@@ -162,6 +162,7 @@ Route::middleware('provider.auth')->group(function () {
     Route::get('/add-photo', [PhotoController::class, 'index'])->name('photos.index');
     Route::get('/photos', [PhotoController::class, 'getPhotos'])->name('photos');
     Route::post('/upload-photos', [PhotoController::class, 'uploadPhotos'])->name('photos.upload');
+    Route::post('/editor/upload-image', [PhotoController::class, 'uploadEditorImage'])->name('editor.upload-image');
     Route::post('/photos/{photo}/set-cover', [PhotoController::class, 'setCover'])->name('photos.setCover');
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
     Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');

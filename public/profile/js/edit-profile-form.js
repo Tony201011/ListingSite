@@ -63,36 +63,100 @@ document.addEventListener('alpine:init', () => {
                 this.createEditor(
                     'profile_text_editor',
                     'profile_text',
-                    'Write your profile description here...'
+                    'Write your profile description here...',
+                    { imageUpload: true }
                 );
             });
         },
 
-        createEditor(elementId, modelKey, placeholder) {
+        createEditor(elementId, modelKey, placeholder, options = {}) {
             const element = document.querySelector(`#${elementId}`);
 
             if (!element || editorInstances.has(elementId)) {
                 return;
             }
 
+            const toolbarOptions = options.imageUpload
+                ? [
+                      [{ header: [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline'],
+                      [{ list: 'ordered' }, { list: 'bullet' }],
+                      ['link', 'blockquote', 'image'],
+                      ['clean'],
+                  ]
+                : [
+                      [{ header: [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline'],
+                      [{ list: 'ordered' }, { list: 'bullet' }],
+                      ['link', 'blockquote'],
+                      ['clean'],
+                  ];
+
             const quill = new Quill(element, {
                 theme: 'snow',
                 modules: {
-                    toolbar: [
-                        [{ header: [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline'],
-                        [{ list: 'ordered' }, { list: 'bullet' }],
-                        ['link', 'blockquote'],
-                        ['clean']
-                    ]
+                    toolbar: toolbarOptions,
                 },
-                placeholder
+                placeholder,
             });
 
             editorInstances.set(elementId, quill);
 
             if (this[modelKey]) {
                 quill.clipboard.dangerouslyPasteHTML(0, this[modelKey]);
+            }
+
+            if (options.imageUpload) {
+                quill.getModule('toolbar').addHandler('image', () => {
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/jpeg,image/jpg,image/png,image/webp');
+                    input.click();
+
+                    input.addEventListener('change', async () => {
+                        const file = input.files[0];
+                        if (!file) return;
+
+                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                        if (!allowedTypes.includes(file.type)) {
+                            this.error('Invalid file type. Please upload a jpg, jpeg, png, or webp image.');
+                            return;
+                        }
+
+                        const maxSizeBytes = 5 * 1024 * 1024;
+                        if (file.size > maxSizeBytes) {
+                            this.error('Image is too large. Maximum allowed size is 5 MB.');
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        formData.append('_token', this.csrfToken);
+
+                        try {
+                            const response = await fetch('/editor/upload-image', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                            });
+
+                            if (!response.ok) {
+                                const data = await response.json().catch(() => ({}));
+                                throw new Error(data.message || 'Upload failed');
+                            }
+
+                            const data = await response.json();
+                            const range = quill.getSelection(true);
+                            quill.insertEmbed(range.index, 'image', data.url);
+                            quill.setSelection(range.index + 1);
+                        } catch (err) {
+                            console.error('Image upload error:', err);
+                            this.error(err.message || 'Failed to upload image. Please try again.');
+                        }
+                    });
+                });
             }
 
             quill.on('text-change', () => {
