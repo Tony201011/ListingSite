@@ -1,6 +1,7 @@
 <!-- Gallery Modal -->
 <div
     x-data="galleryModal()"
+    x-init="init()"
     x-show="open"
     x-cloak
     x-transition.opacity
