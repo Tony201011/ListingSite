@@ -42,7 +42,12 @@ document.addEventListener('alpine:init', () => {
                     }
                 );
 
-                const result = await response.json();
+                let result;
+                try {
+                    result = await response.json();
+                } catch {
+                    throw new Error('Server returned an unexpected response. Please refresh the page and try again.');
+                }
 
                 if (!response.ok) {
                     throw new Error(result.message || 'Delete failed');
