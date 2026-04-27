@@ -24,7 +24,10 @@ class GetOnlineNowState
         $onlineUser = $this->getOrCreateOnlineUser($user->id);
 
         $this->expireIfNeeded($onlineUser);
-        $onlineUser->save();
+
+        if ($onlineUser->isDirty()) {
+            $onlineUser->save();
+        }
 
         $onlineStatus = $onlineUser->isCurrentlyOnline();
         $remainingUses = max(0, $maxUses - $onlineUser->usage_count);

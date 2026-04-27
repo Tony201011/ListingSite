@@ -24,7 +24,10 @@ class GetAvailableNowState
         $available = $this->getOrCreateAvailableNow($user->id);
 
         $this->syncExpiredStatus($available);
-        $available->save();
+
+        if ($available->isDirty()) {
+            $available->save();
+        }
 
         $status = $available->isCurrentlyAvailable();
         $remainingUses = max(0, $maxUses - $available->usage_count);
