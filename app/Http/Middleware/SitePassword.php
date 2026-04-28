@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Closure;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -37,16 +36,9 @@ class SitePassword
         $configurationEnabled = false;
 
         if (Schema::hasTable('site_settings')) {
-            $setting = SiteSetting::query()->latest('updated_at')->first();
-
-            if ($setting) {
-                try {
-                    $configuredPassword = $setting->site_password ?: null;
-                } catch (DecryptException) {
-                    $configuredPassword = null;
-                }
-                $configurationEnabled = (bool) $setting->site_password_enabled;
-            }
+            $config = SiteSetting::getSitePasswordConfig();
+            $configuredPassword = $config['password'] ?: null;
+            $configurationEnabled = $config['enabled'];
         }
 
         if (blank($configuredPassword)) {

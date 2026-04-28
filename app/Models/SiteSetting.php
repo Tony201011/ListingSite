@@ -75,6 +75,23 @@ class SiteSetting extends Model
             cache()->forget('site_setting.home_page_records');
             cache()->forget('site_setting.status_settings');
             cache()->forget('site_setting.logging_enabled');
+            cache()->forget('site_setting.site_password_config');
+        });
+    }
+
+    public static function getSitePasswordConfig(): array
+    {
+        return cache()->remember('site_setting.site_password_config', now()->addMinutes(10), function () {
+            $setting = static::first();
+
+            if (! $setting) {
+                return ['enabled' => false, 'password' => null];
+            }
+
+            return [
+                'enabled' => (bool) $setting->site_password_enabled,
+                'password' => $setting->site_password,
+            ];
         });
     }
 

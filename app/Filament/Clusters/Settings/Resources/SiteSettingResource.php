@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Settings\Resources;
 
 use App\Filament\Clusters\Settings;
+use App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Actions\EditAction;
@@ -72,10 +73,6 @@ class SiteSettingResource extends Resource
                 ->label('Enable Distance Search')
                 ->default(true)
                 ->helperText('When enabled, users can filter profiles by distance using their location.'),
-            Forms\Components\Toggle::make('logging_enabled')
-                ->label('Enable System Logs')
-                ->default(true)
-                ->helperText('When enabled, the Logs cluster and site log page are displayed in the admin menu.'),
             Forms\Components\TextInput::make('home_page_records')
                 ->label('Home Page Records Per Page')
                 ->numeric()
@@ -129,7 +126,7 @@ class SiteSettingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ManageSiteSettings::route('/'),
+            'index' => ManageSiteSettings::route('/'),
         ];
     }
 }
