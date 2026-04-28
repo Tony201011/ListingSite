@@ -3,7 +3,6 @@
 namespace App\Actions\SiteAccess;
 
 use App\Models\SiteSetting;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Schema;
 
 class VerifySitePassword
@@ -24,15 +23,8 @@ class VerifySitePassword
         $dbPassword = null;
 
         if (Schema::hasTable('site_settings')) {
-            $setting = SiteSetting::query()->latest('updated_at')->first();
-
-            if ($setting) {
-                try {
-                    $dbPassword = $setting->site_password ?: null;
-                } catch (DecryptException) {
-                    $dbPassword = null;
-                }
-            }
+            $config = SiteSetting::getSitePasswordConfig();
+            $dbPassword = $config['password'] ?: null;
         }
 
         return $dbPassword ?? config('app.site_password', env('SITE_PASSWORD'));
