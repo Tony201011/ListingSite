@@ -41,7 +41,7 @@ class SigninProvider
 
             $destination = match ($user->role) {
                 User::ROLE_ADMIN => '/admin',
-                default => '/my-profile',
+                default => '/select-profile',
             };
 
             return redirect()->intended($destination);

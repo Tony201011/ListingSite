@@ -24,6 +24,26 @@ class ProfileSwitchController extends Controller
         return view('profile.my-profiles', compact('profiles', 'activeProfileId'));
     }
 
+    public function selectProfile(): View|RedirectResponse
+    {
+        $user = Auth::user();
+        $profiles = $user->providerProfiles()->orderBy('id')->get();
+
+        // No profiles yet — send straight to dashboard to set up the first one
+        if ($profiles->isEmpty()) {
+            return redirect()->route('my-profile');
+        }
+
+        // Exactly one profile — auto-select and proceed
+        if ($profiles->count() === 1) {
+            session(['active_provider_profile_id' => $profiles->first()->id]);
+
+            return redirect()->route('my-profile');
+        }
+
+        return view('profile.select-profile', compact('profiles'));
+    }
+
     public function store(): RedirectResponse
     {
         $user = Auth::user();

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\CheckProfileSteps;
+use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\PhotoVerification;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
@@ -43,6 +44,16 @@ class AuthorizationTest extends TestCase
         ]);
 
         return $user;
+    }
+
+    /**
+     * Return a test case instance acting as a provider with the active profile already set in session.
+     */
+    private function actingAsProviderWithProfile(User $user): static
+    {
+        return $this->actingAs($user)->withSession([
+            'active_provider_profile_id' => $user->providerProfile?->id,
+        ]);
     }
 
     private function userWithoutProfile(): User
@@ -1045,7 +1056,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $photo = $this->makePhoto($owner);
 
-        $this->actingAs($owner)
+        $this->actingAsProviderWithProfile($owner)
             ->postJson(route('photos.setCover', $photo))
             ->assertOk();
     }
@@ -1055,7 +1066,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $photo = $this->makePhoto($owner);
 
-        $this->actingAs($owner)
+        $this->actingAsProviderWithProfile($owner)
             ->deleteJson(route('photos.destroy', $photo))
             ->assertOk();
     }
@@ -1067,7 +1078,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $video = $this->makeVideo($owner);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->deleteJson(route('videos.destroy', $video))
             ->assertOk();
@@ -1079,7 +1090,7 @@ class AuthorizationTest extends TestCase
     {
         $owner = $this->providerWithProfile();
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('my-rate.store'), [
                 'description' => '30 min',
@@ -1094,7 +1105,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $rate = $this->makeRate($owner);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->putJson(route('my-rate.update', $rate), [
                 'description' => '1 hour',
@@ -1109,7 +1120,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $rate = $this->makeRate($owner);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->deleteJson(route('my-rate.destroy', $rate))
             ->assertOk();
@@ -1121,7 +1132,7 @@ class AuthorizationTest extends TestCase
     {
         $owner = $this->providerWithProfile();
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('my-rate.groups.store'), [
                 'name' => 'Standard',
@@ -1134,7 +1145,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $group = $this->makeRateGroup($owner);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->putJson(route('my-rate.groups.update', $group), [
                 'name' => 'VIP',
@@ -1147,7 +1158,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $group = $this->makeRateGroup($owner);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->deleteJson(route('my-rate.groups.destroy', $group))
             ->assertOk();
@@ -1159,7 +1170,7 @@ class AuthorizationTest extends TestCase
     {
         $owner = $this->providerWithProfile();
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('my-tours.store'), [
                 'city' => 'Melbourne',
@@ -1174,7 +1185,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $tour = $this->makeTour($owner);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->putJson(route('my-tours.update', $tour), [
                 'city' => 'Brisbane',
@@ -1189,7 +1200,7 @@ class AuthorizationTest extends TestCase
         $owner = $this->providerWithProfile();
         $tour = $this->makeTour($owner);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->deleteJson(route('my-tours.destroy', $tour))
             ->assertOk();

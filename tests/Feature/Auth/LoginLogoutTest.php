@@ -24,7 +24,7 @@ class LoginLogoutTest extends TestCase
     // Login success
     // ---------------------------------------------------------------
 
-    public function test_login_with_valid_credentials_redirects_to_my_profile(): void
+    public function test_login_with_valid_credentials_redirects_to_select_profile(): void
     {
         $user = $this->createVerifiedUser();
 
@@ -33,7 +33,7 @@ class LoginLogoutTest extends TestCase
             'password' => 'CorrectPass123',
         ]);
 
-        $response->assertRedirect('/my-profile');
+        $response->assertRedirect('/select-profile');
         $this->assertAuthenticatedAs($user);
     }
 

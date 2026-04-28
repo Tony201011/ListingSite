@@ -38,6 +38,18 @@ class MyProfileControllerTest extends TestCase
     }
 
     /**
+     * Act as a provider with their first profile already selected in session.
+     */
+    private function actingAsProvider(User $user): static
+    {
+        $profile = $user->providerProfile;
+
+        return $this->actingAs($user)->withSession([
+            'active_provider_profile_id' => $profile?->id,
+        ]);
+    }
+
+    /**
      * Create a parent + child category for a given type slug.
      * Returns the child category ID to use in form submissions.
      */
@@ -81,7 +93,7 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(GetMyProfilePageData::class, $getMyProfilePageData);
 
-        $response = $this->actingAs($user)->get(route('my-profile'));
+        $response = $this->actingAsProvider($user)->get(route('my-profile'));
 
         $response->assertOk();
         $response->assertViewIs('profile.my-profile-1');
@@ -107,7 +119,7 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(GetMyProfilePageData::class, $getMyProfilePageData);
 
-        $response = $this->actingAs($user)->get(route('my-profile'));
+        $response = $this->actingAsProvider($user)->get(route('my-profile'));
 
         $response->assertViewHas('stepOneCompleted', true);
         $response->assertViewHas('stepTwoCompleted', true);
@@ -144,7 +156,7 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(GetMyProfileStepTwoData::class, $getMyProfileStepTwoData);
 
-        $response = $this->actingAs($user)->get(route('edit-profile'));
+        $response = $this->actingAsProvider($user)->get(route('edit-profile'));
 
         $response->assertOk();
         $response->assertViewIs('profile.my-profile-2');
@@ -169,7 +181,7 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(SaveMyProfile::class, $saveMyProfile);
 
-        $response = $this->actingAs($user)->postJson(route('edit-profile.save'), [
+        $response = $this->actingAsProvider($user)->postJson(route('edit-profile.save'), [
             'suburb' => 'Sydney',
             'introduction_line' => 'Hello there',
             'profile_text' => 'My profile text',
@@ -216,7 +228,7 @@ class MyProfileControllerTest extends TestCase
 
         $this->app->instance(SaveMyProfile::class, $saveMyProfile);
 
-        $response = $this->actingAs($user)->postJson(route('edit-profile.save'), [
+        $response = $this->actingAsProvider($user)->postJson(route('edit-profile.save'), [
             'suburb' => 'Sydney',
             'introduction_line' => 'Hello there',
             'profile_text' => 'My profile text',
@@ -244,7 +256,7 @@ class MyProfileControllerTest extends TestCase
     {
         $user = $this->createProvider();
 
-        $response = $this->actingAs($user)->postJson(route('edit-profile.save'), []);
+        $response = $this->actingAsProvider($user)->postJson(route('edit-profile.save'), []);
 
         $response->assertStatus(422);
     }

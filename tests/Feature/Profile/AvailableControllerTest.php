@@ -6,6 +6,7 @@ use App\Actions\GetAvailableNowState;
 use App\Actions\Support\ActionResult;
 use App\Actions\UpdateAvailableNowStatus;
 use App\Http\Middleware\CheckProfileSteps;
+use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,7 +20,7 @@ class AvailableControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutMiddleware(CheckProfileSteps::class);
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class]);
     }
 
     protected function tearDown(): void

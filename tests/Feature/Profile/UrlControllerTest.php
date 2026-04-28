@@ -6,6 +6,7 @@ use App\Actions\GetShortUrlPageData;
 use App\Actions\Support\ActionResult;
 use App\Actions\UpdateUserShortUrl;
 use App\Http\Middleware\CheckProfileSteps;
+use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProviderProfile;
 use App\Models\ShortUrl;
 use App\Models\User;
@@ -20,7 +21,7 @@ class UrlControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutMiddleware(CheckProfileSteps::class);
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class]);
     }
 
     protected function tearDown(): void

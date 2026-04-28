@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Middleware\CheckProfileSteps;
+use App\Http\Middleware\EnsureProfileSelected;
+use App\Http\Middleware\EnsureProviderAccess;
+use App\Http\Middleware\SitePassword;
 use App\Models\SiteSetting;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,13 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'profile.steps' => \App\Http\Middleware\CheckProfileSteps::class,
-            'provider.auth' => \App\Http\Middleware\EnsureProviderAccess::class,
-            'site.password' => \App\Http\Middleware\SitePassword::class,
+            'profile.steps' => CheckProfileSteps::class,
+            'provider.auth' => EnsureProviderAccess::class,
+            'profile.selected' => EnsureProfileSelected::class,
+            'site.password' => SitePassword::class,
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\SitePassword::class,
+            SitePassword::class,
         ]);
 
         $middleware->redirectUsersTo('/');
@@ -31,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (\Throwable $exception, Request $request) {
+        $exceptions->render(function (Throwable $exception, Request $request) {
             $statusCode = $exception instanceof HttpExceptionInterface
                 ? $exception->getStatusCode()
                 : 500;
@@ -65,7 +70,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->view('errors.fatal', [
                     'fatalMessage' => $message,
                 ], 500);
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 return null;
             }
         });
