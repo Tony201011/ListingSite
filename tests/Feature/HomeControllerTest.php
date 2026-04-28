@@ -258,6 +258,7 @@ class HomeControllerTest extends TestCase
     {
         $response = $this->get('/?escort_name=Ruby');
 
+        $response->assertViewHas('escortNameQuery', 'Ruby');
     }
 
     // ---------------------------------------------------------------

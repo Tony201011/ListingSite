@@ -19,10 +19,15 @@ class BuildProfileFilterViewData
     use ResolvesProfileCategoryIds;
 
     private const DEFAULT_PROFILES_PER_PAGE = 12;
+
     private const DEFAULT_MIN_AGE = 18;
+
     private const DEFAULT_MAX_AGE = 40;
+
     private const DEFAULT_MIN_PRICE = 150;
+
     private const DEFAULT_MAX_PRICE = 400;
+
     private const DEFAULT_MAX_DISTANCE = 500;
 
     private const SLUG_TO_COLUMN = [
@@ -285,24 +290,8 @@ class BuildProfileFilterViewData
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
-                $suburb = $exactLocation['suburb'];
-                $state = $exactLocation['state'];
-                $fullStateName = $this->resolveStateName($state);
-
-                $query->where(function ($q) use ($exactLocation, $suburb, $state, $fullStateName) {
+                $query->where(function ($q) use ($exactLocation) {
                     $this->applyExactLocationFilter($q, $exactLocation);
-
-                    $q->orWhereHas('city', function ($cityQ) use ($suburb) {
-                        $cityQ->where('name', 'like', '%'.$suburb.'%');
-                    })->orWhereHas('user', function ($userQ) use ($suburb, $state, $fullStateName) {
-                        $userQ->where(function ($inner) use ($suburb, $state, $fullStateName) {
-                            $inner->where('suburb', 'like', '%'.$suburb.'%')
-                                ->orWhere('suburb', 'like', '%'.$suburb.', '.$state.'%')
-                                ->orWhere('suburb', 'like', '%'.$suburb.' '.$state.'%')
-                                ->orWhere('suburb', 'like', '%'.$suburb.', '.$fullStateName.'%')
-                                ->orWhere('suburb', 'like', '%'.$suburb.' '.$fullStateName.'%');
-                        });
-                    });
                 });
             } elseif ($hasLocationQuery) {
                 if ($scoutMatchedIds !== null && $scoutMatchedIds->isNotEmpty()) {
@@ -355,6 +344,7 @@ class BuildProfileFilterViewData
                         $column = self::SLUG_TO_COLUMN[$slug] ?? null;
                         if ($column !== null) {
                             $q->whereIn($column, $ids);
+
                             continue;
                         }
 
@@ -519,7 +509,7 @@ class BuildProfileFilterViewData
             END
         ";
 
-        $distanceSql = "(6371 * acos(
+        $distanceSql = '(6371 * acos(
             LEAST(1, GREATEST(-1,
                 cos(radians(?)) *
                 cos(radians(profile_postcodes.latitude)) *
@@ -527,7 +517,7 @@ class BuildProfileFilterViewData
                 sin(radians(?)) *
                 sin(radians(profile_postcodes.latitude))
             ))
-        ))";
+        ))';
 
         return DB::table('provider_profiles')
             ->join('users', 'users.id', '=', 'provider_profiles.user_id')
