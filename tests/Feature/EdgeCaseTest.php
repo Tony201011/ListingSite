@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Actions\Auth\SendProviderOtp;
 use App\Actions\GenerateUniqueProviderProfileSlug;
 use App\Http\Middleware\CheckProfileSteps;
+use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
 use App\Models\ShortUrl;
@@ -19,6 +20,13 @@ use Tests\TestCase;
 class EdgeCaseTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // EnsureProfileSelected is tested separately; bypass here so edge-case tests focus on their own logic
+        $this->withoutMiddleware(EnsureProfileSelected::class);
+    }
 
     // ---------------------------------------------------------------
     // Helpers
@@ -324,7 +332,7 @@ class EdgeCaseTest extends TestCase
 
         ShortUrl::create(['user_id' => $owner1->id, 'short_url' => 'taken-slug']);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner2)
             ->postJson(route('short-url.update'), ['slug' => 'taken-slug'])
             ->assertStatus(422)
@@ -337,7 +345,7 @@ class EdgeCaseTest extends TestCase
 
         ShortUrl::create(['user_id' => $owner->id, 'short_url' => 'my-slug']);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('short-url.update'), ['slug' => 'my-slug'])
             ->assertOk();
@@ -347,7 +355,7 @@ class EdgeCaseTest extends TestCase
     {
         $owner = $this->providerWithProfile();
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('short-url.update'), ['slug' => 'invalid slug!@#'])
             ->assertStatus(422)
@@ -360,7 +368,7 @@ class EdgeCaseTest extends TestCase
 
         ShortUrl::create(['user_id' => $owner->id, 'short_url' => 'old-slug']);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('short-url.update'), ['slug' => 'new-slug'])
             ->assertOk();
@@ -435,7 +443,7 @@ class EdgeCaseTest extends TestCase
             'group_id' => $group->id,
         ]);
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->deleteJson(route('my-rate.groups.destroy', $group))
             ->assertOk();
@@ -452,7 +460,7 @@ class EdgeCaseTest extends TestCase
     {
         $owner = $this->providerWithProfile();
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('my-tours.store'), [
                 'city' => 'Sydney',
@@ -466,7 +474,7 @@ class EdgeCaseTest extends TestCase
     {
         $owner = $this->providerWithProfile();
 
-        $this->withoutMiddleware(CheckProfileSteps::class)
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('my-tours.store'), [
                 'city' => 'Melbourne',

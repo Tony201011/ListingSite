@@ -4,6 +4,7 @@ namespace Tests\Feature\Profile;
 
 use App\Actions\GetProfileSettingPageData;
 use App\Http\Middleware\CheckProfileSteps;
+use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,7 +18,7 @@ class ProfileSettingControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutMiddleware(CheckProfileSteps::class);
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class]);
     }
 
     protected function tearDown(): void

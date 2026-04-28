@@ -64,6 +64,37 @@
                     To set up your profile please do the next three steps:
                 </p>
 
+                @if($profile)
+                    <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3">
+                        <div class="flex items-center gap-2 text-sm font-medium text-pink-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span>Active profile: <strong>{{ $profile->name }}</strong>
+                                @if($profile->slug)
+                                    <span class="ml-1 text-xs text-pink-500">({{ $profile->slug }})</span>
+                                @endif
+                            </span>
+                        </div>
+                        <a
+                            href="{{ route('profiles.index') }}"
+                            class="text-sm font-medium text-pink-600 underline-offset-2 hover:underline"
+                        >
+                            Manage profiles
+                        </a>
+                    </div>
+                @else
+                    <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3">
+                        <span class="text-sm font-medium text-pink-800">No profile yet — complete the steps below to create one.</span>
+                        <a
+                            href="{{ route('profiles.index') }}"
+                            class="text-sm font-medium text-pink-600 underline-offset-2 hover:underline"
+                        >
+                            Manage profiles
+                        </a>
+                    </div>
+                @endif
+
                 <div class="mb-6 space-y-1">
                     <div class="flex items-center justify-between border-b border-gray-200 py-3">
                         <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Action</span>

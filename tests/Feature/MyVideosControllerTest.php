@@ -7,6 +7,7 @@ use App\Actions\GetUserVideos;
 use App\Actions\Support\ActionResult;
 use App\Actions\UploadUserVideos;
 use App\Http\Middleware\CheckProfileSteps;
+use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\User;
 use App\Models\UserVideo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,7 +22,7 @@ class MyVideosControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutMiddleware(CheckProfileSteps::class);
+        $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class]);
     }
 
     protected function tearDown(): void

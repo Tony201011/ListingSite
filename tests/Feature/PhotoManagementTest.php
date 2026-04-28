@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
 use App\Models\User;
@@ -15,6 +16,12 @@ use Tests\TestCase;
 class PhotoManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(EnsureProfileSelected::class);
+    }
 
     protected function tearDown(): void
     {
