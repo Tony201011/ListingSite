@@ -67,68 +67,66 @@ return new class extends Migration
         }
 
         // ── 4. Singleton tables: swap unique constraint from user_id to provider_profile_id ──
+        // On MySQL the unique index backs the FK, so the FK must be dropped first.
 
-        Schema::table('online_users', function (Blueprint $table): void {
-            $table->dropUnique(['user_id']);
-            $table->unique('provider_profile_id');
-        });
-
-        Schema::table('available_nows', function (Blueprint $table): void {
-            $table->dropUnique(['user_id']);
-            $table->unique('provider_profile_id');
-        });
-
-        Schema::table('hide_show_profiles', function (Blueprint $table): void {
-            $table->dropUnique(['user_id']);
-            $table->unique('provider_profile_id');
-        });
-
-        Schema::table('profile_messages', function (Blueprint $table): void {
-            $table->dropUnique(['user_id']);
-            $table->unique('provider_profile_id');
-        });
+        foreach (self::SINGLETON_TABLES as $singletonTable) {
+            Schema::table($singletonTable, function (Blueprint $t) use ($singletonTable): void {
+                if (DB::getDriverName() !== 'sqlite') {
+                    $t->dropForeign([$singletonTable.'_user_id_foreign']);
+                }
+                $t->dropUnique([$singletonTable.'_user_id_unique']);
+                if (DB::getDriverName() !== 'sqlite') {
+                    $t->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+                }
+                $t->unique('provider_profile_id');
+            });
+        }
 
         // ── 5. availabilities: swap composite unique from (user_id, day) to (provider_profile_id, day) ──
 
         Schema::table('availabilities', function (Blueprint $table): void {
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['availabilities_user_id_foreign']);
+            }
             $table->dropUnique(['user_id', 'day']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            }
             $table->unique(['provider_profile_id', 'day']);
         });
     }
 
     public function down(): void
     {
-        // Restore singleton unique constraints
-        Schema::table('online_users', function (Blueprint $table): void {
-            $table->dropUnique(['provider_profile_id']);
-            $table->unique('user_id');
-        });
+        // ── 1. Singleton tables: drop provider_profile_id FK+unique, restore user_id unique ──
+        // On MySQL the unique index backs the FK, so the FK must be dropped first.
 
-        Schema::table('available_nows', function (Blueprint $table): void {
-            $table->dropUnique(['provider_profile_id']);
-            $table->unique('user_id');
-        });
+        foreach (self::SINGLETON_TABLES as $singletonTable) {
+            Schema::table($singletonTable, function (Blueprint $t) use ($singletonTable): void {
+                if (DB::getDriverName() !== 'sqlite') {
+                    $t->dropForeign([$singletonTable.'_provider_profile_id_foreign']);
+                }
+                $t->dropUnique([$singletonTable.'_provider_profile_id_unique']);
+                $t->unique('user_id');
+            });
+        }
 
-        Schema::table('hide_show_profiles', function (Blueprint $table): void {
-            $table->dropUnique(['provider_profile_id']);
-            $table->unique('user_id');
-        });
+        // ── 2. Restore availabilities unique constraint ──
 
-        Schema::table('profile_messages', function (Blueprint $table): void {
-            $table->dropUnique(['provider_profile_id']);
-            $table->unique('user_id');
-        });
-
-        // Restore availabilities unique constraint
         Schema::table('availabilities', function (Blueprint $table): void {
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['availabilities_provider_profile_id_foreign']);
+            }
             $table->dropUnique(['provider_profile_id', 'day']);
             $table->unique(['user_id', 'day']);
         });
 
-        // Drop FK and column from all tables
+        // ── 3. Drop provider_profile_id column (and FK for multi-tables) from all tables ──
+        // Singleton-table and availabilities FKs were already dropped above.
+
         foreach (array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']) as $table) {
             Schema::table($table, function (Blueprint $t) use ($table): void {
-                if (DB::getDriverName() !== 'sqlite') {
+                if (DB::getDriverName() !== 'sqlite' && in_array($table, self::MULTI_TABLES)) {
                     $t->dropForeign([$table.'_provider_profile_id_foreign']);
                 }
                 $t->dropColumn('provider_profile_id');
