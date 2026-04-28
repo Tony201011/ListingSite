@@ -57,6 +57,8 @@
                                                     class="h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm"
                                                     :class="online ? 'bg-green-400' : 'bg-gray-300'"
                                                     :title="online ? 'Online' : 'Offline'"
+                                                    :aria-label="online ? 'Status: Online' : 'Status: Offline'"
+                                                    role="img"
                                                 ></span>
                                             </div>
                                             <p class="text-xs text-gray-500">/{{ $profile->slug }}</p>
@@ -97,7 +99,7 @@
                                                 </span>
                                                 <span x-show="!loading" x-text="online ? 'Online' : 'Go Online'"></span>
                                             </button>
-                                            <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00'" x-text="countdown"></span>
+                                            <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00'" x-text="countdown" aria-label="Time remaining" aria-live="polite"></span>
                                             <span class="text-xs text-gray-400" x-show="!online" x-text="remainingUses + ' uses left'"></span>
                                         </div>
 
