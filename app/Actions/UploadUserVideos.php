@@ -44,45 +44,44 @@ class UploadUserVideos
         }
 
         $username = $this->buildUsername($profile);
-        $uploadedVideos = [];
         $storedVideoPaths = [];
 
         try {
-            DB::beginTransaction();
+            $uploadedVideos = DB::transaction(function () use ($videos, $user, $profile, $username, &$storedVideoPaths) {
+                $result = [];
 
-            foreach ($videos as $video) {
-                $storedVideo = $this->videoStorageService->store(
-                    user: $user,
-                    video: $video,
-                    username: $username
-                );
+                foreach ($videos as $video) {
+                    $storedVideo = $this->videoStorageService->store(
+                        user: $user,
+                        video: $video,
+                        username: $username
+                    );
 
-                $storedVideoPaths[] = $storedVideo['video_path'];
+                    $storedVideoPaths[] = $storedVideo['video_path'];
 
-                $userVideo = UserVideo::create([
-                    'user_id' => $profile->user_id,
-                    'provider_profile_id' => $profile->id,
-                    'video_path' => $storedVideo['video_path'],
-                    'original_name' => $video->getClientOriginalName(),
-                ]);
+                    $userVideo = UserVideo::create([
+                        'user_id' => $profile->user_id,
+                        'provider_profile_id' => $profile->id,
+                        'video_path' => $storedVideo['video_path'],
+                        'original_name' => $video->getClientOriginalName(),
+                    ]);
 
-                $uploadedVideos[] = [
-                    'id' => $userVideo->id,
-                    'video_path' => $userVideo->video_path,
-                    'video_url' => $storedVideo['video_url'],
-                    'original_name' => $userVideo->original_name,
-                    'created_at' => $userVideo->created_at,
-                ];
-            }
+                    $result[] = [
+                        'id' => $userVideo->id,
+                        'video_path' => $userVideo->video_path,
+                        'video_url' => $storedVideo['video_url'],
+                        'original_name' => $userVideo->original_name,
+                        'created_at' => $userVideo->created_at,
+                    ];
+                }
 
-            DB::commit();
+                return $result;
+            });
 
             return ActionResult::success([
                 'videos' => $uploadedVideos,
             ], 'Videos uploaded successfully.');
         } catch (Throwable $e) {
-            DB::rollBack();
-
             foreach ($storedVideoPaths as $videoPath) {
                 try {
                     $this->videoStorageService->deletePath($videoPath);
