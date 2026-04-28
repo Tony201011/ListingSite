@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Actions\GenerateUniqueProviderProfileSlug;
+use App\Actions\GetOnlineNowState;
+use App\Actions\UpdateOnlineNowStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateOnlineStatusRequest;
 use App\Models\ProviderProfile;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -13,6 +17,8 @@ class ProfileSwitchController extends Controller
 {
     public function __construct(
         private GenerateUniqueProviderProfileSlug $generateSlug,
+        private GetOnlineNowState $getOnlineNowState,
+        private UpdateOnlineNowStatus $updateOnlineNowStatus,
     ) {}
 
     public function index(): View
@@ -21,7 +27,20 @@ class ProfileSwitchController extends Controller
         $profiles = $user->providerProfiles()->orderBy('id')->get();
         $activeProfileId = session('active_provider_profile_id') ?? $profiles->first()?->id;
 
-        return view('profile.my-profiles', compact('profiles', 'activeProfileId'));
+        $onlineStates = $profiles->mapWithKeys(function (ProviderProfile $profile): array {
+            return [$profile->id => $this->getOnlineNowState->execute($profile)];
+        });
+
+        return view('profile.my-profiles', compact('profiles', 'activeProfileId', 'onlineStates'));
+    }
+
+    public function updateOnlineStatus(UpdateOnlineStatusRequest $request, ProviderProfile $profile): JsonResponse
+    {
+        $this->authorizeProfileOwnership($profile);
+
+        $result = $this->updateOnlineNowStatus->execute($profile, $request->validated('status'));
+
+        return response()->json($result->toPayload(), $result->status());
     }
 
     public function selectProfile(): View|RedirectResponse
