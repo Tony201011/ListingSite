@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -33,6 +34,8 @@ return new class extends Migration
     public function down(): void
     {
         foreach (self::TABLES as $table) {
+            DB::table($table)->whereNull('user_id')->delete();
+
             Schema::table($table, function (Blueprint $t): void {
                 $t->unsignedBigInteger('user_id')->nullable(false)->change();
             });
