@@ -41,7 +41,7 @@ class SitePassword
             $configurationEnabled = $config['enabled'];
         }
 
-        if (blank($configuredPassword)) {
+        if (! $configurationEnabled) {
             $envPassword = env('SITE_PASSWORD');
             $envEnabled = filter_var(env('SITE_PASSWORD_ENABLED', false), FILTER_VALIDATE_BOOL);
 
@@ -51,7 +51,7 @@ class SitePassword
             }
         }
 
-        $protectionEnabled = $configurationEnabled && filled($configuredPassword);
+        $protectionEnabled = $configurationEnabled;
 
         if ($protectionEnabled && $request->session()->get('site_access') !== true) {
             /** @var User|null $user */
