@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /** Tables that need provider_profile_id plus a simple (provider_profile_id) unique. */
     private const SINGLETON_TABLES = [
         'online_users',
         'available_nows',
@@ -15,7 +14,6 @@ return new class extends Migration
         'profile_messages',
     ];
 
-    /** Tables that only need provider_profile_id added (no unique constraint change). */
     private const MULTI_TABLES = [
         'rates',
         'rate_groups',
@@ -26,24 +24,58 @@ return new class extends Migration
         'set_and_forgets',
     ];
 
+    private function dropForeignIfExists(string $table, string $fkName): void
+    {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
+        $exists = DB::selectOne("
+            SELECT CONSTRAINT_NAME
+            FROM information_schema.KEY_COLUMN_USAGE
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = ?
+              AND CONSTRAINT_NAME = ?
+              AND REFERENCED_TABLE_NAME IS NOT NULL
+        ", [$table, $fkName]);
+
+        if ($exists) {
+            DB::statement("ALTER TABLE `$table` DROP FOREIGN KEY `$fkName`");
+        }
+    }
+
+    private function dropIndexIfExists(string $table, string $indexName): void
+    {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
+        $exists = DB::selectOne("
+            SELECT INDEX_NAME
+            FROM information_schema.STATISTICS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = ?
+              AND INDEX_NAME = ?
+        ", [$table, $indexName]);
+
+        if ($exists) {
+            DB::statement("ALTER TABLE `$table` DROP INDEX `$indexName`");
+        }
+    }
+
     public function up(): void
     {
-        // ── 1. Add provider_profile_id (nullable, no FK yet) to every table ──
+        $allTables = array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']);
 
-        foreach (array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']) as $table) {
-            Schema::table($table, function (Blueprint $t) use ($table): void {
-                if (! Schema::hasColumn($table, 'provider_profile_id')) {
+        foreach ($allTables as $table) {
+            Schema::table($table, function (Blueprint $t) use ($table) {
+                if (!Schema::hasColumn($table, 'provider_profile_id')) {
                     $t->unsignedBigInteger('provider_profile_id')->nullable()->after('user_id');
                 }
             });
         }
 
-        // ── 2. Back-fill: set provider_profile_id from the user's first profile ──
-        // Use correlated subquery syntax (compatible with both MySQL and SQLite).
-
-        $tables = array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']);
-
-        foreach ($tables as $table) {
+        foreach ($allTables as $table) {
             DB::table($table)
                 ->whereNull('provider_profile_id')
                 ->whereNotNull('user_id')
@@ -54,82 +86,68 @@ return new class extends Migration
                 ]);
         }
 
-        // ── 3. Add FK constraints now that data is in place (not supported on SQLite) ──
+        foreach (self::SINGLETON_TABLES as $table) {
+            $this->dropForeignIfExists($table, "{$table}_user_id_foreign");
+            $this->dropForeignIfExists($table, "{$table}_provider_profile_id_foreign");
 
-        if (DB::getDriverName() !== 'sqlite') {
-            foreach (array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']) as $table) {
-                Schema::table($table, function (Blueprint $t): void {
-                    $t->foreign('provider_profile_id')
-                        ->references('id')->on('provider_profiles')
-                        ->cascadeOnDelete();
-                });
-            }
-        }
+            $this->dropIndexIfExists($table, "{$table}_user_id_unique");
+            $this->dropIndexIfExists($table, "{$table}_provider_profile_id_unique");
 
-        // ── 4. Singleton tables: swap unique constraint from user_id to provider_profile_id ──
-        // On MySQL the unique index backs the FK, so the FK must be dropped first.
-
-        foreach (self::SINGLETON_TABLES as $singletonTable) {
-            Schema::table($singletonTable, function (Blueprint $t) use ($singletonTable): void {
-                if (DB::getDriverName() !== 'sqlite') {
-                    $t->dropForeign([$singletonTable.'_user_id_foreign']);
-                }
-                $t->dropUnique([$singletonTable.'_user_id_unique']);
-                if (DB::getDriverName() !== 'sqlite') {
-                    $t->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
-                }
+            Schema::table($table, function (Blueprint $t) {
+                $t->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+                $t->foreign('provider_profile_id')->references('id')->on('provider_profiles')->cascadeOnDelete();
                 $t->unique('provider_profile_id');
             });
         }
 
-        // ── 5. availabilities: swap composite unique from (user_id, day) to (provider_profile_id, day) ──
+        $this->dropForeignIfExists('availabilities', 'availabilities_user_id_foreign');
+        $this->dropForeignIfExists('availabilities', 'availabilities_provider_profile_id_foreign');
 
-        Schema::table('availabilities', function (Blueprint $table): void {
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->dropForeign(['availabilities_user_id_foreign']);
-            }
-            $table->dropUnique(['user_id', 'day']);
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
-            }
+        $this->dropIndexIfExists('availabilities', 'availabilities_user_id_day_unique');
+        $this->dropIndexIfExists('availabilities', 'availabilities_provider_profile_id_day_unique');
+
+        Schema::table('availabilities', function (Blueprint $table) {
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('provider_profile_id')->references('id')->on('provider_profiles')->cascadeOnDelete();
             $table->unique(['provider_profile_id', 'day']);
         });
+
+        foreach (self::MULTI_TABLES as $table) {
+            $this->dropForeignIfExists($table, "{$table}_provider_profile_id_foreign");
+
+            Schema::table($table, function (Blueprint $t) {
+                $t->foreign('provider_profile_id')->references('id')->on('provider_profiles')->cascadeOnDelete();
+            });
+        }
     }
 
     public function down(): void
     {
-        // ── 1. Singleton tables: drop provider_profile_id FK+unique, restore user_id unique ──
-        // On MySQL the unique index backs the FK, so the FK must be dropped first.
+        $allTables = array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']);
 
-        foreach (self::SINGLETON_TABLES as $singletonTable) {
-            Schema::table($singletonTable, function (Blueprint $t) use ($singletonTable): void {
-                if (DB::getDriverName() !== 'sqlite') {
-                    $t->dropForeign([$singletonTable.'_provider_profile_id_foreign']);
-                }
-                $t->dropUnique([$singletonTable.'_provider_profile_id_unique']);
+        foreach ($allTables as $table) {
+            $this->dropForeignIfExists($table, "{$table}_provider_profile_id_foreign");
+        }
+
+        foreach (self::SINGLETON_TABLES as $table) {
+            $this->dropIndexIfExists($table, "{$table}_provider_profile_id_unique");
+
+            Schema::table($table, function (Blueprint $t) {
                 $t->unique('user_id');
             });
         }
 
-        // ── 2. Restore availabilities unique constraint ──
+        $this->dropIndexIfExists('availabilities', 'availabilities_provider_profile_id_day_unique');
 
-        Schema::table('availabilities', function (Blueprint $table): void {
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->dropForeign(['availabilities_provider_profile_id_foreign']);
-            }
-            $table->dropUnique(['provider_profile_id', 'day']);
+        Schema::table('availabilities', function (Blueprint $table) {
             $table->unique(['user_id', 'day']);
         });
 
-        // ── 3. Drop provider_profile_id column (and FK for multi-tables) from all tables ──
-        // Singleton-table and availabilities FKs were already dropped above.
-
-        foreach (array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']) as $table) {
-            Schema::table($table, function (Blueprint $t) use ($table): void {
-                if (DB::getDriverName() !== 'sqlite' && in_array($table, self::MULTI_TABLES)) {
-                    $t->dropForeign([$table.'_provider_profile_id_foreign']);
+        foreach ($allTables as $table) {
+            Schema::table($table, function (Blueprint $t) use ($table) {
+                if (Schema::hasColumn($table, 'provider_profile_id')) {
+                    $t->dropColumn('provider_profile_id');
                 }
-                $t->dropColumn('provider_profile_id');
             });
         }
     }
