@@ -3,15 +3,15 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
+use App\Models\ProviderProfile;
 use App\Models\ShortUrl;
-use App\Models\User;
 
 class UpdateUserShortUrl
 {
-    public function execute(User $user, string $slug): ActionResult
+    public function execute(ProviderProfile $profile, string $slug): ActionResult
     {
         ShortUrl::query()->updateOrCreate(
-            ['user_id' => $user->id],
+            ['provider_profile_id' => $profile->id],
             ['short_url' => $slug]
         );
 

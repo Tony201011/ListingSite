@@ -2,19 +2,19 @@
 
 namespace App\Actions;
 
+use App\Models\ProviderProfile;
 use App\Models\ShortUrl;
 use App\Models\SiteSetting;
-use App\Models\User;
 
 class GetShortUrlPageData
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
         $siteSetting = SiteSetting::query()
             ->latest('updated_at')
             ->value('short_url') ?? false;
 
-        if (! $user) {
+        if (! $profile) {
             return [
                 'redirect' => '/signin',
             ];
@@ -22,8 +22,8 @@ class GetShortUrlPageData
 
         $shortUrlRecord = ShortUrl::query()
             ->firstOrCreate(
-                ['user_id' => $user->id],
-                ['short_url' => $this->generateUniqueSlug($user)]
+                ['provider_profile_id' => $profile->id],
+                ['short_url' => $this->generateUniqueSlug($profile)]
             );
 
         return [
@@ -32,12 +32,12 @@ class GetShortUrlPageData
         ];
     }
 
-    private function generateUniqueSlug(User $user): string
+    private function generateUniqueSlug(ProviderProfile $profile): string
     {
-        $slug = md5($user->name.$user->id);
+        $slug = md5($profile->name.$profile->id);
 
         while (ShortUrl::query()->where('short_url', $slug)->exists()) {
-            $slug = md5($user->name.$user->id.random_int(1, 9999));
+            $slug = md5($profile->name.$profile->id.random_int(1, 9999));
         }
 
         return $slug;

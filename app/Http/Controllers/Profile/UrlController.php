@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetShortUrlPageData;
 use App\Actions\UpdateUserShortUrl;
 use App\Http\Controllers\Controller;
@@ -16,12 +17,14 @@ class UrlController extends Controller
 {
     public function __construct(
         private GetShortUrlPageData $getShortUrlPageData,
-        private UpdateUserShortUrl $updateUserShortUrl
+        private UpdateUserShortUrl $updateUserShortUrl,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function shortUrl(): View|RedirectResponse
     {
-        $result = $this->getShortUrlPageData->execute(Auth::user());
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $result = $this->getShortUrlPageData->execute($profile);
 
         if (isset($result['redirect'])) {
             return redirect($result['redirect']);
@@ -34,8 +37,10 @@ class UrlController extends Controller
     {
         $this->authorize('create', ShortUrl::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->updateUserShortUrl->execute(
-            Auth::user(),
+            $profile,
             $request->validated('slug')
         );
 
@@ -46,13 +51,13 @@ class UrlController extends Controller
     {
         $record = ShortUrl::query()
             ->where('short_url', $shortUrl)
-            ->with('user.providerProfile')
+            ->with('providerProfile')
             ->first();
 
-        if ($record === null || $record->user === null || $record->user->providerProfile === null) {
+        if ($record === null || $record->providerProfile === null) {
             abort(404);
         }
 
-        return redirect()->route('profile.show', ['slug' => $record->user->providerProfile->slug]);
+        return redirect()->route('profile.show', ['slug' => $record->providerProfile->slug]);
     }
 }
