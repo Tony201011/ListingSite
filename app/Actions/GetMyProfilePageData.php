@@ -38,14 +38,16 @@ class GetMyProfilePageData
                 ! empty($profile->services_provided);
         }
 
-        $stepTwoCompleted = $user?->profileImages()
-            ->whereNull('deleted_at')
-            ->count() > 0;
+        $stepTwoCompleted = $profile
+            ? $profile->profileImages()->whereNull('deleted_at')->count() > 0
+            : false;
 
-        $stepPhotoVerificationCompleted = $user?->photoVerification()
-            ->where('status', 'approved')
-            ->whereNull('deleted_at')
-            ->count() > 1;
+        $stepPhotoVerificationCompleted = $profile
+            ? $profile->photoVerification()
+                ->where('status', 'approved')
+                ->whereNull('deleted_at')
+                ->count() > 1
+            : false;
 
         $shortUrlRecord = $user?->shortUrl;
 

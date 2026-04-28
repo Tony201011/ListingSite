@@ -5,8 +5,9 @@ namespace App\Actions;
 use App\Concerns\ResolvesProfileCategoryIds;
 use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\Category;
+use App\Models\ProviderProfile;
 use App\Models\User;
-use App\Models\UserVideo;
+use Illuminate\Support\Collection;
 
 class GetProfileSettingPageData
 {
@@ -17,10 +18,10 @@ class GetProfileSettingPageData
         private GetProfileMessage $getProfileMessage
     ) {}
 
-    public function execute(?User $user): array
+    public function execute(?User $user, ?ProviderProfile $activeProfile = null): array
     {
         $user = $user?->load('providerProfile');
-        $profile = $user?->providerProfile;
+        $profile = $activeProfile ?? $user?->providerProfile;
 
         $ids = array_filter([
             $profile?->age_group_id,
@@ -64,21 +65,20 @@ class GetProfileSettingPageData
             'phone_contact_preference_name' => self::resolveProfileCategoryName($profile?->phone_contact_preference, 'phone-contact-preferences'),
         ];
 
-        $profileImages = $user?->profileImages()
-            ->latest()
-            ->get() ?? collect();
-
-        $videos = $user
-            ? UserVideo::query()
-                ->where('user_id', $user->id)
-                ->latest()
-                ->get()
+        $profileImages = $profile
+            ? $profile->profileImages()->latest()->get()
             : collect();
 
-        $photoVerification = $user?->photoVerification()
-            ->where('status', 'approved')
-            ->whereNull('deleted_at')
-            ->exists();
+        $videos = $profile
+            ? $profile->userVideos()->latest()->get()
+            : collect();
+
+        $photoVerification = $profile
+            ? $profile->photoVerification()
+                ->where('status', 'approved')
+                ->whereNull('deleted_at')
+                ->exists()
+            : false;
 
         return [
             'profileImages' => $profileImages,
@@ -89,7 +89,7 @@ class GetProfileSettingPageData
         ];
     }
 
-    private function resolveTagIds(mixed $profile, \Illuminate\Support\Collection $categories): array
+    private function resolveTagIds(mixed $profile, Collection $categories): array
     {
         if ($profile === null) {
             return [];
