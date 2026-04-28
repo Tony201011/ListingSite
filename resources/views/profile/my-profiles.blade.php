@@ -74,13 +74,15 @@
                                         <form
                                             method="POST"
                                             action="{{ route('profiles.destroy', $profile) }}"
-                                            onsubmit="return confirm('Delete this profile? This cannot be undone.')"
+                                            x-data
+                                            @submit.prevent="if (confirm('Delete this profile? This cannot be undone.')) $el.submit()"
                                         >
                                             @csrf
                                             @method('DELETE')
                                             <button
                                                 type="submit"
                                                 class="rounded-lg bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
+                                                aria-label="Delete profile {{ $profile->name }}"
                                             >
                                                 Delete
                                             </button>

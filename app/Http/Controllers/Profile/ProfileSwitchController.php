@@ -44,11 +44,7 @@ class ProfileSwitchController extends Controller
 
     public function switchTo(ProviderProfile $profile): RedirectResponse
     {
-        $user = Auth::user();
-
-        if ($profile->user_id !== $user->id) {
-            abort(403);
-        }
+        $this->authorizeProfileOwnership($profile);
 
         session(['active_provider_profile_id' => $profile->id]);
 
@@ -58,18 +54,14 @@ class ProfileSwitchController extends Controller
 
     public function destroy(ProviderProfile $profile): RedirectResponse
     {
-        $user = Auth::user();
+        $this->authorizeProfileOwnership($profile);
 
-        if ($profile->user_id !== $user->id) {
-            abort(403);
-        }
-
-        if ($user->providerProfiles()->count() <= 1) {
+        if (Auth::user()->providerProfiles()->count() <= 1) {
             return back()->with('error', 'You cannot delete your only profile.');
         }
 
         if ((int) session('active_provider_profile_id') === $profile->id) {
-            $newActive = $user->providerProfiles()
+            $newActive = Auth::user()->providerProfiles()
                 ->where('id', '!=', $profile->id)
                 ->orderBy('id')
                 ->first();
@@ -80,5 +72,12 @@ class ProfileSwitchController extends Controller
 
         return redirect()->route('profiles.index')
             ->with('success', 'Profile deleted.');
+    }
+
+    private function authorizeProfileOwnership(ProviderProfile $profile): void
+    {
+        if ($profile->user_id !== Auth::id()) {
+            abort(403);
+        }
     }
 }
