@@ -8,6 +8,8 @@ use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
+use App\Models\Rate;
+use App\Models\RateGroup;
 use App\Models\ShortUrl;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -178,9 +180,11 @@ class EdgeCaseTest extends TestCase
     public function test_setting_cover_on_already_primary_photo_is_idempotent(): void
     {
         $owner = $this->providerWithProfile();
+        $profile = $owner->providerProfile;
 
         $photo = ProfileImage::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/test.jpg',
             'thumbnail_path' => 'thumbnails/test.jpg',
             'is_primary' => true,
@@ -202,9 +206,11 @@ class EdgeCaseTest extends TestCase
     public function test_deleting_primary_photo_promotes_most_recent_remaining(): void
     {
         $owner = $this->providerWithProfile();
+        $profile = $owner->providerProfile;
 
         $oldest = ProfileImage::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/oldest.jpg',
             'thumbnail_path' => 'thumbnails/oldest.jpg',
             'is_primary' => false,
@@ -214,6 +220,7 @@ class EdgeCaseTest extends TestCase
 
         $newest = ProfileImage::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/newest.jpg',
             'thumbnail_path' => 'thumbnails/newest.jpg',
             'is_primary' => false,
@@ -222,6 +229,7 @@ class EdgeCaseTest extends TestCase
 
         $primary = ProfileImage::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/primary.jpg',
             'thumbnail_path' => 'thumbnails/primary.jpg',
             'is_primary' => true,
@@ -241,9 +249,11 @@ class EdgeCaseTest extends TestCase
     public function test_deleting_only_photo_leaves_user_with_no_photos(): void
     {
         $owner = $this->providerWithProfile();
+        $profile = $owner->providerProfile;
 
         $photo = ProfileImage::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/only.jpg',
             'thumbnail_path' => 'thumbnails/only.jpg',
             'is_primary' => true,
@@ -259,9 +269,11 @@ class EdgeCaseTest extends TestCase
     public function test_soft_deleted_photo_cannot_be_set_as_cover(): void
     {
         $owner = $this->providerWithProfile();
+        $profile = $owner->providerProfile;
 
         $photo = ProfileImage::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/deleted.jpg',
             'thumbnail_path' => 'thumbnails/deleted.jpg',
             'is_primary' => false,
@@ -277,9 +289,11 @@ class EdgeCaseTest extends TestCase
     public function test_soft_deleted_photo_cannot_be_deleted_again(): void
     {
         $owner = $this->providerWithProfile();
+        $profile = $owner->providerProfile;
 
         $photo = ProfileImage::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/deleted.jpg',
             'thumbnail_path' => 'thumbnails/deleted.jpg',
             'is_primary' => false,
@@ -295,11 +309,13 @@ class EdgeCaseTest extends TestCase
     public function test_switching_primary_across_many_photos_leaves_exactly_one_primary(): void
     {
         $owner = $this->providerWithProfile();
+        $profile = $owner->providerProfile;
 
         $photos = [];
         for ($i = 0; $i < 5; $i++) {
             $photos[] = ProfileImage::create([
                 'user_id' => $owner->id,
+                'provider_profile_id' => $profile->id,
                 'image_path' => "images/photo-{$i}.jpg",
                 'thumbnail_path' => "thumbnails/photo-{$i}.jpg",
                 'is_primary' => $i === 0,
@@ -430,12 +446,13 @@ class EdgeCaseTest extends TestCase
     {
         $owner = $this->providerWithProfile();
 
-        $group = \App\Models\RateGroup::create([
+        $group = RateGroup::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $owner->providerProfile->id,
             'name' => 'Standard',
         ]);
 
-        $rate = \App\Models\Rate::create([
+        $rate = Rate::create([
             'user_id' => $owner->id,
             'description' => '30 min',
             'incall' => 200,
@@ -512,6 +529,7 @@ class EdgeCaseTest extends TestCase
 
         ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $user->providerProfile->id,
             'image_path' => 'images/test.jpg',
             'thumbnail_path' => 'thumbnails/test.jpg',
             'is_primary' => true,
