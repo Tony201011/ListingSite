@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Actions\UpdateAvailableNowStatus;
 use App\Actions\UpdateOnlineNowStatus;
+use App\Models\ProviderProfile;
 use App\Models\SetAndForget;
-use App\Models\User;
 use Illuminate\Console\Command;
 
 class ProcessSetAndForget extends Command
@@ -31,36 +31,36 @@ class ProcessSetAndForget extends Command
                 $q->where('online_now_enabled', true)
                     ->orWhere('available_now_enabled', true);
             })
-            ->with('user')
+            ->with('providerProfile')
             ->chunkById(100, function ($schedules) use (&$triggered, &$failed) {
                 foreach ($schedules as $schedule) {
-                    $user = $schedule->user;
+                    $profile = $schedule->providerProfile;
 
-                    if (! $user instanceof User) {
+                    if (! $profile instanceof ProviderProfile) {
                         continue;
                     }
 
                     if ($schedule->shouldTriggerOnlineNow()) {
-                        $result = $this->updateOnlineNowStatus->execute($user, 'online');
+                        $result = $this->updateOnlineNowStatus->execute($profile, 'online');
 
                         if ($result->isSuccess()) {
                             $triggered++;
-                            $this->info("Online Now triggered for user ID {$user->id}");
+                            $this->info("Online Now triggered for profile ID {$profile->id}");
                         } else {
                             $failed++;
-                            $this->warn("Online Now failed for user ID {$user->id}: {$result->message()}");
+                            $this->warn("Online Now failed for profile ID {$profile->id}: {$result->message()}");
                         }
                     }
 
                     if ($schedule->shouldTriggerAvailableNow()) {
-                        $result = $this->updateAvailableNowStatus->execute($user, 'online');
+                        $result = $this->updateAvailableNowStatus->execute($profile, 'online');
 
                         if ($result->isSuccess()) {
                             $triggered++;
-                            $this->info("Available Now triggered for user ID {$user->id}");
+                            $this->info("Available Now triggered for profile ID {$profile->id}");
                         } else {
                             $failed++;
-                            $this->warn("Available Now failed for user ID {$user->id}: {$result->message()}");
+                            $this->warn("Available Now failed for profile ID {$profile->id}: {$result->message()}");
                         }
                     }
                 }

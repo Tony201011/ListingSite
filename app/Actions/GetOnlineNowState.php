@@ -3,12 +3,12 @@
 namespace App\Actions;
 
 use App\Models\OnlineUser;
+use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
-use App\Models\User;
 
 class GetOnlineNowState
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
         $settings = SiteSetting::getStatusSettings();
         $maxUses = $settings['online_status_max_uses'];
@@ -17,11 +17,11 @@ class GetOnlineNowState
         $remainingUses = $maxUses;
         $expiresAt = null;
 
-        if (! $user) {
+        if (! $profile) {
             return compact('onlineStatus', 'remainingUses', 'expiresAt');
         }
 
-        $onlineUser = $this->getOrCreateOnlineUser($user->id);
+        $onlineUser = $this->getOrCreateOnlineUser($profile->id);
 
         $this->expireIfNeeded($onlineUser);
 
@@ -36,10 +36,10 @@ class GetOnlineNowState
         return compact('onlineStatus', 'remainingUses', 'expiresAt');
     }
 
-    private function getOrCreateOnlineUser(int $userId): OnlineUser
+    private function getOrCreateOnlineUser(int $profileId): OnlineUser
     {
         $onlineUser = OnlineUser::firstOrCreate(
-            ['user_id' => $userId],
+            ['provider_profile_id' => $profileId],
             [
                 'status' => 'offline',
                 'usage_date' => today(),

@@ -3,21 +3,17 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
-use App\Models\User;
+use App\Models\ProviderProfile;
 
 class StoreRate
 {
-    public function execute(?User $user, array $validated): ActionResult
+    public function execute(?ProviderProfile $profile, array $validated): ActionResult
     {
-        if (! $user) {
-            return ActionResult::authorizationFailure('Unauthenticated.', 401);
+        if (! $profile) {
+            return ActionResult::authorizationFailure('No active profile selected.', 401);
         }
 
-        if (! $user->providerProfile()->exists()) {
-            return ActionResult::authorizationFailure('Provider profile is required to manage rates.');
-        }
-
-        $rate = $user->rates()->create($validated);
+        $rate = $profile->rates()->create($validated);
 
         return ActionResult::success([
             'rate' => $rate,

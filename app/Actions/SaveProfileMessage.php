@@ -3,20 +3,21 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
-use App\Models\User;
+use App\Models\ProviderProfile;
 
 class SaveProfileMessage
 {
-    public function execute(User $user, string $message): ActionResult
+    public function execute(ProviderProfile $profile, string $message): ActionResult
     {
-        $profileMessage = $user->profileMessage;
+        $profileMessage = $profile->profileMessage;
 
         if ($profileMessage) {
             $profileMessage->update([
                 'message' => $message,
             ]);
         } else {
-            $user->profileMessage()->create([
+            $profile->profileMessage()->create([
+                'user_id' => $profile->user_id,
                 'message' => $message,
             ]);
         }

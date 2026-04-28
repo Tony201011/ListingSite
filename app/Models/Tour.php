@@ -12,6 +12,7 @@ class Tour extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'city',
         'from',
         'to',

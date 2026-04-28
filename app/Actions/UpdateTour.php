@@ -3,14 +3,14 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
+use App\Models\ProviderProfile;
 use App\Models\Tour;
-use App\Models\User;
 
 class UpdateTour
 {
-    public function execute(User $user, Tour $tour, array $validated): ActionResult
+    public function execute(ProviderProfile $profile, Tour $tour, array $validated): ActionResult
     {
-        if ((int) $tour->user_id !== (int) $user->id) {
+        if ((int) $tour->provider_profile_id !== (int) $profile->id) {
             return ActionResult::authorizationFailure('You can only modify your own tours.');
         }
 

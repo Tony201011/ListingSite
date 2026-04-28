@@ -2,18 +2,18 @@
 
 namespace App\Actions;
 
-use App\Models\User;
+use App\Models\ProviderProfile;
 use App\Models\VerificationExampleImage;
 
 class GetPhotoVerificationPageData
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
         $latestVerification = null;
         $lastTwoPhotos = [];
 
-        if ($user) {
-            $latestVerifications = $user->photoVerification()
+        if ($profile) {
+            $latestVerifications = $profile->photoVerification()
                 ->whereNull('deleted_at')
                 ->latest('created_at')
                 ->take(2)

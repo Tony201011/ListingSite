@@ -13,6 +13,7 @@ class UserVideo extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'video_path',
         'original_name',
     ];

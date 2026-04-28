@@ -3,19 +3,15 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
+use App\Models\ProviderProfile;
 use App\Models\RateGroup;
-use App\Models\User;
 
 class StoreRateGroup
 {
-    public function execute(User $user, array $validated): ActionResult
+    public function execute(ProviderProfile $profile, array $validated): ActionResult
     {
-        if (! $user->providerProfile()->exists()) {
-            return ActionResult::authorizationFailure('Provider profile is required to manage rate groups.');
-        }
-
-        $group = RateGroup::create([
-            'user_id' => $user->id,
+        $group = $profile->rateGroups()->create([
+            'user_id' => $profile->user_id,
             'name' => $validated['name'],
         ]);
 

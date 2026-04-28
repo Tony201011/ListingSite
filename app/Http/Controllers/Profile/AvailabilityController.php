@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetUserAvailability;
 use App\Actions\UpdateUserAvailability;
 use App\Http\Controllers\Controller;
@@ -16,12 +17,14 @@ class AvailabilityController extends Controller
 {
     public function __construct(
         private UpdateUserAvailability $updateUserAvailability,
-        private GetUserAvailability $getUserAvailability
+        private GetUserAvailability $getUserAvailability,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function edit(): View
     {
-        $saved = $this->getUserAvailability->forEdit(Auth::id());
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $saved = $this->getUserAvailability->forEdit($profile?->id ?? 0);
 
         return view('profile.set-your-availability', [
             'days' => $this->getUserAvailability->days(),
@@ -33,8 +36,10 @@ class AvailabilityController extends Controller
     {
         $this->authorize('update', ProviderProfile::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $this->updateUserAvailability->execute(
-            Auth::id(),
+            $profile?->id ?? 0,
             $request->validated()['availability'] ?? []
         );
 
@@ -52,7 +57,8 @@ class AvailabilityController extends Controller
 
     public function show(): View
     {
-        $data = $this->getUserAvailability->forShow(Auth::id());
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $data = $this->getUserAvailability->forShow($profile?->id ?? 0);
 
         return view('profile.my-availability', $data);
     }

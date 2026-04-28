@@ -15,6 +15,7 @@ class ProfileImage extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'image_path',
         'thumbnail_path',
         'is_primary',
@@ -66,5 +67,10 @@ class ProfileImage extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(ProviderProfile::class, 'provider_profile_id');
     }
 }

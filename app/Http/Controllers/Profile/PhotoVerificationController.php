@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Actions\DeletePhotoVerificationPhoto;
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetPhotoVerificationPageData;
 use App\Actions\UploadPhotoVerificationPhotos;
 use App\Http\Controllers\Controller;
@@ -19,14 +20,17 @@ class PhotoVerificationController extends Controller
     public function __construct(
         private GetPhotoVerificationPageData $getPhotoVerificationPageData,
         private UploadPhotoVerificationPhotos $uploadPhotoVerificationPhotos,
-        private DeletePhotoVerificationPhoto $deletePhotoVerificationPhoto
+        private DeletePhotoVerificationPhoto $deletePhotoVerificationPhoto,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function index(): View
     {
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         return view(
             'profile.verify-photo',
-            $this->getPhotoVerificationPageData->execute(Auth::user())
+            $this->getPhotoVerificationPageData->execute($profile)
         );
     }
 
@@ -35,8 +39,9 @@ class PhotoVerificationController extends Controller
         $this->authorize('create', PhotoVerification::class);
 
         try {
+            $profile = $this->getActiveProviderProfile->execute(Auth::user());
             $result = $this->uploadPhotoVerificationPhotos->execute(
-                Auth::user(),
+                $profile,
                 $request->file('photos', [])
             );
 
@@ -57,8 +62,9 @@ class PhotoVerificationController extends Controller
     {
         $this->authorize('deletePhoto', PhotoVerification::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
         $result = $this->deletePhotoVerificationPhoto->execute(
-            Auth::user(),
+            $profile,
             $request->validated('path')
         );
 

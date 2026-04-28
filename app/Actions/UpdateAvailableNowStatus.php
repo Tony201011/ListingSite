@@ -4,18 +4,18 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\AvailableNow;
+use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
-use App\Models\User;
 
 class UpdateAvailableNowStatus
 {
-    public function execute(User $user, string $status): ActionResult
+    public function execute(ProviderProfile $profile, string $status): ActionResult
     {
         $settings = SiteSetting::getStatusSettings();
         $maxUses = $settings['available_now_max_uses'];
         $durationMinutes = $settings['available_now_duration_minutes'];
 
-        $available = $this->getOrCreateAvailableNow($user->id);
+        $available = $this->getOrCreateAvailableNow($profile->id);
 
         $this->syncExpiredStatus($available);
 
@@ -26,10 +26,10 @@ class UpdateAvailableNowStatus
         return $this->goOffline($available, $maxUses);
     }
 
-    protected function getOrCreateAvailableNow(int $userId): AvailableNow
+    protected function getOrCreateAvailableNow(int $profileId): AvailableNow
     {
         $available = AvailableNow::firstOrCreate(
-            ['user_id' => $userId],
+            ['provider_profile_id' => $profileId],
             [
                 'status' => 'offline',
                 'usage_date' => today(),

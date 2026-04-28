@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\ProfileImage;
-use App\Models\User;
+use App\Models\ProviderProfile;
 use App\Services\UserPhotoStorageService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -19,11 +19,13 @@ class UploadUserPhotos
         private UserPhotoStorageService $photoStorageService
     ) {}
 
-    public function execute(?User $user, array $photos): ActionResult
+    public function execute(?ProviderProfile $profile, array $photos): ActionResult
     {
-        if (! $user) {
+        if (! $profile) {
             return $this->errorResponse('Unauthenticated.', 401);
         }
+
+        $user = $profile->user;
 
         try {
             Gate::forUser($user)->authorize('create', ProfileImage::class);
@@ -37,7 +39,7 @@ class UploadUserPhotos
             return $this->errorResponse('No photos were provided.', 422);
         }
 
-        $username = $this->buildUsername($user);
+        $username = $this->buildUsername($profile);
         $uploadedPhotos = [];
         $storedBatchFiles = [];
 
@@ -45,7 +47,7 @@ class UploadUserPhotos
             DB::beginTransaction();
 
             $hasPrimary = ProfileImage::query()
-                ->where('user_id', $user->id)
+                ->where('provider_profile_id', $profile->id)
                 ->where('is_primary', true)
                 ->lockForUpdate()
                 ->exists();
@@ -63,7 +65,8 @@ class UploadUserPhotos
                 ];
 
                 $profileImage = ProfileImage::create([
-                    'user_id' => $user->id,
+                    'user_id' => $profile->user_id,
+                    'provider_profile_id' => $profile->id,
                     'image_path' => $storedPhoto['image_path'],
                     'thumbnail_path' => $storedPhoto['thumbnail_path'],
                     'is_primary' => ! $hasPrimary,
@@ -99,7 +102,7 @@ class UploadUserPhotos
                     );
                 } catch (Throwable $cleanupException) {
                     Log::warning('Failed to clean up uploaded photo after batch failure.', [
-                        'user_id' => $user->id,
+                        'profile_id' => $profile->id,
                         'image_path' => $storedFile['image_path'] ?? null,
                         'thumbnail_path' => $storedFile['thumbnail_path'] ?? null,
                         'error' => $cleanupException->getMessage(),
@@ -108,7 +111,7 @@ class UploadUserPhotos
             }
 
             Log::error('Photo upload batch failed.', [
-                'user_id' => $user->id,
+                'profile_id' => $profile->id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -119,16 +122,16 @@ class UploadUserPhotos
         }
     }
 
-    private function buildUsername(User $user): string
+    private function buildUsername(ProviderProfile $profile): string
     {
-        $baseName = trim((string) ($user->name ?: 'user'));
+        $baseName = trim((string) ($profile->name ?: 'user'));
         $slug = Str::slug($baseName);
 
         if ($slug === '') {
             $slug = 'user';
         }
 
-        return $slug.$user->id;
+        return $slug.$profile->id;
     }
 
     private function errorResponse(string $message, int $status): ActionResult

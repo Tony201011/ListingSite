@@ -45,11 +45,12 @@ class AvailabilityControllerTest extends TestCase
     public function test_edit_view_is_returned_for_authenticated_provider(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $getUserAvailability = Mockery::mock(GetUserAvailability::class);
         $getUserAvailability->shouldReceive('forEdit')
             ->once()
-            ->with($user->id)
+            ->with($profile->id)
             ->andReturn(collect());
         $getUserAvailability->shouldReceive('days')
             ->once()
@@ -68,11 +69,12 @@ class AvailabilityControllerTest extends TestCase
     public function test_show_view_is_returned_for_authenticated_provider(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $getUserAvailability = Mockery::mock(GetUserAvailability::class);
         $getUserAvailability->shouldReceive('forShow')
             ->once()
-            ->with($user->id)
+            ->with($profile->id)
             ->andReturn([
                 'availabilities' => collect(),
                 'availabilityCount' => 0,
@@ -89,11 +91,12 @@ class AvailabilityControllerTest extends TestCase
     public function test_update_returns_json_on_ajax_request(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $updateUserAvailability = Mockery::mock(UpdateUserAvailability::class);
         $updateUserAvailability->shouldReceive('execute')
             ->once()
-            ->with($user->id, Mockery::type('array'));
+            ->with($profile->id, Mockery::type('array'));
 
         $this->app->instance(UpdateUserAvailability::class, $updateUserAvailability);
 

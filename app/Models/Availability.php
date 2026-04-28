@@ -8,6 +8,7 @@ class Availability extends Model
 {
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'day',
         'enabled',
         'from_time',
@@ -20,5 +21,10 @@ class Availability extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function profile()
+    {
+        return $this->belongsTo(ProviderProfile::class, 'provider_profile_id');
     }
 }

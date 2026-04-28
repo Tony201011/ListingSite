@@ -3,16 +3,17 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
+use App\Models\ProviderProfile;
 use App\Models\SetAndForget;
-use App\Models\User;
 
 class SaveSetAndForget
 {
-    public function execute(User $user, array $data): ActionResult
+    public function execute(ProviderProfile $profile, array $data): ActionResult
     {
         SetAndForget::updateOrCreate(
-            ['user_id' => $user->id],
+            ['provider_profile_id' => $profile->id],
             [
+                'user_id' => $profile->user_id,
                 'online_now_enabled' => (bool) ($data['online_now_enabled'] ?? false),
                 'online_now_days' => $data['online_now_days'] ?? [],
                 'online_now_time' => $data['online_now_time'] ?? null,

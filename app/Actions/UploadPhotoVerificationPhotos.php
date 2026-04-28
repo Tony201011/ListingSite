@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\PhotoVerification;
-use App\Models\User;
+use App\Models\ProviderProfile;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -13,9 +13,9 @@ use Throwable;
 
 class UploadPhotoVerificationPhotos
 {
-    public function execute(User $user, array $photos): ActionResult
+    public function execute(ProviderProfile $profile, array $photos): ActionResult
     {
-        $countVerification = $user->photoVerification()
+        $countVerification = $profile->photoVerification()
             ->whereNull('deleted_at')
             ->count();
 
@@ -29,8 +29,8 @@ class UploadPhotoVerificationPhotos
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk(config('media.upload_disk'));
 
-        $baseName = $user->name ?: 'user';
-        $username = Str::slug($baseName).$user->id;
+        $baseName = $profile->name ?: 'user';
+        $username = Str::slug($baseName).$profile->id;
 
         $uploadedPhotos = [];
         $storedPaths = [];
@@ -42,7 +42,7 @@ class UploadPhotoVerificationPhotos
                 }
 
                 $originalExtension = strtolower($photo->getClientOriginalExtension() ?: 'jpg');
-                $fileName = 'verification_'.$user->id.'_'.Str::uuid().'.'.$originalExtension;
+                $fileName = 'verification_'.$profile->id.'_'.Str::uuid().'.'.$originalExtension;
                 $filePath = "verification/{$username}/{$fileName}";
 
                 $uploaded = $disk->putFileAs(
@@ -73,7 +73,8 @@ class UploadPhotoVerificationPhotos
             }
 
             $verification = PhotoVerification::create([
-                'user_id' => $user->id,
+                'user_id' => $profile->user_id,
+                'provider_profile_id' => $profile->id,
                 'photos' => $uploadedPhotos,
                 'status' => 'pending',
                 'submitted_at' => now(),

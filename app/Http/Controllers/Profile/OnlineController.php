@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetOnlineNowState;
 use App\Actions\UpdateOnlineNowStatus;
 use App\Http\Controllers\Controller;
@@ -15,12 +16,14 @@ class OnlineController extends Controller
 {
     public function __construct(
         private GetOnlineNowState $getOnlineNowState,
-        private UpdateOnlineNowStatus $updateOnlineNowStatus
+        private UpdateOnlineNowStatus $updateOnlineNowStatus,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function onlineNow(): View
     {
-        $data = $this->getOnlineNowState->execute(Auth::user());
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $data = $this->getOnlineNowState->execute($profile);
 
         return view('profile.online-now', $data);
     }
@@ -29,8 +32,10 @@ class OnlineController extends Controller
     {
         $this->authorize('update', ProviderProfile::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->updateOnlineNowStatus->execute(
-            Auth::user(),
+            $profile,
             $request->validated('status')
         );
 

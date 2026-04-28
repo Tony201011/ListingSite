@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetShowHideProfileState;
 use App\Actions\UpdateShowHideProfileState;
 use App\Http\Controllers\Controller;
@@ -15,14 +16,17 @@ class ShowHideProfileController extends Controller
 {
     public function __construct(
         private GetShowHideProfileState $getShowHideProfileState,
-        private UpdateShowHideProfileState $updateShowHideProfileState
+        private UpdateShowHideProfileState $updateShowHideProfileState,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function hideShowProfile(): View
     {
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         return view(
             'profile.hide-show',
-            $this->getShowHideProfileState->execute(Auth::user())
+            $this->getShowHideProfileState->execute($profile)
         );
     }
 
@@ -30,8 +34,10 @@ class ShowHideProfileController extends Controller
     {
         $this->authorize('update', ProviderProfile::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->updateShowHideProfileState->execute(
-            Auth::user(),
+            $profile,
             $request->validated('status')
         );
 

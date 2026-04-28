@@ -2,12 +2,12 @@
 
 namespace App\Actions;
 
-use App\Models\User;
+use App\Models\ProviderProfile;
 
 class GetProfileMessage
 {
-    public function execute(?User $user): ?string
+    public function execute(?ProviderProfile $profile): ?string
     {
-        return $user?->profileMessage?->message;
+        return $profile?->profileMessage?->message;
     }
 }

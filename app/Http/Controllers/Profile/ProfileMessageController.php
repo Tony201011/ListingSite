@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetProfileMessage;
 use App\Actions\SaveProfileMessage;
 use App\Http\Controllers\Controller;
@@ -15,13 +16,16 @@ class ProfileMessageController extends Controller
 {
     public function __construct(
         private GetProfileMessage $getProfileMessage,
-        private SaveProfileMessage $saveProfileMessage
+        private SaveProfileMessage $saveProfileMessage,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function profileMessage(): View
     {
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         return view('profile.profile-message', [
-            'profileMessage' => $this->getProfileMessage->execute(Auth::user()),
+            'profileMessage' => $this->getProfileMessage->execute($profile),
         ]);
     }
 
@@ -29,8 +33,10 @@ class ProfileMessageController extends Controller
     {
         $this->authorize('update', ProviderProfile::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->saveProfileMessage->execute(
-            Auth::user(),
+            $profile,
             $request->validated('message')
         );
 

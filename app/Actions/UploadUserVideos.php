@@ -3,7 +3,7 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
-use App\Models\User;
+use App\Models\ProviderProfile;
 use App\Models\UserVideo;
 use App\Services\UserVideoStorageService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -20,11 +20,13 @@ class UploadUserVideos
         private UserVideoStorageService $videoStorageService
     ) {}
 
-    public function execute(?User $user, array $videos): ActionResult
+    public function execute(?ProviderProfile $profile, array $videos): ActionResult
     {
-        if (! $user) {
+        if (! $profile) {
             return $this->errorResponse('Unauthenticated.', 401);
         }
+
+        $user = $profile->user;
 
         try {
             Gate::forUser($user)->authorize('create', UserVideo::class);
@@ -41,7 +43,7 @@ class UploadUserVideos
             return $this->errorResponse('No videos were provided.', 422);
         }
 
-        $username = $this->buildUsername($user);
+        $username = $this->buildUsername($profile);
         $uploadedVideos = [];
         $storedVideoPaths = [];
 
@@ -58,7 +60,8 @@ class UploadUserVideos
                 $storedVideoPaths[] = $storedVideo['video_path'];
 
                 $userVideo = UserVideo::create([
-                    'user_id' => $user->id,
+                    'user_id' => $profile->user_id,
+                    'provider_profile_id' => $profile->id,
                     'video_path' => $storedVideo['video_path'],
                     'original_name' => $video->getClientOriginalName(),
                 ]);
@@ -85,7 +88,7 @@ class UploadUserVideos
                     $this->videoStorageService->deletePath($videoPath);
                 } catch (Throwable $cleanupException) {
                     Log::warning('Failed to clean up uploaded video after batch failure.', [
-                        'user_id' => $user->id,
+                        'profile_id' => $profile->id,
                         'video_path' => $videoPath,
                         'error' => $cleanupException->getMessage(),
                     ]);
@@ -93,7 +96,7 @@ class UploadUserVideos
             }
 
             Log::error('Video upload batch failed.', [
-                'user_id' => $user->id,
+                'profile_id' => $profile->id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -104,16 +107,16 @@ class UploadUserVideos
         }
     }
 
-    private function buildUsername(User $user): string
+    private function buildUsername(ProviderProfile $profile): string
     {
-        $baseName = trim((string) ($user->name ?: 'user'));
+        $baseName = trim((string) ($profile->name ?: 'user'));
         $slug = Str::slug($baseName);
 
         if ($slug === '') {
             $slug = 'user';
         }
 
-        return $slug.$user->id;
+        return $slug.$profile->id;
     }
 
     private function errorResponse(string $message, int $status): ActionResult

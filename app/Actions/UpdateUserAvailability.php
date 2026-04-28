@@ -17,9 +17,9 @@ class UpdateUserAvailability
         'Sunday',
     ];
 
-    public function execute(int $userId, array $availabilityData): void
+    public function execute(int $profileId, array $availabilityData): void
     {
-        DB::transaction(function () use ($userId, $availabilityData) {
+        DB::transaction(function () use ($profileId, $availabilityData) {
             $normalizedData = [];
             foreach ($availabilityData as $key => $value) {
                 $normalizedData[ucfirst(strtolower($key))] = $value;
@@ -32,7 +32,7 @@ class UpdateUserAvailability
 
                 Availability::updateOrCreate(
                     [
-                        'user_id' => $userId,
+                        'provider_profile_id' => $profileId,
                         'day' => $day,
                     ],
                     $payload
