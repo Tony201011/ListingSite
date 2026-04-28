@@ -47,12 +47,12 @@ class UploadUserVideos
         $storedVideoPaths = [];
 
         try {
-            $uploadedVideos = DB::transaction(function () use ($videos, $profile, $username, &$storedVideoPaths) {
+            $uploadedVideos = DB::transaction(function () use ($videos, $user, $profile, $username, &$storedVideoPaths) {
                 $result = [];
 
                 foreach ($videos as $video) {
                     $storedVideo = $this->videoStorageService->store(
-                        user: $profile->user,
+                        user: $user,
                         video: $video,
                         username: $username
                     );
