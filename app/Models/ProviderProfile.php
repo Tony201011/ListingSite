@@ -97,27 +97,67 @@ class ProviderProfile extends Model
 
     public function rates(): HasMany
     {
-        return $this->hasMany(Rate::class, 'user_id', 'user_id');
+        return $this->hasMany(Rate::class, 'provider_profile_id');
+    }
+
+    public function rateGroups(): HasMany
+    {
+        return $this->hasMany(RateGroup::class, 'provider_profile_id');
     }
 
     public function availabilities(): HasMany
     {
-        return $this->hasMany(Availability::class, 'user_id', 'user_id');
+        return $this->hasMany(Availability::class, 'provider_profile_id');
     }
 
     public function profileImages(): HasMany
     {
-        return $this->hasMany(ProfileImage::class, 'user_id', 'user_id');
+        return $this->hasMany(ProfileImage::class, 'provider_profile_id');
+    }
+
+    public function primaryProfileImage(): HasOne
+    {
+        return $this->hasOne(ProfileImage::class, 'provider_profile_id')->where('is_primary', true);
     }
 
     public function userVideos(): HasMany
     {
-        return $this->hasMany(UserVideo::class, 'user_id', 'user_id');
+        return $this->hasMany(UserVideo::class, 'provider_profile_id');
     }
 
     public function profileMessage(): HasOne
     {
-        return $this->hasOne(ProfileMessage::class, 'user_id', 'user_id');
+        return $this->hasOne(ProfileMessage::class, 'provider_profile_id');
+    }
+
+    public function tours(): HasMany
+    {
+        return $this->hasMany(Tour::class, 'provider_profile_id');
+    }
+
+    public function photoVerification(): HasMany
+    {
+        return $this->hasMany(PhotoVerification::class, 'provider_profile_id');
+    }
+
+    public function onlineUser(): HasOne
+    {
+        return $this->hasOne(OnlineUser::class, 'provider_profile_id');
+    }
+
+    public function availableNow(): HasOne
+    {
+        return $this->hasOne(AvailableNow::class, 'provider_profile_id');
+    }
+
+    public function hideShowProfile(): HasOne
+    {
+        return $this->hasOne(HideShowProfile::class, 'provider_profile_id');
+    }
+
+    public function setAndForget(): HasOne
+    {
+        return $this->hasOne(SetAndForget::class, 'provider_profile_id');
     }
 
     public function reports(): HasMany

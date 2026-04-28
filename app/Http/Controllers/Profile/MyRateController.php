@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Profile;
 
 use App\Actions\DeleteRate;
 use App\Actions\DeleteRateGroup;
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetMyRatePageData;
 use App\Actions\StoreRate;
 use App\Actions\StoreRateGroup;
@@ -29,20 +30,25 @@ class MyRateController extends Controller
         private DeleteRate $deleteRate,
         private StoreRateGroup $storeRateGroup,
         private UpdateRateGroup $updateRateGroup,
-        private DeleteRateGroup $deleteRateGroup
+        private DeleteRateGroup $deleteRateGroup,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function index(): View
     {
-        return view('profile.my-rate', $this->getMyRatePageData->execute(Auth::user()));
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
+        return view('profile.my-rate', $this->getMyRatePageData->execute($profile));
     }
 
     public function store(StoreRateRequest $request): JsonResponse
     {
         $this->authorize('create', Rate::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->storeRate->execute(
-            Auth::user(),
+            $profile,
             $request->validated()
         );
 
@@ -53,8 +59,10 @@ class MyRateController extends Controller
     {
         $this->authorize('update', $rate);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->updateRate->execute(
-            Auth::user(),
+            $profile,
             $rate,
             $request->validated()
         );
@@ -66,7 +74,9 @@ class MyRateController extends Controller
     {
         $this->authorize('delete', $rate);
 
-        $result = $this->deleteRate->execute(Auth::user(), $rate);
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
+        $result = $this->deleteRate->execute($profile, $rate);
 
         return response()->json($result->toPayload(), $result->status());
     }
@@ -75,8 +85,10 @@ class MyRateController extends Controller
     {
         $this->authorize('create', RateGroup::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->storeRateGroup->execute(
-            Auth::user(),
+            $profile,
             $request->validated()
         );
 
@@ -87,8 +99,10 @@ class MyRateController extends Controller
     {
         $this->authorize('update', $group);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->updateRateGroup->execute(
-            Auth::user(),
+            $profile,
             $group,
             $request->validated()
         );
@@ -100,7 +114,9 @@ class MyRateController extends Controller
     {
         $this->authorize('delete', $group);
 
-        $result = $this->deleteRateGroup->execute(Auth::user(), $group);
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
+        $result = $this->deleteRateGroup->execute($profile, $group);
 
         return response()->json($result->toPayload(), $result->status());
     }

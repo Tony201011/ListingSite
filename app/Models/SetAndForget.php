@@ -11,6 +11,7 @@ class SetAndForget extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'online_now_enabled',
         'online_now_days',
         'online_now_time',
@@ -29,6 +30,11 @@ class SetAndForget extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function providerProfile(): BelongsTo
+    {
+        return $this->belongsTo(ProviderProfile::class, 'provider_profile_id');
     }
 
     public function shouldTriggerOnlineNow(): bool

@@ -2,14 +2,14 @@
 
 namespace App\Actions;
 
-use App\Models\User;
+use App\Models\ProviderProfile;
 
 class GetMyRatePageData
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
-        $rates = $user
-            ? $user->rates()
+        $rates = $profile
+            ? $profile->rates()
                 ->whereNull('group_id')
                 ->whereNotNull('description')
                 ->where('description', '!=', '')
@@ -17,8 +17,8 @@ class GetMyRatePageData
                 ->get()
             : collect();
 
-        $groups = $user
-            ? $user->rateGroups()->with(['rates' => fn ($q) => $q->orderByDesc('created_at')])->get()
+        $groups = $profile
+            ? $profile->rateGroups()->with(['rates' => fn ($q) => $q->orderByDesc('created_at')])->get()
             : collect();
 
         return [

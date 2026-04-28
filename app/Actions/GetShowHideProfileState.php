@@ -3,17 +3,17 @@
 namespace App\Actions;
 
 use App\Models\HideShowProfile;
-use App\Models\User;
+use App\Models\ProviderProfile;
 
 class GetShowHideProfileState
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
         $status = false;
 
-        if ($user) {
+        if ($profile) {
             $profileVisibility = HideShowProfile::query()
-                ->where('user_id', $user->id)
+                ->where('provider_profile_id', $profile->id)
                 ->first();
 
             $status = $profileVisibility && $profileVisibility->status === 'show';

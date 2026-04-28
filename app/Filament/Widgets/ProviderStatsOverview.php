@@ -15,7 +15,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
 
     public static function canView(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'agent'], true);
+        return Filament::getCurrentPanel()?->getId() === 'admin';
     }
 
     /**
@@ -24,12 +24,6 @@ class ProviderStatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         $providers = User::query()->where('role', User::ROLE_PROVIDER);
-
-        if (Filament::getCurrentPanel()?->getId() === 'agent' && Filament::auth()->id()) {
-            $providers->whereHas('providerProfile', function ($query): void {
-                $query->where('agent_id', Filament::auth()->id());
-            });
-        }
 
         $total = (clone $providers)->count();
         $active = (clone $providers)->where('is_blocked', false)->count();
@@ -54,10 +48,6 @@ class ProviderStatsOverview extends StatsOverviewWidget
 
     protected function getDescription(): ?string
     {
-        if (Filament::getCurrentPanel()?->getId() === 'agent') {
-            return 'Quick overview of provider accounts created by this agent';
-        }
-
         return 'Quick overview of provider accounts';
     }
 }

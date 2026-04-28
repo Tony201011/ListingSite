@@ -9,7 +9,7 @@ class RateGroup extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'name'];
+    protected $fillable = ['user_id', 'provider_profile_id', 'name'];
 
     /**
      * Get the user that owns the group.
@@ -17,6 +17,14 @@ class RateGroup extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the provider profile this group belongs to.
+     */
+    public function profile()
+    {
+        return $this->belongsTo(ProviderProfile::class, 'provider_profile_id');
     }
 
     /**

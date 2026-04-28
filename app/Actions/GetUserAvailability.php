@@ -22,22 +22,22 @@ class GetUserAvailability
         return $this->days;
     }
 
-    public function forEdit(int $userId): SupportCollection
+    public function forEdit(int $profileId): SupportCollection
     {
-        return Availability::where('user_id', $userId)
+        return Availability::where('provider_profile_id', $profileId)
             ->get()
             ->keyBy('day');
     }
 
-    public function forShow(int $userId): array
+    public function forShow(int $profileId): array
     {
-        $availabilities = Availability::where('user_id', $userId)
+        $availabilities = Availability::where('provider_profile_id', $profileId)
             ->orderByRaw("
                 FIELD(day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
             ")
             ->get();
 
-        $availabilityCount = Availability::where('user_id', $userId)->count();
+        $availabilityCount = Availability::where('provider_profile_id', $profileId)->count();
 
         return [
             'availabilities' => $availabilities,

@@ -28,7 +28,7 @@ class SitePassword
             return $next($request);
         }
 
-        if ($request->is('admin*') || $request->is('agent*')) {
+        if ($request->is('admin*')) {
             return $next($request);
         }
 
@@ -57,7 +57,7 @@ class SitePassword
         $protectionEnabled = $configurationEnabled && filled($configuredPassword);
 
         if ($protectionEnabled && $request->session()->get('site_access') !== true) {
-            /** @var \App\Models\User|null $user */
+            /** @var User|null $user */
             $user = Auth::user();
 
             if ($user && $user->role === User::ROLE_ADMIN) {

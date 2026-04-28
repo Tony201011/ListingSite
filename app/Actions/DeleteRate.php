@@ -3,14 +3,14 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
+use App\Models\ProviderProfile;
 use App\Models\Rate;
-use App\Models\User;
 
 class DeleteRate
 {
-    public function execute(User $user, Rate $rate): ActionResult
+    public function execute(ProviderProfile $profile, Rate $rate): ActionResult
     {
-        if ((int) $rate->user_id !== (int) $user->id) {
+        if ((int) $rate->provider_profile_id !== (int) $profile->id) {
             return ActionResult::authorizationFailure('You can only modify your own rates.');
         }
 

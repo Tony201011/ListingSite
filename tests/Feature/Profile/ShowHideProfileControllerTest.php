@@ -64,12 +64,13 @@ class ShowHideProfileControllerTest extends TestCase
     public function test_update_hide_show_profile_returns_json_response(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $updateShowHideProfileState = Mockery::mock(UpdateShowHideProfileState::class);
         $updateShowHideProfileState->shouldReceive('execute')
             ->once()
             ->with(
-                Mockery::on(fn ($arg) => $arg->is($user)),
+                Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)),
                 'show'
             )
             ->andReturn(ActionResult::success(['status' => 'show'], 'Your profile is now visible'));
@@ -91,12 +92,13 @@ class ShowHideProfileControllerTest extends TestCase
     public function test_update_hide_show_profile_can_hide_profile(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $updateShowHideProfileState = Mockery::mock(UpdateShowHideProfileState::class);
         $updateShowHideProfileState->shouldReceive('execute')
             ->once()
             ->with(
-                Mockery::on(fn ($arg) => $arg->is($user)),
+                Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)),
                 'hide'
             )
             ->andReturn(ActionResult::success(['status' => 'hide'], 'Your profile is now hidden'));

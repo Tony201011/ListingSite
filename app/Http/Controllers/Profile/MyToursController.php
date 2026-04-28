@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Actions\DeleteTour;
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetMyToursPageData;
 use App\Actions\SearchTourCities;
 use App\Actions\StoreTour;
@@ -23,7 +24,8 @@ class MyToursController extends Controller
         private StoreTour $storeTour,
         private UpdateTour $updateTour,
         private DeleteTour $deleteTour,
-        private SearchTourCities $searchTourCities
+        private SearchTourCities $searchTourCities,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     /**
@@ -33,7 +35,9 @@ class MyToursController extends Controller
     {
         $this->authorize('viewAny', Tour::class);
 
-        return view('profile.my-tours', $this->getMyToursPageData->execute(Auth::user()));
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
+        return view('profile.my-tours', $this->getMyToursPageData->execute($profile));
     }
 
     /**
@@ -43,8 +47,10 @@ class MyToursController extends Controller
     {
         $this->authorize('create', Tour::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->storeTour->execute(
-            Auth::user(),
+            $profile,
             $request->validated()
         );
 
@@ -58,8 +64,10 @@ class MyToursController extends Controller
     {
         $this->authorize('update', $tour);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->updateTour->execute(
-            Auth::user(),
+            $profile,
             $tour,
             $request->validated()
         );
@@ -74,7 +82,9 @@ class MyToursController extends Controller
     {
         $this->authorize('delete', $tour);
 
-        $result = $this->deleteTour->execute(Auth::user(), $tour);
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
+        $result = $this->deleteTour->execute($profile, $tour);
 
         return response()->json($result->toPayload(), $result->status());
     }

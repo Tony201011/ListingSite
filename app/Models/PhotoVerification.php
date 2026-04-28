@@ -12,6 +12,7 @@ class PhotoVerification extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'photos',
         'status',
         'admin_note',

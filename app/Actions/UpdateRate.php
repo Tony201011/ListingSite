@@ -3,14 +3,14 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
+use App\Models\ProviderProfile;
 use App\Models\Rate;
-use App\Models\User;
 
 class UpdateRate
 {
-    public function execute(User $user, Rate $rate, array $validated): ActionResult
+    public function execute(ProviderProfile $profile, Rate $rate, array $validated): ActionResult
     {
-        if ((int) $rate->user_id !== (int) $user->id) {
+        if ((int) $rate->provider_profile_id !== (int) $profile->id) {
             return ActionResult::authorizationFailure('You can only modify your own rates.');
         }
 

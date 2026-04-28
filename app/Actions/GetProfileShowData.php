@@ -17,15 +17,16 @@ class GetProfileShowData
         $providerProfile = ProviderProfile::query()
             ->where('slug', $slug)
             ->with([
-                'user.profileImages',
-                'user.primaryProfileImage',
-                'user.rates.group',
-                'user.availabilities',
-                'user.tours',
-                'user.userVideos',
-                'user.onlineUser',
-                'user.availableNow',
-                'user.profileMessage',
+                'profileImages',
+                'primaryProfileImage',
+                'rates.group',
+                'availabilities',
+                'tours',
+                'userVideos',
+                'onlineUser',
+                'availableNow',
+                'profileMessage',
+                'user',
                 'city',
                 'state',
                 'country',
@@ -142,7 +143,7 @@ class GetProfileShowData
     {
         $user = $providerProfile->user;
 
-        $images = collect($user?->profileImages ?? [])
+        $images = collect($providerProfile->profileImages ?? [])
             ->sortByDesc('is_primary')
             ->map(fn ($img) => $this->normalizeMediaUrl($img->image_url ?? null))
             ->filter()
@@ -150,20 +151,20 @@ class GetProfileShowData
             ->values()
             ->all();
 
-        $primaryImage = $user?->primaryProfileImage;
+        $primaryImage = $providerProfile->primaryProfileImage;
         $primaryImageUrl = $this->normalizeMediaUrl($primaryImage?->image_url ?? null);
 
         if ($primaryImageUrl && ! in_array($primaryImageUrl, $images, true)) {
             array_unshift($images, $primaryImageUrl);
         }
 
-        $videos = collect($user?->userVideos ?? [])
+        $videos = collect($providerProfile->userVideos ?? [])
             ->map(fn ($v) => $this->normalizeMediaUrl($v->video_url ?? null))
             ->filter()
             ->values()
             ->all();
 
-        $rates = $user?->rates ?? collect();
+        $rates = $providerProfile->rates ?? collect();
 
         $priceList = $rates->map(fn ($rate) => [
             'description' => $rate->description ?? '',
@@ -175,7 +176,7 @@ class GetProfileShowData
 
         $dayOrder = ['Monday' => 0, 'Tuesday' => 1, 'Wednesday' => 2, 'Thursday' => 3, 'Friday' => 4, 'Saturday' => 5, 'Sunday' => 6];
 
-        $availabilities = $user?->availabilities ?? collect();
+        $availabilities = $providerProfile->availabilities ?? collect();
         $availabilityList = $availabilities
             ->sortBy(fn ($avail) => $dayOrder[$avail->day] ?? 99)
             ->map(function ($avail) {
@@ -200,7 +201,7 @@ class GetProfileShowData
                 return ['day' => $avail->day, 'time' => $time];
             })->values()->all();
 
-        $tours = $user?->tours
+        $tours = $providerProfile->tours
             ?->where('enabled', true)
             ->sortBy('from')
             ->map(fn ($tour) => [
@@ -255,11 +256,11 @@ class GetProfileShowData
             'bust_size' => $categoryNames->get($providerProfile->bust_size_id) ?? '',
             'your_length' => $categoryNames->get($providerProfile->your_length_id) ?? '',
             'age_group' => $categoryNames->get($providerProfile->age_group_id) ?? '',
-            'profile_message' => $user?->profileMessage?->message ?? '',
-            'active' => $user?->onlineUser?->isCurrentlyOnline() ?? false,
-            'available_now' => $user?->availableNow?->isCurrentlyAvailable() ?? false,
-            'available_expires_at' => $user?->availableNow?->isCurrentlyAvailable()
-                ? $user->availableNow->available_expires_at
+            'profile_message' => $providerProfile->profileMessage?->message ?? '',
+            'active' => $providerProfile->onlineUser?->isCurrentlyOnline() ?? false,
+            'available_now' => $providerProfile->availableNow?->isCurrentlyAvailable() ?? false,
+            'available_expires_at' => $providerProfile->availableNow?->isCurrentlyAvailable()
+                ? $providerProfile->availableNow->available_expires_at
                 : null,
             'suburb' => $this->extractSuburbName($user?->suburb ?? ''),
             'contact_method' => $providerProfile->contact_method ?? '',
@@ -336,9 +337,10 @@ class GetProfileShowData
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
             ->with([
-                'user.primaryProfileImage',
-                'user.rates',
-                'user.onlineUser',
+                'primaryProfileImage',
+                'rates',
+                'onlineUser',
+                'user',
                 'city',
             ])
             ->orderByDesc('is_featured')
@@ -357,7 +359,7 @@ class GetProfileShowData
 
         return $profiles
             ->map(function (ProviderProfile $profile) use ($categoryNames) {
-                $primaryImage = $profile->user?->primaryProfileImage;
+                $primaryImage = $profile->primaryProfileImage;
                 $imageUrl = $this->normalizeMediaUrl($primaryImage?->image_url ?? null);
 
                 $services = $this->resolveIds(
@@ -365,7 +367,7 @@ class GetProfileShowData
                     $categoryNames
                 );
 
-                $firstRate = $profile->user?->rates?->first();
+                $firstRate = $profile->rates?->first();
                 $rateDisplay = $this->formatRate($firstRate);
 
                 return [
@@ -382,7 +384,7 @@ class GetProfileShowData
                     'out_call' => trim((string) ($firstRate?->outcall ?? '')),
                     'age' => $profile->age,
                     'verified' => $profile->is_verified,
-                    'active' => $profile->user?->onlineUser?->isCurrentlyOnline() ?? false,
+                    'active' => $profile->onlineUser?->isCurrentlyOnline() ?? false,
                     'date' => $profile->created_at->format('d/m/Y'),
                 ];
             })

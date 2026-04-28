@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetSetAndForgetState;
 use App\Actions\SaveSetAndForget;
 use App\Http\Controllers\Controller;
@@ -14,20 +15,24 @@ class ForgetController extends Controller
 {
     public function __construct(
         private GetSetAndForgetState $getSetAndForgetState,
-        private SaveSetAndForget $saveSetAndForget
+        private SaveSetAndForget $saveSetAndForget,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function setForget(): View
     {
-        $data = $this->getSetAndForgetState->execute(Auth::user());
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $data = $this->getSetAndForgetState->execute($profile);
 
         return view('profile.set-forget', $data);
     }
 
     public function save(SaveSetAndForgetRequest $request): JsonResponse
     {
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->saveSetAndForget->execute(
-            $request->user(),
+            $profile,
             $request->validated()
         );
 

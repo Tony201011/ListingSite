@@ -2,12 +2,12 @@
 
 namespace App\Actions;
 
+use App\Models\ProviderProfile;
 use App\Models\SetAndForget;
-use App\Models\User;
 
 class GetSetAndForgetState
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
         $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -20,11 +20,11 @@ class GetSetAndForgetState
             'available_now_time' => '',
         ];
 
-        if (! $user) {
+        if (! $profile) {
             return array_merge($defaults, compact('days'));
         }
 
-        $record = SetAndForget::firstWhere('user_id', $user->id);
+        $record = SetAndForget::firstWhere('provider_profile_id', $profile->id);
 
         return [
             'days' => $days,

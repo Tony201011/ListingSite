@@ -13,6 +13,7 @@ class AvailableNow extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'status',
         'usage_date',
         'usage_count',

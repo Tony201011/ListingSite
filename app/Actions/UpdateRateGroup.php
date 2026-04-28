@@ -3,14 +3,14 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
+use App\Models\ProviderProfile;
 use App\Models\RateGroup;
-use App\Models\User;
 
 class UpdateRateGroup
 {
-    public function execute(User $user, RateGroup $group, array $validated): ActionResult
+    public function execute(ProviderProfile $profile, RateGroup $group, array $validated): ActionResult
     {
-        if ((int) $group->user_id !== (int) $user->id) {
+        if ((int) $group->provider_profile_id !== (int) $profile->id) {
             return ActionResult::authorizationFailure('You can only modify your own rate groups.');
         }
 

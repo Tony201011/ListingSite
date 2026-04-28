@@ -12,6 +12,7 @@ class Rate extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'description',
         'incall',
         'outcall',
@@ -22,6 +23,11 @@ class Rate extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(ProviderProfile::class, 'provider_profile_id');
     }
 
     public function group()

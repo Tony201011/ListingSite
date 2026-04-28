@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetAvailableNowState;
 use App\Actions\UpdateAvailableNowStatus;
 use App\Http\Controllers\Controller;
@@ -15,12 +16,14 @@ class AvailableController extends Controller
 {
     public function __construct(
         private GetAvailableNowState $getAvailableNowState,
-        private UpdateAvailableNowStatus $updateAvailableNowStatus
+        private UpdateAvailableNowStatus $updateAvailableNowStatus,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function availableNow(): View
     {
-        $data = $this->getAvailableNowState->execute(Auth::user());
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $data = $this->getAvailableNowState->execute($profile);
 
         return view('profile.available-now', $data);
     }
@@ -29,8 +32,10 @@ class AvailableController extends Controller
     {
         $this->authorize('update', ProviderProfile::class);
 
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+
         $result = $this->updateAvailableNowStatus->execute(
-            $request->user(),
+            $profile,
             $request->string('status')->toString()
         );
 

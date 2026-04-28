@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Actions\DeleteProfilePhoto;
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetUserPhotos;
 use App\Actions\SetPrimaryProfilePhoto;
 use App\Actions\UploadEditorImage;
@@ -23,7 +24,8 @@ class PhotoController extends Controller
         private UploadUserPhotos $uploadUserPhotos,
         private SetPrimaryProfilePhoto $setPrimaryProfilePhoto,
         private DeleteProfilePhoto $deleteProfilePhoto,
-        private UploadEditorImage $uploadEditorImage
+        private UploadEditorImage $uploadEditorImage,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function index(): View
@@ -37,7 +39,8 @@ class PhotoController extends Controller
     {
         $this->authorize('viewAny', ProfileImage::class);
 
-        $result = $this->getUserPhotos->execute(Auth::user());
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $result = $this->getUserPhotos->execute($profile);
 
         if (! $result->isSuccess()) {
             abort($result->status(), $result->message() ?? 'Forbidden');
@@ -54,8 +57,9 @@ class PhotoController extends Controller
         $this->authorize('create', ProfileImage::class);
 
         try {
+            $profile = $this->getActiveProviderProfile->execute(Auth::user());
             $result = $this->uploadUserPhotos->execute(
-                Auth::user(),
+                $profile,
                 $request->file('photos', [])
             );
 
@@ -99,7 +103,8 @@ class PhotoController extends Controller
     {
         $this->authorize('update', $photo);
 
-        $result = $this->setPrimaryProfilePhoto->execute(Auth::user(), $photo);
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $result = $this->setPrimaryProfilePhoto->execute($profile, $photo);
 
         return response()->json($result->toPayload(), $result->status());
     }
@@ -108,7 +113,8 @@ class PhotoController extends Controller
     {
         $this->authorize('delete', $photo);
 
-        $result = $this->deleteProfilePhoto->execute(Auth::user(), $photo);
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $result = $this->deleteProfilePhoto->execute($profile, $photo);
 
         return response()->json($result->toPayload(), $result->status());
     }

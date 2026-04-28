@@ -81,12 +81,13 @@ class ProfileMessageControllerTest extends TestCase
     public function test_store_saves_profile_message_and_returns_json(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $saveProfileMessage = Mockery::mock(SaveProfileMessage::class);
         $saveProfileMessage->shouldReceive('execute')
             ->once()
             ->with(
-                Mockery::on(fn ($arg) => $arg->is($user)),
+                Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)),
                 'Hello, welcome to my profile!'
             )
             ->andReturn(ActionResult::success([], 'Profile message saved successfully.'));

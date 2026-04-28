@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Actions\DeleteUserVideo;
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetUserVideos;
 use App\Actions\UploadUserVideos;
 use App\Http\Controllers\Controller;
@@ -18,7 +19,8 @@ class MyVideosController extends Controller
     public function __construct(
         private GetUserVideos $getUserVideos,
         private UploadUserVideos $uploadUserVideos,
-        private DeleteUserVideo $deleteUserVideo
+        private DeleteUserVideo $deleteUserVideo,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function index(): View
@@ -32,7 +34,8 @@ class MyVideosController extends Controller
     {
         $this->authorize('viewAny', UserVideo::class);
 
-        $result = $this->getUserVideos->execute(Auth::user());
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $result = $this->getUserVideos->execute($profile);
 
         if (! $result->isSuccess()) {
             abort($result->status(), $result->message() ?? 'Forbidden');
@@ -49,8 +52,9 @@ class MyVideosController extends Controller
         $this->authorize('create', UserVideo::class);
 
         try {
+            $profile = $this->getActiveProviderProfile->execute(Auth::user());
             $result = $this->uploadUserVideos->execute(
-                Auth::user(),
+                $profile,
                 $request->file('videos', [])
             );
 
@@ -71,7 +75,8 @@ class MyVideosController extends Controller
     {
         $this->authorize('delete', $video);
 
-        $result = $this->deleteUserVideo->execute(Auth::user(), $video);
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
+        $result = $this->deleteUserVideo->execute($profile, $video);
 
         return response()->json($result->toPayload(), $result->status());
     }

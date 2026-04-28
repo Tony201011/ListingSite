@@ -4,18 +4,18 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\OnlineUser;
+use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
-use App\Models\User;
 
 class UpdateOnlineNowStatus
 {
-    public function execute(User $user, ?string $status): ActionResult
+    public function execute(ProviderProfile $profile, ?string $status): ActionResult
     {
         $settings = SiteSetting::getStatusSettings();
         $maxUses = $settings['online_status_max_uses'];
         $durationMinutes = $settings['online_status_duration_minutes'];
 
-        $onlineUser = $this->getOrCreateOnlineUser($user->id);
+        $onlineUser = $this->getOrCreateOnlineUser($profile);
 
         $this->expireIfNeeded($onlineUser);
 
@@ -26,11 +26,12 @@ class UpdateOnlineNowStatus
         return $this->goOffline($onlineUser, $maxUses);
     }
 
-    private function getOrCreateOnlineUser(int $userId): OnlineUser
+    private function getOrCreateOnlineUser(ProviderProfile $profile): OnlineUser
     {
         $onlineUser = OnlineUser::firstOrCreate(
-            ['user_id' => $userId],
+            ['provider_profile_id' => $profile->id],
             [
+                'user_id' => $profile->user_id,
                 'status' => 'offline',
                 'usage_date' => today(),
                 'usage_count' => 0,

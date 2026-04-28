@@ -2,14 +2,14 @@
 
 namespace App\Actions;
 
-use App\Models\User;
+use App\Models\ProviderProfile;
 
 class GetMyToursPageData
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
-        $tours = $user
-            ? $user->tours()->orderBy('from')->get()
+        $tours = $profile
+            ? $profile->tours()->orderBy('from')->get()
             : collect();
 
         return [

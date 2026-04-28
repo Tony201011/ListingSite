@@ -3,12 +3,12 @@
 namespace App\Actions;
 
 use App\Models\AvailableNow;
+use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
-use App\Models\User;
 
 class GetAvailableNowState
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
         $settings = SiteSetting::getStatusSettings();
         $maxUses = $settings['available_now_max_uses'];
@@ -17,11 +17,11 @@ class GetAvailableNowState
         $remainingUses = $maxUses;
         $expiresAt = null;
 
-        if (! $user) {
+        if (! $profile) {
             return compact('status', 'remainingUses', 'expiresAt');
         }
 
-        $available = $this->getOrCreateAvailableNow($user->id);
+        $available = $this->getOrCreateAvailableNow($profile->id);
 
         $this->syncExpiredStatus($available);
 
@@ -36,10 +36,10 @@ class GetAvailableNowState
         return compact('status', 'remainingUses', 'expiresAt');
     }
 
-    protected function getOrCreateAvailableNow(int $userId): AvailableNow
+    protected function getOrCreateAvailableNow(int $profileId): AvailableNow
     {
         $available = AvailableNow::firstOrCreate(
-            ['user_id' => $userId],
+            ['provider_profile_id' => $profileId],
             [
                 'status' => 'offline',
                 'usage_date' => today(),

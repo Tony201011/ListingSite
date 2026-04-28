@@ -3,18 +3,18 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
-use App\Models\User;
+use App\Models\ProviderProfile;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 
 class DeletePhotoVerificationPhoto
 {
-    public function execute(User $user, string $path): ActionResult
+    public function execute(ProviderProfile $profile, string $path): ActionResult
     {
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk(config('media.upload_disk'));
 
-        $verifications = $user->photoVerification()
+        $verifications = $profile->photoVerification()
             ->whereNull('deleted_at')
             ->get();
 

@@ -4,15 +4,15 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\HideShowProfile;
-use App\Models\User;
+use App\Models\ProviderProfile;
 
 class UpdateShowHideProfileState
 {
-    public function execute(User $user, string $status): ActionResult
+    public function execute(ProviderProfile $profile, string $status): ActionResult
     {
         $profileVisibility = HideShowProfile::updateOrCreate(
-            ['user_id' => $user->id],
-            ['status' => $status]
+            ['provider_profile_id' => $profile->id],
+            ['user_id' => $profile->user_id, 'status' => $status]
         );
 
         return ActionResult::success([
