@@ -37,7 +37,7 @@ class PurgeDeletedAccountsTest extends TestCase
     /** Seed owned resources for a user. */
     private function seedOwnedResources(User $user): void
     {
-        ProviderProfile::create([
+        $profile = ProviderProfile::create([
             'user_id' => $user->id,
             'name' => $user->name,
             'slug' => 'test-'.$user->id,
@@ -45,6 +45,7 @@ class PurgeDeletedAccountsTest extends TestCase
 
         ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/photo.jpg',
             'thumbnail_path' => 'thumbnails/photo.jpg',
             'is_primary' => true,
@@ -57,11 +58,13 @@ class PurgeDeletedAccountsTest extends TestCase
 
         $group = RateGroup::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'name' => 'Standard',
         ]);
 
         Rate::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'description' => '30 min',
             'incall' => 200,
             'outcall' => 250,
@@ -70,6 +73,7 @@ class PurgeDeletedAccountsTest extends TestCase
 
         Tour::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'city' => 'Sydney',
             'from' => now()->addDays(5),
             'to' => now()->addDays(10),
@@ -77,6 +81,7 @@ class PurgeDeletedAccountsTest extends TestCase
 
         UserVideo::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'video_path' => 'videos/test.mp4',
             'thumbnail_path' => 'thumbnails/test.jpg',
         ]);
@@ -170,6 +175,7 @@ class PurgeDeletedAccountsTest extends TestCase
         $this->seedOwnedResources($user);
 
         $userId = $user->id;
+        $profileId = ProviderProfile::where('user_id', $userId)->value('id');
 
         $this->artisan('accounts:purge-deleted')
             ->assertSuccessful();
@@ -177,14 +183,18 @@ class PurgeDeletedAccountsTest extends TestCase
         // User hard-deleted
         $this->assertDatabaseMissing('users', ['id' => $userId]);
 
-        // FK cascades remove related rows
-        $this->assertEquals(0, ProfileImage::withTrashed()->where('user_id', $userId)->count());
+        // Provider profile cascade-deleted with the user
+        $this->assertDatabaseMissing('provider_profiles', ['id' => $profileId]);
+
+        // FK cascades (via provider_profile_id) remove related rows
+        $this->assertEquals(0, ProfileImage::withTrashed()->where('provider_profile_id', $profileId)->count());
+        $this->assertEquals(0, Rate::where('provider_profile_id', $profileId)->count());
+        $this->assertEquals(0, RateGroup::where('provider_profile_id', $profileId)->count());
+        $this->assertEquals(0, Tour::where('provider_profile_id', $profileId)->count());
+        $this->assertEquals(0, UserVideo::withTrashed()->where('provider_profile_id', $profileId)->count());
+
+        // ShortUrl is still user-scoped (no provider_profile_id)
         $this->assertEquals(0, ShortUrl::where('user_id', $userId)->count());
-        $this->assertEquals(0, Rate::where('user_id', $userId)->count());
-        $this->assertEquals(0, RateGroup::where('user_id', $userId)->count());
-        $this->assertEquals(0, Tour::where('user_id', $userId)->count());
-        $this->assertEquals(0, UserVideo::withTrashed()->where('user_id', $userId)->count());
-        $this->assertDatabaseMissing('provider_profiles', ['user_id' => $userId]);
     }
 
     // ===============================================================
