@@ -69,12 +69,13 @@ class AvailableControllerTest extends TestCase
     public function test_update_status_to_online_returns_json_response(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $updateAvailableNowStatus = Mockery::mock(UpdateAvailableNowStatus::class);
         $updateAvailableNowStatus->shouldReceive('execute')
             ->once()
             ->with(
-                Mockery::on(fn ($arg) => $arg->is($user)),
+                Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)),
                 'online'
             )
             ->andReturn(ActionResult::success([
@@ -100,12 +101,13 @@ class AvailableControllerTest extends TestCase
     public function test_update_status_to_offline_returns_json_response(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $updateAvailableNowStatus = Mockery::mock(UpdateAvailableNowStatus::class);
         $updateAvailableNowStatus->shouldReceive('execute')
             ->once()
             ->with(
-                Mockery::on(fn ($arg) => $arg->is($user)),
+                Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)),
                 'offline'
             )
             ->andReturn(ActionResult::success([
