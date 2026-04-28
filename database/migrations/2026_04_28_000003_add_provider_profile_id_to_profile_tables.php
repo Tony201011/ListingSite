@@ -39,123 +39,31 @@ return new class extends Migration
         }
 
         // ── 2. Back-fill: set provider_profile_id from the user's first profile ──
+        // Use correlated subquery syntax (compatible with both MySQL and SQLite).
 
-        DB::statement('
-            UPDATE rates r
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON r.user_id = pp.user_id
-            SET r.provider_profile_id = pp.profile_id
-            WHERE r.provider_profile_id IS NULL
-        ');
+        $tables = array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']);
 
-        DB::statement('
-            UPDATE rate_groups rg
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON rg.user_id = pp.user_id
-            SET rg.provider_profile_id = pp.profile_id
-            WHERE rg.provider_profile_id IS NULL
-        ');
+        foreach ($tables as $table) {
+            DB::table($table)
+                ->whereNull('provider_profile_id')
+                ->whereNotNull('user_id')
+                ->update([
+                    'provider_profile_id' => DB::raw(
+                        "(SELECT MIN(id) FROM provider_profiles WHERE provider_profiles.user_id = {$table}.user_id)"
+                    ),
+                ]);
+        }
 
-        DB::statement('
-            UPDATE availabilities a
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON a.user_id = pp.user_id
-            SET a.provider_profile_id = pp.profile_id
-            WHERE a.provider_profile_id IS NULL
-        ');
+        // ── 3. Add FK constraints now that data is in place (not supported on SQLite) ──
 
-        DB::statement('
-            UPDATE profile_images pi
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON pi.user_id = pp.user_id
-            SET pi.provider_profile_id = pp.profile_id
-            WHERE pi.provider_profile_id IS NULL
-        ');
-
-        DB::statement('
-            UPDATE user_videos uv
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON uv.user_id = pp.user_id
-            SET uv.provider_profile_id = pp.profile_id
-            WHERE uv.provider_profile_id IS NULL
-        ');
-
-        DB::statement('
-            UPDATE profile_messages pm
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON pm.user_id = pp.user_id
-            SET pm.provider_profile_id = pp.profile_id
-            WHERE pm.provider_profile_id IS NULL
-        ');
-
-        DB::statement('
-            UPDATE tours t
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON t.user_id = pp.user_id
-            SET t.provider_profile_id = pp.profile_id
-            WHERE t.provider_profile_id IS NULL
-        ');
-
-        DB::statement('
-            UPDATE photo_verifications pv
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON pv.user_id = pp.user_id
-            SET pv.provider_profile_id = pp.profile_id
-            WHERE pv.provider_profile_id IS NULL
-        ');
-
-        DB::statement('
-            UPDATE available_nows an
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON an.user_id = pp.user_id
-            SET an.provider_profile_id = pp.profile_id
-            WHERE an.provider_profile_id IS NULL
-        ');
-
-        DB::statement('
-            UPDATE online_users ou
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON ou.user_id = pp.user_id
-            SET ou.provider_profile_id = pp.profile_id
-            WHERE ou.provider_profile_id IS NULL
-        ');
-
-        DB::statement('
-            UPDATE hide_show_profiles hsp
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON hsp.user_id = pp.user_id
-            SET hsp.provider_profile_id = pp.profile_id
-            WHERE hsp.provider_profile_id IS NULL
-        ');
-
-        DB::statement('
-            UPDATE set_and_forgets sf
-            JOIN (
-                SELECT user_id, MIN(id) AS profile_id FROM provider_profiles GROUP BY user_id
-            ) pp ON sf.user_id = pp.user_id
-            SET sf.provider_profile_id = pp.profile_id
-            WHERE sf.provider_profile_id IS NULL
-        ');
-
-        // ── 3. Add FK constraints now that data is in place ──
-
-        foreach (array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']) as $table) {
-            Schema::table($table, function (Blueprint $t) use ($table): void {
-                $t->foreign('provider_profile_id')
-                    ->references('id')->on('provider_profiles')
-                    ->cascadeOnDelete();
-            });
+        if (DB::getDriverName() !== 'sqlite') {
+            foreach (array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']) as $table) {
+                Schema::table($table, function (Blueprint $t): void {
+                    $t->foreign('provider_profile_id')
+                        ->references('id')->on('provider_profiles')
+                        ->cascadeOnDelete();
+                });
+            }
         }
 
         // ── 4. Singleton tables: swap unique constraint from user_id to provider_profile_id ──
@@ -220,7 +128,9 @@ return new class extends Migration
         // Drop FK and column from all tables
         foreach (array_merge(self::SINGLETON_TABLES, self::MULTI_TABLES, ['availabilities']) as $table) {
             Schema::table($table, function (Blueprint $t) use ($table): void {
-                $t->dropForeign([$table.'_provider_profile_id_foreign']);
+                if (DB::getDriverName() !== 'sqlite') {
+                    $t->dropForeign([$table.'_provider_profile_id_foreign']);
+                }
                 $t->dropColumn('provider_profile_id');
             });
         }

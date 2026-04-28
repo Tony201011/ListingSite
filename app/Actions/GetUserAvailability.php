@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Models\Availability;
-use App\Models\ProviderProfile;
 use Illuminate\Support\Collection as SupportCollection;
 
 class GetUserAvailability

@@ -15,7 +15,7 @@ class UpdateOnlineNowStatus
         $maxUses = $settings['online_status_max_uses'];
         $durationMinutes = $settings['online_status_duration_minutes'];
 
-        $onlineUser = $this->getOrCreateOnlineUser($profile->id);
+        $onlineUser = $this->getOrCreateOnlineUser($profile);
 
         $this->expireIfNeeded($onlineUser);
 
@@ -26,11 +26,12 @@ class UpdateOnlineNowStatus
         return $this->goOffline($onlineUser, $maxUses);
     }
 
-    private function getOrCreateOnlineUser(int $profileId): OnlineUser
+    private function getOrCreateOnlineUser(ProviderProfile $profile): OnlineUser
     {
         $onlineUser = OnlineUser::firstOrCreate(
-            ['provider_profile_id' => $profileId],
+            ['provider_profile_id' => $profile->id],
             [
+                'user_id' => $profile->user_id,
                 'status' => 'offline',
                 'usage_date' => today(),
                 'usage_count' => 0,

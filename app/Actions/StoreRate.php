@@ -13,7 +13,9 @@ class StoreRate
             return ActionResult::authorizationFailure('No active profile selected.', 401);
         }
 
-        $rate = $profile->rates()->create($validated);
+        $rate = $profile->rates()->create(array_merge($validated, [
+            'user_id' => $profile->user_id,
+        ]));
 
         return ActionResult::success([
             'rate' => $rate,

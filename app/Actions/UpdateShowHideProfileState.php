@@ -12,7 +12,7 @@ class UpdateShowHideProfileState
     {
         $profileVisibility = HideShowProfile::updateOrCreate(
             ['provider_profile_id' => $profile->id],
-            ['status' => $status]
+            ['user_id' => $profile->user_id, 'status' => $status]
         );
 
         return ActionResult::success([

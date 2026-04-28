@@ -13,7 +13,9 @@ class StoreTour
             return ActionResult::authorizationFailure('No active profile selected.', 401);
         }
 
-        $tour = $profile->tours()->create($validated);
+        $tour = $profile->tours()->create(array_merge($validated, [
+            'user_id' => $profile->user_id,
+        ]));
 
         return ActionResult::success([
             'tour' => $tour,

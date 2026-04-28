@@ -63,8 +63,11 @@ class AuthorizationTest extends TestCase
 
     private function makePhoto(User $owner, bool $primary = false): ProfileImage
     {
+        $profile = ProviderProfile::where('user_id', $owner->id)->first();
+
         return ProfileImage::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile?->id,
             'image_path' => 'images/photo-'.$owner->id.'.jpg',
             'thumbnail_path' => 'thumbnails/photo-'.$owner->id.'.jpg',
             'is_primary' => $primary,
@@ -73,8 +76,11 @@ class AuthorizationTest extends TestCase
 
     private function makeVideo(User $owner): UserVideo
     {
+        $profile = ProviderProfile::where('user_id', $owner->id)->first();
+
         return UserVideo::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile?->id,
             'video_path' => 'videos/video-'.$owner->id.'.mp4',
             'original_name' => 'video.mp4',
         ]);
@@ -82,8 +88,11 @@ class AuthorizationTest extends TestCase
 
     private function makeRate(User $owner): Rate
     {
+        $profile = ProviderProfile::where('user_id', $owner->id)->first();
+
         return Rate::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile?->id,
             'description' => '30 min',
             'incall' => 200,
             'outcall' => 250,
@@ -92,16 +101,22 @@ class AuthorizationTest extends TestCase
 
     private function makeRateGroup(User $owner): RateGroup
     {
+        $profile = ProviderProfile::where('user_id', $owner->id)->first();
+
         return RateGroup::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile?->id,
             'name' => 'Standard',
         ]);
     }
 
     private function makeTour(User $owner): Tour
     {
+        $profile = ProviderProfile::where('user_id', $owner->id)->first();
+
         return Tour::create([
             'user_id' => $owner->id,
+            'provider_profile_id' => $profile?->id,
             'city' => 'Sydney',
             'from' => now()->addDays(1),
             'to' => now()->addDays(5),

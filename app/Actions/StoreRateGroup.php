@@ -4,7 +4,6 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\ProviderProfile;
-use App\Models\RateGroup;
 
 class StoreRateGroup
 {

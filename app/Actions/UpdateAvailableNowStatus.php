@@ -15,7 +15,7 @@ class UpdateAvailableNowStatus
         $maxUses = $settings['available_now_max_uses'];
         $durationMinutes = $settings['available_now_duration_minutes'];
 
-        $available = $this->getOrCreateAvailableNow($profile->id);
+        $available = $this->getOrCreateAvailableNow($profile);
 
         $this->syncExpiredStatus($available);
 
@@ -26,11 +26,12 @@ class UpdateAvailableNowStatus
         return $this->goOffline($available, $maxUses);
     }
 
-    protected function getOrCreateAvailableNow(int $profileId): AvailableNow
+    protected function getOrCreateAvailableNow(ProviderProfile $profile): AvailableNow
     {
         $available = AvailableNow::firstOrCreate(
-            ['provider_profile_id' => $profileId],
+            ['provider_profile_id' => $profile->id],
             [
+                'user_id' => $profile->user_id,
                 'status' => 'offline',
                 'usage_date' => today(),
                 'usage_count' => 0,

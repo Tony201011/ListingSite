@@ -57,7 +57,7 @@ class SitePassword
         $protectionEnabled = $configurationEnabled && filled($configuredPassword);
 
         if ($protectionEnabled && $request->session()->get('site_access') !== true) {
-            /** @var \App\Models\User|null $user */
+            /** @var User|null $user */
             $user = Auth::user();
 
             if ($user && $user->role === User::ROLE_ADMIN) {
