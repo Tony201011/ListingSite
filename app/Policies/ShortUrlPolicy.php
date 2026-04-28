@@ -14,7 +14,7 @@ class ShortUrlPolicy
 
     public function create(User $user): bool
     {
-        return $user->providerProfile()->exists();
+        return $user->providerProfiles()->exists();
     }
 
     public function update(User $user, ShortUrl $shortUrl): bool

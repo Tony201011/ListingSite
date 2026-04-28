@@ -160,6 +160,11 @@ class ProviderProfile extends Model
         return $this->hasOne(SetAndForget::class, 'provider_profile_id');
     }
 
+    public function shortUrl(): HasOne
+    {
+        return $this->hasOne(ShortUrl::class, 'provider_profile_id');
+    }
+
     public function reports(): HasMany
     {
         return $this->hasMany(UserReport::class);

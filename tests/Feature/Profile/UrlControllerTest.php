@@ -86,12 +86,13 @@ class UrlControllerTest extends TestCase
     public function test_update_short_url_returns_json_response(): void
     {
         $user = $this->createProvider();
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
 
         $updateUserShortUrl = Mockery::mock(UpdateUserShortUrl::class);
         $updateUserShortUrl->shouldReceive('execute')
             ->once()
             ->with(
-                Mockery::on(fn ($arg) => $arg->is($user)),
+                Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)),
                 'my-new-slug'
             )
             ->andReturn(ActionResult::success([
@@ -138,9 +139,14 @@ class UrlControllerTest extends TestCase
     {
         $user = $this->createProvider();
         $otherUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $otherProfile = ProviderProfile::query()->create([
+            'user_id' => $otherUser->id,
+            'name' => $otherUser->name,
+            'slug' => 'provider-'.$otherUser->id,
+        ]);
 
         ShortUrl::query()->create([
-            'user_id' => $otherUser->id,
+            'provider_profile_id' => $otherProfile->id,
             'short_url' => 'taken-slug',
         ]);
 

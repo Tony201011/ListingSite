@@ -17,13 +17,13 @@ class UpdateShortUrlRequest extends FormRequest
 
     public function rules(): array
     {
-        $userId = Auth::id();
+        $profileId = session('active_provider_profile_id');
 
         return [
             'slug' => [
                 'required',
                 'alpha_dash',
-                Rule::unique('short_urls', 'short_url')->ignore($userId, 'user_id'),
+                Rule::unique('short_urls', 'short_url')->ignore($profileId, 'provider_profile_id'),
             ],
         ];
     }
