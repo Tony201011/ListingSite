@@ -7,7 +7,9 @@ use App\Actions\GetUserPhotos;
 use App\Actions\SetPrimaryProfilePhoto;
 use App\Actions\Support\ActionResult;
 use App\Actions\UploadUserPhotos;
+use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProfileImage;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -18,11 +20,25 @@ class PhotoControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(EnsureProfileSelected::class);
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();
 
         parent::tearDown();
+    }
+
+    private function userWithProfile(): User
+    {
+        $user = User::factory()->create();
+        ProviderProfile::create(['user_id' => $user->id, 'name' => $user->name, 'slug' => 'test-'.$user->id]);
+
+        return $user;
     }
 
     public function test_index_returns_add_photo_view_for_authenticated_user(): void
@@ -37,13 +53,14 @@ class PhotoControllerTest extends TestCase
 
     public function test_get_photos_returns_photos_view_with_action_data(): void
     {
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
+        $profile = $user->providerProfile;
         $photo = ProfileImage::factory()->create(['user_id' => $user->id]);
 
         $getUserPhotos = Mockery::mock(GetUserPhotos::class);
         $getUserPhotos->shouldReceive('execute')
             ->once()
-            ->with(Mockery::on(fn ($arg) => $arg->is($user)))
+            ->with(Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->id === $profile->id))
             ->andReturn(ActionResult::success(['photos' => collect([$photo])]));
 
         $this->app->instance(GetUserPhotos::class, $getUserPhotos);
@@ -57,12 +74,12 @@ class PhotoControllerTest extends TestCase
 
     public function test_upload_photos_returns_json_response_from_action(): void
     {
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
 
         $uploadUserPhotos = Mockery::mock(UploadUserPhotos::class);
         $uploadUserPhotos->shouldReceive('execute')
             ->once()
-            ->with($user, Mockery::type('array'))
+            ->with(Mockery::type(ProviderProfile::class), Mockery::type('array'))
             ->andReturn(ActionResult::success([
                 'photos' => [
                     [
@@ -94,7 +111,7 @@ class PhotoControllerTest extends TestCase
 
     public function test_upload_photos_returns_500_json_when_action_throws_exception(): void
     {
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
 
         $uploadUserPhotos = Mockery::mock(UploadUserPhotos::class);
         $uploadUserPhotos->shouldReceive('execute')
@@ -117,7 +134,7 @@ class PhotoControllerTest extends TestCase
     {
         config(['app.debug' => true]);
 
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
 
         $uploadUserPhotos = Mockery::mock(UploadUserPhotos::class);
         $uploadUserPhotos->shouldReceive('execute')
@@ -141,7 +158,7 @@ class PhotoControllerTest extends TestCase
     {
         config(['app.debug' => false]);
 
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
 
         $uploadUserPhotos = Mockery::mock(UploadUserPhotos::class);
         $uploadUserPhotos->shouldReceive('execute')
@@ -163,13 +180,13 @@ class PhotoControllerTest extends TestCase
 
     public function test_set_cover_returns_json_response_from_action(): void
     {
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
         $photo = ProfileImage::factory()->create(['user_id' => $user->id]);
 
         $setPrimaryProfilePhoto = Mockery::mock(SetPrimaryProfilePhoto::class);
         $setPrimaryProfilePhoto->shouldReceive('execute')
             ->once()
-            ->with($user, Mockery::on(fn ($arg) => $arg->is($photo)))
+            ->with(Mockery::type(ProviderProfile::class), Mockery::on(fn ($arg) => $arg->is($photo)))
             ->andReturn(ActionResult::success([], 'Profile photo updated successfully.'));
 
         $this->app->instance(SetPrimaryProfilePhoto::class, $setPrimaryProfilePhoto);
@@ -184,13 +201,13 @@ class PhotoControllerTest extends TestCase
 
     public function test_destroy_returns_json_response_from_action(): void
     {
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
         $photo = ProfileImage::factory()->create(['user_id' => $user->id]);
 
         $deleteProfilePhoto = Mockery::mock(DeleteProfilePhoto::class);
         $deleteProfilePhoto->shouldReceive('execute')
             ->once()
-            ->with($user, Mockery::on(fn ($arg) => $arg->is($photo)))
+            ->with(Mockery::type(ProviderProfile::class), Mockery::on(fn ($arg) => $arg->is($photo)))
             ->andReturn(ActionResult::success([], 'Photo deleted successfully.'));
 
         $this->app->instance(DeleteProfilePhoto::class, $deleteProfilePhoto);
