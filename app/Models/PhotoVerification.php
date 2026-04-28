@@ -56,4 +56,9 @@ class PhotoVerification extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function providerProfile()
+    {
+        return $this->belongsTo(ProviderProfile::class);
+    }
 }
