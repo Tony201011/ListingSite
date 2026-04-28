@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
 
 class SiteSetting extends Model
 {
@@ -52,29 +53,19 @@ class SiteSetting extends Model
     protected function sitePassword(): Attribute
     {
         return Attribute::make(
-            get: function (mixed $value): ?string {
+            get: function (?string $value): ?string {
                 if ($value === null) {
                     return null;
                 }
                 try {
-                    return decrypt($value);
-                } catch (DecryptException) {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    logger()->warning('SiteSetting: failed to decrypt site_password (key rotation may be needed).', ['exception' => $e->getMessage()]);
+
                     return null;
                 }
             },
-            set: function (mixed $value): ?string {
-                if ($value === null || $value === '') {
-                    return null;
-                }
-
-                $trimmed = trim((string) $value);
-
-                if ($trimmed === '') {
-                    return null;
-                }
-
-                return encrypt($trimmed);
-            },
+            set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
         );
     }
 
