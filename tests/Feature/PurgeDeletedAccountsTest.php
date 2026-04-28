@@ -234,6 +234,93 @@ class PurgeDeletedAccountsTest extends TestCase
     }
 
     // ===============================================================
+    // Multiple profiles per user
+    // ===============================================================
+
+    public function test_cascade_deletes_all_resources_for_multi_profile_user(): void
+    {
+        $user = $this->deletedUserDueForPurge();
+        $userId = $user->id;
+
+        // Profile 1 with full set of resources (via helper)
+        $this->seedOwnedResources($user);
+        $profileId1 = ProviderProfile::where('user_id', $userId)->value('id');
+
+        // Profile 2 with its own set of resources
+        $profile2 = ProviderProfile::create([
+            'user_id' => $userId,
+            'name' => $user->name,
+            'slug' => 'test-alt-'.$userId,
+        ]);
+        $profileId2 = $profile2->id;
+
+        ProfileImage::create([
+            'user_id' => $userId,
+            'provider_profile_id' => $profileId2,
+            'image_path' => 'images/alt.jpg',
+            'thumbnail_path' => 'thumbnails/alt.jpg',
+            'is_primary' => false,
+        ]);
+
+        $group2 = RateGroup::create([
+            'user_id' => $userId,
+            'provider_profile_id' => $profileId2,
+            'name' => 'Premium',
+        ]);
+
+        Rate::create([
+            'user_id' => $userId,
+            'provider_profile_id' => $profileId2,
+            'description' => '60 min',
+            'incall' => 400,
+            'outcall' => 500,
+            'group_id' => $group2->id,
+        ]);
+
+        Tour::create([
+            'user_id' => $userId,
+            'provider_profile_id' => $profileId2,
+            'city' => 'Melbourne',
+            'from' => now()->addDays(3),
+            'to' => now()->addDays(7),
+        ]);
+
+        UserVideo::create([
+            'user_id' => $userId,
+            'provider_profile_id' => $profileId2,
+            'video_path' => 'videos/alt.mp4',
+            'thumbnail_path' => 'thumbnails/alt.jpg',
+        ]);
+
+        $this->artisan('accounts:purge-deleted')
+            ->assertSuccessful();
+
+        // User hard-deleted
+        $this->assertDatabaseMissing('users', ['id' => $userId]);
+
+        // Both profiles cascade-deleted
+        $this->assertDatabaseMissing('provider_profiles', ['id' => $profileId1]);
+        $this->assertDatabaseMissing('provider_profiles', ['id' => $profileId2]);
+
+        // All resources for profile 1 deleted
+        $this->assertEquals(0, ProfileImage::withTrashed()->where('provider_profile_id', $profileId1)->count());
+        $this->assertEquals(0, Rate::where('provider_profile_id', $profileId1)->count());
+        $this->assertEquals(0, RateGroup::where('provider_profile_id', $profileId1)->count());
+        $this->assertEquals(0, Tour::where('provider_profile_id', $profileId1)->count());
+        $this->assertEquals(0, UserVideo::withTrashed()->where('provider_profile_id', $profileId1)->count());
+
+        // All resources for profile 2 deleted
+        $this->assertEquals(0, ProfileImage::withTrashed()->where('provider_profile_id', $profileId2)->count());
+        $this->assertEquals(0, Rate::where('provider_profile_id', $profileId2)->count());
+        $this->assertEquals(0, RateGroup::where('provider_profile_id', $profileId2)->count());
+        $this->assertEquals(0, Tour::where('provider_profile_id', $profileId2)->count());
+        $this->assertEquals(0, UserVideo::withTrashed()->where('provider_profile_id', $profileId2)->count());
+
+        // User-scoped records deleted
+        $this->assertEquals(0, ShortUrl::where('user_id', $userId)->count());
+    }
+
+    // ===============================================================
     // Edge cases
     // ===============================================================
 
