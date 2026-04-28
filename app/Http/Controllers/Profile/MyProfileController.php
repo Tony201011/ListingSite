@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetMyProfilePageData;
 use App\Actions\GetMyProfileStepTwoData;
 use App\Actions\SaveMyProfile;
@@ -18,7 +19,8 @@ class MyProfileController extends Controller
     public function __construct(
         private GetMyProfilePageData $getMyProfilePageData,
         private GetMyProfileStepTwoData $getMyProfileStepTwoData,
-        private SaveMyProfile $saveMyProfile
+        private SaveMyProfile $saveMyProfile,
+        private GetActiveProviderProfile $getActiveProviderProfile,
     ) {}
 
     public function myProfile(): View|RedirectResponse
@@ -27,7 +29,9 @@ class MyProfileController extends Controller
 
         $this->authorize('view', ProviderProfile::class);
 
-        return view('profile.my-profile-1', $this->getMyProfilePageData->execute($user));
+        $profile = $this->getActiveProviderProfile->execute($user);
+
+        return view('profile.my-profile-1', $this->getMyProfilePageData->execute($user, $profile));
     }
 
     public function editProfile(): View|RedirectResponse
@@ -36,20 +40,31 @@ class MyProfileController extends Controller
 
         $this->authorize('view', ProviderProfile::class);
 
-        return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute($user));
+        $profile = $this->getActiveProviderProfile->execute($user);
+
+        return view('profile.my-profile-2', $this->getMyProfileStepTwoData->execute($user, $profile));
     }
 
     public function save(SaveMyProfileRequest $request): JsonResponse|RedirectResponse
     {
         $this->authorize('update', ProviderProfile::class);
 
+        $user = Auth::user();
+
+        $activeProfile = $this->getActiveProviderProfile->execute($user);
+
         $result = $this->saveMyProfile->execute(
-            Auth::user(),
-            $request->validated()
+            $user,
+            $request->validated(),
+            $activeProfile
         );
 
         if (! $result->isSuccess()) {
             abort($result->status(), $result->message() ?? 'Forbidden');
+        }
+
+        if (isset($result->data()['profile_id'])) {
+            session(['active_provider_profile_id' => $result->data()['profile_id']]);
         }
 
         if ($request->wantsJson()) {

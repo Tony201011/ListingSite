@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Actions\GetActiveProviderProfile;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,20 +11,24 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckProfileSteps
 {
+    public function __construct(
+        private GetActiveProviderProfile $getActiveProviderProfile,
+    ) {}
+
     public function handle(Request $request, Closure $next): Response
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
         if (! $user) {
             return $next($request);
         }
 
-        if ($user->role === \App\Models\User::ROLE_ADMIN) {
+        if ($user->role === User::ROLE_ADMIN) {
             return redirect('/admin');
         }
 
-        $profile = $user->providerProfile;
+        $profile = $this->getActiveProviderProfile->execute($user);
 
         $stepOneCompleted = $profile &&
             ! empty($profile->introduction_line) &&

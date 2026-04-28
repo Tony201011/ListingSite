@@ -33,6 +33,7 @@ use App\Http\Controllers\Profile\PhotoController;
 use App\Http\Controllers\Profile\PhotoVerificationController;
 use App\Http\Controllers\Profile\ProfileMessageController;
 use App\Http\Controllers\Profile\ProfileSettingController;
+use App\Http\Controllers\Profile\ProfileSwitchController;
 use App\Http\Controllers\Profile\ReferralsController;
 use App\Http\Controllers\Profile\ShowHideProfileController;
 use App\Http\Controllers\Profile\StatusTabsController;
@@ -156,6 +157,10 @@ Route::middleware('provider.auth')->group(function () {
     Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
     Route::get('/edit-profile', [MyProfileController::class, 'editProfile'])->name('edit-profile');
     Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
+    Route::get('/my-profiles', [ProfileSwitchController::class, 'index'])->name('profiles.index');
+    Route::post('/my-profiles', [ProfileSwitchController::class, 'store'])->name('profiles.store');
+    Route::post('/my-profiles/{profile}/switch', [ProfileSwitchController::class, 'switchTo'])->name('profiles.switch');
+    Route::delete('/my-profiles/{profile}', [ProfileSwitchController::class, 'destroy'])->name('profiles.destroy');
     Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
     Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
     Route::get('/add-photos', [PhotoController::class, 'index'])->name('add-photos');

@@ -448,22 +448,22 @@ class AuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_user_without_profile_cannot_view_my_profile(): void
+    public function test_user_without_profile_can_view_my_profile(): void
     {
         $user = $this->userWithoutProfile();
 
         $this->actingAs($user)
-            ->getJson(route('my-profile'))
-            ->assertForbidden();
+            ->get(route('my-profile'))
+            ->assertOk();
     }
 
-    public function test_user_without_profile_cannot_view_edit_profile(): void
+    public function test_user_without_profile_can_view_edit_profile(): void
     {
         $user = $this->userWithoutProfile();
 
         $this->actingAs($user)
             ->get(route('edit-profile'))
-            ->assertForbidden();
+            ->assertOk();
     }
 
     // ===============================================================
@@ -886,11 +886,11 @@ class AuthorizationTest extends TestCase
         $this->assertTrue(app(ProviderProfilePolicy::class)->view($user));
     }
 
-    public function test_provider_profile_policy_blocks_view_without_profile(): void
+    public function test_provider_profile_policy_allows_view_without_profile(): void
     {
         $user = $this->userWithoutProfile();
 
-        $this->assertFalse(app(ProviderProfilePolicy::class)->view($user));
+        $this->assertTrue(app(ProviderProfilePolicy::class)->view($user));
     }
 
     public function test_provider_profile_policy_allows_update_with_profile(): void
@@ -900,11 +900,11 @@ class AuthorizationTest extends TestCase
         $this->assertTrue(app(ProviderProfilePolicy::class)->update($user));
     }
 
-    public function test_provider_profile_policy_blocks_update_without_profile(): void
+    public function test_provider_profile_policy_allows_update_without_profile(): void
     {
         $user = $this->userWithoutProfile();
 
-        $this->assertFalse(app(ProviderProfilePolicy::class)->update($user));
+        $this->assertTrue(app(ProviderProfilePolicy::class)->update($user));
     }
 
     public function test_provider_profile_policy_allows_create_for_provider_role(): void

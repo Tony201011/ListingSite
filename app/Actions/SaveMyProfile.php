@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\Category;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,7 +16,7 @@ class SaveMyProfile
         private GenerateUniqueProviderProfileSlug $generateUniqueProviderProfileSlug
     ) {}
 
-    public function execute(?User $user, array $validated): ActionResult
+    public function execute(?User $user, array $validated, ?ProviderProfile $activeProfile = null): ActionResult
     {
         if (! $user) {
             return ActionResult::authorizationFailure('Unauthenticated.', 401);
@@ -23,14 +24,16 @@ class SaveMyProfile
 
         $this->validateCategorySelections($validated);
 
-        DB::transaction(function () use ($user, $validated) {
+        $profile = DB::transaction(function () use ($user, $validated, $activeProfile) {
             $user->update([
                 'suburb' => $validated['suburb'] ?? null,
             ]);
 
-            $profile = $user->providerProfile()->firstOrNew([
-                'user_id' => $user->id,
-            ]);
+            if ($activeProfile !== null) {
+                $profile = $activeProfile;
+            } else {
+                $profile = new ProviderProfile(['user_id' => $user->id]);
+            }
 
             $accountUserReferralCode = Str::substr(
                 md5($user->id.$user->email),
@@ -69,9 +72,11 @@ class SaveMyProfile
             ]);
 
             $profile->save();
+
+            return $profile;
         });
 
-        return ActionResult::success([], 'Profile updated successfully.');
+        return ActionResult::success(['profile_id' => $profile->id], 'Profile updated successfully.');
     }
 
     private function validateCategorySelections(array $validated): void
