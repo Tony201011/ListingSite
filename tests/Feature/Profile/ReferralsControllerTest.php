@@ -79,6 +79,7 @@ class ReferralsControllerTest extends TestCase
         $getActiveProviderProfile = Mockery::mock(GetActiveProviderProfile::class);
         $getActiveProviderProfile->shouldReceive('execute')
             ->once()
+            ->with(Mockery::on(fn ($arg) => $arg instanceof User && $arg->is($user)))
             ->andReturn($profile);
 
         $getReferralPageData = Mockery::mock(GetReferralPageData::class);
