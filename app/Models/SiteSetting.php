@@ -60,9 +60,9 @@ class SiteSetting extends Model
                 try {
                     return Crypt::decryptString($value);
                 } catch (DecryptException $e) {
-                    logger()->warning('SiteSetting: failed to decrypt site_password (key rotation may be needed).', ['exception' => $e->getMessage()]);
+                    logger()->warning('SiteSetting: failed to decrypt site_password, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
 
-                    return null;
+                    return $value;
                 }
             },
             set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
