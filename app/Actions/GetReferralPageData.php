@@ -2,16 +2,16 @@
 
 namespace App\Actions;
 
+use App\Models\ProviderProfile;
 use App\Models\User;
 
 class GetReferralPageData
 {
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
-        abort_if(! $user, 403);
+        abort_if(! $profile, 403);
 
-        $profile = $user->providerProfile;
-        $referralLink = $profile?->account_user_referral_code;
+        $referralLink = $profile->account_user_referral_code;
 
         $referralCount = $referralLink
             ? User::query()
