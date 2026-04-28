@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
 
 class SiteSetting extends Model
 {
@@ -35,7 +38,6 @@ class SiteSetting extends Model
         'enable_cookies' => 'boolean',
         'captcha_enabled' => 'boolean',
         'site_password_enabled' => 'boolean',
-        'site_password' => 'encrypted',
         'short_url' => 'boolean',
         'max_search_distance' => 'integer',
         'distance_search_enabled' => 'boolean',
@@ -47,6 +49,23 @@ class SiteSetting extends Model
         'fatal_error_page_enabled' => 'boolean',
         'logging_enabled' => 'boolean',
     ];
+
+    protected function sitePassword(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException) {
+                    return null;
+                }
+            },
+            set: fn (?string $value): ?string => $value !== null ? Crypt::encryptString($value) : null,
+        );
+    }
 
     protected static function booted(): void
     {
