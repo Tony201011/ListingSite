@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Settings\Resources;
 
 use App\Filament\Clusters\Settings;
+use App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Actions\EditAction;
@@ -55,6 +56,7 @@ class SiteSettingResource extends Resource
                 ->label('Site Password')
                 ->password()
                 ->revealable()
+                ->dehydrated(fn ($state) => filled($state))
                 ->helperText('Set the site password used to grant visitor access. If empty, `SITE_PASSWORD` env will be used.'),
             Forms\Components\TextInput::make('contact_email')
                 ->label('Contact Email')
@@ -129,7 +131,7 @@ class SiteSettingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ManageSiteSettings::route('/'),
+            'index' => ManageSiteSettings::route('/'),
         ];
     }
 }
