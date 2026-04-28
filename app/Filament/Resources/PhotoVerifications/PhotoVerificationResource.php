@@ -134,11 +134,7 @@ class PhotoVerificationResource extends Resource
                     ->action(function (PhotoVerification $record): void {
                         $record->update(['status' => 'approved']);
 
-                        if ($record->provider_profile_id) {
-                            $record->providerProfile?->update(['is_verified' => true]);
-                        } else {
-                            $record->user?->providerProfile?->update(['is_verified' => true]);
-                        }
+                        self::updateProviderVerificationStatus($record, true);
 
                         Notification::make()
                             ->title('Photo verification approved')
@@ -173,11 +169,7 @@ class PhotoVerificationResource extends Resource
                             ->exists();
 
                         if (! $hasOtherApproved) {
-                            if ($record->provider_profile_id) {
-                                $record->providerProfile?->update(['is_verified' => false]);
-                            } else {
-                                $record->user?->providerProfile?->update(['is_verified' => false]);
-                            }
+                            self::updateProviderVerificationStatus($record, false);
                         }
 
                         Notification::make()
@@ -200,5 +192,14 @@ class PhotoVerificationResource extends Resource
             'index' => ListPhotoVerifications::route('/'),
             'view' => ViewPhotoVerification::route('/{record}'),
         ];
+    }
+
+    private static function updateProviderVerificationStatus(PhotoVerification $record, bool $isVerified): void
+    {
+        if ($record->provider_profile_id) {
+            $record->providerProfile?->update(['is_verified' => $isVerified]);
+        } else {
+            $record->user?->providerProfile?->update(['is_verified' => $isVerified]);
+        }
     }
 }

@@ -228,14 +228,9 @@ class EditUser extends EditRecord
             return;
         }
 
-        $items = array_map(
-            fn (array $item) => array_merge($item, ['user_id' => $record->id]),
-            $data['profileImages']
-        );
-
         $this->syncHasManyRelation(
             $profile->profileImages(),
-            $items,
+            $this->addUserIdToItems($data['profileImages'], $record->id),
             ['image_path', 'thumbnail_path', 'is_primary', 'user_id']
         );
     }
@@ -252,15 +247,18 @@ class EditUser extends EditRecord
             return;
         }
 
-        $items = array_map(
-            fn (array $item) => array_merge($item, ['user_id' => $record->id]),
-            $data['userVideos']
-        );
-
         $this->syncHasManyRelation(
             $profile->userVideos(),
-            $items,
+            $this->addUserIdToItems($data['userVideos'], $record->id),
             ['original_name', 'video_path', 'user_id']
+        );
+    }
+
+    private function addUserIdToItems(array $items, int $userId): array
+    {
+        return array_map(
+            fn (array $item) => array_merge($item, ['user_id' => $userId]),
+            $items
         );
     }
 
