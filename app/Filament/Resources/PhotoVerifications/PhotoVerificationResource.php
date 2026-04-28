@@ -133,7 +133,12 @@ class PhotoVerificationResource extends Resource
                     ->visible(fn (PhotoVerification $record): bool => $record->status !== 'approved')
                     ->action(function (PhotoVerification $record): void {
                         $record->update(['status' => 'approved']);
-                        $record->user?->providerProfile?->update(['is_verified' => true]);
+
+                        if ($record->provider_profile_id) {
+                            $record->providerProfile?->update(['is_verified' => true]);
+                        } else {
+                            $record->user?->providerProfile?->update(['is_verified' => true]);
+                        }
 
                         Notification::make()
                             ->title('Photo verification approved')
@@ -156,14 +161,23 @@ class PhotoVerificationResource extends Resource
                     ->action(function (PhotoVerification $record, array $data): void {
                         $record->update(['status' => 'rejected', 'admin_note' => $data['admin_note']]);
 
-                        $hasOtherApproved = $record->user?->photoVerification()
+                        $hasOtherApproved = PhotoVerification::query()
+                            ->when(
+                                $record->provider_profile_id,
+                                fn ($q) => $q->where('provider_profile_id', $record->provider_profile_id),
+                                fn ($q) => $q->where('user_id', $record->user_id),
+                            )
                             ->where('status', 'approved')
                             ->where('id', '!=', $record->id)
                             ->whereNull('deleted_at')
                             ->exists();
 
                         if (! $hasOtherApproved) {
-                            $record->user?->providerProfile?->update(['is_verified' => false]);
+                            if ($record->provider_profile_id) {
+                                $record->providerProfile?->update(['is_verified' => false]);
+                            } else {
+                                $record->user?->providerProfile?->update(['is_verified' => false]);
+                            }
                         }
 
                         Notification::make()

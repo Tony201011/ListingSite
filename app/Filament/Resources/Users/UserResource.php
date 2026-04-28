@@ -84,13 +84,13 @@ class UserResource extends Resource
             ->withTrashed()
             ->with([
                 'providerProfile',
+                'providerProfile.profileImages',
+                'providerProfile.userVideos',
+                'providerProfile.photoVerification',
                 'onlineUser',
                 'hideShowProfile',
                 'availableNow',
-                'profileImages',
-                'userVideos',
                 'rates',
-                'photoVerification',
                 'availabilities',
                 'profileMessage',
             ])
@@ -467,7 +467,6 @@ class UserResource extends Resource
                                 ->icon('heroicon-o-camera')
                                 ->schema([
                                     Repeater::make('profileImages')
-                                        ->relationship('profileImages')
                                         ->label('Images')
                                         ->schema([
                                             Hidden::make('id'),
@@ -516,7 +515,6 @@ class UserResource extends Resource
                                 ->icon('heroicon-o-film')
                                 ->schema([
                                     Repeater::make('userVideos')
-                                        ->relationship()
                                         ->label('Videos')
                                         ->schema([
                                             Hidden::make('id'),
@@ -901,7 +899,7 @@ class UserResource extends Resource
                     Tab::make('Images')
                         ->icon('heroicon-o-photo')
                         ->schema([
-                            RepeatableEntry::make('profileImages')
+                            RepeatableEntry::make('providerProfile.profileImages')
                                 ->label('')
                                 ->schema([
                                     TextEntry::make('image_path')
@@ -928,7 +926,7 @@ class UserResource extends Resource
                     Tab::make('Videos')
                         ->icon('heroicon-o-video-camera')
                         ->schema([
-                            RepeatableEntry::make('userVideos')
+                            RepeatableEntry::make('providerProfile.userVideos')
                                 ->label('')
                                 ->schema([
                                     TextEntry::make('original_name')
@@ -985,7 +983,7 @@ class UserResource extends Resource
                     Tab::make('Verification')
                         ->icon('heroicon-o-shield-check')
                         ->schema([
-                            RepeatableEntry::make('photoVerification')
+                            RepeatableEntry::make('providerProfile.photoVerification')
                                 ->label('')
                                 ->schema([
                                     TextEntry::make('status')

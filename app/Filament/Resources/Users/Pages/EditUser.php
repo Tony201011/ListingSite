@@ -222,10 +222,21 @@ class EditUser extends EditRecord
             return;
         }
 
+        $profile = $record->providerProfile;
+
+        if (! $profile) {
+            return;
+        }
+
+        $items = array_map(
+            fn (array $item) => array_merge($item, ['user_id' => $record->id]),
+            $data['profileImages']
+        );
+
         $this->syncHasManyRelation(
-            $record->profileImages(),
-            $data['profileImages'],
-            ['image_path', 'thumbnail_path', 'is_primary']
+            $profile->profileImages(),
+            $items,
+            ['image_path', 'thumbnail_path', 'is_primary', 'user_id']
         );
     }
 
@@ -235,10 +246,21 @@ class EditUser extends EditRecord
             return;
         }
 
+        $profile = $record->providerProfile;
+
+        if (! $profile) {
+            return;
+        }
+
+        $items = array_map(
+            fn (array $item) => array_merge($item, ['user_id' => $record->id]),
+            $data['userVideos']
+        );
+
         $this->syncHasManyRelation(
-            $record->userVideos(),
-            $data['userVideos'],
-            ['original_name', 'video_path']
+            $profile->userVideos(),
+            $items,
+            ['original_name', 'video_path', 'user_id']
         );
     }
 

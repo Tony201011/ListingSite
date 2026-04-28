@@ -8,9 +8,11 @@ trait LoadsProviderMediaBeforeFill
     {
         $record = $this->getRecord();
 
-        $record->load(['profileImages', 'userVideos']);
+        $record->load(['providerProfile.profileImages', 'providerProfile.userVideos']);
 
-        $data['profileImages'] = $record->profileImages
+        $profile = $record->providerProfile;
+
+        $data['profileImages'] = ($profile?->profileImages ?? collect())
             ->map(fn ($image) => [
                 'id' => $image->id,
                 'image_path' => $image->image_path,
@@ -18,7 +20,7 @@ trait LoadsProviderMediaBeforeFill
             ])
             ->toArray();
 
-        $data['userVideos'] = $record->userVideos
+        $data['userVideos'] = ($profile?->userVideos ?? collect())
             ->map(fn ($video) => [
                 'id' => $video->id,
                 'original_name' => $video->original_name,
