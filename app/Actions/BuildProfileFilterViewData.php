@@ -130,6 +130,7 @@ class BuildProfileFilterViewData
         $locationQuery = trim((string) ($validated['location'] ?? ''));
         $girlsMode = (string) ($validated['girls'] ?? 'all');
         $locationStateQuery = trim((string) ($validated['location_state'] ?? ''));
+        $escortNameQuery = trim((string) ($validated['escort_name'] ?? ''));
 
         $setting = SiteSetting::query()->first(['max_search_distance', 'distance_search_enabled']);
         $distanceSearchEnabled = (bool) ($setting?->distance_search_enabled ?? true);
@@ -184,6 +185,7 @@ class BuildProfileFilterViewData
             $searchLng,
             $distanceFilter,
             $girlsMode,
+            $escortNameQuery,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -216,6 +218,7 @@ class BuildProfileFilterViewData
             'distanceSearchEnabled',
             'searchLat',
             'searchLng',
+            'escortNameQuery',
         );
     }
 
@@ -258,6 +261,7 @@ class BuildProfileFilterViewData
         ?float $searchLng = null,
         ?int $distanceFilter = null,
         string $girlsMode = 'all',
+        string $escortNameQuery = '',
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -314,6 +318,10 @@ class BuildProfileFilterViewData
 
         if ($minAge > self::DEFAULT_MIN_AGE || $maxAge < self::DEFAULT_MAX_AGE) {
             $query->whereBetween('provider_profiles.age', [$minAge, $maxAge]);
+        }
+
+        if ($escortNameQuery !== '') {
+            $query->where('provider_profiles.name', 'like', '%'.$escortNameQuery.'%');
         }
 
         if ($minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE) {
@@ -661,15 +669,9 @@ class BuildProfileFilterViewData
                     });
             })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
                 $userQuery->whereRaw(
-                    'LOWER(TRIM(SUBSTRING_INDEX(suburb, ",", 1))) = ?',
-                    [mb_strtolower($suburb)]
-                )->where(function (Builder $stateMatch) use ($state): void {
-                    $stateMatch->whereRaw('LOCATE(",", suburb) > 0')
-                        ->whereRaw(
-                            'UPPER(TRIM(SUBSTRING_INDEX(suburb, ",", -1))) = ?',
-                            [$state]
-                        );
-                });
+                    'LOWER(TRIM(suburb)) LIKE ?',
+                    [mb_strtolower($suburb.', '.$state).'%']
+                );
             });
         });
     }
