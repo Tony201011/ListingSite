@@ -32,6 +32,6 @@ class SiteSettingSeeder extends Seeder
             $attributes['fatal_error_query_param'] = 'fatal_message';
         }
 
-        SiteSetting::create($attributes);
+        SiteSetting::updateOrCreate(['id' => 1], $attributes);
     }
 }
