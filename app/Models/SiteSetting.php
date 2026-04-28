@@ -59,11 +59,13 @@ class SiteSetting extends Model
                 }
                 try {
                     return Crypt::decryptString($value);
-                } catch (DecryptException) {
+                } catch (DecryptException $e) {
+                    logger()->warning('SiteSetting: failed to decrypt site_password (key rotation may be needed).', ['exception' => $e->getMessage()]);
+
                     return null;
                 }
             },
-            set: fn (?string $value): ?string => $value !== null ? Crypt::encryptString($value) : null,
+            set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
         );
     }
 
