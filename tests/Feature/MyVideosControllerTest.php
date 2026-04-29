@@ -8,6 +8,7 @@ use App\Actions\Support\ActionResult;
 use App\Actions\UploadUserVideos;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use App\Models\UserVideo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,6 +33,14 @@ class MyVideosControllerTest extends TestCase
         parent::tearDown();
     }
 
+    private function userWithProfile(): User
+    {
+        $user = User::factory()->create();
+        ProviderProfile::create(['user_id' => $user->id, 'name' => $user->name, 'slug' => 'test-'.$user->id]);
+
+        return $user;
+    }
+
     public function test_index_returns_upload_video_view_for_authenticated_user(): void
     {
         $user = User::factory()->create();
@@ -44,13 +53,14 @@ class MyVideosControllerTest extends TestCase
 
     public function test_get_videos_returns_my_videos_view_with_action_data(): void
     {
-        $user = User::factory()->create();
-        $video = UserVideo::factory()->create(['user_id' => $user->id]);
+        $user = $this->userWithProfile();
+        $profile = $user->providerProfile;
+        $video = UserVideo::factory()->create(['user_id' => $user->id, 'provider_profile_id' => $profile->id]);
 
         $getUserVideos = Mockery::mock(GetUserVideos::class);
         $getUserVideos->shouldReceive('execute')
             ->once()
-            ->with(Mockery::on(fn ($arg) => $arg->is($user)))
+            ->with(Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->id === $profile->id))
             ->andReturn(ActionResult::success([
                 'videos' => collect([$video]),
             ]));
@@ -66,12 +76,13 @@ class MyVideosControllerTest extends TestCase
 
     public function test_upload_videos_returns_json_response_from_action(): void
     {
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
+        $profile = $user->providerProfile;
 
         $uploadUserVideos = Mockery::mock(UploadUserVideos::class);
         $uploadUserVideos->shouldReceive('execute')
             ->once()
-            ->with($user, Mockery::type('array'))
+            ->with(Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->id === $profile->id), Mockery::type('array'))
             ->andReturn(ActionResult::success([
                 'videos' => [
                     [
@@ -101,7 +112,7 @@ class MyVideosControllerTest extends TestCase
 
     public function test_upload_videos_returns_500_json_when_action_throws_exception(): void
     {
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
 
         $uploadUserVideos = Mockery::mock(UploadUserVideos::class);
         $uploadUserVideos->shouldReceive('execute')
@@ -124,7 +135,7 @@ class MyVideosControllerTest extends TestCase
     {
         config(['app.debug' => true]);
 
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
 
         $uploadUserVideos = Mockery::mock(UploadUserVideos::class);
         $uploadUserVideos->shouldReceive('execute')
@@ -148,7 +159,7 @@ class MyVideosControllerTest extends TestCase
     {
         config(['app.debug' => false]);
 
-        $user = User::factory()->create();
+        $user = $this->userWithProfile();
 
         $uploadUserVideos = Mockery::mock(UploadUserVideos::class);
         $uploadUserVideos->shouldReceive('execute')
@@ -170,13 +181,17 @@ class MyVideosControllerTest extends TestCase
 
     public function test_destroy_returns_json_response_from_action(): void
     {
-        $user = User::factory()->create();
-        $video = UserVideo::factory()->create(['user_id' => $user->id]);
+        $user = $this->userWithProfile();
+        $profile = $user->providerProfile;
+        $video = UserVideo::factory()->create(['user_id' => $user->id, 'provider_profile_id' => $profile->id]);
 
         $deleteUserVideo = Mockery::mock(DeleteUserVideo::class);
         $deleteUserVideo->shouldReceive('execute')
             ->once()
-            ->with($user, Mockery::on(fn ($arg) => $arg->is($video)))
+            ->with(
+                Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->id === $profile->id),
+                Mockery::on(fn ($arg) => $arg->is($video))
+            )
             ->andReturn(ActionResult::success([], 'Video deleted successfully.'));
 
         $this->app->instance(DeleteUserVideo::class, $deleteUserVideo);
