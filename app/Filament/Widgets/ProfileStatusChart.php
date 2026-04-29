@@ -2,16 +2,16 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\User;
+use App\Models\ProviderProfile;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
-class AccountStatusChart extends ChartWidget
+class ProfileStatusChart extends ChartWidget
 {
-    protected ?string $heading = 'Account Status Overview';
+    protected ?string $heading = 'Profile Status Overview';
 
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 3;
 
     protected int|string|array $columnSpan = 2;
 
@@ -34,34 +34,25 @@ class AccountStatusChart extends ChartWidget
 
     protected function getData(): array
     {
-        $query = User::query()
-            ->where('role', User::ROLE_PROVIDER);
+        $query = ProviderProfile::query()->withoutTrashed();
 
         if ($this->filter && $this->filter !== 'all') {
             $query->whereYear('created_at', (int) $this->filter);
         }
 
-        $stats = $query
-            ->selectRaw('
-                role,
-                SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,
-                SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NULL THEN 1 ELSE 0 END) as active_unverified,
-                SUM(CASE WHEN is_blocked = 1 THEN 1 ELSE 0 END) as blocked
-            ')
-            ->groupBy('role')
-            ->get()
-            ->keyBy('role');
-
-        $providers = $stats->get(User::ROLE_PROVIDER);
+        $counts = $query
+            ->selectRaw('profile_status, COUNT(*) as count')
+            ->groupBy('profile_status')
+            ->pluck('count', 'profile_status');
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Providers',
+                    'label' => 'Profiles',
                     'data' => [
-                        (int) ($providers?->active_verified ?? 0),
-                        (int) ($providers?->active_unverified ?? 0),
-                        (int) ($providers?->blocked ?? 0),
+                        (int) $counts->get('approved', 0),
+                        (int) $counts->get('pending', 0),
+                        (int) $counts->get('rejected', 0),
                     ],
                     'backgroundColor' => [
                         'rgba(34, 197, 94, 0.7)',
@@ -76,7 +67,7 @@ class AccountStatusChart extends ChartWidget
                     'borderWidth' => 1,
                 ],
             ],
-            'labels' => ['Active & Verified', 'Active & Unverified', 'Blocked'],
+            'labels' => ['Approved', 'Pending', 'Rejected'],
         ];
     }
 

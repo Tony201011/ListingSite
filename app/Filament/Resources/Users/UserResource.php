@@ -1163,6 +1163,25 @@ class UserResource extends Resource
                             );
                     }),
 
+                SelectFilter::make('profile_status')
+                    ->label('Profile Status')
+                    ->options([
+                        'approved' => 'Approved',
+                        'pending' => 'Pending',
+                        'rejected' => 'Rejected',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (blank($data['value'] ?? null)) {
+                            return $query;
+                        }
+
+                        return $query->whereHas(
+                            'providerProfiles',
+                            fn (Builder $q) => $q->where('profile_status', $data['value'])
+                        );
+                    })
+                    ->placeholder('All Statuses'),
+
                 SelectFilter::make('deleted_status')
                     ->label('Deleted Status')
                     ->options([
