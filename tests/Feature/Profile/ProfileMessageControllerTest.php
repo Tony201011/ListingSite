@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetProfileMessage;
 use App\Actions\SaveProfileMessage;
 use App\Actions\Support\ActionResult;
@@ -30,28 +31,36 @@ class ProfileMessageControllerTest extends TestCase
         parent::tearDown();
     }
 
-    private function createProvider(): User
+    private function createProvider(): array
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
-        ProviderProfile::query()->create([
+        $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
             'name' => $user->name,
             'slug' => 'provider-'.$user->id,
         ]);
 
-        return $user;
+        return [$user, $profile];
     }
 
     public function test_profile_message_view_is_returned_for_authenticated_provider(): void
     {
-        $user = $this->createProvider();
+        [$user, $profile] = $this->createProvider();
+
+        $getActiveProviderProfile = Mockery::mock(GetActiveProviderProfile::class);
+        $getActiveProviderProfile->shouldReceive('execute')
+            ->once()
+            ->with(Mockery::on(fn ($arg) => $arg instanceof User && $arg->is($user)))
+            ->andReturn($profile);
 
         $getProfileMessage = Mockery::mock(GetProfileMessage::class);
         $getProfileMessage->shouldReceive('execute')
             ->once()
+            ->with(Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)))
             ->andReturn('My existing message');
 
+        $this->app->instance(GetActiveProviderProfile::class, $getActiveProviderProfile);
         $this->app->instance(GetProfileMessage::class, $getProfileMessage);
 
         $response = $this->actingAs($user)->get(route('profile-message'));
@@ -63,13 +72,21 @@ class ProfileMessageControllerTest extends TestCase
 
     public function test_profile_message_view_shows_null_when_no_message_exists(): void
     {
-        $user = $this->createProvider();
+        [$user, $profile] = $this->createProvider();
+
+        $getActiveProviderProfile = Mockery::mock(GetActiveProviderProfile::class);
+        $getActiveProviderProfile->shouldReceive('execute')
+            ->once()
+            ->with(Mockery::on(fn ($arg) => $arg instanceof User && $arg->is($user)))
+            ->andReturn($profile);
 
         $getProfileMessage = Mockery::mock(GetProfileMessage::class);
         $getProfileMessage->shouldReceive('execute')
             ->once()
+            ->with(Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)))
             ->andReturn(null);
 
+        $this->app->instance(GetActiveProviderProfile::class, $getActiveProviderProfile);
         $this->app->instance(GetProfileMessage::class, $getProfileMessage);
 
         $response = $this->actingAs($user)->get(route('profile-message'));
@@ -78,10 +95,45 @@ class ProfileMessageControllerTest extends TestCase
         $response->assertViewHas('profileMessage', null);
     }
 
+    public function test_profile_message_uses_active_profile_not_first_profile(): void
+    {
+        [$user, $firstProfile] = $this->createProvider();
+
+        $secondProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' (2)',
+            'slug' => 'provider-'.$user->id.'-2',
+        ]);
+
+        $getActiveProviderProfile = Mockery::mock(GetActiveProviderProfile::class);
+        $getActiveProviderProfile->shouldReceive('execute')
+            ->once()
+            ->andReturn($secondProfile);
+
+        $getProfileMessage = Mockery::mock(GetProfileMessage::class);
+        $getProfileMessage->shouldReceive('execute')
+            ->once()
+            ->with(Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($secondProfile)))
+            ->andReturn('Message for second profile');
+
+        $this->app->instance(GetActiveProviderProfile::class, $getActiveProviderProfile);
+        $this->app->instance(GetProfileMessage::class, $getProfileMessage);
+
+        $response = $this->actingAs($user)->get(route('profile-message'));
+
+        $response->assertOk();
+        $response->assertViewHas('profileMessage', 'Message for second profile');
+    }
+
     public function test_store_saves_profile_message_and_returns_json(): void
     {
-        $user = $this->createProvider();
-        $profile = ProviderProfile::where('user_id', $user->id)->first();
+        [$user, $profile] = $this->createProvider();
+
+        $getActiveProviderProfile = Mockery::mock(GetActiveProviderProfile::class);
+        $getActiveProviderProfile->shouldReceive('execute')
+            ->once()
+            ->with(Mockery::on(fn ($arg) => $arg instanceof User && $arg->is($user)))
+            ->andReturn($profile);
 
         $saveProfileMessage = Mockery::mock(SaveProfileMessage::class);
         $saveProfileMessage->shouldReceive('execute')
@@ -92,6 +144,7 @@ class ProfileMessageControllerTest extends TestCase
             )
             ->andReturn(ActionResult::success([], 'Profile message saved successfully.'));
 
+        $this->app->instance(GetActiveProviderProfile::class, $getActiveProviderProfile);
         $this->app->instance(SaveProfileMessage::class, $saveProfileMessage);
 
         $response = $this->actingAs($user)->postJson(route('profile-message.store'), [
@@ -105,9 +158,47 @@ class ProfileMessageControllerTest extends TestCase
         ]);
     }
 
+    public function test_store_saves_message_for_active_profile_not_first_profile(): void
+    {
+        [$user, $firstProfile] = $this->createProvider();
+
+        $secondProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' (2)',
+            'slug' => 'provider-'.$user->id.'-2',
+        ]);
+
+        $getActiveProviderProfile = Mockery::mock(GetActiveProviderProfile::class);
+        $getActiveProviderProfile->shouldReceive('execute')
+            ->once()
+            ->andReturn($secondProfile);
+
+        $saveProfileMessage = Mockery::mock(SaveProfileMessage::class);
+        $saveProfileMessage->shouldReceive('execute')
+            ->once()
+            ->with(
+                Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($secondProfile)),
+                'Hello from second profile!'
+            )
+            ->andReturn(ActionResult::success([], 'Profile message saved successfully.'));
+
+        $this->app->instance(GetActiveProviderProfile::class, $getActiveProviderProfile);
+        $this->app->instance(SaveProfileMessage::class, $saveProfileMessage);
+
+        $response = $this->actingAs($user)->postJson(route('profile-message.store'), [
+            'message' => 'Hello from second profile!',
+        ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'message' => 'Profile message saved successfully.',
+        ]);
+    }
+
     public function test_store_returns_422_when_message_is_missing(): void
     {
-        $user = $this->createProvider();
+        [$user] = $this->createProvider();
 
         $saveProfileMessage = Mockery::mock(SaveProfileMessage::class);
         $saveProfileMessage->shouldNotReceive('execute');
@@ -125,7 +216,7 @@ class ProfileMessageControllerTest extends TestCase
 
     public function test_store_returns_422_when_message_exceeds_max_length(): void
     {
-        $user = $this->createProvider();
+        [$user] = $this->createProvider();
 
         $saveProfileMessage = Mockery::mock(SaveProfileMessage::class);
         $saveProfileMessage->shouldNotReceive('execute');
