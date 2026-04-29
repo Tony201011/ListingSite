@@ -41,9 +41,9 @@ class ProfileStatusChart extends ChartWidget
         }
 
         $counts = $query
-            ->get(['profile_status'])
+            ->selectRaw('profile_status, COUNT(*) as count')
             ->groupBy('profile_status')
-            ->map(fn ($group) => $group->count());
+            ->pluck('count', 'profile_status');
 
         return [
             'datasets' => [

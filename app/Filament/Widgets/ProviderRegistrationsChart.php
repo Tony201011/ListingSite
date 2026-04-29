@@ -39,8 +39,8 @@ class ProviderRegistrationsChart extends ChartWidget
         $rows = User::query()
             ->where('role', User::ROLE_PROVIDER)
             ->whereYear('created_at', $selectedYear)
-            ->get(['created_at'])
-            ->groupBy(fn ($user) => $user->created_at->format('Y-m'))
+            ->pluck('created_at')
+            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m'))
             ->map(fn ($group) => $group->count());
 
         $data = [];
