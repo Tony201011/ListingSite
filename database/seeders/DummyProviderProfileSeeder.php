@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Availability;
+use App\Models\AvailableNow;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
@@ -332,15 +333,15 @@ class DummyProviderProfileSeeder extends Seeder
 
             // 4. RateGroup + Rates
             $rateGroup = RateGroup::updateOrCreate(
-                ['user_id' => $user->id, 'name' => 'Standard Rates'],
-                ['provider_profile_id' => $providerProfile->id],
+                ['provider_profile_id' => $providerProfile->id, 'name' => 'Standard Rates'],
+                ['user_id' => $user->id],
             );
 
             foreach (self::RATE_DESCRIPTIONS as $rateIndex => $description) {
                 Rate::updateOrCreate(
-                    ['user_id' => $user->id, 'description' => $description],
+                    ['provider_profile_id' => $providerProfile->id, 'description' => $description],
                     [
-                        'provider_profile_id' => $providerProfile->id,
+                        'user_id' => $user->id,
                         'incall' => self::INCALL_PRICES[$rateIndex],
                         'outcall' => self::OUTCALL_PRICES[$rateIndex],
                         'extra' => $rateIndex === count(self::RATE_DESCRIPTIONS) - 1
@@ -358,9 +359,9 @@ class DummyProviderProfileSeeder extends Seeder
                 $tillLate = $enabled && $i % 5 === 0;
 
                 Availability::updateOrCreate(
-                    ['user_id' => $user->id, 'day' => $day],
+                    ['provider_profile_id' => $providerProfile->id, 'day' => $day],
                     [
-                        'provider_profile_id' => $providerProfile->id,
+                        'user_id' => $user->id,
                         'enabled' => $enabled,
                         'from_time' => ($enabled && ! $allDay) ? '09:00' : null,
                         'to_time' => ($enabled && ! $allDay && ! $tillLate) ? '22:00' : null,
@@ -394,9 +395,9 @@ class DummyProviderProfileSeeder extends Seeder
 
             // 6b. Profile message
             ProfileMessage::updateOrCreate(
-                ['user_id' => $user->id],
+                ['provider_profile_id' => $providerProfile->id],
                 [
-                    'provider_profile_id' => $providerProfile->id,
+                    'user_id' => $user->id,
                     'message' => "Hi there! I'm {$name}. Feel free to send me a message to discuss your requirements or arrange a meeting. I'm responsive and discreet.",
                 ],
             );
@@ -406,9 +407,9 @@ class DummyProviderProfileSeeder extends Seeder
                 $videoUrl = $this->pickFrom(self::SAMPLE_VIDEOS, $i + $vidIndex);
 
                 UserVideo::updateOrCreate(
-                    ['user_id' => $user->id, 'video_path' => $videoUrl],
+                    ['provider_profile_id' => $providerProfile->id, 'video_path' => $videoUrl],
                     [
-                        'provider_profile_id' => $providerProfile->id,
+                        'user_id' => $user->id,
                         'original_name' => "video-{$i}-{$vidIndex}.mp4",
                     ],
                 );
@@ -421,15 +422,24 @@ class DummyProviderProfileSeeder extends Seeder
                 $to = (clone $from)->addDays(rand(2, 7))->setTime(18, 0);
 
                 Tour::updateOrCreate(
-                    ['user_id' => $user->id, 'city' => $city, 'from' => $from],
+                    ['provider_profile_id' => $providerProfile->id, 'city' => $city, 'from' => $from],
                     [
-                        'provider_profile_id' => $providerProfile->id,
+                        'user_id' => $user->id,
                         'to' => $to,
                         'description' => "I will be visiting {$city}. Contact me to arrange a meeting during my stay.",
                         'enabled' => true,
                     ],
                 );
             }
+
+            // 9. AvailableNow (one per profile, set to offline by default)
+            AvailableNow::updateOrCreate(
+                ['provider_profile_id' => $providerProfile->id],
+                [
+                    'user_id' => $user->id,
+                    'status' => 'offline',
+                ],
+            );
         }
     }
 
