@@ -13,7 +13,7 @@ class ProviderRegistrationsChart extends ChartWidget
 
     protected static ?int $sort = 2;
 
-    protected int|string|array $columnSpan = 1;
+    protected int|string|array $columnSpan = 2;
 
     public static function canView(): bool
     {
@@ -39,10 +39,9 @@ class ProviderRegistrationsChart extends ChartWidget
         $rows = User::query()
             ->where('role', User::ROLE_PROVIDER)
             ->whereYear('created_at', $selectedYear)
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total")
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('total', 'month');
+            ->get(['created_at'])
+            ->groupBy(fn ($user) => $user->created_at->format('Y-m'))
+            ->map(fn ($group) => $group->count());
 
         $data = [];
         $labels = [];
@@ -51,7 +50,7 @@ class ProviderRegistrationsChart extends ChartWidget
             $month = Carbon::createFromDate($selectedYear, $m, 1);
             $key = $month->format('Y-m');
             $labels[] = $month->format('M Y');
-            $data[] = $rows->get($key, 0);
+            $data[] = (int) $rows->get($key, 0);
         }
 
         return [

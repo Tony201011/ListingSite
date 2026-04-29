@@ -13,6 +13,8 @@ class AccountStatusChart extends ChartWidget
 
     protected static ?int $sort = 4;
 
+    protected int|string|array $columnSpan = 2;
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
