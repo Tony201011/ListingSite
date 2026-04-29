@@ -137,6 +137,11 @@ class PurgeDeletedAccountsTest extends TestCase
             'role' => User::ROLE_PROVIDER,
             'account_status' => 'soft_deleted',
             'scheduled_purge_at' => now()->subDay(),
+        ]);
+        ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'test-hold-'.$user->id,
             'hold_reason' => 'legal_investigation',
         ]);
         $user->delete();
