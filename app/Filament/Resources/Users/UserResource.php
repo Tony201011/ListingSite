@@ -87,11 +87,13 @@ class UserResource extends Resource
                 'providerProfile.profileImages',
                 'providerProfile.userVideos',
                 'providerProfile.photoVerification',
+                'providerProfile.rates',
+                'providerProfile.availabilities',
+                'providerProfile.profileMessage',
+                'providerProfiles',
                 'onlineUser',
                 'hideShowProfile',
                 'availableNow',
-                'rates',
-                'availabilities',
                 'profileMessage',
             ])
             ->where('role', User::ROLE_PROVIDER);
@@ -583,7 +585,6 @@ class UserResource extends Resource
                                 ->icon('heroicon-o-currency-dollar')
                                 ->schema([
                                     Repeater::make('rates')
-                                        ->relationship()
                                         ->label('Rates')
                                         ->schema([
                                             Hidden::make('id'),
@@ -624,7 +625,6 @@ class UserResource extends Resource
                                 ->icon('heroicon-o-calendar-days')
                                 ->schema([
                                     Repeater::make('availabilities')
-                                        ->relationship()
                                         ->label('Availability')
                                         ->schema([
                                             Hidden::make('id'),
@@ -765,58 +765,50 @@ class UserResource extends Resource
                                 ->columns(3)
                                 ->collapsible(),
 
-                            Section::make('Profile Information')
-                                ->description('Public-facing provider profile content and status.')
+                            Section::make('Profiles')
+                                ->description('All provider profiles associated with this account.')
                                 ->icon('heroicon-o-sparkles')
                                 ->schema([
-                                    TextEntry::make('providerProfile.name')
-                                        ->label('Profile Name')
-                                        ->weight('bold')
-                                        ->placeholder('-'),
+                                    RepeatableEntry::make('providerProfiles')
+                                        ->label('')
+                                        ->schema([
+                                            TextEntry::make('name')
+                                                ->label('Profile Name')
+                                                ->weight('bold')
+                                                ->placeholder('-'),
 
-                                    TextEntry::make('providerProfile.slug')
-                                        ->label('Profile Slug')
-                                        ->badge()
-                                        ->placeholder('-'),
+                                            TextEntry::make('slug')
+                                                ->label('Slug')
+                                                ->badge()
+                                                ->placeholder('-'),
 
-                                    TextEntry::make('providerProfile.description')
-                                        ->label('Description')
-                                        ->placeholder('-')
+                                            TextEntry::make('profile_status')
+                                                ->label('Status')
+                                                ->badge()
+                                                ->color(fn ($state): string => match ($state) {
+                                                    'approved' => 'success',
+                                                    'rejected' => 'danger',
+                                                    default => 'warning',
+                                                })
+                                                ->placeholder('-'),
+
+                                            IconEntry::make('is_verified')
+                                                ->label('Verified')
+                                                ->boolean(),
+
+                                            IconEntry::make('is_featured')
+                                                ->label('Featured')
+                                                ->boolean(),
+
+                                            TextEntry::make('description')
+                                                ->label('Description')
+                                                ->placeholder('-')
+                                                ->columnSpanFull(),
+                                        ])
+                                        ->columns(3)
                                         ->columnSpanFull(),
-
-                                    TextEntry::make('providerProfile.introduction_line')
-                                        ->label('Introduction Line')
-                                        ->formatStateUsing(fn (?string $state): string => strip_tags((string) $state, '<p><br><ul><ol><li><strong><em><blockquote>'))
-                                        ->html()
-                                        ->placeholder('-')
-                                        ->columnSpanFull(),
-
-                                    TextEntry::make('providerProfile.profile_text')
-                                        ->label('Profile Text')
-                                        ->formatStateUsing(fn (?string $state): string => strip_tags((string) $state, '<p><br><ul><ol><li><strong><em><blockquote>'))
-                                        ->html()
-                                        ->placeholder('-')
-                                        ->columnSpanFull(),
-
-                                    IconEntry::make('providerProfile.is_verified')
-                                        ->label('Profile Verified')
-                                        ->boolean(),
-
-                                    IconEntry::make('providerProfile.is_featured')
-                                        ->label('Featured')
-                                        ->boolean(),
-
-                                    TextEntry::make('providerProfile.profile_status')
-                                        ->label('Profile Status')
-                                        ->badge()
-                                        ->color(fn ($state): string => match ($state) {
-                                            'approved' => 'success',
-                                            'rejected' => 'danger',
-                                            default => 'warning',
-                                        })
-                                        ->placeholder('-'),
                                 ])
-                                ->columns(2)
+                                ->columns(1)
                                 ->collapsible(),
                         ]),
 
@@ -1090,20 +1082,40 @@ class UserResource extends Resource
                     ->color(fn (string $state): string => $state === 'Verified' ? 'success' : 'warning'),
 
                 TextColumn::make('providerProfile.profile_status')
-                    ->label('Profile')
+                    ->label('Profiles')
                     ->badge()
-                    ->state(fn (User $record): string => $record->providerProfile?->profile_status ?? 'pending')
-                    ->color(fn (string $state): string => match ($state) {
-                        'approved' => 'success',
-                        'rejected' => 'danger',
-                        default => 'warning',
+                    ->state(function (User $record): string {
+                        $profiles = $record->providerProfiles;
+                        if ($profiles->isEmpty()) {
+                            return 'No Profile';
+                        }
+
+                        return $profiles->map(fn ($p) => ucfirst($p->profile_status ?? 'pending'))->implode(' | ');
+                    })
+                    ->color(function (string $state): string {
+                        if (str_contains(strtolower($state), 'approved')) {
+                            return 'success';
+                        }
+                        if (str_contains(strtolower($state), 'rejected')) {
+                            return 'danger';
+                        }
+
+                        return 'warning';
                     }),
 
                 TextColumn::make('providerProfile.is_featured')
                     ->label('Featured')
                     ->badge()
-                    ->state(fn (User $record): string => $record->providerProfile?->is_featured ? 'Yes' : 'No')
-                    ->color(fn (string $state): string => $state === 'Yes' ? 'success' : 'gray'),
+                    ->state(function (User $record): string {
+                        $featured = $record->providerProfiles->where('is_featured', true)->count();
+                        $total = $record->providerProfiles->count();
+                        if ($featured === 0) {
+                            return 'No';
+                        }
+
+                        return $total > 1 ? "Yes ({$featured}/{$total})" : 'Yes';
+                    })
+                    ->color(fn (string $state): string => str_starts_with($state, 'Yes') ? 'success' : 'gray'),
 
                 TextColumn::make('created_at')
                     ->label('Joined')
@@ -1177,9 +1189,16 @@ class UserResource extends Resource
                     ->label('View as Provider')
                     ->icon('heroicon-o-user')
                     ->color('info')
-                    ->url(fn (User $record): string => $record->providerProfile?->slug ? route('profile.show', ['slug' => $record->providerProfile->slug]) : '#')
+                    ->url(function (User $record): string {
+                        $profile = $record->providerProfiles
+                            ->where('profile_status', 'approved')
+                            ->first()
+                            ?? $record->providerProfiles->first();
+
+                        return $profile?->slug ? route('profile.show', ['slug' => $profile->slug]) : '#';
+                    })
                     ->openUrlInNewTab()
-                    ->visible(fn (User $record): bool => filled($record->providerProfile?->slug) && ! $record->trashed()),
+                    ->visible(fn (User $record): bool => $record->providerProfiles->isNotEmpty() && filled($record->providerProfiles->first()?->slug) && ! $record->trashed()),
 
                 Action::make('edit')
                     ->label('Edit')

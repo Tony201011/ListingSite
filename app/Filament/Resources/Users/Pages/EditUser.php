@@ -268,8 +268,14 @@ class EditUser extends EditRecord
             return;
         }
 
+        $profile = $record->providerProfile;
+
+        if (! $profile) {
+            return;
+        }
+
         $this->syncHasManyRelation(
-            $record->rates(),
+            $profile->rates(),
             $data['rates'],
             ['description', 'incall', 'outcall', 'extra']
         );
@@ -281,8 +287,14 @@ class EditUser extends EditRecord
             return;
         }
 
+        $profile = $record->providerProfile;
+
+        if (! $profile) {
+            return;
+        }
+
         $this->syncHasManyRelation(
-            $record->availabilities(),
+            $profile->availabilities(),
             $data['availabilities'],
             ['day', 'enabled', 'from_time', 'to_time', 'till_late', 'all_day', 'by_appointment']
         );
@@ -293,9 +305,14 @@ class EditUser extends EditRecord
         $messageData = $data['profileMessage'] ?? [];
 
         if (array_key_exists('message', $messageData)) {
+            $profile = $record->providerProfile;
+
             ProfileMessage::query()->updateOrCreate(
                 ['user_id' => $record->id],
-                ['message' => $messageData['message'] ?? ''],
+                [
+                    'provider_profile_id' => $profile?->id,
+                    'message' => $messageData['message'] ?? '',
+                ],
             );
         }
     }
