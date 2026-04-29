@@ -153,10 +153,13 @@ class BuildProfileFilterViewData
             $distanceFilter = min(max(1, $requestedDistance), $maxSearchDistance);
         }
 
+        $rawUserLat = isset($validated['user_lat']) ? (float) $validated['user_lat'] : null;
+        $rawUserLng = isset($validated['user_lng']) ? (float) $validated['user_lng'] : null;
+
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
 
-        $searchLat = null;
-        $searchLng = null;
+        $geocodedLat = null;
+        $geocodedLng = null;
 
         if ($resolvedLocation !== null) {
             $locationCoordinates = $this->resolveLocationCoordinates(
@@ -165,10 +168,14 @@ class BuildProfileFilterViewData
             );
 
             if ($locationCoordinates !== null) {
-                $searchLat = $locationCoordinates['latitude'];
-                $searchLng = $locationCoordinates['longitude'];
+                $geocodedLat = $locationCoordinates['latitude'];
+                $geocodedLng = $locationCoordinates['longitude'];
             }
         }
+
+        // Prefer geocoded coordinates over raw user GPS for the search centre.
+        $userLat = $geocodedLat ?? $rawUserLat;
+        $userLng = $geocodedLng ?? $rawUserLng;
 
         $categoryToParentSlug = $this->buildCategoryToParentSlugMap($parents, $childrenByParent);
 
@@ -186,8 +193,8 @@ class BuildProfileFilterViewData
             $selectedCategoryIds,
             $categoryToParentSlug,
             $categoryNameById,
-            $searchLat,
-            $searchLng,
+            $userLat,
+            $userLng,
             $distanceFilter,
             $girlsMode,
             $escortNameQuery,
@@ -221,8 +228,8 @@ class BuildProfileFilterViewData
             'distanceFilter',
             'hasDistanceFilter',
             'distanceSearchEnabled',
-            'searchLat',
-            'searchLng',
+            'userLat',
+            'userLng',
             'escortNameQuery',
         );
     }
@@ -262,15 +269,15 @@ class BuildProfileFilterViewData
         array $selectedCategoryIds,
         array $categoryToParentSlug,
         array $categoryNameById,
-        ?float $searchLat = null,
-        ?float $searchLng = null,
+        ?float $userLat = null,
+        ?float $userLng = null,
         ?int $distanceFilter = null,
         string $girlsMode = 'all',
         string $escortNameQuery = '',
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
-        $distanceSearchActive = $distanceFilter !== null && $searchLat !== null && $searchLng !== null;
+        $distanceSearchActive = $distanceFilter !== null && $userLat !== null && $userLng !== null;
 
         $scoutMatchedIds = null;
         if ($hasLocationQuery && $exactLocation === null) {
@@ -384,7 +391,7 @@ class BuildProfileFilterViewData
         $distanceOrderingApplied = false;
 
         if ($distanceSearchActive) {
-            $distanceRows = $this->findNearbyProfileDistances($searchLat, $searchLng, $distanceFilter);
+            $distanceRows = $this->findNearbyProfileDistances($userLat, $userLng, $distanceFilter);
 
             if (empty($distanceRows)) {
                 $query->whereRaw('1 = 0');
