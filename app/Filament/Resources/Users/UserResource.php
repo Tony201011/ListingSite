@@ -94,7 +94,6 @@ class UserResource extends Resource
                 'onlineUser',
                 'hideShowProfile',
                 'availableNow',
-                'profileMessage',
             ])
             ->where('role', User::ROLE_PROVIDER);
     }
@@ -1090,7 +1089,7 @@ class UserResource extends Resource
                             return 'No Profile';
                         }
 
-                        return $profiles->map(fn ($p) => ucfirst($p->profile_status ?? 'pending'))->implode(' | ');
+                        return $profiles->map(fn ($profile) => ucfirst($profile->profile_status ?? 'pending'))->implode(' | ');
                     })
                     ->color(function (string $state): string {
                         if (str_contains(strtolower($state), 'approved')) {

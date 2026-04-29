@@ -268,7 +268,7 @@ class EditUser extends EditRecord
             return;
         }
 
-        $profile = $record->providerProfile;
+        $profile = $this->resolveProviderProfile($record);
 
         if (! $profile) {
             return;
@@ -287,7 +287,7 @@ class EditUser extends EditRecord
             return;
         }
 
-        $profile = $record->providerProfile;
+        $profile = $this->resolveProviderProfile($record);
 
         if (! $profile) {
             return;
@@ -305,7 +305,7 @@ class EditUser extends EditRecord
         $messageData = $data['profileMessage'] ?? [];
 
         if (array_key_exists('message', $messageData)) {
-            $profile = $record->providerProfile;
+            $profile = $this->resolveProviderProfile($record);
 
             ProfileMessage::query()->updateOrCreate(
                 ['user_id' => $record->id],
@@ -315,6 +315,11 @@ class EditUser extends EditRecord
                 ],
             );
         }
+    }
+
+    private function resolveProviderProfile(Model $record): ?ProviderProfile
+    {
+        return $record->providerProfile ?? $record->providerProfiles()->orderBy('id')->first();
     }
 
     protected function syncHasManyRelation(HasMany $relation, array $items, array $allowedFields): void
