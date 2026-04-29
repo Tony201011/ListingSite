@@ -92,7 +92,7 @@
                             {{ $userInfo['user']?->name ?? '' }}
                         </h1>
                         <span class="text-gray-500 font-medium">
-                            {{ $userInfo['provider_profile']?->suburb ?? ($userInfo['user']?->suburb ?? '') }}
+                            {{ $userInfo['provider_profile']?->suburb ?? '' }}
                         </span>
                     </div>
 

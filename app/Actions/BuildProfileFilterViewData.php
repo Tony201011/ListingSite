@@ -307,7 +307,7 @@ class BuildProfileFilterViewData
                 } else {
                     $query->where(function ($q) use ($locationQuery) {
                         $q->whereHas('city', fn ($cityQ) => $cityQ->where('name', 'like', '%'.$locationQuery.'%'))
-                            ->orWhereHas('user', fn ($userQ) => $userQ->where('suburb', 'like', '%'.$locationQuery.'%'));
+                            ->orWhere('provider_profiles.suburb', 'like', '%'.$locationQuery.'%');
                     });
                 }
             }
@@ -528,16 +528,15 @@ class BuildProfileFilterViewData
         ))';
 
         return DB::table('provider_profiles')
-            ->join('users', 'users.id', '=', 'provider_profiles.user_id')
             ->leftJoin('states', 'states.id', '=', 'provider_profiles.state_id')
             ->join('postcodes as profile_postcodes', function ($join) use ($stateCaseSql) {
-                $join->whereRaw('UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(users.suburb, ",", 1)))')
+                $join->whereRaw('UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(provider_profiles.suburb, ",", 1)))')
                     ->whereRaw("
                         UPPER(TRIM(profile_postcodes.state)) = UPPER(TRIM(
                             COALESCE(
                                 NULLIF(
                                     CASE
-                                        WHEN users.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(users.suburb, ',', -1)), ' ', 1)
+                                        WHEN provider_profiles.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(provider_profiles.suburb, ',', -1)), ' ', 1)
                                         ELSE NULL
                                     END,
                                     ''
@@ -665,9 +664,9 @@ class BuildProfileFilterViewData
                     ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
                         $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
                     });
-            })->orWhereHas('user', function (Builder $userQuery) use ($suburb, $state): void {
-                $userQuery->whereRaw(
-                    'LOWER(TRIM(suburb)) LIKE ?',
+            })->orWhere(function (Builder $profileQuery) use ($suburb, $state): void {
+                $profileQuery->whereRaw(
+                    'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
                     [mb_strtolower($suburb.', '.$state).'%']
                 );
             });
@@ -739,7 +738,7 @@ class BuildProfileFilterViewData
             'in_call' => trim((string) ($firstRate?->incall ?? '')),
             'out_call' => trim((string) ($firstRate?->outcall ?? '')),
             'city' => $profile->city?->name ?? '',
-            'suburb' => $profile->user?->suburb,
+            'suburb' => $profile->suburb,
             'distance_km' => isset($profile->distance_km) ? round((float) $profile->distance_km, 1) : null,
             'height' => '',
             'service_1' => $services[0] ?? '',

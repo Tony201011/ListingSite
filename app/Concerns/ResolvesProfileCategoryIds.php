@@ -34,7 +34,7 @@ trait ResolvesProfileCategoryIds
     /**
      * Extract just the suburb/locality name from a raw suburb string.
      *
-     * The users.suburb column stores values in the form "SuburbName, STATE postcode"
+     * The provider_profiles.suburb column stores values in the form "SuburbName, STATE postcode"
      * (e.g. "Melbourne, VIC 3000"). This helper strips the state and postcode portion
      * so only the clean suburb name is returned for display purposes.
      */

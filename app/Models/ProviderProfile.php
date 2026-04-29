@@ -43,6 +43,7 @@ class ProviderProfile extends Model
         'country_id',
         'state_id',
         'city_id',
+        'suburb',
         'latitude',
         'longitude',
         'phone',
@@ -177,7 +178,7 @@ class ProviderProfile extends Model
 
     public function toSearchableArray(): array
     {
-        $this->loadMissing(['city', 'state', 'user']);
+        $this->loadMissing(['city', 'state']);
 
         return [
             'id' => (string) $this->id,
@@ -186,7 +187,7 @@ class ProviderProfile extends Model
             'description' => (string) ($this->description ?? ''),
             'city' => (string) ($this->city?->name ?? ''),
             'state' => (string) ($this->state?->name ?? ''),
-            'suburb' => (string) ($this->user?->suburb ?? ''),
+            'suburb' => (string) ($this->suburb ?? ''),
             'profile_status' => (string) ($this->profile_status ?? ''),
             'is_featured' => (bool) $this->is_featured,
             'created_at' => $this->created_at ? $this->created_at->timestamp : 0,

@@ -546,9 +546,9 @@ class SearchTest extends TestCase
     public function test_location_only_search_restricts_to_exact_suburb(): void
     {
         // Profile in Mount Gambier, SA
-        $this->createApprovedProvider(['name' => 'Local Escort', 'slug' => 'local-escort'], ['suburb' => 'Mount Gambier, SA 5290']);
+        $this->createApprovedProvider(['name' => 'Local Escort', 'slug' => 'local-escort', 'suburb' => 'Mount Gambier, SA 5290']);
         // Profile somewhere else
-        $this->createApprovedProvider(['name' => 'Remote Escort', 'slug' => 'remote-escort'], ['suburb' => 'Sydney, NSW 2000']);
+        $this->createApprovedProvider(['name' => 'Remote Escort', 'slug' => 'remote-escort', 'suburb' => 'Sydney, NSW 2000']);
 
         // Searching by location only (no lat/lng/distance) applies exact text filter.
         $response = $this->get('/?location=Mount+Gambier%2C+SA');
@@ -581,13 +581,11 @@ class SearchTest extends TestCase
 
         // Profile in Melbourne – no direct lat/lng on the profile row.
         $this->createApprovedProvider(
-            ['name' => 'Melbourne Escort', 'slug' => 'melbourne-escort'],
-            ['suburb' => 'Melbourne, VIC 3000']
+            ['name' => 'Melbourne Escort', 'slug' => 'melbourne-escort', 'suburb' => 'Melbourne, VIC 3000']
         );
         // Profile in Sydney – should be excluded.
         $this->createApprovedProvider(
-            ['name' => 'Sydney Escort', 'slug' => 'sydney-escort'],
-            ['suburb' => 'Sydney, NSW 2000']
+            ['name' => 'Sydney Escort', 'slug' => 'sydney-escort', 'suburb' => 'Sydney, NSW 2000']
         );
 
         // When lat/lng + distance + location are all provided, profiles whose

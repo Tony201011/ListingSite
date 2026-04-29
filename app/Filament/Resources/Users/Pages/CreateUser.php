@@ -29,7 +29,6 @@ class CreateUser extends CreateRecord
             'name' => $data['name'],
             'email' => $data['email'],
             'mobile' => $data['mobile'] ?? null,
-            'suburb' => $data['suburb'] ?? null,
             'password' => $data['password'],
             'role' => User::ROLE_PROVIDER,
             'is_blocked' => false,
@@ -67,6 +66,7 @@ class CreateUser extends CreateRecord
             [
                 'name' => $profileName,
                 'slug' => $slug,
+                'suburb' => $profileData['suburb'] ?? null,
                 'description' => $profileData['description'] ?? '',
                 'introduction_line' => $profileData['introduction_line'] ?? '',
                 'profile_text' => $profileData['profile_text'] ?? '',

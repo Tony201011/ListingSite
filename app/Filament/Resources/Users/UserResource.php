@@ -129,27 +129,6 @@ class UserResource extends Resource
                                         ->placeholder('+61...')
                                         ->maxLength(20),
 
-                                    Select::make('suburb')
-                                        ->label('Suburb')
-                                        ->searchable()
-                                        ->getSearchResultsUsing(function (string $search): array {
-                                            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
-
-                                            return Postcode::query()
-                                                ->where(function ($q) use ($escaped) {
-                                                    $q->where('suburb', 'LIKE', $escaped.'%')
-                                                        ->orWhere('postcode', 'LIKE', $escaped.'%');
-                                                })
-                                                ->orderBy('suburb')
-                                                ->limit(50)
-                                                ->get()
-                                                ->mapWithKeys(fn ($p) => [
-                                                    "{$p->suburb}, {$p->state} {$p->postcode}" => "{$p->suburb}, {$p->state} {$p->postcode}",
-                                                ])
-                                                ->all();
-                                        })
-                                        ->getOptionLabelUsing(fn ($value): string => (string) $value),
-
                                     TextInput::make('password')
                                         ->label('Password')
                                         ->password()
@@ -208,6 +187,27 @@ class UserResource extends Resource
                                             column: 'slug',
                                             ignoreRecord: true,
                                         ),
+
+                                    Select::make('suburb')
+                                        ->label('Suburb')
+                                        ->searchable()
+                                        ->getSearchResultsUsing(function (string $search): array {
+                                            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+
+                                            return Postcode::query()
+                                                ->where(function ($q) use ($escaped) {
+                                                    $q->where('suburb', 'LIKE', $escaped.'%')
+                                                        ->orWhere('postcode', 'LIKE', $escaped.'%');
+                                                })
+                                                ->orderBy('suburb')
+                                                ->limit(50)
+                                                ->get()
+                                                ->mapWithKeys(fn ($p) => [
+                                                    "{$p->suburb}, {$p->state} {$p->postcode}" => "{$p->suburb}, {$p->state} {$p->postcode}",
+                                                ])
+                                                ->all();
+                                        })
+                                        ->getOptionLabelUsing(fn ($value): string => (string) $value),
 
                                     Textarea::make('description')
                                         ->label('Short Description')
@@ -734,10 +734,6 @@ class UserResource extends Resource
                                         ->label('Mobile')
                                         ->placeholder('-'),
 
-                                    TextEntry::make('suburb')
-                                        ->label('Suburb')
-                                        ->placeholder('-'),
-
                                     TextEntry::make('referral_code')
                                         ->label('Referral Code')
                                         ->badge()
@@ -779,6 +775,10 @@ class UserResource extends Resource
                                             TextEntry::make('slug')
                                                 ->label('Slug')
                                                 ->badge()
+                                                ->placeholder('-'),
+
+                                            TextEntry::make('suburb')
+                                                ->label('Suburb')
                                                 ->placeholder('-'),
 
                                             TextEntry::make('profile_status')

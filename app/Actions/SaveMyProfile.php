@@ -25,10 +25,6 @@ class SaveMyProfile
         $this->validateCategorySelections($validated);
 
         $profile = DB::transaction(function () use ($user, $validated, $activeProfile) {
-            $user->update([
-                'suburb' => $validated['suburb'] ?? null,
-            ]);
-
             if ($activeProfile !== null) {
                 $profile = $activeProfile;
             } else {
@@ -48,6 +44,7 @@ class SaveMyProfile
             }
 
             $profile->fill([
+                'suburb' => $validated['suburb'] ?? null,
                 'introduction_line' => $validated['introduction_line'] ?? null,
                 'profile_text' => $validated['profile_text'] ?? null,
                 'primary_identity' => $validated['primary_identity'] ?? [],
