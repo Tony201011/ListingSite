@@ -289,9 +289,10 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.profile_status', 'approved')
             ->whereHas('user')
             ->with([
-                'user.profileImages' => fn ($q) => $q->where('is_primary', true),
-                'user.rates',
-                'user.onlineUser',
+                'profileImages' => fn ($q) => $q->where('is_primary', true),
+                'rates',
+                'onlineUser',
+                'user',
                 'city',
             ]);
 
@@ -717,10 +718,10 @@ class BuildProfileFilterViewData
 
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
     {
-        $primaryImage = $profile->user?->profileImages?->first();
+        $primaryImage = $profile->profileImages?->first();
         $imageUrl = $primaryImage?->thumbnail_url ?? $primaryImage?->image_url ?? null;
 
-        $firstRate = $profile->user?->rates?->first();
+        $firstRate = $profile->rates?->first();
         $rateDisplay = $this->formatRate($firstRate);
 
         $services = $this->resolveIds(
@@ -728,7 +729,7 @@ class BuildProfileFilterViewData
             $categoryNames
         );
 
-        $isOnline = $profile->user?->onlineUser?->isCurrentlyOnline() ?? false;
+        $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
 
         return [
             'name' => $profile->name,
