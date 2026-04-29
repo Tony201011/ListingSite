@@ -160,7 +160,9 @@
             <!-- Logo (escortify) -->
             <a href="{{ url('/') }}" class="shrink-0">
                 @if($logoType === 'image' && filled($logoUrl))
-                        <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
+                    <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
+                @else
+                    <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
                 @endif
             </a>
 
