@@ -20,7 +20,7 @@ class PurgeDeletedAccounts extends Command
         User::onlyTrashed()
             ->whereNotNull('scheduled_purge_at')
             ->where('scheduled_purge_at', '<=', now())
-            ->whereNull('hold_reason')
+            ->whereDoesntHave('providerProfiles', fn ($q) => $q->whereNotNull('hold_reason'))
             ->chunkById(100, function ($users) use (&$processed, &$failed) {
                 foreach ($users as $user) {
                     try {
@@ -56,9 +56,10 @@ class PurgeDeletedAccounts extends Command
             'email_verified_at' => null,
             'mobile_verified' => false,
             'remember_token' => null,
-            'anonymized_at' => now(),
             'account_status' => 'anonymized',
         ])->save();
+
+        $user->providerProfiles()->update(['anonymized_at' => now()]);
 
         // Hard-delete the user; FK cascades remove profile_images, rates,
         // rate_groups, tours, short_urls, provider_profile, etc.

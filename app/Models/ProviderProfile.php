@@ -54,6 +54,8 @@ class ProviderProfile extends Model
         'membership_id',
         'profile_status',
         'expires_at',
+        'hold_reason',
+        'anonymized_at',
     ];
 
     protected function casts(): array
@@ -69,6 +71,7 @@ class ProviderProfile extends Model
             'is_featured' => 'boolean',
             'membership_id' => 'integer',
             'expires_at' => 'datetime',
+            'anonymized_at' => 'datetime',
             'primary_identity' => 'array',
             'attributes' => 'array',
             'services_style' => 'array',

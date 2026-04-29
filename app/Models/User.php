@@ -35,7 +35,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'password',
         'must_change_password',
         'account_status',
-        'hold_reason',
         'email_verified_at',
     ];
 
@@ -54,7 +53,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             'password' => 'hashed',
             'deleted_at' => 'datetime',
             'scheduled_purge_at' => 'datetime',
-            'anonymized_at' => 'datetime',
         ];
     }
 
