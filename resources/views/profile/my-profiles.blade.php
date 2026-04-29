@@ -49,6 +49,20 @@
                             >
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
+                                        {{-- Profile avatar --}}
+                                        <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-gray-200">
+                                            @if($profile->primaryProfileImage?->thumbnail_url)
+                                                <img
+                                                    src="{{ $profile->primaryProfileImage->thumbnail_url }}"
+                                                    alt="{{ $profile->name }}"
+                                                    class="h-full w-full object-cover"
+                                                >
+                                            @else
+                                                <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#e04ecb] to-[#c13ab0]">
+                                                    <span class="text-lg font-bold text-white select-none">{{ strtoupper(substr($profile->name, 0, 1)) }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
                                         <div>
                                             <div class="flex items-center gap-2">
                                                 <p class="font-semibold text-gray-900">{{ $profile->name }}</p>

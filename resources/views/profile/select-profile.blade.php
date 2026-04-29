@@ -19,11 +19,19 @@
                 >
                     {{-- Avatar circle --}}
                     <div class="relative h-28 w-28 rounded-xl overflow-hidden border-4 border-transparent transition-all duration-200 group-hover:border-[#e04ecb] group-focus:border-[#e04ecb]">
-                        <div class="h-full w-full flex items-center justify-center bg-gradient-to-br from-[#e04ecb] to-[#c13ab0]">
-                            <span class="text-4xl font-bold text-white select-none">
-                                {{ strtoupper(substr($profile->name, 0, 1)) }}
-                            </span>
-                        </div>
+                        @if($profile->primaryProfileImage?->thumbnail_url)
+                            <img
+                                src="{{ $profile->primaryProfileImage->thumbnail_url }}"
+                                alt="{{ $profile->name }}"
+                                class="h-full w-full object-cover"
+                            >
+                        @else
+                            <div class="h-full w-full flex items-center justify-center bg-gradient-to-br from-[#e04ecb] to-[#c13ab0]">
+                                <span class="text-4xl font-bold text-white select-none">
+                                    {{ strtoupper(substr($profile->name, 0, 1)) }}
+                                </span>
+                            </div>
+                        @endif
 
                         {{-- Status badge --}}
                         @if($profile->profile_status === 'approved')
