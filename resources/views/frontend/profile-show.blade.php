@@ -766,9 +766,6 @@ $profileTags = array_values(array_unique(array_merge(
     </div>
 </div>
 
-@endsection
-
-@push('scripts')
 <!-- Report User Modal -->
 <div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6 relative">
@@ -831,6 +828,9 @@ $profileTags = array_values(array_unique(array_merge(
     </div>
 </div>
 
+@endsection
+
+@push('scripts')
 <script>
     if (typeof window.favouriteBookmark !== 'function') {
         window.favouriteBookmark = function favouriteBookmark(config = {}) {
@@ -889,5 +889,54 @@ $profileTags = array_values(array_unique(array_merge(
     };
 </script>
 
+<script>
+    async function submitReport(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('report-form');
+        const submitBtn = document.getElementById('report-submit-btn');
+        const successDiv = document.getElementById('report-success');
+        const errorDiv = document.getElementById('report-error');
+
+        successDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch(window.__profileShowConfig.reportUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                form.reset();
+                successDiv.classList.remove('hidden');
+            } else {
+                const result = await response.json();
+                const messages = result.errors
+                    ? Object.values(result.errors).flat().join(' ')
+                    : (result.message || 'Something went wrong. Please try again.');
+                errorDiv.textContent = messages;
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (e) {
+            errorDiv.textContent = 'Network error. Please try again.';
+            errorDiv.classList.remove('hidden');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Report';
+        }
+    }
+</script>
 
 @endpush
