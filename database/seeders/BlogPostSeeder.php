@@ -7,11 +7,6 @@ use Illuminate\Database\Seeder;
 
 
 
-
-
-
-
-
 class BlogPostSeeder extends Seeder
 {
     public function run(): void
