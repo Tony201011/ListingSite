@@ -59,7 +59,7 @@ class GetMyProfilePageData
             ? url($shortUrlRecord->short_url)
             : null;
 
-        $rankData = $this->calculateBabeRank->execute($user);
+        $rankData = $this->calculateBabeRank->execute($profile);
 
         return [
             'user' => $user,

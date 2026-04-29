@@ -17,6 +17,7 @@ class UserVideoFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
+            'provider_profile_id' => null,
             'video_path' => 'videos/'.fake()->uuid().'.mp4',
             'original_name' => fake()->word().'.mp4',
         ];

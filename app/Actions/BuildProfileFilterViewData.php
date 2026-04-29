@@ -289,7 +289,7 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.profile_status', 'approved')
             ->whereHas('user')
             ->with([
-                'profileImages' => fn ($q) => $q->where('is_primary', true),
+                'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
                 'onlineUser',
                 'user',

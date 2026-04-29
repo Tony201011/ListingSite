@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Actions\GetActiveProviderProfile;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -17,7 +18,9 @@ class UpdateShortUrlRequest extends FormRequest
 
     public function rules(): array
     {
-        $profileId = session('active_provider_profile_id');
+        $user = Auth::user();
+        $profile = $user ? app(GetActiveProviderProfile::class)->execute($user) : null;
+        $profileId = $profile?->id;
 
         return [
             'slug' => [

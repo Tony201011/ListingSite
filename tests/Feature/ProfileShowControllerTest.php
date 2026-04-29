@@ -154,9 +154,11 @@ class ProfileShowControllerTest extends TestCase
     public function test_profile_view_data_shows_incall_rate_when_set(): void
     {
         $user = $this->createApprovedProvider();
+        $profileId = $user->providerProfile->id;
 
         Rate::query()->create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profileId,
             'description' => '1 hour',
             'incall' => '$300',
             'outcall' => '$350',
@@ -171,9 +173,11 @@ class ProfileShowControllerTest extends TestCase
     public function test_profile_view_data_falls_back_to_outcall_when_incall_is_empty(): void
     {
         $user = $this->createApprovedProvider();
+        $profileId = $user->providerProfile->id;
 
         Rate::query()->create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profileId,
             'description' => '1 hour',
             'incall' => '',
             'outcall' => '$350',
@@ -188,9 +192,10 @@ class ProfileShowControllerTest extends TestCase
     public function test_profile_view_data_price_list_contains_all_rates(): void
     {
         $user = $this->createApprovedProvider();
+        $profileId = $user->providerProfile->id;
 
-        Rate::query()->create(['user_id' => $user->id, 'description' => '30 min', 'incall' => '$150', 'outcall' => '$180']);
-        Rate::query()->create(['user_id' => $user->id, 'description' => '1 hour', 'incall' => '$250', 'outcall' => '$300']);
+        Rate::query()->create(['user_id' => $user->id, 'provider_profile_id' => $profileId, 'description' => '30 min', 'incall' => '$150', 'outcall' => '$180']);
+        Rate::query()->create(['user_id' => $user->id, 'provider_profile_id' => $profileId, 'description' => '1 hour', 'incall' => '$250', 'outcall' => '$300']);
 
         $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
 

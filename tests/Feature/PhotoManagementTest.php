@@ -127,9 +127,11 @@ class PhotoManagementTest extends TestCase
     public function test_set_cover_changes_primary_photo(): void
     {
         $user = $this->providerWithProfile();
+        $profile = $user->providerProfile;
 
         $photo1 = ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/photo1.jpg',
             'thumbnail_path' => 'thumbnails/photo1.jpg',
             'is_primary' => true,
@@ -137,6 +139,7 @@ class PhotoManagementTest extends TestCase
 
         $photo2 = ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/photo2.jpg',
             'thumbnail_path' => 'thumbnails/photo2.jpg',
             'is_primary' => false,
@@ -157,11 +160,13 @@ class PhotoManagementTest extends TestCase
     public function test_set_cover_ensures_only_one_primary(): void
     {
         $user = $this->providerWithProfile();
+        $profile = $user->providerProfile;
 
         $photos = [];
         for ($i = 1; $i <= 5; $i++) {
             $photos[] = ProfileImage::create([
                 'user_id' => $user->id,
+                'provider_profile_id' => $profile->id,
                 'image_path' => "images/photo{$i}.jpg",
                 'thumbnail_path' => "thumbnails/photo{$i}.jpg",
                 'is_primary' => $i === 1,
@@ -187,9 +192,11 @@ class PhotoManagementTest extends TestCase
     {
         Storage::fake('s3');
         $user = $this->providerWithProfile();
+        $profile = $user->providerProfile;
 
         $primary = ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/primary.jpg',
             'thumbnail_path' => 'thumbnails/primary.jpg',
             'is_primary' => true,
@@ -197,6 +204,7 @@ class PhotoManagementTest extends TestCase
 
         $next = ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/next.jpg',
             'thumbnail_path' => 'thumbnails/next.jpg',
             'is_primary' => false,
@@ -215,9 +223,11 @@ class PhotoManagementTest extends TestCase
     {
         Storage::fake('s3');
         $user = $this->providerWithProfile();
+        $profile = $user->providerProfile;
 
         $primary = ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/primary.jpg',
             'thumbnail_path' => 'thumbnails/primary.jpg',
             'is_primary' => true,
@@ -225,6 +235,7 @@ class PhotoManagementTest extends TestCase
 
         $other = ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/other.jpg',
             'thumbnail_path' => 'thumbnails/other.jpg',
             'is_primary' => false,
@@ -240,9 +251,11 @@ class PhotoManagementTest extends TestCase
     {
         Storage::fake('s3');
         $user = $this->providerWithProfile();
+        $profile = $user->providerProfile;
 
         $photo = ProfileImage::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'image_path' => 'images/only.jpg',
             'thumbnail_path' => 'thumbnails/only.jpg',
             'is_primary' => true,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetAvailableNowState;
 use App\Actions\GetOnlineNowState;
 use App\Actions\GetShowHideProfileState;
@@ -15,16 +16,17 @@ class StatusTabsController extends Controller
     public function __construct(
         private GetOnlineNowState $getOnlineNowState,
         private GetAvailableNowState $getAvailableNowState,
-        private GetShowHideProfileState $getShowHideProfileState
+        private GetShowHideProfileState $getShowHideProfileState,
+        private GetActiveProviderProfile $getActiveProviderProfile
     ) {}
 
     public function show(): View
     {
-        $user = Auth::user();
+        $profile = $this->getActiveProviderProfile->execute(Auth::user());
 
-        $onlineData = $this->getOnlineNowState->execute($user);
-        $availableData = $this->getAvailableNowState->execute($user);
-        $visibilityData = $this->getShowHideProfileState->execute($user);
+        $onlineData = $this->getOnlineNowState->execute($profile);
+        $availableData = $this->getAvailableNowState->execute($profile);
+        $visibilityData = $this->getShowHideProfileState->execute($profile);
         $statusSettings = SiteSetting::getStatusSettings();
 
         return view('profile.status-tabs', [

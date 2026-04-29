@@ -346,7 +346,7 @@ class EdgeCaseTest extends TestCase
         $owner1 = $this->providerWithProfile();
         $owner2 = $this->providerWithProfile();
 
-        ShortUrl::create(['user_id' => $owner1->id, 'short_url' => 'taken-slug']);
+        ShortUrl::create(['user_id' => $owner1->id, 'provider_profile_id' => $owner1->providerProfile->id, 'short_url' => 'taken-slug']);
 
         $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner2)
@@ -358,8 +358,9 @@ class EdgeCaseTest extends TestCase
     public function test_short_url_allows_owner_to_keep_same_slug(): void
     {
         $owner = $this->providerWithProfile();
+        $profile = $owner->providerProfile;
 
-        ShortUrl::create(['user_id' => $owner->id, 'short_url' => 'my-slug']);
+        ShortUrl::create(['user_id' => $owner->id, 'provider_profile_id' => $profile->id, 'short_url' => 'my-slug']);
 
         $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
@@ -381,16 +382,17 @@ class EdgeCaseTest extends TestCase
     public function test_short_url_update_replaces_existing_url(): void
     {
         $owner = $this->providerWithProfile();
+        $profile = $owner->providerProfile;
 
-        ShortUrl::create(['user_id' => $owner->id, 'short_url' => 'old-slug']);
+        ShortUrl::create(['user_id' => $owner->id, 'provider_profile_id' => $profile->id, 'short_url' => 'old-slug']);
 
         $this->withoutMiddleware([CheckProfileSteps::class, EnsureProfileSelected::class])
             ->actingAs($owner)
             ->postJson(route('short-url.update'), ['slug' => 'new-slug'])
             ->assertOk();
 
-        $this->assertEquals('new-slug', ShortUrl::where('user_id', $owner->id)->value('short_url'));
-        $this->assertEquals(1, ShortUrl::where('user_id', $owner->id)->count());
+        $this->assertEquals('new-slug', ShortUrl::where('provider_profile_id', $profile->id)->value('short_url'));
+        $this->assertEquals(1, ShortUrl::where('provider_profile_id', $profile->id)->count());
     }
 
     // ===============================================================
