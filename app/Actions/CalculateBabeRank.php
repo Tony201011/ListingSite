@@ -3,14 +3,14 @@
 namespace App\Actions;
 
 use App\Models\LoginLog;
-use App\Models\Rate;
-use App\Models\User;
+use App\Models\ProfileView;
+use App\Models\ProviderProfile;
 use Illuminate\Support\Carbon;
 
 class CalculateBabeRank
 {
     /**
-     * Calculate the babe rank data for the given user.
+     * Calculate the babe rank data for the given profile.
      *
      * Returns an array with:
      *   - rank         (int 1–100)
@@ -18,9 +18,9 @@ class CalculateBabeRank
      *   - viewsToday   (int)
      *   - shortCode    (string|null)
      */
-    public function execute(?User $user): array
+    public function execute(?ProviderProfile $profile): array
     {
-        if (! $user) {
+        if (! $profile) {
             return [
                 'rank' => 0,
                 'profileScore' => 0,
@@ -29,8 +29,7 @@ class CalculateBabeRank
             ];
         }
 
-        $user->loadMissing([
-            'providerProfile',
+        $profile->loadMissing([
             'profileImages',
             'availabilities',
             'shortUrl',
@@ -38,8 +37,6 @@ class CalculateBabeRank
             'availableNow',
             'onlineUser',
         ]);
-
-        $profile = $user->providerProfile;
 
         // ── Profile score (completeness %) ───────────────────────────────────
         $scorePoints = 0;
@@ -74,7 +71,7 @@ class CalculateBabeRank
             $scorePoints += 5;
         }
 
-        $photoCount = $user->profileImages->count();
+        $photoCount = $profile->profileImages->count();
         if ($photoCount >= 1) {
             $scorePoints += 15;
         }
@@ -82,23 +79,23 @@ class CalculateBabeRank
             $scorePoints += 10;
         }
 
-        $hasRates = Rate::query()->where('user_id', $user->id)->exists();
+        $hasRates = $profile->rates()->exists();
         if ($hasRates) {
             $scorePoints += 10;
         }
 
-        if ($user->availabilities->count() > 0) {
+        if ($profile->availabilities->count() > 0) {
             $scorePoints += 10;
         }
-        if (! empty($profile?->phone) || ! empty($profile?->contact_method)) {
+        if (! empty($profile->phone) || ! empty($profile->contact_method)) {
             $scorePoints += 5;
         }
 
-        $shortUrlRecord = $user->shortUrl;
+        $shortUrlRecord = $profile->shortUrl;
         if ($shortUrlRecord?->short_url) {
             $scorePoints += 5;
         }
-        if (! empty($profile?->website) || ! empty($profile?->twitter_handle)) {
+        if (! empty($profile->website) || ! empty($profile->twitter_handle)) {
             $scorePoints += 5;
         }
 
@@ -113,26 +110,27 @@ class CalculateBabeRank
         }
 
         $recentLogin = LoginLog::query()
-            ->where('user_id', $user->id)
+            ->where('user_id', $profile->user_id)
             ->where('created_at', '>=', Carbon::now()->subDays(7))
             ->exists();
         if ($recentLogin) {
             $rankPoints += 8;
         }
 
-        $profileVisible = $user->hideShowProfile?->status !== 'hide';
+        $profileVisible = $profile->hideShowProfile?->status !== 'hide';
         if ($profileVisible) {
             $rankPoints += 7;
         }
 
-        if ($user->availableNow !== null) {
+        if ($profile->availableNow !== null) {
             $rankPoints += 5;
         }
 
         $rank = max(1, min(100, $rankPoints));
 
         // ── Views today ──────────────────────────────────────────────────────
-        $viewsToday = $user->profileViews()
+        $viewsToday = ProfileView::query()
+            ->where('user_id', $profile->user_id)
             ->whereDate('created_at', Carbon::today())
             ->count();
 
