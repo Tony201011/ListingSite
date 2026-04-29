@@ -908,12 +908,13 @@ $profileTags = array_values(array_unique(array_merge(
         const data = Object.fromEntries(formData.entries());
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
             const response = await fetch(window.__profileShowConfig.reportUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-CSRF-TOKEN': csrfToken,
                 },
                 body: JSON.stringify(data),
             });
@@ -930,7 +931,7 @@ $profileTags = array_values(array_unique(array_merge(
                 errorDiv.classList.remove('hidden');
             }
         } catch (e) {
-            errorDiv.textContent = 'Network error. Please try again.';
+            errorDiv.textContent = 'A network error occurred. Please check your connection and try again.';
             errorDiv.classList.remove('hidden');
         } finally {
             submitBtn.disabled = false;
