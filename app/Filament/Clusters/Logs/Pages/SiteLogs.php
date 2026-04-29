@@ -45,9 +45,9 @@ class SiteLogs extends Page
 
     public function mount(): void
     {
-        $this->logFilePath = storage_path('logs/laravel.log');
-        $this->dateFrom = request()->query('date_from');
-        $this->dateTo = request()->query('date_to');
+        $this->logFilePath = $this->resolveLogFilePath();
+        $this->dateFrom = $this->sanitizeDateInput(request()->query('date_from'));
+        $this->dateTo = $this->sanitizeDateInput(request()->query('date_to'));
 
         $this->loadLogLines();
     }
@@ -61,6 +61,11 @@ class SiteLogs extends Page
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('refresh')
+                ->label('Refresh')
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->action(fn () => $this->refreshLogLines()),
             Action::make('clearFile')
                 ->label('Clear File')
                 ->icon('heroicon-o-trash')
@@ -68,6 +73,16 @@ class SiteLogs extends Page
                 ->requiresConfirmation()
                 ->action(fn () => $this->clearLogFile()),
         ];
+    }
+
+    public function refreshLogLines(): void
+    {
+        $this->loadLogLines();
+
+        Notification::make()
+            ->title('Log file refreshed.')
+            ->success()
+            ->send();
     }
 
     public function clearLogFile(): void
@@ -81,6 +96,46 @@ class SiteLogs extends Page
             ->title('Log file cleared successfully.')
             ->success()
             ->send();
+    }
+
+    private function resolveLogFilePath(): string
+    {
+        $channel = config('logging.default', 'stack');
+        $channelConfig = config("logging.channels.{$channel}", []);
+
+        // For the stack driver, resolve the first stacked channel.
+        if (($channelConfig['driver'] ?? null) === 'stack') {
+            $channels = $channelConfig['channels'] ?? ['single'];
+            $first = is_array($channels) ? ($channels[0] ?? 'single') : 'single';
+            $channelConfig = config("logging.channels.{$first}", []);
+        }
+
+        $basePath = $channelConfig['path'] ?? storage_path('logs/laravel.log');
+
+        // For the daily driver, Monolog appends the current date to the filename.
+        if (($channelConfig['driver'] ?? null) === 'daily') {
+            $dir = dirname($basePath);
+            $stem = pathinfo($basePath, PATHINFO_FILENAME);
+            $ext = pathinfo($basePath, PATHINFO_EXTENSION);
+
+            return $dir.DIRECTORY_SEPARATOR.$stem.'-'.date('Y-m-d').($ext !== '' ? ".{$ext}" : '');
+        }
+
+        return $basePath;
+    }
+
+    private function sanitizeDateInput(mixed $value): ?string
+    {
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        // Accept only YYYY-MM-DD format to prevent invalid or malicious input.
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return null;
+        }
+
+        return \DateTimeImmutable::createFromFormat('Y-m-d', $value) instanceof \DateTimeImmutable ? $value : null;
     }
 
     private function loadLogLines(): void
@@ -100,6 +155,14 @@ class SiteLogs extends Page
         }
 
         $tailedLogContents = $this->tailLogFile($this->logFilePath);
+
+        if ($tailedLogContents === null) {
+            $this->logStatusMessage = 'Unable to read the application log file. Please verify file permissions.';
+            $this->logLines = [];
+
+            return;
+        }
+
         $this->logStatusMessage = null;
         $this->logLines = $this->normalizeLogLines($tailedLogContents);
 
@@ -114,8 +177,12 @@ class SiteLogs extends Page
      */
     private function filterLogLinesByDate(array $logLines): array
     {
-        $from = $this->dateFrom ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->dateFrom.' 00:00:00') : null;
-        $to = $this->dateTo ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->dateTo.' 23:59:59') : null;
+        $from = $this->dateFrom
+            ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->dateFrom.' 00:00:00') ?: null
+            : null;
+        $to = $this->dateTo
+            ? \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->dateTo.' 23:59:59') ?: null
+            : null;
 
         return array_values(array_filter($logLines, function (array $entry) use ($from, $to): bool {
             $timestamp = $entry['timestamp'] !== ''
@@ -164,12 +231,12 @@ class SiteLogs extends Page
         ];
     }
 
-    private function tailLogFile(string $path, int $lines = 500): string
+    private function tailLogFile(string $path, int $lines = 500): ?string
     {
         $handle = fopen($path, 'rb');
 
         if (! $handle) {
-            return 'Unable to read the application log file. Please verify file permissions.';
+            return null;
         }
 
         $buffer = '';
