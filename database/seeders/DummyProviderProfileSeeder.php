@@ -268,7 +268,7 @@ class DummyProviderProfileSeeder extends Seeder
             // 3 out of 5 providers are approved; 1 pending; 1 rejected
             $profileStatuses = ['approved', 'approved', 'approved', 'pending', 'rejected'];
 
-            ProviderProfile::updateOrCreate(
+            $providerProfile = ProviderProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'name' => $name,
@@ -333,13 +333,14 @@ class DummyProviderProfileSeeder extends Seeder
             // 4. RateGroup + Rates
             $rateGroup = RateGroup::updateOrCreate(
                 ['user_id' => $user->id, 'name' => 'Standard Rates'],
-                [],
+                ['provider_profile_id' => $providerProfile->id],
             );
 
             foreach (self::RATE_DESCRIPTIONS as $rateIndex => $description) {
                 Rate::updateOrCreate(
                     ['user_id' => $user->id, 'description' => $description],
                     [
+                        'provider_profile_id' => $providerProfile->id,
                         'incall' => self::INCALL_PRICES[$rateIndex],
                         'outcall' => self::OUTCALL_PRICES[$rateIndex],
                         'extra' => $rateIndex === count(self::RATE_DESCRIPTIONS) - 1
@@ -359,6 +360,7 @@ class DummyProviderProfileSeeder extends Seeder
                 Availability::updateOrCreate(
                     ['user_id' => $user->id, 'day' => $day],
                     [
+                        'provider_profile_id' => $providerProfile->id,
                         'enabled' => $enabled,
                         'from_time' => ($enabled && ! $allDay) ? '09:00' : null,
                         'to_time' => ($enabled && ! $allDay && ! $tillLate) ? '22:00' : null,
@@ -371,7 +373,7 @@ class DummyProviderProfileSeeder extends Seeder
 
             // 6. Profile images (3 per provider; first is primary and also stored as user avatar)
             // Force-delete existing images to avoid the uq_one_primary_per_user constraint on re-runs.
-            ProfileImage::where('user_id', $user->id)->forceDelete();
+            ProfileImage::where('provider_profile_id', $providerProfile->id)->forceDelete();
 
             for ($imgIndex = 1; $imgIndex <= 3; $imgIndex++) {
                 $isPrimary = $imgIndex === 1;
@@ -380,6 +382,7 @@ class DummyProviderProfileSeeder extends Seeder
 
                 ProfileImage::create([
                     'user_id' => $user->id,
+                    'provider_profile_id' => $providerProfile->id,
                     'image_path' => $imageUrl,
                     'thumbnail_path' => $thumbUrl,
                     'is_primary' => $isPrimary,
@@ -392,7 +395,10 @@ class DummyProviderProfileSeeder extends Seeder
             // 6b. Profile message
             ProfileMessage::updateOrCreate(
                 ['user_id' => $user->id],
-                ['message' => "Hi there! I'm {$name}. Feel free to send me a message to discuss your requirements or arrange a meeting. I'm responsive and discreet."],
+                [
+                    'provider_profile_id' => $providerProfile->id,
+                    'message' => "Hi there! I'm {$name}. Feel free to send me a message to discuss your requirements or arrange a meeting. I'm responsive and discreet.",
+                ],
             );
 
             // 7. User videos (2 per provider)
@@ -401,7 +407,10 @@ class DummyProviderProfileSeeder extends Seeder
 
                 UserVideo::updateOrCreate(
                     ['user_id' => $user->id, 'video_path' => $videoUrl],
-                    ['original_name' => "video-{$i}-{$vidIndex}.mp4"],
+                    [
+                        'provider_profile_id' => $providerProfile->id,
+                        'original_name' => "video-{$i}-{$vidIndex}.mp4",
+                    ],
                 );
             }
 
@@ -414,6 +423,7 @@ class DummyProviderProfileSeeder extends Seeder
                 Tour::updateOrCreate(
                     ['user_id' => $user->id, 'city' => $city, 'from' => $from],
                     [
+                        'provider_profile_id' => $providerProfile->id,
                         'to' => $to,
                         'description' => "I will be visiting {$city}. Contact me to arrange a meeting during my stay.",
                         'enabled' => true,
