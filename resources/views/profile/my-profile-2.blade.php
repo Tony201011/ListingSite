@@ -15,7 +15,7 @@
             email: @js(old('email', $user->email ?? '')),
             mobile: @js(old('mobile', $user->mobile ?? '')),
             introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
-            suburb: @js(old('suburb', $user->suburb ?? '')),
+            suburb: @js(old('suburb', $profile->suburb ?? '')),
             profile_text: @js(old('profile_text', $profile->profile_text ?? '')),
 
             age_group: @js(old('age_group', $selected['age_group'] ?? '')),
@@ -40,7 +40,7 @@
             website: @js(old('website', $profile->website ?? '')),
             onlyfans_username: @js(old('onlyfans_username', $profile->onlyfans_username ?? '')),
 
-            suburbSelected: @js((bool) old('suburb', $user->suburb ?? '')),
+            suburbSelected: @js((bool) old('suburb', $profile->suburb ?? '')),
             serverErrors: @js($errors->all()),
         },
         submitUrl: @js(url()->current()),

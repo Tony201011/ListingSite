@@ -262,7 +262,7 @@ class GetProfileShowData
             'available_expires_at' => $providerProfile->availableNow?->isCurrentlyAvailable()
                 ? $providerProfile->availableNow->available_expires_at
                 : null,
-            'suburb' => $this->extractSuburbName($user?->suburb ?? ''),
+            'suburb' => $this->extractSuburbName($providerProfile->suburb ?? ''),
             'contact_method' => $providerProfile->contact_method ?? '',
             'phone_contact_preference' => $providerProfile->phone_contact_preference ?? '',
         ];
@@ -376,7 +376,7 @@ class GetProfileShowData
                     'name' => $profile->name ?? '',
                     'image' => $imageUrl ?? '',
                     'city' => $profile->city?->name ?? '',
-                    'suburb' => $this->extractSuburbName($profile->user?->suburb ?? ''),
+                    'suburb' => $this->extractSuburbName($profile->suburb ?? ''),
                     'service_1' => $services[0] ?? '',
                     'service_2' => $services[1] ?? '',
                     'description' => $profile->description ?? '',

@@ -114,7 +114,6 @@ class EditUser extends EditRecord
             'name' => $data['name'] ?? $record->name,
             'email' => $data['email'] ?? $record->email,
             'mobile' => $data['mobile'] ?? $record->mobile,
-            'suburb' => $data['suburb'] ?? $record->suburb,
             'password' => filled($data['password'] ?? null) ? $data['password'] : null,
         ], fn ($value): bool => $value !== null));
 
@@ -156,6 +155,7 @@ class EditUser extends EditRecord
             [
                 'name' => $profileName,
                 'slug' => $slug,
+                'suburb' => $profileData['suburb'] ?? $existingProfile?->suburb,
                 'description' => array_key_exists('description', $profileData)
                     ? ($profileData['description'] ?? '')
                     : ($existingProfile?->description ?? ''),

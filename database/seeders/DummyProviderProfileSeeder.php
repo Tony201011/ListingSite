@@ -250,7 +250,6 @@ class DummyProviderProfileSeeder extends Seeder
                     'role' => User::ROLE_PROVIDER,
                     'is_blocked' => false,
                     'mobile' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 7) % 1000, ($i * 13) % 1000),
-                    'suburb' => $this->pickFrom($suburbs, $i),
                     'mobile_verified' => true,
                     'email_verified_at' => now(),
                     'account_status' => 'active',
@@ -273,6 +272,7 @@ class DummyProviderProfileSeeder extends Seeder
                 [
                     'name' => $name,
                     'slug' => $slug,
+                    'suburb' => $this->pickFrom($suburbs, $i),
                     'age' => rand(21, 45),
                     'description' => "Hi, I'm {$name}. I am a professional and discreet companion offering premium companionship services. I love to meet new people and create unforgettable experiences.",
                     'introduction_line' => "Welcome to my profile! I'm {$name}, your perfect companion.",

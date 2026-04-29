@@ -2,7 +2,9 @@
 
 namespace App\Actions\Auth;
 
+use App\Actions\GenerateUniqueProviderProfileSlug;
 use App\Actions\Support\ActionResult;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -16,7 +18,8 @@ class VerifyProviderSignupOtp
     private const LOCKOUT_MINUTES = 15;
 
     public function __construct(
-        private SendProviderAccountEmails $sendProviderAccountEmails
+        private SendProviderAccountEmails $sendProviderAccountEmails,
+        private GenerateUniqueProviderProfileSlug $generateUniqueProviderProfileSlug
     ) {}
 
     public function execute(string $otp): ActionResult
@@ -73,10 +76,17 @@ class VerifyProviderSignupOtp
             'email' => $pendingUser['email'],
             'mobile' => $pendingUser['mobile'],
             'password' => $pendingUser['password'],
-            'suburb' => $pendingUser['suburb'],
             'role' => $pendingUser['role'],
             'mobile_verified' => true,
             'referral_code' => $pendingUser['referral_code'],
+        ]);
+
+        ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $pendingUser['name'],
+            'slug' => $this->generateUniqueProviderProfileSlug->execute($pendingUser['name']),
+            'suburb' => $pendingUser['suburb'] ?? null,
+            'profile_status' => 'pending',
         ]);
 
         $this->sendProviderAccountEmails->execute($user);

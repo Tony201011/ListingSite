@@ -51,7 +51,6 @@ class PurgeDeletedAccounts extends Command
             'email' => "deleted+{$random}@example.invalid",
             'password' => '',
             'mobile' => null,
-            'suburb' => null,
             'profile_image' => null,
             'referral_code' => null,
             'email_verified_at' => null,

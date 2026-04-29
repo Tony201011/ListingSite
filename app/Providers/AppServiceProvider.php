@@ -102,7 +102,7 @@ class AppServiceProvider extends ServiceProvider
 
             $escortCities = Schema::hasTable('postcodes')
                 ? Cache::remember('header_escort_suburbs', now()->addHour(), function () {
-                    // users.suburb stores the full "Suburb, STATE postcode" format
+                    // provider_profiles.suburb stores the full "Suburb, STATE postcode" format
                     // (e.g. "Sydney, NSW 2000") written by the signup/edit-profile
                     // autocomplete.  We join postcodes on the suburb name prefix so that
                     // the header links include the state (e.g. "/?location=Sydney, NSW")
@@ -112,17 +112,12 @@ class AppServiceProvider extends ServiceProvider
                         ->groupBy(['suburb', 'state'])
                         ->whereExists(function ($q) {
                             $q->selectRaw('1')
-                                ->from('users')
-                                ->whereNotNull('suburb')
-                                ->where('suburb', '!=', '')
-                                ->whereRaw('users.suburb LIKE CONCAT(postcodes.suburb, \', \', postcodes.state, \'%\')')
-                                ->whereExists(function ($q2) {
-                                    $q2->selectRaw('1')
-                                        ->from('provider_profiles')
-                                        ->whereColumn('provider_profiles.user_id', 'users.id')
-                                        ->where('provider_profiles.profile_status', 'approved')
-                                        ->whereNull('provider_profiles.deleted_at');
-                                });
+                                ->from('provider_profiles')
+                                ->whereNotNull('provider_profiles.suburb')
+                                ->where('provider_profiles.suburb', '!=', '')
+                                ->whereRaw('provider_profiles.suburb LIKE CONCAT(postcodes.suburb, \', \', postcodes.state, \'%\')')
+                                ->where('provider_profiles.profile_status', 'approved')
+                                ->whereNull('provider_profiles.deleted_at');
                         })
                         ->orderBy('suburb')
                         ->get();

@@ -43,7 +43,6 @@ class HomeControllerTest extends TestCase
 
         $user = User::factory()->create([
             'role' => User::ROLE_PROVIDER,
-            'suburb' => $storedSuburb,
         ]);
 
         ProviderProfile::query()->create(array_merge([
@@ -52,6 +51,7 @@ class HomeControllerTest extends TestCase
             'slug' => 'test-escort-'.$user->id,
             'profile_status' => 'approved',
             'age' => 25,
+            'suburb' => $storedSuburb,
         ], $profileOverrides));
 
         Postcode::query()->create([

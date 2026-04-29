@@ -30,7 +30,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'role',
         'is_blocked',
         'mobile',
-        'suburb',
         'referral_code',
         'mobile_verified',
         'password',
