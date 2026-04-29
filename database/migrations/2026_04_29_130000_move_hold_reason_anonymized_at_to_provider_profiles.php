@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,6 +16,20 @@ return new class extends Migration
             $table->string('hold_reason')->nullable()->after('profile_status');
             $table->timestamp('anonymized_at')->nullable()->after('hold_reason');
         });
+
+        // Copy existing data from users to their provider profiles.
+        DB::table('users')
+            ->whereNotNull('hold_reason')
+            ->orWhereNotNull('anonymized_at')
+            ->get(['id', 'hold_reason', 'anonymized_at'])
+            ->each(function ($user) {
+                DB::table('provider_profiles')
+                    ->where('user_id', $user->id)
+                    ->update([
+                        'hold_reason' => $user->hold_reason,
+                        'anonymized_at' => $user->anonymized_at,
+                    ]);
+            });
 
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn(['hold_reason', 'anonymized_at']);
