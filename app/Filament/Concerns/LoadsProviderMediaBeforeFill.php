@@ -8,7 +8,12 @@ trait LoadsProviderMediaBeforeFill
     {
         $record = $this->getRecord();
 
-        $record->load(['providerProfile.profileImages', 'providerProfile.userVideos']);
+        $record->load([
+            'providerProfile.profileImages',
+            'providerProfile.userVideos',
+            'providerProfile.rates',
+            'providerProfile.availabilities',
+        ]);
 
         $profile = $record->providerProfile;
 
@@ -25,6 +30,29 @@ trait LoadsProviderMediaBeforeFill
                 'id' => $video->id,
                 'original_name' => $video->original_name,
                 'video_path' => $video->video_path,
+            ])
+            ->toArray();
+
+        $data['rates'] = ($profile?->rates ?? collect())
+            ->map(fn ($rate) => [
+                'id' => $rate->id,
+                'description' => $rate->description,
+                'incall' => $rate->incall,
+                'outcall' => $rate->outcall,
+                'extra' => $rate->extra,
+            ])
+            ->toArray();
+
+        $data['availabilities'] = ($profile?->availabilities ?? collect())
+            ->map(fn ($a) => [
+                'id' => $a->id,
+                'day' => $a->day,
+                'enabled' => (bool) $a->enabled,
+                'from_time' => $a->from_time,
+                'to_time' => $a->to_time,
+                'till_late' => (bool) $a->till_late,
+                'all_day' => (bool) $a->all_day,
+                'by_appointment' => (bool) $a->by_appointment,
             ])
             ->toArray();
 

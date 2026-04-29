@@ -96,12 +96,17 @@ class CreateUser extends CreateRecord
             ],
         );
 
+        $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
+
         $messageData = $data['profileMessage'] ?? [];
 
         if (array_key_exists('message', $messageData)) {
             ProfileMessage::query()->updateOrCreate(
                 ['user_id' => $user->id],
-                ['message' => $messageData['message'] ?? ''],
+                [
+                    'provider_profile_id' => $profile?->id,
+                    'message' => $messageData['message'] ?? '',
+                ],
             );
         }
 
