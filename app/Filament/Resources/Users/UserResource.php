@@ -101,6 +101,11 @@ class UserResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
+            // Persists the ID of the provider profile currently being edited through
+            // the Livewire component state so that save operations can always target
+            // the correct profile even after the record is re-hydrated from the DB.
+            Hidden::make('active_profile_id'),
+
             Tabs::make('ProviderFormTabs')
                 ->persistTabInQueryString('tab')
                 ->tabs([
