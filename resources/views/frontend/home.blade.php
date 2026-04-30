@@ -42,7 +42,7 @@
                         <span>
                             <input type="hidden" name="user_lat" :value="userLat">
                             <input type="hidden" name="user_lng" :value="userLng">
-                            <input type="hidden" name="distance" :value="(locationEnabled || (searchMode === 'suburb' && term.trim() !== '')) ? distance : ''">
+                            <input type="hidden" name="distance" :value="(searchMode === 'suburb' && (locationEnabled || term.trim() !== '')) ? distance : ''">
                         </span>
                     </template>
 
@@ -285,9 +285,6 @@
                                 <span class="inline-flex items-center gap-1">
                                     <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
                                     {{ $profile['suburb'] ?: $profile['city'] }}
-                                    {{-- @if(isset($profile['distance_km']) && $profile['distance_km'] !== null)
-                                        <span class="text-gray-400">({{ $profile['distance_km'] }} km)</span>
-                                    @endif --}}
                                 </span>
                             @endif
                             @if(!empty($profile['service_1']))

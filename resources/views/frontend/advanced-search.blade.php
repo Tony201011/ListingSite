@@ -218,6 +218,7 @@
                     </div>
                 </div>
 
+                @if($distanceSearchEnabled)
                 <div class="rounded-lg border border-gray-200 bg-white px-3 py-5">
                     <label for="distance" class="mb-4 block text-xs font-bold uppercase tracking-wide text-gray-700">Distance</label>
 
@@ -253,6 +254,7 @@
                         <span>{{ $maxSearchDistance }} km</span>
                     </div>
                 </div>
+                @endif
 
                 <div>
                     <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Age Range</label>
@@ -596,9 +598,6 @@
                                         <span class="inline-flex items-center gap-1">
                                             <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
                                             {{ $profile['suburb'] ?: $profile['city'] }}
-                                            {{-- @if(isset($profile['distance_km']) && $profile['distance_km'] !== null)
-                                                <span class="text-gray-400">({{ $profile['distance_km'] }} km)</span>
-                                            @endif --}}
                                         </span>
                                     @endif
                                     @if(!empty($profile['service_1']))
