@@ -8,14 +8,19 @@ trait LoadsProviderMediaBeforeFill
     {
         $record = $this->getRecord();
 
-        $record->load([
-            'providerProfile.profileImages',
-            'providerProfile.userVideos',
-            'providerProfile.rates',
-            'providerProfile.availabilities',
-        ]);
-
+        // Access providerProfile WITHOUT calling $record->load('providerProfile.*')
+        // so that any active profile set via resolveRecord::setRelation() is preserved.
         $profile = $record->providerProfile;
+
+        // Load sub-relations directly on the resolved profile to avoid reloading the
+        // providerProfile relation itself (which would discard the setRelation override).
+        if ($profile) {
+            $profile->load(['profileImages', 'userVideos', 'rates', 'availabilities']);
+        }
+
+        // Persist the active profile ID in form data so that save operations can
+        // target the correct profile even after Livewire re-hydrates the record.
+        $data['active_profile_id'] = $profile?->id;
 
         $data['profileImages'] = ($profile?->profileImages ?? collect())
             ->map(fn ($image) => [
