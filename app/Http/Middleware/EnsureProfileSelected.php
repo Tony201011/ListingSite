@@ -38,9 +38,12 @@ class EnsureProfileSelected
             // Single-profile users are auto-selected so they are never blocked
             if ($profileCount === 1) {
                 $profile = $user->providerProfiles()->first();
-                session(['active_provider_profile_id' => $profile->id]);
 
-                return $next($request);
+                if ($profile) {
+                    session(['active_provider_profile_id' => $profile->id]);
+
+                    return $next($request);
+                }
             }
 
             if ($request->expectsJson()) {
