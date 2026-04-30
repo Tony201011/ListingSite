@@ -98,7 +98,7 @@ class MyToursController extends Controller
 
         $tour->update(['enabled' => ! $tour->enabled]);
 
-        return response()->json(['tour' => $tour->fresh()]);
+        return response()->json(['tour' => $tour]);
     }
 
     public function search(SearchTourCityRequest $request): JsonResponse
