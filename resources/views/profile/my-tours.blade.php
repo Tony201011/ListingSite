@@ -6,6 +6,7 @@
             tours: @js($tours),
             storeUrl: @js(route('my-tours.store')),
             updateUrl: @js(route('my-tours.update', ['tour' => '__ID__'])),
+            toggleUrl: @js(route('my-tours.toggle', ['tour' => '__ID__'])),
             deleteUrl: @js(route('my-tours.destroy', ['tour' => '__ID__'])),
             csrfToken: @js(csrf_token())
         })"
@@ -116,7 +117,7 @@
                             >
                             <select
                                 x-model="statusFilter"
-                                class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white"
+                                class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white text-gray-900"
                             >
                                 <option value="all">All status</option>
                                 <option value="enabled">Enabled only</option>
@@ -175,10 +176,11 @@
                                         <td class="px-4 py-3">
                                             <button
                                                 @click="toggleStatus(tour)"
-                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-                                                :class="tour.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                                :disabled="togglingId === tour.id"
+                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                                                :class="tour.enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'"
                                             >
-                                                <span x-text="tour.enabled ? 'Enabled' : 'Disabled'"></span>
+                                                <span x-text="togglingId === tour.id ? '...' : (tour.enabled ? 'Enabled' : 'Disabled')"></span>
                                             </button>
                                         </td>
                                         <td class="px-4 py-3">
@@ -288,11 +290,17 @@
     .ql-container.ql-snow {
         border-color: #e5e7eb !important;
     }
-    input, textarea, td, th {
+    input, textarea, select, td, th {
         color: #111827 !important;
     }
     .text-gray-500, .text-gray-600, .text-gray-700 {
         color: #4b5563 !important;
+    }
+    .text-green-800 {
+        color: #166534 !important;
+    }
+    .text-red-700 {
+        color: #b91c1c !important;
     }
 </style>
 @endpush

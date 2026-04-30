@@ -7,6 +7,7 @@ document.addEventListener('alpine:init', () => {
             tours: config.tours || [],
             storeUrl: config.storeUrl,
             updateUrl: config.updateUrl,
+            toggleUrl: config.toggleUrl,
             deleteUrl: config.deleteUrl,
             csrfToken: config.csrfToken,
 
@@ -23,6 +24,7 @@ document.addEventListener('alpine:init', () => {
             selectedTour: null,
             citySuggestions: [],
             submitting: false,
+            togglingId: null,
 
             searchQuery: '',
             statusFilter: 'all',
@@ -273,8 +275,34 @@ document.addEventListener('alpine:init', () => {
                 }
             },
 
-            toggleStatus(tour) {
-                tour.enabled = !tour.enabled;
+            async toggleStatus(tour) {
+                if (this.togglingId === tour.id) return;
+                this.togglingId = tour.id;
+
+                try {
+                    const url = this.toggleUrl.replace('__ID__', tour.id);
+                    const res = await fetch(url, {
+                        method: 'PATCH',
+                        headers: {
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) throw new Error(data.message || 'Toggle failed');
+
+                    const idx = this.tours.findIndex(t => t.id === tour.id);
+                    if (idx !== -1) {
+                        this.tours[idx] = data.tour;
+                    }
+                } catch (e) {
+                    this.error(e.message);
+                } finally {
+                    this.togglingId = null;
+                }
             },
 
             toast(msg) {
