@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\GoogleRecaptchaSetting;
+use App\Models\RecaptchaLog;
 use App\Models\SiteSetting;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Http;
@@ -48,6 +49,14 @@ class ProviderSigninRequest extends FormRequest
             $secret = $recaptchaSetting?->secret_key;
 
             if (! $recaptcha || ! $secret) {
+                RecaptchaLog::create([
+                    'action' => 'signin',
+                    'ip_address' => $this->ip(),
+                    'status' => 'failed',
+                    'error_codes' => null,
+                    'hostname' => null,
+                ]);
+
                 $validator->errors()->add(
                     'g-recaptcha-response',
                     'reCAPTCHA verification failed'
@@ -68,12 +77,36 @@ class ProviderSigninRequest extends FormRequest
                 $result = $response->json();
 
                 if (! $response->successful() || ! data_get($result, 'success', false)) {
+                    RecaptchaLog::create([
+                        'action' => 'signin',
+                        'ip_address' => $this->ip(),
+                        'status' => 'failed',
+                        'error_codes' => data_get($result, 'error-codes'),
+                        'hostname' => data_get($result, 'hostname'),
+                    ]);
+
                     $validator->errors()->add(
                         'g-recaptcha-response',
                         'reCAPTCHA verification failed'
                     );
+                } else {
+                    RecaptchaLog::create([
+                        'action' => 'signin',
+                        'ip_address' => $this->ip(),
+                        'status' => 'success',
+                        'error_codes' => null,
+                        'hostname' => data_get($result, 'hostname'),
+                    ]);
                 }
             } catch (\Throwable $e) {
+                RecaptchaLog::create([
+                    'action' => 'signin',
+                    'ip_address' => $this->ip(),
+                    'status' => 'failed',
+                    'error_codes' => null,
+                    'hostname' => null,
+                ]);
+
                 $validator->errors()->add(
                     'g-recaptcha-response',
                     'reCAPTCHA verification failed'
