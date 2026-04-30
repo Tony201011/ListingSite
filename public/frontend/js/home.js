@@ -123,24 +123,20 @@ function escortSearch(config) {
             this.searchMode = item.type === 'suburb' ? 'suburb' : 'username';
             this.closeSuggestions();
 
-            // Explicitly sync the hidden inputs so the correct value is present
-            // when the form is submitted (e.g. via the "Find Escorts" button).
+            if (!autoSubmit) {
+                return;
+            }
+
             const form = (event && (event.currentTarget || event.target)
                 ? (event.currentTarget || event.target).closest('form')
                 : null) || document.querySelector('form');
             if (!form) {
                 return;
             }
-            const locationInput = form.querySelector('input[name="location"]');
-            const escortNameInput = form.querySelector('input[name="escort_name"]');
-            if (locationInput) locationInput.value = item.type === 'suburb' ? (item.value || item.name || '') : '';
-            if (escortNameInput) escortNameInput.value = item.type !== 'suburb' ? (item.value || item.name || '') : '';
 
-            // Auto-submit when a suggestion is selected so the search is passed
-            // into the query string immediately (like selecting from a native <select>).
-            if (autoSubmit) {
-                form.submit();
-            }
+            // Wait for Alpine.js to apply the updated :name binding before submitting,
+            // so the correct field name (location or escort_name) is sent.
+            this.$nextTick(() => form.submit());
         },
 
         closeSuggestions() {
@@ -163,8 +159,8 @@ function escortSearch(config) {
                 // Pass false so selectSuggestion doesn't also call form.submit();
                 // we submit explicitly below so the caller controls timing.
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
-                // For keyboard selection (Enter key), submit the form immediately.
-                event.target.closest('form')?.submit();
+                // Wait for Alpine.js to apply the updated :name binding before submitting.
+                this.$nextTick(() => event.target.closest('form')?.submit());
                 return;
             }
             this.closeSuggestions();
@@ -177,9 +173,8 @@ function escortSearch(config) {
                 // Pass false so selectSuggestion doesn't also call form.submit();
                 // we submit explicitly below so the caller controls timing.
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
-                // Submit using the form's native method so the event handler is
-                // not re-triggered (form.submit() does not fire the submit event).
-                event.target.closest('form')?.submit();
+                // Wait for Alpine.js to apply the updated :name binding before submitting.
+                this.$nextTick(() => event.target.closest('form')?.submit());
                 return;
             }
             this.closeSuggestions();
