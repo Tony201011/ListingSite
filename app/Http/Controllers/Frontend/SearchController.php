@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SearchController extends Controller
 {
@@ -24,17 +25,27 @@ class SearchController extends Controller
                 ->where('profile_status', 'approved')
                 ->take(self::MAX_SUGGESTIONS)
                 ->get(['id', 'name', 'slug', 'city_id', 'age']);
-
-            $suggestions = $results->map(fn (ProviderProfile $profile) => [
-                'name' => $profile->name,
-                'slug' => $profile->slug,
-                'location' => $profile->city?->name ?? '',
-                'age' => $profile->age,
-            ])->values();
-
-            return response()->json(['suggestions' => $suggestions]);
-        } catch (\Throwable) {
-            return response()->json(['suggestions' => []]);
+        } catch (\Throwable $e) {
+            Log::warning('Scout search unavailable, falling back to database search.', [
+                'error' => $e->getMessage(),
+            ]);
+            $results = ProviderProfile::query()
+                ->where('profile_status', 'approved')
+                ->whereNull('deleted_at')
+                ->where('name', 'like', '%'.$term.'%')
+                ->with('city')
+                ->orderBy('name')
+                ->take(self::MAX_SUGGESTIONS)
+                ->get(['id', 'name', 'slug', 'city_id', 'age']);
         }
+
+        $suggestions = $results->map(fn (ProviderProfile $profile) => [
+            'name' => $profile->name,
+            'slug' => $profile->slug,
+            'location' => $profile->city?->name ?? '',
+            'age' => $profile->age,
+        ])->values();
+
+        return response()->json(['suggestions' => $suggestions]);
     }
 }
