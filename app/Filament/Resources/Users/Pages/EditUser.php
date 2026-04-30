@@ -191,16 +191,14 @@ class EditUser extends EditRecord
             : null;
 
         if ($profileId) {
-            // Use the already-loaded collection when available to avoid an extra query.
-            if ($record->relationLoaded('providerProfiles')) {
-                $profile = $record->providerProfiles->firstWhere('id', $profileId);
-
-                if ($profile) {
-                    return $profile;
-                }
+            // Ensure the providerProfiles collection is loaded so that we can use
+            // a single collection lookup instead of issuing a second query when
+            // the relation was not already eager-loaded.
+            if (! $record->relationLoaded('providerProfiles')) {
+                $record->load('providerProfiles');
             }
 
-            $profile = $record->providerProfiles()->find($profileId);
+            $profile = $record->providerProfiles->firstWhere('id', $profileId);
 
             if ($profile) {
                 return $profile;
