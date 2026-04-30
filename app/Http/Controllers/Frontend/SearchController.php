@@ -24,17 +24,24 @@ class SearchController extends Controller
                 ->where('profile_status', 'approved')
                 ->take(self::MAX_SUGGESTIONS)
                 ->get(['id', 'name', 'slug', 'city_id', 'age']);
-
-            $suggestions = $results->map(fn (ProviderProfile $profile) => [
-                'name' => $profile->name,
-                'slug' => $profile->slug,
-                'location' => $profile->city?->name ?? '',
-                'age' => $profile->age,
-            ])->values();
-
-            return response()->json(['suggestions' => $suggestions]);
         } catch (\Throwable) {
-            return response()->json(['suggestions' => []]);
+            $results = ProviderProfile::query()
+                ->where('profile_status', 'approved')
+                ->whereNull('deleted_at')
+                ->where('name', 'like', '%'.$term.'%')
+                ->with('city')
+                ->orderBy('name')
+                ->take(self::MAX_SUGGESTIONS)
+                ->get(['id', 'name', 'slug', 'city_id', 'age']);
         }
+
+        $suggestions = $results->map(fn (ProviderProfile $profile) => [
+            'name' => $profile->name,
+            'slug' => $profile->slug,
+            'location' => $profile->city?->name ?? '',
+            'age' => $profile->age,
+        ])->values();
+
+        return response()->json(['suggestions' => $suggestions]);
     }
 }
