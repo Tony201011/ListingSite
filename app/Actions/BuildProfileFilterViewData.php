@@ -288,6 +288,7 @@ class BuildProfileFilterViewData
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
             ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
@@ -530,6 +531,7 @@ class BuildProfileFilterViewData
 
         return DB::table('provider_profiles')
             ->leftJoin('states', 'states.id', '=', 'provider_profiles.state_id')
+            ->leftJoin('hide_show_profiles', 'hide_show_profiles.provider_profile_id', '=', 'provider_profiles.id')
             ->join('postcodes as profile_postcodes', function ($join) use ($stateCaseSql) {
                 $join->whereRaw('UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(provider_profiles.suburb, ",", 1)))')
                     ->whereRaw("
@@ -549,6 +551,10 @@ class BuildProfileFilterViewData
             })
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
+            ->where(function ($q) {
+                $q->whereNull('hide_show_profiles.id')
+                    ->orWhere('hide_show_profiles.status', 'show');
+            })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
             ->select('provider_profiles.id as provider_profile_id')

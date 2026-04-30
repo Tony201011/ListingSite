@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\HideShowProfile;
 use App\Models\ProviderProfile;
 use App\Models\Rate;
 use App\Models\SiteSetting;
@@ -114,6 +115,38 @@ class ProfileShowControllerTest extends TestCase
         $response = $this->get(route('profile.show', ['slug' => 'deleted-profile']));
 
         $response->assertStatus(404);
+    }
+
+    public function test_profile_show_returns_404_for_hidden_profile(): void
+    {
+        $user = $this->createApprovedProvider(['slug' => 'hidden-profile']);
+        $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
+
+        HideShowProfile::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'hide',
+        ]);
+
+        $response = $this->get(route('profile.show', ['slug' => 'hidden-profile']));
+
+        $response->assertStatus(404);
+    }
+
+    public function test_profile_show_returns_200_for_profile_with_visible_status(): void
+    {
+        $user = $this->createApprovedProvider(['slug' => 'visible-profile']);
+        $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
+
+        HideShowProfile::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'show',
+        ]);
+
+        $response = $this->get(route('profile.show', ['slug' => 'visible-profile']));
+
+        $response->assertStatus(200);
     }
 
     // ---------------------------------------------------------------

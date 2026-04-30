@@ -107,7 +107,8 @@ class SitemapService
             ->whereRaw('slug = lower(slug)')
             ->whereRaw('slug = trim(slug)')
             ->where('slug', 'not like', '% %')
-            ->whereHas('user');
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'));
     }
 
     private function profileSitemapPageSize(): int
