@@ -89,6 +89,18 @@ class MyToursController extends Controller
         return response()->json($result->toPayload(), $result->status());
     }
 
+    /**
+     * Toggle the enabled status of the specified tour.
+     */
+    public function toggleEnabled(Tour $tour): JsonResponse
+    {
+        $this->authorize('update', $tour);
+
+        $tour->update(['enabled' => ! $tour->enabled]);
+
+        return response()->json(['tour' => $tour->fresh()]);
+    }
+
     public function search(SearchTourCityRequest $request): JsonResponse
     {
         $this->authorize('viewAny', Tour::class);

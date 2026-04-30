@@ -197,6 +197,7 @@ Route::middleware('provider.auth')->group(function () {
             Route::get('/my-tours', [MyToursController::class, 'index'])->name('my-tours');
             Route::post('/my-tours', [MyToursController::class, 'store'])->name('my-tours.store');
             Route::put('/my-tours/{tour}', [MyToursController::class, 'update'])->name('my-tours.update');
+            Route::patch('/my-tours/{tour}/toggle', [MyToursController::class, 'toggleEnabled'])->name('my-tours.toggle');
             Route::delete('/my-tours/{tour}', [MyToursController::class, 'destroy'])->name('my-tours.destroy');
             Route::get('/search-cities', [MyToursController::class, 'search'])->name('search-cities');
             /*** tour route end here */
