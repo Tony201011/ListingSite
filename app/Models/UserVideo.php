@@ -26,6 +26,11 @@ class UserVideo extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function providerProfile(): BelongsTo
+    {
+        return $this->belongsTo(ProviderProfile::class, 'provider_profile_id');
+    }
+
     public function getVideoUrlAttribute(): ?string
     {
         if (! $this->video_path) {

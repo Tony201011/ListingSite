@@ -60,6 +60,11 @@ class VideoLogResource extends Resource
                     ->label('Email')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('providerProfile.name')
+                    ->label('Profile')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('-'),
                 TextColumn::make('original_name')
                     ->label('File Name')
                     ->limit(50)
