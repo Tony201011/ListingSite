@@ -32,6 +32,7 @@ class SiteSetting extends Model
         'fatal_error_default_message',
         'fatal_error_query_param',
         'logging_enabled',
+        'max_video_upload_mb',
     ];
 
     protected $casts = [
@@ -48,6 +49,7 @@ class SiteSetting extends Model
         'available_now_duration_minutes' => 'integer',
         'fatal_error_page_enabled' => 'boolean',
         'logging_enabled' => 'boolean',
+        'max_video_upload_mb' => 'integer',
     ];
 
     protected function sitePassword(): Attribute
@@ -76,6 +78,7 @@ class SiteSetting extends Model
             cache()->forget('site_setting.status_settings');
             cache()->forget('site_setting.logging_enabled');
             cache()->forget('site_setting.site_password_config');
+            cache()->forget('site_setting.max_video_upload_mb');
         });
     }
 
@@ -113,6 +116,13 @@ class SiteSetting extends Model
                 'available_now_max_uses' => $setting?->available_now_max_uses ?? 2,
                 'available_now_duration_minutes' => $setting?->available_now_duration_minutes ?? 120,
             ];
+        });
+    }
+
+    public static function getMaxVideoUploadMb(): int
+    {
+        return cache()->remember('site_setting.max_video_upload_mb', now()->addMinutes(10), function () {
+            return (int) (static::first()?->max_video_upload_mb ?: 100);
         });
     }
 }

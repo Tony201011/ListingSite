@@ -98,6 +98,13 @@ class SiteSettingResource extends Resource
                 ->label('Enable Logs')
                 ->default(true)
                 ->helperText('When enabled, the Logs section is visible in the admin navigation. When disabled, all log pages are hidden.'),
+            Forms\Components\TextInput::make('max_video_upload_mb')
+                ->label('Max Video Upload Size (MB)')
+                ->numeric()
+                ->minValue(1)
+                ->maxValue(10240)
+                ->default(100)
+                ->helperText('Maximum video file size users can upload in megabytes. Default is 100 MB.'),
         ]);
     }
 
@@ -117,6 +124,7 @@ class SiteSettingResource extends Resource
                 Tables\Columns\IconColumn::make('fatal_error_page_enabled')->label('Fatal Error Page')->boolean(),
                 Tables\Columns\TextColumn::make('fatal_error_query_param')->label('Fatal Query Param'),
                 Tables\Columns\IconColumn::make('logging_enabled')->label('Logs Enabled')->boolean(),
+                Tables\Columns\TextColumn::make('max_video_upload_mb')->label('Max Video Upload (MB)'),
                 Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
             ])
             ->recordActions([

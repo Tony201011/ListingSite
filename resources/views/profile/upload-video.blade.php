@@ -6,7 +6,8 @@
     x-data="uploadVideoPage({
         uploadUrl: @js(route('videos.upload')),
         redirectUrl: @js(route('my-videos')),
-        csrfToken: @js(csrf_token())
+        csrfToken: @js(csrf_token()),
+        maxUploadMb: @js(\App\Models\SiteSetting::getMaxVideoUploadMb())
     })"
 >
     <div class="mx-auto max-w-4xl">
@@ -24,7 +25,7 @@
             </h1>
 
             <p class="mb-6 text-gray-600">
-                Add short clips for your profile. MP4/MOV up to 100MB each.
+                Add short clips for your profile. MP4/MOV up to <span x-text="maxUploadMb"></span>MB each.
             </p>
 
             <template x-if="successMessage">

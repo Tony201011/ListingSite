@@ -3,6 +3,7 @@ document.addEventListener('alpine:init', () => {
         uploadUrl: config.uploadUrl || '',
         redirectUrl: config.redirectUrl || '',
         csrfToken: config.csrfToken || '',
+        maxUploadMb: config.maxUploadMb || 100,
 
         selectedVideos: [],
         uploading: false,
@@ -32,9 +33,16 @@ document.addEventListener('alpine:init', () => {
 
         addFiles(files) {
             const incomingFiles = Array.from(files || []);
+            const maxBytes = this.maxUploadMb * 1024 * 1024;
 
             incomingFiles.forEach(file => {
                 if (this.isDuplicate(file)) return;
+
+                if (file.size > maxBytes) {
+                    this.errorMessage = (this.errorMessage ? this.errorMessage + '\n' : '') +
+                        `"${file.name}" exceeds the maximum allowed size of ${this.maxUploadMb} MB.`;
+                    return;
+                }
 
                 this.selectedVideos.push({
                     key: `${file.name}-${file.size}-${file.lastModified}-${Math.random()}`,
