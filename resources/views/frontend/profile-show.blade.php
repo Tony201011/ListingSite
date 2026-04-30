@@ -104,7 +104,7 @@ $profileTags = array_values(array_unique(array_merge(
 
 
                 <!-- Gallery (left, spans 2 columns) -->
-                <div class="md:col-span-2 flex flex-col gap-4 relative order-2 md:order-1">
+                <div class="md:col-span-2 flex flex-col gap-8 relative order-2 md:order-1">
                     <!-- Previous Button (left corner) -->
                           <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
                               x-data="{ visible: false }"
@@ -155,7 +155,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </a>
                 <!-- Currently Touring Section -->
                 @if(!empty($profile['tours']))
-                <div class="mb-6">
+                <div>
                     <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
                         <div class="mb-6">
                             <div class="flex items-center mb-2">
@@ -177,13 +177,12 @@ $profileTags = array_values(array_unique(array_merge(
                         );
                     @endphp
                     @if(!empty($safeAbout))
-                        <div class="mt-8 mb-8">
+                        <div>
                             <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
                             <hr class="mb-4">
                             <div class="text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
                                 {!! nl2br($safeAbout) !!}
                             </div>
-                            <br>
                         </div>
                     @endif
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -191,18 +190,14 @@ $profileTags = array_values(array_unique(array_merge(
                             <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
-                    <br>
 
                     <!-- Videos Section -->
 
 @include('components.gallery-modal')
                     @if(!empty($profile['videos'] ?? []))
-                    <section class="mt-12 overflow-hidden">
-                        <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
-                            <hr class="mb-4">
-                        </div>
-                        <br>
+                    <section class="overflow-hidden">
+                        <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
+                        <hr class="mb-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
                             x-data="{
                                 init() {
@@ -255,12 +250,11 @@ $profileTags = array_values(array_unique(array_merge(
 
                     <!-- My Upcoming Tours Section (Card Style) -->
                     @if(!empty($profile['tours'] ?? []))
-                    <section id="upcoming-tours" class="mt-12 scroll-mt-32">
+                    <section id="upcoming-tours" class="scroll-mt-32">
                         <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                            <div class="flex items-center mb-1">
+                            <div class="flex items-center mb-3">
                                 <i class="fa-solid fa-location-dot text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-semibold mb-2 text-pink-600">My upcoming tours</h2>
-                                <hr class="mb-4">
+                                <h2 class="text-2xl font-semibold text-pink-600">My upcoming tours</h2>
                             </div>
                             <div class="border-b border-gray-200 mb-6"></div>
                             <div class="space-y-4">
@@ -273,12 +267,11 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                         </div>
                     </section>
-                    <br>
                     @endif
 
                     <!-- Profile Message Section -->
                     @if(!empty($profile['profile_message']))
-                    <section class="mt-12">
+                    <section>
                         <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
                             <div class="flex items-center mb-3">
                                 <i class="fa-solid fa-bullhorn text-pink-600 text-xl mr-2"></i>
@@ -290,17 +283,15 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                         </div>
                     </section>
-                    <br>
                     @endif
 
                     <!-- Contact Me For Section (Card Style) -->
-                    <section id="contact-me-for" class="mt-12 scroll-mt-32">
+                    <section id="contact-me-for" class="scroll-mt-32">
                         @if(!empty($servicesProvided))
                         <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                            <div class="flex items-center mb-1">
+                            <div class="flex items-center mb-3">
                                 <i class="fa-solid fa-comments text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-semibold mb-2 text-pink-600">Contact me for</h2>
-                                <hr class="mb-4">
+                                <h2 class="text-2xl font-semibold text-pink-600">Contact me for</h2>
                             </div>
                             <div class="border-b border-pink-300 mb-6 w-24"></div>
                             <ul class="space-y-2 list-none pl-0">
@@ -312,12 +303,11 @@ $profileTags = array_values(array_unique(array_merge(
                                 @endforeach
                             </ul>
                         </div>
-                        <br>
                         @endif
                     </section>
 
-                                    <!-- Short Link Section -->
-                <div class="text-center mb-8 mt-8">
+                    <!-- Short Link Section -->
+                <div class="text-center">
                     <span class="text-lg font-medium" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
                         Find me easily with this short link:
                         <a href="{{ $profileUrl }}" class="hover:underline text-blue-500" style="background: none; color: #4fa3e3;">
