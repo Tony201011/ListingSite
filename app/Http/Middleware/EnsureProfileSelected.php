@@ -35,6 +35,17 @@ class EnsureProfileSelected
         $activeId = session('active_provider_profile_id');
 
         if (! $activeId || ! $user->providerProfiles()->where('id', $activeId)->exists()) {
+            // Single-profile users are auto-selected so they are never blocked
+            if ($profileCount === 1) {
+                $profile = $user->providerProfiles()->first();
+
+                if ($profile) {
+                    session(['active_provider_profile_id' => $profile->id]);
+
+                    return $next($request);
+                }
+            }
+
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'No profile selected.'], 403);
             }
