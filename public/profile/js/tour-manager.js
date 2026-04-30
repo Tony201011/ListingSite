@@ -85,11 +85,16 @@ document.addEventListener('alpine:init', () => {
             formatDateTime(dt) {
                 if (!dt) return '';
                 try {
-                    const d = new Date(dt);
+                    const d = new Date(dt.replace(' ', 'T'));
                     return d.toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
                 } catch {
                     return dt;
                 }
+            },
+
+            toDatetimeLocal(dt) {
+                if (!dt) return '';
+                return dt.replace(' ', 'T').substring(0, 16);
             },
 
             plainDescription(desc) {
@@ -208,12 +213,24 @@ document.addEventListener('alpine:init', () => {
 
             editTour(tour) {
                 this.editingIndex = this.tours.findIndex(t => t.id === tour.id);
-                this.newTour = { ...tour };
+                this.newTour = {
+                    ...tour,
+                    from: this.toDatetimeLocal(tour.from),
+                    to: this.toDatetimeLocal(tour.to),
+                };
 
                 if (editorInstance) {
                     editorInstance.setContents([]);
                     editorInstance.clipboard.dangerouslyPasteHTML(0, tour.description || '');
                 }
+
+                this.$nextTick(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            },
+
+            cancelEdit() {
+                this.resetForm();
             },
 
             resetForm() {

@@ -16,7 +16,7 @@ class UpdateTourRequest extends FormRequest
     {
         return [
             'city' => ['required', 'string', 'max:255'],
-            'from' => ['required', 'date', 'after_or_equal:today'],
+            'from' => ['required', 'date'],
             'to' => ['required', 'date'],
             'description' => ['nullable', 'string'],
             'enabled' => ['sometimes', 'boolean'],
@@ -49,7 +49,6 @@ class UpdateTourRequest extends FormRequest
             'city.max' => 'City may not be greater than 255 characters.',
             'from.required' => 'From date is required.',
             'from.date' => 'From must be a valid date.',
-            'from.after_or_equal' => 'From date must be today or later.',
             'to.required' => 'To date is required.',
             'to.date' => 'To must be a valid date.',
             'to.after' => 'To date must be after the from date.',
