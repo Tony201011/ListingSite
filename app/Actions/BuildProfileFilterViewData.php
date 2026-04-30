@@ -553,7 +553,7 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.profile_status', 'approved')
             ->where(function ($q) {
                 $q->whereNull('hide_show_profiles.id')
-                    ->orWhere('hide_show_profiles.status', '!=', 'hide');
+                    ->orWhere('hide_show_profiles.status', 'show');
             })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])

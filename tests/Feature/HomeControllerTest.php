@@ -172,13 +172,9 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_does_not_show_hidden_profiles(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
-        $profile = ProviderProfile::query()->create([
-            'user_id' => $user->id,
-            'name' => 'Hidden Escort',
-            'slug' => 'hidden-escort',
-            'profile_status' => 'approved',
-        ]);
+        $user = $this->createApprovedProvider(['name' => 'Hidden Escort', 'slug' => 'hidden-escort']);
+        $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
+
         HideShowProfile::query()->create([
             'user_id' => $user->id,
             'provider_profile_id' => $profile->id,
@@ -193,13 +189,9 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_shows_visible_profiles(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
-        $profile = ProviderProfile::query()->create([
-            'user_id' => $user->id,
-            'name' => 'Visible Escort',
-            'slug' => 'visible-escort',
-            'profile_status' => 'approved',
-        ]);
+        $user = $this->createApprovedProvider(['name' => 'Visible Escort', 'slug' => 'visible-escort']);
+        $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
+
         HideShowProfile::query()->create([
             'user_id' => $user->id,
             'provider_profile_id' => $profile->id,
