@@ -80,8 +80,8 @@
         </div>
     </div>
 </div>
+@endsection
 
 @push('scripts')
 <script src="{{ asset('profile/js/video-gallery.js') }}?v={{ filemtime(public_path('profile/js/video-gallery.js')) }}"></script>
 @endpush
-@endsection
