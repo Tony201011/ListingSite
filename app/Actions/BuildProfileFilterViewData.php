@@ -324,7 +324,7 @@ class BuildProfileFilterViewData
         }
 
         if ($minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE) {
-            $query->whereHas('user.rates', function ($q) use ($minPrice, $maxPrice): void {
+            $query->whereHas('rates', function ($q) use ($minPrice, $maxPrice): void {
                 $q->whereRaw(
                     "CASE
                         WHEN incall IS NOT NULL AND TRIM(incall) != ''
@@ -429,7 +429,7 @@ class BuildProfileFilterViewData
                 $query->addSelect([
                     'popularity_score' => ProfileView::query()
                         ->selectRaw('count(*)')
-                        ->whereColumn('profile_views.user_id', 'provider_profiles.user_id'),
+                        ->whereColumn('profile_views.provider_profile_id', 'provider_profiles.id'),
                 ]);
 
                 if (! $distanceOrderingApplied) {

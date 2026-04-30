@@ -9,11 +9,17 @@ class ProfileView extends Model
 {
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'viewer_ip',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function providerProfile(): BelongsTo
+    {
+        return $this->belongsTo(ProviderProfile::class);
     }
 }
