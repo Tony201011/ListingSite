@@ -456,6 +456,8 @@ class BuildProfileFilterViewData
 
         $appendParams = array_filter([
             'location' => $locationQuery ?: null,
+            'location_state' => $locationStateQuery ?: null,
+            'escort_name' => $escortNameQuery ?: null,
             'min_age' => $minAge !== self::DEFAULT_MIN_AGE ? $minAge : null,
             'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
             'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
