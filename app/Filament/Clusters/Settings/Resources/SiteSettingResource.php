@@ -104,6 +104,7 @@ class SiteSettingResource extends Resource
                 ->minValue(1)
                 ->maxValue(10240)
                 ->default(100)
+                ->required()
                 ->helperText('Maximum video file size users can upload in megabytes. Default is 100 MB.'),
         ]);
     }
