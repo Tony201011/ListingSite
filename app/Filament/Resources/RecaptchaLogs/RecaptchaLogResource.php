@@ -20,11 +20,11 @@ class RecaptchaLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static ?string $navigationLabel = 'Recaptcha Logs';
+    protected static ?string $navigationLabel = 'reCAPTCHA Logs';
 
-    protected static ?string $modelLabel = 'Recaptcha Log';
+    protected static ?string $modelLabel = 'reCAPTCHA Log';
 
-    protected static ?string $pluralModelLabel = 'Recaptcha Logs';
+    protected static ?string $pluralModelLabel = 'reCAPTCHA Logs';
 
     protected static ?string $slug = 'recaptcha-logs';
 
@@ -69,7 +69,7 @@ class RecaptchaLogResource extends Resource
                 TextColumn::make('error_codes')
                     ->label('Error Codes')
                     ->placeholder('-')
-                    ->formatStateUsing(fn ($state): string => is_array($state) ? implode(', ', $state) : ($state ?? '-'))
+                    ->formatStateUsing(fn ($state): string => is_array($state) ? implode(', ', $state) : '-')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('hostname')
                     ->label('Hostname')

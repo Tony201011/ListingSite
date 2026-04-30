@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('action')->index();
             $table->string('ip_address', 45)->nullable();
-            $table->string('status')->default('success')->index();
+            $table->string('status')->nullable()->index();
             $table->json('error_codes')->nullable();
             $table->string('hostname')->nullable();
             $table->timestamps();
