@@ -22,7 +22,7 @@ class DummyProviderListingSeeder extends Seeder
             ->all();
 
         $providers = User::query()
-            ->where('email', 'regexp', '^provider[0-9]+@yopmail\\.com$')
+            ->where('email', 'like', 'provider%@yopmail.com')
             ->orderBy('id')
             ->take(1000)
             ->get();
