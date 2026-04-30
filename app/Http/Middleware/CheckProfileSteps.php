@@ -54,11 +54,19 @@ class CheckProfileSteps
             ->exists();
 
         if (! $stepOneCompleted) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Please complete your profile first.'], 403);
+            }
+
             return redirect()
                 ->route('my-profile')
                 ->with('error', 'Please complete your profile first.');
         }
         if (! $stepTwoCompleted) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Please upload at least one photo.'], 403);
+            }
+
             return redirect()
                 ->route('my-profile')
                 ->with('error', 'Please upload at least one photo.');
