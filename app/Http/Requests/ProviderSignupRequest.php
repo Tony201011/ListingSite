@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\GoogleRecaptchaSetting;
+use App\Models\RecaptchaLog;
 use App\Models\SiteSetting;
 use App\ValueObjects\AustralianMobile;
 use Illuminate\Foundation\Http\FormRequest;
@@ -69,6 +70,14 @@ class ProviderSignupRequest extends FormRequest
             $secret = $recaptchaSetting?->secret_key;
 
             if (! $recaptcha || ! $secret) {
+                RecaptchaLog::create([
+                    'action' => 'signup',
+                    'ip_address' => $this->ip(),
+                    'status' => 'failed',
+                    'error_codes' => null,
+                    'hostname' => null,
+                ]);
+
                 $validator->errors()->add(
                     'g-recaptcha-response',
                     'Google reCAPTCHA verification failed. Please try again.'
@@ -89,12 +98,36 @@ class ProviderSignupRequest extends FormRequest
                 $result = $response->json();
 
                 if (! $response->successful() || ! data_get($result, 'success', false)) {
+                    RecaptchaLog::create([
+                        'action' => 'signup',
+                        'ip_address' => $this->ip(),
+                        'status' => 'failed',
+                        'error_codes' => data_get($result, 'error-codes'),
+                        'hostname' => data_get($result, 'hostname'),
+                    ]);
+
                     $validator->errors()->add(
                         'g-recaptcha-response',
                         'Google reCAPTCHA verification failed. Please try again.'
                     );
+                } else {
+                    RecaptchaLog::create([
+                        'action' => 'signup',
+                        'ip_address' => $this->ip(),
+                        'status' => 'success',
+                        'error_codes' => null,
+                        'hostname' => data_get($result, 'hostname'),
+                    ]);
                 }
             } catch (\Throwable $e) {
+                RecaptchaLog::create([
+                    'action' => 'signup',
+                    'ip_address' => $this->ip(),
+                    'status' => 'failed',
+                    'error_codes' => null,
+                    'hostname' => null,
+                ]);
+
                 $validator->errors()->add(
                     'g-recaptcha-response',
                     'Google reCAPTCHA verification failed. Please try again.'
