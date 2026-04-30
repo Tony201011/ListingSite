@@ -13,7 +13,13 @@ return new class extends Migration
             $table->unsignedBigInteger('provider_profile_id')->nullable()->after('user_id');
         });
 
-        // Best-effort backfill: link existing views to the earliest profile for each user.
+        // Best-effort backfill for MySQL: assign existing view records to the earliest
+        // (minimum id) profile for each user.  This is an approximation – since the
+        // original schema stored only user_id we cannot determine which specific profile
+        // was actually viewed.  Historical popularity counts will therefore start from
+        // each user's first profile; all new views will be attributed correctly.
+        // SQLite (used in testing) starts with an empty profile_views table, so no
+        // backfill is required there.
         if (DB::getDriverName() !== 'sqlite') {
             DB::statement('
                 UPDATE profile_views
