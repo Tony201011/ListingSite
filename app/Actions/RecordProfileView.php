@@ -14,16 +14,17 @@ class RecordProfileView
      */
     public function execute(string $slug, Request $request): void
     {
-        $userId = ProviderProfile::query()
+        $profile = ProviderProfile::query()
             ->where('slug', $slug)
-            ->value('user_id');
+            ->first(['id', 'user_id']);
 
-        if (! $userId) {
+        if (! $profile) {
             return;
         }
 
         ProfileView::query()->create([
-            'user_id' => $userId,
+            'user_id' => $profile->user_id,
+            'provider_profile_id' => $profile->id,
             'viewer_ip' => $request->ip(),
         ]);
     }
