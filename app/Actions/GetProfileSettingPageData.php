@@ -85,7 +85,7 @@ class GetProfileSettingPageData
             'videos' => $videos,
             'photoVerification' => $photoVerification,
             'userInfo' => $userInfo,
-            'profileMessage' => $this->getProfileMessage->execute($user),
+            'profileMessage' => $this->getProfileMessage->execute($profile),
         ];
     }
 
