@@ -340,6 +340,7 @@ class GetProfileShowData
                 'primaryProfileImage',
                 'rates',
                 'onlineUser',
+                'availableNow',
                 'user',
                 'city',
             ])
@@ -386,6 +387,7 @@ class GetProfileShowData
                     'age' => $profile->age,
                     'verified' => $profile->is_verified,
                     'active' => $profile->onlineUser?->isCurrentlyOnline() ?? false,
+                    'available_now' => $profile->availableNow?->isCurrentlyAvailable() ?? false,
                     'date' => $profile->created_at->format('d/m/Y'),
                 ];
             })

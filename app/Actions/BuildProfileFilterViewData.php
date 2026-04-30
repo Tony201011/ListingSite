@@ -292,6 +292,7 @@ class BuildProfileFilterViewData
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
                 'onlineUser',
+                'availableNow',
                 'user',
                 'city',
             ]);
@@ -729,6 +730,7 @@ class BuildProfileFilterViewData
         );
 
         $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
+        $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
 
         return [
             'name' => $profile->name,
@@ -746,6 +748,7 @@ class BuildProfileFilterViewData
             'date' => $profile->created_at->format('d/m/Y'),
             'description' => $profile->description ?? '',
             'active' => $isOnline,
+            'available_now' => $isAvailableNow,
             'verified' => $profile->is_verified,
             'image' => $imageUrl ?? '',
             'slug' => $profile->slug,
