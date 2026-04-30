@@ -30,10 +30,12 @@ class GetProfileShowData
                 'city',
                 'state',
                 'country',
+                'hideShowProfile',
             ])
             ->first();
 
         abort_if($providerProfile === null, 404);
+        abort_if($providerProfile->hideShowProfile?->status === 'hide', 404);
 
         $categoryIds = array_filter([
             $providerProfile->age_group_id,
@@ -291,6 +293,7 @@ class GetProfileShowData
             $adjacent = ProviderProfile::query()
                 ->where('profile_status', 'approved')
                 ->whereHas('user')
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where('id', '<', $currentId)
                 ->orderByDesc('id')
                 ->first(['id', 'name', 'slug']);
@@ -299,6 +302,7 @@ class GetProfileShowData
                 $adjacent = ProviderProfile::query()
                     ->where('profile_status', 'approved')
                     ->whereHas('user')
+                    ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                     ->orderByDesc('id')
                     ->first(['id', 'name', 'slug']);
             }
@@ -306,6 +310,7 @@ class GetProfileShowData
             $adjacent = ProviderProfile::query()
                 ->where('profile_status', 'approved')
                 ->whereHas('user')
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where('id', '>', $currentId)
                 ->orderBy('id')
                 ->first(['id', 'name', 'slug']);
@@ -314,6 +319,7 @@ class GetProfileShowData
                 $adjacent = ProviderProfile::query()
                     ->where('profile_status', 'approved')
                     ->whereHas('user')
+                    ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                     ->orderBy('id')
                     ->first(['id', 'name', 'slug']);
             }
@@ -336,6 +342,7 @@ class GetProfileShowData
             ->where('profile_status', 'approved')
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
                 'primaryProfileImage',
                 'rates',

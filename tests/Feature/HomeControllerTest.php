@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\HideShowProfile;
 use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
@@ -167,6 +168,48 @@ class HomeControllerTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(0, $profiles->total());
+    }
+
+    public function test_home_page_does_not_show_hidden_profiles(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Hidden Escort',
+            'slug' => 'hidden-escort',
+            'profile_status' => 'approved',
+        ]);
+        HideShowProfile::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'hide',
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(0, $profiles->total());
+    }
+
+    public function test_home_page_shows_visible_profiles(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Visible Escort',
+            'slug' => 'visible-escort',
+            'profile_status' => 'approved',
+        ]);
+        HideShowProfile::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'show',
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(1, $profiles->total());
     }
 
     public function test_featured_profiles_appear_before_non_featured(): void
