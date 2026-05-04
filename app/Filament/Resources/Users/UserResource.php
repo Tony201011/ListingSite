@@ -1214,14 +1214,22 @@ class UserResource extends Resource
                     ->color('info')
                     ->url(function (User $record): string {
                         $profile = $record->providerProfiles
+                            ->whereNotNull('slug')
+                            ->where('slug', '!=', '')
                             ->where('profile_status', 'approved')
                             ->first()
-                            ?? $record->providerProfiles->first();
+                            ?? $record->providerProfiles
+                                ->whereNotNull('slug')
+                                ->where('slug', '!=', '')
+                                ->first();
 
-                        return $profile?->slug ? route('profile.show', ['slug' => $profile->slug]) : '#';
+                        return $profile ? route('profile.show', ['slug' => $profile->slug]) : '#';
                     })
                     ->openUrlInNewTab()
-                    ->visible(fn (User $record): bool => $record->providerProfiles->isNotEmpty() && filled($record->providerProfiles->first()?->slug) && ! $record->trashed()),
+                    ->visible(fn (User $record): bool => $record->providerProfiles
+                        ->whereNotNull('slug')
+                        ->where('slug', '!=', '')
+                        ->isNotEmpty() && ! $record->trashed()),
 
                 Action::make('edit')
                     ->label('Edit')
