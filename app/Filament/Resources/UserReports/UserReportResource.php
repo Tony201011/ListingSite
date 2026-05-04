@@ -27,11 +27,11 @@ class UserReportResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFlag;
 
-    protected static ?string $navigationLabel = 'User Reports';
+    protected static ?string $navigationLabel = 'Provider Reports';
 
-    protected static ?string $modelLabel = 'User Report';
+    protected static ?string $modelLabel = 'Provider Report';
 
-    protected static ?string $pluralModelLabel = 'User Reports';
+    protected static ?string $pluralModelLabel = 'Provider Reports';
 
     protected static ?string $slug = 'user-reports';
 
@@ -192,7 +192,7 @@ class UserReportResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()
-            ->emptyStateHeading('No user reports yet')
+            ->emptyStateHeading('No provider reports yet')
             ->emptyStateDescription('Submitted profile reports will appear here.');
     }
 
