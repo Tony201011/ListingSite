@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Database\Seeders\CookieSettingSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -55,10 +56,10 @@ class DatabaseSeeder extends Seeder
             FooterTextSeeder::class,
             HeaderWidgetSeeder::class,
             FaqSeeder::class,
-         //   SmtpSettingSeeder::class,
-           // S3BucketSettingSeeder::class,
-          //  GoogleRecaptchaSettingSeeder::class,
-            //  CookieSettingSeeder::class,
+            SmtpSettingSeeder::class,
+            S3BucketSettingSeeder::class,
+            GoogleRecaptchaSettingSeeder::class,
+            CookieSettingSeeder::class,
             MetaKeywordSeeder::class,
             MetaDescriptionSeeder::class,
         ]);
