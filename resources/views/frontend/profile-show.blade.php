@@ -614,12 +614,17 @@ $profileTags = array_values(array_unique(array_merge(
                     if (!track) return;
                     const container = track.parentElement;
                     if (!container) return;
+                    const containerW = container.clientWidth;
+                    if (containerW === 0) {
+                        window.requestAnimationFrame(() => this.computeDimensions());
+                        return;
+                    }
                     const gap = parseFloat(getComputedStyle(track).gap) || 16;
                     const containerStyle = getComputedStyle(container);
                     const paddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
                     const paddingRight = parseFloat(containerStyle.paddingRight) || 0;
-                    const containerW = container.clientWidth - paddingLeft - paddingRight;
-                    this._cardW = (containerW - (this.pageSize - 1) * gap) / this.pageSize;
+                    const usableW = containerW - paddingLeft - paddingRight;
+                    this._cardW = (usableW - (this.pageSize - 1) * gap) / this.pageSize;
                     this._slideW = this._cardW + gap;
                 },
                 get translateX() {
@@ -627,6 +632,19 @@ $profileTags = array_values(array_unique(array_merge(
                 },
                 init() {
                     this.updatePageSize();
+                    this.$nextTick(() => {
+                        window.requestAnimationFrame(() => this.computeDimensions());
+                        if (window.ResizeObserver) {
+                            const container = this.$refs.track?.parentElement;
+                            if (container) {
+                                const ro = new ResizeObserver(() => {
+                                    window.requestAnimationFrame(() => this.computeDimensions());
+                                });
+                                ro.observe(container);
+                                this.$cleanup(() => ro.disconnect());
+                            }
+                        }
+                    });
                 },
                 updatePageSize() {
                     this.pageSize = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 1;
@@ -634,7 +652,7 @@ $profileTags = array_values(array_unique(array_merge(
                         this.page = this.pages - 1;
                     }
                     this.$nextTick(() => {
-                        this.computeDimensions();
+                        window.requestAnimationFrame(() => this.computeDimensions());
                     });
                 },
                 prev() { if (this.page > 0) this.page--; },
