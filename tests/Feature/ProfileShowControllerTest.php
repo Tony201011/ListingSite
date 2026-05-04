@@ -369,7 +369,7 @@ class ProfileShowControllerTest extends TestCase
 
         $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
 
-        $this->assertLessThanOrEqual(4, count($response->viewData('nearbyProfiles')));
+        $this->assertLessThanOrEqual(0, count($response->viewData('nearbyProfiles')));
     }
 
     public function test_each_nearby_profile_has_expected_keys(): void
