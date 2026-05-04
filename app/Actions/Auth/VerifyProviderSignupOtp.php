@@ -95,10 +95,8 @@ class VerifyProviderSignupOtp
 
         $this->expireOtpSession($pendingKey);
 
-        Session::flash('success', 'Your account has been created successfully! Please check your email and verify your email address before logging in.');
-
         return ActionResult::success([
-            'redirect' => route('signin'),
+            'redirect' => url('/'),
         ], 'Account created successfully.');
     }
 
