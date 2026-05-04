@@ -6,23 +6,16 @@ trait LoadsProviderMediaBeforeFill
 {
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $record = $this->getRecord();
+        // The resource model is ProviderProfile, so the record IS the profile.
+        $profile = $this->getRecord();
 
-        // Access providerProfile WITHOUT calling $record->load('providerProfile.*')
-        // so that any active profile set via resolveRecord::setRelation() is preserved.
-        $profile = $record->providerProfile;
-
-        // Load sub-relations directly on the resolved profile to avoid reloading the
-        // providerProfile relation itself (which would discard the setRelation override).
-        if ($profile) {
-            $profile->load(['profileImages', 'userVideos', 'rates', 'availabilities']);
-        }
+        $profile->load(['profileImages', 'userVideos', 'rates', 'availabilities']);
 
         // Persist the active profile ID in form data so that save operations can
         // target the correct profile even after Livewire re-hydrates the record.
-        $data['active_profile_id'] = $profile?->id;
+        $data['active_profile_id'] = $profile->id;
 
-        $data['profileImages'] = ($profile?->profileImages ?? collect())
+        $data['profileImages'] = $profile->profileImages
             ->map(fn ($image) => [
                 'id' => $image->id,
                 'image_path' => $image->image_path,
@@ -30,7 +23,7 @@ trait LoadsProviderMediaBeforeFill
             ])
             ->toArray();
 
-        $data['userVideos'] = ($profile?->userVideos ?? collect())
+        $data['userVideos'] = $profile->userVideos
             ->map(fn ($video) => [
                 'id' => $video->id,
                 'original_name' => $video->original_name,
@@ -38,7 +31,7 @@ trait LoadsProviderMediaBeforeFill
             ])
             ->toArray();
 
-        $data['rates'] = ($profile?->rates ?? collect())
+        $data['rates'] = $profile->rates
             ->map(fn ($rate) => [
                 'id' => $rate->id,
                 'description' => $rate->description,
@@ -48,7 +41,7 @@ trait LoadsProviderMediaBeforeFill
             ])
             ->toArray();
 
-        $data['availabilities'] = ($profile?->availabilities ?? collect())
+        $data['availabilities'] = $profile->availabilities
             ->map(fn ($a) => [
                 'id' => $a->id,
                 'day' => $a->day,

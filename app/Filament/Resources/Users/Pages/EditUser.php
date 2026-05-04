@@ -10,7 +10,6 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
@@ -23,44 +22,19 @@ class EditUser extends EditRecord
     protected static string $resource = UserResource::class;
 
     /**
-     * Override record resolution so that a ?profile_id= URL parameter causes
-     * $record->providerProfile to return the requested profile during the
-     * mount lifecycle (form fill).  Subsequent Livewire requests re-hydrate
-     * the record from the database, so save operations rely on the
-     * active_profile_id value stored in the form state instead.
-     */
-    protected function resolveRecord(int|string $key): Model
-    {
-        $record = parent::resolveRecord($key);
-
-        $profileId = (int) request()->query('profile_id', 0);
-
-        if ($profileId > 0) {
-            $record->load('providerProfiles');
-            $selected = $record->providerProfiles->firstWhere('id', $profileId);
-
-            if ($selected) {
-                $record->setRelation('providerProfile', $selected);
-            }
-        }
-
-        return $record;
-    }
-
-    /**
      * Add a "Switch Profile" header action when the provider has more than one
      * profile, so the admin can navigate directly to a specific profile's edit view.
+     * Each ProviderProfile has its own URL, so switching jumps to the selected
+     * profile's edit page directly.
      */
     protected function getHeaderActions(): array
     {
         $record = $this->getRecord();
-        $profiles = $record->providerProfiles;
+        $profiles = $record->user?->providerProfiles ?? collect();
 
         if ($profiles->count() <= 1) {
             return [];
         }
-
-        $currentProfileId = $record->providerProfile?->id;
 
         return [
             Action::make('switchProfile')
@@ -77,13 +51,12 @@ class EditUser extends EditRecord
                                 $p->id => "#{$p->id}: {$p->name} ({$p->profile_status})",
                             ])->all()
                         )
-                        ->default($currentProfileId)
+                        ->default($record->id)
                         ->required(),
                 ])
                 ->action(function (array $data): void {
                     redirect()->to(
-                        static::getResource()::getUrl('edit', ['record' => $this->record->id])
-                        .'?profile_id='.(int) $data['profile_id']
+                        static::getResource()::getUrl('edit', ['record' => (int) $data['profile_id']])
                     );
                 }),
         ];
@@ -177,61 +150,38 @@ class EditUser extends EditRecord
     }
 
     /**
-     * Resolve the provider profile that is currently being edited.
-     *
-     * During the mount lifecycle the record already has the correct profile
-     * set via setRelation (see resolveRecord).  On subsequent Livewire requests
-     * the record is re-hydrated from the database, so we fall back to the
-     * active_profile_id value persisted in the form state.
+     * Since the resource model is now ProviderProfile, the record itself IS the
+     * active profile.  This helper is kept for backwards compatibility but simply
+     * returns the record cast to ProviderProfile.
      */
     private function getActiveProfile(Model $record, array $data): ?ProviderProfile
     {
-        $profileId = filled($data['active_profile_id'] ?? null)
-            ? (int) $data['active_profile_id']
-            : null;
-
-        if ($profileId) {
-            // Ensure the providerProfiles collection is loaded so that we can use
-            // a single collection lookup instead of issuing a second query when
-            // the relation was not already eager-loaded.
-            if (! $record->relationLoaded('providerProfiles')) {
-                $record->load('providerProfiles');
-            }
-
-            $profile = $record->providerProfiles->firstWhere('id', $profileId);
-
-            if ($profile) {
-                return $profile;
-            }
-        }
-
-        return $record->providerProfile ?? $record->providerProfiles()->orderBy('id')->first();
+        return $record instanceof ProviderProfile ? $record : null;
     }
 
     protected function updateOverviewTab(Model $record, array $data): void
     {
-        $record->update(array_filter([
-            'name' => $data['name'] ?? $record->name,
-            'email' => $data['email'] ?? $record->email,
-            'mobile' => $data['mobile'] ?? $record->mobile,
-            'password' => filled($data['password'] ?? null) ? $data['password'] : null,
-        ], fn ($value): bool => $value !== null));
+        // User account fields come from the 'user' relationship section in the form.
+        $userData = $data['user'] ?? [];
 
-        $profileData = $data['providerProfile'] ?? [];
-        $existingProfile = $this->getActiveProfile($record, $data);
+        $userUpdates = array_filter([
+            'name' => $userData['name'] ?? null,
+            'email' => $userData['email'] ?? null,
+            'mobile' => $userData['mobile'] ?? null,
+            'password' => filled($userData['password'] ?? null) ? $userData['password'] : null,
+        ], fn ($value): bool => $value !== null);
 
-        $profileName = filled($profileData['name'] ?? null)
-            ? $profileData['name']
-            : ($existingProfile?->name ?? ($data['name'] ?? $record->name));
+        if (! empty($userUpdates) && $record->user) {
+            $record->user->update($userUpdates);
+        }
 
-        $requestedSlug = filled($profileData['slug'] ?? null)
-            ? $profileData['slug']
-            : $profileName;
-
+        // Profile fields are at the top level of $data (no relationship wrapper).
+        $profileName = filled($data['name'] ?? null) ? $data['name'] : $record->name;
+        $requestedSlug = filled($data['slug'] ?? null) ? $data['slug'] : $profileName;
         $baseSlug = Str::slug($requestedSlug);
 
         if (! filled($baseSlug)) {
-            $baseSlug = $existingProfile?->slug ?: 'provider-'.$record->id;
+            $baseSlug = $record->slug ?: 'provider-'.$record->id;
         }
 
         $slug = $baseSlug;
@@ -240,89 +190,64 @@ class EditUser extends EditRecord
         while (
             ProviderProfile::query()
                 ->where('slug', $slug)
-                ->when(
-                    filled($existingProfile?->id),
-                    fn (Builder $query): Builder => $query->where('id', '!=', $existingProfile->id),
-                )
+                ->where('id', '!=', $record->id)
                 ->exists()
         ) {
             $slug = $baseSlug.'-'.$index;
             $index++;
         }
 
-        $profileAttributes = [
+        $record->update([
             'name' => $profileName,
             'slug' => $slug,
-            'suburb' => $profileData['suburb'] ?? $existingProfile?->suburb,
-            'description' => array_key_exists('description', $profileData)
-                ? ($profileData['description'] ?? '')
-                : ($existingProfile?->description ?? ''),
-            'introduction_line' => array_key_exists('introduction_line', $profileData)
-                ? ($profileData['introduction_line'] ?? '')
-                : ($existingProfile?->introduction_line ?? ''),
-            'profile_text' => array_key_exists('profile_text', $profileData)
-                ? ($profileData['profile_text'] ?? '')
-                : ($existingProfile?->profile_text ?? ''),
-            'is_verified' => $profileData['is_verified'] ?? $existingProfile?->is_verified ?? false,
-            'is_featured' => $profileData['is_featured'] ?? $existingProfile?->is_featured ?? false,
-            'profile_status' => $profileData['profile_status'] ?? $existingProfile?->profile_status ?? 'pending',
-        ];
-
-        if ($existingProfile) {
-            $existingProfile->update($profileAttributes);
-        } else {
-            ProviderProfile::create(array_merge(['user_id' => $record->id], $profileAttributes));
-        }
+            'suburb' => $data['suburb'] ?? $record->suburb,
+            'description' => array_key_exists('description', $data)
+                ? ($data['description'] ?? '')
+                : ($record->description ?? ''),
+            'introduction_line' => array_key_exists('introduction_line', $data)
+                ? ($data['introduction_line'] ?? '')
+                : ($record->introduction_line ?? ''),
+            'profile_text' => array_key_exists('profile_text', $data)
+                ? ($data['profile_text'] ?? '')
+                : ($record->profile_text ?? ''),
+            'is_verified' => $data['is_verified'] ?? $record->is_verified ?? false,
+            'is_featured' => $data['is_featured'] ?? $record->is_featured ?? false,
+            'profile_status' => $data['profile_status'] ?? $record->profile_status ?? 'pending',
+        ]);
     }
 
     protected function updateAttributesTab(Model $record, array $data): void
     {
-        $profileData = $data['providerProfile'] ?? [];
-        $existingProfile = $this->getActiveProfile($record, $data);
-
-        $profileAttributes = [
-            'age_group_id' => $profileData['age_group_id'] ?? $existingProfile?->age_group_id,
-            'hair_color_id' => $profileData['hair_color_id'] ?? $existingProfile?->hair_color_id,
-            'hair_length_id' => $profileData['hair_length_id'] ?? $existingProfile?->hair_length_id,
-            'ethnicity_id' => $profileData['ethnicity_id'] ?? $existingProfile?->ethnicity_id,
-            'body_type_id' => $profileData['body_type_id'] ?? $existingProfile?->body_type_id,
-            'bust_size_id' => $profileData['bust_size_id'] ?? $existingProfile?->bust_size_id,
-            'your_length_id' => $profileData['your_length_id'] ?? $existingProfile?->your_length_id,
-            'availability' => $profileData['availability'] ?? $existingProfile?->availability,
-            'contact_method' => $profileData['contact_method'] ?? $existingProfile?->contact_method,
-            'phone_contact_preference' => $profileData['phone_contact_preference'] ?? $existingProfile?->phone_contact_preference,
-            'time_waster_shield' => $profileData['time_waster_shield'] ?? $existingProfile?->time_waster_shield,
-            'primary_identity' => $profileData['primary_identity'] ?? $existingProfile?->primary_identity ?? [],
-            'attributes' => $profileData['attributes'] ?? $existingProfile?->attributes ?? [],
-            'services_style' => $profileData['services_style'] ?? $existingProfile?->services_style ?? [],
-            'services_provided' => $profileData['services_provided'] ?? $existingProfile?->services_provided ?? [],
-        ];
-
-        if ($existingProfile) {
-            $existingProfile->update($profileAttributes);
-        } else {
-            ProviderProfile::create(array_merge(['user_id' => $record->id], $profileAttributes));
-        }
+        // Attribute fields are at the top level of $data (no relationship wrapper).
+        $record->update([
+            'age_group_id' => $data['age_group_id'] ?? $record->age_group_id,
+            'hair_color_id' => $data['hair_color_id'] ?? $record->hair_color_id,
+            'hair_length_id' => $data['hair_length_id'] ?? $record->hair_length_id,
+            'ethnicity_id' => $data['ethnicity_id'] ?? $record->ethnicity_id,
+            'body_type_id' => $data['body_type_id'] ?? $record->body_type_id,
+            'bust_size_id' => $data['bust_size_id'] ?? $record->bust_size_id,
+            'your_length_id' => $data['your_length_id'] ?? $record->your_length_id,
+            'availability' => $data['availability'] ?? $record->availability,
+            'contact_method' => $data['contact_method'] ?? $record->contact_method,
+            'phone_contact_preference' => $data['phone_contact_preference'] ?? $record->phone_contact_preference,
+            'time_waster_shield' => $data['time_waster_shield'] ?? $record->time_waster_shield,
+            'primary_identity' => $data['primary_identity'] ?? $record->primary_identity ?? [],
+            'attributes' => $data['attributes'] ?? $record->attributes ?? [],
+            'services_style' => $data['services_style'] ?? $record->services_style ?? [],
+            'services_provided' => $data['services_provided'] ?? $record->services_provided ?? [],
+        ]);
     }
 
     protected function updateContactTab(Model $record, array $data): void
     {
-        $profileData = $data['providerProfile'] ?? [];
-        $existingProfile = $this->getActiveProfile($record, $data);
-
-        $profileAttributes = [
-            'twitter_handle' => $profileData['twitter_handle'] ?? $existingProfile?->twitter_handle,
-            'website' => $profileData['website'] ?? $existingProfile?->website,
-            'onlyfans_username' => $profileData['onlyfans_username'] ?? $existingProfile?->onlyfans_username,
-            'phone' => $profileData['phone'] ?? $existingProfile?->phone,
-            'whatsapp' => $profileData['whatsapp'] ?? $existingProfile?->whatsapp,
-        ];
-
-        if ($existingProfile) {
-            $existingProfile->update($profileAttributes);
-        } else {
-            ProviderProfile::create(array_merge(['user_id' => $record->id], $profileAttributes));
-        }
+        // Contact fields are at the top level of $data (no relationship wrapper).
+        $record->update([
+            'twitter_handle' => $data['twitter_handle'] ?? $record->twitter_handle,
+            'website' => $data['website'] ?? $record->website,
+            'onlyfans_username' => $data['onlyfans_username'] ?? $record->onlyfans_username,
+            'phone' => $data['phone'] ?? $record->phone,
+            'whatsapp' => $data['whatsapp'] ?? $record->whatsapp,
+        ]);
     }
 
     protected function updateImagesTab(Model $record, array $data): void
@@ -331,15 +256,9 @@ class EditUser extends EditRecord
             return;
         }
 
-        $profile = $this->getActiveProfile($record, $data);
-
-        if (! $profile) {
-            return;
-        }
-
         $this->syncHasManyRelation(
-            $profile->profileImages(),
-            $this->addUserIdToItems($data['profileImages'], $record->id),
+            $record->profileImages(),
+            $this->addUserIdToItems($data['profileImages'], $record->user_id),
             ['image_path', 'thumbnail_path', 'is_primary', 'user_id']
         );
     }
@@ -350,15 +269,9 @@ class EditUser extends EditRecord
             return;
         }
 
-        $profile = $this->getActiveProfile($record, $data);
-
-        if (! $profile) {
-            return;
-        }
-
         $this->syncHasManyRelation(
-            $profile->userVideos(),
-            $this->addUserIdToItems($data['userVideos'], $record->id),
+            $record->userVideos(),
+            $this->addUserIdToItems($data['userVideos'], $record->user_id),
             ['original_name', 'video_path', 'user_id']
         );
     }
@@ -377,14 +290,8 @@ class EditUser extends EditRecord
             return;
         }
 
-        $profile = $this->getActiveProfile($record, $data);
-
-        if (! $profile) {
-            return;
-        }
-
         $this->syncHasManyRelation(
-            $profile->rates(),
+            $record->rates(),
             $data['rates'],
             ['description', 'incall', 'outcall', 'extra']
         );
@@ -396,14 +303,8 @@ class EditUser extends EditRecord
             return;
         }
 
-        $profile = $this->getActiveProfile($record, $data);
-
-        if (! $profile) {
-            return;
-        }
-
         $this->syncHasManyRelation(
-            $profile->availabilities(),
+            $record->availabilities(),
             $data['availabilities'],
             ['day', 'enabled', 'from_time', 'to_time', 'till_late', 'all_day', 'by_appointment']
         );
@@ -414,18 +315,13 @@ class EditUser extends EditRecord
         $messageData = $data['profileMessage'] ?? [];
 
         if (array_key_exists('message', $messageData)) {
-            $profile = $this->getActiveProfile($record, $data);
-
-            if ($profile) {
-                // ProfileMessage is unique per provider_profile_id (see migration).
-                ProfileMessage::query()->updateOrCreate(
-                    ['provider_profile_id' => $profile->id],
-                    [
-                        'user_id' => $record->id,
-                        'message' => $messageData['message'] ?? '',
-                    ],
-                );
-            }
+            ProfileMessage::query()->updateOrCreate(
+                ['provider_profile_id' => $record->id],
+                [
+                    'user_id' => $record->user_id,
+                    'message' => $messageData['message'] ?? '',
+                ],
+            );
         }
     }
 

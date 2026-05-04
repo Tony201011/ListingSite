@@ -11,7 +11,6 @@ use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
 use App\Models\Postcode;
 use App\Models\ProviderProfile;
-use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -84,13 +83,16 @@ class UserResource extends Resource
         return parent::getEloquentQuery()
             ->withTrashed()
             ->with([
-                'user',
+                'user.providerProfiles',
                 'profileImages',
                 'userVideos',
                 'photoVerification',
                 'rates',
                 'availabilities',
                 'profileMessage',
+                'onlineUser',
+                'hideShowProfile',
+                'availableNow',
             ]);
     }
 
@@ -428,7 +430,6 @@ class UserResource extends Resource
                         ->icon('heroicon-o-phone')
                         ->schema([
                             Section::make('Social & Contact')
-                                ->relationship('providerProfile')
                                 ->description('Public contact details and social links.')
                                 ->icon('heroicon-o-chat-bubble-left-right')
                                 ->schema([
@@ -720,38 +721,38 @@ class UserResource extends Resource
                                 ->description('Core account details and verification state.')
                                 ->icon('heroicon-o-identification')
                                 ->schema([
-                                    TextEntry::make('name')
+                                    TextEntry::make('user.name')
                                         ->label('User Name')
                                         ->weight('bold'),
 
-                                    TextEntry::make('email')
+                                    TextEntry::make('user.email')
                                         ->label('Email')
                                         ->copyable(),
 
-                                    TextEntry::make('mobile')
+                                    TextEntry::make('user.mobile')
                                         ->label('Mobile')
                                         ->placeholder('-'),
 
-                                    TextEntry::make('referral_code')
+                                    TextEntry::make('user.referral_code')
                                         ->label('Referral Code')
                                         ->badge()
                                         ->placeholder('-'),
 
-                                    TextEntry::make('created_at')
+                                    TextEntry::make('user.created_at')
                                         ->label('Joined At')
                                         ->dateTime()
                                         ->placeholder('-'),
 
-                                    TextEntry::make('email_verified_at')
+                                    TextEntry::make('user.email_verified_at')
                                         ->label('Email Verified At')
                                         ->dateTime()
                                         ->placeholder('-'),
 
-                                    IconEntry::make('mobile_verified')
+                                    IconEntry::make('user.mobile_verified')
                                         ->label('Mobile Verified')
                                         ->boolean(),
 
-                                    IconEntry::make('is_blocked')
+                                    IconEntry::make('user.is_blocked')
                                         ->label('Blocked')
                                         ->boolean(),
                                 ])
@@ -762,7 +763,7 @@ class UserResource extends Resource
                                 ->description('All provider profiles associated with this account.')
                                 ->icon('heroicon-o-sparkles')
                                 ->schema([
-                                    RepeatableEntry::make('providerProfiles')
+                                    RepeatableEntry::make('user.providerProfiles')
                                         ->label('')
                                         ->schema([
                                             TextEntry::make('name')
@@ -843,13 +844,13 @@ class UserResource extends Resource
                             Section::make('Physical Attributes')
                                 ->icon('heroicon-o-user')
                                 ->schema([
-                                    TextEntry::make('providerProfile.age_group_id')->label('Age Group')->formatStateUsing(fn ($state): string => self::categoryName($state)),
-                                    TextEntry::make('providerProfile.hair_color_id')->label('Hair Color')->formatStateUsing(fn ($state): string => self::categoryName($state)),
-                                    TextEntry::make('providerProfile.hair_length_id')->label('Hair Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
-                                    TextEntry::make('providerProfile.ethnicity_id')->label('Ethnicity')->formatStateUsing(fn ($state): string => self::categoryName($state)),
-                                    TextEntry::make('providerProfile.body_type_id')->label('Body Type')->formatStateUsing(fn ($state): string => self::categoryName($state)),
-                                    TextEntry::make('providerProfile.bust_size_id')->label('Bust Size')->formatStateUsing(fn ($state): string => self::categoryName($state)),
-                                    TextEntry::make('providerProfile.your_length_id')->label('Your Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('age_group_id')->label('Age Group')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('hair_color_id')->label('Hair Color')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('hair_length_id')->label('Hair Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('ethnicity_id')->label('Ethnicity')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('body_type_id')->label('Body Type')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('bust_size_id')->label('Bust Size')->formatStateUsing(fn ($state): string => self::categoryName($state)),
+                                    TextEntry::make('your_length_id')->label('Your Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
                                 ])
                                 ->columns(3)
                                 ->collapsible(),
@@ -857,14 +858,14 @@ class UserResource extends Resource
                             Section::make('Preferences & Services')
                                 ->icon('heroicon-o-heart')
                                 ->schema([
-                                    TextEntry::make('providerProfile.availability')->label('Availability')->placeholder('-'),
-                                    TextEntry::make('providerProfile.contact_method')->label('Contact Method')->placeholder('-'),
-                                    TextEntry::make('providerProfile.phone_contact_preference')->label('Phone Contact Preference')->placeholder('-'),
-                                    TextEntry::make('providerProfile.time_waster_shield')->label('Time Waster Shield')->placeholder('-'),
-                                    TextEntry::make('providerProfile.primary_identity')->label('Primary Identity')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
-                                    TextEntry::make('providerProfile.attributes')->label('Attributes')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
-                                    TextEntry::make('providerProfile.services_style')->label('Services Style')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
-                                    TextEntry::make('providerProfile.services_provided')->label('Services Provided')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
+                                    TextEntry::make('availability')->label('Availability')->placeholder('-'),
+                                    TextEntry::make('contact_method')->label('Contact Method')->placeholder('-'),
+                                    TextEntry::make('phone_contact_preference')->label('Phone Contact Preference')->placeholder('-'),
+                                    TextEntry::make('time_waster_shield')->label('Time Waster Shield')->placeholder('-'),
+                                    TextEntry::make('primary_identity')->label('Primary Identity')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
+                                    TextEntry::make('attributes')->label('Attributes')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
+                                    TextEntry::make('services_style')->label('Services Style')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
+                                    TextEntry::make('services_provided')->label('Services Provided')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
                                 ])
                                 ->columns(2)
                                 ->collapsible(),
@@ -876,11 +877,11 @@ class UserResource extends Resource
                             Section::make('Social & Contact')
                                 ->icon('heroicon-o-chat-bubble-left-right')
                                 ->schema([
-                                    TextEntry::make('providerProfile.phone')->label('Phone')->placeholder('-'),
-                                    TextEntry::make('providerProfile.whatsapp')->label('WhatsApp')->placeholder('-'),
-                                    TextEntry::make('providerProfile.twitter_handle')->label('Twitter Handle')->placeholder('-'),
-                                    TextEntry::make('providerProfile.website')->label('Website')->placeholder('-'),
-                                    TextEntry::make('providerProfile.onlyfans_username')->label('OnlyFans Username')->placeholder('-'),
+                                    TextEntry::make('phone')->label('Phone')->placeholder('-'),
+                                    TextEntry::make('whatsapp')->label('WhatsApp')->placeholder('-'),
+                                    TextEntry::make('twitter_handle')->label('Twitter Handle')->placeholder('-'),
+                                    TextEntry::make('website')->label('Website')->placeholder('-'),
+                                    TextEntry::make('onlyfans_username')->label('OnlyFans Username')->placeholder('-'),
                                 ])
                                 ->columns(2),
                         ]),
@@ -888,7 +889,7 @@ class UserResource extends Resource
                     Tab::make('Images')
                         ->icon('heroicon-o-photo')
                         ->schema([
-                            RepeatableEntry::make('providerProfile.profileImages')
+                            RepeatableEntry::make('profileImages')
                                 ->label('')
                                 ->schema([
                                     TextEntry::make('image_path')
@@ -915,7 +916,7 @@ class UserResource extends Resource
                     Tab::make('Videos')
                         ->icon('heroicon-o-video-camera')
                         ->schema([
-                            RepeatableEntry::make('providerProfile.userVideos')
+                            RepeatableEntry::make('userVideos')
                                 ->label('')
                                 ->schema([
                                     TextEntry::make('original_name')
@@ -972,7 +973,7 @@ class UserResource extends Resource
                     Tab::make('Verification')
                         ->icon('heroicon-o-shield-check')
                         ->schema([
-                            RepeatableEntry::make('providerProfile.photoVerification')
+                            RepeatableEntry::make('photoVerification')
                                 ->label('')
                                 ->schema([
                                     TextEntry::make('status')
@@ -1134,16 +1135,6 @@ class UserResource extends Resource
                         'pending' => 'Pending',
                         'rejected' => 'Rejected',
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (blank($data['value'] ?? null)) {
-                            return $query;
-                        }
-
-                        return $query->whereHas(
-                            'providerProfiles',
-                            fn (Builder $q) => $q->where('profile_status', $data['value'])
-                        );
-                    })
                     ->placeholder('All Statuses'),
 
                 SelectFilter::make('deleted_status')
