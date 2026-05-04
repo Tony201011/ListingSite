@@ -862,19 +862,19 @@ $profileTags = array_values(array_unique(array_merge(
             <div class="mb-3">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Your Name <span class="text-gray-400 font-normal">(optional)</span></label>
                 <input type="text" name="reporter_name" placeholder="Enter your name" maxlength="255"
-                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
             </div>
 
             <div class="mb-3">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Your Email <span class="text-gray-400 font-normal">(optional)</span></label>
                 <input type="email" name="reporter_email" placeholder="Enter your email" maxlength="255"
-                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
             </div>
 
             <div class="mb-3">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Reason <span class="text-red-500">*</span></label>
                 <select name="reason" required
-                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
                     <option value="" disabled selected>Select a reason</option>
                     <option value="spam">Spam</option>
                     <option value="fake_profile">Fake Profile</option>
@@ -888,7 +888,7 @@ $profileTags = array_values(array_unique(array_merge(
             <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Additional Details <span class="text-gray-400 font-normal">(optional)</span></label>
                 <textarea name="description" rows="3" placeholder="Provide any additional details..." maxlength="2000"
-                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none"></textarea>
+                    class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none"></textarea>
             </div>
 
             <div class="flex gap-3">
