@@ -620,7 +620,7 @@ $profileTags = array_values(array_unique(array_merge(
                     this._slideW = this._cardW + gap;
                 },
                 get translateX() {
-                    return -(this.page * this._slideW) + this.dragOffset;
+                    return -(this.page * this.pageSize * this._slideW) + this.dragOffset;
                 },
                 init() {
                     this.updatePageSize();
