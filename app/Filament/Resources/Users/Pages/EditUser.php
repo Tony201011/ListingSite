@@ -149,16 +149,6 @@ class EditUser extends EditRecord
         return $tab;
     }
 
-    /**
-     * Since the resource model is now ProviderProfile, the record itself IS the
-     * active profile.  This helper is kept for backwards compatibility but simply
-     * returns the record cast to ProviderProfile.
-     */
-    private function getActiveProfile(Model $record, array $data): ?ProviderProfile
-    {
-        return $record instanceof ProviderProfile ? $record : null;
-    }
-
     protected function updateOverviewTab(Model $record, array $data): void
     {
         // User account fields come from the 'user' relationship section in the form.

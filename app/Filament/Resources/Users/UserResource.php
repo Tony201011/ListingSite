@@ -1135,6 +1135,7 @@ class UserResource extends Resource
                         'pending' => 'Pending',
                         'rejected' => 'Rejected',
                     ])
+                    ->attribute('profile_status')
                     ->placeholder('All Statuses'),
 
                 SelectFilter::make('deleted_status')
