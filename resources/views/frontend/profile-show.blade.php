@@ -607,7 +607,7 @@ $profileTags = array_values(array_unique(array_merge(
                 currentX: 0,
                 dragOffset: 0,
                 _slideW: 0,
-                _cardW: 0,
+                _cardW: 300,
                 get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
                 computeDimensions() {
                     const track = this.$refs.track;
@@ -632,6 +632,7 @@ $profileTags = array_values(array_unique(array_merge(
                 },
                 init() {
                     this.updatePageSize();
+                    this.computeDimensions();
                     this.$nextTick(() => {
                         window.requestAnimationFrame(() => this.computeDimensions());
                         if (window.ResizeObserver) {
@@ -710,8 +711,8 @@ $profileTags = array_values(array_unique(array_merge(
                         :style="`transform: translateX(${translateX}px);`"
                     >
                         @foreach($nearbyProfiles as $nearby)
-                            <article class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
-                                :style="`flex: 0 0 ${_cardW > 0 ? _cardW + 'px' : '100%'}; width: ${_cardW > 0 ? _cardW + 'px' : '100%'};`">
+                            <article class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 flex-shrink-0"
+                                :style="`width: ${_cardW > 0 ? _cardW + 'px' : '300px'};`">
                                 <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
                                 <div class="relative overflow-hidden rounded-t-2xl">
