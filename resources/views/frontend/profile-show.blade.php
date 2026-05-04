@@ -993,8 +993,14 @@ $profileTags = array_values(array_unique(array_merge(
             body: formData,
         })
         .then(function (response) {
-            return response.json().then(function (data) {
-                return { ok: response.ok, status: response.status, data: data };
+            const isOk = response.ok;
+            const contentType = response.headers.get('Content-Type') ?? '';
+            const isJson = contentType.includes('application/json');
+
+            const bodyPromise = isJson ? response.json().catch(function () { return {}; }) : Promise.resolve({});
+
+            return bodyPromise.then(function (data) {
+                return { ok: isOk, data: data };
             });
         })
         .then(function (result) {
