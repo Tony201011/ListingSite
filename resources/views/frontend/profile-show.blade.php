@@ -615,7 +615,10 @@ $profileTags = array_values(array_unique(array_merge(
                     const container = track.parentElement;
                     if (!container) return;
                     const gap = parseFloat(getComputedStyle(track).gap) || 16;
-                    const containerW = container.clientWidth;
+                    const containerStyle = getComputedStyle(container);
+                    const paddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+                    const paddingRight = parseFloat(containerStyle.paddingRight) || 0;
+                    const containerW = container.clientWidth - paddingLeft - paddingRight;
                     this._cardW = (containerW - (this.pageSize - 1) * gap) / this.pageSize;
                     this._slideW = this._cardW + gap;
                 },
@@ -695,7 +698,7 @@ $profileTags = array_values(array_unique(array_merge(
 
                                 <div class="relative overflow-hidden rounded-t-2xl">
                                     @if(!empty($nearby['image']))
-                                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105 h-52" loading="lazy" decoding="async">
+                                        <img src="{{ $nearby['image'] }}" alt="{{ $nearby['name'] }}" class="w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105 h-52" decoding="async">
                                     @else
                                         <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
                                             <i class="fa-solid fa-image text-4xl"></i>
