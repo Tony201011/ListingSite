@@ -133,6 +133,9 @@ function otpVerification(config) {
                 const data = await res.json();
 
                 if (data.success) {
+                    if (data.message) {
+                        sessionStorage.setItem('flash_success', data.message);
+                    }
                     window.location.href = data.redirect || '/my-profile';
                 } else {
                     const msg = data.message || data.errors?.otp?.[0] || 'Verification failed. Please try again.';
