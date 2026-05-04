@@ -606,26 +606,36 @@ $profileTags = array_values(array_unique(array_merge(
                 startX: 0,
                 currentX: 0,
                 dragOffset: 0,
+                _slideW: 0,
                 get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
-                slideWidth() {
+                computeSlideWidth() {
                     const card = this.$refs.track && this.$refs.track.querySelector('article');
                     if (!card) return 0;
                     const gap = parseFloat(getComputedStyle(this.$refs.track).gap) || 0;
                     return card.offsetWidth + gap;
                 },
                 get translateX() {
-                    return -(this.page * this.slideWidth()) + this.dragOffset;
+                    return -(this.page * this._slideW) + this.dragOffset;
                 },
-                init() { this.updatePageSize(); },
+                init() {
+                    this.$nextTick(() => {
+                        this._slideW = this.computeSlideWidth();
+                    });
+                    this.updatePageSize();
+                },
                 updatePageSize() {
                     this.pageSize = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 1;
                     if (this.page > this.pages - 1) {
                         this.page = this.pages - 1;
                     }
+                    this.$nextTick(() => {
+                        this._slideW = this.computeSlideWidth();
+                    });
                 },
                 prev() { if (this.page > 0) this.page--; },
                 next() { if (this.page < this.pages - 1) this.page++; },
                 startDrag(event) {
+                    if (this._slideW === 0) this._slideW = this.computeSlideWidth();
                     this.isDragging = true;
                     this.startX = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;
                     this.currentX = this.startX;
@@ -640,8 +650,7 @@ $profileTags = array_values(array_unique(array_merge(
                 endDrag() {
                     if (!this.isDragging) return;
                     this.isDragging = false;
-                    const slideW = this.slideWidth();
-                    const threshold = slideW > 0 ? slideW / 4 : 50;
+                    const threshold = this._slideW > 0 ? this._slideW / 4 : 50;
                     if (this.dragOffset > threshold && this.page > 0) {
                         this.page--;
                     } else if (this.dragOffset < -threshold && this.page < this.pages - 1) {
