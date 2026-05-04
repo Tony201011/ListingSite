@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\UserReports;
 
 use App\Actions\SendUserReportReplyEmail;
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\UserReports\Pages\ListUserReports;
 use App\Models\UserReport;
 use BackedEnum;
@@ -40,9 +39,7 @@ class UserReportResource extends Resource
 
     protected static ?string $slug = 'user-reports';
 
-    protected static ?string $cluster = Pages::class;
-
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 3;
 
     public static function canAccess(): bool
     {
