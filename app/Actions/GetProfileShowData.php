@@ -353,7 +353,7 @@ class GetProfileShowData
             ])
             ->orderByDesc('is_featured')
             ->orderByDesc('created_at')
-            ->take(16)
+            ->take(4)
             ->get();
 
         $serviceIds = $profiles
