@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
@@ -36,34 +37,31 @@ class AccountStatusChart extends ChartWidget
 
     protected function getData(): array
     {
-        $query = User::query()
-            ->where('role', User::ROLE_PROVIDER);
+        $query = ProviderProfile::query()
+            ->withoutTrashed()
+            ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER));
 
         if ($this->filter && $this->filter !== 'all') {
-            $query->whereYear('created_at', (int) $this->filter);
+            $query->whereYear('provider_profiles.created_at', (int) $this->filter);
         }
 
         $stats = $query
             ->selectRaw('
-                role,
-                SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,
-                SUM(CASE WHEN is_blocked = 0 AND email_verified_at IS NULL THEN 1 ELSE 0 END) as active_unverified,
-                SUM(CASE WHEN is_blocked = 1 THEN 1 ELSE 0 END) as blocked
+                SUM(CASE WHEN users.is_blocked = 0 AND users.email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,
+                SUM(CASE WHEN users.is_blocked = 0 AND users.email_verified_at IS NULL THEN 1 ELSE 0 END) as active_unverified,
+                SUM(CASE WHEN users.is_blocked = 1 THEN 1 ELSE 0 END) as blocked
             ')
-            ->groupBy('role')
-            ->get()
-            ->keyBy('role');
-
-        $providers = $stats->get(User::ROLE_PROVIDER);
+            ->join('users', 'users.id', '=', 'provider_profiles.user_id')
+            ->first();
 
         return [
             'datasets' => [
                 [
                     'label' => 'Providers',
                     'data' => [
-                        (int) ($providers?->active_verified ?? 0),
-                        (int) ($providers?->active_unverified ?? 0),
-                        (int) ($providers?->blocked ?? 0),
+                        (int) ($stats?->active_verified ?? 0),
+                        (int) ($stats?->active_unverified ?? 0),
+                        (int) ($stats?->blocked ?? 0),
                     ],
                     'backgroundColor' => [
                         'rgba(34, 197, 94, 0.7)',

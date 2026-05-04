@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\User;
+use App\Models\ProviderProfile;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
@@ -38,8 +38,8 @@ class ProviderRegistrationsChart extends ChartWidget
     {
         $selectedYear = (int) ($this->filter ?? Carbon::now()->year);
 
-        $rows = User::query()
-            ->where('role', User::ROLE_PROVIDER)
+        $rows = ProviderProfile::query()
+            ->withoutTrashed()
             ->whereYear('created_at', $selectedYear)
             ->pluck('created_at')
             ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m'))
