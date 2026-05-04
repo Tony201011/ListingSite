@@ -607,20 +607,22 @@ $profileTags = array_values(array_unique(array_merge(
                 currentX: 0,
                 dragOffset: 0,
                 _slideW: 0,
+                _cardW: 0,
                 get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
-                computeSlideWidth() {
-                    const card = this.$refs.track && this.$refs.track.querySelector('article');
-                    if (!card) return 0;
-                    const gap = parseFloat(getComputedStyle(this.$refs.track).gap) || 0;
-                    return card.offsetWidth + gap;
+                computeDimensions() {
+                    const track = this.$refs.track;
+                    if (!track) return;
+                    const container = track.parentElement;
+                    if (!container) return;
+                    const gap = parseFloat(getComputedStyle(track).gap) || 16;
+                    const containerW = container.clientWidth;
+                    this._cardW = (containerW - (this.pageSize - 1) * gap) / this.pageSize;
+                    this._slideW = this._cardW + gap;
                 },
                 get translateX() {
                     return -(this.page * this._slideW) + this.dragOffset;
                 },
                 init() {
-                    this.$nextTick(() => {
-                        this._slideW = this.computeSlideWidth();
-                    });
                     this.updatePageSize();
                 },
                 updatePageSize() {
@@ -629,13 +631,13 @@ $profileTags = array_values(array_unique(array_merge(
                         this.page = this.pages - 1;
                     }
                     this.$nextTick(() => {
-                        this._slideW = this.computeSlideWidth();
+                        this.computeDimensions();
                     });
                 },
                 prev() { if (this.page > 0) this.page--; },
                 next() { if (this.page < this.pages - 1) this.page++; },
                 startDrag(event) {
-                    if (this._slideW === 0) this._slideW = this.computeSlideWidth();
+                    if (this._slideW === 0) this.computeDimensions();
                     this.isDragging = true;
                     this.startX = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;
                     this.currentX = this.startX;
@@ -681,13 +683,14 @@ $profileTags = array_values(array_unique(array_merge(
                     @touchstart="startDrag($event)"
                     @touchmove="drag($event)"
                     @touchend="endDrag()"
-                    :style="cursor: isDragging ? 'grabbing' : 'grab'"
+                    :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
                 >
                     <div x-ref="track" class="flex flex-nowrap gap-4 transition-transform duration-500"
                         :style="`transform: translateX(${translateX}px);`"
                     >
                         @foreach($nearbyProfiles as $nearby)
-                            <article class="group relative flex-none min-w-full sm:min-w-[calc(50%-0.75rem)] lg:min-w-[calc(25%-0.75rem)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5">
+                            <article class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
+                                :style="`flex: 0 0 ${_cardW > 0 ? _cardW + 'px' : '100%'}; width: ${_cardW > 0 ? _cardW + 'px' : '100%'};`">
                                 <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
                                 <div class="relative overflow-hidden rounded-t-2xl">
