@@ -156,7 +156,7 @@ class SignupAndOtpFlowTest extends TestCase
         $response->assertOk();
         $response->assertJson([
             'success' => true,
-            'message' => 'Account created successfully.',
+            'message' => 'Your account has been successfully created! 🎉Before you proceed further, please verify your email address..',
         ]);
         $response->assertJsonStructure(['redirect']);
 
@@ -170,13 +170,13 @@ class SignupAndOtpFlowTest extends TestCase
         ]);
     }
 
-    public function test_otp_verify_success_logs_in_the_user(): void
+    public function test_otp_verify_success_does_not_log_in_the_user(): void
     {
         $this->from('/signup')->post('/signup', $this->validSignupPayload());
 
         $this->postJson('/verify-otp', ['otp' => self::DUMMY_OTP]);
 
-        $this->assertAuthenticated();
+        $this->assertGuest();
     }
 
     public function test_otp_verify_success_clears_pending_session(): void
