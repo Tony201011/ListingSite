@@ -22,10 +22,10 @@
             <div id="js-flash-success" class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 text-sm hidden"></div>
             <script>
                 (function () {
-                    var msg = sessionStorage.getItem('flash_success');
+                    const msg = sessionStorage.getItem('flash_success');
                     if (msg) {
                         sessionStorage.removeItem('flash_success');
-                        var el = document.getElementById('js-flash-success');
+                        const el = document.getElementById('js-flash-success');
                         el.textContent = msg;
                         el.classList.remove('hidden');
                     }
