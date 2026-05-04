@@ -131,5 +131,48 @@ class SendUserReportEmailJob implements ShouldQueue
                 ]);
             }
         }
+
+        // Send confirmation to reporter if they provided an email
+        $reporterEmail = $report->reporter_email;
+
+        if (filled($reporterEmail)) {
+            $reporterName = $report->reporter_name ?? null;
+            $confirmationSubject = 'Your report has been received';
+
+            try {
+                Mail::mailer('mailgun')->send(
+                    'emails.user-report-confirmation',
+                    ['report' => $report],
+                    function ($message) use ($reporterEmail, $reporterName, $confirmationSubject): void {
+                        $message->to($reporterEmail, $reporterName)
+                            ->subject($confirmationSubject);
+                    }
+                );
+
+                Log::info('User report confirmation email sent to reporter', ['user_report_id' => $report->id]);
+
+                EmailLog::create([
+                    'recipient' => $reporterEmail,
+                    'subject' => $confirmationSubject,
+                    'type' => 'user_report_confirmation',
+                    'status' => 'sent',
+                    'sent_at' => now(),
+                ]);
+            } catch (Throwable $e) {
+                Log::warning('User report confirmation email to reporter failed', [
+                    'user_report_id' => $report->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                EmailLog::create([
+                    'recipient' => $reporterEmail,
+                    'subject' => $confirmationSubject,
+                    'type' => 'user_report_confirmation',
+                    'status' => 'failed',
+                    'error' => $e->getMessage(),
+                    'sent_at' => now(),
+                ]);
+            }
+        }
     }
 }

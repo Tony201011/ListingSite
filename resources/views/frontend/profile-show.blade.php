@@ -963,5 +963,69 @@ $profileTags = array_values(array_unique(array_merge(
     };
 </script>
 
+<script>
+    function submitReport(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('report-form');
+        const submitBtn = document.getElementById('report-submit-btn');
+        const successEl = document.getElementById('report-success');
+        const errorEl = document.getElementById('report-error');
+
+        successEl.classList.add('hidden');
+        errorEl.classList.add('hidden');
+        errorEl.textContent = '';
+
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting…';
+
+        const formData = new FormData(form);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+
+        fetch(window.__profileShowConfig.reportUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: formData,
+        })
+        .then(function (response) {
+            return response.json().then(function (data) {
+                return { ok: response.ok, status: response.status, data: data };
+            });
+        })
+        .then(function (result) {
+            if (result.ok) {
+                form.reset();
+                successEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            } else {
+                let message = 'Something went wrong. Please try again.';
+
+                if (result.data && result.data.errors) {
+                    const firstKey = Object.keys(result.data.errors)[0];
+                    message = result.data.errors[firstKey][0] ?? message;
+                } else if (result.data && result.data.message) {
+                    message = result.data.message;
+                }
+
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        })
+        .catch(function () {
+            errorEl.textContent = 'A network error occurred. Please check your connection and try again.';
+            errorEl.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        });
+    }
+</script>
 
 @endpush
