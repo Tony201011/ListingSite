@@ -602,6 +602,10 @@ $profileTags = array_values(array_unique(array_merge(
                 page: 0,
                 pageSize: 1,
                 total: {{ count($nearbyProfiles) }},
+                isDragging: false,
+                startX: 0,
+                currentX: 0,
+                dragOffset: 0,
                 get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
                 init() { this.updatePageSize(); },
                 updatePageSize() {
@@ -611,7 +615,30 @@ $profileTags = array_values(array_unique(array_merge(
                     }
                 },
                 prev() { if (this.page > 0) this.page--; },
-                next() { if (this.page < this.pages - 1) this.page++; }
+                next() { if (this.page < this.pages - 1) this.page++; },
+                startDrag(event) {
+                    this.isDragging = true;
+                    this.startX = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;
+                    this.currentX = this.startX;
+                    this.dragOffset = 0;
+                },
+                drag(event) {
+                    if (!this.isDragging) return;
+                    event.preventDefault();
+                    this.currentX = event.type === 'mousemove' ? event.clientX : event.touches[0].clientX;
+                    this.dragOffset = this.currentX - this.startX;
+                },
+                endDrag() {
+                    if (!this.isDragging) return;
+                    this.isDragging = false;
+                    const threshold = 50;
+                    if (this.dragOffset > threshold && this.page > 0) {
+                        this.page--;
+                    } else if (this.dragOffset < -threshold && this.page < this.pages - 1) {
+                        this.page++;
+                    }
+                    this.dragOffset = 0;
+                }
             }"
             x-init="init()"
             @resize.window="updatePageSize()"
@@ -627,10 +654,19 @@ $profileTags = array_values(array_unique(array_merge(
 
             @if(count($nearbyProfiles) > 0)
             <div class="relative group">
-                <div class="overflow-hidden px-4 sm:px-6 pb-2">
+                <div class="overflow-hidden px-4 sm:px-6 pb-2"
+                    @mousedown="startDrag($event)"
+                    @mousemove="drag($event)"
+                    @mouseup="endDrag()"
+                    @mouseleave="endDrag()"
+                    @touchstart="startDrag($event)"
+                    @touchmove="drag($event)"
+                    @touchend="endDrag()"
+                    :style="cursor: isDragging ? 'grabbing' : 'grab'"
+                >
                     <div class="flex flex-nowrap gap-4 transition-transform duration-500"
-                        :style="`transform: translateX(-${page * 100}%);`
-                    ">
+                        :style="`transform: translateX(calc(-${page * 100}% + ${dragOffset}px));`"
+                    >
                         @foreach($nearbyProfiles as $nearby)
                             <article class="group relative flex-none min-w-full sm:min-w-[calc(50%-0.75rem)] lg:min-w-[calc(25%-0.75rem)] overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5">
                                 <a href="{{ route('profile.show', array_merge(['slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
