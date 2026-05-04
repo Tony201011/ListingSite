@@ -10,6 +10,7 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
 use App\Models\Postcode;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -54,15 +55,15 @@ class UserResource extends Resource
 {
     use ResolvesProfileCategoryValues;
 
-    protected static ?string $model = User::class;
+    protected static ?string $model = ProviderProfile::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $navigationLabel = 'Provider Listing';
+    protected static ?string $navigationLabel = 'Provider Profiles';
 
-    protected static ?string $modelLabel = 'Provider';
+    protected static ?string $modelLabel = 'Provider Profile';
 
-    protected static ?string $pluralModelLabel = 'Providers';
+    protected static ?string $pluralModelLabel = 'Provider Profiles';
 
     protected static ?string $slug = 'providers';
 
@@ -83,19 +84,14 @@ class UserResource extends Resource
         return parent::getEloquentQuery()
             ->withTrashed()
             ->with([
-                'providerProfile',
-                'providerProfile.profileImages',
-                'providerProfile.userVideos',
-                'providerProfile.photoVerification',
-                'providerProfile.rates',
-                'providerProfile.availabilities',
-                'providerProfile.profileMessage',
-                'providerProfiles',
-                'onlineUser',
-                'hideShowProfile',
-                'availableNow',
-            ])
-            ->where('role', User::ROLE_PROVIDER);
+                'user',
+                'profileImages',
+                'userVideos',
+                'photoVerification',
+                'rates',
+                'availabilities',
+                'profileMessage',
+            ]);
     }
 
     public static function form(Schema $schema): Schema
@@ -115,6 +111,7 @@ class UserResource extends Resource
                             Section::make('Account Information')
                                 ->description('Basic account details for this provider.')
                                 ->icon('heroicon-o-identification')
+                                ->relationship('user')
                                 ->schema([
                                     TextInput::make('name')
                                         ->label('User Name')
@@ -173,7 +170,6 @@ class UserResource extends Resource
                                 ->collapsible(),
 
                             Section::make('Profile Information')
-                                ->relationship('providerProfile')
                                 ->description('Public-facing provider profile content.')
                                 ->icon('heroicon-o-sparkles')
                                 ->schema([
@@ -263,7 +259,6 @@ class UserResource extends Resource
                                 ->collapsible(),
 
                             Section::make('Current Status')
-                                ->relationship('providerProfile')
                                 ->description('Manage profile visibility and approval state.')
                                 ->icon('heroicon-o-bolt')
                                 ->schema([
@@ -293,7 +288,6 @@ class UserResource extends Resource
                         ->icon('heroicon-o-adjustments-horizontal')
                         ->schema([
                             Section::make('Physical Attributes')
-                                ->relationship('providerProfile')
                                 ->description('Appearance and profile attribute settings.')
                                 ->icon('heroicon-o-user')
                                 ->schema([
@@ -343,7 +337,6 @@ class UserResource extends Resource
                                 ->collapsible(),
 
                             Section::make('Preferences & Services')
-                                ->relationship('providerProfile')
                                 ->description('Service style, contact preference, and identity tags.')
                                 ->icon('heroicon-o-heart')
                                 ->schema([
@@ -1053,8 +1046,9 @@ class UserResource extends Resource
                     ->label('')
                     ->disk(fn (): string => config('filesystems.default', 'public'))
                     ->circular()
+                    ->getStateUsing(fn (ProviderProfile $record): string => $record->profileImages->first()?->image ?? '')
                     ->defaultImageUrl(
-                        fn (User $record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&background=E5E7EB&color=111827'
+                        fn (ProviderProfile $record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->user?->name ?? 'Provider').'&background=E5E7EB&color=111827'
                     )
                     ->size(40),
 
@@ -1063,78 +1057,35 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->description(fn (User $record): string => $record->email),
+                    ->description(fn (ProviderProfile $record): string => $record->user?->email ?? ''),
 
-                TextColumn::make('mobile')
+                TextColumn::make('user.mobile')
                     ->label('Mobile')
                     ->searchable()
                     ->toggleable(),
 
-                TextColumn::make('account_status')
-                    ->label('Account')
+                TextColumn::make('profile_status')
+                    ->label('Status')
                     ->badge()
-                    ->state(fn (User $record): string => $record->trashed() ? 'Deleted' : ($record->is_blocked ? 'Blocked' : 'Active'))
+                    ->state(fn (ProviderProfile $record): string => ucfirst($record->profile_status ?? 'pending'))
                     ->color(fn (string $state): string => match ($state) {
-                        'Deleted' => 'danger',
-                        'Blocked' => 'warning',
-                        default => 'success',
-                    }),
-                TextColumn::make('status')
-                    ->label('Verification')
-                    ->badge()
-                    ->state(fn (User $record): string => filled($record->email_verified_at) ? 'Verified' : 'Unverified')
-                    ->color(fn (string $state): string => $state === 'Verified' ? 'success' : 'warning'),
-
-                TextColumn::make('profile_count')
-                    ->label('# Profiles')
-                    ->state(fn (User $record): int => $record->providerProfiles->count())
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query->withCount('providerProfiles')
-                            ->orderBy('provider_profiles_count', $direction);
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        default => 'warning',
                     }),
 
-                TextColumn::make('providerProfile.profile_status')
-                    ->label('Profiles')
-                    ->badge()
-                    ->state(function (User $record): string {
-                        $profiles = $record->providerProfiles;
-                        if ($profiles->isEmpty()) {
-                            return 'No Profile';
-                        }
-
-                        return $profiles->map(fn ($profile) => ucfirst($profile->profile_status ?? 'pending'))->implode(' | ');
-                    })
-                    ->color(function (string $state): string {
-                        if (str_contains(strtolower($state), 'approved')) {
-                            return 'success';
-                        }
-                        if (str_contains(strtolower($state), 'rejected')) {
-                            return 'danger';
-                        }
-
-                        return 'warning';
-                    }),
-
-                TextColumn::make('providerProfile.is_featured')
+                TextColumn::make('is_featured')
                     ->label('Featured')
                     ->badge()
-                    ->state(function (User $record): string {
-                        $featured = $record->providerProfiles->where('is_featured', true)->count();
-                        $total = $record->providerProfiles->count();
-                        if ($featured === 0) {
-                            return 'No';
-                        }
-
-                        return $total > 1 ? "Yes ({$featured}/{$total})" : 'Yes';
-                    })
-                    ->color(fn (string $state): string => str_starts_with($state, 'Yes') ? 'success' : 'gray'),
+                    ->state(fn (ProviderProfile $record): string => $record->is_featured ? 'Yes' : 'No')
+                    ->color(fn (string $state): string => $state === 'Yes' ? 'success' : 'gray'),
 
                 TextColumn::make('created_at')
-                    ->label('Joined')
+                    ->label('Created')
                     ->dateTime()
                     ->sortable()
                     ->since()
-                    ->tooltip(fn (User $record): string => $record->created_at?->format('M d, Y h:i A') ?? ''),
+                    ->tooltip(fn (ProviderProfile $record): string => $record->created_at?->format('M d, Y h:i A') ?? ''),
 
                 TextColumn::make('deleted_at')
                     ->label('Deleted At')
@@ -1145,13 +1096,13 @@ class UserResource extends Resource
                     ->color('danger'),
             ])
             ->filters([
-                TernaryFilter::make('email_verified_at')
-                    ->label('Status')
+                TernaryFilter::make('user.email_verified_at')
+                    ->label('Email Verified')
                     ->nullable()
                     ->trueLabel('Verified')
                     ->falseLabel('Unverified'),
 
-                SelectFilter::make('is_blocked')
+                SelectFilter::make('user.is_blocked')
                     ->label('Account')
                     ->options([
                         '0' => 'Active',
@@ -1203,67 +1154,52 @@ class UserResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
-                            'deleted' => $query->whereNotNull((new User)->getTable().'.deleted_at'),
-                            'not_deleted' => $query->whereNull((new User)->getTable().'.deleted_at'),
+                            'deleted' => $query->whereNotNull((new ProviderProfile)->getTable().'.deleted_at'),
+                            'not_deleted' => $query->whereNull((new ProviderProfile)->getTable().'.deleted_at'),
                             default => $query,
                         };
                     })
-                    ->placeholder('All Accounts'),
+                    ->placeholder('All Profiles'),
             ])
             ->recordActions([
                 ViewAction::make()
                     ->label('View as Admin')
                     ->icon('heroicon-o-eye')
-                    ->visible(fn (User $record): bool => ! $record->trashed()),
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
 
                 Action::make('view_as_provider')
                     ->label('View as Provider')
                     ->icon('heroicon-o-user')
                     ->color('info')
-                    ->url(function (User $record): string {
-                        $profile = $record->providerProfiles
-                            ->whereNotNull('slug')
-                            ->where('slug', '!=', '')
-                            ->where('profile_status', 'approved')
-                            ->first()
-                            ?? $record->providerProfiles
-                                ->whereNotNull('slug')
-                                ->where('slug', '!=', '')
-                                ->first();
-
-                        return $profile ? route('profile.show', ['slug' => $profile->slug]) : '#';
-                    })
+                    ->url(fn (ProviderProfile $record): string => $record->slug ? route('profile.show', ['slug' => $record->slug]) : '#')
                     ->openUrlInNewTab()
-                    ->visible(fn (User $record): bool => $record->providerProfiles
-                        ->whereNotNull('slug')
-                        ->where('slug', '!=', '')
-                        ->isNotEmpty() && ! $record->trashed()),
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && filled($record->slug)),
 
                 Action::make('edit')
                     ->label('Edit')
-                    ->url(fn (User $record): string => static::getUrl('edit', ['record' => $record]))
-                    ->visible(fn (User $record): bool => ! $record->trashed()),
+                    ->url(fn (ProviderProfile $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
 
                 Action::make('block')
-                    ->label('Block')
+                    ->label('Block User')
                     ->color('danger')
                     ->icon('heroicon-o-lock-closed')
                     ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => ! $record->is_blocked && ! $record->trashed())
-                    ->action(function (User $record): void {
-                        $record->update(['is_blocked' => true]);
-                        SendAdminProviderEmailJob::dispatch($record->id, 'blocked');
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->user?->is_blocked && ! $record->trashed())
+                    ->action(function (ProviderProfile $record): void {
+                        $record->user?->update(['is_blocked' => true]);
+                        SendAdminProviderEmailJob::dispatch($record->user?->id, 'blocked');
                     }),
 
                 Action::make('unblock')
-                    ->label('Unblock')
+                    ->label('Unblock User')
                     ->color('success')
                     ->icon('heroicon-o-lock-open')
                     ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => $record->is_blocked && ! $record->trashed())
-                    ->action(function (User $record): void {
-                        $record->update(['is_blocked' => false]);
-                        SendAdminProviderEmailJob::dispatch($record->id, 'unblocked');
+                    ->visible(fn (ProviderProfile $record): bool => $record->user?->is_blocked && ! $record->trashed())
+                    ->action(function (ProviderProfile $record): void {
+                        $record->user?->update(['is_blocked' => false]);
+                        SendAdminProviderEmailJob::dispatch($record->user?->id, 'unblocked');
                     }),
 
                 Action::make('restore')
@@ -1271,26 +1207,26 @@ class UserResource extends Resource
                     ->color('success')
                     ->icon('heroicon-o-arrow-path')
                     ->requiresConfirmation()
-                    ->modalHeading('Restore provider')
-                    ->modalDescription('Are you sure you want to restore this provider account?')
-                    ->visible(fn (User $record): bool => $record->trashed())
-                    ->action(function (User $record): void {
+                    ->modalHeading('Restore profile')
+                    ->modalDescription('Are you sure you want to restore this provider profile?')
+                    ->visible(fn (ProviderProfile $record): bool => $record->trashed())
+                    ->action(function (ProviderProfile $record): void {
                         $record->restore();
                     })
-                    ->successNotificationTitle('Provider restored'),
+                    ->successNotificationTitle('Profile restored'),
 
                 Action::make('delete')
                     ->label('Delete')
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation()
-                    ->modalHeading('Delete provider')
-                    ->modalDescription('Delete this provider? This soft-deletes the user and removes them from listings.')
-                    ->visible(fn (User $record): bool => ! $record->trashed())
-                    ->action(function (User $record): void {
+                    ->modalHeading('Delete profile')
+                    ->modalDescription('Delete this provider profile? This soft-deletes the profile and removes it from listings.')
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                    ->action(function (ProviderProfile $record): void {
                         $record->delete();
                     })
-                    ->successNotificationTitle('Provider deleted'),
+                    ->successNotificationTitle('Profile deleted'),
             ])
             ->toolbarActions([])
             ->defaultSort('created_at', 'desc')
