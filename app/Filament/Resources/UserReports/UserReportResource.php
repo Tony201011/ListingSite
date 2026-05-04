@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserReports;
 
+use App\Actions\SendUserReportReplyEmail;
 use App\Filament\Clusters\Pages;
 use App\Filament\Resources\UserReports\Pages\ListUserReports;
 use App\Models\UserReport;
@@ -10,7 +11,9 @@ use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -20,6 +23,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class UserReportResource extends Resource
 {
@@ -147,6 +152,52 @@ class UserReportResource extends Resource
             ->recordActions([
                 ViewAction::make()
                     ->after(fn (UserReport $record): bool => $record->is_read ?: (bool) $record->update(['is_read' => true])),
+
+                Action::make('reply')
+                    ->label('Reply')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('primary')
+                    ->visible(fn (UserReport $record): bool => filled($record->reporter_email))
+                    ->modalHeading(fn (UserReport $record): string => 'Reply to '.($record->reporter_name ?? $record->reporter_email))
+                    ->modalSubmitActionLabel('Send Reply')
+                    ->form([
+                        Textarea::make('admin_reply')
+                            ->label('Your reply')
+                            ->required()
+                            ->rows(6)
+                            ->maxLength(5000)
+                            ->default(fn (UserReport $record): ?string => $record->admin_reply)
+                            ->helperText('This reply will be emailed to the person who submitted the report.'),
+                    ])
+                    ->action(function (UserReport $record, array $data, SendUserReportReplyEmail $sendReply): void {
+                        $record->update([
+                            'admin_reply' => $data['admin_reply'],
+                            'status' => 'reviewed',
+                            'is_read' => true,
+                            'replied_at' => now(),
+                        ]);
+
+                        try {
+                            $sendReply->execute($record);
+                        } catch (Throwable $e) {
+                            Log::warning('User report reply email failed after saving reply.', [
+                                'user_report_id' => $record->id,
+                                'error' => $e->getMessage(),
+                            ]);
+
+                            Notification::make()
+                                ->title('Reply saved but email could not be sent.')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
+                        Notification::make()
+                            ->title('Reply sent successfully.')
+                            ->success()
+                            ->send();
+                    }),
 
                 Action::make('mark_read')
                     ->label('Mark read')
