@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -27,10 +28,19 @@ class AdminPanelTest extends TestCase
 
     private function createProvider(array $overrides = []): User
     {
-        return User::factory()->create(array_merge([
+        $user = User::factory()->create(array_merge([
             'role' => User::ROLE_PROVIDER,
             'email_verified_at' => now(),
         ], $overrides));
+
+        // Create a default profile for the provider
+        ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'provider-'.$user->id,
+        ]);
+
+        return $user;
     }
 
     // ---------------------------------------------------------------
@@ -56,8 +66,11 @@ class AdminPanelTest extends TestCase
     public function test_provider_user_cannot_access_admin_panel(): void
     {
         $provider = $this->createProvider();
+        $profile = $provider->providerProfiles()->first();
 
-        $response = $this->actingAs($provider)->get('/admin');
+        $response = $this->actingAs($provider)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get('/admin');
 
         $response->assertForbidden();
     }

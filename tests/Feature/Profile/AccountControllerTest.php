@@ -3,6 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Actions\DeleteUserAccount;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -22,8 +23,15 @@ class AccountControllerTest extends TestCase
     public function test_delete_account_page_is_returned_for_authenticated_user(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'user-'.$user->id,
+        ]);
 
-        $response = $this->actingAs($user)->get(route('account.delete-page'));
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get(route('account.delete-page'));
 
         $response->assertOk();
         $response->assertViewIs('auth.delete-account');
@@ -35,6 +43,11 @@ class AccountControllerTest extends TestCase
             'role' => User::ROLE_PROVIDER,
             'password' => bcrypt('secret123'),
         ]);
+        $profile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'user-'.$user->id,
+        ]);
 
         $deleteUserAccount = Mockery::mock(DeleteUserAccount::class);
         $deleteUserAccount->shouldReceive('execute')
@@ -43,10 +56,12 @@ class AccountControllerTest extends TestCase
 
         $this->app->instance(DeleteUserAccount::class, $deleteUserAccount);
 
-        $response = $this->actingAs($user)->delete(route('account.destroy'), [
-            'password' => 'secret123',
-            'confirmation_text' => 'DELETE',
-        ]);
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->delete(route('account.destroy'), [
+                'password' => 'secret123',
+                'confirmation_text' => 'DELETE',
+            ]);
 
         $response->assertRedirect('/signin');
         $response->assertSessionHas('success');
@@ -58,6 +73,11 @@ class AccountControllerTest extends TestCase
             'role' => User::ROLE_PROVIDER,
             'password' => bcrypt('secret123'),
         ]);
+        $profile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'user-'.$user->id,
+        ]);
 
         $deleteUserAccount = Mockery::mock(DeleteUserAccount::class);
         $deleteUserAccount->shouldReceive('execute')
@@ -66,10 +86,13 @@ class AccountControllerTest extends TestCase
 
         $this->app->instance(DeleteUserAccount::class, $deleteUserAccount);
 
-        $response = $this->actingAs($user)->from('/delete-account')->delete(route('account.destroy'), [
-            'password' => 'secret123',
-            'confirmation_text' => 'DELETE',
-        ]);
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->from('/delete-account')
+            ->delete(route('account.destroy'), [
+                'password' => 'secret123',
+                'confirmation_text' => 'DELETE',
+            ]);
 
         $response->assertRedirect('/delete-account');
         $response->assertSessionHas('error');

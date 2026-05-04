@@ -6,6 +6,7 @@ use App\Actions\CreateContactInquiry;
 use App\Actions\SendContactInquiryReplyEmail;
 use App\Models\ContactInquiry;
 use App\Models\ContactUsPage;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -296,7 +297,16 @@ class ContactUsTest extends TestCase
     {
         $provider = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
-        $response = $this->actingAs($provider)->get('/admin/pages/contact-inquiries');
+        // Create a default profile for the provider
+        $profile = ProviderProfile::create([
+            'user_id' => $provider->id,
+            'name' => $provider->name,
+            'slug' => 'provider-'.$provider->id,
+        ]);
+
+        $response = $this->actingAs($provider)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get('/admin/pages/contact-inquiries');
 
         $response->assertForbidden();
     }
