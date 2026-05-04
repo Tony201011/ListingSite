@@ -117,52 +117,54 @@
                         x-show="showPasswordPopup"
                         x-cloak
                         x-transition
+                        class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
                         @click.away="showPasswordPopup = false"
-                        class="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-white border border-gray-200 rounded-2xl shadow-xl p-4"
                     >
-                        <div class="flex items-start justify-between gap-3 mb-3">
-                            <div>
-                                <h4 class="font-bold text-gray-800">Strong password suggestion</h4>
-                                <p class="text-sm text-gray-500">Save this password somewhere safe before using it.</p>
+                        <div class="w-full max-w-sm bg-white border border-gray-200 rounded-2xl shadow-xl p-4">
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div>
+                                    <h4 class="font-bold text-gray-800">Strong password suggestion</h4>
+                                    <p class="text-sm text-gray-500">Save this password somewhere safe before using it.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="showPasswordPopup = false"
+                                    class="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                                >
+                                    &times;
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                @click="showPasswordPopup = false"
-                                class="text-gray-400 hover:text-gray-600 text-xl leading-none"
-                            >
-                                &times;
-                            </button>
-                        </div>
 
-                        <div
-                            class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm break-all text-gray-800 mb-4"
-                            x-text="generatedPassword"
-                        ></div>
+                            <div
+                                class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm break-all text-gray-800 mb-4"
+                                x-text="generatedPassword"
+                            ></div>
 
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                type="button"
-                                @click="generatePasswordPopup()"
-                                class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
-                            >
-                                Regenerate
-                            </button>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    @click="generatePasswordPopup()"
+                                    class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
+                                >
+                                    Regenerate
+                                </button>
 
-                            <button
-                                type="button"
-                                @click="copyGeneratedPassword()"
-                                class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
-                            >
-                                <span x-text="copied ? 'Copied!' : 'Copy'"></span>
-                            </button>
+                                <button
+                                    type="button"
+                                    @click="copyGeneratedPassword()"
+                                    class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
+                                >
+                                    <span x-text="copied ? 'Copied!' : 'Copy'"></span>
+                                </button>
 
-                            <button
-                                type="button"
-                                @click="useGeneratedPassword()"
-                                class="px-4 py-2 rounded-lg bg-[#e04ecb] text-white font-semibold hover:bg-[#c13ab0]"
-                            >
-                                Use this password
-                            </button>
+                                <button
+                                    type="button"
+                                    @click="useGeneratedPassword()"
+                                    class="px-4 py-2 rounded-lg bg-[#e04ecb] text-white font-semibold hover:bg-[#c13ab0]"
+                                >
+                                    Use this password
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
