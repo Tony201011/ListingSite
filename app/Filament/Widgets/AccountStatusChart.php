@@ -11,7 +11,7 @@ class AccountStatusChart extends ChartWidget
 {
     protected ?string $heading = 'Account Status Overview';
 
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 5;
 
     protected int|string|array $columnSpan = 1;
 

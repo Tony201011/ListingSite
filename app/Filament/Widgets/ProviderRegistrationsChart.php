@@ -11,7 +11,7 @@ class ProviderRegistrationsChart extends ChartWidget
 {
     protected ?string $heading = 'Provider Registrations';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
 
     protected int|string|array $columnSpan = 2;
 
