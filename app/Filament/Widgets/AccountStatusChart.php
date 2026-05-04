@@ -15,6 +15,8 @@ class AccountStatusChart extends ChartWidget
 
     protected int|string|array $columnSpan = 1;
 
+    protected ?string $maxHeight = '360px';
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';

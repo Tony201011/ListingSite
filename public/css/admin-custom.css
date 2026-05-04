@@ -2,3 +2,16 @@
 .fi-fo-rich-editor .fi-fo-rich-editor-content {
     min-height: 300px;
 }
+
+/* Improve admin dashboard chart sizing and layout */
+.fi-wi-chart .fi-wi-chart-canvas-ctn {
+    min-height: 360px;
+}
+
+.fi-wi-chart .fi-wi-chart-canvas-ctn-no-aspect-ratio {
+    min-height: 360px;
+}
+
+.fi-wi-chart .fi-wi-chart-canvas-ctn canvas {
+    min-height: 100% !important;
+}

@@ -15,6 +15,8 @@ class ProviderRegistrationsChart extends ChartWidget
 
     protected int|string|array $columnSpan = 2;
 
+    protected ?string $maxHeight = '420px';
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
