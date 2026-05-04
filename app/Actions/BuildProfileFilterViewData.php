@@ -320,7 +320,7 @@ class BuildProfileFilterViewData
         }
 
         if ($escortNameQuery !== '') {
-            $query->where('provider_profiles.name', 'like', '%'.$escortNameQuery.'%');
+            $query->whereRaw('LOWER(provider_profiles.name) LIKE ?', ['%'.strtolower($escortNameQuery).'%']);
         }
 
         if ($minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE) {

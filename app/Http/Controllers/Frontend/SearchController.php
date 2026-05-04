@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProviderProfile;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -23,8 +24,14 @@ class SearchController extends Controller
         try {
             $results = ProviderProfile::search($term)
                 ->where('profile_status', 'approved')
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->whereNull('deleted_at')
+                ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->take(self::MAX_SUGGESTIONS)
-                ->get(['id', 'name', 'slug', 'city_id', 'age']);
+                ->get(['id', 'name', 'slug', 'city_id', 'age'])
+                ->load('city');
         } catch (\Throwable $e) {
             Log::warning('Scout search unavailable, falling back to database search.', [
                 'error' => $e->getMessage(),
@@ -32,7 +39,11 @@ class SearchController extends Controller
             $results = ProviderProfile::query()
                 ->where('profile_status', 'approved')
                 ->whereNull('deleted_at')
-                ->where('name', 'like', '%'.$term.'%')
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+                ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
                 ->with('city')
                 ->orderBy('name')
                 ->take(self::MAX_SUGGESTIONS)
