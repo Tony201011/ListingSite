@@ -45,10 +45,9 @@ class UniqueUsersChart extends ChartWidget
                 ->map(fn (int $month) => Carbon::createFromDate($year, $month, 1)->format('M'))
                 ->all();
 
-            $rawCounts = DB::table('sessions')
-                ->selectRaw('MONTH(FROM_UNIXTIME(last_activity)) as month, COUNT(DISTINCT user_id) as count')
-                ->whereYear(DB::raw('FROM_UNIXTIME(last_activity)'), $year)
-                ->whereNotNull('user_id')
+            $rawCounts = DB::table('login_logs')
+                ->selectRaw('MONTH(created_at) as month, COUNT(DISTINCT user_id) as count')
+                ->whereYear('created_at', $year)
                 ->groupBy('month')
                 ->pluck('count', 'month');
 
@@ -56,9 +55,8 @@ class UniqueUsersChart extends ChartWidget
                 ->map(fn (int $month) => (int) $rawCounts->get($month, 0))
                 ->all();
         } else {
-            $rawCounts = DB::table('sessions')
-                ->selectRaw('YEAR(FROM_UNIXTIME(last_activity)) as year, COUNT(DISTINCT user_id) as count')
-                ->whereNotNull('user_id')
+            $rawCounts = DB::table('login_logs')
+                ->selectRaw('YEAR(created_at) as year, COUNT(DISTINCT user_id) as count')
                 ->groupBy('year')
                 ->orderBy('year')
                 ->pluck('count', 'year');
