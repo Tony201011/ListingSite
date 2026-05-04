@@ -70,14 +70,12 @@ class EmailVerificationTest extends TestCase
 
     public function test_nonexistent_user_id_returns_404(): void
     {
-        $user = User::factory()->create(['email_verified_at' => null]);
-
         $url = URL::temporarySignedRoute(
             'verification.verify',
             Carbon::now()->addMinutes(60),
             [
                 'id' => 99999,
-                'hash' => sha1($user->getEmailForVerification()),
+                'hash' => sha1('nonexistent@example.com'),
             ]
         );
 

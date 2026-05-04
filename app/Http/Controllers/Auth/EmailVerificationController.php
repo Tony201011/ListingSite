@@ -24,7 +24,7 @@ class EmailVerificationController extends Controller
             abort(404);
         }
 
-        if (! hash_equals($hash, sha1($user->getEmailForVerification()))) {
+        if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
             abort(403, 'Invalid verification link.');
         }
 
