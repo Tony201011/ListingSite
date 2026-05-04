@@ -25,12 +25,15 @@ class ProviderStatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         $profiles = ProviderProfile::query()->withoutTrashed();
-        $users = User::query()->where('role', User::ROLE_PROVIDER);
+        $users = User::query()->where('role', User::ROLE_PROVIDER)->withoutTrashed();
 
         $total = $profiles->count();
-        $active = (clone $users)->where('is_blocked', false)->count();
+        $active = (clone $users)->whereHas('providerProfiles', function ($q) {
+            $q->where('profile_status', 'approved');
+        })->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
         $verified = (clone $users)->whereNotNull('email_verified_at')->count();
+        $featured = (clone $profiles)->where('is_featured', true)->count();
 
         return [
             Stat::make('Total Providers', (string) $total)
@@ -45,6 +48,9 @@ class ProviderStatsOverview extends StatsOverviewWidget
             Stat::make('Verified Emails', (string) $verified)
                 ->color('warning')
                 ->icon('heroicon-o-shield-check'),
+            Stat::make('Featured Profiles', (string) $featured)
+                ->color('info')
+                ->icon('heroicon-o-star'),
         ];
     }
 
