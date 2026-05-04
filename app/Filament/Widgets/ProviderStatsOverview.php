@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
@@ -23,12 +24,13 @@ class ProviderStatsOverview extends StatsOverviewWidget
      */
     protected function getStats(): array
     {
-        $providers = User::query()->where('role', User::ROLE_PROVIDER);
+        $profiles = ProviderProfile::query()->withoutTrashed();
+        $users = User::query()->where('role', User::ROLE_PROVIDER);
 
-        $total = (clone $providers)->count();
-        $active = (clone $providers)->where('is_blocked', false)->count();
-        $blocked = (clone $providers)->where('is_blocked', true)->count();
-        $verified = (clone $providers)->whereNotNull('email_verified_at')->count();
+        $total = $profiles->count();
+        $active = (clone $users)->where('is_blocked', false)->count();
+        $blocked = (clone $users)->where('is_blocked', true)->count();
+        $verified = (clone $users)->whereNotNull('email_verified_at')->count();
 
         return [
             Stat::make('Total Providers', (string) $total)
@@ -48,6 +50,6 @@ class ProviderStatsOverview extends StatsOverviewWidget
 
     protected function getDescription(): ?string
     {
-        return 'Quick overview of provider accounts';
+        return 'Quick overview of provider profiles and accounts';
     }
 }

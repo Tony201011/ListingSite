@@ -1085,6 +1085,14 @@ class UserResource extends Resource
                     ->state(fn (User $record): string => filled($record->email_verified_at) ? 'Verified' : 'Unverified')
                     ->color(fn (string $state): string => $state === 'Verified' ? 'success' : 'warning'),
 
+                TextColumn::make('profile_count')
+                    ->label('# Profiles')
+                    ->state(fn (User $record): int => $record->providerProfiles->count())
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query->withCount('providerProfiles')
+                            ->orderBy('provider_profiles_count', $direction);
+                    }),
+
                 TextColumn::make('providerProfile.profile_status')
                     ->label('Profiles')
                     ->badge()
