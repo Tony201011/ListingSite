@@ -7,10 +7,14 @@ use App\Filament\Resources\PurchaseTransactions\Pages\ListPurchaseTransactions;
 use App\Models\PurchaseTransaction;
 use BackedEnum;
 use Filament\Facades\Filament;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -39,6 +43,77 @@ class PurchaseTransactionResource extends Resource
     public static function canCreate(): bool
     {
         return false;
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('Transaction Details')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('id')
+                            ->label('Transaction ID'),
+                        TextEntry::make('status')
+                            ->label('Status')
+                            ->badge()
+                            ->color(fn (string $state): string => match ($state) {
+                                'paid' => 'success',
+                                'pending' => 'warning',
+                                'failed' => 'danger',
+                                'refunded' => 'info',
+                                default => 'gray',
+                            }),
+                        TextEntry::make('credits')
+                            ->label('Credits'),
+                        TextEntry::make('amount')
+                            ->label('Amount')
+                            ->money(fn ($record) => $record->currency ?? 'AUD'),
+                        TextEntry::make('currency')
+                            ->label('Currency'),
+                        TextEntry::make('invoice_name')
+                            ->label('Invoice Name')
+                            ->placeholder('-'),
+                        TextEntry::make('paid_at')
+                            ->label('Paid At')
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('created_at')
+                            ->label('Created At')
+                            ->dateTime(),
+                    ]),
+                Section::make('Provider Information')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('user.name')
+                            ->label('Provider Name'),
+                        TextEntry::make('user.email')
+                            ->label('Provider Email'),
+                        TextEntry::make('user.mobile')
+                            ->label('Provider Mobile')
+                            ->placeholder('-'),
+                        TextEntry::make('user.providerProfile.name')
+                            ->label('Profile Name')
+                            ->placeholder('-'),
+                    ]),
+                Section::make('Stripe Information')
+                    ->columns(1)
+                    ->schema([
+                        TextEntry::make('stripe_session_id')
+                            ->label('Stripe Session ID')
+                            ->copyable()
+                            ->placeholder('-'),
+                        TextEntry::make('stripe_payment_intent_id')
+                            ->label('Payment Intent ID')
+                            ->copyable()
+                            ->placeholder('-'),
+                        TextEntry::make('receipt_url')
+                            ->label('Receipt URL')
+                            ->url(fn ($record) => $record->receipt_url)
+                            ->openUrlInNewTab()
+                            ->placeholder('-'),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -124,6 +199,11 @@ class PurchaseTransactionResource extends Resource
                     ]),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->modalHeading('Transaction Details'),
+
                 Action::make('view_receipt')
                     ->label('View Receipt')
                     ->icon('heroicon-o-document-text')
