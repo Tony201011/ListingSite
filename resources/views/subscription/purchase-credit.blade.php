@@ -2,21 +2,12 @@
 
 @section('content')
 @php
-    $currentBalance = 21;
-    $allowedCredits = [7, 30, 60, 120, 180];
-    $selectedCredits = (int) old('credits', request('credits', 30));
+    $allowedCredits = collect($plans)->pluck('credits')->toArray();
+    $selectedCredits = (int) old('credits', request('credits', $plans[1]['credits'] ?? ($plans[0]['credits'] ?? 30)));
 
     if (!in_array($selectedCredits, $allowedCredits, true)) {
-        $selectedCredits = 30;
+        $selectedCredits = $allowedCredits[0] ?? 30;
     }
-
-    $plans = [
-        ['credits' => 7, 'price' => 10],
-        ['credits' => 30, 'price' => 35],
-        ['credits' => 60, 'price' => 65],
-        ['credits' => 120, 'price' => 120],
-        ['credits' => 180, 'price' => 160],
-    ];
 @endphp
 
 <div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{ selectedPlan: {{ $selectedCredits }} }">
@@ -92,7 +83,7 @@
                             id="invoice_name"
                             name="invoice_name"
                             type="text"
-                            value="{{ old('invoice_name', 'Sourabh wadhwa') }}"
+                            value="{{ old('invoice_name', auth()->user()->name) }}"
                             class="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                         >
                     </div>

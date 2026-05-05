@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Subscription;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
+use App\Models\PricingPackage;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,7 +21,26 @@ class PurchaseCreditController extends Controller
 
     public function purchaseCredit(): View
     {
-        return view('subscription.purchase-credit');
+        $currentBalance = auth()->user()->credits ?? 0;
+
+        $packages = PricingPackage::where('is_active', true)->orderBy('credits')->get();
+
+        if ($packages->isNotEmpty()) {
+            $plans = $packages->map(fn ($pkg) => [
+                'credits' => (int) $pkg->credits,
+                'price' => (float) preg_replace('/[^\d.]/', '', $pkg->total_price),
+            ])->toArray();
+        } else {
+            $plans = [
+                ['credits' => 7, 'price' => 10],
+                ['credits' => 30, 'price' => 35],
+                ['credits' => 60, 'price' => 65],
+                ['credits' => 120, 'price' => 120],
+                ['credits' => 180, 'price' => 160],
+            ];
+        }
+
+        return view('subscription.purchase-credit', compact('currentBalance', 'plans'));
     }
 
     public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse
@@ -44,12 +63,12 @@ class PurchaseCreditController extends Controller
     {
         $sessionId = $request->get('session_id');
 
-        if (!$sessionId) {
+        if (! $sessionId) {
             return redirect('/purchase-credit')->withErrors('Invalid checkout session.');
         }
 
         $siteSetting = SiteSetting::first();
-        if (!$siteSetting?->stripe_enabled || !$siteSetting->stripe_secret_key) {
+        if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
             return redirect('/purchase-credit')->withErrors('Payment system is not configured.');
         }
 
@@ -58,17 +77,26 @@ class PurchaseCreditController extends Controller
             $session = $stripe->checkout->sessions->retrieve($sessionId);
 
             if ($session->payment_status === 'paid') {
-                // Process the successful payment
-                $userId = $session->metadata->user_id;
-                $credits = $session->metadata->credits;
+                $transaction = PurchaseTransaction::where('stripe_session_id', $sessionId)->first();
 
-                // Add credits to user account
-                $user = User::find($userId);
-                if ($user) {
-                    $user->increment('credits', $credits);
+                if ($transaction && $transaction->status !== 'paid') {
+                    $transaction->update([
+                        'status' => 'paid',
+                        'stripe_payment_intent_id' => $session->payment_intent,
+                        'paid_at' => now(),
+                    ]);
 
-                    // Log the purchase
-                    // You might want to create a purchase history record here
+                    $user = $transaction->user;
+                    if ($user) {
+                        $user->increment('credits', $transaction->credits);
+                    }
+
+                    $credits = $transaction->credits;
+                } elseif ($transaction) {
+                    // Already processed (e.g., by webhook)
+                    $credits = $transaction->credits;
+                } else {
+                    $credits = (int) ($session->metadata->credits ?? 0);
                 }
 
                 return redirect('/purchase-history')->with(
@@ -79,7 +107,7 @@ class PurchaseCreditController extends Controller
 
             return redirect('/purchase-credit')->withErrors('Payment was not completed.');
         } catch (\Exception $e) {
-            return redirect('/purchase-credit')->withErrors('Failed to verify payment: ' . $e->getMessage());
+            return redirect('/purchase-credit')->withErrors('Failed to verify payment: '.$e->getMessage());
         }
     }
 
@@ -107,15 +135,15 @@ class PurchaseCreditController extends Controller
         $month = request('month', 'all');
         if ($month !== 'all') {
             $query->whereYear('created_at', substr($month, 0, 4))
-                  ->whereMonth('created_at', substr($month, 5, 2));
+                ->whereMonth('created_at', substr($month, 5, 2));
         }
 
         $search = trim(request('q', ''));
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('invoice_name', 'like', "%{$search}%")
-                  ->orWhere('credits', 'like', "%{$search}%")
-                  ->orWhere('amount', 'like', "%{$search}%");
+                    ->orWhere('credits', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
             });
         }
 
