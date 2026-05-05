@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Log;
 
 class HandleStripeWebhook
 {
+    public function __construct(
+        private SendCreditPurchaseEmail $sendCreditPurchaseEmail,
+    ) {}
+
     public function execute(object $event): void
     {
         Log::info('Stripe webhook received', ['type' => $event->type, 'id' => $event->id]);
@@ -40,30 +44,42 @@ class HandleStripeWebhook
             return;
         }
 
-        DB::transaction(function () use ($session, $transactionId) {
-            $transaction = PurchaseTransaction::lockForUpdate()->find($transactionId);
+        $transaction = PurchaseTransaction::find($transactionId);
 
-            if (! $transaction || $transaction->status === 'paid') {
+        if (! $transaction || $transaction->status === 'paid') {
+            return;
+        }
+
+        DB::transaction(function () use ($session, $transaction) {
+            $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
+
+            if (! $locked || $locked->status === 'paid') {
                 return;
             }
 
-            $transaction->update([
+            $locked->update([
                 'status' => 'paid',
                 'stripe_payment_intent_id' => $session->payment_intent,
                 'paid_at' => now(),
             ]);
 
-            $user = $transaction->user;
+            $user = $locked->user;
             if ($user) {
-                $user->increment('credits', $transaction->credits);
+                $user->increment('credits', $locked->credits);
                 Log::info('Credits added to user via webhook', [
                     'user_id' => $user->id,
-                    'credits_added' => $transaction->credits,
-                    'transaction_id' => $transaction->id,
+                    'credits_added' => $locked->credits,
+                    'transaction_id' => $locked->id,
                     'session_id' => $session->id,
                 ]);
             }
         });
+
+        $transaction->refresh();
+
+        if ($transaction->status === 'paid') {
+            $this->sendCreditPurchaseEmail->execute($transaction);
+        }
     }
 
     private function handlePaymentIntentSucceeded(object $paymentIntent): void

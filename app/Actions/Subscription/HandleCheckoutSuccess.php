@@ -10,6 +10,10 @@ use Stripe\StripeClient;
 
 class HandleCheckoutSuccess
 {
+    public function __construct(
+        private SendCreditPurchaseEmail $sendCreditPurchaseEmail,
+    ) {}
+
     /**
      * @return array{status: string, credits?: int, error?: string}
      */
@@ -56,6 +60,8 @@ class HandleCheckoutSuccess
 
                 $transaction->refresh();
             }
+
+            $this->sendCreditPurchaseEmail->execute($transaction);
 
             return ['status' => 'paid', 'credits' => $transaction->credits];
         } catch (\Exception $e) {
