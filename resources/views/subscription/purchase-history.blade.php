@@ -141,34 +141,40 @@
                                             {{ ucfirst($purchase->status) }}
                                         </span>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                                        @if($purchase->status === 'paid' && $purchase->receipt_url)
-                                            <div class="flex items-center gap-3">
-                                                <a href="{{ $purchase->receipt_url }}" target="_blank" rel="noopener noreferrer" class="text-[#e04ecb] hover:text-[#c13ab0] font-medium">
-                                                    View Receipt
-                                                </a>
-                                                <button
-                                                    type="button"
-                                                    onclick="openComplaintModal({{ $purchase->id }})"
-                                                    class="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
-                                                >
-                                                    <svg class="mr-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                                    </svg>
-                                                    Complaint
-                                                </button>
-                                            </div>
-                                        @elseif($purchase->status === 'paid')
-                                            <button
-                                                type="button"
-                                                onclick="openComplaintModal({{ $purchase->id }})"
-                                                class="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
-                                            >
-                                                <svg class="mr-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                                </svg>
-                                                Complaint
-                                            </button>
+                                     <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                        @php
+                                            $latestComplaint = $purchase->complaints->first();
+                                        @endphp
+                                        @if($purchase->status === 'paid')
+                                            @if($latestComplaint)
+                                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                                                    @if($latestComplaint->status === 'reviewed') bg-green-100 text-green-800
+                                                    @elseif($latestComplaint->status === 'closed') bg-gray-100 text-gray-700
+                                                    @else bg-yellow-100 text-yellow-800 @endif">
+                                                    Complaint: {{ ucfirst($latestComplaint->status) }}
+                                                </span>
+                                                @if($latestComplaint->admin_reply && $latestComplaint->replied_at)
+                                                    <p class="mt-1 text-xs text-gray-500">Admin replied on {{ $latestComplaint->replied_at->format('d M Y') }}</p>
+                                                @endif
+                                            @else
+                                                <div class="flex items-center gap-3">
+                                                    @if($purchase->receipt_url)
+                                                        <a href="{{ $purchase->receipt_url }}" target="_blank" rel="noopener noreferrer" class="text-[#e04ecb] hover:text-[#c13ab0] font-medium">
+                                                            View Receipt
+                                                        </a>
+                                                    @endif
+                                                    <button
+                                                        type="button"
+                                                        onclick="openComplaintModal({{ $purchase->id }})"
+                                                        class="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                                                    >
+                                                        <svg class="mr-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                        </svg>
+                                                        Complaint
+                                                    </button>
+                                                </div>
+                                            @endif
                                         @else
                                             -
                                         @endif

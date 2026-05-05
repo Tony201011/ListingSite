@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PurchaseTransaction extends Model
 {
@@ -63,5 +64,10 @@ class PurchaseTransaction extends Model
     public function getMonthAttribute(): string
     {
         return $this->created_at->format('Y-m');
+    }
+
+    public function complaints(): HasMany
+    {
+        return $this->hasMany(PurchaseComplaint::class);
     }
 }
