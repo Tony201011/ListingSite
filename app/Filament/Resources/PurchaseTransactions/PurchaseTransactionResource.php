@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\PurchaseTransactions;
 
+use App\Actions\Subscription\ProcessStripeRefund;
 use App\Filament\Resources\PurchaseTransactions\Pages\ListPurchaseTransactions;
 use App\Models\PurchaseTransaction;
 use BackedEnum;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -86,13 +89,6 @@ class PurchaseTransactionResource extends Resource
                     ->label('Invoice Name')
                     ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('receipt_url')
-                    ->label('Receipt')
-                    ->url(fn ($record) => $record->receipt_url)
-                    ->openUrlInNewTab()
-                    ->placeholder('-')
-                    ->limit(30)
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('stripe_session_id')
                     ->label('Stripe Session')
                     ->copyable()
@@ -126,6 +122,47 @@ class PurchaseTransactionResource extends Resource
                         'failed' => 'Failed',
                         'refunded' => 'Refunded',
                     ]),
+            ])
+            ->recordActions([
+                Action::make('view_receipt')
+                    ->label('View Receipt')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->url(fn (PurchaseTransaction $record): ?string => $record->receipt_url ?: null)
+                    ->openUrlInNewTab()
+                    ->visible(fn (PurchaseTransaction $record): bool => ! empty($record->receipt_url)),
+
+                Action::make('refund')
+                    ->label('Refund')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Refund Transaction')
+                    ->modalDescription(fn (PurchaseTransaction $record): string => "Refund \${$record->amount} to {$record->user?->name}? This will process a full refund via Stripe and deduct {$record->credits} credit(s) from their account.")
+                    ->modalSubmitActionLabel('Yes, Refund')
+                    ->visible(fn (PurchaseTransaction $record): bool => $record->status === 'paid')
+                    ->action(function (PurchaseTransaction $record, ProcessStripeRefund $processStripeRefund): void {
+                        try {
+                            $processStripeRefund->execute($record);
+
+                            Notification::make()
+                                ->title('Refund processed successfully')
+                                ->success()
+                                ->send();
+                        } catch (\RuntimeException $e) {
+                            Notification::make()
+                                ->title('Refund failed')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Refund failed')
+                                ->body('An unexpected error occurred. Please try again or check Stripe directly.')
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()
