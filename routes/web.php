@@ -285,6 +285,7 @@ Route::middleware('provider.auth')->group(function () {
             Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
             Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
             Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
+            Route::post('/purchase-history/{purchaseTransaction}/complaint', [PurchaseCreditController::class, 'storeComplaint'])->name('purchase-history.complaint');
             Route::get('/payment-subscription', [PaymentSubscriptionController::class, 'index'])->name('payment-subscription');
             /*** credit route end here */
         });

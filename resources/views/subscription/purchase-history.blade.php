@@ -28,6 +28,12 @@
             </div>
         @endif
 
+        @if(session('complaint_success'))
+            <div class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700 shadow-sm">
+                {{ session('complaint_success') }}
+            </div>
+        @endif
+
         @if($errors->any())
             <div class="mb-5 rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm">
                 <ul class="list-disc pl-5 space-y-1">
@@ -137,9 +143,32 @@
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
                                         @if($purchase->status === 'paid' && $purchase->receipt_url)
-                                            <a href="{{ $purchase->receipt_url }}" target="_blank" rel="noopener noreferrer" class="text-[#e04ecb] hover:text-[#c13ab0] font-medium">
-                                                View Receipt
-                                            </a>
+                                            <div class="flex items-center gap-3">
+                                                <a href="{{ $purchase->receipt_url }}" target="_blank" rel="noopener noreferrer" class="text-[#e04ecb] hover:text-[#c13ab0] font-medium">
+                                                    View Receipt
+                                                </a>
+                                                <button
+                                                    type="button"
+                                                    onclick="openComplaintModal({{ $purchase->id }})"
+                                                    class="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                                                >
+                                                    <svg class="mr-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                    </svg>
+                                                    Complaint
+                                                </button>
+                                            </div>
+                                        @elseif($purchase->status === 'paid')
+                                            <button
+                                                type="button"
+                                                onclick="openComplaintModal({{ $purchase->id }})"
+                                                class="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                                            >
+                                                <svg class="mr-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                </svg>
+                                                Complaint
+                                            </button>
                                         @else
                                             -
                                         @endif
@@ -172,5 +201,76 @@
         </div>
     </div>
 </div>
+
+<!-- Complaint Modal -->
+<div id="complaint-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+            <h2 class="text-lg font-semibold text-gray-900">Submit a Complaint</h2>
+            <button type="button" onclick="closeComplaintModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="complaint-form" method="POST" action="" class="px-6 py-5 space-y-4">
+            @csrf
+            <div>
+                <label for="complaint-subject" class="block text-sm font-medium text-gray-700 mb-1">Subject <span class="text-rose-500">*</span></label>
+                <input
+                    type="text"
+                    name="subject"
+                    id="complaint-subject"
+                    required
+                    maxlength="255"
+                    placeholder="Brief description of your issue..."
+                    class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                >
+            </div>
+            <div>
+                <label for="complaint-message" class="block text-sm font-medium text-gray-700 mb-1">Message <span class="text-rose-500">*</span></label>
+                <textarea
+                    name="message"
+                    id="complaint-message"
+                    required
+                    maxlength="5000"
+                    rows="5"
+                    placeholder="Please describe your complaint in detail..."
+                    class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 resize-none"
+                ></textarea>
+                <p class="mt-1 text-xs text-gray-400">Maximum 5000 characters.</p>
+            </div>
+            <div class="flex justify-end gap-3 pt-1">
+                <button type="button" onclick="closeComplaintModal()" class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button type="submit" class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700">
+                    Submit Complaint
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openComplaintModal(transactionId) {
+    var complaintBasePath = '{{ url('/purchase-history') }}';
+    document.getElementById('complaint-form').action = complaintBasePath + '/' + encodeURIComponent(transactionId) + '/complaint';
+    var modal = document.getElementById('complaint-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeComplaintModal() {
+    var modal = document.getElementById('complaint-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.getElementById('complaint-form').reset();
+}
+
+document.getElementById('complaint-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeComplaintModal();
+});
+</script>
 
 @endsection
