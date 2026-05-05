@@ -30,8 +30,6 @@ class HandleCheckoutSuccess
         if ($transaction->status === 'paid') {
             return ['status' => 'paid', 'credits' => $transaction->credits];
         }
-
-        // Webhook may not have arrived yet — verify directly with Stripe as fallback
         $siteSetting = SiteSetting::first();
         if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
             return ['status' => 'not_configured'];
@@ -39,19 +37,26 @@ class HandleCheckoutSuccess
 
         try {
             $stripe = new StripeClient($siteSetting->stripe_secret_key);
-            $session = $stripe->checkout->sessions->retrieve($sessionId);
+            $session = $stripe->checkout->sessions->retrieve($sessionId, [
+                'expand' => ['payment_intent.latest_charge'],
+            ]);
 
             if ($session->payment_status !== 'paid') {
                 return ['status' => 'unpaid'];
             }
 
             if ($transaction->status !== 'paid') {
-                DB::transaction(function () use ($transaction, $session) {
+                $receiptUrl = $session->payment_intent?->latest_charge?->receipt_url ?? null;
+
+                DB::transaction(function () use ($transaction, $session, $receiptUrl) {
                     $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
                     if ($locked && $locked->status !== 'paid') {
                         $locked->update([
                             'status' => 'paid',
-                            'stripe_payment_intent_id' => $session->payment_intent,
+                            'stripe_payment_intent_id' => is_string($session->payment_intent)
+                                ? $session->payment_intent
+                                : $session->payment_intent?->id,
+                            'receipt_url' => $receiptUrl,
                             'paid_at' => now(),
                         ]);
                         $locked->user?->increment('credits', $locked->credits);
