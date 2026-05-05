@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -109,15 +110,24 @@ class SiteSettingResource extends Resource
 
             Forms\Components\Section::make('Payment Settings')
                 ->schema([
+                    Forms\Components\Select::make('stripe_mode')
+                        ->label('Stripe Mode')
+                        ->options([
+                            'sandbox' => 'Sandbox (Testing)',
+                            'live' => 'Live (Production)',
+                        ])
+                        ->default('sandbox')
+                        ->required()
+                        ->helperText('Choose Sandbox for testing or Live for production transactions.'),
                     Forms\Components\TextInput::make('stripe_publishable_key')
                         ->label('Stripe Publishable Key')
-                        ->placeholder('pk_test_...')
+                        ->placeholder('pk_test_... or pk_live_...')
                         ->helperText('Your Stripe publishable key for client-side operations.'),
                     Forms\Components\TextInput::make('stripe_secret_key')
                         ->label('Stripe Secret Key')
                         ->password()
                         ->revealable()
-                        ->placeholder('sk_test_...')
+                        ->placeholder('sk_test_... or sk_live_...')
                         ->helperText('Your Stripe secret key for server-side operations. Keep this secure.'),
                     Forms\Components\TextInput::make('stripe_webhook_secret')
                         ->label('Stripe Webhook Secret')

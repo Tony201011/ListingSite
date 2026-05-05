@@ -33,6 +33,7 @@ class SiteSetting extends Model
         'fatal_error_query_param',
         'logging_enabled',
         'max_video_upload_mb',
+        'stripe_mode',
         'stripe_publishable_key',
         'stripe_secret_key',
         'stripe_webhook_secret',
@@ -54,6 +55,7 @@ class SiteSetting extends Model
         'fatal_error_page_enabled' => 'boolean',
         'logging_enabled' => 'boolean',
         'max_video_upload_mb' => 'integer',
+        'stripe_mode' => 'string',
         'stripe_enabled' => 'boolean',
     ];
 
