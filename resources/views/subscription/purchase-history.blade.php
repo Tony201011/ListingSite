@@ -254,8 +254,8 @@
 
 <script>
 function openComplaintModal(transactionId) {
-    var baseUrl = '{{ url('/purchase-history') }}';
-    document.getElementById('complaint-form').action = baseUrl + '/' + transactionId + '/complaint';
+    var complaintBasePath = '{{ url('/purchase-history') }}';
+    document.getElementById('complaint-form').action = complaintBasePath + '/' + encodeURIComponent(transactionId) + '/complaint';
     var modal = document.getElementById('complaint-modal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -265,8 +265,7 @@ function closeComplaintModal() {
     var modal = document.getElementById('complaint-modal');
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-    document.getElementById('complaint-subject').value = '';
-    document.getElementById('complaint-message').value = '';
+    document.getElementById('complaint-form').reset();
 }
 
 document.getElementById('complaint-modal').addEventListener('click', function(e) {
