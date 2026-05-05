@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Stripe\StripeClient;
+use Stripe\Exception\SignatureVerificationException;
 use Stripe\Webhook;
 
 class StripeWebhookController extends Controller
@@ -16,8 +16,9 @@ class StripeWebhookController extends Controller
     {
         $siteSetting = SiteSetting::first();
 
-        if (!$siteSetting?->stripe_enabled || !$siteSetting->stripe_webhook_secret) {
+        if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_webhook_secret) {
             Log::warning('Stripe webhook received but Stripe is not configured');
+
             return response('Stripe not configured', 400);
         }
 
@@ -28,9 +29,11 @@ class StripeWebhookController extends Controller
             $event = Webhook::constructEvent($payload, $sigHeader, $siteSetting->stripe_webhook_secret);
         } catch (\UnexpectedValueException $e) {
             Log::error('Invalid Stripe payload', ['error' => $e->getMessage()]);
+
             return response('Invalid payload', 400);
-        } catch (\Stripe\Exception\SignatureVerificationException $e) {
+        } catch (SignatureVerificationException $e) {
             Log::error('Invalid Stripe signature', ['error' => $e->getMessage()]);
+
             return response('Invalid signature', 400);
         }
 
@@ -52,48 +55,44 @@ class StripeWebhookController extends Controller
 
     private function handleCheckoutSessionCompleted($session)
     {
-        if ($session->payment_status === 'paid') {
-            $transactionId = $session->metadata->transaction_id ?? null;
-
-            if ($transactionId) {
-                $transaction = PurchaseTransaction::find($transactionId);
-                if ($transaction && $transaction->status !== 'paid') {
-                    $transaction->update([
-                        'status' => 'paid',
-                        'stripe_payment_intent_id' => $session->payment_intent,
-                        'paid_at' => now(),
-                    ]);
-
-                    // Add credits to user account
-                    $user = $transaction->user;
-                    if ($user) {
-                        $user->increment('credits', $transaction->credits);
-                        Log::info('Credits added to user via webhook', [
-                            'user_id' => $user->id,
-                            'credits_added' => $transaction->credits,
-                            'transaction_id' => $transaction->id,
-                            'session_id' => $session->id
-                        ]);
-                    }
-                }
-            } else {
-                // Fallback for sessions without transaction_id (backward compatibility)
-                $userId = $session->metadata->user_id ?? null;
-                $credits = $session->metadata->credits ?? null;
-
-                if ($userId && $credits) {
-                    $user = User::find($userId);
-                    if ($user) {
-                        $user->increment('credits', (int) $credits);
-                        Log::info('Credits added to user via webhook (legacy)', [
-                            'user_id' => $userId,
-                            'credits_added' => $credits,
-                            'session_id' => $session->id
-                        ]);
-                    }
-                }
-            }
+        if ($session->payment_status !== 'paid') {
+            return;
         }
+
+        $transactionId = $session->metadata->transaction_id ?? null;
+
+        if (! $transactionId) {
+            Log::warning('Stripe webhook: checkout.session.completed received without transaction_id', [
+                'session_id' => $session->id,
+            ]);
+
+            return;
+        }
+
+        DB::transaction(function () use ($session, $transactionId) {
+            $transaction = PurchaseTransaction::lockForUpdate()->find($transactionId);
+
+            if (! $transaction || $transaction->status === 'paid') {
+                return;
+            }
+
+            $transaction->update([
+                'status' => 'paid',
+                'stripe_payment_intent_id' => $session->payment_intent,
+                'paid_at' => now(),
+            ]);
+
+            $user = $transaction->user;
+            if ($user) {
+                $user->increment('credits', $transaction->credits);
+                Log::info('Credits added to user via webhook', [
+                    'user_id' => $user->id,
+                    'credits_added' => $transaction->credits,
+                    'transaction_id' => $transaction->id,
+                    'session_id' => $session->id,
+                ]);
+            }
+        });
     }
 
     private function handlePaymentIntentSucceeded($paymentIntent)

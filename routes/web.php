@@ -44,16 +44,22 @@ use App\Http\Controllers\SiteAccess\SitePasswordController;
 
 /**subscription controller start */
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Subscription\MemberShipController;
 use App\Http\Controllers\Subscription\PaymentSubscriptionController;
-use App\Http\Controllers\Subscription\PurchaseCreditController;
 /**subscription controller end */
 
 /*******site access controller start here  */
-use App\Http\Controllers\StripeWebhookController;
+use App\Http\Controllers\Subscription\PurchaseCreditController;
 /*******site access controller end here  */
 
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
+
+// Stripe webhook — must be outside all auth/session middleware and CSRF-exempt
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
+    ->name('stripe.webhook')
+    ->withoutMiddleware([VerifyCsrfToken::class]);
 
 Route::get('/site-password', [SitePasswordController::class, 'showForm'])
     ->name('site-password.form');
@@ -111,7 +117,7 @@ Route::post('/booking-enquiry', [BookingController::class, 'send'])
 Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
 Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
 Route::get('/naughty-corner', [FrontendPageController::class, 'naughtyCorner'])->name('naughty-corner');
-Route::get('/membership', [FrontendPageController::class, 'membership'])->name('membership');
+Route::get('/membership', [MemberShipController::class, 'membership'])->name('membership');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.load-more');
@@ -276,11 +282,9 @@ Route::middleware('provider.auth')->group(function () {
             Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
             Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
             Route::get('/purchase-credit/success', [PurchaseCreditController::class, 'checkoutSuccess'])->name('purchase-credit.success');
-            Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
             Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
             Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
             Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
-            Route::get('/membership', [MemberShipController::class, 'membership'])->name('membership');
             Route::get('/payment-subscription', [PaymentSubscriptionController::class, 'index'])->name('payment-subscription');
             /*** credit route end here */
         });

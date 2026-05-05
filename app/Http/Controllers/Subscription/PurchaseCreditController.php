@@ -8,9 +8,9 @@ use App\Http\Requests\CheckoutPurchaseCreditRequest;
 use App\Models\CreditPackage;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Stripe\StripeClient;
 
@@ -68,6 +68,23 @@ class PurchaseCreditController extends Controller
             return redirect('/purchase-credit')->withErrors('Invalid checkout session.');
         }
 
+        // Look up the transaction that the webhook should have already processed
+        $transaction = PurchaseTransaction::where('stripe_session_id', $sessionId)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (! $transaction) {
+            return redirect('/purchase-credit')->withErrors('Transaction not found.');
+        }
+
+        if ($transaction->status === 'paid') {
+            return redirect('/purchase-history')->with(
+                'checkout_success',
+                "Payment successful! {$transaction->credits} credits have been added to your account."
+            );
+        }
+
+        // Webhook may not have arrived yet — verify directly with Stripe as fallback
         $siteSetting = SiteSetting::first();
         if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
             return redirect('/purchase-credit')->withErrors('Payment system is not configured.');
@@ -78,22 +95,28 @@ class PurchaseCreditController extends Controller
             $session = $stripe->checkout->sessions->retrieve($sessionId);
 
             if ($session->payment_status === 'paid') {
-                // Process the successful payment
-                $userId = $session->metadata->user_id;
-                $credits = $session->metadata->credits;
+                // Webhook has not processed yet — mark transaction and add credits now,
+                // using a DB-level guard so a subsequent webhook delivery does not double-credit.
+                if ($transaction->status !== 'paid') {
+                    DB::transaction(function () use ($transaction, $session) {
+                        // Re-read inside transaction with row lock to prevent race with webhook
+                        $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
+                        if ($locked && $locked->status !== 'paid') {
+                            $locked->update([
+                                'status' => 'paid',
+                                'stripe_payment_intent_id' => $session->payment_intent,
+                                'paid_at' => now(),
+                            ]);
+                            $locked->user?->increment('credits', $locked->credits);
+                        }
+                    });
 
-                // Add credits to user account
-                $user = User::find($userId);
-                if ($user) {
-                    $user->increment('credits', $credits);
-
-                    // Log the purchase
-                    // You might want to create a purchase history record here
+                    $transaction->refresh();
                 }
 
                 return redirect('/purchase-history')->with(
                     'checkout_success',
-                    "Payment successful! {$credits} credits have been added to your account."
+                    "Payment successful! {$transaction->credits} credits have been added to your account."
                 );
             }
 
@@ -126,8 +149,7 @@ class PurchaseCreditController extends Controller
 
         $month = request('month', 'all');
         if ($month !== 'all') {
-            $query->whereYear('created_at', substr($month, 0, 4))
-                ->whereMonth('created_at', substr($month, 5, 2));
+            $query->whereRaw('SUBSTR(created_at, 1, 7) = ?', [$month]);
         }
 
         $search = trim(request('q', ''));
@@ -141,16 +163,15 @@ class PurchaseCreditController extends Controller
 
         $purchases = $query->paginate(20);
 
-        // Get available months for filter
+        // Get available months for filter — use SUBSTR for cross-DB compatibility (MySQL + SQLite)
         $availableMonths = PurchaseTransaction::where('user_id', auth()->id())
-            ->selectRaw('DISTINCT YEAR(created_at) as year, MONTH(created_at) as month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+            ->selectRaw('DISTINCT SUBSTR(created_at, 1, 7) as month_key')
+            ->orderByRaw('month_key DESC')
             ->get()
             ->map(function ($item) {
                 return [
-                    'value' => sprintf('%04d-%02d', $item->year, $item->month),
-                    'label' => date('M Y', strtotime("{$item->year}-{$item->month}-01")),
+                    'value' => $item->month_key,
+                    'label' => date('M Y', strtotime($item->month_key.'-01')),
                 ];
             });
 
