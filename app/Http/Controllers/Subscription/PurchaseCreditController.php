@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Subscription;
 
+use App\Actions\Subscription\CreatePurchaseComplaint;
 use App\Actions\Subscription\GetPurchaseCreditPageData;
 use App\Actions\Subscription\GetPurchaseHistory;
 use App\Actions\Subscription\HandleCheckoutSuccess;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
+use App\Models\PurchaseTransaction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,6 +21,7 @@ class PurchaseCreditController extends Controller
         private ProcessCreditCheckout $processCreditCheckout,
         private HandleCheckoutSuccess $handleCheckoutSuccess,
         private GetPurchaseHistory $getPurchaseHistory,
+        private CreatePurchaseComplaint $createPurchaseComplaint,
     ) {}
 
     public function purchaseCredit(): View
@@ -78,5 +81,22 @@ class PurchaseCreditController extends Controller
     public function purchaseHistory(): View
     {
         return view('subscription.purchase-history', $this->getPurchaseHistory->execute());
+    }
+
+    public function storeComplaint(Request $request, PurchaseTransaction $purchaseTransaction): RedirectResponse
+    {
+        $request->validate([
+            'subject' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string', 'max:5000'],
+        ]);
+
+        if ($purchaseTransaction->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $this->createPurchaseComplaint->execute($purchaseTransaction, $request->only('subject', 'message'));
+
+        return redirect()->route('purchase-history')
+            ->with('complaint_success', 'Your complaint has been submitted. We will review it and respond shortly.');
     }
 }
