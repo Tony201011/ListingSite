@@ -3,8 +3,10 @@
 namespace App\Actions\Subscription;
 
 use App\Models\PurchaseTransaction;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Stripe\StripeClient;
 
 class HandleStripeWebhook
 {
@@ -50,7 +52,9 @@ class HandleStripeWebhook
             return;
         }
 
-        DB::transaction(function () use ($session, $transaction) {
+        $receiptUrl = $this->fetchReceiptUrl($session->payment_intent ?? null);
+
+        DB::transaction(function () use ($session, $transaction, $receiptUrl) {
             $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
 
             if (! $locked || $locked->status === 'paid') {
@@ -60,6 +64,7 @@ class HandleStripeWebhook
             $locked->update([
                 'status' => 'paid',
                 'stripe_payment_intent_id' => $session->payment_intent,
+                'receipt_url' => $receiptUrl,
                 'paid_at' => now(),
             ]);
 
@@ -85,5 +90,33 @@ class HandleStripeWebhook
     private function handlePaymentIntentSucceeded(object $paymentIntent): void
     {
         Log::info('Payment intent succeeded', ['id' => $paymentIntent->id]);
+    }
+
+    private function fetchReceiptUrl(?string $paymentIntentId): ?string
+    {
+        if (! $paymentIntentId) {
+            return null;
+        }
+
+        try {
+            $siteSetting = SiteSetting::first();
+            if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
+                return null;
+            }
+
+            $stripe = new StripeClient($siteSetting->stripe_secret_key);
+            $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId, [
+                'expand' => ['latest_charge'],
+            ]);
+
+            return $paymentIntent->latest_charge?->receipt_url ?? null;
+        } catch (\Exception $e) {
+            Log::warning('Failed to fetch Stripe receipt URL', [
+                'payment_intent_id' => $paymentIntentId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 }

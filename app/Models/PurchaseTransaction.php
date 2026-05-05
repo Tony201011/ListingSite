@@ -14,6 +14,7 @@ class PurchaseTransaction extends Model
         'user_id',
         'stripe_session_id',
         'stripe_payment_intent_id',
+        'receipt_url',
         'credits',
         'amount',
         'currency',
