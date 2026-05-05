@@ -2,16 +2,20 @@
 
 @section('content')
 @php
-    $allowedCredits = collect($plans)->pluck('credits')->toArray();
-    $defaultCredits = $allowedCredits[0] ?? 30;
-    $selectedCredits = (int) old('credits', request('credits', $defaultCredits));
-
-    if (!in_array($selectedCredits, $allowedCredits, true)) {
-        $selectedCredits = $defaultCredits;
-    }
+    $packagesJson = $packages->map(fn ($p) => [
+        'id' => $p->id,
+        'name' => $p->name,
+        'credits' => $p->credits,
+        'price' => number_format($p->price, 2),
+    ])->values()->toJson();
 @endphp
-
-<div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{ selectedPlan: {{ $selectedCredits }} }">
+<div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{
+    selectedPackageId: {{ $selectedPackageId ?? 'null' }},
+    packages: {{ $packagesJson }},
+    get selected() {
+        return this.packages.find(p => p.id === this.selectedPackageId) ?? null;
+    }
+}">
     <div class="mx-auto w-full max-w-5xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -42,68 +46,83 @@
             </div>
         @endif
 
-        <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
-            <form action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
-                @csrf
+        @if($packages->isEmpty())
+            <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm text-center text-gray-500 text-sm">
+                No credit packages are currently available. Please check back later.
+            </div>
+        @else
+            <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
+                <form action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
+                    @csrf
 
-                <div class="rounded-xl border border-gray-100">
-                    @foreach($plans as $index => $plan)
-                        <label class="flex cursor-pointer items-center justify-between gap-3 px-4 py-4 {{ $index < count($plans) - 1 ? 'border-b border-gray-100' : '' }}">
-                            <div class="flex items-center gap-3">
-                                <input
-                                    type="radio"
-                                    name="credits"
-                                    value="{{ $plan['credits'] }}"
-                                    class="h-4 w-4 border-gray-300 text-[#e04ecb] focus:ring-pink-200"
-                                    @change="selectedPlan = {{ $plan['credits'] }}"
-                                    {{ $plan['credits'] === $selectedCredits ? 'checked' : '' }}
-                                >
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900">{{ $plan['credits'] }} credits</p>
-                                    <p class="text-xs text-gray-500">AUD ${{ number_format($plan['price'], 2) }} (incl. GST)</p>
+                    <div class="rounded-xl border border-gray-100">
+                        @foreach($packages as $index => $package)
+                            <label class="flex cursor-pointer items-center justify-between gap-3 px-4 py-4 {{ $index < $packages->count() - 1 ? 'border-b border-gray-100' : '' }}">
+                                <div class="flex items-center gap-3">
+                                    <input
+                                        type="radio"
+                                        name="package_id"
+                                        value="{{ $package->id }}"
+                                        class="h-4 w-4 border-gray-300 text-[#e04ecb] focus:ring-pink-200"
+                                        @change="selectedPackageId = {{ $package->id }}"
+                                        {{ $package->id === $selectedPackageId ? 'checked' : '' }}
+                                    >
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900">{{ $package->name }}</p>
+                                        <p class="text-xs text-gray-700">{{ $package->credits }} credits &mdash; AUD ${{ number_format($package->price, 2) }} (incl. GST)</p>
+                                        @if($package->description)
+                                            <p class="text-xs text-gray-500">{{ $package->description }}</p>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                            <button
-                                type="button"
-                                @click="selectedPlan = {{ $plan['credits'] }}; $el.closest('label').querySelector('input').checked = true"
-                                class="rounded-lg border border-[#e04ecb] px-3 py-1.5 text-xs font-semibold text-[#e04ecb] transition hover:bg-pink-50"
+                                <button
+                                    type="button"
+                                    @click="selectedPackageId = {{ $package->id }}; $el.closest('label').querySelector('input').checked = true"
+                                    class="rounded-lg border border-[#e04ecb] px-3 py-1.5 text-xs font-semibold text-[#e04ecb] transition hover:bg-pink-50"
+                                >
+                                    Select
+                                </button>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                        <div class="lg:col-span-2">
+                            <label for="invoice_name" class="mb-2 block text-sm font-semibold text-gray-700">
+                                Invoice Name
+                                <span class="font-normal text-gray-500">(displayed on invoice)</span>
+                            </label>
+                            <input
+                                id="invoice_name"
+                                name="invoice_name"
+                                type="text"
+                                value="{{ old('invoice_name', $userName) }}"
+                                class="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                             >
-                                Select
-                            </button>
-                        </label>
-                    @endforeach
-                </div>
+                        </div>
 
-                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    <div class="lg:col-span-2">
-                        <label for="invoice_name" class="mb-2 block text-sm font-semibold text-gray-700">
-                            Invoice Name
-                            <span class="font-normal text-gray-500">(displayed on invoice)</span>
-                        </label>
-                        <input
-                            id="invoice_name"
-                            name="invoice_name"
-                            type="text"
-                            value="{{ old('invoice_name', $userName) }}"
-                            class="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                        >
+                        <div class="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Selected package</p>
+                            <template x-if="selected">
+                                <div>
+                                    <p class="mt-2 text-xl font-bold text-gray-900" x-text="selected.name"></p>
+                                    <p class="mt-1 text-sm text-gray-700" x-text="selected.credits + ' credits'"></p>
+                                    <p class="mt-0.5 text-sm font-semibold text-gray-900" x-text="'AUD $' + selected.price"></p>
+                                </div>
+                            </template>
+                            <p class="mt-1 text-xs text-gray-500">Final payment is shown at checkout.</p>
+                        </div>
                     </div>
 
-                    <div class="rounded-xl border border-gray-100 bg-gray-50 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Selected package</p>
-                        <p class="mt-2 text-2xl font-bold text-gray-900"><span x-text="selectedPlan"></span> credits</p>
-                        <p class="mt-1 text-xs text-gray-500">Final payment is shown at checkout.</p>
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <p class="text-xs text-gray-500">All prices are in Australian Dollars (AUD) and include GST.</p>
+                        <button type="submit" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
+                            Continue to checkout
+                        </button>
                     </div>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                    <p class="text-xs text-gray-500">All prices are in Australian Dollars (AUD) and include GST.</p>
-                    <button type="submit" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
-                        Continue to checkout
-                    </button>
-                </div>
-            </form>
-        </div>
+                </form>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

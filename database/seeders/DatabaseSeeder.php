@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Database\Seeders\CookieSettingSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -50,6 +49,7 @@ class DatabaseSeeder extends Seeder
             NaughtyCornerPageSeeder::class,
             PricingPageSeeder::class,
             PricingPackageSeeder::class,
+            CreditPackageSeeder::class,
             HelpPageSeeder::class,
             GlobalBannerSeeder::class,
             FooterWidgetSeeder::class,
