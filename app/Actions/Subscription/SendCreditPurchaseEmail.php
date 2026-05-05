@@ -20,6 +20,7 @@ class SendCreditPurchaseEmail
             $user->name,
             $transaction->credits,
             (float) $transaction->amount,
+            $transaction->currency,
             $transaction->invoice_name,
         );
     }

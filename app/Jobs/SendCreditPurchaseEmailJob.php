@@ -23,6 +23,7 @@ class SendCreditPurchaseEmailJob implements ShouldQueue
         public string $recipientName,
         public int $credits,
         public float $amount,
+        public string $currency,
         public string $invoiceName,
     ) {}
 
@@ -44,6 +45,7 @@ class SendCreditPurchaseEmailJob implements ShouldQueue
                     'email' => $this->recipientEmail,
                     'credits' => $this->credits,
                     'amount' => $this->amount,
+                    'currency' => $this->currency,
                     'invoiceName' => $this->invoiceName,
                     'historyUrl' => url('/purchase-history'),
                 ],

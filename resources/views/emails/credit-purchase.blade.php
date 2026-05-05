@@ -33,7 +33,7 @@
                                     </tr>
                                     <tr>
                                         <td style="font-size:14px;color:#6b7280;padding:4px 0;">Amount Paid</td>
-                                        <td style="font-size:14px;color:#111827;font-weight:600;text-align:right;">AUD ${{ number_format($amount, 2) }}</td>
+                                        <td style="font-size:14px;color:#111827;font-weight:600;text-align:right;">{{ $currency }} ${{ number_format($amount, 2) }}</td>
                                     </tr>
                                     <tr>
                                         <td style="font-size:14px;color:#6b7280;padding:4px 0;">Invoice Name</td>
