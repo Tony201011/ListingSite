@@ -8,11 +8,16 @@ use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 
 class SiteSettingResource extends Resource
 {
@@ -41,65 +46,65 @@ class SiteSettingResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\TextInput::make('meta_key')->label('Meta Key'),
-            Forms\Components\Textarea::make('meta_description')->label('Meta Description'),
-            Forms\Components\Toggle::make('enable_cookies')->label('Enable Cookie Consent Banner'),
-            Forms\Components\Toggle::make('captcha_enabled')
+            TextInput::make('meta_key')->label('Meta Key'),
+            Textarea::make('meta_description')->label('Meta Description'),
+            Toggle::make('enable_cookies')->label('Enable Cookie Consent Banner'),
+            Toggle::make('captcha_enabled')
                 ->label('Enable reCAPTCHA')
                 ->default(true)
                 ->helperText('When enabled, reCAPTCHA is shown on sign up and sign in pages.'),
-            Forms\Components\Textarea::make('cookies_text')->label('Cookie Consent Text')->rows(4),
-            Forms\Components\Toggle::make('site_password_enabled')->label('Enable Site Password')->helperText('When enabled, visitors must enter the site password to access the site.'),
+            Textarea::make('cookies_text')->label('Cookie Consent Text')->rows(4),
+            Toggle::make('site_password_enabled')->label('Enable Site Password')->helperText('When enabled, visitors must enter the site password to access the site.'),
 
-            Forms\Components\Toggle::make('short_url')->label('Enable Short URLs')->helperText('When enabled, the site will use short URLs for all links.'),
+            Toggle::make('short_url')->label('Enable Short URLs')->helperText('When enabled, the site will use short URLs for all links.'),
 
-            Forms\Components\TextInput::make('site_password')
+            TextInput::make('site_password')
                 ->label('Site Password')
                 ->password()
                 ->revealable()
                 ->dehydrated(fn ($state) => filled($state))
                 ->helperText('Set the site password used to grant visitor access. If empty, `SITE_PASSWORD` env will be used.'),
-            Forms\Components\TextInput::make('contact_email')
+            TextInput::make('contact_email')
                 ->label('Contact Email')
                 ->email()
                 ->maxLength(255)
                 ->helperText('Shown on profile contact section for email enquiries.'),
-            Forms\Components\TextInput::make('max_search_distance')
+            TextInput::make('max_search_distance')
                 ->label('Max Search Distance (km)')
                 ->numeric()
                 ->minValue(1)
                 ->maxValue(20000)
                 ->default(500)
                 ->helperText('Maximum distance in kilometres users can filter profiles by. Default is 500 km.'),
-            Forms\Components\Toggle::make('distance_search_enabled')
+            Toggle::make('distance_search_enabled')
                 ->label('Enable Distance Search')
                 ->default(true)
                 ->helperText('When enabled, users can filter profiles by distance using their location.'),
-            Forms\Components\TextInput::make('home_page_records')
+            TextInput::make('home_page_records')
                 ->label('Home Page Records Per Page')
                 ->numeric()
                 ->minValue(1)
                 ->maxValue(100)
                 ->default(12)
                 ->helperText('Number of profiles displayed per page on the home page. Default is 12.'),
-            Forms\Components\Toggle::make('fatal_error_page_enabled')
+            Toggle::make('fatal_error_page_enabled')
                 ->label('Enable Fatal Error Maintenance Page')
                 ->default(false)
                 ->helperText('When enabled, unhandled server errors show a maintenance-style page with your configured message.'),
-            Forms\Components\Textarea::make('fatal_error_default_message')
+            Textarea::make('fatal_error_default_message')
                 ->label('Fatal Error Default Message')
                 ->rows(3)
                 ->maxLength(1000)
                 ->helperText('Default message shown on the fatal error page.'),
-            Forms\Components\TextInput::make('fatal_error_query_param')
+            TextInput::make('fatal_error_query_param')
                 ->label('Fatal Error Query Parameter')
                 ->maxLength(100)
                 ->helperText('Optional query key used to override the message on error pages (example: fatal_message).'),
-            Forms\Components\Toggle::make('logging_enabled')
+            Toggle::make('logging_enabled')
                 ->label('Enable Logs')
                 ->default(true)
                 ->helperText('When enabled, the Logs section is visible in the admin navigation. When disabled, all log pages are hidden.'),
-            Forms\Components\TextInput::make('max_video_upload_mb')
+            TextInput::make('max_video_upload_mb')
                 ->label('Max Video Upload Size (MB)')
                 ->numeric()
                 ->minValue(1)
@@ -108,9 +113,9 @@ class SiteSettingResource extends Resource
                 ->required()
                 ->helperText('Maximum video file size users can upload in megabytes. Default is 100 MB.'),
 
-            Forms\Components\Section::make('Payment Settings')
+            Section::make('Payment Settings')
                 ->schema([
-                    Forms\Components\Select::make('stripe_mode')
+                    Select::make('stripe_mode')
                         ->label('Stripe Mode')
                         ->options([
                             'sandbox' => 'Sandbox (Testing)',
@@ -119,23 +124,23 @@ class SiteSettingResource extends Resource
                         ->default('sandbox')
                         ->required()
                         ->helperText('Choose Sandbox for testing or Live for production transactions.'),
-                    Forms\Components\TextInput::make('stripe_publishable_key')
+                    TextInput::make('stripe_publishable_key')
                         ->label('Stripe Publishable Key')
                         ->placeholder('pk_test_... or pk_live_...')
                         ->helperText('Your Stripe publishable key for client-side operations.'),
-                    Forms\Components\TextInput::make('stripe_secret_key')
+                    TextInput::make('stripe_secret_key')
                         ->label('Stripe Secret Key')
                         ->password()
                         ->revealable()
                         ->placeholder('sk_test_... or sk_live_...')
                         ->helperText('Your Stripe secret key for server-side operations. Keep this secure.'),
-                    Forms\Components\TextInput::make('stripe_webhook_secret')
+                    TextInput::make('stripe_webhook_secret')
                         ->label('Stripe Webhook Secret')
                         ->password()
                         ->revealable()
                         ->placeholder('whsec_...')
                         ->helperText('Secret for verifying Stripe webhook signatures.'),
-                    Forms\Components\Toggle::make('stripe_enabled')
+                    Toggle::make('stripe_enabled')
                         ->label('Enable Stripe Payments')
                         ->default(false)
                         ->helperText('When enabled, users can make payments using Stripe.'),
@@ -147,22 +152,22 @@ class SiteSettingResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('meta_key')->label('Meta Key'),
-                Tables\Columns\IconColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
-                Tables\Columns\IconColumn::make('captcha_enabled')->label('Captcha')->boolean(),
-                Tables\Columns\IconColumn::make('site_password_enabled')->label('Site Password')->boolean(),
-                Tables\Columns\IconColumn::make('short_url')->label('Short URL')->boolean(),
-                Tables\Columns\TextColumn::make('contact_email')->label('Contact Email'),
-                Tables\Columns\TextColumn::make('max_search_distance')->label('Max Distance (km)'),
-                Tables\Columns\IconColumn::make('distance_search_enabled')->label('Distance Search')->boolean(),
-                Tables\Columns\TextColumn::make('home_page_records')->label('Home Page Records'),
-                Tables\Columns\IconColumn::make('fatal_error_page_enabled')->label('Fatal Error Page')->boolean(),
-                Tables\Columns\TextColumn::make('fatal_error_query_param')->label('Fatal Query Param'),
-                Tables\Columns\IconColumn::make('logging_enabled')->label('Logs Enabled')->boolean(),
-                Tables\Columns\TextColumn::make('max_video_upload_mb')->label('Max Video Upload (MB)'),
-                Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
-                Tables\Columns\IconColumn::make('stripe_enabled')->label('Stripe Enabled')->boolean(),
-                Tables\Columns\TextColumn::make('stripe_publishable_key')->label('Stripe Key')->limit(20),
+                TextColumn::make('meta_key')->label('Meta Key'),
+                IconColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
+                IconColumn::make('captcha_enabled')->label('Captcha')->boolean(),
+                IconColumn::make('site_password_enabled')->label('Site Password')->boolean(),
+                IconColumn::make('short_url')->label('Short URL')->boolean(),
+                TextColumn::make('contact_email')->label('Contact Email'),
+                TextColumn::make('max_search_distance')->label('Max Distance (km)'),
+                IconColumn::make('distance_search_enabled')->label('Distance Search')->boolean(),
+                TextColumn::make('home_page_records')->label('Home Page Records'),
+                IconColumn::make('fatal_error_page_enabled')->label('Fatal Error Page')->boolean(),
+                TextColumn::make('fatal_error_query_param')->label('Fatal Query Param'),
+                IconColumn::make('logging_enabled')->label('Logs Enabled')->boolean(),
+                TextColumn::make('max_video_upload_mb')->label('Max Video Upload (MB)'),
+                TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
+                IconColumn::make('stripe_enabled')->label('Stripe Enabled')->boolean(),
+                TextColumn::make('stripe_publishable_key')->label('Stripe Key')->limit(20),
             ])
             ->recordActions([
                 EditAction::make(),
