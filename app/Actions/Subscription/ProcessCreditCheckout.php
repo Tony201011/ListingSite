@@ -2,7 +2,7 @@
 
 namespace App\Actions\Subscription;
 
-use App\Models\PricingPackage;
+use App\Models\CreditPackage;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Auth;
@@ -15,14 +15,12 @@ class ProcessCreditCheckout
      */
     public function execute(array $validated): array
     {
-        $selectedCredits = (int) $validated['credits'];
+        $package = CreditPackage::where('id', $validated['package_id'])
+            ->where('status', 'active')
+            ->firstOrFail();
 
-        $package = PricingPackage::query()
-            ->where('credits', $selectedCredits)
-            ->where('is_active', true)
-            ->first();
-
-        $selectedPrice = $package ? (float) preg_replace('/[^\d.]/', '', $package->total_price) : 0;
+        $selectedCredits = $package->credits;
+        $selectedPrice = (float) $package->price;
 
         $result = [
             'credits' => $selectedCredits,
@@ -32,7 +30,7 @@ class ProcessCreditCheckout
 
         // Check if Stripe is enabled
         $siteSetting = SiteSetting::first();
-        if (!$siteSetting?->stripe_enabled || !$siteSetting->stripe_secret_key) {
+        if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
             return $result;
         }
 
@@ -55,19 +53,20 @@ class ProcessCreditCheckout
                 'price_data' => [
                     'currency' => 'aud',
                     'product_data' => [
-                        'name' => "{$selectedCredits} Credits Package",
-                        'description' => "Purchase {$selectedCredits} credits for AUD $" . number_format($selectedPrice, 2),
+                        'name' => $package->name,
+                        'description' => $package->description ?? "Purchase {$selectedCredits} credits for AUD $".number_format($selectedPrice, 2),
                     ],
                     'unit_amount' => (int) ($selectedPrice * 100), // Amount in cents
                 ],
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
-            'success_url' => route('purchase-credit.success') . '?session_id={CHECKOUT_SESSION_ID}',
+            'success_url' => route('purchase-credit.success').'?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('purchase-credit'),
             'metadata' => [
                 'user_id' => Auth::id(),
                 'credits' => $selectedCredits,
+                'package_id' => $package->id,
                 'transaction_id' => $transaction->id,
                 'invoice_name' => $validated['invoice_name'],
             ],

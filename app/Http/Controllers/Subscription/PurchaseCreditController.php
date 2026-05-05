@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Subscription;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
-use App\Models\PricingPackage;
+use App\Models\CreditPackage;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -24,22 +24,23 @@ class PurchaseCreditController extends Controller
     {
         $user = auth()->user();
 
-        // Get active pricing packages, ordered by credits
-        $packages = PricingPackage::where('is_active', true)
-            ->orderBy('credits', 'asc')
-            ->get()
-            ->map(function ($package) {
-                return [
-                    'credits' => $package->credits,
-                    'price' => (float) preg_replace('/[^\d.]/', '', $package->total_price),
-                ];
-            })
-            ->toArray();
+        $packages = CreditPackage::where('status', 'active')
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('price', 'asc')
+            ->get();
+
+        $defaultPackageId = $packages->first()?->id;
+        $selectedPackageId = (int) old('package_id', request('package_id', $defaultPackageId));
+
+        if (! $packages->contains('id', $selectedPackageId)) {
+            $selectedPackageId = $defaultPackageId;
+        }
 
         return view('subscription.purchase-credit', [
             'currentBalance' => $user->credits ?? 0,
             'userName' => $user->name ?? 'User',
-            'plans' => $packages,
+            'packages' => $packages,
+            'selectedPackageId' => $selectedPackageId,
         ]);
     }
 
@@ -63,12 +64,12 @@ class PurchaseCreditController extends Controller
     {
         $sessionId = $request->get('session_id');
 
-        if (!$sessionId) {
+        if (! $sessionId) {
             return redirect('/purchase-credit')->withErrors('Invalid checkout session.');
         }
 
         $siteSetting = SiteSetting::first();
-        if (!$siteSetting?->stripe_enabled || !$siteSetting->stripe_secret_key) {
+        if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
             return redirect('/purchase-credit')->withErrors('Payment system is not configured.');
         }
 
@@ -98,7 +99,7 @@ class PurchaseCreditController extends Controller
 
             return redirect('/purchase-credit')->withErrors('Payment was not completed.');
         } catch (\Exception $e) {
-            return redirect('/purchase-credit')->withErrors('Failed to verify payment: ' . $e->getMessage());
+            return redirect('/purchase-credit')->withErrors('Failed to verify payment: '.$e->getMessage());
         }
     }
 
@@ -126,15 +127,15 @@ class PurchaseCreditController extends Controller
         $month = request('month', 'all');
         if ($month !== 'all') {
             $query->whereYear('created_at', substr($month, 0, 4))
-                  ->whereMonth('created_at', substr($month, 5, 2));
+                ->whereMonth('created_at', substr($month, 5, 2));
         }
 
         $search = trim(request('q', ''));
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('invoice_name', 'like', "%{$search}%")
-                  ->orWhere('credits', 'like', "%{$search}%")
-                  ->orWhere('amount', 'like', "%{$search}%");
+                    ->orWhere('credits', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
             });
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\CreditPackage;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,11 @@ class CheckoutPurchaseCreditRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'credits' => ['required', 'integer', Rule::in([7, 30, 60, 120, 180])],
+            'package_id' => [
+                'required',
+                'integer',
+                Rule::exists(CreditPackage::class, 'id')->where('status', 'active'),
+            ],
             'invoice_name' => ['required', 'string', 'max:120'],
         ];
     }
@@ -23,9 +28,9 @@ class CheckoutPurchaseCreditRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'credits.required' => 'Please select a credit package.',
-            'credits.integer' => 'Credits must be a valid number.',
-            'credits.in' => 'Selected credit package is invalid.',
+            'package_id.required' => 'Please select a credit package.',
+            'package_id.integer' => 'The selected package is invalid.',
+            'package_id.exists' => 'The selected credit package is no longer available.',
             'invoice_name.required' => 'Invoice name is required.',
             'invoice_name.string' => 'Invoice name must be a valid string.',
             'invoice_name.max' => 'Invoice name may not be greater than 120 characters.',
