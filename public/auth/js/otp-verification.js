@@ -133,10 +133,12 @@ function otpVerification(config) {
                 const data = await res.json();
 
                 if (data.success) {
-                    if (data.message) {
-                        sessionStorage.setItem('flash_success', data.message);
-                    }
-                    window.location.href = data.redirect || '/my-profile';
+                    this.verificationStatus = { type: 'success', message: data.message || 'Verification successful!' };
+                    this.isVerifying = false;
+                    // Redirect after showing success message
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/my-profile';
+                    }, 2000); // 2 second delay to show the message
                 } else {
                     const msg = data.message || data.errors?.otp?.[0] || 'Verification failed. Please try again.';
                     this.verificationStatus = { type: 'error', message: msg };
