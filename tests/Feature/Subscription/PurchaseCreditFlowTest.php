@@ -3,6 +3,7 @@
 namespace Tests\Feature\Subscription;
 
 use App\Actions\Subscription\HandleStripeWebhook;
+use App\Actions\Subscription\SendCreditPurchaseEmail;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\CreditPackage;
@@ -14,6 +15,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PurchaseCreditFlowTest extends TestCase
@@ -329,6 +331,44 @@ class PurchaseCreditFlowTest extends TestCase
         ]);
     }
 
+    public function test_webhook_sends_purchase_email_on_successful_payment(): void
+    {
+        $user = $this->createProvider();
+        $user->update(['credits' => 0]);
+
+        $transaction = PurchaseTransaction::create([
+            'user_id' => $user->id,
+            'stripe_session_id' => 'cs_test_email',
+            'credits' => 30,
+            'amount' => '9.99',
+            'currency' => 'AUD',
+            'status' => 'pending',
+            'invoice_name' => 'Email Test',
+        ]);
+
+        $emailAction = $this->createMock(SendCreditPurchaseEmail::class);
+        $emailAction->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(fn ($t) => $t->id === $transaction->id));
+
+        $controller = new HandleStripeWebhook($emailAction);
+        $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
+        $method->setAccessible(true);
+
+        $session = (object) [
+            'payment_status' => 'paid',
+            'payment_intent' => 'pi_test_email',
+            'metadata' => (object) [
+                'transaction_id' => (string) $transaction->id,
+                'user_id' => (string) $transaction->user_id,
+                'credits' => (string) $transaction->credits,
+            ],
+            'id' => 'cs_test_email',
+        ];
+
+        $method->invoke($controller, $session);
+    }
+
     public function test_webhook_is_idempotent_on_duplicate_delivery(): void
     {
         $user = $this->createProvider();
@@ -379,7 +419,7 @@ class PurchaseCreditFlowTest extends TestCase
     {
         Log::spy();
 
-        $controller = new HandleStripeWebhook;
+        $controller = new HandleStripeWebhook(new SendCreditPurchaseEmail);
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
@@ -487,7 +527,9 @@ class PurchaseCreditFlowTest extends TestCase
         string $sessionId,
         string $paymentStatus = 'paid'
     ): void {
-        $controller = new HandleStripeWebhook;
+        Mail::fake();
+
+        $controller = new HandleStripeWebhook(new SendCreditPurchaseEmail);
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
