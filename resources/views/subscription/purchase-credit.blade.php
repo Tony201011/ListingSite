@@ -3,10 +3,11 @@
 @section('content')
 @php
     $allowedCredits = collect($plans)->pluck('credits')->toArray();
-    $selectedCredits = (int) old('credits', request('credits', $plans[1]['credits'] ?? ($plans[0]['credits'] ?? 30)));
+    $defaultCredits = $allowedCredits[0] ?? 30;
+    $selectedCredits = (int) old('credits', request('credits', $defaultCredits));
 
     if (!in_array($selectedCredits, $allowedCredits, true)) {
-        $selectedCredits = $allowedCredits[0] ?? 30;
+        $selectedCredits = $defaultCredits;
     }
 @endphp
 

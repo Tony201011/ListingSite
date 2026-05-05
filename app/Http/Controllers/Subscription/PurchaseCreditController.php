@@ -8,6 +8,7 @@ use App\Http\Requests\CheckoutPurchaseCreditRequest;
 use App\Models\PricingPackage;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,7 +24,7 @@ class PurchaseCreditController extends Controller
     {
         $currentBalance = auth()->user()->credits ?? 0;
 
-        $packages = PricingPackage::where('is_active', true)->orderBy('credits')->get();
+        $packages = PricingPackage::where('is_active', true)->orderBy('credits')->take(20)->get();
 
         if ($packages->isNotEmpty()) {
             $plans = $packages->map(fn ($pkg) => [
@@ -96,7 +97,29 @@ class PurchaseCreditController extends Controller
                     // Already processed (e.g., by webhook)
                     $credits = $transaction->credits;
                 } else {
+                    // No transaction record found — award credits directly from Stripe metadata
+                    $userId = $session->metadata->user_id ?? null;
                     $credits = (int) ($session->metadata->credits ?? 0);
+                    $invoiceName = $session->metadata->invoice_name ?? null;
+
+                    if ($userId && $credits > 0) {
+                        $user = User::find($userId);
+                        if ($user) {
+                            $user->increment('credits', $credits);
+
+                            PurchaseTransaction::create([
+                                'user_id' => $userId,
+                                'stripe_session_id' => $sessionId,
+                                'stripe_payment_intent_id' => $session->payment_intent,
+                                'credits' => $credits,
+                                'amount' => $session->amount_total / 100,
+                                'currency' => strtoupper($session->currency ?? 'AUD'),
+                                'status' => 'paid',
+                                'invoice_name' => $invoiceName,
+                                'paid_at' => now(),
+                            ]);
+                        }
+                    }
                 }
 
                 return redirect('/purchase-history')->with(
