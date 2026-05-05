@@ -31,7 +31,7 @@ class GetPurchaseHistory
             });
         }
 
-        $purchases = $query->paginate(20);
+        $purchases = $query->with(['complaints' => fn ($q) => $q->latest()])->paginate(20);
 
         // Get available months for filter — use SUBSTR for cross-DB compatibility (MySQL + SQLite)
         $availableMonths = PurchaseTransaction::where('user_id', Auth::id())

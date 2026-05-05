@@ -94,6 +94,11 @@ class PurchaseCreditController extends Controller
             abort(403);
         }
 
+        if ($purchaseTransaction->complaints()->whereIn('status', ['pending', 'reviewed'])->exists()) {
+            return redirect()->route('purchase-history')
+                ->withErrors('A complaint for this transaction is already under review.');
+        }
+
         $this->createPurchaseComplaint->execute($purchaseTransaction, $request->only('subject', 'message'));
 
         return redirect()->route('purchase-history')

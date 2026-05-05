@@ -51,6 +51,18 @@ class PurchaseComplaintResource extends Resource
         return false;
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = PurchaseComplaint::where('status', 'pending')->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'warning';
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema
