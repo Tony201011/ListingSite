@@ -21,7 +21,25 @@ class PurchaseCreditController extends Controller
 
     public function purchaseCredit(): View
     {
-        return view('subscription.purchase-credit');
+        $user = auth()->user();
+        
+        // Get active pricing packages, ordered by credits
+        $packages = PricingPackage::where('is_active', true)
+            ->orderBy('credits', 'asc')
+            ->get()
+            ->map(function ($package) {
+                return [
+                    'credits' => $package->credits,
+                    'price' => (float) preg_replace('/[^\d.]/', '', $package->total_price),
+                ];
+            })
+            ->toArray();
+
+        return view('subscription.purchase-credit', [
+            'currentBalance' => $user->credits ?? 0,
+            'userName' => $user->name ?? 'User',
+            'plans' => $packages,
+        ]);
     }
 
     public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse
