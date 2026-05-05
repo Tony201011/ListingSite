@@ -2,46 +2,28 @@
 
 namespace App\Http\Controllers\Subscription;
 
+use App\Actions\Subscription\GetPurchaseCreditPageData;
+use App\Actions\Subscription\GetPurchaseHistory;
+use App\Actions\Subscription\HandleCheckoutSuccess;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
-use App\Models\CreditPackage;
-use App\Models\PurchaseTransaction;
-use App\Models\SiteSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Stripe\StripeClient;
 
 class PurchaseCreditController extends Controller
 {
     public function __construct(
-        private ProcessCreditCheckout $processCreditCheckout
+        private GetPurchaseCreditPageData $getPurchaseCreditPageData,
+        private ProcessCreditCheckout $processCreditCheckout,
+        private HandleCheckoutSuccess $handleCheckoutSuccess,
+        private GetPurchaseHistory $getPurchaseHistory,
     ) {}
 
     public function purchaseCredit(): View
     {
-        $user = auth()->user();
-
-        $packages = CreditPackage::where('status', 'active')
-            ->orderBy('sort_order', 'asc')
-            ->orderBy('price', 'asc')
-            ->get();
-
-        $defaultPackageId = $packages->first()?->id;
-        $selectedPackageId = (int) old('package_id', request('package_id', $defaultPackageId));
-
-        if (! $packages->contains('id', $selectedPackageId)) {
-            $selectedPackageId = $defaultPackageId;
-        }
-
-        return view('subscription.purchase-credit', [
-            'currentBalance' => $user->credits ?? 0,
-            'userName' => $user->name ?? 'User',
-            'packages' => $packages,
-            'selectedPackageId' => $selectedPackageId,
-        ]);
+        return view('subscription.purchase-credit', $this->getPurchaseCreditPageData->execute());
     }
 
     public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse
@@ -68,62 +50,19 @@ class PurchaseCreditController extends Controller
             return redirect('/purchase-credit')->withErrors('Invalid checkout session.');
         }
 
-        // Look up the transaction that the webhook should have already processed
-        $transaction = PurchaseTransaction::where('stripe_session_id', $sessionId)
-            ->where('user_id', auth()->id())
-            ->first();
+        $result = $this->handleCheckoutSuccess->execute($sessionId);
 
-        if (! $transaction) {
-            return redirect('/purchase-credit')->withErrors('Transaction not found.');
-        }
-
-        if ($transaction->status === 'paid') {
-            return redirect('/purchase-history')->with(
+        return match ($result['status']) {
+            'paid' => redirect('/purchase-history')->with(
                 'checkout_success',
-                "Payment successful! {$transaction->credits} credits have been added to your account."
-            );
-        }
-
-        // Webhook may not have arrived yet — verify directly with Stripe as fallback
-        $siteSetting = SiteSetting::first();
-        if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
-            return redirect('/purchase-credit')->withErrors('Payment system is not configured.');
-        }
-
-        try {
-            $stripe = new StripeClient($siteSetting->stripe_secret_key);
-            $session = $stripe->checkout->sessions->retrieve($sessionId);
-
-            if ($session->payment_status === 'paid') {
-                // Webhook has not processed yet — mark transaction and add credits now,
-                // using a DB-level guard so a subsequent webhook delivery does not double-credit.
-                if ($transaction->status !== 'paid') {
-                    DB::transaction(function () use ($transaction, $session) {
-                        // Re-read inside transaction with row lock to prevent race with webhook
-                        $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
-                        if ($locked && $locked->status !== 'paid') {
-                            $locked->update([
-                                'status' => 'paid',
-                                'stripe_payment_intent_id' => $session->payment_intent,
-                                'paid_at' => now(),
-                            ]);
-                            $locked->user?->increment('credits', $locked->credits);
-                        }
-                    });
-
-                    $transaction->refresh();
-                }
-
-                return redirect('/purchase-history')->with(
-                    'checkout_success',
-                    "Payment successful! {$transaction->credits} credits have been added to your account."
-                );
-            }
-
-            return redirect('/purchase-credit')->withErrors('Payment was not completed.');
-        } catch (\Exception $e) {
-            return redirect('/purchase-credit')->withErrors('Failed to verify payment: '.$e->getMessage());
-        }
+                "Payment successful! {$result['credits']} credits have been added to your account."
+            ),
+            'not_found' => redirect('/purchase-credit')->withErrors('Transaction not found.'),
+            'not_configured' => redirect('/purchase-credit')->withErrors('Payment system is not configured.'),
+            'unpaid' => redirect('/purchase-credit')->withErrors('Payment was not completed.'),
+            'error' => redirect('/purchase-credit')->withErrors('Failed to verify payment: '.$result['error']),
+            default => redirect('/purchase-credit')->withErrors('An unexpected error occurred.'),
+        };
     }
 
     public function creditHistory(): View
@@ -138,43 +77,6 @@ class PurchaseCreditController extends Controller
 
     public function purchaseHistory(): View
     {
-        $query = PurchaseTransaction::where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc');
-
-        // Apply filters
-        $status = request('status', 'all');
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
-
-        $month = request('month', 'all');
-        if ($month !== 'all') {
-            $query->whereRaw('SUBSTR(created_at, 1, 7) = ?', [$month]);
-        }
-
-        $search = trim(request('q', ''));
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('invoice_name', 'like', "%{$search}%")
-                    ->orWhere('credits', 'like', "%{$search}%")
-                    ->orWhere('amount', 'like', "%{$search}%");
-            });
-        }
-
-        $purchases = $query->paginate(20);
-
-        // Get available months for filter — use SUBSTR for cross-DB compatibility (MySQL + SQLite)
-        $availableMonths = PurchaseTransaction::where('user_id', auth()->id())
-            ->selectRaw('DISTINCT SUBSTR(created_at, 1, 7) as month_key')
-            ->orderByRaw('month_key DESC')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'value' => $item->month_key,
-                    'label' => date('M Y', strtotime($item->month_key.'-01')),
-                ];
-            });
-
-        return view('subscription.purchase-history', compact('purchases', 'availableMonths'));
+        return view('subscription.purchase-history', $this->getPurchaseHistory->execute());
     }
 }

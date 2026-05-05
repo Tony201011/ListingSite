@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Subscription;
 
-use App\Http\Controllers\StripeWebhookController;
+use App\Actions\Subscription\HandleStripeWebhook;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\CreditPackage;
@@ -379,7 +379,7 @@ class PurchaseCreditFlowTest extends TestCase
     {
         Log::spy();
 
-        $controller = new StripeWebhookController;
+        $controller = new HandleStripeWebhook;
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
@@ -487,7 +487,7 @@ class PurchaseCreditFlowTest extends TestCase
         string $sessionId,
         string $paymentStatus = 'paid'
     ): void {
-        $controller = new StripeWebhookController;
+        $controller = new HandleStripeWebhook;
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
