@@ -49,7 +49,7 @@ use App\Http\Controllers\Subscription\PaymentSubscriptionController;
 /**subscription controller end */
 
 /*******site access controller start here  */
-use App\Http\Controllers\Subscription\PurchaseCreditController;
+use App\Http\Controllers\StripeWebhookController;
 /*******site access controller end here  */
 
 use Illuminate\Support\Facades\Route;
@@ -274,6 +274,8 @@ Route::middleware('provider.auth')->group(function () {
             /*** credit route start here */
             Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
             Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
+            Route::get('/purchase-credit/success', [PurchaseCreditController::class, 'checkoutSuccess'])->name('purchase-credit.success');
+            Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
             Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
             Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
             Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');

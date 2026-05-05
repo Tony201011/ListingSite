@@ -16,6 +16,7 @@
         "league/flysystem-aws-s3-v3": "^3.32",
         "spatie/laravel-sitemap": "^8.0",
         "staudenmeir/belongs-to-through": "^2.16",
+        "stripe/stripe-php": "^13.0",
         "symfony/http-client": "^7.4",
         "symfony/mailgun-mailer": "^7.4",
         "twilio/sdk": "^8.11",

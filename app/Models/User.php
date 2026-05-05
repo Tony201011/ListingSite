@@ -36,6 +36,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'must_change_password',
         'account_status',
         'email_verified_at',
+        'credits',
     ];
 
     protected $hidden = [
@@ -53,6 +54,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             'password' => 'hashed',
             'deleted_at' => 'datetime',
             'scheduled_purge_at' => 'datetime',
+            'credits' => 'integer',
         ];
     }
 

@@ -33,6 +33,10 @@ class SiteSetting extends Model
         'fatal_error_query_param',
         'logging_enabled',
         'max_video_upload_mb',
+        'stripe_publishable_key',
+        'stripe_secret_key',
+        'stripe_webhook_secret',
+        'stripe_enabled',
     ];
 
     protected $casts = [
@@ -50,6 +54,7 @@ class SiteSetting extends Model
         'fatal_error_page_enabled' => 'boolean',
         'logging_enabled' => 'boolean',
         'max_video_upload_mb' => 'integer',
+        'stripe_enabled' => 'boolean',
     ];
 
     protected function sitePassword(): Attribute
@@ -63,6 +68,44 @@ class SiteSetting extends Model
                     return Crypt::decryptString($value);
                 } catch (DecryptException $e) {
                     logger()->warning('SiteSetting: failed to decrypt site_password, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
+
+                    return $value;
+                }
+            },
+            set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
+        );
+    }
+
+    protected function stripeSecretKey(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    logger()->warning('SiteSetting: failed to decrypt stripe_secret_key, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
+
+                    return $value;
+                }
+            },
+            set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
+        );
+    }
+
+    protected function stripeWebhookSecret(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    logger()->warning('SiteSetting: failed to decrypt stripe_webhook_secret, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
 
                     return $value;
                 }

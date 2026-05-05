@@ -106,6 +106,30 @@ class SiteSettingResource extends Resource
                 ->default(100)
                 ->required()
                 ->helperText('Maximum video file size users can upload in megabytes. Default is 100 MB.'),
+
+            Forms\Components\Section::make('Payment Settings')
+                ->schema([
+                    Forms\Components\TextInput::make('stripe_publishable_key')
+                        ->label('Stripe Publishable Key')
+                        ->placeholder('pk_test_...')
+                        ->helperText('Your Stripe publishable key for client-side operations.'),
+                    Forms\Components\TextInput::make('stripe_secret_key')
+                        ->label('Stripe Secret Key')
+                        ->password()
+                        ->revealable()
+                        ->placeholder('sk_test_...')
+                        ->helperText('Your Stripe secret key for server-side operations. Keep this secure.'),
+                    Forms\Components\TextInput::make('stripe_webhook_secret')
+                        ->label('Stripe Webhook Secret')
+                        ->password()
+                        ->revealable()
+                        ->placeholder('whsec_...')
+                        ->helperText('Secret for verifying Stripe webhook signatures.'),
+                    Forms\Components\Toggle::make('stripe_enabled')
+                        ->label('Enable Stripe Payments')
+                        ->default(false)
+                        ->helperText('When enabled, users can make payments using Stripe.'),
+                ]),
         ]);
     }
 
@@ -127,6 +151,8 @@ class SiteSettingResource extends Resource
                 Tables\Columns\IconColumn::make('logging_enabled')->label('Logs Enabled')->boolean(),
                 Tables\Columns\TextColumn::make('max_video_upload_mb')->label('Max Video Upload (MB)'),
                 Tables\Columns\TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
+                Tables\Columns\IconColumn::make('stripe_enabled')->label('Stripe Enabled')->boolean(),
+                Tables\Columns\TextColumn::make('stripe_publishable_key')->label('Stripe Key')->limit(20),
             ])
             ->recordActions([
                 EditAction::make(),
