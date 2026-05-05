@@ -7,9 +7,9 @@ use App\Filament\Resources\PurchaseTransactions\Pages\ListPurchaseTransactions;
 use App\Models\PurchaseTransaction;
 use BackedEnum;
 use Filament\Facades\Filament;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -45,9 +45,9 @@ class PurchaseTransactionResource extends Resource
         return false;
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 Section::make('Transaction Details')
                     ->columns(2)
