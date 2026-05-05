@@ -66,7 +66,7 @@ class PurchaseTransactionResource extends Resource
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label('Amount')
-                    ->money('AUD')
+                    ->money(fn ($record) => $record->currency ?? 'AUD')
                     ->sortable(),
                 TextColumn::make('currency')
                     ->label('Currency')
