@@ -22,7 +22,7 @@
                 <h1 class="m-0 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">Purchase Credits</h1>
                 <p class="mt-2 text-sm text-gray-600">Choose a credit package and continue to checkout.</p>
             </div>
-            <a href="{{ url('/dashboard') }}" class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
+            <a href="{{ route('my-profile') }}" class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
         </div>
 
         <div class="mb-5 rounded-2xl border border-pink-100 bg-pink-50 p-4 text-sm text-gray-700 shadow-sm">
