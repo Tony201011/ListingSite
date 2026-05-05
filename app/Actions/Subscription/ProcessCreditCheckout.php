@@ -3,6 +3,7 @@
 namespace App\Actions\Subscription;
 
 use App\Models\PricingPackage;
+use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Auth;
 use Stripe\StripeClient;
@@ -35,6 +36,16 @@ class ProcessCreditCheckout
             return $result;
         }
 
+        // Create transaction record
+        $transaction = PurchaseTransaction::create([
+            'user_id' => Auth::id(),
+            'credits' => $selectedCredits,
+            'amount' => $selectedPrice,
+            'currency' => 'AUD',
+            'status' => 'pending',
+            'invoice_name' => $validated['invoice_name'],
+        ]);
+
         // Create Stripe checkout session
         $stripe = new StripeClient($siteSetting->stripe_secret_key);
 
@@ -57,10 +68,14 @@ class ProcessCreditCheckout
             'metadata' => [
                 'user_id' => Auth::id(),
                 'credits' => $selectedCredits,
+                'transaction_id' => $transaction->id,
                 'invoice_name' => $validated['invoice_name'],
             ],
             'customer_email' => Auth::user()->email,
         ]);
+
+        // Update transaction with Stripe session ID
+        $transaction->update(['stripe_session_id' => $checkoutSession->id]);
 
         $result['checkout_url'] = $checkoutSession->url;
 

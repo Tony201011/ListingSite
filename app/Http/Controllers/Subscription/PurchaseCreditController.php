@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Subscription;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
+use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -94,6 +95,45 @@ class PurchaseCreditController extends Controller
 
     public function purchaseHistory(): View
     {
-        return view('subscription.purchase-history');
+        $query = PurchaseTransaction::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc');
+
+        // Apply filters
+        $status = request('status', 'all');
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $month = request('month', 'all');
+        if ($month !== 'all') {
+            $query->whereYear('created_at', substr($month, 0, 4))
+                  ->whereMonth('created_at', substr($month, 5, 2));
+        }
+
+        $search = trim(request('q', ''));
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_name', 'like', "%{$search}%")
+                  ->orWhere('credits', 'like', "%{$search}%")
+                  ->orWhere('amount', 'like', "%{$search}%");
+            });
+        }
+
+        $purchases = $query->paginate(20);
+
+        // Get available months for filter
+        $availableMonths = PurchaseTransaction::where('user_id', auth()->id())
+            ->selectRaw('DISTINCT YEAR(created_at) as year, MONTH(created_at) as month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'value' => sprintf('%04d-%02d', $item->year, $item->month),
+                    'label' => date('M Y', strtotime("{$item->year}-{$item->month}-01")),
+                ];
+            });
+
+        return view('subscription.purchase-history', compact('purchases', 'availableMonths'));
     }
 }

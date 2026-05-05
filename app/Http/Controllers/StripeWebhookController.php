@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -52,18 +53,44 @@ class StripeWebhookController extends Controller
     private function handleCheckoutSessionCompleted($session)
     {
         if ($session->payment_status === 'paid') {
-            $userId = $session->metadata->user_id ?? null;
-            $credits = $session->metadata->credits ?? null;
+            $transactionId = $session->metadata->transaction_id ?? null;
 
-            if ($userId && $credits) {
-                $user = User::find($userId);
-                if ($user) {
-                    $user->increment('credits', (int) $credits);
-                    Log::info('Credits added to user', [
-                        'user_id' => $userId,
-                        'credits_added' => $credits,
-                        'session_id' => $session->id
+            if ($transactionId) {
+                $transaction = PurchaseTransaction::find($transactionId);
+                if ($transaction && $transaction->status !== 'paid') {
+                    $transaction->update([
+                        'status' => 'paid',
+                        'stripe_payment_intent_id' => $session->payment_intent,
+                        'paid_at' => now(),
                     ]);
+
+                    // Add credits to user account
+                    $user = $transaction->user;
+                    if ($user) {
+                        $user->increment('credits', $transaction->credits);
+                        Log::info('Credits added to user via webhook', [
+                            'user_id' => $user->id,
+                            'credits_added' => $transaction->credits,
+                            'transaction_id' => $transaction->id,
+                            'session_id' => $session->id
+                        ]);
+                    }
+                }
+            } else {
+                // Fallback for sessions without transaction_id (backward compatibility)
+                $userId = $session->metadata->user_id ?? null;
+                $credits = $session->metadata->credits ?? null;
+
+                if ($userId && $credits) {
+                    $user = User::find($userId);
+                    if ($user) {
+                        $user->increment('credits', (int) $credits);
+                        Log::info('Credits added to user via webhook (legacy)', [
+                            'user_id' => $userId,
+                            'credits_added' => $credits,
+                            'session_id' => $session->id
+                        ]);
+                    }
                 }
             }
         }

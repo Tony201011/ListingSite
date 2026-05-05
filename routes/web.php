@@ -46,6 +46,7 @@ use App\Http\Controllers\SiteAccess\SitePasswordController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Subscription\MemberShipController;
 use App\Http\Controllers\Subscription\PaymentSubscriptionController;
+use App\Http\Controllers\Subscription\PurchaseCreditController;
 /**subscription controller end */
 
 /*******site access controller start here  */
