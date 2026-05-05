@@ -2,11 +2,12 @@
 
 @section('content')
 @php
-    $allowedCredits = [7, 30, 60, 120, 180];
-    $selectedCredits = (int) old('credits', request('credits', 30));
+    $allowedCredits = collect($plans)->pluck('credits')->toArray();
+    $defaultCredits = $allowedCredits[0] ?? 30;
+    $selectedCredits = (int) old('credits', request('credits', $defaultCredits));
 
     if (!in_array($selectedCredits, $allowedCredits, true)) {
-        $selectedCredits = 30;
+        $selectedCredits = $defaultCredits;
     }
 @endphp
 
@@ -83,6 +84,7 @@
                             id="invoice_name"
                             name="invoice_name"
                             type="text"
+<<<<<<< HEAD
                             value="{{ old('invoice_name', $userName) }}"
                             class="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                         >
@@ -151,6 +153,9 @@
                             name="invoice_name"
                             type="text"
                             value="{{ old('invoice_name', 'Sourabh wadhwa') }}"
+=======
+                            value="{{ old('invoice_name', auth()->user()->name) }}"
+>>>>>>> a13205c4d9ed7a31ad7b1636c1780ec5573e539a
                             class="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                         >
                     </div>
