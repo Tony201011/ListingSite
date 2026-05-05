@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Subscription;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
+use App\Models\PricingPackage;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use App\Models\User;
