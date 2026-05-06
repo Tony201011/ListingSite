@@ -19,9 +19,6 @@ $profileTags = array_values(array_unique(array_merge(
     x-init="init()"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-
-        {{-- Ad: Profile Top --}}
-        @include('layouts.partials.ads', ['position' => 'profile_top', 'pageKey' => 'profile'])
         <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
             <a href="{{ url('/') }}" class="hover:text-gray-700">Home</a>
             <span>›</span>
@@ -840,9 +837,6 @@ $profileTags = array_values(array_unique(array_merge(
             </div>
             @endif
         </section>
-
-        {{-- Ad: Profile Bottom --}}
-        @include('layouts.partials.ads', ['position' => 'profile_bottom', 'pageKey' => 'profile'])
     </div>
 </div>
 
