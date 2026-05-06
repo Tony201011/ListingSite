@@ -75,7 +75,7 @@ class VerifyProviderSignupOtp
             return ActionResult::domainError('Mobile number already registered.');
         }
 
-        DB::transaction(function () use ($pendingUser): void {
+        $user = DB::transaction(function () use ($pendingUser): User {
             $user = User::create([
                 'name' => $pendingUser['name'],
                 'email' => $pendingUser['email'],
@@ -95,8 +95,10 @@ class VerifyProviderSignupOtp
                 'profile_status' => 'pending',
             ]);
 
-            $this->sendProviderAccountEmails->execute($user);
+            return $user;
         });
+
+        $this->sendProviderAccountEmails->execute($user);
 
         $this->expireOtpSession($pendingKey);
 
