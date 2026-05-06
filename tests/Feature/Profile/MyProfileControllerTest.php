@@ -287,8 +287,9 @@ class MyProfileControllerTest extends TestCase
     /**
      * Helper to create a named category used for select-by-name fields
      * (availability, contact-method, phone-contact-preferences, time-waster-shield).
+     * Creates the parent category if it does not exist, then creates a child with the given name.
      */
-    private function createNamedCategory(string $parentSlug, string $childName): void
+    private function createCategoryByName(string $parentSlug, string $childName): void
     {
         $parent = Category::query()->firstOrCreate(
             ['slug' => $parentSlug, 'website_type' => 'adult'],
@@ -314,14 +315,14 @@ class MyProfileControllerTest extends TestCase
         $bustSizeId = $this->createCategoryForType('bust-size');
         $yourLengthId = $this->createCategoryForType('your-length');
 
-        $this->createNamedCategory('primary-identity', 'Identity A');
-        $this->createNamedCategory('attributes', 'Attr A');
-        $this->createNamedCategory('services-style', 'Style A');
-        $this->createNamedCategory('services-you-provide', 'Service A');
-        $this->createNamedCategory('availability', 'Weekdays');
-        $this->createNamedCategory('contact-method', 'Phone');
-        $this->createNamedCategory('phone-contact-preferences', 'Call');
-        $this->createNamedCategory('time-waster-shield', 'Basic');
+        $this->createCategoryByName('primary-identity', 'Identity A');
+        $this->createCategoryByName('attributes', 'Attr A');
+        $this->createCategoryByName('services-style', 'Style A');
+        $this->createCategoryByName('services-you-provide', 'Service A');
+        $this->createCategoryByName('availability', 'Weekdays');
+        $this->createCategoryByName('contact-method', 'Phone');
+        $this->createCategoryByName('phone-contact-preferences', 'Call');
+        $this->createCategoryByName('time-waster-shield', 'Basic');
 
         return array_merge([
             'name' => 'Jenny',
