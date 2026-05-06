@@ -35,7 +35,7 @@ class ProviderSignupRequest extends FormRequest
             'email' => ['required', 'email', 'unique:users,email'],
             'nickname' => ['required', 'string', 'min:3', 'max:255'],
             'password' => ['required', 'min:8', 'confirmed'],
-            'mobile' => ['required', 'regex:/^04\d{8}$/'],
+            'mobile' => ['required', 'regex:/^04\d{8}$/', 'unique:users,mobile'],
             'suburb' => ['required', 'string', 'max:255'],
             'age_confirm' => ['accepted'],
             'referral_code' => ['nullable', 'string', 'max:255'],

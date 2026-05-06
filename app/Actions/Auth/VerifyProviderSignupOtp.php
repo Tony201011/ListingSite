@@ -6,8 +6,8 @@ use App\Actions\GenerateUniqueProviderProfileSlug;
 use App\Actions\Support\ActionResult;
 use App\Models\ProviderProfile;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
@@ -71,27 +71,32 @@ class VerifyProviderSignupOtp
             return ActionResult::domainError('Email already exists.');
         }
 
-        $user = User::create([
-            'name' => $pendingUser['name'],
-            'email' => $pendingUser['email'],
-            'mobile' => $pendingUser['mobile'],
-            'password' => $pendingUser['password'],
-            'role' => $pendingUser['role'],
-            'mobile_verified' => true,
-            'referral_code' => $pendingUser['referral_code'],
-        ]);
+        if (User::query()->where('mobile', $pendingUser['mobile'])->exists()) {
+            return ActionResult::domainError('Mobile number already registered.');
+        }
 
-        ProviderProfile::create([
-            'user_id' => $user->id,
-            'name' => $pendingUser['name'],
-            'slug' => $this->generateUniqueProviderProfileSlug->execute($pendingUser['name']),
-            'suburb' => $pendingUser['suburb'] ?? null,
-            'profile_status' => 'pending',
-        ]);
+        DB::transaction(function () use ($pendingUser): void {
+            $user = User::create([
+                'name' => $pendingUser['name'],
+                'email' => $pendingUser['email'],
+                'mobile' => $pendingUser['mobile'],
+                'password' => $pendingUser['password'],
+                'role' => $pendingUser['role'],
+                'mobile_verified' => true,
+                'referral_code' => $pendingUser['referral_code'],
+            ]);
 
-        $this->sendProviderAccountEmails->execute($user);
+            ProviderProfile::create([
+                'user_id' => $user->id,
+                'name' => $pendingUser['name'],
+                'slug' => $this->generateUniqueProviderProfileSlug->execute($pendingUser['name']),
+                'mobile' => $pendingUser['mobile'],
+                'suburb' => $pendingUser['suburb'] ?? null,
+                'profile_status' => 'pending',
+            ]);
 
-      //  Auth::login($user);
+            $this->sendProviderAccountEmails->execute($user);
+        });
 
         $this->expireOtpSession($pendingKey);
 
