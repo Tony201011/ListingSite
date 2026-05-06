@@ -179,10 +179,19 @@
             </div>
         @endif
 
+        {{-- Ad: Home Top --}}
+        @include('layouts.partials.ads', ['position' => 'home_top', 'pageKey' => 'home'])
+
         {{-- Profile Cards Grid --}}
         <div x-cloak>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             @forelse($profiles as $profile)
+                @if($loop->iteration === 11 && $loop->count > 10)
+                    {{-- Ad: Between listings (shown as a full-width row after the 10th card) --}}
+                    <div class="col-span-full">
+                        @include('layouts.partials.ads', ['position' => 'home_between', 'pageKey' => 'home'])
+                    </div>
+                @endif
                 <article
                     class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
                 >
@@ -324,6 +333,9 @@
             @endif
             {{ $profiles->links() }}
         </div>
+
+        {{-- Ad: Home Bottom --}}
+        @include('layouts.partials.ads', ['position' => 'home_bottom', 'pageKey' => 'home'])
         </div>
     </div>
 </div>
