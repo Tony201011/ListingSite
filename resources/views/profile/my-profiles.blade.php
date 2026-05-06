@@ -244,6 +244,7 @@
                             type="button"
                             @click="showCreateModal = false"
                             class="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                            aria-label="Close modal"
                         >&times;</button>
                     </div>
 
