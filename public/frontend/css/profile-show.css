@@ -25,11 +25,13 @@ html {
     }
 
     .mobile-prev-btn {
-        left: 0.75rem !important;
+        right: calc(50% + 0.25rem) !important;
+        left: unset !important;
     }
 
     .mobile-next-btn {
-        right: 0.75rem !important;
+        left: calc(50% + 0.25rem) !important;
+        right: unset !important;
     }
 
     /* Move the scroll-to-top button above the profile nav buttons so they don't overlap */
