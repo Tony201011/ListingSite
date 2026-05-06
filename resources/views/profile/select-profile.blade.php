@@ -65,8 +65,8 @@
                                 {{ $profile->name }}
                             </p>
                             @if($isActive)
-                                <span class="rounded-full bg-pink-100 px-2 py-0.5 text-xs font-semibold text-pink-700">
-                                    Active
+                                <span class="rounded-full bg-pink-100 px-2 py-0.5 text-xs font-semibold text-pink-700" title="This is the profile you are currently managing.">
+                                    Selected
                                 </span>
                             @endif
                         </div>
@@ -78,8 +78,15 @@
                             @elseif($profile->profile_status === 'rejected') bg-red-100 text-red-700
                             @else bg-yellow-100 text-yellow-700
                             @endif
-                        ">
-                            {{ ucfirst($profile->profile_status ?? 'pending') }}
+                        "
+                        title="@if($profile->profile_status === 'approved')Live – visible in search results.@elseif($profile->profile_status === 'rejected')Rejected – not visible publicly.@else Pending admin approval – not yet visible in search results.@endif">
+                            @if($profile->profile_status === 'approved')
+                                ✓ Approved – Live
+                            @elseif($profile->profile_status === 'rejected')
+                                ✗ Rejected
+                            @else
+                                ⏳ Pending Approval
+                            @endif
                         </span>
                     </div>
                 </button>
