@@ -211,7 +211,7 @@
             </a>
             @foreach($mainNavLinks as $item)
                 @if(!empty($item['is_logout']))
-                    <form method="POST" action="{{ route('logout') }}" class="inline-flex">
+                    <form method="POST" action="{{ route('logout') }}" class="inline-flex" @submit.prevent="if (confirm('Are you sure you want to logout?')) $el.submit()">
                         @csrf
                         <button type="submit" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">Logout</button>
                     </form>
@@ -262,7 +262,7 @@
                 <!-- Main nav links -->
                 @foreach($mainNavLinks as $item)
                     @if(!empty($item['is_logout']))
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" @submit.prevent="if (confirm('Are you sure you want to logout?')) $el.submit()">
                             @csrf
                             <button type="submit" class="block w-full rounded-lg px-3 py-2 text-left text-gray-200 hover:bg-gray-800">Logout</button>
                         </form>
