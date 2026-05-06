@@ -13,6 +13,11 @@ Schedule::command('accounts:purge-deleted')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('credits:deduct-daily')
+    ->dailyAt('00:05')
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('set-and-forget:process')
     ->everyMinute()
     ->withoutOverlapping()

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Subscription;
 
 use App\Actions\Subscription\CreatePurchaseComplaint;
+use App\Actions\Subscription\GetCreditHistory;
 use App\Actions\Subscription\GetPurchaseCreditPageData;
 use App\Actions\Subscription\GetPurchaseHistory;
 use App\Actions\Subscription\HandleCheckoutSuccess;
@@ -22,6 +23,7 @@ class PurchaseCreditController extends Controller
         private HandleCheckoutSuccess $handleCheckoutSuccess,
         private GetPurchaseHistory $getPurchaseHistory,
         private CreatePurchaseComplaint $createPurchaseComplaint,
+        private GetCreditHistory $getCreditHistory,
     ) {}
 
     public function purchaseCredit(): View
@@ -70,12 +72,14 @@ class PurchaseCreditController extends Controller
 
     public function creditHistory(): View
     {
-        return view('subscription.credit-history');
+        return view('subscription.credit-history', $this->getCreditHistory->execute());
     }
 
-    public function creditHistoryLastMonth(): View
+    public function creditHistoryLastMonth(): RedirectResponse
     {
-        return view('subscription.credit-history-last-month');
+        $lastMonth = now()->subMonth()->format('Y-m');
+
+        return redirect()->route('credit-history', ['month' => $lastMonth]);
     }
 
     public function purchaseHistory(): View

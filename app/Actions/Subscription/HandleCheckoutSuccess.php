@@ -2,6 +2,7 @@
 
 namespace App\Actions\Subscription;
 
+use App\Models\CreditLog;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Auth;
@@ -60,6 +61,16 @@ class HandleCheckoutSuccess
                             'paid_at' => now(),
                         ]);
                         $locked->user?->increment('credits', $locked->credits);
+                        if ($locked->user) {
+                            CreditLog::create([
+                                'user_id' => $locked->user->id,
+                                'amount' => $locked->credits,
+                                'type' => 'purchase_credit',
+                                'description' => "Purchased {$locked->credits} credits",
+                                'reference_type' => PurchaseTransaction::class,
+                                'reference_id' => $locked->id,
+                            ]);
+                        }
                     }
                 });
 
