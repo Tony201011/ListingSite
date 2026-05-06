@@ -66,56 +66,70 @@
                                         <div>
                                             <div class="flex items-center gap-2">
                                                 <p class="font-semibold text-gray-900">{{ $profile->name }}</p>
-                                                {{-- Online indicator dot --}}
-                                                <span
-                                                    class="h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm"
-                                                    :class="online ? 'bg-green-400' : 'bg-gray-300'"
-                                                    :title="online ? 'Online' : 'Offline'"
-                                                    :aria-label="online ? 'Status: Online' : 'Status: Offline'"
-                                                    role="img"
-                                                ></span>
+                                                {{-- Online indicator dot (only meaningful when profile is approved) --}}
+                                                @if($profile->profile_status === 'approved')
+                                                    <span
+                                                        class="h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm"
+                                                        :class="online ? 'bg-green-400' : 'bg-gray-300'"
+                                                        :title="online ? 'Online Now' : 'Offline'"
+                                                        :aria-label="online ? 'Status: Online Now' : 'Status: Offline'"
+                                                        role="img"
+                                                    ></span>
+                                                @endif
                                             </div>
                                             <p class="text-xs text-gray-500">/{{ $profile->slug }}</p>
-                                            <span class="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium
-                                                @if($profile->profile_status === 'approved') bg-green-100 text-green-700
-                                                @elseif($profile->profile_status === 'rejected') bg-red-100 text-red-700
-                                                @else bg-yellow-100 text-yellow-700
+                                            <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                                                <span
+                                                    class="inline-block rounded-full px-2 py-0.5 text-xs font-medium
+                                                        @if($profile->profile_status === 'approved') bg-green-100 text-green-700
+                                                        @elseif($profile->profile_status === 'rejected') bg-red-100 text-red-700
+                                                        @else bg-yellow-100 text-yellow-700
+                                                        @endif
+                                                    "
+                                                    title="@if($profile->profile_status === 'approved')Your listing is live and visible in search results.@elseif($profile->profile_status === 'rejected')Your listing has been rejected. Please contact support.@else Your listing is awaiting admin approval before it becomes visible in search results.@endif"
+                                                >
+                                                    @if($profile->profile_status === 'approved')
+                                                        ✓ Approved – Live
+                                                    @elseif($profile->profile_status === 'rejected')
+                                                        ✗ Rejected
+                                                    @else
+                                                        ⏳ Pending Approval
+                                                    @endif
+                                                </span>
+                                                @if((int)$activeProfileId === $profile->id)
+                                                    <span class="inline-block rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-semibold text-pink-700" title="This is the profile you are currently managing.">
+                                                        Selected
+                                                    </span>
                                                 @endif
-                                            ">
-                                                {{ ucfirst($profile->profile_status ?? 'pending') }}
-                                            </span>
+                                            </div>
                                         </div>
-
-                                        @if((int)$activeProfileId === $profile->id)
-                                            <span class="ml-2 rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-semibold text-pink-700">
-                                                Active
-                                            </span>
-                                        @endif
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        {{-- Online Now toggle --}}
-                                        <div class="flex flex-col items-end gap-1">
-                                            <button
-                                                type="button"
-                                                @click="toggleOnline"
-                                                :disabled="loading || (!online && remainingUses <= 0)"
-                                                class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
-                                                :class="online
-                                                    ? 'bg-green-600 text-white hover:bg-green-700'
-                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50'"
-                                            >
-                                                <span x-show="loading" class="flex items-center gap-1">
-                                                    <svg class="h-3 w-3 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                                    </svg>
-                                                </span>
-                                                <span x-show="!loading" x-text="online ? 'Online' : 'Go Online'"></span>
-                                            </button>
-                                            <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00'" x-text="countdown" aria-label="Time remaining" aria-live="polite"></span>
-                                            <span class="text-xs text-gray-400" x-show="!online" x-text="remainingUses + ' uses left'"></span>
-                                        </div>
+                                        {{-- Online Now toggle (only available for approved profiles) --}}
+                                        @if($profile->profile_status === 'approved')
+                                            <div class="flex flex-col items-end gap-1">
+                                                <button
+                                                    type="button"
+                                                    @click="toggleOnline"
+                                                    :disabled="loading || (!online && remainingUses <= 0)"
+                                                    class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+                                                    :class="online
+                                                        ? 'bg-green-600 text-white hover:bg-green-700'
+                                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50'"
+                                                >
+                                                    <span x-show="loading" class="flex items-center gap-1">
+                                                        <svg class="h-3 w-3 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                        </svg>
+                                                    </span>
+                                                    <span x-show="!loading" x-text="online ? 'Online Now' : 'Go Online'"></span>
+                                                </button>
+                                                <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00'" x-text="countdown" aria-label="Time remaining" aria-live="polite"></span>
+                                                <span class="text-xs text-gray-400" x-show="!online" x-text="remainingUses + ' uses left'"></span>
+                                            </div>
+                                        @endif
 
                                         @if((int)$activeProfileId !== $profile->id)
                                             <form method="POST" action="{{ route('profiles.switch', $profile) }}">
@@ -149,6 +163,24 @@
                                         @endif
                                     </div>
                                 </div>
+
+                                {{-- Visibility notice for non-approved profiles --}}
+                                @if($profile->profile_status !== 'approved')
+                                    <div class="mt-2 rounded-lg border
+                                        @if($profile->profile_status === 'rejected') border-red-200 bg-red-50 text-red-700
+                                        @else border-yellow-200 bg-yellow-50 text-yellow-700
+                                        @endif
+                                        px-3 py-2 text-xs font-medium"
+                                        role="alert"
+                                        aria-live="polite"
+                                    >
+                                        @if($profile->profile_status === 'rejected')
+                                            ✗ This profile has been rejected and is not visible in search results. Please contact support for assistance.
+                                        @else
+                                            ⏳ This profile is awaiting admin approval. It will <strong>not appear in search results</strong> until it has been approved. You will be notified once the review is complete.
+                                        @endif
+                                    </div>
+                                @endif
 
                                 {{-- Inline message --}}
                                 <div class="mt-2" x-show="message" x-transition>
