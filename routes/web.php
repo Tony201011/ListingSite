@@ -192,6 +192,22 @@ Route::middleware('provider.auth')->group(function () {
         Route::post('/photos/{photo}/set-cover', [PhotoController::class, 'setCover'])->name('photos.setCover');
         Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
 
+        /*** availability route start here */
+        Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
+        Route::post('/set-availability', [AvailabilityController::class, 'update'])->name('availability.update');
+        Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
+        /*** availability route end here */
+
+        /************* rate and group route start here */
+        Route::get('/my-rate', [MyRateController::class, 'index'])->name('my-rate');
+        Route::post('/my-rate', [MyRateController::class, 'store'])->name('my-rate.store');
+        Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])->name('my-rate.destroy');
+        Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])->name('my-rate.update');
+        Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store');
+        Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update');
+        Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
+        /************* rate and group route end here */
+
         Route::middleware(['profile.steps'])->group(function () {
             /**** video route start here */
             Route::get('/upload-video', [MyVideosController::class, 'index'])->name('upload-video');
@@ -208,22 +224,6 @@ Route::middleware('provider.auth')->group(function () {
             Route::delete('/my-tours/{tour}', [MyToursController::class, 'destroy'])->name('my-tours.destroy');
             Route::get('/search-cities', [MyToursController::class, 'search'])->name('search-cities');
             /*** tour route end here */
-
-            /*** availability route start here */
-            Route::get('/set-availability', [AvailabilityController::class, 'edit'])->name('availability.edit');
-            Route::post('/set-availability', [AvailabilityController::class, 'update'])->name('availability.update');
-            Route::get('/my-availability', [AvailabilityController::class, 'show'])->name('availability.show');
-            /*** availability route end here */
-
-            /************* rate and group route start here */
-            Route::get('/my-rate', [MyRateController::class, 'index'])->name('my-rate');
-            Route::post('/my-rate', [MyRateController::class, 'store'])->name('my-rate.store');
-            Route::delete('/my-rate/{rate}', [MyRateController::class, 'destroy'])->name('my-rate.destroy');
-            Route::put('/my-rate/{rate}', [MyRateController::class, 'update'])->name('my-rate.update');
-            Route::post('/groups', [MyRateController::class, 'storeGroup'])->name('my-rate.groups.store');
-            Route::put('/groups/{group}', [MyRateController::class, 'updateGroup'])->name('my-rate.groups.update');
-            Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
-            /************* rate and group route end here */
 
             /*** photo route start here */
             Route::get('/verify-photo', [PhotoVerificationController::class, 'index'])->name('verify.photos');
