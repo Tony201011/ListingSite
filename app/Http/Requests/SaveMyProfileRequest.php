@@ -16,6 +16,8 @@ class SaveMyProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
             'suburb' => ['required', 'string', 'max:255'],
             'introduction_line' => ['required', 'string', 'max:1000'],
             'profile_text' => ['required', 'string', 'max:15000'],

@@ -182,6 +182,7 @@ class MyProfileControllerTest extends TestCase
         $this->app->instance(SaveMyProfile::class, $saveMyProfile);
 
         $response = $this->actingAsProvider($user)->postJson(route('edit-profile.save'), [
+            'name' => 'Jenny',
             'suburb' => 'Sydney',
             'introduction_line' => 'Hello there',
             'profile_text' => 'My profile text',
@@ -229,6 +230,7 @@ class MyProfileControllerTest extends TestCase
         $this->app->instance(SaveMyProfile::class, $saveMyProfile);
 
         $response = $this->actingAsProvider($user)->postJson(route('edit-profile.save'), [
+            'name' => 'Jenny',
             'suburb' => 'Sydney',
             'introduction_line' => 'Hello there',
             'profile_text' => 'My profile text',

@@ -27,7 +27,15 @@
             </div>
         @endif
 
-        <div class="mb-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div
+            class="mb-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+            x-data="{
+                showCreateModal: false,
+                createName: '',
+                createPhone: '',
+                createErrors: []
+            }"
+        >
             <div class="p-6 sm:p-8">
 
                 @if($profiles->isEmpty())
@@ -131,6 +139,17 @@
                                             </div>
                                         @endif
 
+                                        {{-- Edit button --}}
+                                        <form method="POST" action="{{ route('profiles.switch-edit', $profile) }}">
+                                            @csrf
+                                            <button
+                                                type="submit"
+                                                class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-pink-300 hover:text-pink-700 hover:bg-pink-50"
+                                            >
+                                                Edit
+                                            </button>
+                                        </form>
+
                                         @if((int)$activeProfileId !== $profile->id)
                                             <form method="POST" action="{{ route('profiles.switch', $profile) }}">
                                                 @csrf
@@ -197,16 +216,104 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('profiles.store') }}">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="inline-flex items-center justify-center rounded-full border border-transparent bg-pink-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
-                    >
-                        + Create New Profile
-                    </button>
-                </form>
+                <button
+                    type="button"
+                    @click="showCreateModal = true; createName = ''; createPhone = ''; createErrors = []"
+                    class="inline-flex items-center justify-center rounded-full border border-transparent bg-pink-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
+                >
+                    + Create New Profile
+                </button>
 
+            </div>
+
+            {{-- Create New Profile Modal --}}
+            <div
+                x-show="showCreateModal"
+                x-cloak
+                x-transition.opacity
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+                @keydown.escape.window="showCreateModal = false"
+            >
+                <div
+                    class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+                    @click.stop
+                >
+                    <div class="mb-5 flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-gray-900">Create New Profile</h2>
+                        <button
+                            type="button"
+                            @click="showCreateModal = false"
+                            class="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                            aria-label="Close modal"
+                        >&times;</button>
+                    </div>
+
+                    <p class="mb-4 text-sm text-gray-600">
+                        Each profile can have its own name and phone number, so you can manage multiple listings from one account.
+                    </p>
+
+                    <template x-if="createErrors.length > 0">
+                        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <template x-for="err in createErrors" :key="err">
+                                <p x-text="err"></p>
+                            </template>
+                        </div>
+                    </template>
+
+                    <form
+                        method="POST"
+                        action="{{ route('profiles.store') }}"
+                        @submit.prevent="
+                            createErrors = [];
+                            if (!createName.trim()) { createErrors.push('Profile name is required.'); return; }
+                            $el.submit();
+                        "
+                        class="space-y-4"
+                    >
+                        @csrf
+                        <div>
+                            <label class="block text-sm font-semibold text-[#e04ecb] mb-1">Profile name <span class="text-red-500">*</span></label>
+                            <input
+                                name="name"
+                                type="text"
+                                x-model="createName"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-[#e04ecb] focus:outline-none focus:ring-2 focus:ring-[#e04ecb]/30"
+                                placeholder="e.g. Jenny"
+                                required
+                                autofocus
+                            >
+                            <p class="mt-1 text-xs text-gray-500">This is the name that will appear on the listing (e.g. Jenny, Kate).</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-[#e04ecb] mb-1">Mobile number <span class="text-gray-400 font-normal">(optional)</span></label>
+                            <input
+                                name="phone"
+                                type="text"
+                                x-model="createPhone"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-[#e04ecb] focus:outline-none focus:ring-2 focus:ring-[#e04ecb]/30"
+                                placeholder="e.g. 0400 000 000"
+                            >
+                            <p class="mt-1 text-xs text-gray-500">You can set or change this later.</p>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-2">
+                            <button
+                                type="button"
+                                @click="showCreateModal = false"
+                                class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                class="rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-pink-700"
+                            >
+                                Create Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

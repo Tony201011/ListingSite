@@ -11,9 +11,9 @@
     class="bg-white min-h-screen py-10 px-4"
     x-data="editProfileForm({
         initial: {
-            name: @js(old('name', $user->name ?? '')),
+            name: @js(old('name', $profile_name ?? '')),
             email: @js(old('email', $user->email ?? '')),
-            mobile: @js(old('mobile', $user->mobile ?? '')),
+            phone: @js(old('phone', $profile_phone ?? '')),
             introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
             suburb: @js(old('suburb', $profile->suburb ?? '')),
             profile_text: @js(old('profile_text', $profile->profile_text ?? '')),
@@ -90,13 +90,13 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Your name</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Profile name</label>
                         <input
                             name="name"
                             type="text"
                             x-model="name"
-                            readonly
-                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium bg-gray-100 cursor-not-allowed transition"
+                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                            placeholder="e.g. Jenny"
                         >
                     </div>
 
@@ -155,13 +155,13 @@
                     </div>
 
                     <div>
-                        <label class="block font-semibold text-[#e04ecb] mb-1">Mobile number</label>
+                        <label class="block font-semibold text-[#e04ecb] mb-1">Mobile number <span class="text-gray-400 font-normal">(optional)</span></label>
                         <input
-                            name="mobile"
+                            name="phone"
                             type="text"
-                            x-model="mobile"
-                            readonly
-                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium bg-gray-100 cursor-not-allowed transition"
+                            x-model="phone"
+                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                            placeholder="e.g. 0400 000 000"
                         >
                     </div>
                 </div>
