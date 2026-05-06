@@ -219,7 +219,7 @@
                         <div>
                             <p class="text-sm text-gray-500">Phone</p>
                             <p class="text-2xl font-bold text-gray-900 leading-tight">
-                                {{ $userInfo['user']?->mobile ?? ($userInfo['user']?->mobile ?? '') }}
+                                {{ $userInfo['provider_profile']?->phone ?? '' }}
                             </p>
                             <p class="text-sm text-gray-500 mt-1">I accept phone calls & SMS</p>
                         </div>
