@@ -17,18 +17,19 @@
                 @foreach($packages as $package)
                     <div class="flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                         <div class="flex-1">
-                            <p class="text-lg font-bold text-gray-900">{{ $package->credits }} Credits</p>
+                            <p class="text-lg font-bold text-gray-900">{{ $package->name }}</p>
                             <p class="mt-1 text-3xl font-extrabold text-gray-900">
-                                AUD ${{ number_format($package->total_price, 2) }}
+                                AUD ${{ number_format($package->price, 2) }}
                             </p>
-                            @if($package->price_per_credit)
-                                <p class="mt-1 text-sm text-gray-500">
-                                    ${{ number_format($package->price_per_credit, 4) }} per credit
-                                </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                {{ $package->credits }} credits
+                            </p>
+                            @if($package->description)
+                                <p class="mt-2 text-sm text-gray-500">{{ $package->description }}</p>
                             @endif
                         </div>
                         <a
-                            href="{{ route('purchase-credit') }}"
+                            href="{{ route('purchase-credit', ['package_id' => $package->id]) }}"
                             class="mt-6 block rounded-full bg-[#e04ecb] px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#c13ab0]"
                         >
                             Buy Now

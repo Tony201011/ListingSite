@@ -2,15 +2,16 @@
 
 namespace App\Actions\Subscription;
 
-use App\Models\PricingPackage;
+use App\Models\CreditPackage;
 
 class GetSubscriptionPlans
 {
     public function execute(): array
     {
-        $packages = PricingPackage::query()
-            ->where('is_active', true)
+        $packages = CreditPackage::query()
+            ->where('status', 'active')
             ->orderBy('sort_order')
+            ->orderBy('price')
             ->get();
 
         return [

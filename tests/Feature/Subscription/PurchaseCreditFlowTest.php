@@ -7,8 +7,6 @@ use App\Actions\Subscription\SendCreditPurchaseEmail;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\CreditPackage;
-use App\Models\PricingPackage;
-use App\Models\PricingPage;
 use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
@@ -489,21 +487,19 @@ class PurchaseCreditFlowTest extends TestCase
     {
         $user = $this->createProvider();
 
-        $pricingPage = PricingPage::create(['title' => 'Pricing', 'is_active' => true]);
-
-        PricingPackage::create([
-            'pricing_page_id' => $pricingPage->id,
+        CreditPackage::create([
+            'name' => 'Starter Pack',
             'credits' => 30,
-            'total_price' => '9.99',
-            'price_per_credit' => '0.333',
+            'price' => '9.99',
+            'status' => 'active',
             'sort_order' => 1,
-            'is_active' => true,
         ]);
 
         $response = $this->actingAsProvider($user)->get('/payment-subscription');
 
         $response->assertOk();
         $response->assertViewIs('subscription.payment-subscription');
+        $response->assertViewHas('packages', fn ($p) => $p->count() === 1);
     }
 
     // ---------------------------------------------------------------
