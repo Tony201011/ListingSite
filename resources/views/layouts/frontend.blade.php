@@ -50,11 +50,7 @@
 
     @include('layouts.partials.global-banner')
 
-    @include('layouts.partials.ads', ['position' => 'all_pages_top'])
-
     @yield('content')
-
-    @include('layouts.partials.ads', ['position' => 'all_pages_bottom'])
 
     @php
         $siteSetting = \App\Models\SiteSetting::first();
