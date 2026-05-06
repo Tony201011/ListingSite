@@ -369,10 +369,12 @@ class SignupAndOtpFlowTest extends TestCase
     {
         $this->from('/signup')->post('/signup', $this->validSignupPayload());
 
-        $response = $this->get('/otp-verification');
+        $pendingKey = session('pending_signup_key');
 
-        $response->assertOk();
-        $response->assertViewIs('auth.otp-verification');
+        $this->withSession(['otp_required' => true, 'pending_signup_key' => $pendingKey])
+            ->get('/otp-verification')
+            ->assertOk()
+            ->assertViewIs('auth.otp-verification');
     }
 
     public function test_otp_page_redirects_to_signup_without_session(): void
