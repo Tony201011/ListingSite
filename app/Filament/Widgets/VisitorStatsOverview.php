@@ -31,9 +31,11 @@ class VisitorStatsOverview extends StatsOverviewWidget
             ->whereYear(DB::raw('FROM_UNIXTIME(last_activity)'), Carbon::now()->year)
             ->whereMonth(DB::raw('FROM_UNIXTIME(last_activity)'), Carbon::now()->month)
             ->count();
-        $uniqueToday = DB::table('login_logs')
-            ->whereDate('created_at', Carbon::today())
-            ->count(DB::raw('DISTINCT user_id'));
+        $uniqueToday = DB::table('sessions')
+            ->whereNotNull('user_id')
+            ->whereDate(DB::raw('FROM_UNIXTIME(last_activity)'), Carbon::today())
+            ->distinct('user_id')
+            ->count('user_id');
 
         return [
             Stat::make('Total Visitors', (string) $totalVisitors)
