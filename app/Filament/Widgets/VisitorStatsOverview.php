@@ -34,8 +34,7 @@ class VisitorStatsOverview extends StatsOverviewWidget
         $uniqueToday = DB::table('sessions')
             ->whereNotNull('user_id')
             ->whereDate(DB::raw('FROM_UNIXTIME(last_activity)'), Carbon::today())
-            ->distinct('user_id')
-            ->count('user_id');
+            ->count(DB::raw('DISTINCT user_id'));
 
         return [
             Stat::make('Total Visitors', (string) $totalVisitors)
