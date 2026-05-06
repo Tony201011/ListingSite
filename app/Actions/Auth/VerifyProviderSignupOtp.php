@@ -85,8 +85,9 @@ class VerifyProviderSignupOtp
             'user_id' => $user->id,
             'name' => $pendingUser['name'],
             'slug' => $this->generateUniqueProviderProfileSlug->execute($pendingUser['name']),
+            'mobile' => $pendingUser['mobile'] ?? null,
             'suburb' => $pendingUser['suburb'] ?? null,
-            'profile_status' => 'pending',
+            'profile_status' => 'approved',
         ]);
 
         $this->sendProviderAccountEmails->execute($user);
