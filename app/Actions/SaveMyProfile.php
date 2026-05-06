@@ -37,13 +37,14 @@ class SaveMyProfile
                 10
             );
 
-            $profile->name = $user->name;
+            $profile->name = $validated['name'] ?? $user->name;
 
             if (! $profile->slug) {
                 $profile->slug = $this->generateUniqueProviderProfileSlug->execute($profile->name);
             }
 
             $profile->fill([
+                'phone' => $validated['phone'] ?? null,
                 'suburb' => $validated['suburb'] ?? null,
                 'introduction_line' => $validated['introduction_line'] ?? null,
                 'profile_text' => $validated['profile_text'] ?? null,

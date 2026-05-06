@@ -60,7 +60,7 @@
                         ['label' => 'My videos', 'url' => url('/my-videos')],
                         ['label' => 'My rates', 'url' => url('/my-rate'), 'isNew' => true],
                         ['label' => 'My tours', 'url' => url('/my-tours')],
-                        ['label' => 'Availability', 'url' => url('/my-availability')],
+                        ['label' => 'Availability', 'url' => route('availability.edit')],
                         ['label' => 'Short URL', 'url' => url('/short-url')],
                         ['label' => 'Status', 'url' => route('status')],
                         ['label' => 'Set & Forget', 'url' => url('/set-and-forget')],

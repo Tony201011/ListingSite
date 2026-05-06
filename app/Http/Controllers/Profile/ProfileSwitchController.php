@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateOnlineStatusRequest;
 use App\Models\ProviderProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -69,15 +70,21 @@ class ProfileSwitchController extends Controller
         return view('profile.select-profile', compact('profiles', 'activeProfileId', 'onlineStates'));
     }
 
-    public function store(): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $user = Auth::user();
 
-        $slug = $this->generateSlug->execute($user->name);
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $slug = $this->generateSlug->execute($validated['name']);
 
         $profile = ProviderProfile::create([
             'user_id' => $user->id,
-            'name' => $user->name,
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? null,
             'slug' => $slug,
         ]);
 
@@ -85,6 +92,15 @@ class ProfileSwitchController extends Controller
 
         return redirect()->route('edit-profile')
             ->with('success', 'New profile created. Please fill in your profile details.');
+    }
+
+    public function switchToEdit(ProviderProfile $profile): RedirectResponse
+    {
+        $this->authorizeProfileOwnership($profile);
+
+        session(['active_provider_profile_id' => $profile->id]);
+
+        return redirect()->route('edit-profile');
     }
 
     public function switchTo(ProviderProfile $profile): RedirectResponse

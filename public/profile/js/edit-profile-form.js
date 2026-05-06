@@ -5,7 +5,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
         name: config.initial?.name || '',
         email: config.initial?.email || '',
-        mobile: config.initial?.mobile || '',
+        phone: config.initial?.phone || '',
         introduction_line: config.initial?.introduction_line || '',
         suburb: config.initial?.suburb || '',
         profile_text: config.initial?.profile_text || '',
@@ -290,9 +290,7 @@ document.addEventListener('alpine:init', () => {
         validate() {
             const errors = [];
 
-            if (!this.name.trim()) errors.push('Name is required.');
-            if (!this.email.trim()) errors.push('Email is required.');
-            if (!this.mobile.trim()) errors.push('Mobile number is required.');
+            if (!this.name.trim()) errors.push('Profile name is required.');
 
             if (!this.suburb.trim()) {
                 errors.push('Suburb is required.');
@@ -366,8 +364,7 @@ document.addEventListener('alpine:init', () => {
 
             const formData = new FormData();
             formData.append('name', this.name);
-            formData.append('email', this.email);
-            formData.append('mobile', this.mobile);
+            formData.append('phone', this.phone);
             formData.append('introduction_line', this.introduction_line);
             formData.append('suburb', this.suburb);
             formData.append('profile_text', this.profile_text);
