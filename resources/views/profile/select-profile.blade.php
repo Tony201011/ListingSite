@@ -10,7 +10,24 @@
 
     <div class="flex flex-wrap justify-center gap-6">
         @foreach($profiles as $profile)
-            <form method="POST" action="{{ route('profiles.switch', $profile) }}" class="group">
+            @php
+                $state = $onlineStates[$profile->id] ?? ['onlineStatus' => false, 'remainingUses' => 0, 'expiresAt' => null];
+                $isOnline = (bool) $state['onlineStatus'];
+                $isActive = (int) $activeProfileId === $profile->id;
+            @endphp
+            <form
+                method="POST"
+                action="{{ route('profiles.switch', $profile) }}"
+                class="group"
+                x-data="profileOnlineToggle({
+                    profileId: @js($profile->id),
+                    initialStatus: @js($isOnline),
+                    initialRemainingUses: @js($state['remainingUses']),
+                    initialExpiresAt: @js($state['expiresAt'] ?? null),
+                    updateUrl: @js(route('profiles.online-status', $profile)),
+                    csrfToken: @js(csrf_token())
+                })"
+            >
                 @csrf
                 <button
                     type="submit"
@@ -33,20 +50,26 @@
                             </div>
                         @endif
 
-                        {{-- Status badge --}}
-                        @if($profile->profile_status === 'approved')
-                            <span class="absolute bottom-1 right-1 h-3 w-3 rounded-full bg-green-400 border-2 border-white"></span>
-                        @elseif($profile->profile_status === 'rejected')
-                            <span class="absolute bottom-1 right-1 h-3 w-3 rounded-full bg-red-400 border-2 border-white"></span>
-                        @else
-                            <span class="absolute bottom-1 right-1 h-3 w-3 rounded-full bg-yellow-400 border-2 border-white"></span>
-                        @endif
+                        {{-- Online indicator dot (matches my-profiles page) --}}
+                        <span
+                            class="absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-white shadow-sm"
+                            :class="online ? 'bg-green-400' : 'bg-gray-300'"
+                            :title="online ? 'Online' : 'Offline'"
+                            role="img"
+                        ></span>
                     </div>
 
                     <div class="text-center">
-                        <p class="text-gray-700 text-sm font-medium group-hover:text-gray-900 transition-colors">
-                            {{ $profile->name }}
-                        </p>
+                        <div class="flex items-center justify-center gap-2">
+                            <p class="text-gray-700 text-sm font-medium group-hover:text-gray-900 transition-colors">
+                                {{ $profile->name }}
+                            </p>
+                            @if($isActive)
+                                <span class="rounded-full bg-pink-100 px-2 py-0.5 text-xs font-semibold text-pink-700">
+                                    Active
+                                </span>
+                            @endif
+                        </div>
                         <p class="text-gray-400 text-xs mt-0.5 group-hover:text-gray-600 transition-colors">
                             /{{ $profile->slug }}
                         </p>
@@ -97,3 +120,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('profile/js/my-profiles-online.js') }}"></script>
+@endpush

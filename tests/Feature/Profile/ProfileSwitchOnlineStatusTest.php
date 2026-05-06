@@ -53,6 +53,24 @@ class ProfileSwitchOnlineStatusTest extends TestCase
         $response->assertViewHas('onlineStates');
     }
 
+    public function test_select_profile_includes_online_states_and_active_profile_id(): void
+    {
+        [$user, $profiles] = $this->createProviderWithProfiles(2);
+
+        $getOnlineNowState = Mockery::mock(GetOnlineNowState::class);
+        $getOnlineNowState->shouldReceive('execute')
+            ->twice()
+            ->andReturn(['onlineStatus' => true, 'remainingUses' => 3, 'expiresAt' => null]);
+
+        $this->app->instance(GetOnlineNowState::class, $getOnlineNowState);
+
+        $response = $this->actingAs($user)->get(route('select-profile'));
+
+        $response->assertOk();
+        $response->assertViewHas('onlineStates');
+        $response->assertViewHas('activeProfileId');
+    }
+
     public function test_owner_can_set_profile_online(): void
     {
         [$user, $profiles] = $this->createProviderWithProfiles(2);

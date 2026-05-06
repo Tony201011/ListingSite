@@ -60,7 +60,13 @@ class ProfileSwitchController extends Controller
             return redirect()->route('my-profile');
         }
 
-        return view('profile.select-profile', compact('profiles'));
+        $activeProfileId = session('active_provider_profile_id') ?? $profiles->first()?->id;
+
+        $onlineStates = $profiles->mapWithKeys(function (ProviderProfile $profile): array {
+            return [$profile->id => $this->getOnlineNowState->execute($profile)];
+        });
+
+        return view('profile.select-profile', compact('profiles', 'activeProfileId', 'onlineStates'));
     }
 
     public function store(): RedirectResponse
