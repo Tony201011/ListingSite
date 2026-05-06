@@ -241,8 +241,8 @@ class HomeControllerTest extends TestCase
         $popularUser = $this->createApprovedProvider(['name' => 'Popular Escort', 'slug' => 'popular-escort']);
         $lessPopularUser = $this->createApprovedProvider(['name' => 'Less Popular Escort', 'slug' => 'less-popular-escort']);
 
-        $popularProfile = ProviderProfile::query()->where('user_id', $popularUser->id)->first();
-        $lessPopularProfile = ProviderProfile::query()->where('user_id', $lessPopularUser->id)->first();
+        $popularProfile = ProviderProfile::query()->where('user_id', $popularUser->id)->firstOrFail();
+        $lessPopularProfile = ProviderProfile::query()->where('user_id', $lessPopularUser->id)->firstOrFail();
 
         ProfileView::query()->create(['user_id' => $popularUser->id, 'provider_profile_id' => $popularProfile->id, 'viewer_ip' => '1.1.1.1']);
         ProfileView::query()->create(['user_id' => $popularUser->id, 'provider_profile_id' => $popularProfile->id, 'viewer_ip' => '1.1.1.2']);
