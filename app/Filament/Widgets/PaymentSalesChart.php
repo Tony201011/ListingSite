@@ -2,10 +2,10 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\PurchaseTransaction;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PaymentSalesChart extends ChartWidget
 {
@@ -38,11 +38,12 @@ class PaymentSalesChart extends ChartWidget
     {
         $selectedYear = (int) ($this->filter ?? Carbon::now()->year);
 
-        $rows = PurchaseTransaction::paid()
+        $rows = DB::table('purchase_transactions')
+            ->selectRaw('MONTH(paid_at) as month, SUM(amount) as total')
+            ->where('status', 'paid')
             ->whereYear('paid_at', $selectedYear)
-            ->get()
-            ->groupBy(fn ($t) => Carbon::parse($t->paid_at)->format('n'))
-            ->map(fn ($group) => $group->sum('amount'));
+            ->groupBy('month')
+            ->pluck('total', 'month');
 
         $labels = [];
         $data = [];
