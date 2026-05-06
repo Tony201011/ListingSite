@@ -88,9 +88,9 @@
             Manage profiles
         </a>
         <span>·</span>
-        <form method="POST" action="{{ route('logout') }}" @submit.prevent="if (confirm('Are you sure you want to logout?')) $el.submit()">
+        <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="hover:text-gray-700 transition-colors">
+            <button type="button" class="hover:text-gray-700 transition-colors" @click="confirmSignOut($el.closest('form'))">
                 Sign out
             </button>
         </form>

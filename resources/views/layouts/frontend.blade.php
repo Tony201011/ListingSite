@@ -102,6 +102,24 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script>
+        function confirmSignOut(form) {
+            Swal.fire({
+                title: 'Sign Out?',
+                text: 'Are you sure you want to sign out?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, sign out',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#db2777',
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    </script>
+
     @stack('scripts')
 
     <script src="{{ asset('js/password-toggle.js') }}"></script>
