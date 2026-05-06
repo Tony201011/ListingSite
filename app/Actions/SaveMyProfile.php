@@ -45,7 +45,7 @@ class SaveMyProfile
 
             $profile->fill([
                 'phone' => $validated['phone'] ?? null,
-                'mobile' => $validated['mobile'] ?? $user->mobile ?? null,
+                'mobile' => $validated['phone'] ?? $user->mobile ?? null,
                 'suburb' => $validated['suburb'] ?? null,
                 'introduction_line' => $validated['introduction_line'] ?? null,
                 'profile_text' => $validated['profile_text'] ?? null,
@@ -73,8 +73,8 @@ class SaveMyProfile
             $profile->save();
 
             // Sync mobile number to user account if provided
-            if (isset($validated['mobile']) && $validated['mobile']) {
-                $user->update(['mobile' => $validated['mobile']]);
+            if (isset($validated['phone']) && $validated['phone']) {
+                $user->update(['mobile' => $validated['phone']]);
             }
 
             return $profile;

@@ -77,7 +77,6 @@ document.addEventListener('alpine:init', () => {
             let errors = [];
 
             if (!this.name) errors.push('Name is required');
-            if (!this.mobile) errors.push('Mobile required');
             if (!this.suburbSelected) errors.push('Select suburb from dropdown');
 
             return errors;
