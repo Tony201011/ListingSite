@@ -1,13 +1,16 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
+<div class="bg-[#f8fafc] min-h-screen py-10">
+    <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
         <a href="{{ url('/profile') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium">
-            <span class="mr-1">&lt;</span> Back to dashboard
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to dashboard
         </a>
 
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-md p-6 md:p-10">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Delete Account</h1>
             <p class="text-sm text-gray-600 mb-6">
                 This action is permanent. Once deleted, your profile, photos, videos, and account data cannot be recovered.

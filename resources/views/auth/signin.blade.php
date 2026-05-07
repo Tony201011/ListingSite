@@ -80,10 +80,10 @@
 
                 <!-- Keep me logged in (styled like the age confirmation pill) -->
                 <div class="mb-6">
-                    <div class="inline-flex items-center gap-2.5 bg-gray-50 px-5 py-3 rounded-full">
-                        <input type="checkbox" id="keep_logged_in" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="w-5 h-5 accent-[#e04ecb]">
-                        <label for="keep_logged_in" class="font-semibold text-gray-800">Keep me logged in on this device</label>
-                    </div>
+                    <label for="keep_logged_in" class="flex items-center gap-2.5 bg-gray-50 px-4 py-3 rounded-xl cursor-pointer w-full sm:w-fit">
+                        <input type="checkbox" id="keep_logged_in" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="w-5 h-5 flex-shrink-0 accent-[#e04ecb]">
+                        <span class="font-semibold text-gray-800">Keep me logged in on this device</span>
+                    </label>
                 </div>
 
                 @if ($shouldUseRecaptcha ?? false)
