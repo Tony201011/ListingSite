@@ -22,6 +22,8 @@ html {
         transform: none !important;
         margin: 0 !important;
         width: max-content;
+        /* Keep the paired mobile prev/next buttons inside the viewport with a
+           small center gap so each side can occupy at most half the screen. */
         max-width: calc(50vw - 0.75rem);
         z-index: 50;
         display: flex;

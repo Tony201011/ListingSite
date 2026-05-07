@@ -106,7 +106,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     @endif
                     @if(!empty($introTagline))
-                    <div class="mt-2 px-2 text-base font-medium text-gray-700 break-words sm:mt-3 sm:text-lg">{{ $introTagline }}</div>
+                    <div class="mt-2 px-2 text-base font-medium text-gray-700 [overflow-wrap:anywhere] sm:mt-3 sm:text-lg">{{ $introTagline }}</div>
                     @endif
                 </div>
 
