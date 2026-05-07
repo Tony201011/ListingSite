@@ -12,6 +12,7 @@
         (function () {
             const BASE_WIDTH = 304;
             const BASE_HEIGHT = 78;
+            let resizeScheduled = false;
 
             const resizeRecaptcha = () => {
                 document.querySelectorAll('[data-recaptcha-container]').forEach((container) => {
@@ -31,8 +32,20 @@
                 });
             };
 
-            window.addEventListener('load', resizeRecaptcha);
-            window.addEventListener('resize', resizeRecaptcha);
+            const scheduleResizeRecaptcha = () => {
+                if (resizeScheduled) {
+                    return;
+                }
+
+                resizeScheduled = true;
+                window.requestAnimationFrame(() => {
+                    resizeScheduled = false;
+                    resizeRecaptcha();
+                });
+            };
+
+            window.addEventListener('load', scheduleResizeRecaptcha);
+            window.addEventListener('resize', scheduleResizeRecaptcha);
         })();
     </script>
 @endpush
