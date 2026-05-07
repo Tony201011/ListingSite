@@ -130,7 +130,7 @@
                 </div>
 
                 <!-- Add / Edit Rate Button -->
-                <button x-show="!showForm" @click="openFormForAdd()" class="w-full sm:w-auto bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                <button x-show="!showForm" @click="openFormForAdd()" aria-label="Add a new rate" class="w-full sm:w-auto bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
                     + Add rate
                 </button>
 
