@@ -53,10 +53,10 @@
         x-show="isModalOpen"
         x-cloak
         x-transition.opacity
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-2 sm:items-center sm:p-4"
         @click.self="closeModal()"
     >
-        <div class="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
             <div class="flex items-center border-b border-gray-200 px-4 pt-4 sm:px-6">
                 <button
                     type="button"
@@ -86,7 +86,7 @@
                 </button>
             </div>
 
-            <div class="bg-gray-50 p-4 sm:p-6">
+            <div class="overflow-y-auto bg-gray-50 p-4 sm:p-6">
                 <div
                     x-show="successMessage"
                     x-cloak
@@ -161,17 +161,17 @@
 
                     <template x-if="filePreviews.length > 0">
                         <div class="mt-4 rounded-xl border border-gray-200 bg-white p-4">
-                            <div class="mb-3 flex items-center justify-between">
+                            <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <p class="text-sm font-semibold text-gray-700">
                                     Selected (<span x-text="filePreviews.length"></span>)
                                 </p>
 
-                                <div class="flex items-center gap-2">
+                                <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                                     <button
                                         type="button"
                                         @click="uploadFiles()"
                                         :disabled="uploading"
-                                        class="flex items-center gap-1 rounded-full bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                        class="flex w-full items-center justify-center gap-1 rounded-full bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:py-1.5"
                                     >
                                         <svg x-show="!uploading" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
@@ -187,7 +187,7 @@
                                     <button
                                         type="button"
                                         @click="clearSelectedFiles()"
-                                        class="text-xs font-semibold text-red-600 hover:text-red-700"
+                                        class="w-full text-center text-xs font-semibold text-red-600 hover:text-red-700 sm:w-auto"
                                     >
                                         Delete all
                                     </button>
