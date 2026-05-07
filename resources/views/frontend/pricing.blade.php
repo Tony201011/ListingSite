@@ -44,11 +44,7 @@
                 <p class="text-gray-600 mb-4">You can purchase your credits in the following packages:</p>
 
                 <div class="overflow-x-auto rounded-lg border border-gray-200">
-<<<<<<< HEAD
-                    <table class="w-full text-sm min-w-[400px]">
-=======
                     <table class="w-full min-w-[360px] text-sm">
->>>>>>> 66d12c7ae744d648aa7d36672632cbcdeaf100c9
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th class="px-3 py-3 text-left font-semibold sm:px-4">Credits</th>
@@ -75,11 +71,7 @@
                 <p class="text-gray-600 mb-4">You can purchase your credits in the following packages:</p>
 
                 <div class="overflow-x-auto rounded-lg border border-gray-200">
-<<<<<<< HEAD
-                    <table class="w-full text-sm min-w-[400px]">
-=======
                     <table class="w-full min-w-[360px] text-sm">
->>>>>>> 66d12c7ae744d648aa7d36672632cbcdeaf100c9
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th class="px-3 py-3 text-left font-semibold sm:px-4">Credits</th>
