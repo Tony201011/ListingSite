@@ -108,6 +108,27 @@ document.addEventListener('alpine:init', () => {
 
             if (options.imageUpload) {
                 quill.getModule('toolbar').addHandler('image', () => {
+                    const imageUrl = window.prompt(
+                        'Paste image URL (http/https). Leave empty to upload from your device.'
+                    );
+
+                    if (imageUrl === null) {
+                        return;
+                    }
+
+                    const trimmedImageUrl = imageUrl.trim();
+                    if (trimmedImageUrl !== '') {
+                        if (!this.isValidImageUrl(trimmedImageUrl)) {
+                            this.error('Invalid image URL. Please use a valid http/https URL.');
+                            return;
+                        }
+
+                        const range = quill.getSelection(true);
+                        quill.insertEmbed(range.index, 'image', trimmedImageUrl);
+                        quill.setSelection(range.index + 1);
+                        return;
+                    }
+
                     const input = document.createElement('input');
                     input.setAttribute('type', 'file');
                     input.setAttribute('accept', 'image/jpeg,image/jpg,image/png,image/webp');
@@ -170,6 +191,15 @@ document.addEventListener('alpine:init', () => {
                     this.$refs.profileTextInput.value = this[modelKey];
                 }
             });
+        },
+
+        isValidImageUrl(url) {
+            try {
+                const parsed = new URL(url);
+                return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+            } catch {
+                return false;
+            }
         },
 
         syncHiddenEditorInputs() {
