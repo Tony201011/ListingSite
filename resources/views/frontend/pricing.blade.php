@@ -43,8 +43,8 @@
             @if(!empty($packages) && $packages->count() > 0)
                 <p class="text-gray-600 mb-4">You can purchase your credits in the following packages:</p>
 
-                <div class="overflow-hidden rounded-lg border border-gray-200">
-                    <table class="w-full text-sm">
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full min-w-[360px] text-sm">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold">Credits</th>
@@ -70,8 +70,8 @@
             @else
                 <p class="text-gray-600 mb-4">You can purchase your credits in the following packages:</p>
 
-                <div class="overflow-hidden rounded-lg border border-gray-200">
-                    <table class="w-full text-sm">
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full min-w-[360px] text-sm">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold">Credits</th>

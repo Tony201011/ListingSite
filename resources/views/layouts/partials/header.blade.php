@@ -156,7 +156,7 @@
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <!-- Main row: logo, search, actions, auth -->
-        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 md:hidden">
+        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 lg:hidden">
             <!-- Logo (escortify) -->
             <a href="{{ url('/') }}" class="shrink-0">
                 @if($logoType === 'image' && filled($logoUrl))
@@ -182,7 +182,7 @@
             </form>
 
             <!-- Action links & Auth (from third image) -->
-            <div class="hidden items-center space-x-4 md:flex">
+            <div class="hidden items-center space-x-4 md:flex lg:hidden">
                 <!-- Action links -->
                 @foreach($actionLinks as $item)
                     <a href="{{ $item['url'] }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">{{ $item['label'] }}</a>
@@ -194,13 +194,13 @@
             </div>
 
             <!-- Mobile menu button (unchanged) -->
-            <button @click="mobileMenu = !mobileMenu" class="md:hidden text-gray-300 hover:text-white" aria-label="Toggle menu">
+            <button @click="mobileMenu = !mobileMenu" class="lg:hidden text-gray-300 hover:text-white" aria-label="Toggle menu">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
 
         <!-- Second row: main navigation (from first & second images) -->
-        <div class="hidden items-center gap-1 border-t border-gray-800 py-3 md:flex">
+        <div class="hidden items-center gap-1 border-t border-gray-800 py-3 lg:flex">
             <a href="{{ url('/') }}" class="mr-4 shrink-0">
                 @if($logoType === 'image' && filled($logoUrl))
                     <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
@@ -256,7 +256,16 @@
         </div>
 
         <!-- Mobile menu (updated with all items) -->
-        <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 md:hidden">
+        <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 lg:hidden">
+            @if($showSearch)
+            <form action="{{ url('/') }}" method="GET" class="px-3 pb-1" @submit="mobileMenu = false">
+                <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2">
+                    <i class="fa-solid fa-magnifying-glass text-gray-500 text-xs shrink-0"></i>
+                    <input type="text" name="location" placeholder="Search escorts by location…" class="min-w-0 flex-1 border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                    <button type="submit" class="shrink-0 text-xs font-semibold text-pink-400 hover:text-pink-300">Go</button>
+                </div>
+            </form>
+            @endif
             <div class="space-y-1 text-sm">
                 <!-- Main nav links -->
                 @foreach($mainNavLinks as $item)
