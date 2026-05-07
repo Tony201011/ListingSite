@@ -56,7 +56,7 @@ class ProfileShowControllerTest extends TestCase
         $response->assertViewIs('frontend.profile-show');
     }
 
-    public function test_profile_show_hides_adjacent_navigation_when_no_other_profiles_exist(): void
+    public function test_profile_show_does_not_display_navigation_when_single_profile_exists(): void
     {
         $this->createApprovedProvider();
 

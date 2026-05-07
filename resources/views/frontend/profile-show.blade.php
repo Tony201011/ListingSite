@@ -64,7 +64,11 @@ $profileTags = array_values(array_unique(array_merge(
 
             $profileUrl = route('profile.show', ['slug' => $profile['slug']]);
             $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . '/profile/' . $profile['slug'];
-            $locationLabel = trim((string) ($profile['suburb'] ?: $profile['city']));
+            $locationLabel = trim((string) (
+                trim((string) ($profile['suburb'] ?? '')) !== ''
+                    ? $profile['suburb']
+                    : ($profile['city'] ?? '')
+            ));
             $hasPrevProfile = !empty($prevProfile['slug']) && !empty($prevProfile['name']);
             $hasNextProfile = !empty($nextProfile['slug']) && !empty($nextProfile['name']);
 
