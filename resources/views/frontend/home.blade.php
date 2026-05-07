@@ -46,9 +46,9 @@
                         </span>
                     </template>
 
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                         {{-- Text input --}}
-                        <div class="relative flex-1">
+                        <div class="relative min-w-0 flex-1">
                             <input
                                 type="text"
                                 :name="searchMode === 'suburb' ? 'location' : 'escort_name'"
@@ -91,12 +91,12 @@
                         </div>
 
                         {{-- Find Escorts button --}}
-                        <button type="submit" class="shrink-0 rounded bg-fuchsia-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-700 active:scale-95">
+                        <button type="submit" class="w-full shrink-0 rounded bg-fuchsia-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-700 active:scale-95 sm:w-auto">
                             Find Escorts
                         </button>
 
                         {{-- Advanced search link --}}
-                        <a href="{{ route('advanced-search') }}" class="shrink-0 text-sm font-medium text-fuchsia-400 transition hover:text-fuchsia-300">
+                        <a href="{{ route('advanced-search') }}" class="w-full shrink-0 text-center text-sm font-medium text-fuchsia-400 transition hover:text-fuchsia-300 sm:w-auto sm:text-left">
                             Advanced search
                         </a>
 
@@ -104,7 +104,7 @@
                         <button
                             type="button"
                             @click="searchMode = searchMode === 'suburb' ? 'username' : 'suburb'; term = ''; closeSuggestions()"
-                            class="shrink-0 rounded bg-gray-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-600"
+                            class="w-full shrink-0 rounded bg-gray-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-600 sm:w-auto"
                             x-text="searchMode === 'suburb' ? 'Search by Name' : 'Search by Location'"
                         ></button>
                     </div>
@@ -130,7 +130,7 @@
                 $popularGirlsQuery = array_merge($currentQuery, ['girls' => 'popular']);
                 $girlsUrl = fn (array $query): string => url('/').'?'.http_build_query($query);
             @endphp
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 <a
                     href="{{ $girlsUrl($newGirlsQuery) }}"
                     class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'new' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
