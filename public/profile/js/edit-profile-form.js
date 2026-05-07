@@ -1,5 +1,6 @@
 // Store Quill instances outside Alpine's reactive proxy to avoid conflicts
 const editorInstances = new Map();
+const IMAGE_LOAD_TIMEOUT_MS = 8000;
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
@@ -107,7 +108,49 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (options.imageUpload) {
-                quill.getModule('toolbar').addHandler('image', () => {
+                quill.getModule('toolbar').addHandler('image', async () => {
+                    const result = await Swal.fire({
+                        title: 'Insert image',
+                        input: 'url',
+                        inputLabel: 'Paste image URL',
+                        inputPlaceholder: 'https://your-image-url.com/photo.jpg',
+                        showCancelButton: true,
+                        showDenyButton: true,
+                        confirmButtonText: 'Insert URL',
+                        denyButtonText: 'Upload from device',
+                        cancelButtonText: 'Cancel',
+                        inputValidator: async (value) => {
+                            const trimmedValue = (value || '').trim();
+
+                            if (trimmedValue === '') {
+                                return 'Please enter an image URL or choose upload.';
+                            }
+
+                            if (!this.isValidImageUrl(trimmedValue)) {
+                                return 'Invalid image URL. Please use a valid http/https URL.';
+                            }
+
+                            const canLoadImage = await this.canLoadImageUrl(trimmedValue);
+                            if (!canLoadImage) {
+                                return 'Unable to load a valid image from this URL.';
+                            }
+
+                            return null;
+                        },
+                    });
+
+                    if (result.isConfirmed) {
+                        const imageUrl = (result.value || '').trim();
+                        const range = quill.getSelection(true);
+                        quill.insertEmbed(range.index, 'image', imageUrl);
+                        quill.setSelection(range.index + 1);
+                        return;
+                    }
+
+                    if (!result.isDenied) {
+                        return;
+                    }
+
                     const input = document.createElement('input');
                     input.setAttribute('type', 'file');
                     input.setAttribute('accept', 'image/jpeg,image/jpg,image/png,image/webp');
@@ -169,6 +212,46 @@ document.addEventListener('alpine:init', () => {
                 if (modelKey === 'profile_text' && this.$refs.profileTextInput) {
                     this.$refs.profileTextInput.value = this[modelKey];
                 }
+            });
+        },
+
+        isValidImageUrl(url) {
+            try {
+                const parsed = new URL(url);
+                return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+            } catch {
+                return false;
+            }
+        },
+
+        canLoadImageUrl(url) {
+            return new Promise((resolve) => {
+                const image = new Image();
+                let timeoutId = null;
+                let settled = false;
+                const finalize = (result) => {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    if (timeoutId !== null) {
+                        window.clearTimeout(timeoutId);
+                    }
+                    image.onload = null;
+                    image.onerror = null;
+                    image.removeAttribute('src');
+                    resolve(result);
+                };
+
+                timeoutId = window.setTimeout(() => finalize(false), IMAGE_LOAD_TIMEOUT_MS);
+                image.onload = () => {
+                    finalize(true);
+                };
+                image.onerror = () => {
+                    finalize(false);
+                };
+
+                image.src = url;
             });
         },
 
