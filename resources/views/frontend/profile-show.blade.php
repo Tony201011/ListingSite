@@ -108,11 +108,52 @@ $profileTags = array_values(array_unique(array_merge(
 
                 <!-- Gallery (left, spans 2 columns) -->
                 <div class="md:col-span-2 flex flex-col gap-6 sm:gap-8 relative order-2 md:order-1">
+                    <!-- Previous Button (left corner) -->
+                    <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
+                        x-data="{ visible: false }"
+                        x-show="visible"
+                        x-transition:enter="transition duration-300"
+                        x-transition:enter-start="opacity-0 scale-90"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition duration-200"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-90"
+                        @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
+                        class="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn md:flex"
+                        style="margin-left: 0.5rem;">
+                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
+                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
+                                <span class="flex items-center"><i class="fa-solid fa-arrow-left text-lg sm:text-xl mr-2"></i> <span class="text-xs font-semibold">PREV</span></span>
+                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate profile-nav-name">{{ $prevProfile['name'] }}</span>
+                            </button>
+                        </div>
+                    </a>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
                             <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-lg sm:rounded-xl w-full h-48 sm:h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
+                    <!-- Next Button (right corner) -->
+                    <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
+                        x-data="{ visible: false }"
+                        x-show="visible"
+                        x-transition:enter="transition duration-300"
+                        x-transition:enter-start="opacity-0 scale-90"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition duration-200"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-90"
+                        @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
+                        class="fixed right-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn md:flex"
+                        style="margin-right: 0.5rem;">
+                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
+                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
+                                <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-lg sm:text-xl ml-2"></i></span>
+                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate profile-nav-name">{{ $nextProfile['name'] }}</span>
+                            </button>
+                        </div>
+                    </a>
                 <!-- Currently Touring Section -->
                 @if(!empty($profile['tours']))
                 <div>
