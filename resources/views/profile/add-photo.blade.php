@@ -56,7 +56,7 @@
         class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-2 sm:items-center sm:p-4"
         @click.self="closeModal()"
     >
-        <div class="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
+        <div class="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
             <div class="flex items-center border-b border-gray-200 px-4 pt-4 sm:px-6">
                 <button
                     type="button"
@@ -171,7 +171,7 @@
                                         type="button"
                                         @click="uploadFiles()"
                                         :disabled="uploading"
-                                        class="flex w-full items-center justify-center gap-1 rounded-full bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:py-1.5"
+                                        class="flex w-full items-center justify-center gap-1 rounded-full bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                                     >
                                         <svg x-show="!uploading" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
