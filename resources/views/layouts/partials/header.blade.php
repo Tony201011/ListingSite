@@ -124,7 +124,7 @@
 
         $showTopBar = $headerWidget?->enable_top_bar ?? true;
         $showSearch = $headerWidget?->enable_search ?? true;
-        $isProfilePage = request()->routeIs('profile.show');
+        $isGirlProfilePage = request()->routeIs('profile.show');
         $showFreeTrialCta = (bool) ($headerWidget?->show_free_trial_cta ?? true);
         $freeTrialCtaText = trim((string) ($headerWidget?->free_trial_cta_text ?? 'Get 21 days for free'));
         $freeTrialCtaUrl = trim((string) ($headerWidget?->free_trial_cta_url ?? url('/signup')));
@@ -157,7 +157,7 @@
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <!-- Main row: logo, search, actions, auth -->
-        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 {{ $isProfilePage ? 'md:hidden' : 'lg:hidden' }}">
+        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 {{ $isGirlProfilePage ? 'md:hidden' : 'lg:hidden' }}">
             <!-- Logo (escortify) -->
             <a href="{{ url('/') }}" class="shrink-0">
                 @if($logoType === 'image' && filled($logoUrl))
@@ -183,7 +183,7 @@
             </form>
 
             <!-- Action links & Auth (from third image) -->
-            <div class="hidden items-center space-x-4 md:flex {{ $isProfilePage ? '' : 'lg:hidden' }}">
+            <div class="hidden items-center space-x-4 md:flex {{ $isGirlProfilePage ? '' : 'lg:hidden' }}">
                 <!-- Action links -->
                 @foreach($actionLinks as $item)
                     <a href="{{ $item['url'] }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">{{ $item['label'] }}</a>
@@ -195,13 +195,13 @@
             </div>
 
             <!-- Mobile menu button (unchanged) -->
-            <button @click="mobileMenu = !mobileMenu" class="{{ $isProfilePage ? 'md:hidden' : 'lg:hidden' }} text-gray-300 hover:text-white" aria-label="Toggle menu">
+            <button @click="mobileMenu = !mobileMenu" class="{{ $isGirlProfilePage ? 'md:hidden' : 'lg:hidden' }} text-gray-300 hover:text-white" aria-label="Toggle menu">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
 
         <!-- Second row: main navigation (from first & second images) -->
-        <div class="hidden items-center gap-1 border-t border-gray-800 py-3 {{ $isProfilePage ? 'md:flex' : 'lg:flex' }}">
+        <div class="hidden items-center gap-1 border-t border-gray-800 py-3 {{ $isGirlProfilePage ? 'md:flex' : 'lg:flex' }}">
             <a href="{{ url('/') }}" class="mr-4 shrink-0">
                 @if($logoType === 'image' && filled($logoUrl))
                     <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
@@ -257,9 +257,9 @@
         </div>
 
         <!-- Mobile menu (updated with all items) -->
-        <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 {{ $isProfilePage ? 'md:hidden' : 'lg:hidden' }}">
-            {{-- Match the original profile page layout from before the responsive header redesign (no mobile menu search block). --}}
-            @if($showSearch && ! $isProfilePage)
+        <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 {{ $isGirlProfilePage ? 'md:hidden' : 'lg:hidden' }}">
+            {{-- Match the original girl profile page layout from before the responsive header redesign (no mobile menu search block). --}}
+            @if($showSearch && ! $isGirlProfilePage)
             <form action="{{ url('/') }}" method="GET" class="px-3 pb-1" @submit="mobileMenu = false">
                 <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2">
                     <i class="fa-solid fa-magnifying-glass text-gray-500 text-xs shrink-0"></i>
