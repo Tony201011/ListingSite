@@ -174,6 +174,26 @@ class ProfileShowControllerTest extends TestCase
         $this->assertSame('jade010-10', $profile['slug']);
     }
 
+    public function test_profile_view_data_contains_provider_user_id_for_booking(): void
+    {
+        $user = $this->createApprovedProvider();
+
+        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+
+        $profile = $response->viewData('profile');
+        $this->assertSame($user->id, $profile['user_id']);
+    }
+
+    public function test_profile_show_renders_booking_form_with_provider_user_id(): void
+    {
+        $user = $this->createApprovedProvider();
+
+        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+
+        $response->assertSee('name="user_id" value="'.$user->id.'"', false);
+        $response->assertSee('Send booking enquiry');
+    }
+
     public function test_profile_view_data_defaults_rate_to_contact_for_rate_when_no_rates(): void
     {
         $this->createApprovedProvider();

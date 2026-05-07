@@ -222,6 +222,7 @@ class GetProfileShowData
 
         return [
             'id' => $providerProfile->id,
+            'user_id' => $providerProfile->user_id,
             'slug' => $providerProfile->slug,
             'name' => $providerProfile->name,
             'age' => $providerProfile->age,

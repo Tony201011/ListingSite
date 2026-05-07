@@ -47,7 +47,7 @@ class BookingEnquiryFlowTest extends TestCase
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'phone' => '0400000000',
-            'datetime' => '2026-04-15 14:00:00',
+            'datetime' => now()->addDay()->setTime(14, 0)->toDateTimeString(),
             'services' => 'Massage',
             'duration' => '60 mins',
             'location' => 'Sydney',
@@ -139,6 +139,18 @@ class BookingEnquiryFlowTest extends TestCase
 
         $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
             'datetime' => '2020-01-01 10:00:00',
+        ]));
+
+        $response->assertRedirect('/booking');
+        $response->assertSessionHasErrors(['datetime']);
+    }
+
+    public function test_booking_enquiry_rejects_recent_past_datetime(): void
+    {
+        $provider = $this->createBookableProvider();
+
+        $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
+            'datetime' => now()->subSeconds(30)->toDateTimeString(),
         ]));
 
         $response->assertRedirect('/booking');
