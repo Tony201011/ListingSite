@@ -113,7 +113,7 @@ document.addEventListener('alpine:init', () => {
                         title: 'Insert image',
                         input: 'url',
                         inputLabel: 'Paste image URL',
-                        inputPlaceholder: 'https://example.com/photo.jpg',
+                        inputPlaceholder: 'https://your-image-url.com/photo.jpg',
                         showCancelButton: true,
                         showDenyButton: true,
                         confirmButtonText: 'Insert URL',
@@ -227,25 +227,27 @@ document.addEventListener('alpine:init', () => {
         canLoadImageUrl(url) {
             return new Promise((resolve) => {
                 const image = new Image();
+                let timeoutId = null;
                 let settled = false;
                 const finalize = (result) => {
                     if (settled) {
                         return;
                     }
                     settled = true;
+                    if (timeoutId !== null) {
+                        window.clearTimeout(timeoutId);
+                    }
                     image.onload = null;
                     image.onerror = null;
-                    image.src = '';
+                    image.removeAttribute('src');
                     resolve(result);
                 };
 
-                const timeout = window.setTimeout(() => finalize(false), IMAGE_LOAD_TIMEOUT_MS);
+                timeoutId = window.setTimeout(() => finalize(false), IMAGE_LOAD_TIMEOUT_MS);
                 image.onload = () => {
-                    window.clearTimeout(timeout);
                     finalize(true);
                 };
                 image.onerror = () => {
-                    window.clearTimeout(timeout);
                     finalize(false);
                 };
 
