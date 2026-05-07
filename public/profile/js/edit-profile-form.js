@@ -118,7 +118,7 @@ document.addEventListener('alpine:init', () => {
                         confirmButtonText: 'Insert URL',
                         denyButtonText: 'Upload from device',
                         cancelButtonText: 'Cancel',
-                        inputValidator: (value) => {
+                        inputValidator: async (value) => {
                             const trimmedValue = (value || '').trim();
 
                             if (trimmedValue === '') {
@@ -129,8 +129,9 @@ document.addEventListener('alpine:init', () => {
                                 return 'Invalid image URL. Please use a valid http/https URL.';
                             }
 
-                            if (!this.hasImageFileExtension(trimmedValue)) {
-                                return 'URL must point to an image file (jpg, jpeg, png, webp).';
+                            const canLoadImage = await this.canLoadImageUrl(trimmedValue);
+                            if (!canLoadImage) {
+                                return 'Unable to load a valid image from this URL.';
                             }
 
                             return null;
@@ -222,14 +223,30 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        hasImageFileExtension(url) {
-            try {
-                const parsed = new URL(url);
-                const pathname = parsed.pathname.toLowerCase();
-                return /\.(jpg|jpeg|png|webp)$/.test(pathname);
-            } catch {
-                return false;
-            }
+        canLoadImageUrl(url) {
+            return new Promise((resolve) => {
+                const image = new Image();
+                let settled = false;
+                const finalize = (result) => {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    resolve(result);
+                };
+
+                const timeout = window.setTimeout(() => finalize(false), 8000);
+                image.onload = () => {
+                    window.clearTimeout(timeout);
+                    finalize(true);
+                };
+                image.onerror = () => {
+                    window.clearTimeout(timeout);
+                    finalize(false);
+                };
+
+                image.src = url;
+            });
         },
 
         syncHiddenEditorInputs() {
