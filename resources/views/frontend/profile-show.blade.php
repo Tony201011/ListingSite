@@ -110,7 +110,16 @@ $profileTags = array_values(array_unique(array_merge(
                 <div class="md:col-span-2 flex flex-col gap-6 sm:gap-8 relative order-2 md:order-1">
                     <!-- Previous Button (left corner) -->
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
-                        x-data="{ visible: false }"
+                        x-data="{
+                            visible: false,
+                            init() {
+                                this.checkVisibility();
+                                window.addEventListener('scroll', () => this.checkVisibility(), { passive: true });
+                            },
+                            checkVisibility() {
+                                this.visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight;
+                            }
+                        }"
                         x-show="visible"
                         x-transition:enter="transition duration-300"
                         x-transition:enter-start="opacity-0 scale-90"
@@ -118,7 +127,6 @@ $profileTags = array_values(array_unique(array_merge(
                         x-transition:leave="transition duration-200"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-90"
-                        @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
                         class="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn md:flex"
                         style="margin-left: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
@@ -136,7 +144,16 @@ $profileTags = array_values(array_unique(array_merge(
                     </div>
                     <!-- Next Button (right corner) -->
                     <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
-                        x-data="{ visible: false }"
+                        x-data="{
+                            visible: false,
+                            init() {
+                                this.checkVisibility();
+                                window.addEventListener('scroll', () => this.checkVisibility(), { passive: true });
+                            },
+                            checkVisibility() {
+                                this.visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight;
+                            }
+                        }"
                         x-show="visible"
                         x-transition:enter="transition duration-300"
                         x-transition:enter-start="opacity-0 scale-90"
@@ -144,7 +161,6 @@ $profileTags = array_values(array_unique(array_merge(
                         x-transition:leave="transition duration-200"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-90"
-                        @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
                         class="fixed right-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn md:flex"
                         style="margin-right: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
