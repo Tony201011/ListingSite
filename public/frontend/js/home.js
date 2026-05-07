@@ -188,7 +188,7 @@ function favouriteBookmark(config) {
         favourites: Array.isArray(config.favourites) ? config.favourites.map(String) : [],
         bookmarks: Array.isArray(config.bookmarks) ? config.bookmarks.map(String) : [],
 
-        normalise(slug) {
+        normalize(slug) {
             return String(slug || '').trim();
         },
 
@@ -216,6 +216,7 @@ function favouriteBookmark(config) {
                 const data = await response.json();
 
                 if (typeof data.active !== 'boolean') {
+                    console.warn('Unexpected favourite/bookmark toggle response payload:', data);
                     return null;
                 }
 
@@ -226,17 +227,17 @@ function favouriteBookmark(config) {
         },
 
         isFavourite(slug) {
-            slug = this.normalise(slug);
+            slug = this.normalize(slug);
             return this.favourites.includes(slug);
         },
 
         isBookmark(slug) {
-            slug = this.normalise(slug);
+            slug = this.normalize(slug);
             return this.bookmarks.includes(slug);
         },
 
         async toggleFavourite(slug) {
-            slug = this.normalise(slug);
+            slug = this.normalize(slug);
             if (!slug) return;
 
             const active = await this.requestToggle('/favourite/' + encodeURIComponent(slug));
@@ -250,7 +251,7 @@ function favouriteBookmark(config) {
         },
 
         async toggleBookmark(slug) {
-            slug = this.normalise(slug);
+            slug = this.normalize(slug);
             if (!slug) return;
 
             const active = await this.requestToggle('/bookmark/' + encodeURIComponent(slug));
