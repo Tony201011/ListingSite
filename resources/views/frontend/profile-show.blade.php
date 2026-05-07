@@ -106,7 +106,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     @endif
                     @if(!empty($introTagline))
-                    <div class="mt-2 sm:mt-3 text-base sm:text-lg text-gray-700 font-medium px-2 truncate md:whitespace-normal md:overflow-visible md:[text-overflow:clip]">{{ $introTagline }}</div>
+                    <div class="mt-2 px-2 text-base font-medium text-gray-700 break-words sm:mt-3 sm:text-lg">{{ $introTagline }}</div>
                     @endif
                 </div>
 
@@ -489,7 +489,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     </div>
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
-                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-4 border border-gray-100">
+                     <div class="border border-gray-100 bg-white p-4 shadow sm:rounded-2xl sm:p-4 rounded-lg">
                         <h3 class="mb-2 text-base sm:text-lg font-bold text-pink-600 flex items-center gap-2">
                             <i class="fa-solid fa-user-gear text-pink-500 flex-shrink-0"></i> <span>My profile</span>
                         </h3>
@@ -622,7 +622,7 @@ $profileTags = array_values(array_unique(array_merge(
                     @endphp
                     @if(!empty($nonEmptyAvailability))
                     <!-- My Availability Section -->
-                     <div class="mt-4 border border-gray-100 bg-white p-4 shadow sm:mt-6 sm:rounded-2xl sm:p-4">
+                     <div class="mt-4 rounded-lg border border-gray-100 bg-white p-4 shadow sm:mt-6 sm:rounded-2xl sm:p-4">
                         <h3 class="mb-2 text-base sm:text-lg font-bold flex items-center gap-2 text-pink-600">
                             <i class="fa-regular fa-calendar-days text-pink-600 flex-shrink-0"></i> <span>My availability</span>
                         </h3>
