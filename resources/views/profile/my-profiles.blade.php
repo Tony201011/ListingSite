@@ -55,8 +55,8 @@
                                     csrfToken: @js(csrf_token())
                                 })"
                             >
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
+                                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div class="flex min-w-0 items-center gap-3">
                                         {{-- Profile avatar --}}
                                         <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-gray-200">
                                             @if($profile->primaryProfileImage?->thumbnail_url)
@@ -71,9 +71,9 @@
                                                 </div>
                                             @endif
                                         </div>
-                                        <div>
+                                        <div class="min-w-0">
                                             <div class="flex items-center gap-2">
-                                                <p class="font-semibold text-gray-900">{{ $profile->name }}</p>
+                                                <p class="truncate font-semibold text-gray-900">{{ $profile->name }}</p>
                                                 {{-- Online indicator dot (only meaningful when profile is approved) --}}
                                                 @if($profile->profile_status === 'approved')
                                                     <span
@@ -85,7 +85,7 @@
                                                     ></span>
                                                 @endif
                                             </div>
-                                            <p class="text-xs text-gray-500">/{{ $profile->slug }}</p>
+                                            <p class="truncate text-xs text-gray-500">/{{ $profile->slug }}</p>
                                             <div class="mt-1 flex flex-wrap items-center gap-1.5">
                                                 <span
                                                     class="inline-block rounded-full px-2 py-0.5 text-xs font-medium
@@ -113,15 +113,15 @@
                                         </div>
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex w-full flex-wrap items-stretch gap-2 sm:w-auto sm:items-center sm:justify-end">
                                         {{-- Online Now toggle (only available for approved profiles) --}}
                                         @if($profile->profile_status === 'approved')
-                                            <div class="flex flex-col items-end gap-1">
+                                            <div class="flex min-w-[8.5rem] flex-col items-start gap-1 sm:items-end">
                                                 <button
                                                     type="button"
                                                     @click="toggleOnline"
                                                     :disabled="loading || (!online && remainingUses <= 0)"
-                                                    class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+                                                    class="w-full rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition sm:w-auto"
                                                     :class="online
                                                         ? 'bg-green-600 text-white hover:bg-green-700'
                                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50'"
@@ -140,22 +140,22 @@
                                         @endif
 
                                         {{-- Edit button --}}
-                                        <form method="POST" action="{{ route('profiles.switch-edit', $profile) }}">
+                                        <form method="POST" action="{{ route('profiles.switch-edit', $profile) }}" class="w-full sm:w-auto">
                                             @csrf
                                             <button
                                                 type="submit"
-                                                class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-pink-300 hover:text-pink-700 hover:bg-pink-50"
+                                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-center text-sm font-medium text-gray-700 transition hover:border-pink-300 hover:bg-pink-50 hover:text-pink-700 sm:w-auto"
                                             >
                                                 Edit
                                             </button>
                                         </form>
 
                                         @if((int)$activeProfileId !== $profile->id)
-                                            <form method="POST" action="{{ route('profiles.switch', $profile) }}">
+                                            <form method="POST" action="{{ route('profiles.switch', $profile) }}" class="w-full sm:w-auto">
                                                 @csrf
                                                 <button
                                                     type="submit"
-                                                    class="rounded-lg bg-pink-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-pink-700"
+                                                    class="w-full rounded-lg bg-pink-600 px-3 py-1.5 text-center text-sm font-medium text-white transition hover:bg-pink-700 sm:w-auto"
                                                 >
                                                     Switch
                                                 </button>
@@ -168,12 +168,13 @@
                                                 action="{{ route('profiles.destroy', $profile) }}"
                                                 x-data
                                                 @submit.prevent="if (confirm('Delete this profile? This cannot be undone.')) $el.submit()"
+                                                class="w-full sm:w-auto"
                                             >
                                                 @csrf
                                                 @method('DELETE')
                                                 <button
                                                     type="submit"
-                                                    class="rounded-lg bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
+                                                    class="w-full rounded-lg bg-rose-50 px-3 py-1.5 text-center text-sm font-medium text-rose-700 transition hover:bg-rose-100 sm:w-auto"
                                                     aria-label="Delete profile {{ $profile->name }}"
                                                 >
                                                     Delete
@@ -219,7 +220,7 @@
                 <button
                     type="button"
                     @click="showCreateModal = true; createName = ''; createPhone = ''; createErrors = []"
-                    class="inline-flex items-center justify-center rounded-full border border-transparent bg-pink-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
+                    class="inline-flex w-full items-center justify-center rounded-full border border-transparent bg-pink-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
                 >
                     + Create New Profile
                 </button>
@@ -297,17 +298,17 @@
                             <p class="mt-1 text-xs text-gray-500">You can set or change this later.</p>
                         </div>
 
-                        <div class="flex items-center justify-end gap-3 pt-2">
+                        <div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
                             <button
                                 type="button"
                                 @click="showCreateModal = false"
-                                class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                                class="w-full rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:w-auto"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                class="rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-pink-700"
+                                class="w-full rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto"
                             >
                                 Create Profile
                             </button>
