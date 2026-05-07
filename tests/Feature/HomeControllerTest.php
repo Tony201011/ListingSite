@@ -241,9 +241,12 @@ class HomeControllerTest extends TestCase
         $popularUser = $this->createApprovedProvider(['name' => 'Popular Escort', 'slug' => 'popular-escort']);
         $lessPopularUser = $this->createApprovedProvider(['name' => 'Less Popular Escort', 'slug' => 'less-popular-escort']);
 
-        ProfileView::query()->create(['user_id' => $popularUser->id, 'viewer_ip' => '1.1.1.1']);
-        ProfileView::query()->create(['user_id' => $popularUser->id, 'viewer_ip' => '1.1.1.2']);
-        ProfileView::query()->create(['user_id' => $lessPopularUser->id, 'viewer_ip' => '1.1.1.3']);
+        $popularProfile = ProviderProfile::query()->where('user_id', $popularUser->id)->firstOrFail();
+        $lessPopularProfile = ProviderProfile::query()->where('user_id', $lessPopularUser->id)->firstOrFail();
+
+        ProfileView::query()->create(['user_id' => $popularUser->id, 'provider_profile_id' => $popularProfile->id, 'viewer_ip' => '1.1.1.1']);
+        ProfileView::query()->create(['user_id' => $popularUser->id, 'provider_profile_id' => $popularProfile->id, 'viewer_ip' => '1.1.1.2']);
+        ProfileView::query()->create(['user_id' => $lessPopularUser->id, 'provider_profile_id' => $lessPopularProfile->id, 'viewer_ip' => '1.1.1.3']);
 
         $response = $this->get('/?girls=popular');
 
