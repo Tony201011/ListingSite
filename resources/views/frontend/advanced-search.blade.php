@@ -30,6 +30,7 @@
 
         <div class="lg:flex lg:items-start lg:gap-6">
 
+        {{-- On large screens: sticky sidebar with top offset matching the sticky header height (~96px) --}}
         <div class="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 lg:w-72 lg:shrink-0 lg:sticky lg:top-24 lg:self-start">
             <p class="mb-4 text-xs sm:text-sm text-gray-500">Use filters below to find matching profiles.</p>
 
