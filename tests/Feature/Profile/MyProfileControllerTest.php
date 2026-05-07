@@ -283,4 +283,162 @@ class MyProfileControllerTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    /**
+     * Helper to create a named category used for select-by-name fields
+     * (availability, contact-method, phone-contact-preferences, time-waster-shield).
+     * Creates the parent category if it does not exist, then creates a child with the given name.
+     */
+    private function createCategoryByName(string $parentSlug, string $childName): void
+    {
+        $parent = Category::query()->firstOrCreate(
+            ['slug' => $parentSlug, 'website_type' => 'adult'],
+            ['name' => $parentSlug, 'is_active' => true]
+        );
+
+        Category::query()->firstOrCreate(
+            ['parent_id' => $parent->id, 'name' => $childName, 'website_type' => 'adult'],
+            ['slug' => $parentSlug.'-'.str_replace(' ', '-', strtolower($childName)), 'is_active' => true]
+        );
+    }
+
+    /**
+     * Build a valid full profile payload for SaveMyProfile integration tests.
+     */
+    private function buildValidProfilePayload(array $overrides = []): array
+    {
+        $ageGroupId = $this->createCategoryForType('age-group');
+        $hairColorId = $this->createCategoryForType('hair-color');
+        $hairLengthId = $this->createCategoryForType('hair-length');
+        $ethnicityId = $this->createCategoryForType('ethnicity');
+        $bodyTypeId = $this->createCategoryForType('body-type');
+        $bustSizeId = $this->createCategoryForType('bust-size');
+        $yourLengthId = $this->createCategoryForType('your-length');
+
+        $this->createCategoryByName('primary-identity', 'Identity A');
+        $this->createCategoryByName('attributes', 'Attr A');
+        $this->createCategoryByName('services-style', 'Style A');
+        $this->createCategoryByName('services-you-provide', 'Service A');
+        $this->createCategoryByName('availability', 'Weekdays');
+        $this->createCategoryByName('contact-method', 'Phone');
+        $this->createCategoryByName('phone-contact-preferences', 'Call');
+        $this->createCategoryByName('time-waster-shield', 'Basic');
+
+        return array_merge([
+            'name' => 'Jenny',
+            'suburb' => 'Sydney',
+            'introduction_line' => 'Hello there',
+            'profile_text' => 'My profile text',
+            'age_group' => $ageGroupId,
+            'hair_color' => $hairColorId,
+            'hair_length' => $hairLengthId,
+            'ethnicity' => $ethnicityId,
+            'body_type' => $bodyTypeId,
+            'bust_size' => $bustSizeId,
+            'your_length' => $yourLengthId,
+            'availability' => 'Weekdays',
+            'contact_method' => 'Phone',
+            'phone_contact' => 'Call',
+            'time_waster' => 'Basic',
+            'primary_identity' => ['Identity A'],
+            'attributes' => ['Attr A'],
+            'services_style' => ['Style A'],
+            'services_provided' => ['Service A'],
+        ], $overrides);
+    }
+
+    public function test_save_syncs_mobile_to_users_table_when_phone_provided(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'mobile' => '0400000000',
+            'mobile_verified' => true,
+        ]);
+
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'provider-'.$user->id,
+        ]);
+
+        $payload = $this->buildValidProfilePayload(['phone' => '0499999999']);
+
+        $response = $this->actingAsProvider($user)->postJson(route('edit-profile.save'), $payload);
+
+        $response->assertOk();
+
+        $user->refresh();
+        $this->assertSame('0499999999', $user->mobile);
+        $this->assertFalse($user->mobile_verified);
+    }
+
+    public function test_save_resets_mobile_verified_when_mobile_changes(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'mobile' => '0400000000',
+            'mobile_verified' => true,
+        ]);
+
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'provider-'.$user->id,
+        ]);
+
+        $payload = $this->buildValidProfilePayload(['phone' => '0411111111']);
+
+        $this->actingAsProvider($user)->postJson(route('edit-profile.save'), $payload);
+
+        $user->refresh();
+        $this->assertFalse($user->mobile_verified, 'mobile_verified should be reset when mobile changes');
+    }
+
+    public function test_save_preserves_mobile_verified_when_mobile_unchanged(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'mobile' => '0400000000',
+            'mobile_verified' => true,
+        ]);
+
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'provider-'.$user->id,
+        ]);
+
+        // Submit with the same phone number as the existing mobile
+        $payload = $this->buildValidProfilePayload(['phone' => '0400000000']);
+
+        $this->actingAsProvider($user)->postJson(route('edit-profile.save'), $payload);
+
+        $user->refresh();
+        $this->assertTrue($user->mobile_verified, 'mobile_verified should stay true when mobile is unchanged');
+    }
+
+    public function test_save_does_not_update_mobile_when_phone_not_provided(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'mobile' => '0400000000',
+            'mobile_verified' => true,
+        ]);
+
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'provider-'.$user->id,
+        ]);
+
+        // No phone field in payload
+        $payload = $this->buildValidProfilePayload();
+        unset($payload['phone']);
+
+        $this->actingAsProvider($user)->postJson(route('edit-profile.save'), $payload);
+
+        $user->refresh();
+        $this->assertSame('0400000000', $user->mobile);
+        $this->assertTrue($user->mobile_verified);
+    }
 }

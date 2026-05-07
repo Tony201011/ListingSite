@@ -1,4 +1,4 @@
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .mobile-nav-btn-wrapper {
     position: fixed !important;
     bottom: 1.5rem !important;
@@ -15,16 +15,23 @@
   }
 
   .mobile-prev-btn {
-    left: 0.75rem !important;
+    right: calc(50% + 0.25rem) !important;
+    left: unset !important;
   }
 
   .mobile-next-btn {
-    right: 0.75rem !important;
+    left: calc(50% + 0.25rem) !important;
+    right: unset !important;
+  }
+
+  /* Move the scroll-to-top button above the profile nav buttons so they don't overlap */
+  #smooth-scroll-top {
+    bottom: 6.5rem;
   }
 }
 
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .mobile-transparent-nav-btn {
     background-color: rgba(225, 58, 139, 0.85) !important;
     backdrop-filter: blur(4px);
@@ -38,8 +45,10 @@
     text-shadow: 0 1px 4px rgba(0,0,0,0.4);
   }
 
-  /* Bottom padding so fixed nav buttons (approx 4rem height + 1.5rem bottom offset) don't overlap page content */
+  /* Bottom padding: nav buttons at 1.5rem + ~4rem height = ~5.5rem from bottom;
+     scroll-to-top moved to 6.5rem + 2.75rem height = ~9.25rem. Use 10rem so
+     no content is hidden behind either fixed element. */
   .profile-page-content {
-    padding-bottom: 6rem;
+    padding-bottom: 10rem;
   }
 }

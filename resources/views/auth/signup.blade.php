@@ -299,7 +299,7 @@
                         @input="touched.mobile = true; validateMobile()"
                         placeholder="Australian mobile (e.g. 04XXXXXXXX)"
                         autocomplete="off"
-                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
+                        class="flex-1 min-w-0 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
                 </div>
 
