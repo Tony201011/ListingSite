@@ -51,7 +51,7 @@
                 <form @submit.prevent="verifyOTP">
 
                     <!-- OTP INPUTS -->
-                    <div class="flex justify-center gap-2 mb-6">
+                    <div class="flex justify-center gap-1.5 sm:gap-2 mb-6">
                         <template x-for="(digit, index) in otpDigits" :key="index">
                             <input
                                 type="text"
@@ -63,7 +63,7 @@
                                 @keydown.arrow-left.prevent="focusInput(index - 1)"
                                 @keydown.arrow-right.prevent="focusInput(index + 1)"
                                 @paste="handlePaste($event)"
-                                class="otp-input w-14 h-14 text-center text-2xl font-extrabold text-gray-800 bg-white border-2 border-gray-400 rounded-xl focus:border-[#e04ecb] focus:outline-none"
+                                class="otp-input w-10 h-10 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-extrabold text-gray-800 bg-white border-2 border-gray-400 rounded-xl focus:border-[#e04ecb] focus:outline-none"
                             >
                         </template>
                     </div>

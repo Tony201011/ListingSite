@@ -147,7 +147,7 @@
                     </div>
 
                     <div class="mt-2">
-                        <div class="flex items-center justify-between text-xs mb-1">
+                        <div class="flex flex-wrap items-center justify-between text-xs mb-1 gap-y-0.5">
                             <span class="text-gray-500">Use 8+ characters with uppercase, lowercase, number and symbol</span>
                             <span
                                 class="font-semibold"
