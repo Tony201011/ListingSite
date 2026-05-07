@@ -26,15 +26,19 @@
             <span class="text-gray-700">Advanced Search / Filter</span>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
-            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Advanced Search / Filter</h1>
-            <p class="mt-1 text-xs sm:text-sm text-gray-500">Use filters below to find matching profiles.</p>
+        <h1 class="mb-4 text-2xl sm:text-3xl font-bold text-gray-900">Advanced Search / Filter</h1>
+
+        <div class="lg:flex lg:items-start lg:gap-6">
+
+        {{-- On large screens: sticky sidebar with top offset matching the sticky header height (~96px) --}}
+        <div class="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 lg:w-72 lg:shrink-0 lg:sticky lg:top-24 lg:self-start">
+            <p class="mb-4 text-xs sm:text-sm text-gray-500">Use filters below to find matching profiles.</p>
 
             @php
                 $selectedCategoryIds = collect($selectedCategoryIds ?? [])->map(fn ($id) => (string) $id)->values();
             @endphp
 
-            <form method="GET" action="{{ route('advanced-search') }}" class="mt-6 space-y-4 text-sm text-gray-600" x-data="{
+            <form method="GET" action="{{ route('advanced-search') }}" class="space-y-4 text-sm text-gray-600" x-data="{
                 minAge: {{ (int) ($minAge ?? 18) }},
                 maxAge: {{ (int) ($maxAge ?? 60) }},
                 ageMinLimit: 18,
@@ -570,7 +574,7 @@
             </form>
         </div>
 
-                <div class="mt-6"
+                <div class="mt-6 lg:mt-0 min-w-0 flex-1"
             x-data="favouriteBookmark({
                 viewMode: 'grid',
                 favourites: {{ Js::from($userFavourites ?? []) }},
@@ -756,6 +760,7 @@
                     {{ $profiles->links() }}
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </div>
