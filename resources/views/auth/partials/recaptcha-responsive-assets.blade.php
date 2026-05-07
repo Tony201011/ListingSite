@@ -17,14 +17,14 @@
             const resizeRecaptcha = () => {
                 document.querySelectorAll('[data-recaptcha-container]').forEach((container) => {
                     const widget = container.querySelector('.g-recaptcha');
-                    const hostWidth = container.parentElement?.clientWidth ?? BASE_WIDTH;
+                    const hostWidth = container.parentElement?.clientWidth ?? container.clientWidth;
                     const availableWidth = Math.min(hostWidth, BASE_WIDTH);
-                    const scale = availableWidth / BASE_WIDTH;
 
-                    if (!widget || scale <= 0) {
+                    if (!widget || availableWidth <= 0) {
                         return;
                     }
 
+                    const scale = availableWidth / BASE_WIDTH;
                     container.style.width = `${availableWidth}px`;
                     container.style.height = `${Math.ceil(BASE_HEIGHT * scale)}px`;
                     widget.style.transform = `scale(${scale})`;
