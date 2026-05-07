@@ -114,7 +114,7 @@ $profileTags = array_values(array_unique(array_merge(
 
 
                 <!-- Gallery (left, spans 2 columns) -->
-                <div class="relative order-2 flex min-w-0 flex-col gap-6 md:col-span-2 md:order-1 sm:gap-8">
+                <div class="relative order-2 flex min-w-0 flex-col gap-6 sm:gap-8 md:col-span-2 md:order-1">
                     <!-- Previous Button (left corner) -->
                     @if($hasPrevProfile)
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
@@ -345,7 +345,7 @@ $profileTags = array_values(array_unique(array_merge(
                 </div>
                 </div>
                 <!-- Info/Sidebar (right) -->
-                <div class="order-1 flex min-w-0 flex-col gap-4 md:order-2 sm:gap-6">
+                <div class="order-1 flex min-w-0 flex-col gap-4 sm:gap-6 md:order-2">
                     <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100 mb-0 sm:mb-6">
                         <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2">
                             <span class="font-bold text-base sm:text-lg text-black">Info</span>
@@ -489,7 +489,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     </div>
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
-                     <div class="border border-gray-100 bg-white p-4 shadow sm:rounded-2xl sm:p-4 rounded-lg">
+                     <div class="rounded-lg border border-gray-100 bg-white p-4 shadow sm:rounded-2xl sm:p-4">
                         <h3 class="mb-2 text-base sm:text-lg font-bold text-pink-600 flex items-center gap-2">
                             <i class="fa-solid fa-user-gear text-pink-500 flex-shrink-0"></i> <span>My profile</span>
                         </h3>
