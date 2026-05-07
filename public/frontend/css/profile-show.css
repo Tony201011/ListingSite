@@ -53,11 +53,27 @@ html {
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     }
 
-    /* Bottom padding: nav buttons at 1.5rem + ~4rem height = ~5.5rem from bottom;
-       scroll-to-top moved to 6.5rem + 2.75rem height = ~9.25rem. Use 10rem so
-       no content is hidden behind either fixed element. */
+    .mobile-transparent-nav-btn {
+        min-width: 84px;
+        min-height: 52px;
+        padding: 0.5rem 0.625rem;
+    }
+
+    /* Bottom padding keeps content clear of fixed nav buttons and the
+       scroll-to-top button. Use 10rem so no content is hidden behind either element. */
     .profile-page-content {
         padding-bottom: 10rem;
+    }
+}
+
+.profile-nav-name {
+    max-width: 92px;
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .profile-nav-name {
+        max-width: 128px;
     }
 }
 

@@ -99,7 +99,7 @@ $profileTags = array_values(array_unique(array_merge(
                         </div>
                     @endif
                     @if(!empty($introTagline))
-                    <div class="mt-2 sm:mt-3 text-base sm:text-lg text-gray-700 font-medium px-2 truncate sm:truncate md:truncate-none">{{ $introTagline }}</div>
+                    <div class="mt-2 sm:mt-3 text-base sm:text-lg text-gray-700 font-medium px-2 truncate md:whitespace-normal md:overflow-visible md:[text-overflow:clip]">{{ $introTagline }}</div>
                     @endif
                 </div>
 
@@ -124,7 +124,7 @@ $profileTags = array_values(array_unique(array_merge(
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
                             <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
                                 <span class="flex items-center"><i class="fa-solid fa-arrow-left text-lg sm:text-xl mr-2"></i> <span class="text-xs font-semibold">PREV</span></span>
-                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate">{{ $prevProfile['name'] }}</span>
+                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate profile-nav-name">{{ $prevProfile['name'] }}</span>
                             </button>
                         </div>
                     </a>
@@ -150,7 +150,7 @@ $profileTags = array_values(array_unique(array_merge(
                             <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
                                 <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
                                     <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-lg sm:text-xl ml-2"></i></span>
-                                    <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate">{{ $nextProfile['name'] }}</span>
+                                    <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate profile-nav-name">{{ $nextProfile['name'] }}</span>
                                 </button>
                             </div>
                         </a>
