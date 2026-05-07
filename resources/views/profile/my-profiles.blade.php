@@ -113,7 +113,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="flex w-full flex-wrap items-stretch gap-2 sm:w-auto sm:items-center sm:justify-end">
+                                    <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
                                         {{-- Online Now toggle (only available for approved profiles) --}}
                                         @if($profile->profile_status === 'approved')
                                             <div class="flex flex-col items-start gap-1 sm:items-end">
@@ -298,7 +298,7 @@
                             <p class="mt-1 text-xs text-gray-500">You can set or change this later.</p>
                         </div>
 
-                        <div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
+                        <div class="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
                             <button
                                 type="button"
                                 @click="showCreateModal = false"
