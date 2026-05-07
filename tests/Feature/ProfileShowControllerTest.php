@@ -56,6 +56,17 @@ class ProfileShowControllerTest extends TestCase
         $response->assertViewIs('frontend.profile-show');
     }
 
+    public function test_profile_show_does_not_display_navigation_when_single_profile_exists(): void
+    {
+        $this->createApprovedProvider();
+
+        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+
+        $response->assertStatus(200);
+        $response->assertDontSee('PREV');
+        $response->assertDontSee('NEXT');
+    }
+
     public function test_profile_show_passes_required_view_data_keys(): void
     {
         $this->createApprovedProvider();
