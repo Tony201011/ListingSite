@@ -158,7 +158,7 @@
                         <label class="block font-semibold text-[#e04ecb] mb-1">Mobile number <span class="text-gray-400 font-normal">(optional)</span></label>
                         <input
                             name="phone"
-                            type="text"
+                            type="tel"
                             x-model="phone"
                             class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
                             placeholder="e.g. 0400 000 000"
