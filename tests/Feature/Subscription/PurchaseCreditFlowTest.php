@@ -110,6 +110,19 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertViewHas('currentBalance', 42);
     }
 
+    public function test_purchase_credit_page_shows_day_based_pricing_message(): void
+    {
+        $user = $this->createProvider();
+        $this->createActivePackage();
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSeeText('One credit for every day your profile is online.');
+        $response->assertSeeText('basic, pro and premium packages');
+        $response->assertSeeText('2 x daily Available NOW (2 x 2 hours)');
+    }
+
     // ---------------------------------------------------------------
     // Checkout validation
     // ---------------------------------------------------------------
@@ -500,6 +513,8 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('subscription.payment-subscription');
         $response->assertViewHas('packages', fn ($p) => $p->count() === 1);
+        $response->assertSeeText('Simple and fair credits pricing for all profiles.');
+        $response->assertSeeText('Buy credits');
     }
 
     // ---------------------------------------------------------------

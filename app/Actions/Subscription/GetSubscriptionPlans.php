@@ -3,11 +3,17 @@
 namespace App\Actions\Subscription;
 
 use App\Models\CreditPackage;
+use App\Models\PricingPage;
 
 class GetSubscriptionPlans
 {
     public function execute(): array
     {
+        $pricingPage = PricingPage::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+
         $packages = CreditPackage::query()
             ->where('status', 'active')
             ->orderBy('sort_order')
@@ -16,6 +22,7 @@ class GetSubscriptionPlans
 
         return [
             'packages' => $packages,
+            'pricingPage' => $pricingPage,
         ];
     }
 }

@@ -19,10 +19,14 @@
     <div class="mx-auto w-full max-w-5xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="m-0 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">Purchase Credits</h1>
-                <p class="mt-2 text-sm text-gray-600">Choose a credit package and continue to checkout.</p>
+                <h1 class="m-0 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">Buy Credits</h1>
+                <p class="mt-2 text-sm text-gray-600">One credit for every day your profile is online.</p>
             </div>
             <a href="{{ route('my-profile') }}" class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
+        </div>
+
+        <div class="mb-5">
+            @include('subscription.partials.pricing-benefits', ['pricingPage' => $pricingPage ?? null])
         </div>
 
         <div class="mb-5 rounded-2xl border border-pink-100 bg-pink-50 p-4 text-sm text-gray-700 shadow-sm">
@@ -66,12 +70,14 @@
                                         class="h-4 w-4 border-gray-300 text-[#e04ecb] focus:ring-pink-200"
                                         @change="selectedPackageId = {{ $package->id }}"
                                         {{ $package->id === $selectedPackageId ? 'checked' : '' }}
-                                    >
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-900">{{ $package->name }}</p>
-                                        <p class="text-xs text-gray-700">{{ $package->credits }} credits &mdash; AUD ${{ number_format($package->price, 2) }} (incl. GST)</p>
+                                     >
+                                     <div>
+                                        <p class="text-sm font-semibold text-gray-900">{{ $package->credits }} credits</p>
+                                        <p class="text-xs text-gray-700">Up to {{ $package->credits }} days online &mdash; AUD ${{ number_format($package->price, 2) }} (incl. GST)</p>
                                         @if($package->description)
                                             <p class="text-xs text-gray-500">{{ $package->description }}</p>
+                                        @elseif($package->name)
+                                            <p class="text-xs text-gray-500">{{ $package->name }}</p>
                                         @endif
                                     </div>
                                 </div>
@@ -105,9 +111,10 @@
                             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Selected package</p>
                             <template x-if="selected">
                                 <div>
-                                    <p class="mt-2 text-xl font-bold text-gray-900" x-text="selected.name"></p>
-                                    <p class="mt-1 text-sm text-gray-700" x-text="selected.credits + ' credits'"></p>
+                                    <p class="mt-2 text-xl font-bold text-gray-900" x-text="selected.credits + ' credits'"></p>
+                                    <p class="mt-1 text-sm text-gray-700" x-text="'Up to ' + selected.credits + ' days online'"></p>
                                     <p class="mt-0.5 text-sm font-semibold text-gray-900" x-text="'AUD $' + selected.price"></p>
+                                    <p class="mt-1 text-xs text-gray-500" x-text="selected.name"></p>
                                 </div>
                             </template>
                             <p class="mt-1 text-xs text-gray-500">Final payment is shown at checkout.</p>
