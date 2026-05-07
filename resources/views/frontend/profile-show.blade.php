@@ -14,7 +14,7 @@ $profileTags = array_values(array_unique(array_merge(
 @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
+<div class="min-h-screen overflow-x-hidden bg-gray-50 text-gray-800 profile-page-content"
     x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
     x-init="init()"
 >
@@ -110,11 +110,11 @@ $profileTags = array_values(array_unique(array_merge(
                     @endif
                 </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-start">
+            <div class="grid grid-cols-1 items-start gap-4 sm:gap-6 md:grid-cols-3">
 
 
                 <!-- Gallery (left, spans 2 columns) -->
-                <div class="md:col-span-2 flex flex-col gap-6 sm:gap-8 relative order-2 md:order-1">
+                <div class="relative order-2 flex min-w-0 flex-col gap-6 md:col-span-2 md:order-1 sm:gap-8">
                     <!-- Previous Button (left corner) -->
                     @if($hasPrevProfile)
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
@@ -345,7 +345,7 @@ $profileTags = array_values(array_unique(array_merge(
                 </div>
                 </div>
                 <!-- Info/Sidebar (right) -->
-                <div class="flex flex-col gap-4 sm:gap-6 order-1 md:order-2">
+                <div class="order-1 flex min-w-0 flex-col gap-4 md:order-2 sm:gap-6">
                     <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100 mb-0 sm:mb-6">
                         <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2">
                             <span class="font-bold text-base sm:text-lg text-black">Info</span>
@@ -590,7 +590,7 @@ $profileTags = array_values(array_unique(array_merge(
                             <i class="fa-regular fa-clock text-pink-600 flex-shrink-0"></i> <span>Rates</span>
                         </h3>
                         <hr class="mb-3">
-                        <div class="overflow-x-auto rounded-lg -mx-4 sm:-mx-4 sm:mx-0">
+                         <div class="max-w-full overflow-x-auto rounded-lg">
                             <table class="min-w-full w-full text-xs sm:text-sm">
                                 <thead>
                                     <tr>
@@ -622,12 +622,12 @@ $profileTags = array_values(array_unique(array_merge(
                     @endphp
                     @if(!empty($nonEmptyAvailability))
                     <!-- My Availability Section -->
-                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-4 border border-gray-100 mt-4 sm:mt-6">
+                     <div class="mt-4 border border-gray-100 bg-white p-4 shadow sm:mt-6 sm:rounded-2xl sm:p-4">
                         <h3 class="mb-2 text-base sm:text-lg font-bold flex items-center gap-2 text-pink-600">
                             <i class="fa-regular fa-calendar-days text-pink-600 flex-shrink-0"></i> <span>My availability</span>
                         </h3>
                         <hr class="mb-3">
-                        <div class="overflow-x-auto rounded-lg -mx-4 sm:-mx-4 sm:mx-0">
+                         <div class="max-w-full overflow-x-auto rounded-lg">
                             <table class="min-w-full w-full text-xs sm:text-sm">
                                 <thead>
                                     <tr>
@@ -900,34 +900,6 @@ $profileTags = array_values(array_unique(array_merge(
 
         {{-- Ad: Profile Bottom --}}
         @include('layouts.partials.ads', ['position' => 'profile_bottom', 'pageKey' => 'profile'])
-
-        <!-- Scroll to Top Button -->
-        <button
-            id="scroll-to-top"
-            x-data="{
-                visible: false,
-                init() {
-                    this.checkVisibility();
-                    window.addEventListener('scroll', () => this.checkVisibility(), { passive: true });
-                },
-                checkVisibility() {
-                    this.visible = window.scrollY > 300;
-                }
-            }"
-            x-show="visible"
-            x-transition:enter="transition duration-300"
-            x-transition:enter-start="opacity-0 scale-90"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition duration-200"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-90"
-            @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
-            class="fixed bottom-6 right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg transition-all hover:scale-110"
-            title="Scroll to top"
-            aria-label="Scroll to top">
-            <i class="fa-solid fa-arrow-up text-lg sm:text-xl"></i>
-        </button>
-
 
     </div>
 </div>
