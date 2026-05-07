@@ -149,8 +149,8 @@ $profileTags = array_values(array_unique(array_merge(
                                     @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
                                     class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn"
                                     style="margin-right: 0.5rem;">
-                            <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200">
-                                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-center shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn">
+                            <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 relative md:bottom-0 bottom-[300px] w-fit">
+                                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left">
                                     <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-xl ml-2"></i></span>
                                     <span class="text-base font-extrabold mt-0.5">{{ $nextProfile['name'] }}</span>
                                 </button>
