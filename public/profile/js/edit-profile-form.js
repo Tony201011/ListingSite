@@ -58,7 +58,8 @@ document.addEventListener('alpine:init', () => {
                 this.createEditor(
                     'introduction_line_editor',
                     'introduction_line',
-                    'Write your introduction line here...'
+                    'Write your introduction line here...',
+                    { imageUpload: true }
                 );
 
                 this.createEditor(
