@@ -28,7 +28,7 @@
                         placeholder="City"
                         @input.debounce.300ms="searchCity"
                         @focus="newTour.city.length >= 2 ? searchCity() : citySuggestions = []"
-                        @click.away="citySuggestions = []"
+                        @click.outside="citySuggestions = []"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
                     >
                     <div

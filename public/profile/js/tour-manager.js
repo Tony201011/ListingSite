@@ -148,7 +148,7 @@ document.addEventListener('alpine:init', () => {
                 if (!this.newTour.city || this.newTour.city.length < 2) return;
 
                 try {
-                    const res = await fetch(`/search-cities?q=${this.newTour.city}`);
+                    const res = await fetch(`/search-cities?q=${encodeURIComponent(this.newTour.city)}`);
                     this.citySuggestions = await res.json();
                 } catch {
                     this.citySuggestions = [];
@@ -197,7 +197,7 @@ document.addEventListener('alpine:init', () => {
                     if (!res.ok) throw new Error(data.message);
 
                     if (this.editingIndex !== null) {
-                        this.tours[this.editingIndex] = data.tour;
+                        this.tours.splice(this.editingIndex, 1, data.tour);
                         this.toast('Updated');
                     } else {
                         this.tours.push(data.tour);
@@ -296,7 +296,7 @@ document.addEventListener('alpine:init', () => {
 
                     const idx = this.tours.findIndex(t => t.id === tour.id);
                     if (idx !== -1) {
-                        this.tours[idx] = data.tour;
+                        this.tours.splice(idx, 1, data.tour);
                     }
                 } catch (e) {
                     this.error(e.message);
