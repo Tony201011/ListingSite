@@ -47,7 +47,7 @@ class BookingEnquiryFlowTest extends TestCase
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'phone' => '0400000000',
-            'datetime' => '2026-04-15 14:00:00',
+            'datetime' => now()->addDay()->setTime(14, 0)->toDateTimeString(),
             'services' => 'Massage',
             'duration' => '60 mins',
             'location' => 'Sydney',
