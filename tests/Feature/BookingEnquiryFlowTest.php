@@ -145,6 +145,18 @@ class BookingEnquiryFlowTest extends TestCase
         $response->assertSessionHasErrors(['datetime']);
     }
 
+    public function test_booking_enquiry_rejects_recent_past_datetime(): void
+    {
+        $provider = $this->createBookableProvider();
+
+        $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
+            'datetime' => now()->subMinute()->toDateTimeString(),
+        ]));
+
+        $response->assertRedirect('/booking');
+        $response->assertSessionHasErrors(['datetime']);
+    }
+
     public function test_booking_enquiry_rejects_message_over_2000_chars(): void
     {
         $provider = $this->createBookableProvider();
