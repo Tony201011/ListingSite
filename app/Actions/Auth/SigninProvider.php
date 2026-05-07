@@ -31,7 +31,7 @@ class SigninProvider
             ])->withInput();
         }
 
-        $guard = 'web';
+        $guard = $user->role === User::ROLE_ADMIN ? 'admin' : 'web';
 
         if (Auth::guard($guard)->attempt([
             'email' => $request->email,

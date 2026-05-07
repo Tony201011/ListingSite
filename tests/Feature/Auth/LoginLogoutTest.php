@@ -50,6 +50,22 @@ class LoginLogoutTest extends TestCase
         $this->assertNotEquals($oldSessionId, session()->getId());
     }
 
+    public function test_admin_login_uses_admin_guard_only(): void
+    {
+        $admin = $this->createVerifiedUser([
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $response = $this->from('/signin')->post('/signin', [
+            'email' => $admin->email,
+            'password' => 'CorrectPass123',
+        ]);
+
+        $response->assertRedirect('/admin');
+        $this->assertAuthenticated('admin');
+        $this->assertGuest('web');
+    }
+
     // ---------------------------------------------------------------
     // Login failure scenarios
     // ---------------------------------------------------------------
