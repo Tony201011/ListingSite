@@ -1,5 +1,6 @@
 // Store Quill instances outside Alpine's reactive proxy to avoid conflicts
 const editorInstances = new Map();
+const IMAGE_LOAD_TIMEOUT_MS = 8000;
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
@@ -232,10 +233,13 @@ document.addEventListener('alpine:init', () => {
                         return;
                     }
                     settled = true;
+                    image.onload = null;
+                    image.onerror = null;
+                    image.src = '';
                     resolve(result);
                 };
 
-                const timeout = window.setTimeout(() => finalize(false), 8000);
+                const timeout = window.setTimeout(() => finalize(false), IMAGE_LOAD_TIMEOUT_MS);
                 image.onload = () => {
                     window.clearTimeout(timeout);
                     finalize(true);
