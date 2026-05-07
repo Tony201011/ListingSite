@@ -1,6 +1,15 @@
 @extends('layouts.frontend')
 
 @section('content')
+@push('styles')
+    <style>
+        [data-recaptcha-container] {
+            width: 304px;
+            max-width: 100%;
+        }
+    </style>
+@endpush
+
 <div class="bg-[#f8fafc] min-h-screen py-10">
     <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
 
@@ -416,7 +425,9 @@
             @if ($shouldUseRecaptcha ?? false)
                 <div class="mb-8">
                     <div class="flex justify-center">
-                        <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
+                        <div data-recaptcha-container class="w-full max-w-full overflow-hidden">
+                            <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
+                        </div>
                     </div>
                     @error('g-recaptcha-response')
                         <div class="text-xs text-red-600 mt-3 text-center">{{ $message }}</div>
@@ -446,6 +457,34 @@
 @endif
 
 @push('scripts')
+    <script>
+        (function () {
+            const BASE_WIDTH = 304;
+            const BASE_HEIGHT = 78;
+
+            const resizeRecaptcha = () => {
+                document.querySelectorAll('[data-recaptcha-container]').forEach((container) => {
+                    const widget = container.querySelector('.g-recaptcha');
+                    const hostWidth = container.parentElement?.clientWidth ?? BASE_WIDTH;
+                    const availableWidth = Math.min(hostWidth, BASE_WIDTH);
+                    const scale = availableWidth / BASE_WIDTH;
+
+                    if (!widget || scale <= 0) {
+                        return;
+                    }
+
+                    container.style.width = `${availableWidth}px`;
+                    container.style.height = `${Math.ceil(BASE_HEIGHT * scale)}px`;
+                    widget.style.transform = `scale(${scale})`;
+                    widget.style.transformOrigin = '0 0';
+                });
+            };
+
+            window.addEventListener('load', resizeRecaptcha);
+            window.addEventListener('resize', resizeRecaptcha);
+            document.addEventListener('DOMContentLoaded', resizeRecaptcha);
+        })();
+    </script>
     <script src="{{ asset('auth/js/password-tools.js') }}"></script>
     <script src="{{ asset('auth/js/signup.js') }}"></script>
 @endpush
