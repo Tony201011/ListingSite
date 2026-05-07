@@ -122,7 +122,7 @@ $profileTags = array_values(array_unique(array_merge(
                               @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
                               class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn"
                               style="margin-left: 0.5rem;">
-                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 relative md:bottom-0 bottom-[300px] w-fit">
+                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit relative md:bottom-0 bottom-[300px]">
                             <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left">
                                 <span class="flex items-center"><i class="fa-solid fa-arrow-left text-xl mr-2"></i> <span class="text-xs font-semibold">PREVIOUS</span></span>
                                 <span class="text-base font-extrabold mt-0.5">{{ $prevProfile['name'] }}</span>
