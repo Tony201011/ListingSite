@@ -130,7 +130,7 @@ document.addEventListener('alpine:init', () => {
                             }
 
                             if (!this.hasImageFileExtension(trimmedValue)) {
-                                return 'URL must point to an image file (jpg, jpeg, png, webp, gif, avif, svg).';
+                                return 'URL must point to an image file (jpg, jpeg, png, webp).';
                             }
 
                             return null;
@@ -226,7 +226,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 const parsed = new URL(url);
                 const pathname = parsed.pathname.toLowerCase();
-                return /\.(jpg|jpeg|png|webp|gif|avif|svg)$/.test(pathname);
+                return /\.(jpg|jpeg|png|webp)$/.test(pathname);
             } catch {
                 return false;
             }
