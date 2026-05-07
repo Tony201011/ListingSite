@@ -183,7 +183,7 @@
             </form>
 
             <!-- Action links & Auth (from third image) -->
-            <div class="{{ $useLegacyProfileHeader ? 'hidden items-center space-x-4 md:flex' : 'hidden items-center space-x-4 md:flex lg:hidden' }}">
+            <div class="hidden items-center space-x-4 md:flex {{ $useLegacyProfileHeader ? '' : 'lg:hidden' }}">
                 <!-- Action links -->
                 @foreach($actionLinks as $item)
                     <a href="{{ $item['url'] }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">{{ $item['label'] }}</a>
@@ -318,4 +318,3 @@
         </div>
     </div>
 </header>
-
