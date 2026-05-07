@@ -158,53 +158,53 @@
                 <div x-show="activeCategoryTours.length > 0">
                     <div class="space-y-3 md:hidden">
                         <template x-for="tour in activeCategoryTours" :key="tour.id">
-                            <article class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm text-gray-900">
+                            <article class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm text-gray-900" :aria-label="'Tour in ' + tour.city">
                                 <div class="flex items-start justify-between gap-3">
                                     <h3 class="font-semibold text-base break-words" x-text="tour.city"></h3>
                                     <button
+                                        type="button"
                                         @click="toggleStatus(tour)"
                                         :disabled="togglingId === tour.id"
-                                        class="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                                        :aria-busy="togglingId === tour.id"
+                                        :aria-label="tour.enabled ? 'Disable tour' : 'Enable tour'"
+                                        class="shrink-0 min-h-11 min-w-11 inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
                                         :class="tour.enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'"
                                     >
-                                        <span x-text="togglingId === tour.id ? '...' : (tour.enabled ? 'Enabled' : 'Disabled')"></span>
+                                        <span x-text="togglingId === tour.id ? 'Updating...' : (tour.enabled ? 'Enabled' : 'Disabled')"></span>
                                     </button>
                                 </div>
 
-                                <dl class="mt-3 space-y-1 text-sm">
+                                <div class="mt-3 space-y-1 text-sm">
                                     <div class="flex flex-col">
-                                        <dt class="text-gray-500">From</dt>
-                                        <dd class="break-words" x-text="formatDateTime(tour.from)"></dd>
+                                        <span class="text-gray-500">From</span>
+                                        <span class="break-words" x-text="formatDateTime(tour.from)"></span>
                                     </div>
                                     <div class="flex flex-col">
-                                        <dt class="text-gray-500">To</dt>
-                                        <dd class="break-words" x-text="formatDateTime(tour.to)"></dd>
+                                        <span class="text-gray-500">To</span>
+                                        <span class="break-words" x-text="formatDateTime(tour.to)"></span>
                                     </div>
                                     <div class="flex flex-col">
-                                        <dt class="text-gray-500">Description</dt>
-                                        <dd class="break-words" x-text="plainDescription(tour.description)"></dd>
+                                        <span class="text-gray-500">Description</span>
+                                        <span class="break-words" x-text="plainDescription(tour.description)"></span>
                                     </div>
-                                </dl>
+                                </div>
 
                                 <div class="mt-3 flex items-center gap-4">
-                                    <button @click="openTourModal(tour)" class="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-1" title="View details">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <button type="button" @click="openTourModal(tour)" class="h-11 w-11 inline-flex items-center justify-center rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2" aria-label="View tour details">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
-                                        <span class="sr-only">View</span>
                                     </button>
-                                    <button @click="editTour(tour)" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1" title="Edit tour">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <button type="button" @click="editTour(tour)" class="h-11 w-11 inline-flex items-center justify-center rounded-lg text-blue-600 hover:text-blue-800 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2" aria-label="Edit tour">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                         </svg>
-                                        <span class="sr-only">Edit</span>
                                     </button>
-                                    <button @click="confirmRemove(tour)" class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1" title="Remove tour">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <button type="button" @click="confirmRemove(tour)" class="h-11 w-11 inline-flex items-center justify-center rounded-lg text-red-600 hover:text-red-800 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2" aria-label="Remove tour">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
-                                        <span class="sr-only">Remove</span>
                                     </button>
                                 </div>
                             </article>
