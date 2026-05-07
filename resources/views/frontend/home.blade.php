@@ -96,7 +96,7 @@
                         </button>
 
                         {{-- Advanced search link --}}
-                        <a href="{{ route('advanced-search') }}" class="w-full text-center text-sm font-medium text-fuchsia-400 transition hover:text-fuchsia-300 sm:w-auto sm:text-left">
+                        <a href="{{ route('advanced-search') }}" class="w-full shrink-0 text-center text-sm font-medium text-fuchsia-400 transition hover:text-fuchsia-300 sm:w-auto sm:text-left">
                             Advanced search
                         </a>
 
