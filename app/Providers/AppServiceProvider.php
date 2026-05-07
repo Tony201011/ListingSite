@@ -19,6 +19,7 @@ use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -111,11 +112,15 @@ class AppServiceProvider extends ServiceProvider
                         ->select(['suburb', 'state'])
                         ->groupBy(['suburb', 'state'])
                         ->whereExists(function ($q) {
+                            $suburbLikeExpression = DB::connection()->getDriverName() === 'sqlite'
+                                ? "provider_profiles.suburb LIKE postcodes.suburb || ', ' || postcodes.state || '%'"
+                                : "provider_profiles.suburb LIKE CONCAT(postcodes.suburb, ', ', postcodes.state, '%')";
+
                             $q->selectRaw('1')
                                 ->from('provider_profiles')
                                 ->whereNotNull('provider_profiles.suburb')
                                 ->where('provider_profiles.suburb', '!=', '')
-                                ->whereRaw('provider_profiles.suburb LIKE CONCAT(postcodes.suburb, \', \', postcodes.state, \'%\')')
+                                ->whereRaw($suburbLikeExpression)
                                 ->where('provider_profiles.profile_status', 'approved')
                                 ->whereNull('provider_profiles.deleted_at');
                         })
