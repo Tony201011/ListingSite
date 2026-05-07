@@ -205,11 +205,13 @@ function favouriteBookmark(config) {
                 });
 
                 if (!response.ok) {
+                    console.warn('Favourite/bookmark toggle request failed with HTTP status:', response.status, response.statusText);
                     return null;
                 }
 
                 const contentType = response.headers.get('content-type') || '';
                 if (!contentType.includes('application/json')) {
+                    console.warn('Favourite/bookmark toggle returned non-JSON content type:', contentType || '(empty)');
                     return null;
                 }
 
