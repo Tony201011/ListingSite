@@ -28,7 +28,10 @@ class SaveMyProfile
             if ($activeProfile !== null) {
                 $profile = $activeProfile;
             } else {
-                $profile = new ProviderProfile(['user_id' => $user->id]);
+                $profile = new ProviderProfile([
+                    'user_id' => $user->id,
+                    'profile_status' => 'approved',
+                ]);
             }
 
             $accountUserReferralCode = Str::substr(
@@ -69,6 +72,10 @@ class SaveMyProfile
                 'onlyfans_username' => $validated['onlyfans_username'] ?? null,
                 'account_user_referral_code' => $accountUserReferralCode,
             ]);
+
+            if ($profile->profile_status === 'pending') {
+                $profile->profile_status = 'approved';
+            }
 
             $profile->save();
 
