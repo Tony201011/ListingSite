@@ -40,17 +40,18 @@ html {
     right: unset !important;
 }
 
-/* Move the scroll-to-top button above the profile nav buttons so they don't overlap */
-#smooth-scroll-top {
-    bottom: 6.5rem;
-}
-
 /* Bottom padding keeps content clear of fixed nav buttons and the scroll-to-top button */
 .profile-page-content {
     padding-bottom: 8rem;
 }
 
 @media (max-width: 767px) {
+    /* On mobile the prev/next buttons sit at bottom-center while the scroll-to-top
+       sits at bottom-right; on narrow screens they can overlap, so push it up. */
+    #smooth-scroll-top {
+        bottom: 6.5rem;
+    }
+
     .mobile-transparent-nav-btn {
         background-color: rgba(225, 58, 139, 0.85) !important;
         backdrop-filter: blur(4px);
