@@ -2,6 +2,10 @@ html {
     scroll-behavior: smooth;
 }
 
+.profile-page-content {
+    overflow-x: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
@@ -18,6 +22,9 @@ html {
         transform: none !important;
         margin: 0 !important;
         width: max-content;
+        /* Keep the paired mobile prev/next buttons inside the viewport with a
+           small center gap so each side can occupy at most half the screen. */
+        max-width: calc(50vw - 0.75rem);
         z-index: 50;
         display: flex;
         justify-content: center;
@@ -45,6 +52,7 @@ html {
         color: #fff !important;
         border: 1px solid rgba(255, 192, 203, 0.5) !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        width: 100%;
     }
 
     .mobile-transparent-nav-btn span,
@@ -69,6 +77,9 @@ html {
 .profile-nav-name {
     max-width: 92px;
     display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 @media (min-width: 768px) {
