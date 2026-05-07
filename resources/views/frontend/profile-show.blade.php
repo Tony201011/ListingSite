@@ -64,6 +64,9 @@ $profileTags = array_values(array_unique(array_merge(
 
             $profileUrl = route('profile.show', ['slug' => $profile['slug']]);
             $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . '/profile/' . $profile['slug'];
+            $locationLabel = trim((string) ($profile['suburb'] ?: $profile['city']));
+            $hasPrevProfile = !empty($prevProfile['slug']) && !empty($prevProfile['name']);
+            $hasNextProfile = !empty($nextProfile['slug']) && !empty($nextProfile['name']);
 
             $introTagline = '';
             $introText = strip_tags($profile['introduction_line'] ?? '');
@@ -90,11 +93,11 @@ $profileTags = array_values(array_unique(array_merge(
                     <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-pink-600 mb-2 sm:mb-3 px-2" style="color:#e13a8b;">
                         {{ $profile['name'] }}
                     </h1>
-                    @if(!empty($profile['city']))
+                    @if(!empty($locationLabel))
                         <div class="flex items-center justify-center mt-1 sm:mt-2 mb-2 sm:mb-3">
                             <span class="text-sm sm:text-base font-semibold text-gray-400 flex items-center gap-1">
                                 <i class="fa-solid fa-location-dot text-pink-400"></i>
-                                <span class="truncate">{{ $profile['suburb'] }}</span>
+                                <span class="truncate">{{ $locationLabel }}</span>
                             </span>
                         </div>
                     @endif
@@ -109,6 +112,7 @@ $profileTags = array_values(array_unique(array_merge(
                 <!-- Gallery (left, spans 2 columns) -->
                 <div class="md:col-span-2 flex flex-col gap-6 sm:gap-8 relative order-2 md:order-1">
                     <!-- Previous Button (left corner) -->
+                    @if($hasPrevProfile)
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
                         x-data="{
                             visible: false,
@@ -136,6 +140,7 @@ $profileTags = array_values(array_unique(array_merge(
                             </button>
                         </div>
                     </a>
+                    @endif
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
@@ -143,6 +148,7 @@ $profileTags = array_values(array_unique(array_merge(
                         @endforeach
                     </div>
                     <!-- Next Button (right corner) -->
+                    @if($hasNextProfile)
                     <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
                         x-data="{
                             visible: false,
@@ -170,6 +176,7 @@ $profileTags = array_values(array_unique(array_merge(
                             </button>
                         </div>
                     </a>
+                    @endif
                 <!-- Currently Touring Section -->
                 @if(!empty($profile['tours']))
                 <div>
