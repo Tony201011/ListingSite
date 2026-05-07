@@ -107,25 +107,45 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (options.imageUpload) {
-                quill.getModule('toolbar').addHandler('image', () => {
-                    const imageUrl = window.prompt(
-                        'Paste image URL (http/https). Leave empty to upload from your device.'
-                    );
+                quill.getModule('toolbar').addHandler('image', async () => {
+                    const result = await Swal.fire({
+                        title: 'Insert image',
+                        input: 'url',
+                        inputLabel: 'Paste image URL',
+                        inputPlaceholder: 'https://example.com/photo.jpg',
+                        showCancelButton: true,
+                        showDenyButton: true,
+                        confirmButtonText: 'Insert URL',
+                        denyButtonText: 'Upload from device',
+                        cancelButtonText: 'Cancel',
+                        inputValidator: (value) => {
+                            const trimmedValue = (value || '').trim();
 
-                    if (imageUrl === null) {
+                            if (trimmedValue === '') {
+                                return 'Please enter an image URL or choose upload.';
+                            }
+
+                            if (!this.isValidImageUrl(trimmedValue)) {
+                                return 'Invalid image URL. Please use a valid http/https URL.';
+                            }
+
+                            if (!this.hasImageFileExtension(trimmedValue)) {
+                                return 'URL must point to an image file (jpg, jpeg, png, webp, gif, avif, svg).';
+                            }
+
+                            return null;
+                        },
+                    });
+
+                    if (result.isConfirmed) {
+                        const imageUrl = (result.value || '').trim();
+                        const range = quill.getSelection(true);
+                        quill.insertEmbed(range.index, 'image', imageUrl);
+                        quill.setSelection(range.index + 1);
                         return;
                     }
 
-                    const trimmedImageUrl = imageUrl.trim();
-                    if (trimmedImageUrl !== '') {
-                        if (!this.isValidImageUrl(trimmedImageUrl)) {
-                            this.error('Invalid image URL. Please use a valid http/https URL.');
-                            return;
-                        }
-
-                        const range = quill.getSelection(true);
-                        quill.insertEmbed(range.index, 'image', trimmedImageUrl);
-                        quill.setSelection(range.index + 1);
+                    if (!result.isDenied) {
                         return;
                     }
 
@@ -197,6 +217,16 @@ document.addEventListener('alpine:init', () => {
             try {
                 const parsed = new URL(url);
                 return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+            } catch {
+                return false;
+            }
+        },
+
+        hasImageFileExtension(url) {
+            try {
+                const parsed = new URL(url);
+                const pathname = parsed.pathname.toLowerCase();
+                return /\.(jpg|jpeg|png|webp|gif|avif|svg)$/.test(pathname);
             } catch {
                 return false;
             }
