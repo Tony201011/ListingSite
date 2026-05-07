@@ -17,11 +17,11 @@
         @include('profile.partials.back-to-settings')
 
         <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
                 Verify your profile photos
             </h1>
 
-            <p class="mt-3 text-gray-600">
+            <p class="mt-3 text-xs sm:text-base text-gray-600">
                 Photo verification is optional. Complete it to get a “Photos Verified” badge on your profile.
             </p>
 
@@ -314,21 +314,21 @@
             <div class="bg-gray-50 p-4 sm:p-6">
                 <div x-show="activeTab === 'files'" x-cloak x-transition>
                     <div
-                        class="rounded-xl border-2 border-dashed p-8 text-center transition sm:p-10"
+                        class="rounded-xl border-2 border-dashed p-4 sm:p-6 lg:p-8 text-center transition h-40 sm:h-48 lg:h-56 flex flex-col items-center justify-center\"
                         :class="isDragging ? 'border-pink-400 bg-pink-50' : 'border-gray-300 bg-white'"
                         @dragenter.prevent="isDragging = true"
                         @dragover.prevent="isDragging = true"
                         @dragleave.prevent="isDragging = false"
                         @drop.prevent="handleDrop($event)"
                     >
-                        <div class="mb-4 text-5xl">📁</div>
-                        <p class="text-lg font-semibold text-gray-700">Drag &amp; drop photos here</p>
-                        <p class="mb-5 mt-1 text-sm text-gray-500">JPG, PNG, WEBP supported · min 2 photos · max 5 photos · max 10MB each</p>
+                        <div class="mb-2 sm:mb-4 text-3xl sm:text-4xl lg:text-5xl\">📁</div>
+                        <p class="text-base sm:text-lg font-semibold text-gray-700\">Drag &amp; drop photos here</p>
+                        <p class="mb-3 sm:mb-5 mt-1 text-xs sm:text-sm text-gray-500\">JPG, PNG, WEBP supported · min 2 photos · max 5 photos · max 10MB each</p>
 
                         <button
                             type="button"
                             @click="openFilePicker()"
-                            class="inline-flex items-center rounded-lg bg-pink-600 px-6 py-2.5 font-medium text-white transition hover:bg-pink-700"
+                            class=\"inline-flex items-center rounded-lg bg-pink-600 px-4 sm:px-6 py-2 sm:py-2.5 font-medium text-white text-xs sm:text-base transition hover:bg-pink-700\"
                         >
                             Browse files
                         </button>

@@ -14,19 +14,19 @@
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
     <div class="flex-1 flex flex-col justify-center items-center">
-        <div class="bg-gray-800/90 rounded-3xl shadow-2xl p-10 max-w-lg w-full text-center">
+        <div class="bg-gray-800/90 rounded-3xl shadow-2xl p-6 sm:p-10 max-w-lg w-full text-center mx-4">
             <div class="flex flex-col items-center">
-                <svg class="w-24 h-24 text-pink-500 mb-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 48 48">
+                <svg class="w-16 h-16 sm:w-24 sm:h-24 text-pink-500 mb-4 sm:mb-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 48 48">
                     <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="4" fill="#fff"/>
                     <path d="M24 14v10" stroke-linecap="round"/>
                     <circle cx="24" cy="32" r="2" fill="currentColor"/>
                 </svg>
-                <h1 class="text-6xl font-extrabold text-pink-400 mb-2">403</h1>
-                <h2 class="text-2xl font-bold text-white mb-4">Access Denied</h2>
-                <p class="text-gray-300 mb-8">You do not have permission to access this page.<br>If you think this is a mistake, please sign in with the correct account or contact support.</p>
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <a href="{{ url('/signin') }}" class="inline-block px-6 py-3 border border-pink-400 text-pink-200 rounded-full font-semibold hover:bg-pink-500/10 transition">Sign In</a>
-                    <a href="{{ url('/') }}" class="inline-block px-6 py-3 bg-gradient-to-r from-pink-600 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:from-pink-500 hover:to-pink-600 transition">Back to Home</a>
+                <h1 class="text-4xl sm:text-6xl font-extrabold text-pink-400 mb-2">403</h1>
+                <h2 class="text-xl sm:text-2xl font-bold text-white mb-4">Access Denied</h2>
+                <p class="text-xs sm:text-base text-gray-300 mb-6 sm:mb-8">You do not have permission to access this page.<br>If you think this is a mistake, please sign in with the correct account or contact support.</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                    <a href="{{ url('/signin') }}" class="inline-block px-4 sm:px-6 py-2 sm:py-3 border border-pink-400 text-pink-200 rounded-full font-semibold text-xs sm:text-base hover:bg-pink-500/10 transition w-full sm:w-auto text-center">Sign In</a>
+                    <a href="{{ url('/') }}" class="inline-block px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-pink-600 to-pink-500 text-white rounded-full font-semibold text-xs sm:text-base shadow-lg hover:from-pink-500 hover:to-pink-600 transition w-full sm:w-auto text-center">Back to Home</a>
                 </div>
             </div>
         </div>

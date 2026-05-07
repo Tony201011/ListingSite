@@ -19,17 +19,17 @@
     <div class="mx-auto w-full max-w-5xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="m-0 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">Buy Credits</h1>
-                <p class="mt-2 text-sm text-gray-600">One credit for every day your profile is online.</p>
+                <h1 class="m-0 text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight text-gray-900">Buy Credits</h1>
+                <p class="mt-2 text-xs sm:text-sm text-gray-600">One credit for every day your profile is online.</p>
             </div>
-            <a href="{{ route('my-profile') }}" class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
+            <a href="{{ route('my-profile') }}" class="text-xs sm:text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline\">&larr; Back to dashboard</a>
         </div>
 
         <div class="mb-5">
             @include('subscription.partials.pricing-benefits', ['pricingPage' => $pricingPage ?? null])
         </div>
 
-        <div class="mb-5 rounded-2xl border border-pink-100 bg-pink-50 p-4 text-sm text-gray-700 shadow-sm">
+        <div class="mb-5 rounded-2xl border border-pink-100 bg-pink-50 p-4 text-xs sm:text-sm text-gray-700 shadow-sm">
             Your current credits balance is <span class="font-semibold text-gray-900">{{ $currentBalance }}</span>.
             You are charged <span class="font-semibold text-gray-900">1 credit per day</span> while your profile is visible.
         </div>
@@ -92,7 +92,7 @@
                         @endforeach
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div class="lg:col-span-2">
                             <label for="invoice_name" class="mb-2 block text-sm font-semibold text-gray-700">
                                 Invoice Name

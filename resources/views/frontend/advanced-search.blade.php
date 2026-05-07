@@ -27,8 +27,8 @@
         </div>
 
         <div class="rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
-            <h1 class="text-xl font-bold text-gray-900">Advanced Search / Filter</h1>
-            <p class="mt-1 text-sm text-gray-500">Use filters below to find matching profiles.</p>
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Advanced Search / Filter</h1>
+            <p class="mt-1 text-xs sm:text-sm text-gray-500">Use filters below to find matching profiles.</p>
 
             @php
                 $selectedCategoryIds = collect($selectedCategoryIds ?? [])->map(fn ($id) => (string) $id)->values();

@@ -20,11 +20,11 @@
 
         <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
             <div class="p-6 sm:p-8">
-                <h1 class="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                <h1 class="mb-4 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
                     Add photos to your profile
                 </h1>
 
-                <p class="mb-8 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
+                <p class="mb-8 max-w-2xl text-xs sm:text-base lg:text-lg leading-relaxed text-gray-600">
                     Upload from your device, drag and drop multiple files, or take a photo directly with your camera.
                     Keep your gallery fresh to improve profile quality and visibility.
                 </p>
@@ -194,7 +194,7 @@
                                 </div>
                             </div>
 
-                            <div class="grid max-h-60 grid-cols-3 gap-3 overflow-y-auto p-1 sm:grid-cols-4">
+                            <div class="grid max-h-60 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 overflow-y-auto p-1">
                                 <template x-for="(preview, index) in filePreviews" :key="preview + '-' + index">
                                     <div
                                         class="group relative aspect-square cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-gray-100"

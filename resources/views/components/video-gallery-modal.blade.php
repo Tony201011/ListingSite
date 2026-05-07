@@ -23,11 +23,11 @@
         <!-- TOP BAR -->
         <div class="absolute top-0 left-0 z-50 flex w-full items-center justify-between bg-[#222] px-4 py-2 sm:px-6 sm:py-3">
             <span
-                class="text-lg text-white"
-                x-text="videos.length ? ((currentIdx + 1) + ' / ' + videos.length) : '0 / 0'"
+                class=\"text-xs sm:text-base lg:text-lg text-white\"
+                x-text=\"videos.length ? ((currentIdx + 1) + ' / ' + videos.length) : '0 / 0'\"
             ></span>
 
-            <div class="flex items-center gap-4 text-xl text-gray-300 sm:gap-8">
+            <div class=\"flex items-center gap-2 sm:gap-4 text-base sm:text-lg lg:text-xl text-gray-300 lg:gap-8\">
                 <!-- Fullscreen -->
                 <button
                     type="button"

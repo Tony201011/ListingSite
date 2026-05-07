@@ -55,9 +55,9 @@
                         </button>
 
                         <template x-if="filePreviews.length">
-                            <div class="mt-4 grid grid-cols-3 gap-2">
+                            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                                 <template x-for="(img, i) in filePreviews" :key="i">
-                                    <img :src="img" class="h-24 object-cover" loading="lazy" decoding="async">
+                                    <img :src="img" class="h-20 sm:h-24 object-cover rounded" loading="lazy" decoding="async">
                                 </template>
                             </div>
                         </template>

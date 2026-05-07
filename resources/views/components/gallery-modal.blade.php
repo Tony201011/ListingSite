@@ -15,9 +15,9 @@
 
     <!-- TOP BAR -->
     <div class="absolute top-0 left-0 w-full flex items-center justify-between px-4 sm:px-6 py-2 sm:py-3 bg-[#222] z-50">
-        <span class="text-white text-lg" x-text="images.length ? ((currentIdx + 1) + ' / ' + images.length) : '0 / 0'"></span>
+        <span class="text-white text-xs sm:text-base lg:text-lg" x-text="images.length ? ((currentIdx + 1) + ' / ' + images.length) : '0 / 0'"></span>
 
-        <div class="flex items-center gap-4 sm:gap-8 text-gray-300 text-xl">
+        <div class="flex items-center gap-2 sm:gap-4 lg:gap-8 text-gray-300 text-base sm:text-lg lg:text-xl">
             <!-- Zoom -->
             <button
                 type="button"
@@ -91,7 +91,7 @@
                 type="button"
                 @click="prev()"
                 x-show="images.length > 1"
-                class="absolute left-2 sm:left-6 text-white text-3xl sm:text-4xl hover:scale-125 transition z-40"
+                class="absolute left-1 sm:left-4 lg:left-6 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40"
                 title="Previous"
             >
                 ❮
@@ -123,7 +123,7 @@
                 <button
                     type="button"
                     @click="next()"
-                    class="absolute right-2 sm:right-6 text-white text-3xl sm:text-4xl hover:scale-125 transition z-40"
+                    class="absolute right-1 sm:right-4 lg:right-6 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40"
                     title="Next"
                 >
                     ❯
@@ -132,15 +132,15 @@
 
             <!-- RIGHT GRID PANEL -->
             <template x-if="gridView">
-                <div class="gallery-modal-grid-panel w-full sm:w-96 bg-black/80 p-2 sm:p-4 border-t sm:border-t-0 sm:border-l border-gray-700 absolute sm:static right-0 bottom-0 sm:top-0 max-h-32 sm:max-h-[80vh] flex sm:block overflow-x-auto sm:overflow-y-auto z-50 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900">
-                    <div class="flex sm:grid sm:grid-cols-2 gap-2 sm:gap-4 w-full">
+                <div class="gallery-modal-grid-panel w-full sm:w-80 md:w-96 bg-black/80 p-2 sm:p-3 lg:p-4 border-t sm:border-t-0 sm:border-l border-gray-700 absolute sm:static right-0 bottom-0 sm:top-0 max-h-32 sm:max-h-48 lg:max-h-[80vh] flex sm:block overflow-x-auto sm:overflow-y-auto z-50 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900">
+                    <div class="flex sm:grid sm:grid-cols-2 gap-1 sm:gap-2 lg:gap-3 w-full">
                         <template x-for="(img, idx) in images" :key="'thumb-' + idx">
                             <img
                                 :src="img"
                                 loading="lazy"
                                 @click="currentIdx = idx; scrollGridToCurrent()"
-                                :class="currentIdx === idx ? 'border-4 border-pink-500' : 'border-2 border-transparent'"
-                                class="h-20 w-20 sm:w-full sm:h-40 object-cover rounded cursor-pointer hover:scale-105 transition flex-shrink-0"
+                                :class="currentIdx === idx ? 'border-3 sm:border-4 border-pink-500' : 'border-2 border-transparent'"
+                                class="h-16 w-16 sm:w-full sm:h-28 lg:h-40 object-cover rounded cursor-pointer hover:scale-105 transition flex-shrink-0"
                                 alt="Gallery thumbnail"
                             />
                         </template>
@@ -153,7 +153,7 @@
                 <button
                     type="button"
                     @click="next()"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 sm:translate-y-0 sm:right-[21rem] text-white text-3xl sm:text-4xl hover:scale-125 transition z-40"
+                    class="absolute right-1 top-1/2 -translate-y-1/2 sm:translate-y-0 sm:right-80 lg:sm:right-96 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40"
                     title="Next"
                 >
                     ❯

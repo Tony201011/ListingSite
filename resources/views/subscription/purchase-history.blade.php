@@ -105,7 +105,7 @@
         <!-- Transactions Table -->
         <div class="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
             @if($purchases->count() > 0)
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto rounded-lg">
                     <table class="w-full">
                         <thead class="border-b border-gray-100 bg-gray-50">
                             <tr>
