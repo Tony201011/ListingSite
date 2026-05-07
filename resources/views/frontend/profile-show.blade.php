@@ -858,6 +858,33 @@ $profileTags = array_values(array_unique(array_merge(
         {{-- Ad: Profile Bottom --}}
         @include('layouts.partials.ads', ['position' => 'profile_bottom', 'pageKey' => 'profile'])
 
+        <!-- Scroll to Top Button -->
+        <button
+            id="scroll-to-top"
+            x-data="{
+                visible: false,
+                init() {
+                    this.checkVisibility();
+                    window.addEventListener('scroll', () => this.checkVisibility(), { passive: true });
+                },
+                checkVisibility() {
+                    this.visible = window.scrollY > 300;
+                }
+            }"
+            x-show="visible"
+            x-transition:enter="transition duration-300"
+            x-transition:enter-start="opacity-0 scale-90"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-90"
+            @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            class="fixed bottom-6 right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg transition-all hover:scale-110"
+            title="Scroll to top"
+            aria-label="Scroll to top">
+            <i class="fa-solid fa-arrow-up text-lg sm:text-xl"></i>
+        </button>
+
 
     </div>
 </div>
