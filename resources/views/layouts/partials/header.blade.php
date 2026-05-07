@@ -258,6 +258,7 @@
 
         <!-- Mobile menu (updated with all items) -->
         <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 {{ $useLegacyProfileHeader ? 'md:hidden' : 'lg:hidden' }}">
+            {{-- Keep profile.show aligned with pre-responsive header behavior (no mobile menu search block). --}}
             @if($showSearch && ! $useLegacyProfileHeader)
             <form action="{{ url('/') }}" method="GET" class="px-3 pb-1" @submit="mobileMenu = false">
                 <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2">
