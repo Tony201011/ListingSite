@@ -108,16 +108,16 @@
 
                     <!-- Search and filter controls -->
                     <div class="flex flex-col gap-2 w-full sm:w-auto">
-                        <div class="flex flex-col sm:flex-row gap-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                             <input
                                 type="text"
                                 x-model="searchQuery"
                                 placeholder="Search by city or description..."
-                                class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                class="w-full sm:w-72 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                             >
                             <select
                                 x-model="statusFilter"
-                                class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white text-gray-900"
+                                class="w-full sm:w-40 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white text-gray-900"
                             >
                                 <option value="all">All status</option>
                                 <option value="enabled">Enabled only</option>
@@ -128,33 +128,90 @@
                 </div>
 
                 <!-- Category Tabs -->
-                <div class="flex border-b border-gray-200 mb-4">
-                    <button
-                        @click="categoryTab = 'upcoming'"
-                        :class="categoryTab === 'upcoming' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                        class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
-                    >
-                        Upcoming <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'upcoming' ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600'" x-text="upcomingTours.length"></span>
-                    </button>
-                    <button
-                        @click="categoryTab = 'ongoing'"
-                        :class="categoryTab === 'ongoing' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                        class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
-                    >
-                        Ongoing <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'ongoing' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'" x-text="ongoingTours.length"></span>
-                    </button>
-                    <button
-                        @click="categoryTab = 'past'"
-                        :class="categoryTab === 'past' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                        class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
-                    >
-                        Past <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'past' ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 text-gray-600'" x-text="pastTours.length"></span>
-                    </button>
+                <div class="overflow-x-auto -mx-1 px-1 mb-4">
+                    <div class="flex w-max min-w-full border-b border-gray-200">
+                        <button
+                            @click="categoryTab = 'upcoming'"
+                            :class="categoryTab === 'upcoming' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
+                        >
+                            Upcoming <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'upcoming' ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600'" x-text="upcomingTours.length"></span>
+                        </button>
+                        <button
+                            @click="categoryTab = 'ongoing'"
+                            :class="categoryTab === 'ongoing' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
+                        >
+                            Ongoing <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'ongoing' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'" x-text="ongoingTours.length"></span>
+                        </button>
+                        <button
+                            @click="categoryTab = 'past'"
+                            :class="categoryTab === 'past' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap"
+                        >
+                            Past <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs" :class="categoryTab === 'past' ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 text-gray-600'" x-text="pastTours.length"></span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Tour table for active category -->
                 <div x-show="activeCategoryTours.length > 0">
-                    <div class="overflow-x-auto">
+                    <div class="space-y-3 md:hidden">
+                        <template x-for="tour in activeCategoryTours" :key="tour.id">
+                            <article class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm text-gray-900" :aria-label="'Tour in ' + tour.city">
+                                <div class="flex items-start justify-between gap-3">
+                                    <h3 class="font-semibold text-base break-words" x-text="tour.city"></h3>
+                                    <button
+                                        type="button"
+                                        @click="toggleStatus(tour)"
+                                        :disabled="togglingId === tour.id"
+                                        :aria-busy="togglingId === tour.id"
+                                        :aria-label="tour.enabled ? 'Disable tour' : 'Enable tour'"
+                                        class="shrink-0 min-h-11 min-w-11 inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                        :class="tour.enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'"
+                                    >
+                                        <span x-text="togglingId === tour.id ? 'Updating...' : (tour.enabled ? 'Enabled' : 'Disabled')"></span>
+                                    </button>
+                                </div>
+
+                                <div class="mt-3 space-y-1 text-sm">
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-500">From</span>
+                                        <span class="break-words" x-text="formatDateTime(tour.from)"></span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-500">To</span>
+                                        <span class="break-words" x-text="formatDateTime(tour.to)"></span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-500">Description</span>
+                                        <span class="break-words" x-text="plainDescription(tour.description)"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 flex items-center gap-4">
+                                    <button type="button" @click="openTourModal(tour)" class="h-11 w-11 inline-flex items-center justify-center rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2" aria-label="View tour details">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" @click="editTour(tour)" class="h-11 w-11 inline-flex items-center justify-center rounded-lg text-blue-600 hover:text-blue-800 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2" aria-label="Edit tour">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" @click="confirmRemove(tour)" class="h-11 w-11 inline-flex items-center justify-center rounded-lg text-red-600 hover:text-red-800 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2" aria-label="Remove tour">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+
+                    <div class="hidden md:block overflow-x-auto">
                         <table class="w-full text-sm text-left border border-gray-200">
                             <thead class="bg-gray-50 text-gray-700">
                                 <tr>
