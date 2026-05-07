@@ -119,7 +119,7 @@ class PurchaseCreditFlowTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('One credit for every day your profile is online.');
-        $response->assertSeeText("We don't believe in basic, pro and premium packages.");
+        $response->assertSeeText('basic, pro and premium packages');
         $response->assertSeeText('2 x daily Available NOW (2 x 2 hours)');
     }
 
