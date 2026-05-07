@@ -463,10 +463,14 @@ $profileTags = array_values(array_unique(array_merge(
                             <form method="POST" action="{{ route('booking.enquiry') }}" class="space-y-2">
                                 @csrf
                                 <input type="hidden" name="user_id" value="{{ $profile['user_id'] }}">
-                                <input type="email" name="email" value="{{ old('email') }}" required maxlength="255" placeholder="Your email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
-                                <input type="tel" name="phone" value="{{ old('phone') }}" maxlength="20" placeholder="Your phone (optional)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
-                                <input type="datetime-local" name="datetime" value="{{ old('datetime') }}" min="{{ now()->format('Y-m-d\TH:i') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
-                                <textarea name="message" rows="3" maxlength="2000" placeholder="Your message (optional)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none">{{ old('message') }}</textarea>
+                                <label for="booking-email" class="sr-only">Email</label>
+                                <input id="booking-email" type="email" name="email" value="{{ old('email') }}" required maxlength="255" placeholder="Your email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
+                                <label for="booking-phone" class="sr-only">Phone</label>
+                                <input id="booking-phone" type="tel" name="phone" value="{{ old('phone') }}" maxlength="20" placeholder="Your phone (optional)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
+                                <label for="booking-datetime" class="sr-only">Date and time</label>
+                                <input id="booking-datetime" type="datetime-local" name="datetime" value="{{ old('datetime') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
+                                <label for="booking-message" class="sr-only">Message</label>
+                                <textarea id="booking-message" name="message" rows="3" maxlength="2000" placeholder="Your message (optional)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none">{{ old('message') }}</textarea>
                                 <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-lg px-4 py-2 text-sm font-semibold transition">
                                     Send enquiry
                                 </button>
