@@ -150,7 +150,7 @@ class BookingEnquiryFlowTest extends TestCase
         $provider = $this->createBookableProvider();
 
         $response = $this->from('/booking')->post('/booking-enquiry', $this->validPayload($provider->id, [
-            'datetime' => now()->subMinute()->toDateTimeString(),
+            'datetime' => now()->subSeconds(30)->toDateTimeString(),
         ]));
 
         $response->assertRedirect('/booking');
