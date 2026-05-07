@@ -185,28 +185,64 @@ function escortSearch(config) {
 function favouriteBookmark(config) {
     return {
         viewMode: config.viewMode || 'grid',
-        favourites: config.favourites || [],
-        bookmarks: config.bookmarks || [],
+        favourites: Array.isArray(config.favourites) ? config.favourites.map(String) : [],
+        bookmarks: Array.isArray(config.bookmarks) ? config.bookmarks.map(String) : [],
+
+        normalise(slug) {
+            return String(slug || '').trim();
+        },
+
+        async requestToggle(url) {
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (!response.ok) {
+                    return null;
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    return null;
+                }
+
+                const data = await response.json();
+
+                if (typeof data.active !== 'boolean') {
+                    return null;
+                }
+
+                return data.active;
+            } catch (error) {
+                return null;
+            }
+        },
 
         isFavourite(slug) {
+            slug = this.normalise(slug);
             return this.favourites.includes(slug);
         },
 
         isBookmark(slug) {
+            slug = this.normalise(slug);
             return this.bookmarks.includes(slug);
         },
 
         async toggleFavourite(slug) {
-            const res = await fetch('/favourite/' + encodeURIComponent(slug), {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data.active) {
+            slug = this.normalise(slug);
+            if (!slug) return;
+
+            const active = await this.requestToggle('/favourite/' + encodeURIComponent(slug));
+            if (active === null) return;
+
+            if (active) {
                 if (!this.favourites.includes(slug)) this.favourites.push(slug);
             } else {
                 this.favourites = this.favourites.filter(s => s !== slug);
@@ -214,16 +250,13 @@ function favouriteBookmark(config) {
         },
 
         async toggleBookmark(slug) {
-            const res = await fetch('/bookmark/' + encodeURIComponent(slug), {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data.active) {
+            slug = this.normalise(slug);
+            if (!slug) return;
+
+            const active = await this.requestToggle('/bookmark/' + encodeURIComponent(slug));
+            if (active === null) return;
+
+            if (active) {
                 if (!this.bookmarks.includes(slug)) this.bookmarks.push(slug);
             } else {
                 this.bookmarks = this.bookmarks.filter(s => s !== slug);
