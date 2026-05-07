@@ -18,6 +18,7 @@ class SaveMyProfileRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
+            'mobile' => ['nullable', 'string', 'max:30'],
             'suburb' => ['required', 'string', 'max:255'],
             'introduction_line' => ['required', 'string', 'max:1000'],
             'profile_text' => ['required', 'string', 'max:15000'],

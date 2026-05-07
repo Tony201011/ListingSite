@@ -14,6 +14,7 @@
             name: @js(old('name', $profile_name ?? '')),
             email: @js(old('email', $user->email ?? '')),
             phone: @js(old('phone', $profile_phone ?? '')),
+            mobile: @js(old('mobile', $profile_mobile ?? '')),
             introduction_line: @js(old('introduction_line', $profile->introduction_line ?? '')),
             suburb: @js(old('suburb', $profile->suburb ?? '')),
             profile_text: @js(old('profile_text', $profile->profile_text ?? '')),
@@ -157,9 +158,9 @@
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Mobile number <span class="text-gray-400 font-normal">(optional)</span></label>
                         <input
-                            name="phone"
-                            type="tel"
-                            x-model="phone"
+                            name="mobile"
+                            type="text"
+                            x-model="mobile"
                             class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
                             placeholder="e.g. 0400 000 000"
                         >
