@@ -222,6 +222,7 @@ function favouriteBookmark(config) {
 
                 return data.active;
             } catch (error) {
+                console.error('Favourite/bookmark toggle request failed:', error);
                 return null;
             }
         },
