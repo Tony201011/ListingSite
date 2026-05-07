@@ -77,37 +77,37 @@ $profileTags = array_values(array_unique(array_merge(
         @endphp
 
         <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-12">
+                <div class="text-center mb-8 sm:mb-12">
                     @if($availableNow)
-                    <div class="inline-block mb-4 px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
+                    <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-sm sm:text-base tracking-wide" style="letter-spacing:0.5px;">
                         AVAILABLE NOW{{ $availableTillText }}
                     </div>
                     @elseif($isOnline)
-                    <div class="inline-block mb-4 px-6 py-2 rounded bg-green-500 text-white font-extrabold text-base tracking-wide" style="letter-spacing:0.5px;">
+                    <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-6 py-2 rounded bg-green-500 text-white font-extrabold text-sm sm:text-base tracking-wide" style="letter-spacing:0.5px;">
                         ONLINE NOW
                     </div>
                     @endif
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-pink-600 mb-3" style="color:#e13a8b;">
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-pink-600 mb-2 sm:mb-3 px-2" style="color:#e13a8b;">
                         {{ $profile['name'] }}
                     </h1>
                     @if(!empty($profile['city']))
-                        <div class="flex items-center justify-center mt-2 mb-3">
-                            <span class="text-base font-semibold text-gray-400 flex items-center gap-1">
+                        <div class="flex items-center justify-center mt-1 sm:mt-2 mb-2 sm:mb-3">
+                            <span class="text-sm sm:text-base font-semibold text-gray-400 flex items-center gap-1">
                                 <i class="fa-solid fa-location-dot text-pink-400"></i>
-                                {{ $profile['suburb'] }}
+                                <span class="truncate">{{ $profile['suburb'] }}</span>
                             </span>
                         </div>
                     @endif
                     @if(!empty($introTagline))
-                    <div class="mt-3 text-lg text-gray-700 font-medium">{{ $introTagline }}</div>
+                    <div class="mt-2 sm:mt-3 text-base sm:text-lg text-gray-700 font-medium px-2 truncate sm:truncate md:truncate-none">{{ $introTagline }}</div>
                     @endif
                 </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-start">
 
 
                 <!-- Gallery (left, spans 2 columns) -->
-                <div class="md:col-span-2 flex flex-col gap-8 relative order-2 md:order-1">
+                <div class="md:col-span-2 flex flex-col gap-6 sm:gap-8 relative order-2 md:order-1">
                     <!-- Previous Button (left corner) -->
                           <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
                               x-data="{ visible: false }"
@@ -120,19 +120,19 @@ $profileTags = array_values(array_unique(array_merge(
                               x-transition:leave-start="opacity-100 scale-100"
                               x-transition:leave-end="opacity-0 scale-90"
                               @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
-                              class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn"
+                              class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn hidden md:flex"
                               style="margin-left: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left">
-                                <span class="flex items-center"><i class="fa-solid fa-arrow-left text-xl mr-2"></i> <span class="text-xs font-semibold">PREVIOUS</span></span>
-                                <span class="text-base font-extrabold mt-0.5">{{ $prevProfile['name'] }}</span>
+                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
+                                <span class="flex items-center"><i class="fa-solid fa-arrow-left text-lg sm:text-xl mr-2"></i> <span class="text-xs font-semibold">PREV</span></span>
+                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate">{{ $prevProfile['name'] }}</span>
                             </button>
                         </div>
                     </a>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-lg sm:rounded-xl w-full h-48 sm:h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
                         <!-- Next Button (right corner) -->
@@ -147,27 +147,27 @@ $profileTags = array_values(array_unique(array_merge(
                                     x-transition:leave-start="opacity-100 scale-100"
                                     x-transition:leave-end="opacity-0 scale-90"
                                     @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
-                                    class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn"
+                                    class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn hidden md:flex"
                                     style="margin-right: 0.5rem;">
                             <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
-                                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left">
-                                    <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-xl ml-2"></i></span>
-                                    <span class="text-base font-extrabold mt-0.5">{{ $nextProfile['name'] }}</span>
+                                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
+                                    <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-lg sm:text-xl ml-2"></i></span>
+                                    <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate">{{ $nextProfile['name'] }}</span>
                                 </button>
                             </div>
                         </a>
                 <!-- Currently Touring Section -->
                 @if(!empty($profile['tours']))
                 <div>
-                    <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                        <div class="mb-6">
-                            <div class="flex items-center mb-2">
-                                <i class="fa-solid fa-location-dot text-pink-500 text-2xl mr-3"></i>
-                                <span class="text-2xl font-extrabold text-pink-600">Currently touring in {{ $profile['tours'][0]['city'] }}</span>
+                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100">
+                        <div class="mb-4 sm:mb-6">
+                            <div class="flex items-start sm:items-center mb-2 gap-2 flex-wrap">
+                                <i class="fa-solid fa-location-dot text-pink-500 text-lg sm:text-2xl flex-shrink-0"></i>
+                                <span class="text-lg sm:text-2xl font-extrabold text-pink-600">Currently touring in <span class="truncate">{{ $profile['tours'][0]['city'] }}</span></span>
                             </div>
-                            <span class="font-bold text-lg text-gray-800">{{ $profile['tours'][0]['from'] }} - {{ $profile['tours'][0]['to'] }}</span>
+                            <span class="font-bold text-base sm:text-lg text-gray-800 px-8 sm:px-0">{{ $profile['tours'][0]['from'] }} - {{ $profile['tours'][0]['to'] }}</span>
                         </div>
-                        <a href="#upcoming-tours" class="border border-pink-300 text-pink-400 px-6 py-3 rounded-md bg-transparent font-medium text-lg hover:bg-pink-50 transition block text-center smooth-scroll">
+                        <a href="#upcoming-tours" class="border border-pink-300 text-pink-400 px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-transparent font-medium text-sm sm:text-lg hover:bg-pink-50 transition block text-center smooth-scroll">
                             See all my other tours
                         </a>
                     </div>
@@ -181,16 +181,16 @@ $profileTags = array_values(array_unique(array_merge(
                     @endphp
                     @if(!empty($safeAbout))
                         <div>
-                            <h2 class="text-2xl font-semibold mb-2 text-pink-600">About me</h2>
-                            <hr class="mb-4">
-                            <div class="text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
+                            <h2 class="text-lg sm:text-2xl font-semibold mb-2 text-pink-600">About me</h2>
+                            <hr class="mb-3 sm:mb-4">
+                            <div class="text-sm sm:text-base text-gray-900 leading-relaxed break-words overflow-hidden [&_*]:max-w-full">
                                 {!! nl2br($safeAbout) !!}
                             </div>
                         </div>
                     @endif
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         @foreach(array_slice($galleryImages, 2) as $img)
-                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-xl w-full h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
+                            <img src="{{ $img }}" alt="{{ $profile['name'] }} image" class="rounded-lg sm:rounded-xl w-full h-48 sm:h-56 lg:h-64 object-cover gallery-img-clickable cursor-pointer" loading="lazy" decoding="async">
                         @endforeach
                     </div>
 
@@ -199,9 +199,9 @@ $profileTags = array_values(array_unique(array_merge(
 @include('components.gallery-modal')
                     @if(!empty($profile['videos'] ?? []))
                     <section class="overflow-hidden">
-                        <h2 class="text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
-                        <hr class="mb-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                        <h2 class="text-lg sm:text-2xl font-semibold mb-2 text-pink-600">Videos</h2>
+                        <hr class="mb-3 sm:mb-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
                             x-data="{
                                 init() {
                                     // Add global video pause handler
@@ -219,7 +219,7 @@ $profileTags = array_values(array_unique(array_merge(
                             x-init="init()">
                             @foreach($profile['videos'] ?? [] as $videoUrl)
                             <div class="relative" x-data="{ playing: false }">
-                                <video controls preload="metadata" class="rounded-xl w-full h-64 bg-black object-cover"
+                                <video controls preload="metadata" class="rounded-lg sm:rounded-xl w-full h-48 sm:h-56 bg-black object-cover"
                                     x-on:play="playing = true"
                                     x-on:pause="playing = false"
                                     x-on:ended="playing = false"
@@ -231,14 +231,14 @@ $profileTags = array_values(array_unique(array_merge(
                                     Your browser does not support the video tag.
                                 </video>
                                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
-                                    <div class="bg-red-500 bg-opacity-75 text-white px-4 py-2 rounded">
+                                    <div class="bg-red-500 bg-opacity-75 text-white px-3 sm:px-4 py-2 rounded text-xs sm:text-sm">
                                         <i class="fa-solid fa-exclamation-triangle mr-2"></i>
                                         Video unavailable
                                     </div>
                                 </div>
                                 <div x-show="!playing" x-transition class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div class="bg-black bg-opacity-50 rounded-full p-3 opacity-75">
-                                        <i class="fa-solid fa-play text-white text-xl"></i>
+                                    <div class="bg-black bg-opacity-50 rounded-full p-2 sm:p-3 opacity-75">
+                                        <i class="fa-solid fa-play text-white text-lg sm:text-xl"></i>
                                     </div>
                                 </div>
                             </div>
@@ -254,17 +254,17 @@ $profileTags = array_values(array_unique(array_merge(
                     <!-- My Upcoming Tours Section (Card Style) -->
                     @if(!empty($profile['tours'] ?? []))
                     <section id="upcoming-tours" class="scroll-mt-32">
-                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                            <div class="flex items-center mb-3">
-                                <i class="fa-solid fa-location-dot text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-semibold text-pink-600">My upcoming tours</h2>
+                        <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100">
+                            <div class="flex items-center mb-2 sm:mb-3 flex-wrap gap-1 sm:gap-2">
+                                <i class="fa-solid fa-location-dot text-pink-600 text-base sm:text-xl"></i>
+                                <h2 class="text-lg sm:text-2xl font-semibold text-pink-600">My upcoming tours</h2>
                             </div>
-                            <div class="border-b border-gray-200 mb-6"></div>
-                            <div class="space-y-4">
+                            <div class="border-b border-gray-200 mb-3 sm:mb-6"></div>
+                            <div class="space-y-3 sm:space-y-4">
                                 @foreach($profile['tours'] ?? [] as $tour)
-                                <div class="flex items-center">
-                                    <span class="font-bold text-pink-600 text-base mr-4">{{ $tour['city'] }}</span>
-                                    <span class="font-semibold text-gray-900 text-base">{{ $tour['from'] }} - {{ $tour['to'] }}</span>
+                                <div class="flex items-center flex-wrap gap-1 sm:gap-2">
+                                    <span class="font-bold text-pink-600 text-sm sm:text-base">{{ $tour['city'] }}</span>
+                                    <span class="font-semibold text-gray-900 text-xs sm:text-base">{{ $tour['from'] }} - {{ $tour['to'] }}</span>
                                 </div>
                                 @endforeach
                             </div>
@@ -275,13 +275,13 @@ $profileTags = array_values(array_unique(array_merge(
                     <!-- Profile Message Section -->
                     @if(!empty($profile['profile_message']))
                     <section>
-                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                            <div class="flex items-center mb-3">
-                                <i class="fa-solid fa-bullhorn text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-semibold text-pink-600">Message from {{ $profile['name'] }}</h2>
+                        <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100">
+                            <div class="flex items-center mb-2 sm:mb-3 flex-wrap gap-1 sm:gap-2">
+                                <i class="fa-solid fa-bullhorn text-pink-600 text-base sm:text-xl"></i>
+                                <h2 class="text-lg sm:text-2xl font-semibold text-pink-600">Message from {{ $profile['name'] }}</h2>
                             </div>
-                            <div class="border-b border-gray-200 mb-4"></div>
-                            <div class="prose max-w-none text-gray-700 leading-relaxed">
+                            <div class="border-b border-gray-200 mb-3 sm:mb-4"></div>
+                            <div class="prose max-w-none text-gray-700 leading-relaxed text-xs sm:text-base">
                                 {!! nl2br($profile['profile_message']) !!}
                             </div>
                         </div>
@@ -291,16 +291,16 @@ $profileTags = array_values(array_unique(array_merge(
                     <!-- Contact Me For Section (Card Style) -->
                     <section id="contact-me-for" class="scroll-mt-32">
                         @if(!empty($servicesProvided))
-                        <div class="bg-white rounded-2xl shadow p-6 border border-gray-100">
-                            <div class="flex items-center mb-3">
-                                <i class="fa-solid fa-comments text-pink-600 text-xl mr-2"></i>
-                                <h2 class="text-2xl font-semibold text-pink-600">Contact me for</h2>
+                        <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100">
+                            <div class="flex items-center mb-2 sm:mb-3 flex-wrap gap-1 sm:gap-2">
+                                <i class="fa-solid fa-comments text-pink-600 text-base sm:text-xl"></i>
+                                <h2 class="text-lg sm:text-2xl font-semibold text-pink-600">Contact me for</h2>
                             </div>
-                            <div class="border-b border-pink-300 mb-6 w-24"></div>
-                            <ul class="space-y-2 list-none pl-0">
+                            <div class="border-b border-pink-300 mb-3 sm:mb-6 w-20 sm:w-24"></div>
+                            <ul class="space-y-2 sm:space-y-3 list-none pl-0">
                                 @foreach($servicesProvided as $item)
-                                    <li class="flex items-start gap-2 text-lg">
-                                        <span class="text-pink-600 text-xl mt-0.5">&raquo;</span>
+                                    <li class="flex items-start gap-2 text-xs sm:text-lg">
+                                        <span class="text-pink-600 text-base sm:text-xl mt-0.5 flex-shrink-0">&raquo;</span>
                                         <span class="text-gray-900">{{ $item }}</span>
                                     </li>
                                 @endforeach
@@ -310,81 +310,81 @@ $profileTags = array_values(array_unique(array_merge(
                     </section>
 
                     <!-- Short Link Section -->
-                <div class="text-center">
-                    <span class="text-lg font-medium" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
-                        Find me easily with this short link:
-                        <a href="{{ $profileUrl }}" class="hover:underline text-blue-500" style="background: none; color: #4fa3e3;">
+                <div class="text-center px-2">
+                    <span class="text-xs sm:text-base font-medium inline-block" style="background: linear-gradient(90deg, #d77dbb 0%, #6ec1e4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent;">
+                        Find me easily with this short link:<br class="sm:hidden">
+                        <a href="{{ $profileUrl }}" class="hover:underline text-blue-500 break-all" style="background: none; color: #4fa3e3; font-weight: bold;">
                             {{ $profileUrlDisplay }}
                         </a>
                     </span>
                 </div>
                 </div>
                 <!-- Info/Sidebar (right) -->
-                <div class="flex flex-col gap-6 order-1 md:order-2">
-                    <div class="bg-white rounded-2xl shadow p-6 border border-gray-100 mb-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="font-bold text-lg text-black">Info</span>
+                <div class="flex flex-col gap-4 sm:gap-6 order-1 md:order-2">
+                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100 mb-0 sm:mb-6">
+                        <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+                            <span class="font-bold text-base sm:text-lg text-black">Info</span>
                             @if($profile['is_verified'])
-                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-xs font-semibold text-blue-700"><i class="fa-solid fa-badge-check text-blue-500 mr-1"></i> PHOTOS VERIFIED</span>
+                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-xs font-semibold text-blue-700 flex-shrink-0"><i class="fa-solid fa-badge-check text-blue-500 mr-1"></i> <span class="hidden sm:inline">VERIFIED</span></span>
                             @endif
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm mb-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 sm:gap-y-3 gap-x-4 sm:gap-x-6 text-xs sm:text-sm mb-3">
                             @if(!empty($profile['age']))
                             <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-hourglass-half text-pink-600 w-5 text-center"></i>
+                                <i class="fa-solid fa-hourglass-half text-pink-600 w-4 text-center flex-shrink-0"></i>
                                 <span>Age <span class="font-bold text-gray-900 ml-1">{{ $profile['age'] }}</span></span>
                             </div>
                             @endif
                             @if(!empty($profile['your_length']))
                             <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
-                                <span>Length <span class="font-bold text-gray-900 ml-1">{{ $profile['your_length'] }}</span></span>
+                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-4 text-center flex-shrink-0"></i>
+                                <span>Height <span class="font-bold text-gray-900 ml-1">{{ $profile['your_length'] }}</span></span>
                             </div>
                             @endif
                             @if(!empty($profile['bust_size']))
                             <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-braille text-pink-600 w-5 text-center"></i>
-                                <span>Bust Size <span class="font-bold text-gray-900 ml-1">{{ $profile['bust_size'] }}</span></span>
+                                <i class="fa-solid fa-braille text-pink-600 w-4 text-center flex-shrink-0"></i>
+                                <span>Bust <span class="font-bold text-gray-900 ml-1">{{ $profile['bust_size'] }}</span></span>
                             </div>
                             @endif
                             @if(!empty($profile['rate']))
-                            <div class="flex items-center space-x-2 col-span-2">
-                                <i class="fa-solid fa-dollar-sign text-pink-600 w-5 text-center"></i>
+                            <div class="flex items-center space-x-2 col-span-1 sm:col-span-2">
+                                <i class="fa-solid fa-dollar-sign text-pink-600 w-4 text-center flex-shrink-0"></i>
                                 <span>Rate <span class="font-bold text-gray-900 ml-1">{{ $profile['rate'] }}</span></span>
                             </div>
                             @endif
                         </div>
                         @if(!empty($primaryPhone) || !empty($profile['website']) || !empty($profile['onlyfans']) || !empty($profile['contact_method']))
-                        <div class="mt-4">
-                            <span class="block text-lg font-bold mb-1 text-black">Contact</span>
-                            <div class="mb-2 text-sm p-2 text-gray-700">
+                        <div class="mt-3 sm:mt-4">
+                            <span class="block text-base sm:text-lg font-bold mb-1 text-black">Contact</span>
+                            <div class="mb-2 text-xs sm:text-sm p-2 text-gray-700 break-words">
                                 Tell you saw advertisement in <span class="text-pink-600 font-semibold">HotEscort</span>, thanks!
                                 @if(!empty($profile['contact_method']))
-                                <br>Preferred contact method: <span class="font-semibold">{{ $profile['contact_method'] }}</span>
+                                <br>Preferred: <span class="font-semibold truncate">{{ $profile['contact_method'] }}</span>
                                 @endif
                             </div>
                             @if(!empty($primaryPhone))
                             <div class="flex items-center gap-2 mt-2">
-                                <i class="fa-solid fa-mobile-screen text-blue-600 text-2xl"></i>
+                                <i class="fa-solid fa-mobile-screen text-blue-600 text-lg sm:text-2xl flex-shrink-0"></i>
                                 <span class="text-xs font-bold text-black">PHONE:</span>
                             </div>
-                            <a href="tel:{{ $phoneHref }}" aria-label="Call {{ $primaryPhone }}" class="block text-2xl font-bold tracking-wide mb-2 text-black hover:text-pink-600 transition">{{ $primaryPhone }}</a>
+                            <a href="tel:{{ $phoneHref }}" aria-label="Call {{ $primaryPhone }}" class="block text-lg sm:text-2xl font-bold tracking-wide mb-2 text-black hover:text-pink-600 transition break-all">{{ $primaryPhone }}</a>
                             @endif
                             @if(!empty($profile['website']))
-                            <hr class="my-3">
+                            <hr class="my-2 sm:my-3">
                             <div class="flex items-center gap-2 mt-2">
-                                <i class="fa-solid fa-globe text-blue-600 text-2xl"></i>
+                                <i class="fa-solid fa-globe text-blue-600 text-lg sm:text-2xl flex-shrink-0"></i>
                                 <span class="text-xs font-bold text-black">WEBSITE:</span>
                             </div>
-                            <a href="{{ $profile['website'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['website'] }}</a>
+                            <a href="{{ $profile['website'] }}" class="block text-pink-600 font-semibold text-xs sm:text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['website'] }}</a>
                             @endif
                             @if(!empty($profile['onlyfans']))
-                            <hr class="my-3">
+                            <hr class="my-2 sm:my-3">
                             <div class="flex items-center gap-2 mt-2">
-                                <i class="fas fa-heart text-pink-600 text-2xl"></i>
+                                <i class="fas fa-heart text-pink-600 text-lg sm:text-2xl flex-shrink-0"></i>
                                 <span class="text-xs font-bold text-black">ONLYFANS:</span>
                             </div>
-                            <a href="{{ $profile['onlyfans'] }}" class="block text-pink-600 font-semibold text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['onlyfans'] }}</a>
+                            <a href="{{ $profile['onlyfans'] }}" class="block text-pink-600 font-semibold text-xs sm:text-base hover:underline break-all mb-2" target="_blank" rel="noopener noreferrer">{{ $profile['onlyfans'] }}</a>
                             @endif
                         </div>
                         @endif
@@ -392,119 +392,119 @@ $profileTags = array_values(array_unique(array_merge(
                         @if(!empty($profile['twitter']) || !empty($profile['whatsapp']))
                         <div class="mt-2">
                             <div class="flex items-center gap-2 mt-2">
-                                <i class="fa-solid fa-share-nodes text-blue-600 text-2xl"></i>
-                                <span class="text-xs font-bold text-black">SOCIAL MEDIA:</span>
+                                <i class="fa-solid fa-share-nodes text-blue-600 text-lg sm:text-2xl flex-shrink-0"></i>
+                                <span class="text-xs font-bold text-black">SOCIAL:</span>
                             </div>
                             <div class="flex gap-3 mt-2">
                                 @if(!empty($profile['twitter']))
                                 <a href="{{ $profile['twitter'] }}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline" title="Twitter">
-                                    <i class="fab fa-twitter-square fa-2x"></i>
+                                    <i class="fab fa-twitter-square text-lg sm:text-2xl"></i>
                                 </a>
                                 @endif
                                 @if(!empty($profile['whatsapp']))
                                 <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile['whatsapp']) }}" target="_blank" rel="noopener noreferrer" class="text-green-500 hover:underline" title="WhatsApp">
-                                    <i class="fab fa-whatsapp-square fa-2x"></i>
+                                    <i class="fab fa-whatsapp-square text-lg sm:text-2xl"></i>
                                 </a>
                                 @endif
                             </div>
                         </div>
                         @endif
-                        <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-3 sm:mt-4">
                             <button
                                 type="button"
                                 @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
                                 :class="isFavourite('{{ $profile['slug'] }}') ? 'bg-pink-50 text-pink-700 border-pink-400' : 'bg-white text-pink-700 border-gray-300 hover:bg-pink-50'"
-                                class="flex items-center gap-2 border rounded-xl px-6 py-3 transition font-semibold text-lg w-full justify-center"
+                                class="flex items-center gap-2 border rounded-lg sm:rounded-xl px-4 sm:px-6 py-2 sm:py-3 transition font-semibold text-sm sm:text-lg w-full justify-center"
                                 style="border-width:2px;"
                                 title="Save favourite"
                                 aria-label="Save favourite"
                             >
                                 <i
                                     :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart text-pink-600' : 'fa-regular fa-heart text-pink-600'"
-                                    class="fa-regular fa-heart text-pink-600 text-2xl"
+                                    class="fa-regular fa-heart text-pink-600 text-lg sm:text-2xl"
                                     aria-hidden="true"
                                 ></i>
                                 <span
-                                    class="font-semibold uppercase tracking-wide text-pink-700"
-                                    x-text="isFavourite('{{ $profile['slug'] }}') ? 'SAVED FAVOURITE' : 'SAVE FAVOURITE'"
-                                >SAVE FAVOURITE</span>
+                                    class="font-semibold uppercase tracking-wide text-pink-700 text-xs sm:text-base"
+                                    x-text="isFavourite('{{ $profile['slug'] }}') ? '✓ SAVED' : 'SAVE'"
+                                >SAVE</span>
                             </button>
                         </div>
                     </div>
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
-                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
-                        <h3 class="mb-2 text-lg font-bold text-pink-600 flex items-center gap-2">
-                            <i class="fa-solid fa-user-gear text-pink-500"></i> My profile
+                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-4 border border-gray-100">
+                        <h3 class="mb-2 text-base sm:text-lg font-bold text-pink-600 flex items-center gap-2">
+                            <i class="fa-solid fa-user-gear text-pink-500 flex-shrink-0"></i> <span>My profile</span>
                         </h3>
-                        <hr class="mb-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                        <hr class="mb-3 sm:mb-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 sm:gap-y-3 gap-x-4 sm:gap-x-6 text-xs sm:text-sm">
                             @if(!empty($profile['ethnicity']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-globe text-pink-600 w-5 text-center"></i>
-                                <div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-globe text-pink-600 w-4 text-center flex-shrink-0 mt-0.5"></i>
+                                <div class="min-w-0">
                                     <span>Ethnicity</span><br>
-                                    <span class="font-bold text-gray-900">{{ $profile['ethnicity'] }}</span>
+                                    <span class="font-bold text-gray-900 break-words">{{ $profile['ethnicity'] }}</span>
                                 </div>
                             </div>
                             @endif
                             @if(!empty($profile['hair_color']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-palette text-pink-600 w-5 text-center"></i>
-                                <div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-palette text-pink-600 w-4 text-center flex-shrink-0 mt-0.5"></i>
+                                <div class="min-w-0">
                                     <span>Hair color</span><br>
                                     <span class="font-bold text-gray-900">{{ $profile['hair_color'] }}</span>
                                 </div>
                             </div>
                             @endif
                             @if(!empty($profile['hair_length']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-scissors text-pink-600 w-5 text-center"></i>
-                                <div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-scissors text-pink-600 w-4 text-center flex-shrink-0 mt-0.5"></i>
+                                <div class="min-w-0">
                                     <span>Hair length</span><br>
                                     <span class="font-bold text-gray-900">{{ $profile['hair_length'] }}</span>
                                 </div>
                             </div>
                             @endif
                             @if(!empty($profile['body_type']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-child-reaching text-pink-600 w-5 text-center"></i>
-                                <div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-child-reaching text-pink-600 w-4 text-center flex-shrink-0 mt-0.5"></i>
+                                <div class="min-w-0">
                                     <span>Body type</span><br>
                                     <span class="font-bold text-gray-900">{{ $profile['body_type'] }}</span>
                                 </div>
                             </div>
                             @endif
                             @if(!empty($profile['age_group']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-hourglass-half text-pink-600 w-5 text-center"></i>
-                                <div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-hourglass-half text-pink-600 w-4 text-center flex-shrink-0 mt-0.5"></i>
+                                <div class="min-w-0">
                                     <span>Age group</span><br>
                                     <span class="font-bold text-gray-900">{{ $profile['age_group'] }}</span>
                                 </div>
                             </div>
                             @endif
                             @if(!empty($profile['bust_size']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-braille text-pink-600 w-5 text-center"></i>
-                                <div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-braille text-pink-600 w-4 text-center flex-shrink-0 mt-0.5"></i>
+                                <div class="min-w-0">
                                     <span>Bust size</span><br>
                                     <span class="font-bold text-gray-900">{{ $profile['bust_size'] }}</span>
                                 </div>
                             </div>
                             @endif
                             @if(!empty($profile['your_length']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-5 text-center"></i>
-                                <div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-ruler-vertical text-pink-600 w-4 text-center flex-shrink-0 mt-0.5"></i>
+                                <div class="min-w-0">
                                     <span>Length</span><br>
                                     <span class="font-bold text-gray-900">{{ $profile['your_length'] }}</span>
                                 </div>
                             </div>
                             @endif
                             @if(!empty($profile['city']))
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-location-dot text-pink-600 w-5 text-center"></i>
-                                <div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-location-dot text-pink-600 w-4 text-center flex-shrink-0 mt-0.5"></i>
+                                <div class="min-w-0">
                                     <span>Location</span><br>
                                     <span class="font-bold text-gray-900">{{ $profile['city'] }}{{ !empty($profile['state']) ? ', ' . $profile['state'] : '' }}</span>
                                 </div>
@@ -512,10 +512,10 @@ $profileTags = array_values(array_unique(array_merge(
                             @endif
                         </div>
                         @if(!empty($profileTags))
-                        <div class="flex flex-wrap gap-2 mt-6">
+                        <div class="flex flex-wrap gap-2 mt-4 sm:mt-6">
                             @foreach($profileTags as $tag)
                                 @if(!empty($tag))
-                                <span class="px-4 py-1 bg-pink-600 text-white rounded-full text-sm font-semibold" style="line-height:1.2;">{{ $tag }}</span>
+                                <span class="px-3 sm:px-4 py-1 bg-pink-600 text-white rounded-full text-xs sm:text-sm font-semibold" style="line-height:1.2;">{{ $tag }}</span>
                                 @endif
                             @endforeach
                         </div>
@@ -528,18 +528,18 @@ $profileTags = array_values(array_unique(array_merge(
                         });
                     @endphp
                     @if(!empty($nonEmptyRates))
-                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100">
-                        <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
-                            <i class="fa-regular fa-clock text-pink-600"></i> Rates
+                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-4 border border-gray-100">
+                        <h3 class="mb-2 text-base sm:text-lg font-bold flex items-center gap-2 text-pink-600">
+                            <i class="fa-regular fa-clock text-pink-600 flex-shrink-0"></i> <span>Rates</span>
                         </h3>
                         <hr class="mb-3">
-                        <div class="overflow-x-auto rounded-lg">
-                            <table class="min-w-full w-full text-sm">
+                        <div class="overflow-x-auto rounded-lg -mx-4 sm:-mx-4 sm:mx-0">
+                            <table class="min-w-full w-full text-xs sm:text-sm">
                                 <thead>
                                     <tr>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Session</th>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Outcall</th>
-                                        <th class="px-4 py-2 text-left font-bold text-black">In-call</th>
+                                        <th class="px-3 sm:px-4 py-2 text-left font-bold text-black">Session</th>
+                                        <th class="px-3 sm:px-4 py-2 text-left font-bold text-black">Out</th>
+                                        <th class="px-3 sm:px-4 py-2 text-left font-bold text-black">In</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -548,9 +548,9 @@ $profileTags = array_values(array_unique(array_merge(
                                         $sessionLabel = $rate['description'] ?: ($rate['group'] ?: 'Session');
                                     @endphp
                                     <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
-                                        <td class="px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
-                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: 'N/A' }}</td>
-                                        <td class="px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: 'N/A' }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: '—' }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: '—' }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -565,24 +565,24 @@ $profileTags = array_values(array_unique(array_merge(
                     @endphp
                     @if(!empty($nonEmptyAvailability))
                     <!-- My Availability Section -->
-                    <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mt-6">
-                        <h3 class="mb-2 text-lg font-bold flex items-center gap-2 text-pink-600">
-                            <i class="fa-regular fa-calendar-days text-pink-600"></i> My availability
+                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-4 border border-gray-100 mt-4 sm:mt-6">
+                        <h3 class="mb-2 text-base sm:text-lg font-bold flex items-center gap-2 text-pink-600">
+                            <i class="fa-regular fa-calendar-days text-pink-600 flex-shrink-0"></i> <span>My availability</span>
                         </h3>
                         <hr class="mb-3">
-                        <div class="overflow-x-auto rounded-lg">
-                            <table class="min-w-full w-full text-sm">
+                        <div class="overflow-x-auto rounded-lg -mx-4 sm:-mx-4 sm:mx-0">
+                            <table class="min-w-full w-full text-xs sm:text-sm">
                                 <thead>
                                     <tr>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Day</th>
-                                        <th class="px-4 py-2 text-left font-bold text-black">Time</th>
+                                        <th class="px-3 sm:px-4 py-2 text-left font-bold text-black">Day</th>
+                                        <th class="px-3 sm:px-4 py-2 text-left font-bold text-black">Time</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($nonEmptyAvailability as $i => $avail)
                                     <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
-                                        <td class="px-4 py-2 font-normal text-black">{{ $avail['day'] }}</td>
-                                        <td class="px-4 py-2 font-bold text-black">{{ $avail['time'] }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-normal text-black">{{ $avail['day'] }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $avail['time'] }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -594,8 +594,8 @@ $profileTags = array_values(array_unique(array_merge(
 
                       <button
                             onclick="document.getElementById('report-modal').classList.remove('hidden')"
-                            class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-gray-700 font-semibold hover:bg-gray-50 transition">
-                            <i class="fa-regular fa-flag"></i> Report User
+                            class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-lg sm:rounded-full border border-gray-300 bg-white px-3 py-2 text-xs sm:text-sm text-gray-700 font-semibold hover:bg-gray-50 transition">
+                            <i class="fa-regular fa-flag"></i> <span>Report User</span>
                         </button>
                 </div>
             </div>
