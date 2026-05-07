@@ -43,21 +43,21 @@
             @if(!empty($packages) && $packages->count() > 0)
                 <p class="text-gray-600 mb-4">You can purchase your credits in the following packages:</p>
 
-                <div class="overflow-hidden rounded-lg border border-gray-200">
-                    <table class="w-full text-sm">
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full text-sm min-w-[400px]">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="px-4 py-3 text-left font-semibold">Credits</th>
-                                <th class="px-4 py-3 text-left font-semibold">Total Price</th>
-                                <th class="px-4 py-3 text-right font-semibold">Price per credit</th>
+                                <th class="px-3 py-3 text-left font-semibold sm:px-4">Credits</th>
+                                <th class="px-3 py-3 text-left font-semibold sm:px-4">Total Price</th>
+                                <th class="px-3 py-3 text-right font-semibold sm:px-4">Price per credit</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-700">
                             @foreach($packages as $package)
                                 <tr class="border-t border-gray-100 {{ $loop->odd ? 'bg-white' : 'bg-gray-50' }}">
-                                    <td class="px-4 py-3">{{ $package->credits }}</td>
-                                    <td class="px-4 py-3 font-semibold">{{ $package->total_price }}</td>
-                                    <td class="px-4 py-3 text-right">{{ $package->price_per_credit }}</td>
+                                    <td class="px-3 py-3 sm:px-4">{{ $package->credits }}</td>
+                                    <td class="px-3 py-3 font-semibold sm:px-4">{{ $package->total_price }}</td>
+                                    <td class="px-3 py-3 text-right sm:px-4">{{ $package->price_per_credit }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -70,40 +70,40 @@
             @else
                 <p class="text-gray-600 mb-4">You can purchase your credits in the following packages:</p>
 
-                <div class="overflow-hidden rounded-lg border border-gray-200">
-                    <table class="w-full text-sm">
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full text-sm min-w-[400px]">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="px-4 py-3 text-left font-semibold">Credits</th>
-                                <th class="px-4 py-3 text-left font-semibold">Total Price</th>
-                                <th class="px-4 py-3 text-right font-semibold">Price per credit</th>
+                                <th class="px-3 py-3 text-left font-semibold sm:px-4">Credits</th>
+                                <th class="px-3 py-3 text-left font-semibold sm:px-4">Total Price</th>
+                                <th class="px-3 py-3 text-right font-semibold sm:px-4">Price per credit</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-700">
                             <tr class="border-t border-gray-100 bg-white">
-                                <td class="px-4 py-3">7</td>
-                                <td class="px-4 py-3 font-semibold">10 AUD $</td>
-                                <td class="px-4 py-3 text-right">AUD $1.43</td>
+                                <td class="px-3 py-3 sm:px-4">7</td>
+                                <td class="px-3 py-3 font-semibold sm:px-4">10 AUD $</td>
+                                <td class="px-3 py-3 text-right sm:px-4">AUD $1.43</td>
                             </tr>
                             <tr class="border-t border-gray-100 bg-gray-50">
-                                <td class="px-4 py-3">30</td>
-                                <td class="px-4 py-3 font-semibold">35 AUD $</td>
-                                <td class="px-4 py-3 text-right">AUD $1.17</td>
+                                <td class="px-3 py-3 sm:px-4">30</td>
+                                <td class="px-3 py-3 font-semibold sm:px-4">35 AUD $</td>
+                                <td class="px-3 py-3 text-right sm:px-4">AUD $1.17</td>
                             </tr>
                             <tr class="border-t border-gray-100 bg-white">
-                                <td class="px-4 py-3">60</td>
-                                <td class="px-4 py-3 font-semibold">65 AUD $</td>
-                                <td class="px-4 py-3 text-right">AUD $1.08</td>
+                                <td class="px-3 py-3 sm:px-4">60</td>
+                                <td class="px-3 py-3 font-semibold sm:px-4">65 AUD $</td>
+                                <td class="px-3 py-3 text-right sm:px-4">AUD $1.08</td>
                             </tr>
                             <tr class="border-t border-gray-100 bg-gray-50">
-                                <td class="px-4 py-3">120</td>
-                                <td class="px-4 py-3 font-semibold">120 AUD $</td>
-                                <td class="px-4 py-3 text-right">AUD $1.00</td>
+                                <td class="px-3 py-3 sm:px-4">120</td>
+                                <td class="px-3 py-3 font-semibold sm:px-4">120 AUD $</td>
+                                <td class="px-3 py-3 text-right sm:px-4">AUD $1.00</td>
                             </tr>
                             <tr class="border-t border-gray-100 bg-white">
-                                <td class="px-4 py-3">180</td>
-                                <td class="px-4 py-3 font-semibold">160 AUD $</td>
-                                <td class="px-4 py-3 text-right">AUD $0.89</td>
+                                <td class="px-3 py-3 sm:px-4">180</td>
+                                <td class="px-3 py-3 font-semibold sm:px-4">160 AUD $</td>
+                                <td class="px-3 py-3 text-right sm:px-4">AUD $0.89</td>
                             </tr>
                         </tbody>
                     </table>
