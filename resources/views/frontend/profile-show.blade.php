@@ -112,7 +112,6 @@ $profileTags = array_values(array_unique(array_merge(
                           <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
                               x-data="{ visible: false }"
                               x-show="visible"
-                              x-cloak
                               x-transition:enter="transition duration-300"
                               x-transition:enter-start="opacity-0 scale-90"
                               x-transition:enter-end="opacity-100 scale-100"
@@ -120,7 +119,7 @@ $profileTags = array_values(array_unique(array_merge(
                               x-transition:leave-start="opacity-100 scale-100"
                               x-transition:leave-end="opacity-0 scale-90"
                               @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
-                              class="md:fixed md:left-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn hidden md:flex"
+                              class="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn md:flex"
                               style="margin-left: 0.5rem;">
                         <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
                             <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
@@ -139,7 +138,6 @@ $profileTags = array_values(array_unique(array_merge(
                                 <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
                                     x-data="{ visible: false }"
                                     x-show="visible"
-                                    x-cloak
                                     x-transition:enter="transition duration-300"
                                     x-transition:enter-start="opacity-0 scale-90"
                                     x-transition:enter-end="opacity-100 scale-100"
@@ -147,7 +145,7 @@ $profileTags = array_values(array_unique(array_merge(
                                     x-transition:leave-start="opacity-100 scale-100"
                                     x-transition:leave-end="opacity-0 scale-90"
                                     @scroll.window.passive="visible = window.scrollY > 300 && (document.getElementById('main-footer')?.getBoundingClientRect().top ?? Infinity) > window.innerHeight"
-                                    class="md:fixed md:right-0 md:top-1/2 md:-translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn hidden md:flex"
+                                    class="fixed right-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn md:flex"
                                     style="margin-right: 0.5rem;">
                             <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
                                 <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
@@ -843,6 +841,25 @@ $profileTags = array_values(array_unique(array_merge(
 
         {{-- Ad: Profile Bottom --}}
         @include('layouts.partials.ads', ['position' => 'profile_bottom', 'pageKey' => 'profile'])
+
+        <!-- Scroll to Top Button -->
+        <button
+            id="scroll-to-top"
+            x-data="{ visible: false }"
+            x-show="visible"
+            x-transition:enter="transition duration-300"
+            x-transition:enter-start="opacity-0 scale-90"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-90"
+            @scroll.window.passive="visible = window.scrollY > 300"
+            @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            class="fixed bottom-6 right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg transition-all hover:scale-110"
+            title="Scroll to top"
+            aria-label="Scroll to top">
+            <i class="fa-solid fa-arrow-up text-lg sm:text-xl"></i>
+        </button>
     </div>
 </div>
 
