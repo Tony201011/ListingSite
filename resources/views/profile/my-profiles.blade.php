@@ -116,7 +116,7 @@
                                     <div class="flex w-full flex-wrap items-stretch gap-2 sm:w-auto sm:items-center sm:justify-end">
                                         {{-- Online Now toggle (only available for approved profiles) --}}
                                         @if($profile->profile_status === 'approved')
-                                            <div class="flex min-w-[8.5rem] flex-col items-start gap-1 sm:items-end">
+                                            <div class="flex min-w-32 flex-col items-start gap-1 sm:items-end">
                                                 <button
                                                     type="button"
                                                     @click="toggleOnline"
