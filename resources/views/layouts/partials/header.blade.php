@@ -189,7 +189,6 @@
                 @endforeach
 
                 @guest
-                    <a href="{{ url('/signin') }}" class="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-100 transition hover:bg-gray-800">Login</a>
                     <a href="{{ url('/signup') }}" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Join Now</a>
                 @endguest
             </div>
@@ -298,7 +297,6 @@
                     @endif
                 @endforeach
                 @guest
-                    <a @click="mobileMenu = false" href="{{ url('/signin') }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">Login</a>
                 @endguest
                 @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
                     <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block rounded-lg px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
