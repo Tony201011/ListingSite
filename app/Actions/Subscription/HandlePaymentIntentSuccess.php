@@ -59,10 +59,11 @@ class HandlePaymentIntentSuccess
                         'receipt_url' => $receiptUrl,
                         'paid_at' => now(),
                     ]);
-                    $locked->user?->increment('credits', $locked->credits);
-                    if ($locked->user) {
+                    $user = $locked->user;
+                    if ($user) {
+                        $user->increment('credits', $locked->credits);
                         CreditLog::create([
-                            'user_id' => $locked->user->id,
+                            'user_id' => $user->id,
                             'amount' => $locked->credits,
                             'type' => 'purchase_credit',
                             'description' => "Purchased {$locked->credits} credits",

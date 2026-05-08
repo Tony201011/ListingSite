@@ -214,7 +214,7 @@
         return Alpine.$data(document.querySelector('[x-data]'));
     }
 
-    window.proceedToPayment = async function (event) {
+    window.proceedToPayment = async function () {
         const data = getAlpineData();
         const form = document.getElementById('package-form');
         const invoiceName = form.querySelector('[name="invoice_name"]').value.trim();
@@ -251,7 +251,7 @@
             const result = await response.json();
 
             if (!response.ok || result.error) {
-                data.paymentError = result.error || result.message || 'Failed to initialise payment. Please try again.';
+                data.paymentError = result.error || result.message || 'Failed to initialize payment. Please try again.';
                 data.processing = false;
                 return;
             }
@@ -274,7 +274,7 @@
         }
     };
 
-    window.submitPayment = async function (event) {
+    window.submitPayment = async function () {
         const data = getAlpineData();
         data.processing = true;
         data.paymentError = null;
