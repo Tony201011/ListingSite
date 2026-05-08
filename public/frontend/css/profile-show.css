@@ -2,7 +2,7 @@ html {
     scroll-behavior: smooth;
 }
 
-body:has(.profile-page-content) {
+body.profile-show-page {
     overflow-x: hidden;
 }
 
