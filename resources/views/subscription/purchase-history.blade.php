@@ -44,6 +44,14 @@
             </div>
         @endif
 
+        <!-- Daily Purchases Line Graph -->
+        <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+            <h2 class="mb-4 text-sm font-semibold text-gray-700">Purchases Day by Day</h2>
+            <div class="relative" style="height:220px">
+                <canvas id="purchasesLineChart"></canvas>
+            </div>
+        </div>
+
         <!-- Filters -->
         <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <form method="GET" class="flex flex-wrap gap-4">
@@ -277,6 +285,87 @@ function closeComplaintModal() {
 document.getElementById('complaint-modal').addEventListener('click', function(e) {
     if (e.target === this) closeComplaintModal();
 });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    var labels  = @json($chartData['labels']);
+    var amounts = @json($chartData['amounts']);
+    var counts  = @json($chartData['counts']);
+
+    var ctx = document.getElementById('purchasesLineChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Amount (AUD)',
+                    data: amounts,
+                    borderColor: '#e04ecb',
+                    backgroundColor: 'rgba(224,78,203,0.1)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    fill: true,
+                    tension: 0.3,
+                    yAxisID: 'yAmount',
+                },
+                {
+                    label: 'Purchases',
+                    data: counts,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99,102,241,0.08)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'yCount',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top', labels: { font: { size: 12 } } },
+                tooltip: {
+                    callbacks: {
+                        label: function (ctx) {
+                            if (ctx.dataset.yAxisID === 'yAmount') {
+                                return ' AUD $' + ctx.parsed.y.toFixed(2);
+                            }
+                            return ' ' + ctx.parsed.y + ' purchase' + (ctx.parsed.y !== 1 ? 's' : '');
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { maxTicksLimit: 15, font: { size: 11 } },
+                    grid: { color: 'rgba(0,0,0,0.04)' }
+                },
+                yAmount: {
+                    type: 'linear',
+                    position: 'left',
+                    beginAtZero: true,
+                    ticks: { font: { size: 11 }, callback: function (v) { return '$' + v; } },
+                    grid: { color: 'rgba(0,0,0,0.04)' }
+                },
+                yCount: {
+                    type: 'linear',
+                    position: 'right',
+                    beginAtZero: true,
+                    ticks: { font: { size: 11 }, stepSize: 1 },
+                    grid: { drawOnChartArea: false }
+                }
+            }
+        }
+    });
+}());
 </script>
 
 @endsection
