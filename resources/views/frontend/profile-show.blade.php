@@ -135,14 +135,12 @@ $profileTags = array_values(array_unique(array_merge(
                         x-transition:leave="transition duration-200"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-90"
-                        class="fixed z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn"
+                        class="fixed left-4 top-1/2 z-30 -translate-y-1/2"
+                        aria-label="Previous profile"
                         x-cloak>
-                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
-                                <span class="flex items-center"><i class="fa-solid fa-arrow-left text-lg sm:text-xl mr-2"></i> <span class="text-xs font-semibold">PREV</span></span>
-                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate profile-nav-name">{{ $prevProfile['name'] }}</span>
-                            </button>
-                        </div>
+                        <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-pink-200 bg-white shadow-lg transition hover:bg-pink-50">
+                            <i class="fa-solid fa-chevron-left text-xl text-pink-600"></i>
+                        </span>
                     </a>
                     @endif
 
@@ -171,14 +169,12 @@ $profileTags = array_values(array_unique(array_merge(
                         x-transition:leave="transition duration-200"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-90"
-                        class="fixed z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn"
+                        class="fixed right-4 top-1/2 z-30 -translate-y-1/2"
+                        aria-label="Next profile"
                         x-cloak>
-                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
-                                <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-lg sm:text-xl ml-2"></i></span>
-                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate profile-nav-name">{{ $nextProfile['name'] }}</span>
-                            </button>
-                        </div>
+                        <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-pink-200 bg-white shadow-lg transition hover:bg-pink-50">
+                            <i class="fa-solid fa-chevron-right text-xl text-pink-600"></i>
+                        </span>
                     </a>
                     @endif
                 <!-- Currently Touring Section -->
