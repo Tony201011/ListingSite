@@ -5,21 +5,14 @@
 
     function scrollToAnchor(target) {
         if (!target) return;
-
-        const scrollMarginTop = parseFloat(window.getComputedStyle(target).scrollMarginTop) || 0;
-        const top = target.getBoundingClientRect().top + window.pageYOffset - scrollMarginTop;
-
-        window.scrollTo({
-            top: Math.max(top, 0),
-            behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+        target.scrollIntoView({
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+            block: 'start'
         });
     }
 
     function initSmoothScrollLinks() {
         document.querySelectorAll('a.smooth-scroll[href^="#"]').forEach((anchor) => {
-            if (anchor.dataset.smoothScrollBound === 'true') return;
-
-            anchor.dataset.smoothScrollBound = 'true';
             anchor.addEventListener('click', (event) => {
                 const href = anchor.getAttribute('href') || '';
                 const targetId = href.slice(1);
