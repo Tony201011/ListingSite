@@ -17,6 +17,11 @@ body.profile-show-page {
     }
 }
 
+/* Scroll-to-top button: always anchor from the bottom, never from the top */
+#smooth-scroll-top {
+    top: unset !important;
+}
+
 /* Profile Prev/Next nav buttons – centred at the bottom on all screen sizes */
 .mobile-nav-btn-wrapper {
     position: fixed !important;
