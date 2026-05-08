@@ -99,6 +99,54 @@ class HandleStripeWebhook
     private function handlePaymentIntentSucceeded(object $paymentIntent): void
     {
         Log::info('Payment intent succeeded', ['id' => $paymentIntent->id]);
+
+        $transaction = PurchaseTransaction::where('stripe_payment_intent_id', $paymentIntent->id)->first();
+
+        if (! $transaction || $transaction->status === 'paid') {
+            return;
+        }
+
+        $receiptUrl = $paymentIntent->latest_charge?->receipt_url ?? null;
+
+        DB::transaction(function () use ($paymentIntent, $transaction, $receiptUrl) {
+            $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
+
+            if (! $locked || $locked->status === 'paid') {
+                return;
+            }
+
+            $locked->update([
+                'status' => 'paid',
+                'stripe_payment_intent_id' => $paymentIntent->id,
+                'receipt_url' => $receiptUrl,
+                'paid_at' => now(),
+            ]);
+
+            $user = $locked->user;
+            if ($user) {
+                $user->increment('credits', $locked->credits);
+                CreditLog::create([
+                    'user_id' => $user->id,
+                    'amount' => $locked->credits,
+                    'type' => 'purchase_credit',
+                    'description' => "Purchased {$locked->credits} credits",
+                    'reference_type' => PurchaseTransaction::class,
+                    'reference_id' => $locked->id,
+                ]);
+                Log::info('Credits added to user via payment_intent webhook', [
+                    'user_id' => $user->id,
+                    'credits_added' => $locked->credits,
+                    'transaction_id' => $locked->id,
+                    'payment_intent_id' => $paymentIntent->id,
+                ]);
+            }
+        });
+
+        $transaction->refresh();
+
+        if ($transaction->status === 'paid') {
+            $this->sendCreditPurchaseEmail->execute($transaction);
+        }
     }
 
     private function fetchReceiptUrl(?string $paymentIntentId): ?string

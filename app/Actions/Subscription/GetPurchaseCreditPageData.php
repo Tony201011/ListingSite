@@ -4,6 +4,7 @@ namespace App\Actions\Subscription;
 
 use App\Models\CreditPackage;
 use App\Models\PricingPage;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Auth;
 
 class GetPurchaseCreditPageData
@@ -28,12 +29,16 @@ class GetPurchaseCreditPageData
             $selectedPackageId = $defaultPackageId;
         }
 
+        $siteSetting = SiteSetting::first();
+
         return [
             'currentBalance' => $user->credits ?? 0,
             'userName' => $user->name ?? 'User',
             'pricingPage' => $pricingPage,
             'packages' => $packages,
             'selectedPackageId' => $selectedPackageId,
+            'stripePublishableKey' => $siteSetting?->stripe_publishable_key,
+            'stripeEnabled' => (bool) ($siteSetting?->stripe_enabled && $siteSetting?->stripe_publishable_key && $siteSetting?->stripe_secret_key),
         ];
     }
 }
