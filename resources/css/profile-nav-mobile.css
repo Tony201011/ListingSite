@@ -15,13 +15,13 @@
   }
 
   .mobile-prev-btn {
-    right: calc(50% + 0.25rem) !important;
-    left: unset !important;
+    left: 1rem !important;
+    right: unset !important;
   }
 
   .mobile-next-btn {
-    left: calc(50% + 0.25rem) !important;
-    right: unset !important;
+    right: 1rem !important;
+    left: unset !important;
   }
 
   /* Move the scroll-to-top button above the profile nav buttons so they don't overlap */
