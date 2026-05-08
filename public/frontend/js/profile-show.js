@@ -1,4 +1,44 @@
 (function () {
+    function prefersReducedMotion() {
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function scrollToAnchor(target) {
+        if (!target) return;
+
+        const scrollMarginTop = parseFloat(window.getComputedStyle(target).scrollMarginTop || '0') || 0;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - scrollMarginTop;
+
+        window.scrollTo({
+            top: Math.max(top, 0),
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+        });
+    }
+
+    function initSmoothScrollLinks() {
+        document.querySelectorAll('a.smooth-scroll[href^="#"]').forEach((anchor) => {
+            if (anchor.dataset.smoothScrollBound === 'true') return;
+
+            anchor.dataset.smoothScrollBound = 'true';
+            anchor.addEventListener('click', (event) => {
+                const href = anchor.getAttribute('href') || '';
+                const targetId = href.slice(1);
+                const target = document.getElementById(targetId);
+
+                if (!target) return;
+
+                event.preventDefault();
+                scrollToAnchor(target);
+
+                if (window.history && typeof window.history.pushState === 'function') {
+                    window.history.pushState(null, '', '#' + targetId);
+                } else {
+                    window.location.hash = targetId;
+                }
+            });
+        });
+    }
+
     function registerAlpineComponents(Alpine) {
         if (!Alpine || window.__profileShowAlpineRegistered) return;
         window.__profileShowAlpineRegistered = true;
@@ -30,27 +70,9 @@
             reportSuccess: '',
 
             init() {
-                this.initSmoothScroll();
+                initSmoothScrollLinks();
                 this.initLazyImages();
                 this.initVideoAutoPause();
-            },
-
-            initSmoothScroll() {
-                document.querySelectorAll('a.smooth-scroll[href^="#"]').forEach((anchor) => {
-                    anchor.addEventListener('click', (event) => {
-                        const href = anchor.getAttribute('href') || '';
-                        const targetId = href.slice(1);
-                        const target = document.getElementById(targetId);
-
-                        if (!target) return;
-
-                        event.preventDefault();
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    });
-                });
             },
 
             initLazyImages() {
@@ -311,4 +333,6 @@
             registerAlpineComponents(window.Alpine);
         }, { once: true });
     }
+
+    initSmoothScrollLinks();
 })();
