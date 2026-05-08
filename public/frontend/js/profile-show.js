@@ -1,4 +1,6 @@
 (function () {
+    let smoothScrollLinksBound = false;
+
     function prefersReducedMotion() {
         return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
@@ -12,13 +14,12 @@
     }
 
     function initSmoothScrollLinks() {
-        if (window.__profileShowSmoothScrollBound) return;
-        window.__profileShowSmoothScrollBound = true;
+        if (smoothScrollLinksBound) return;
+        smoothScrollLinksBound = true;
 
         document.addEventListener('click', (event) => {
-            const anchor = event.target && typeof event.target.closest === 'function'
-                ? event.target.closest('a.smooth-scroll[href^="#"]')
-                : null;
+            if (!(event.target instanceof Element)) return;
+            const anchor = event.target.closest('a.smooth-scroll[href^="#"]');
 
             if (!anchor) return;
 
