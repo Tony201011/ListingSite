@@ -53,7 +53,6 @@ class PasswordResetController extends Controller
         $userEmail = $request->validated('email');
 
         return back()
-            ->with('error', $result->message())
             ->withErrors($result->errors() ?: ['email' => [$result->message()]])
             ->withInput(['email' => $userEmail]);
     }
