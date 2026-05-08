@@ -12,23 +12,30 @@
     }
 
     function initSmoothScrollLinks() {
-        document.querySelectorAll('a.smooth-scroll[href^="#"]').forEach((anchor) => {
-            anchor.addEventListener('click', (event) => {
-                const href = anchor.getAttribute('href') || '';
-                const targetId = href.slice(1);
-                const target = document.getElementById(targetId);
+        if (window.__profileShowSmoothScrollBound) return;
+        window.__profileShowSmoothScrollBound = true;
 
-                if (!target) return;
+        document.addEventListener('click', (event) => {
+            const anchor = event.target && typeof event.target.closest === 'function'
+                ? event.target.closest('a.smooth-scroll[href^="#"]')
+                : null;
 
-                event.preventDefault();
-                scrollToAnchor(target);
+            if (!anchor) return;
 
-                if (window.history && typeof window.history.pushState === 'function') {
-                    window.history.pushState(null, '', '#' + targetId);
-                } else {
-                    window.location.hash = targetId;
-                }
-            });
+            const href = anchor.getAttribute('href') || '';
+            const targetId = href.slice(1);
+            const target = document.getElementById(targetId);
+
+            if (!target) return;
+
+            event.preventDefault();
+            scrollToAnchor(target);
+
+            if (window.history && typeof window.history.pushState === 'function') {
+                window.history.pushState(null, '', `#${targetId}`);
+            } else {
+                window.location.hash = targetId;
+            }
         });
     }
 
