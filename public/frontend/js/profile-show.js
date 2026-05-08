@@ -6,7 +6,7 @@
     function scrollToAnchor(target) {
         if (!target) return;
 
-        const scrollMarginTop = parseFloat(window.getComputedStyle(target).scrollMarginTop || '0') || 0;
+        const scrollMarginTop = parseFloat(window.getComputedStyle(target).scrollMarginTop) || 0;
         const top = target.getBoundingClientRect().top + window.pageYOffset - scrollMarginTop;
 
         window.scrollTo({
@@ -70,7 +70,6 @@
             reportSuccess: '',
 
             init() {
-                initSmoothScrollLinks();
                 this.initLazyImages();
                 this.initVideoAutoPause();
             },
