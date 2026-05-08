@@ -4,6 +4,7 @@
 @endpush
 
 @section('title', $profile['name'] . ' Profile')
+@section('bodyClass', 'profile-show-page')
 
 @php
 $profileTags = array_values(array_unique(array_merge(
