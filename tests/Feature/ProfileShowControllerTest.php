@@ -95,7 +95,7 @@ class ProfileShowControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    public function test_profile_show_returns_404_for_pending_profile(): void
+    public function test_profile_show_returns_404_for_unapproved_profile(): void
     {
         $pendingUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
