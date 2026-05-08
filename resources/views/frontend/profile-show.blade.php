@@ -456,37 +456,6 @@ $profileTags = array_values(array_unique(array_merge(
                             </button>
                         </div>
 
-                        <div class="mt-4 border-t border-gray-200 pt-4">
-                            <h4 class="text-sm font-bold text-gray-900 mb-2">Send booking enquiry</h4>
-
-                            @if (session('success'))
-                                <div class="mb-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
-                                    {{ session('success') }}
-                                </div>
-                            @endif
-
-                            @if ($errors->any())
-                                <div class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                                    {{ $errors->first() }}
-                                </div>
-                            @endif
-
-                            <form method="POST" action="{{ route('booking.enquiry') }}" class="space-y-2">
-                                @csrf
-                                <input type="hidden" name="user_id" value="{{ $profile['user_id'] }}">
-                                <label for="booking-email" class="sr-only">Email</label>
-                                <input id="booking-email" type="email" name="email" value="{{ old('email') }}" required maxlength="255" placeholder="Your email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
-                                <label for="booking-phone" class="sr-only">Phone</label>
-                                <input id="booking-phone" type="tel" name="phone" value="{{ old('phone') }}" maxlength="20" placeholder="Your phone (optional)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
-                                <label for="booking-datetime" class="sr-only">Date and time</label>
-                                <input id="booking-datetime" type="datetime-local" name="datetime" value="{{ old('datetime') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
-                                <label for="booking-message" class="sr-only">Message</label>
-                                <textarea id="booking-message" name="message" rows="3" maxlength="2000" placeholder="Your message (optional)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none">{{ old('message') }}</textarea>
-                                <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-lg px-4 py-2 text-sm font-semibold transition">
-                                    Send enquiry
-                                </button>
-                            </form>
-                        </div>
                     </div>
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
                      <div class="rounded-lg border border-gray-100 bg-white p-4 shadow sm:rounded-2xl sm:p-4">
