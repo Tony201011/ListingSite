@@ -31,13 +31,13 @@ html {
 }
 
 .mobile-prev-btn {
-    right: calc(50% + 0.25rem) !important;
-    left: unset !important;
+    left: 1rem !important;
+    right: unset !important;
 }
 
 .mobile-next-btn {
-    left: calc(50% + 0.25rem) !important;
-    right: unset !important;
+    right: 1rem !important;
+    left: unset !important;
 }
 
 /* Bottom padding keeps content clear of fixed nav buttons and the scroll-to-top button */
