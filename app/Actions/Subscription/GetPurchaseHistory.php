@@ -75,8 +75,8 @@ class GetPurchaseHistory
         while ($current->lte($endDate)) {
             $dayKey = $current->format('Y-m-d');
             $chartLabels[] = $current->format('d M');
-            $chartAmounts[] = isset($dailyTotals[$dayKey]) ? (float) $dailyTotals[$dayKey]->total : 0;
-            $chartCounts[] = isset($dailyTotals[$dayKey]) ? (int) $dailyTotals[$dayKey]->count : 0;
+            $chartAmounts[] = $dailyTotals[$dayKey]->total ?? 0;
+            $chartCounts[] = (int) ($dailyTotals[$dayKey]->count ?? 0);
             $current->addDay();
         }
 
