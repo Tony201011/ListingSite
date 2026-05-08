@@ -9,7 +9,7 @@
         'price' => number_format($p->price, 2),
     ])->values()->toJson();
 @endphp
-<div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{
+<div id="purchase-credit-flow" class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{
     selectedPackageId: {{ $selectedPackageId ?? 'null' }},
     packages: {{ $packagesJson }},
     step: 'select',
@@ -211,12 +211,19 @@
     let clientSecret = null;
 
     function getAlpineData() {
-        return Alpine.$data(document.querySelector('[x-data]'));
+        const purchaseCreditFlow = document.getElementById('purchase-credit-flow');
+
+        return purchaseCreditFlow ? Alpine.$data(purchaseCreditFlow) : null;
     }
 
     window.proceedToPayment = async function () {
         const data = getAlpineData();
         const form = document.getElementById('package-form');
+
+        if (!data || !form) {
+            return;
+        }
+
         const invoiceName = form.querySelector('[name="invoice_name"]').value.trim();
 
         if (!invoiceName) {
@@ -276,6 +283,11 @@
 
     window.submitPayment = async function () {
         const data = getAlpineData();
+
+        if (!data) {
+            return;
+        }
+
         data.processing = true;
         data.paymentError = null;
 

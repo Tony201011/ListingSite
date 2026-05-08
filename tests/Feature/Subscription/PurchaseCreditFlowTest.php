@@ -78,6 +78,23 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertViewIs('subscription.purchase-credit');
     }
 
+    public function test_purchase_credit_page_targets_its_own_alpine_component_for_payment_flow(): void
+    {
+        $user = $this->createProvider();
+        $this->createActivePackage();
+        SiteSetting::query()->create([
+            'stripe_enabled' => true,
+            'stripe_publishable_key' => 'pk_test_123',
+            'stripe_secret_key' => 'sk_test_123',
+        ]);
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSee('id="purchase-credit-flow"', false);
+        $response->assertSee("document.getElementById('purchase-credit-flow')", false);
+    }
+
     public function test_purchase_credit_page_shows_only_active_packages(): void
     {
         $user = $this->createProvider();
