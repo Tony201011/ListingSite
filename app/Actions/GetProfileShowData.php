@@ -16,6 +16,7 @@ class GetProfileShowData
     {
         $providerProfile = ProviderProfile::query()
             ->where('slug', $slug)
+            ->where('profile_status', 'approved')
             ->with([
                 'profileImages',
                 'primaryProfileImage',

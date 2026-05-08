@@ -95,15 +95,8 @@ class ProfileShowControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    public function test_profile_show_returns_200_for_pending_profile(): void
+    public function test_profile_show_returns_404_for_pending_profile(): void
     {
-        // GetProfileShowData does not filter by profile_status on the show page,
-        // so pending profiles are publicly accessible just like approved ones.
-        // We also need at least one approved profile so the adjacent-navigation
-        // queries (which DO filter by 'approved') return a non-empty slug and the
-        // view can generate its prev/next route URLs without throwing.
-        $this->createApprovedProvider(['name' => 'Approved', 'slug' => 'approved-001']);
-
         $pendingUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
             'user_id' => $pendingUser->id,
@@ -114,7 +107,7 @@ class ProfileShowControllerTest extends TestCase
 
         $response = $this->get(route('profile.show', ['slug' => 'pending-profile']));
 
-        $response->assertStatus(200);
+        $response->assertStatus(404);
     }
 
     public function test_profile_show_returns_404_for_soft_deleted_profile(): void
