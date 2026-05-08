@@ -1,9 +1,15 @@
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
 }
 
 .profile-page-content {
     overflow-x: hidden;
+    max-width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
