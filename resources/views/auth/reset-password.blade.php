@@ -15,7 +15,7 @@
 
         <!-- Header -->
         <div class="mb-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#e04ecb] pl-4">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
                 Reset Your Password
             </h2>
         </div>
