@@ -12,7 +12,7 @@
         </a>
 
         <div class="mb-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 pl-4">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
                 Change Your Email
             </h2>
         </div>

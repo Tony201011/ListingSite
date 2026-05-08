@@ -7,7 +7,7 @@
     <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
 
         <div class="flex items-center justify-between flex-wrap gap-4 mb-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 pl-4">Create your free profile</h2>
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Create your free profile</h2>
         </div>
 
         <div class="bg-white rounded-2xl p-6 md:p-8 mb-8 shadow-md border border-gray-100">

@@ -11,7 +11,7 @@
         </a>
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-md p-6 md:p-10">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Delete Account</h1>
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-3">Delete Account</h1>
             <p class="text-sm text-gray-600 mb-6">
                 This action is permanent. Once deleted, your profile, photos, videos, and account data cannot be recovered.
             </p>

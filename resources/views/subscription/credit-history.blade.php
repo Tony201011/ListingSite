@@ -5,8 +5,8 @@
     <div class="mx-auto w-full max-w-5xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="m-0 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">Credit History</h1>
-                <p class="mt-2 text-sm text-gray-600">Track every credit movement for your account.</p>
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Credit History</h1>
+                <p class="mt-3 text-gray-600">Track every credit movement for your account.</p>
             </div>
             <a href="{{ route('my-profile') }}" class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
         </div>

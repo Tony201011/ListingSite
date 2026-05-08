@@ -19,8 +19,8 @@
     <div class="mx-auto w-full max-w-5xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="m-0 text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight text-gray-900">Buy Credits</h1>
-                <p class="mt-2 text-xs sm:text-sm text-gray-600">One credit for every day your profile is online.</p>
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Buy Credits</h1>
+                <p class="mt-3 text-gray-600">One credit for every day your profile is online.</p>
             </div>
             <a href="{{ route('my-profile') }}" class="text-xs sm:text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline\">&larr; Back to dashboard</a>
         </div>

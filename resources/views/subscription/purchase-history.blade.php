@@ -11,8 +11,8 @@
     <div class="mx-auto w-full max-w-6xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="m-0 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">Purchase History</h1>
-                <p class="mt-2 text-sm text-gray-600">View all your credit purchase transactions.</p>
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Purchase History</h1>
+                <p class="mt-3 text-gray-600">View all your credit purchase transactions.</p>
             </div>
             <a href="{{ route('purchase-credit') }}" class="inline-flex items-center rounded-lg bg-[#e04ecb] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

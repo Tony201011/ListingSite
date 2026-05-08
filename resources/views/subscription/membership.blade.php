@@ -4,7 +4,7 @@
 <div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
     <div class="mx-auto w-full max-w-7xl">
         <div class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl">Choose Your Membership</h1>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight sm:text-4xl">Choose Your Membership</h1>
             <p class="mx-auto mt-3 max-w-2xl text-sm text-gray-600 sm:text-base">
                 Activate your profile and increase visibility with a plan that matches your promotion goals.
             </p>

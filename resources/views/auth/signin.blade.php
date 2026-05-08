@@ -16,7 +16,7 @@
 
 
         <div class="mb-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#e04ecb] pl-4">Login to your HOTESCORTS profile</h2>
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Login to your HOTESCORTS profile</h2>
         </div>
 
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">

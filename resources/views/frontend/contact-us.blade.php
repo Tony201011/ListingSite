@@ -84,7 +84,7 @@
 
             <div class="space-y-6">
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                    <h2 class="text-lg font-bold text-gray-900 mb-3">{{ $contactPage?->support_heading ?? 'Support Info' }}</h2>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ $contactPage?->support_heading ?? 'Support Info' }}</h2>
                     <p class="text-sm text-gray-600 mb-2">Response time: {{ $contactPage?->response_time ?? 'within 24 hours' }}</p>
                     <p class="text-sm text-gray-600 mb-2">Support email: {{ $contactEmail ?? 'support@hotescorts.com.au' }}</p>
                     <p class="text-sm text-gray-600">Category: {{ $contactPage?->category_label ?? 'contact-us' }}</p>
