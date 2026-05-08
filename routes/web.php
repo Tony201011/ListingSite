@@ -282,6 +282,7 @@ Route::middleware('provider.auth')->group(function () {
             /*** credit route start here */
             Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
             Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
+            Route::post('/purchase-credit/create-intent', [PurchaseCreditController::class, 'createPaymentIntent'])->name('purchase-credit.create-intent');
             Route::get('/purchase-credit/success', [PurchaseCreditController::class, 'checkoutSuccess'])->name('purchase-credit.success');
             Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
             Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');

@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\Subscription;
 
+use App\Actions\Subscription\CreatePaymentIntent;
 use App\Actions\Subscription\CreatePurchaseComplaint;
 use App\Actions\Subscription\GetCreditHistory;
 use App\Actions\Subscription\GetPurchaseCreditPageData;
 use App\Actions\Subscription\GetPurchaseHistory;
 use App\Actions\Subscription\HandleCheckoutSuccess;
+use App\Actions\Subscription\HandlePaymentIntentSuccess;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
 use App\Models\PurchaseTransaction;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,9 +24,11 @@ class PurchaseCreditController extends Controller
         private GetPurchaseCreditPageData $getPurchaseCreditPageData,
         private ProcessCreditCheckout $processCreditCheckout,
         private HandleCheckoutSuccess $handleCheckoutSuccess,
+        private HandlePaymentIntentSuccess $handlePaymentIntentSuccess,
         private GetPurchaseHistory $getPurchaseHistory,
         private CreatePurchaseComplaint $createPurchaseComplaint,
         private GetCreditHistory $getCreditHistory,
+        private CreatePaymentIntent $createPaymentIntent,
     ) {}
 
     public function purchaseCredit(): View
@@ -49,6 +54,25 @@ class PurchaseCreditController extends Controller
 
     public function checkoutSuccess(Request $request): RedirectResponse
     {
+        // Handle embedded PaymentElement flow
+        if ($request->get('payment_intent')) {
+            $paymentIntentId = $request->get('payment_intent');
+            $result = $this->handlePaymentIntentSuccess->execute($paymentIntentId);
+
+            return match ($result['status']) {
+                'paid' => redirect('/purchase-history')->with(
+                    'checkout_success',
+                    "Payment successful! {$result['credits']} credits have been added to your account."
+                ),
+                'not_found' => redirect('/purchase-credit')->withErrors('Transaction not found.'),
+                'not_configured' => redirect('/purchase-credit')->withErrors('Payment system is not configured.'),
+                'unpaid' => redirect('/purchase-credit')->withErrors('Payment was not completed.'),
+                'error' => redirect('/purchase-credit')->withErrors('Failed to verify payment: '.$result['error']),
+                default => redirect('/purchase-credit')->withErrors('An unexpected error occurred.'),
+            };
+        }
+
+        // Handle Stripe hosted checkout flow
         $sessionId = $request->get('session_id');
 
         if (! $sessionId) {
@@ -68,6 +92,17 @@ class PurchaseCreditController extends Controller
             'error' => redirect('/purchase-credit')->withErrors('Failed to verify payment: '.$result['error']),
             default => redirect('/purchase-credit')->withErrors('An unexpected error occurred.'),
         };
+    }
+
+    public function createPaymentIntent(CheckoutPurchaseCreditRequest $request): JsonResponse
+    {
+        $result = $this->createPaymentIntent->execute($request->validated());
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 422);
+        }
+
+        return response()->json($result);
     }
 
     public function creditHistory(): View
