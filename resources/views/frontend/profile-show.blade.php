@@ -295,7 +295,7 @@ $profileTags = array_values(array_unique(array_merge(
                     @endif
 
                     <!-- Profile Message Section -->
-                    @php($profileMessage = trim((string) ($profile['profile_message'] ?? '')))
+                    @if(!empty($profile['profile_message']))
                     <section>
                         <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100">
                             <div class="flex items-center mb-2 sm:mb-3 flex-wrap gap-1 sm:gap-2">
@@ -304,14 +304,11 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                             <div class="border-b border-gray-200 mb-3 sm:mb-4"></div>
                             <div class="prose max-w-none text-gray-700 leading-relaxed text-xs sm:text-base">
-                                @if($profileMessage !== '')
-                                    {!! nl2br(e($profileMessage)) !!}
-                                @else
-                                    <p class="m-0 text-gray-500">No message available.</p>
-                                @endif
+                                {!! nl2br($profile['profile_message']) !!}
                             </div>
                         </div>
                     </section>
+                    @endif
 
                     <!-- Contact Me For Section (Card Style) -->
                     <section id="contact-me-for" class="scroll-mt-32">
