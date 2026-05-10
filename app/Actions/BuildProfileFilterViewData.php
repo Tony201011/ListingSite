@@ -288,11 +288,6 @@ class BuildProfileFilterViewData
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
             ->whereHas('user')
-            ->whereHas('onlineUser', function (Builder $q): void {
-                $q->where('status', 'online')
-                    ->whereNotNull('online_expires_at')
-                    ->where('online_expires_at', '>', now());
-            })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
@@ -558,14 +553,10 @@ class BuildProfileFilterViewData
             })
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
-            ->join('online_users', 'online_users.provider_profile_id', '=', 'provider_profiles.id')
             ->where(function ($q) {
                 $q->whereNull('hide_show_profiles.id')
                     ->orWhere('hide_show_profiles.status', 'show');
             })
-            ->where('online_users.status', 'online')
-            ->whereNotNull('online_users.online_expires_at')
-            ->where('online_users.online_expires_at', '>', now())
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
             ->select('provider_profiles.id as provider_profile_id')
