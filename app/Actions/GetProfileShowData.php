@@ -18,9 +18,6 @@ class GetProfileShowData
         $providerProfile = ProviderProfile::query()
             ->where('slug', $slug)
             ->where('profile_status', 'approved')
-            ->whereHas('onlineUser', function ($query): void {
-                $this->applyOnlineFilter($query);
-            })
             ->with([
                 'profileImages',
                 'primaryProfileImage',
@@ -41,6 +38,13 @@ class GetProfileShowData
 
         abort_if($providerProfile === null, 404);
         abort_if($providerProfile->hideShowProfile?->status === 'hide', 404);
+
+        if (! $this->isProfileOnline($providerProfile)) {
+            return [
+                'offline' => true,
+                'profile_name' => $providerProfile->name ?? '',
+            ];
+        }
 
         $categoryIds = array_filter([
             $providerProfile->age_group_id,
@@ -420,6 +424,19 @@ class GetProfileShowData
             })
             ->values()
             ->all();
+    }
+
+    private function isProfileOnline(ProviderProfile $providerProfile): bool
+    {
+        $onlineUser = $providerProfile->onlineUser;
+
+        if ($onlineUser === null) {
+            return false;
+        }
+
+        return $onlineUser->status === 'online'
+            && $onlineUser->online_expires_at !== null
+            && $onlineUser->online_expires_at > now();
     }
 
     private function applyOnlineFilter(Builder $query): void
