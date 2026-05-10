@@ -62,8 +62,8 @@ class OnlineUsersChart extends ChartWidget
                 ->orderBy('year')
                 ->pluck('count', 'year');
 
-            $counts = $rawCounts->map(fn (int $count) => $count)->values()->all();
-            $labels = $rawCounts->keys()->map(fn (string $year) => $year)->all();
+            $counts = $rawCounts->values()->all();
+            $labels = $rawCounts->keys()->all();
         }
 
         return [
