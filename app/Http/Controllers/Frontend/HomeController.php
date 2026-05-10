@@ -50,6 +50,11 @@ class HomeController extends Controller
             $slug,
             $request->validated()
         );
+
+        if ($viewData['offline'] ?? false) {
+            return view('frontend.profile-offline', $viewData);
+        }
+
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
 
         $this->recordProfileView->execute($slug, $request);
