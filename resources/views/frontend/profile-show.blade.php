@@ -549,7 +549,7 @@ $profileTags = array_values(array_unique(array_merge(
                         $nonEmptyRates = array_filter($profile['price_list'] ?? [], function ($rate) {
                             return !empty($rate['outcall']) || !empty($rate['incall']);
                         });
-                        $formatRateValue = static function ($value) {
+                        $format_rate_value = static function ($value) {
                             $normalizedValue = trim((string) $value);
 
                             if ($normalizedValue === '') {
@@ -581,8 +581,8 @@ $profileTags = array_values(array_unique(array_merge(
                                     @endphp
                                     <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
                                         <td class="px-3 sm:px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
-                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $formatRateValue($rate['outcall'] ?? '') }}</td>
-                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $formatRateValue($rate['incall'] ?? '') }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $format_rate_value($rate['outcall'] ?? '') }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $format_rate_value($rate['incall'] ?? '') }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
