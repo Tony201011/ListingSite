@@ -6,6 +6,7 @@ use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
 use App\Models\ProviderProfile;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class GetProfileShowData
@@ -17,6 +18,9 @@ class GetProfileShowData
         $providerProfile = ProviderProfile::query()
             ->where('slug', $slug)
             ->where('profile_status', 'approved')
+            ->whereHas('onlineUser', function ($query): void {
+                $this->applyOnlineFilter($query);
+            })
             ->with([
                 'profileImages',
                 'primaryProfileImage',
@@ -295,6 +299,9 @@ class GetProfileShowData
             $adjacent = ProviderProfile::query()
                 ->where('profile_status', 'approved')
                 ->whereHas('user')
+                ->whereHas('onlineUser', function ($query): void {
+                    $this->applyOnlineFilter($query);
+                })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where('id', '<', $currentId)
                 ->orderByDesc('id')
@@ -304,6 +311,9 @@ class GetProfileShowData
                 $adjacent = ProviderProfile::query()
                     ->where('profile_status', 'approved')
                     ->whereHas('user')
+                    ->whereHas('onlineUser', function ($query): void {
+                        $this->applyOnlineFilter($query);
+                    })
                     ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                     ->orderByDesc('id')
                     ->first(['id', 'name', 'slug']);
@@ -312,6 +322,9 @@ class GetProfileShowData
             $adjacent = ProviderProfile::query()
                 ->where('profile_status', 'approved')
                 ->whereHas('user')
+                ->whereHas('onlineUser', function ($query): void {
+                    $this->applyOnlineFilter($query);
+                })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where('id', '>', $currentId)
                 ->orderBy('id')
@@ -321,6 +334,9 @@ class GetProfileShowData
                 $adjacent = ProviderProfile::query()
                     ->where('profile_status', 'approved')
                     ->whereHas('user')
+                    ->whereHas('onlineUser', function ($query): void {
+                        $this->applyOnlineFilter($query);
+                    })
                     ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                     ->orderBy('id')
                     ->first(['id', 'name', 'slug']);
@@ -344,6 +360,9 @@ class GetProfileShowData
             ->where('profile_status', 'approved')
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
+            ->whereHas('onlineUser', function ($query): void {
+                $this->applyOnlineFilter($query);
+            })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
                 'primaryProfileImage',
@@ -401,6 +420,13 @@ class GetProfileShowData
             })
             ->values()
             ->all();
+    }
+
+    private function applyOnlineFilter(Builder $query): void
+    {
+        $query->where('status', 'online')
+            ->whereNotNull('online_expires_at')
+            ->where('online_expires_at', '>', now());
     }
 
     private function normalizeMediaUrl(?string $path): ?string
