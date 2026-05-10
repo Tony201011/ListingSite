@@ -54,24 +54,31 @@ class DeductDailyCredits extends Command
                 return;
             }
 
-            DB::transaction(function () use ($user): void {
+            $wasDeducted = DB::transaction(function () use ($user): bool {
                 $locked = User::lockForUpdate()->find($user->id);
 
                 if (! $locked || $locked->credits <= 0) {
-                    return;
+                    return false;
                 }
 
+                $currentBalance = $locked->credits;
                 $locked->decrement('credits', 1);
 
                 CreditLog::create([
                     'user_id' => $locked->id,
                     'amount' => -1,
                     'type' => 'daily_deduction',
-                    'description' => 'Daily visibility fee',
+                    'description' => "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
                 ]);
+
+                return true;
             });
 
-            $deducted++;
+            if ($wasDeducted) {
+                $deducted++;
+            } else {
+                $skipped++;
+            }
         });
 
         Log::info('Daily credit deduction completed', [
