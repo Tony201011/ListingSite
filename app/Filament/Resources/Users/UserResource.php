@@ -1074,9 +1074,9 @@ class UserResource extends Resource
                         fn (ProviderProfile $record): HtmlString => new HtmlString(
                             $record->user?->providerProfiles
                                 ?->pluck('name')
-                                ->filter()
-                                ->map(fn (string $name): string => '&nbsp;&nbsp;&nbsp;&nbsp;'.e($name))
-                                ->implode('<br>') ?? ''
+                                ->filter(fn (mixed $name): bool => is_string($name) && $name !== '')
+                                ->map(fn (string $name): string => '<div style="padding-left: 0.75rem;">'.e($name).'</div>')
+                                ->implode('') ?? ''
                         )
                     )
                     ->html()
