@@ -54,6 +54,42 @@ document.addEventListener('alpine:init', () => {
             return Object.keys(this.validationErrors).length === 0;
         },
 
+        getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || this.csrfToken || '';
+        },
+
+        getXsrfTokenFromCookie() {
+            const cookie = document.cookie
+                .split(';')
+                .map(row => row.trim())
+                .find(row => row.startsWith('XSRF-TOKEN='));
+
+            return cookie ? decodeURIComponent(cookie.split('=').slice(1).join('=')) : '';
+        },
+
+        csrfHeaders() {
+            const xsrfToken = this.getXsrfTokenFromCookie();
+            if (xsrfToken) {
+                return { 'X-XSRF-TOKEN': xsrfToken };
+            }
+
+            const csrfToken = this.getCsrfToken();
+            if (csrfToken) {
+                return { 'X-CSRF-TOKEN': csrfToken };
+            }
+
+            return {};
+        },
+
+        requireCsrfHeaders() {
+            const headers = this.csrfHeaders();
+            if (Object.keys(headers).length > 0) {
+                return headers;
+            }
+
+            throw new Error('CSRF/XSRF security token not found. Please refresh the page and sign in again if the issue continues.');
+        },
+
         async saveRate() {
             if (!this.validateForm()) return;
 
@@ -63,7 +99,7 @@ document.addEventListener('alpine:init', () => {
                 description: this.form.desc,
                 incall: this.form.incall,
                 outcall: this.form.outcall,
-                extra: this.form.extra
+                extra: this.form.extra,
             };
 
             let url = this.storeUrl;
@@ -75,13 +111,15 @@ document.addEventListener('alpine:init', () => {
             }
 
             try {
+                const csrfHeaders = this.requireCsrfHeaders();
                 const res = await fetch(url, {
                     method,
+                    credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': this.csrfToken
+                        ...csrfHeaders,
                     },
                     body: JSON.stringify(payload)
                 });
@@ -120,7 +158,7 @@ document.addEventListener('alpine:init', () => {
                 this.cancelForm();
 
             } catch (e) {
-                this.error('Something went wrong');
+                this.error(e.message || 'Something went wrong');
             } finally {
                 this.isSubmitting = false;
             }
@@ -142,13 +180,15 @@ document.addEventListener('alpine:init', () => {
         async deleteRate(id, index) {
             try {
                 const url = this.deleteUrl.replace('__ID__', id);
+                const csrfHeaders = this.requireCsrfHeaders();
 
                 const res = await fetch(url, {
                     method: 'DELETE',
+                    credentials: 'same-origin',
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': this.csrfToken
+                        ...csrfHeaders,
                     }
                 });
 
