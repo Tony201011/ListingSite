@@ -33,7 +33,6 @@ class ProviderStatsOverview extends StatsOverviewWidget
         })->count();
         $online = (clone $profiles)->whereHas('onlineUser', function ($q) {
             $q->where('status', 'online')
-                ->whereNotNull('online_expires_at')
                 ->where('online_expires_at', '>', now());
         })->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
