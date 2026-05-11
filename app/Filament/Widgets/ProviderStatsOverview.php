@@ -31,7 +31,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
         $active = (clone $users)->whereHas('providerProfiles', function ($q) {
             $q->where('profile_status', 'approved');
         })->count();
-        $online = (clone $profiles)->whereHas('onlineUser', function ($q) {
+        $onlineCount = (clone $profiles)->whereHas('onlineUser', function ($q) {
             $q->where('status', 'online')
                 ->where('online_expires_at', '>', now());
         })->count();
@@ -46,7 +46,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
             Stat::make('Active Accounts', (string) $active)
                 ->color('success')
                 ->icon('heroicon-o-check-circle'),
-            Stat::make('Online Users', (string) $online)
+            Stat::make('Online Users', (string) $onlineCount)
                 ->color('success')
                 ->icon('heroicon-o-signal'),
             Stat::make('Blocked Accounts', (string) $blocked)
