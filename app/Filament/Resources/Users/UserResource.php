@@ -1085,7 +1085,7 @@ class UserResource extends Resource
                     ->toggleable(),
 
                 TextColumn::make('profile_status')
-                    ->label('Newest Profile Status')
+                    ->label('Current Profile Status')
                     ->badge()
                     ->state(fn (ProviderProfile $record): string => $record->profile_status ?? 'pending')
                     ->formatStateUsing(fn (string $state): string => ucfirst($state))
