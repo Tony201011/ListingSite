@@ -88,7 +88,7 @@ class UserResource extends Resource
                 "{$providerProfilesTable}.id",
                 ProviderProfile::query()
                     ->withTrashed()
-                    ->selectRaw('MAX(id)')
+                    ->selectRaw("MAX({$providerProfilesTable}.id)")
                     ->groupBy('user_id')
             )
             ->with([
@@ -1085,7 +1085,7 @@ class UserResource extends Resource
                     ->toggleable(),
 
                 TextColumn::make('profile_status')
-                    ->label('Latest Profile Status')
+                    ->label('Newest Profile Status')
                     ->badge()
                     ->state(fn (ProviderProfile $record): string => $record->profile_status ?? 'pending')
                     ->formatStateUsing(fn (string $state): string => ucfirst($state))
