@@ -176,4 +176,30 @@ class LoginLogoutTest extends TestCase
         $response = $this->get('/change-password');
         $response->assertRedirect('/signin');
     }
+
+    // ---------------------------------------------------------------
+    // Blocked user access
+    // ---------------------------------------------------------------
+
+    public function test_blocked_user_is_logged_out_when_accessing_provider_route(): void
+    {
+        $user = $this->createVerifiedUser(['is_blocked' => true]);
+
+        $response = $this->actingAs($user)->get('/select-profile');
+
+        $response->assertRedirect('/signin');
+        $this->assertGuest();
+    }
+
+    public function test_blocked_user_accessing_json_provider_route_gets_403(): void
+    {
+        $user = $this->createVerifiedUser(['is_blocked' => true]);
+
+        $response = $this->actingAs($user)
+            ->postJson('/online-status', ['status' => 'online']);
+
+        $response->assertStatus(403)
+            ->assertJson(['message' => 'Your account has been blocked.']);
+        $this->assertGuest();
+    }
 }
