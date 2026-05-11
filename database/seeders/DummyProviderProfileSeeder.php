@@ -265,9 +265,6 @@ class DummyProviderProfileSeeder extends Seeder
 
             $slug = Str::slug($name).'-'.$i;
 
-            // 3 out of 5 providers are approved; 1 pending; 1 rejected
-            $profileStatuses = ['approved', 'approved', 'approved', 'pending', 'rejected'];
-
             $providerProfile = ProviderProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -307,7 +304,7 @@ class DummyProviderProfileSeeder extends Seeder
                     'whatsapp' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 11) % 1000, ($i * 17) % 1000),
                     'is_verified' => $i % 3 === 0,
                     'is_featured' => $i <= 10,
-                    'profile_status' => $profileStatuses[$i % count($profileStatuses)],
+                    'profile_status' => 'approved',
                     'expires_at' => now()->addMonths(rand(1, 12)),
                 ],
             );
