@@ -50,7 +50,11 @@
             }
 
             $path = parse_url($url, PHP_URL_PATH);
-            $normalizedPath = '/'.trim((string) ($path === false || $path === null ? $url : $path), '/');
+            if ($path === false) {
+                return false;
+            }
+
+            $normalizedPath = '/'.trim((string) ($path ?? $url), '/');
 
             return $normalizedPath === $currentPath;
         };
