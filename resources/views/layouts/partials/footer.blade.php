@@ -54,7 +54,7 @@
                 return false;
             }
 
-            $normalizedPath = '/'.trim((string) ($path ?? $url), '/');
+            $normalizedPath = '/'.trim((string) ($path ?? '/'), '/');
 
             return $normalizedPath === $currentPath;
         };
