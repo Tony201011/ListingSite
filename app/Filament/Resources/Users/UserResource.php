@@ -1260,6 +1260,7 @@ class UserResource extends Resource
         $profileCards = $profiles
             ->map(function (ProviderProfile $profile, int $index): string {
                 $profileName = $profile->name ?: 'Untitled profile';
+                $escapedProfileName = e($profileName);
 
                 $badges = [
                     self::renderListingBadge(
@@ -1284,15 +1285,15 @@ class UserResource extends Resource
                     '<div class="rounded-2xl border border-red-100 bg-red-50/40 p-4">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div class="min-w-0">
-                                <h4 class="text-xs font-semibold uppercase tracking-[0.25em] text-red-500">Provider Profile %d: %s</h4>
+                                <div role="heading" aria-level="3" class="text-xs font-semibold uppercase tracking-[0.25em] text-red-500">Provider Profile %d: %s</div>
                                 <p class="mt-2 truncate text-lg font-semibold text-gray-900">%s</p>
                             </div>
                             <div class="flex flex-wrap gap-2">%s</div>
                         </div>
                     </div>',
                     $index + 1,
-                    e($profileName),
-                    e($profileName),
+                    $escapedProfileName,
+                    $escapedProfileName,
                     implode('', $badges),
                 );
             })
@@ -1319,7 +1320,7 @@ class UserResource extends Resource
                     <div class="flex min-w-0 items-center gap-4">
                         <img src="%s" alt="%s" class="h-16 w-16 rounded-full border border-red-100 object-cover shadow-sm" />
                         <div class="min-w-0">
-                            <h3 class="text-xs font-semibold uppercase tracking-[0.35em] text-red-500">Provider Account</h3>
+                            <div role="heading" aria-level="2" class="text-xs font-semibold uppercase tracking-[0.35em] text-red-500">Provider Account</div>
                             <p class="mt-2 truncate text-2xl font-semibold text-gray-950">%s</p>
                             <p class="mt-2 truncate text-sm text-gray-500">%s</p>
                             <p class="mt-1 text-sm text-gray-500">%s</p>
