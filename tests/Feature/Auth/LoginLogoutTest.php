@@ -181,7 +181,7 @@ class LoginLogoutTest extends TestCase
     // Blocked user access
     // ---------------------------------------------------------------
 
-    public function test_blocked_user_accessing_provider_route_is_logged_out_and_redirected(): void
+    public function test_blocked_user_is_logged_out_when_accessing_provider_route(): void
     {
         $user = $this->createVerifiedUser(['is_blocked' => true]);
 
