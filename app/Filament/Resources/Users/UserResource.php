@@ -108,6 +108,33 @@ class UserResource extends Resource
             ]);
     }
 
+    /**
+     * Override the query used to resolve a record for edit/view pages so that
+     * ANY ProviderProfile can be loaded by ID – not just the one per-user
+     * "latest profile" that the listing restricts to. This allows the admin to
+     * switch between a provider's profiles via the "Switch Profile" header
+     * action and edit each one independently.
+     */
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return ProviderProfile::query()
+            ->withTrashed()
+            ->with([
+                'user.providerProfiles' => fn (HasMany $query): HasMany => $query
+                    ->withTrashed()
+                    ->latest('id'),
+                'profileImages',
+                'userVideos',
+                'photoVerification',
+                'rates',
+                'availabilities',
+                'profileMessage',
+                'onlineUser',
+                'hideShowProfile',
+                'availableNow',
+            ]);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
