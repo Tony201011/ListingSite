@@ -113,11 +113,15 @@ class ProfileSwitchController extends Controller
             ->with('success', 'Switched to profile: '.$profile->name);
     }
 
-    public function destroy(ProviderProfile $profile): RedirectResponse
+    public function destroy(ProviderProfile $profile): RedirectResponse|JsonResponse
     {
         $this->authorizeProfileOwnership($profile);
 
         if (Auth::user()->providerProfiles()->count() <= 1) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'You cannot delete your only profile.'], 422);
+            }
+
             return back()->with('error', 'You cannot delete your only profile.');
         }
 
@@ -130,6 +134,10 @@ class ProfileSwitchController extends Controller
         }
 
         $profile->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Profile deleted.']);
+        }
 
         return redirect()->route('profiles.index')
             ->with('success', 'Profile deleted.');
