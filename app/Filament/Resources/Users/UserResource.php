@@ -1068,8 +1068,10 @@ class UserResource extends Resource
                 TextColumn::make('profile_status')
                     ->label('Status')
                     ->badge()
-                    ->state(fn (ProviderProfile $record): string => ucfirst($record->profile_status ?? 'pending'))
+                    ->state(fn (ProviderProfile $record): string => $record->user?->is_blocked ? 'blocked' : ($record->profile_status ?? 'pending'))
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
                     ->color(fn (string $state): string => match ($state) {
+                        'blocked' => 'danger',
                         'approved' => 'success',
                         'rejected' => 'danger',
                         default => 'warning',
