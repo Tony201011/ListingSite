@@ -18,6 +18,7 @@ class GetProfileShowData
         $providerProfile = ProviderProfile::query()
             ->where('slug', $slug)
             ->where('profile_status', 'approved')
+            ->where('is_blocked', false)
             ->with([
                 'profileImages',
                 'primaryProfileImage',
@@ -302,6 +303,7 @@ class GetProfileShowData
         if ($direction === 'prev') {
             $adjacent = ProviderProfile::query()
                 ->where('profile_status', 'approved')
+                ->where('is_blocked', false)
                 ->whereHas('user')
                 ->whereHas('onlineUser', function ($query): void {
                     $this->applyOnlineFilter($query);
@@ -314,6 +316,7 @@ class GetProfileShowData
             if ($adjacent === null) {
                 $adjacent = ProviderProfile::query()
                     ->where('profile_status', 'approved')
+                    ->where('is_blocked', false)
                     ->whereHas('user')
                     ->whereHas('onlineUser', function ($query): void {
                         $this->applyOnlineFilter($query);
@@ -325,6 +328,7 @@ class GetProfileShowData
         } else {
             $adjacent = ProviderProfile::query()
                 ->where('profile_status', 'approved')
+                ->where('is_blocked', false)
                 ->whereHas('user')
                 ->whereHas('onlineUser', function ($query): void {
                     $this->applyOnlineFilter($query);
@@ -337,6 +341,7 @@ class GetProfileShowData
             if ($adjacent === null) {
                 $adjacent = ProviderProfile::query()
                     ->where('profile_status', 'approved')
+                    ->where('is_blocked', false)
                     ->whereHas('user')
                     ->whereHas('onlineUser', function ($query): void {
                         $this->applyOnlineFilter($query);
@@ -362,6 +367,7 @@ class GetProfileShowData
         $profiles = ProviderProfile::query()
             ->where('id', '!=', $currentId)
             ->where('profile_status', 'approved')
+            ->where('is_blocked', false)
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
             ->whereHas('onlineUser', function ($query): void {

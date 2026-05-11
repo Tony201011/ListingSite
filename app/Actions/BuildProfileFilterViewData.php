@@ -287,6 +287,7 @@ class BuildProfileFilterViewData
         $query = ProviderProfile::query()
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
             ->whereHas('onlineUser', function (Builder $q): void {
                 $q->where('status', 'online')

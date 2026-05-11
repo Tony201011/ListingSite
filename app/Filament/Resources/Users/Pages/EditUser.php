@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
@@ -20,6 +21,11 @@ class EditUser extends EditRecord
     use LoadsProviderMediaBeforeFill;
 
     protected static string $resource = UserResource::class;
+
+    protected function getContentMaxWidth(): MaxWidth|string|null
+    {
+        return MaxWidth::Full;
+    }
 
     /**
      * Add a "Switch Profile" header action when the provider has more than one

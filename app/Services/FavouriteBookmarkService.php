@@ -33,6 +33,7 @@ class FavouriteBookmarkService
     {
         return ProviderProfile::whereNull('deleted_at')
             ->where('profile_status', 'approved')
+            ->where('is_blocked', false)
             ->where('slug', $slug)
             ->exists();
     }
