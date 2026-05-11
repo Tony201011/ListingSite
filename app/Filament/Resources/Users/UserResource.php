@@ -1071,7 +1071,6 @@ class UserResource extends Resource
                     ->state(fn (ProviderProfile $record): string => $record->profile_status ?? 'pending')
                     ->formatStateUsing(fn (string $state): string => ucfirst($state))
                     ->color(fn (string $state): string => match ($state) {
-                        'blocked' => 'danger',
                         'approved' => 'success',
                         'rejected' => 'danger',
                         default => 'warning',
