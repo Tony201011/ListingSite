@@ -80,10 +80,21 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $providerProfilesTable = (new ProviderProfile)->getTable();
+
         return parent::getEloquentQuery()
             ->withTrashed()
+            ->whereIn(
+                "{$providerProfilesTable}.id",
+                ProviderProfile::query()
+                    ->withTrashed()
+                    ->selectRaw('MAX(id)')
+                    ->groupBy('user_id')
+            )
             ->with([
-                'user.providerProfiles',
+                'user.providerProfiles' => fn (Builder $query): Builder => $query
+                    ->withTrashed()
+                    ->latest('id'),
                 'profileImages',
                 'userVideos',
                 'photoVerification',
@@ -1053,12 +1064,20 @@ class UserResource extends Resource
                     )
                     ->size(40),
 
-                TextColumn::make('name')
-                    ->label('Provider')
+                TextColumn::make('user.name')
+                    ->label('Account')
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
                     ->description(fn (ProviderProfile $record): string => $record->user?->email ?? ''),
+
+                TextColumn::make('user.providerProfiles.name')
+                    ->label('Profiles')
+                    ->listWithLineBreaks()
+                    ->bulleted()
+                    ->limitList(5)
+                    ->expandableLimitedList()
+                    ->toggleable(),
 
                 TextColumn::make('user.mobile')
                     ->label('Mobile')
@@ -1066,7 +1085,7 @@ class UserResource extends Resource
                     ->toggleable(),
 
                 TextColumn::make('profile_status')
-                    ->label('Status')
+                    ->label('Latest Profile Status')
                     ->badge()
                     ->state(fn (ProviderProfile $record): string => $record->profile_status ?? 'pending')
                     ->formatStateUsing(fn (string $state): string => ucfirst($state))
@@ -1142,7 +1161,17 @@ class UserResource extends Resource
                         'pending' => 'Pending',
                         'rejected' => 'Rejected',
                     ])
-                    ->attribute('profile_status')
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            filled($data['value'] ?? null),
+                            fn (Builder $query): Builder => $query->whereHas(
+                                'user.providerProfiles',
+                                fn (Builder $profileQuery): Builder => $profileQuery
+                                    ->withTrashed()
+                                    ->where('profile_status', $data['value'])
+                            )
+                        );
+                    })
                     ->placeholder('All Statuses'),
 
                 SelectFilter::make('deleted_status')
