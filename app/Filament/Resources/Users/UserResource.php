@@ -1165,8 +1165,10 @@ class UserResource extends Resource
                         'online' => 'Online',
                         'offline' => 'Offline',
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return match ($data['value'] ?? null) {
+                    ->query(function (Builder $query, mixed $data): Builder {
+                        $value = is_array($data) ? ($data['value'] ?? null) : $data;
+
+                        return match ($value) {
                             'online' => $query->whereHas('onlineUser', fn (Builder $q) => $q->where('status', 'online')->where('online_expires_at', '>', now())),
                             'offline' => $query->whereDoesntHave('onlineUser', fn (Builder $q) => $q->where('status', 'online')->where('online_expires_at', '>', now())),
                             default => $query,
