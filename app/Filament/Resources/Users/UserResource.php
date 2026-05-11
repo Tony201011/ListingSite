@@ -46,7 +46,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -93,7 +92,7 @@ class UserResource extends Resource
                     ->groupBy('user_id')
             )
             ->with([
-                'user.providerProfiles' => fn (HasMany $query): HasMany => $query
+                'user.providerProfiles' => fn (Builder $query): Builder => $query
                     ->withTrashed()
                     ->latest('id'),
                 'profileImages',
