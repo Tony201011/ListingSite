@@ -1059,15 +1059,17 @@ class UserResource extends Resource
                     ->html()
                     ->grow()
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where(function (Builder $query) use ($search): Builder {
+                        $escapedSearch = self::escapeLikeSearch($search);
+
+                        return $query->where(function (Builder $query) use ($escapedSearch): Builder {
                             return $query
                                 ->whereHas('user', fn (Builder $userQuery): Builder => $userQuery
-                                    ->where('name', 'like', "%{$search}%")
-                                    ->orWhere('email', 'like', "%{$search}%")
-                                    ->orWhere('mobile', 'like', "%{$search}%"))
+                                    ->where('name', 'like', "%{$escapedSearch}%")
+                                    ->orWhere('email', 'like', "%{$escapedSearch}%")
+                                    ->orWhere('mobile', 'like', "%{$escapedSearch}%"))
                                 ->orWhereHas('user.providerProfiles', fn (Builder $profileQuery): Builder => $profileQuery
                                     ->withTrashed()
-                                    ->where('name', 'like', "%{$search}%"));
+                                    ->where('name', 'like', "%{$escapedSearch}%"));
                         });
                     })
                     ->sortable()
@@ -1321,7 +1323,7 @@ class UserResource extends Resource
                 <div class="mt-6 space-y-3">%s</div>
             </div>',
             e(self::providerAvatarUrl($record)),
-            e($record->user?->name ?? 'Provider'),
+            e('Profile picture of '.($record->user?->name ?? 'Provider')),
             e($record->user?->name ?? 'Provider'),
             e($record->user?->email ?? 'No email available'),
             e($record->user?->mobile ?: 'No mobile number'),
@@ -1352,6 +1354,11 @@ class UserResource extends Resource
             $classes,
             e($label),
         );
+    }
+
+    private static function escapeLikeSearch(string $value): string
+    {
+        return addcslashes($value, '\\%_');
     }
 
     private static function profileCategoryOptions(string $parentSlug): array
