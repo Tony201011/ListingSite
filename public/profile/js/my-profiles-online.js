@@ -125,6 +125,14 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.$refs.profileCard.remove();
+
+                // Hide delete buttons if only one profile card remains
+                const remaining = document.querySelectorAll('[x-ref="profileCard"]');
+                if (remaining.length === 1) {
+                    remaining[0].querySelectorAll('[\\@click="deleteProfile"]').forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+                }
             } catch (error) {
                 this.showMessage(error.message || 'Could not delete profile.', 'error');
                 this.deleting = false;
