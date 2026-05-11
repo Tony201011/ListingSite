@@ -1081,6 +1081,12 @@ class UserResource extends Resource
                     ->state(fn (ProviderProfile $record): string => $record->is_featured ? 'Yes' : 'No')
                     ->color(fn (string $state): string => $state === 'Yes' ? 'success' : 'gray'),
 
+                TextColumn::make('online_status')
+                    ->label('Online')
+                    ->badge()
+                    ->getStateUsing(fn (ProviderProfile $record): string => $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline')
+                    ->color(fn (string $state): string => $state === 'Online' ? 'success' : 'gray'),
+
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
@@ -1152,6 +1158,21 @@ class UserResource extends Resource
                         };
                     })
                     ->placeholder('All Profiles'),
+
+                SelectFilter::make('online_status')
+                    ->label('Online Status')
+                    ->options([
+                        'online' => 'Online',
+                        'offline' => 'Offline',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'online' => $query->whereHas('onlineUser', fn (Builder $q) => $q->where('status', 'online')->where('online_expires_at', '>', now())),
+                            'offline' => $query->whereDoesntHave('onlineUser', fn (Builder $q) => $q->where('status', 'online')->where('online_expires_at', '>', now())),
+                            default => $query,
+                        };
+                    })
+                    ->placeholder('All'),
             ])
             ->recordActions([
                 ViewAction::make()
