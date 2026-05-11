@@ -52,10 +52,8 @@
                                     initialRemainingUses: @js($state['remainingUses']),
                                     initialExpiresAt: @js($state['expiresAt'] ?? null),
                                     updateUrl: @js(route('profiles.online-status', $profile)),
-                                    csrfToken: @js(csrf_token()),
-                                    deleteUrl: @js(route('profiles.destroy', $profile))
+                                    csrfToken: @js(csrf_token())
                                 })"
-                                x-ref="profileCard"
                             >
                                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div class="flex min-w-0 items-center gap-3">
@@ -165,16 +163,23 @@
                                         @endif
 
                                         @if($profiles->count() > 1)
-                                            <button
-                                                type="button"
-                                                @click="deleteProfile"
-                                                :disabled="deleting"
-                                                class="w-full rounded-lg bg-rose-50 px-3 py-1.5 text-center text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                                                aria-label="Delete profile {{ $profile->name }}"
+                                            <form
+                                                method="POST"
+                                                action="{{ route('profiles.destroy', $profile) }}"
+                                                x-data
+                                                @submit.prevent="if (confirm('Delete this profile? This cannot be undone.')) $el.submit()"
+                                                class="w-full sm:w-auto"
                                             >
-                                                <span x-show="deleting">Deleting…</span>
-                                                <span x-show="!deleting">Delete</span>
-                                            </button>
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    type="submit"
+                                                    class="w-full rounded-lg bg-rose-50 px-3 py-1.5 text-center text-sm font-medium text-rose-700 transition hover:bg-rose-100 sm:w-auto"
+                                                    aria-label="Delete profile {{ $profile->name }}"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </form>
                                         @endif
                                     </div>
                                 </div>

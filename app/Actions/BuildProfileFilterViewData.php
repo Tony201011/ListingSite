@@ -288,6 +288,11 @@ class BuildProfileFilterViewData
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
             ->whereHas('user')
+            ->whereHas('onlineUser', function (Builder $q): void {
+                $q->where('status', 'online')
+                    ->whereNotNull('online_expires_at')
+                    ->where('online_expires_at', '>', now());
+            })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
@@ -424,15 +429,6 @@ class BuildProfileFilterViewData
             }
         }
 
-        $nowTimestamp = now()->toDateTimeString();
-        $onlineFirstSql = "CASE WHEN EXISTS (
-            SELECT 1 FROM online_users
-            WHERE online_users.provider_profile_id = provider_profiles.id
-              AND online_users.status = 'online'
-              AND online_users.online_expires_at IS NOT NULL
-              AND online_users.online_expires_at > ?
-        ) THEN 0 ELSE 1 END ASC";
-
         switch ($girlsMode) {
             case 'popular':
                 $query->addSelect([
@@ -442,8 +438,7 @@ class BuildProfileFilterViewData
                 ]);
 
                 if (! $distanceOrderingApplied) {
-                    $query->orderByRaw($onlineFirstSql, [$nowTimestamp])
-                        ->orderByDesc('popularity_score')
+                    $query->orderByDesc('popularity_score')
                         ->orderByDesc('provider_profiles.is_featured')
                         ->orderByDesc('provider_profiles.created_at');
                 }
@@ -451,16 +446,14 @@ class BuildProfileFilterViewData
 
             case 'new':
                 if (! $distanceOrderingApplied) {
-                    $query->orderByRaw($onlineFirstSql, [$nowTimestamp])
-                        ->orderByDesc('provider_profiles.created_at')
+                    $query->orderByDesc('provider_profiles.created_at')
                         ->orderByDesc('provider_profiles.is_featured');
                 }
                 break;
 
             default:
                 if (! $distanceOrderingApplied) {
-                    $query->orderByRaw($onlineFirstSql, [$nowTimestamp])
-                        ->orderByDesc('provider_profiles.is_featured')
+                    $query->orderByDesc('provider_profiles.is_featured')
                         ->orderByDesc('provider_profiles.created_at');
                 }
                 break;
