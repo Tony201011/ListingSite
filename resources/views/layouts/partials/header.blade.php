@@ -128,6 +128,19 @@
         $showFreeTrialCta = (bool) ($headerWidget?->show_free_trial_cta ?? true);
         $freeTrialCtaText = trim((string) ($headerWidget?->free_trial_cta_text ?? 'Get 21 days for free'));
         $freeTrialCtaUrl = trim((string) ($headerWidget?->free_trial_cta_url ?? url('/signup')));
+        $currentPath = '/'.trim((string) (parse_url(url()->current(), PHP_URL_PATH) ?? ''), '/');
+        $currentPath = $currentPath === '//' ? '/' : $currentPath;
+        $hasQueryString = request()->getQueryString() !== null;
+        $isNavItemActive = function (string $url) use ($currentPath, $hasQueryString): bool {
+            $itemPath = '/'.trim((string) (parse_url($url, PHP_URL_PATH) ?? ''), '/');
+            $itemPath = $itemPath === '//' ? '/' : $itemPath;
+
+            if ($itemPath === '/') {
+                return $currentPath === '/' && ! $hasQueryString;
+            }
+
+            return $itemPath === $currentPath;
+        };
 @endphp
 
 <header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md" style="{{ $headerStyle }}">
@@ -246,7 +259,7 @@
                         </div>
                     </div>
                 @else
-                    @php $isActive = rtrim($item['url'], '/') === rtrim(url()->current(), '/'); @endphp
+                    @php $isActive = $isNavItemActive((string) $item['url']); @endphp
                     <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">{{ $item['label'] }}</a>
                 @endif
             @endforeach
@@ -305,7 +318,7 @@
                             </div>
                         </div>
                     @else
-                        @php $isActive = rtrim($item['url'], '/') === rtrim(url()->current(), '/'); @endphp
+                        @php $isActive = $isNavItemActive((string) $item['url']); @endphp
                         <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 {{ $isActive ? 'bg-gray-800 font-medium text-white' : 'text-gray-200 hover:bg-gray-800' }}">{{ $item['label'] }}</a>
                     @endif
                 @endforeach
