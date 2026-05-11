@@ -128,12 +128,15 @@
         $showFreeTrialCta = (bool) ($headerWidget?->show_free_trial_cta ?? true);
         $freeTrialCtaText = trim((string) ($headerWidget?->free_trial_cta_text ?? 'Get 21 days for free'));
         $freeTrialCtaUrl = trim((string) ($headerWidget?->free_trial_cta_url ?? url('/signup')));
-        $currentPath = '/'.trim((string) (parse_url(url()->current(), PHP_URL_PATH) ?? ''), '/');
-        $currentPath = $currentPath === '//' ? '/' : $currentPath;
+        $normalizePath = function (string $url): string {
+            $path = '/'.trim((string) (parse_url($url, PHP_URL_PATH) ?? ''), '/');
+
+            return $path === '//' ? '/' : $path;
+        };
+        $currentPath = $normalizePath(url()->current());
         $hasQueryString = request()->getQueryString() !== null;
-        $isNavItemActive = function (string $url) use ($currentPath, $hasQueryString): bool {
-            $itemPath = '/'.trim((string) (parse_url($url, PHP_URL_PATH) ?? ''), '/');
-            $itemPath = $itemPath === '//' ? '/' : $itemPath;
+        $isNavItemActive = function (string $url) use ($currentPath, $hasQueryString, $normalizePath): bool {
+            $itemPath = $normalizePath($url);
 
             if ($itemPath === '/') {
                 return $currentPath === '/' && ! $hasQueryString;
