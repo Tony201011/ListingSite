@@ -92,7 +92,7 @@ class UserResource extends Resource
                     ->groupBy('user_id')
             )
             ->with([
-                'user.providerProfiles' => fn (Builder $query): Builder => $query
+                'user.providerProfiles' => fn ($query) => $query
                     ->withTrashed()
                     ->latest('id'),
                 'profileImages',
