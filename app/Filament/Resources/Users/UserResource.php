@@ -42,6 +42,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -1080,12 +1081,11 @@ class UserResource extends Resource
                     )
                     ->size(40),
 
-                TextColumn::make('user.email')
-                    ->label('Email')
+                TextColumn::make('name')
+                    ->label('Profile Name')
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->description(fn (ProviderProfile $record): string => $record->name ?? '')
                     ->toggleable(),
 
                 TextColumn::make('user.mobile')
@@ -1287,6 +1287,12 @@ class UserResource extends Resource
                     ->successNotificationTitle('Profile deleted'),
             ])
             ->toolbarActions([])
+            ->groups([
+                Group::make('user.email')
+                    ->label('Account Email')
+                    ->collapsible(),
+            ])
+            ->defaultGroup('user.email')
             ->defaultSort('created_at', 'desc')
             ->striped()
             ->emptyStateHeading('No providers yet')
