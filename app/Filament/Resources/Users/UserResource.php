@@ -81,21 +81,9 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $providerProfilesTable = (new ProviderProfile)->getTable();
-
         return parent::getEloquentQuery()
             ->withTrashed()
-            ->whereIn(
-                "{$providerProfilesTable}.id",
-                ProviderProfile::query()
-                    ->withTrashed()
-                    ->selectRaw("MAX({$providerProfilesTable}.id)")
-                    ->groupBy('user_id')
-            )
             ->with([
-                'user.providerProfiles' => fn (HasMany $query): HasMany => $query
-                    ->withTrashed()
-                    ->latest('id'),
                 'profileImages',
                 'userVideos',
                 'photoVerification',
@@ -1097,16 +1085,7 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->description(
-                        fn (ProviderProfile $record): HtmlString => new HtmlString(
-                            $record->user?->providerProfiles
-                                ?->pluck('name')
-                                ->filter(fn (mixed $name): bool => is_string($name) && $name !== '')
-                                ->map(fn (string $name): string => '<div class="pl-3">'.e($name).'</div>')
-                                ->implode('') ?? ''
-                        )
-                    )
-                    ->html()
+                    ->description(fn (ProviderProfile $record): string => $record->name ?? '')
                     ->toggleable(),
 
                 TextColumn::make('user.mobile')
