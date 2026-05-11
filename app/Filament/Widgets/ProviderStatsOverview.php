@@ -47,7 +47,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ->color('success')
                 ->icon('heroicon-o-check-circle'),
             Stat::make('Online Users', (string) $onlineCount)
-                ->color('success')
+                ->color('info')
                 ->icon('heroicon-o-signal'),
             Stat::make('Blocked Accounts', (string) $blocked)
                 ->color('danger')
