@@ -39,6 +39,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -53,10 +54,6 @@ use Illuminate\Support\Str;
 class UserResource extends Resource
 {
     use ResolvesProfileCategoryValues;
-
-    private const AVATAR_BACKGROUND = 'FEE2E2';
-
-    private const AVATAR_FOREGROUND = '991B1B';
 
     protected static ?string $model = ProviderProfile::class;
 
@@ -1058,27 +1055,73 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
-                    ->label(' ')
-                    ->html()
-                    ->grow()
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        $escapedSearch = self::escapeLikeSearch($search);
+                ImageColumn::make('profile_image')
+                    ->label('')
+                    ->disk(fn (): string => config('filesystems.default', 'public'))
+                    ->circular()
+                    ->getStateUsing(fn (ProviderProfile $record): string => $record->profileImages->first()?->image ?? '')
+                    ->defaultImageUrl(
+                        fn (ProviderProfile $record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->user?->name ?? 'Provider').'&background=E5E7EB&color=111827'
+                    )
+                    ->size(40),
 
-                        return $query->where(function (Builder $query) use ($escapedSearch): Builder {
-                            return $query
-                                ->whereHas('user', fn (Builder $userQuery): Builder => $userQuery
-                                    ->where('name', 'like', "%{$escapedSearch}%")
-                                    ->orWhere('email', 'like', "%{$escapedSearch}%")
-                                    ->orWhere('mobile', 'like', "%{$escapedSearch}%"))
-                                ->orWhereHas('user.providerProfiles', fn (Builder $profileQuery): Builder => $profileQuery
-                                    ->withTrashed()
-                                    ->where('name', 'like', "%{$escapedSearch}%"));
-                        });
-                    })
+                TextColumn::make('user.name')
+                    ->label('Account')
+                    ->searchable()
                     ->sortable()
-                    ->formatStateUsing(fn (?string $state, ProviderProfile $record): HtmlString => self::renderProviderAccountCard($record))
-                    ->extraAttributes(['class' => 'py-4']),
+                    ->weight('semibold')
+                    ->description(fn (ProviderProfile $record): string => $record->user?->email ?? ''),
+
+                TextColumn::make('user.providerProfiles.name')
+                    ->label('Profiles')
+                    ->listWithLineBreaks()
+                    ->bulleted()
+                    ->limitList(5)
+                    ->expandableLimitedList()
+                    ->toggleable(),
+
+                TextColumn::make('user.mobile')
+                    ->label('Mobile')
+                    ->searchable()
+                    ->toggleable(),
+
+                TextColumn::make('profile_status')
+                    ->label('Current Profile Status')
+                    ->badge()
+                    ->state(fn (ProviderProfile $record): string => $record->profile_status ?? 'pending')
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->color(fn (string $state): string => match ($state) {
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        default => 'warning',
+                    }),
+
+                TextColumn::make('is_featured')
+                    ->label('Featured')
+                    ->badge()
+                    ->state(fn (ProviderProfile $record): string => $record->is_featured ? 'Yes' : 'No')
+                    ->color(fn (string $state): string => $state === 'Yes' ? 'success' : 'gray'),
+
+                TextColumn::make('online_status')
+                    ->label('Online')
+                    ->badge()
+                    ->getStateUsing(fn (ProviderProfile $record): string => $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline')
+                    ->color(fn (string $state): string => $state === 'Online' ? 'success' : 'gray'),
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime()
+                    ->sortable()
+                    ->since()
+                    ->tooltip(fn (ProviderProfile $record): string => $record->created_at?->format('M d, Y h:i A') ?? ''),
+
+                TextColumn::make('deleted_at')
+                    ->label('Deleted At')
+                    ->dateTime()
+                    ->sortable()
+                    ->since()
+                    ->placeholder('—')
+                    ->color('danger'),
             ])
             ->filters([
                 TernaryFilter::make('user.email_verified_at')
@@ -1237,6 +1280,7 @@ class UserResource extends Resource
             ])
             ->toolbarActions([])
             ->defaultSort('created_at', 'desc')
+            ->striped()
             ->emptyStateHeading('No providers yet')
             ->emptyStateDescription('Create your first provider to start managing accounts here.');
     }
@@ -1249,123 +1293,6 @@ class UserResource extends Resource
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
         ];
-    }
-
-    private static function renderProviderAccountCard(ProviderProfile $record): HtmlString
-    {
-        $profiles = $record->user?->providerProfiles
-            ?->sortByDesc('id')
-            ->values() ?? collect([$record]);
-
-        $profileCards = $profiles
-            ->map(function (ProviderProfile $profile, int $index): string {
-                $profileName = $profile->name ?: 'Untitled profile';
-                $badges = [
-                    self::renderListingBadge(
-                        ucfirst($profile->profile_status ?? 'pending'),
-                        match ($profile->profile_status) {
-                            'approved' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
-                            'rejected' => 'border-rose-200 bg-rose-50 text-rose-700',
-                            default => 'border-amber-200 bg-amber-50 text-amber-700',
-                        }
-                    ),
-                ];
-
-                if ($profile->is_featured) {
-                    $badges[] = self::renderListingBadge('Featured', 'border-red-200 bg-red-50 text-red-700');
-                }
-
-                if ($profile->deleted_at) {
-                    $badges[] = self::renderListingBadge('Deleted', 'border-slate-200 bg-slate-100 text-slate-600');
-                }
-
-                return sprintf(
-                    '<div class="rounded-2xl border border-red-100 bg-red-50/40 p-4">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div class="min-w-0">
-                                <h3 class="text-xs font-semibold uppercase tracking-[0.25em] text-red-500">Provider Profile %d</h3>
-                                <p class="mt-2 truncate text-lg font-semibold text-gray-900">%s</p>
-                            </div>
-                            <div class="flex flex-wrap gap-2">%s</div>
-                        </div>
-                    </div>',
-                    $index + 1,
-                    e($profileName),
-                    implode('', $badges),
-                );
-            })
-            ->implode('');
-
-        $accountBadges = [
-            self::renderListingBadge(
-                $record->user?->is_blocked ? 'Blocked' : 'Active',
-                $record->user?->is_blocked
-                    ? 'border-rose-200 bg-rose-50 text-rose-700'
-                    : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-            ),
-            self::renderListingBadge(
-                $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline',
-                $record->onlineUser?->isCurrentlyOnline()
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                    : 'border-slate-200 bg-slate-100 text-slate-600'
-            ),
-        ];
-
-        return new HtmlString(sprintf(
-            '<div class="mx-auto w-full max-w-4xl rounded-3xl border-2 border-red-500 bg-white p-6 shadow-sm">
-                <div class="flex flex-col gap-4 border-b border-red-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="flex min-w-0 items-center gap-4">
-                        <img src="%s" alt="%s" class="h-16 w-16 rounded-full border border-red-100 object-cover shadow-sm" />
-                        <div class="min-w-0">
-                            <h2 class="text-xs font-semibold uppercase tracking-[0.35em] text-red-500">Provider Account</h2>
-                            <p class="mt-2 truncate text-2xl font-semibold text-gray-950">%s</p>
-                            <p class="mt-2 truncate text-sm text-gray-500">%s</p>
-                            <p class="mt-1 text-sm text-gray-500">%s</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2">%s</div>
-                </div>
-                <div class="mt-6 space-y-3">%s</div>
-            </div>',
-            e(self::providerAvatarUrl($record)),
-            e('Profile picture of '.($record->user?->name ?? 'Provider')),
-            e($record->user?->name ?? 'Provider'),
-            e($record->user?->email ?? 'No email available'),
-            e($record->user?->mobile ?: 'No mobile number'),
-            implode('', $accountBadges),
-            $profileCards,
-        ));
-    }
-
-    private static function providerAvatarUrl(ProviderProfile $record): string
-    {
-        $path = $record->profileImages->first()?->image;
-
-        if (blank($path)) {
-            return 'https://ui-avatars.com/api/?name='.urlencode($record->user?->name ?? 'Provider')
-                .'&background='.self::AVATAR_BACKGROUND
-                .'&color='.self::AVATAR_FOREGROUND;
-        }
-
-        if (str_starts_with($path, 'http')) {
-            return $path;
-        }
-
-        return Storage::disk(config('filesystems.default', 'public'))->url($path);
-    }
-
-    private static function renderListingBadge(string $label, string $classes): string
-    {
-        return sprintf(
-            '<span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold %s">%s</span>',
-            $classes,
-            e($label),
-        );
-    }
-
-    private static function escapeLikeSearch(string $value): string
-    {
-        return addcslashes($value, '\\%_');
     }
 
     private static function profileCategoryOptions(string $parentSlug): array
