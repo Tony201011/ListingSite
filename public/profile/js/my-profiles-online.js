@@ -4,9 +4,11 @@ document.addEventListener('alpine:init', () => {
         remainingUses: Number(config.initialRemainingUses || 0),
         expiresAt: config.initialExpiresAt || null,
         updateUrl: config.updateUrl || '',
+        deleteUrl: config.deleteUrl || '',
         csrfToken: config.csrfToken || '',
 
         loading: false,
+        deleting: false,
         message: '',
         messageType: 'success',
         countdown: '00:00',
@@ -98,6 +100,34 @@ document.addEventListener('alpine:init', () => {
                 this.showMessage(error.message || 'Something went wrong.', 'error');
             } finally {
                 this.loading = false;
+            }
+        },
+
+        async deleteProfile() {
+            if (this.deleting || !this.deleteUrl) return;
+            if (!confirm('Delete this profile? This cannot be undone.')) return;
+
+            this.deleting = true;
+
+            try {
+                const response = await fetch(this.deleteUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Something went wrong.');
+                }
+
+                this.$refs.profileCard.remove();
+            } catch (error) {
+                this.showMessage(error.message || 'Could not delete profile.', 'error');
+                this.deleting = false;
             }
         },
 
