@@ -31,6 +31,11 @@ class ProviderStatsOverview extends StatsOverviewWidget
         $active = (clone $users)->whereHas('providerProfiles', function ($q) {
             $q->where('profile_status', 'approved');
         })->count();
+        $online = (clone $profiles)->whereHas('onlineUser', function ($q) {
+            $q->where('status', 'online')
+                ->whereNotNull('online_expires_at')
+                ->where('online_expires_at', '>', now());
+        })->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
         $verified = (clone $users)->whereNotNull('email_verified_at')->count();
         $featured = (clone $profiles)->where('is_featured', true)->count();
@@ -42,6 +47,9 @@ class ProviderStatsOverview extends StatsOverviewWidget
             Stat::make('Active Accounts', (string) $active)
                 ->color('success')
                 ->icon('heroicon-o-check-circle'),
+            Stat::make('Online Users', (string) $online)
+                ->color('success')
+                ->icon('heroicon-o-signal'),
             Stat::make('Blocked Accounts', (string) $blocked)
                 ->color('danger')
                 ->icon('heroicon-o-no-symbol'),
