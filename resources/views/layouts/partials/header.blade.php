@@ -246,7 +246,8 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">{{ $item['label'] }}</a>
+                    @php $isActive = rtrim($item['url'], '/') === rtrim(url()->current(), '/'); @endphp
+                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">{{ $item['label'] }}</a>
                 @endif
             @endforeach
             <div class="ml-auto flex items-center gap-2">
@@ -304,7 +305,8 @@
                             </div>
                         </div>
                     @else
-                        <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
+                        @php $isActive = rtrim($item['url'], '/') === rtrim(url()->current(), '/'); @endphp
+                        <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 {{ $isActive ? 'bg-gray-800 font-medium text-white' : 'text-gray-200 hover:bg-gray-800' }}">{{ $item['label'] }}</a>
                     @endif
                 @endforeach
                 @guest
