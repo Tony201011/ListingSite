@@ -1075,7 +1075,7 @@ class UserResource extends Resource
                             $record->user?->providerProfiles
                                 ?->pluck('name')
                                 ->filter(fn (mixed $name): bool => is_string($name) && $name !== '')
-                                ->map(fn (string $name): string => '<div style="padding-left: 0.75rem;">'.e($name).'</div>')
+                                ->map(fn (string $name): string => '<div class="pl-3">'.e($name).'</div>')
                                 ->implode('') ?? ''
                         )
                     )
