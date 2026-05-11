@@ -54,6 +54,28 @@ document.addEventListener('alpine:init', () => {
             return Object.keys(this.validationErrors).length === 0;
         },
 
+        getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || this.csrfToken || '';
+        },
+
+        getXsrfTokenFromCookie() {
+            const cookie = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('XSRF-TOKEN='));
+
+            return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+        },
+
+        csrfHeaders() {
+            const csrfToken = this.getCsrfToken();
+            const xsrfToken = this.getXsrfTokenFromCookie();
+
+            return {
+                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                ...(xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}),
+            };
+        },
+
         async saveRate() {
             if (!this.validateForm()) return;
 
@@ -63,7 +85,8 @@ document.addEventListener('alpine:init', () => {
                 description: this.form.desc,
                 incall: this.form.incall,
                 outcall: this.form.outcall,
-                extra: this.form.extra
+                extra: this.form.extra,
+                _token: this.getCsrfToken(),
             };
 
             let url = this.storeUrl;
@@ -77,11 +100,12 @@ document.addEventListener('alpine:init', () => {
             try {
                 const res = await fetch(url, {
                     method,
+                    credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': this.csrfToken
+                        ...this.csrfHeaders(),
                     },
                     body: JSON.stringify(payload)
                 });
@@ -145,10 +169,11 @@ document.addEventListener('alpine:init', () => {
 
                 const res = await fetch(url, {
                     method: 'DELETE',
+                    credentials: 'same-origin',
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': this.csrfToken
+                        ...this.csrfHeaders(),
                     }
                 });
 
