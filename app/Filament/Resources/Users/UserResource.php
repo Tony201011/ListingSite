@@ -1065,19 +1065,21 @@ class UserResource extends Resource
                     )
                     ->size(40),
 
-                TextColumn::make('user.name')
-                    ->label('Account')
+                TextColumn::make('user.email')
+                    ->label('Email')
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->description(fn (ProviderProfile $record): string => $record->user?->email ?? ''),
-
-                TextColumn::make('user.providerProfiles.name')
-                    ->label('Profiles')
-                    ->listWithLineBreaks()
-                    ->bulleted()
-                    ->limitList(5)
-                    ->expandableLimitedList()
+                    ->description(
+                        fn (ProviderProfile $record): HtmlString => new HtmlString(
+                            $record->user?->providerProfiles
+                                ?->pluck('name')
+                                ->filter(fn (mixed $name): bool => is_string($name) && $name !== '')
+                                ->map(fn (string $name): string => '<div class="pl-3">'.e($name).'</div>')
+                                ->implode('') ?? ''
+                        )
+                    )
+                    ->html()
                     ->toggleable(),
 
                 TextColumn::make('user.mobile')
