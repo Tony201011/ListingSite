@@ -48,7 +48,10 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ->icon('heroicon-o-check-circle'),
             Stat::make('Online Users', (string) $onlineCount)
                 ->color('info')
-                ->icon('heroicon-o-signal'),
+                ->icon('heroicon-o-signal')
+                ->url(fn (): string => route('filament.admin.resources.providers.index', [
+                    'tableFilters' => ['online_status' => ['value' => 'online']],
+                ])),
             Stat::make('Blocked Accounts', (string) $blocked)
                 ->color('danger')
                 ->icon('heroicon-o-no-symbol'),
