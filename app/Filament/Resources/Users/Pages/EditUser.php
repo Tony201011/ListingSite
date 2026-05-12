@@ -402,7 +402,7 @@ class EditUser extends EditRecord
             return $day;
         }
 
-        $normalized = ucfirst(strtolower($day));
+        $normalized = ucwords(strtolower(trim($day)));
 
         return in_array($normalized, self::WEEK_DAYS, true) ? $normalized : $day;
     }
