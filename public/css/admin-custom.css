@@ -33,3 +33,20 @@
 .fi-wi-chart .fi-wi-chart-canvas-ctn canvas {
     min-height: 100% !important;
 }
+
+/* Provider listing table: prevent inner scrollbars and wrap cell content */
+.fi-resource-users .fi-ta-ctn,
+.fi-resource-users .fi-ta-content {
+    overflow: visible !important;
+}
+
+.fi-resource-users .fi-ta-table {
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+.fi-resource-users .fi-ta-table th,
+.fi-resource-users .fi-ta-table td {
+    white-space: normal !important;
+    word-break: break-word;
+}

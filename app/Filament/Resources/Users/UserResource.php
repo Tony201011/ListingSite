@@ -1088,15 +1088,17 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
+                    ->wrap()
                     ->toggleable(),
 
                 TextColumn::make('user.mobile')
                     ->label('Mobile')
                     ->searchable()
+                    ->wrap()
                     ->toggleable(),
 
                 TextColumn::make('profile_status')
-                    ->label('Current Profile Status')
+                    ->label('Status')
                     ->badge()
                     ->state(fn (ProviderProfile $record): string => $record->is_blocked ? 'blocked' : ($record->profile_status ?? 'pending'))
                     ->formatStateUsing(fn (string $state): string => ucfirst($state))
@@ -1124,7 +1126,8 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->since()
-                    ->tooltip(fn (ProviderProfile $record): string => $record->created_at?->format('M d, Y h:i A') ?? ''),
+                    ->tooltip(fn (ProviderProfile $record): string => $record->created_at?->format('M d, Y h:i A') ?? '')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('deleted_at')
                     ->label('Deleted At')
@@ -1132,7 +1135,8 @@ class UserResource extends Resource
                     ->sortable()
                     ->since()
                     ->placeholder('—')
-                    ->color('danger'),
+                    ->color('danger')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TernaryFilter::make('user.email_verified_at')
