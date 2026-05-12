@@ -3,6 +3,24 @@
     min-height: 300px;
 }
 
+/* Provider profile pages - prevent inner scroll containers on non-contained tabs */
+.fi-sc-tabs:not(.fi-contained) > .fi-sc-tabs-tab {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+}
+
+/* Ensure the admin layout scrolls at the page level, not within a fixed container */
+.fi-layout {
+    height: auto !important;
+    min-height: 100dvh;
+}
+
+.fi-main-ctn {
+    overflow: visible !important;
+    height: auto !important;
+}
+
 /* Improve admin dashboard chart sizing and layout */
 .fi-wi-chart .fi-wi-chart-canvas-ctn {
     min-height: 360px;
