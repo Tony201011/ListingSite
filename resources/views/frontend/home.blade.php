@@ -253,15 +253,7 @@
                                 >
                                     <i :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
                                 </button>
-                                <button
-                                    type="button"
-                                    @click.prevent="toggleBookmark('{{ $profile['slug'] }}')"
-                                    :class="isBookmark('{{ $profile['slug'] }}') ? 'text-blue-500' : 'hover:text-blue-500'"
-                                    class="transition-colors"
-                                    title="Bookmark"
-                                >
-                                    <i :class="isBookmark('{{ $profile['slug'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
-                                </button>
+
                             </div>
                         </div>
 
