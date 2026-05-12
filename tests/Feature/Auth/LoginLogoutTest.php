@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -27,6 +28,27 @@ class LoginLogoutTest extends TestCase
     public function test_login_with_valid_credentials_redirects_to_select_profile(): void
     {
         $user = $this->createVerifiedUser();
+
+        $response = $this->from('/signin')->post('/signin', [
+            'email' => $user->email,
+            'password' => 'CorrectPass123',
+        ]);
+
+        $response->assertRedirect('/select-profile');
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_login_allows_user_with_blocked_profile(): void
+    {
+        $user = $this->createVerifiedUser();
+
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Blocked Listing',
+            'slug' => 'blocked-listing-'.$user->id,
+            'profile_status' => 'approved',
+            'is_blocked' => true,
+        ]);
 
         $response = $this->from('/signin')->post('/signin', [
             'email' => $user->email,

@@ -153,6 +153,20 @@ class HomeControllerTest extends TestCase
         $this->assertSame(0, $profiles->total());
     }
 
+    public function test_home_page_does_not_show_blocked_profiles(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Blocked Escort',
+            'slug' => 'blocked-escort',
+            'is_blocked' => true,
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(0, $profiles->total());
+    }
+
     public function test_home_page_does_not_show_soft_deleted_profiles(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);

@@ -122,6 +122,7 @@ class AppServiceProvider extends ServiceProvider
                                 ->where('provider_profiles.suburb', '!=', '')
                                 ->whereRaw($suburbLikeExpression)
                                 ->where('provider_profiles.profile_status', 'approved')
+                                ->where('provider_profiles.is_blocked', false)
                                 ->whereNull('provider_profiles.deleted_at');
                         })
                         ->orderBy('suburb')
