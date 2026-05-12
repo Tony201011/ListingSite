@@ -81,7 +81,7 @@ class FavouriteBookmarkService
             }
 
             $normalized = trim((string) $value);
-            if ($normalized !== '' && ctype_digit($normalized)) {
+            if ($this->isNumericId($normalized)) {
                 $numericIds[] = (int) $normalized;
             }
         }
@@ -108,9 +108,9 @@ class FavouriteBookmarkService
                 continue;
             }
 
-            if (ctype_digit($normalized)) {
+            if ($this->isNumericId($normalized)) {
                 $resolved = $idToSlug->get((int) $normalized);
-                if (! is_string($resolved) || $resolved === '') {
+                if ($resolved === null) {
                     continue;
                 }
                 $normalized = $resolved;
@@ -127,5 +127,10 @@ class FavouriteBookmarkService
         }
 
         return $normalizedSlugs;
+    }
+
+    private function isNumericId(string $value): bool
+    {
+        return $value !== '' && ctype_digit($value);
     }
 }
