@@ -101,6 +101,7 @@ Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
+Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
 Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
 
 Route::post('/favourite/{slug}', [FavouriteBookmarkController::class, 'toggleFavourite'])->name('favourite.toggle');
