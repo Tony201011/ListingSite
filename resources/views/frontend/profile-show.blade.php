@@ -16,8 +16,7 @@ $profileTags = array_values(array_unique(array_merge(
 
 @section('content')
 <div class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
-    x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
-    x-init="init()"
+    x-data="profileShowPage({ favourites: {{ Js::from($userFavourites ?? []) }}, reportUrl: '{{ route('profile.report') }}', profileId: {{ $profile['id'] }} })"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
@@ -950,64 +949,6 @@ $profileTags = array_values(array_unique(array_merge(
 </div>
 
 <script>
-    if (typeof window.favouriteBookmark !== 'function') {
-        window.favouriteBookmark = function favouriteBookmark(config = {}) {
-            return {
-                favourites: Array.isArray(config.favourites) ? config.favourites.map(String) : [],
-
-                init() {
-                    const stored = window.localStorage.getItem('profile_favourites');
-
-                    if (stored) {
-                        try {
-                            const parsed = JSON.parse(stored);
-
-                            if (Array.isArray(parsed)) {
-                                this.favourites = parsed.map(String);
-                            }
-                        } catch (error) {
-                            window.localStorage.removeItem('profile_favourites');
-                        }
-                    }
-                },
-
-                normalise(slug) {
-                    return String(slug || '').trim();
-                },
-
-                isFavourite(slug) {
-                    slug = this.normalise(slug);
-                    return this.favourites.map(String).includes(slug);
-                },
-
-                toggleFavourite(slug) {
-                    slug = this.normalise(slug);
-
-                    if (!slug) {
-                        return;
-                    }
-
-                    if (this.isFavourite(slug)) {
-                        this.favourites = this.favourites.filter(item => String(item) !== slug);
-                    } else {
-                        this.favourites.push(slug);
-                    }
-
-                    window.localStorage.setItem('profile_favourites', JSON.stringify(this.favourites));
-                }
-            };
-        };
-    }
-</script>
-
-<script>
-    window.__profileShowConfig = {
-        reportUrl: '{{ route('profile.report') }}',
-        profileId: {{ $profile['id'] }}
-    };
-</script>
-
-<script>
     function submitReport(event) {
         event.preventDefault();
 
@@ -1027,7 +968,7 @@ $profileTags = array_values(array_unique(array_merge(
         const formData = new FormData(form);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
-        fetch(window.__profileShowConfig.reportUrl, {
+        fetch('{{ route('profile.report') }}', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
