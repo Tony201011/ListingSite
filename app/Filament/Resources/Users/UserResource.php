@@ -48,6 +48,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -1076,20 +1077,18 @@ class UserResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query): Builder {
-                $providerProfilesTable = (new ProviderProfile)->getTable();
-
                 return $query
-                    ->select("{$providerProfilesTable}.*")
+                    ->leftJoin('online_users as active_online_users', function (JoinClause $join): void {
+                        $join
+                            ->on('active_online_users.provider_profile_id', '=', 'provider_profiles.id')
+                            ->where('active_online_users.status', '=', 'online')
+                            ->whereNotNull('active_online_users.online_expires_at')
+                            ->where('active_online_users.online_expires_at', '>', now());
+                    })
+                    ->select('provider_profiles.*')
                     ->selectRaw(
-                        "CASE WHEN EXISTS (
-                            SELECT 1
-                            FROM online_users
-                            WHERE online_users.provider_profile_id = {$providerProfilesTable}.id
-                              AND online_users.status = ?
-                              AND online_users.online_expires_at IS NOT NULL
-                              AND online_users.online_expires_at > ?
-                        ) THEN ? ELSE ? END AS online_status",
-                        ['online', now(), 'online', 'offline']
+                        'CASE WHEN active_online_users.id IS NULL THEN ? ELSE ? END AS online_status',
+                        ['offline', 'online']
                     );
             })
             ->columns([
