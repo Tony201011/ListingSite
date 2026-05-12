@@ -115,18 +115,7 @@ class ProviderProfile extends Model
     public function availabilities(): HasMany
     {
         return $this->hasMany(Availability::class, 'provider_profile_id')
-            ->orderByRaw("
-                CASE day
-                    WHEN 'Monday' THEN 1
-                    WHEN 'Tuesday' THEN 2
-                    WHEN 'Wednesday' THEN 3
-                    WHEN 'Thursday' THEN 4
-                    WHEN 'Friday' THEN 5
-                    WHEN 'Saturday' THEN 6
-                    WHEN 'Sunday' THEN 7
-                    ELSE 8
-                END
-            ");
+            ->orderedByWeekday();
     }
 
     public function profileImages(): HasMany
