@@ -33,15 +33,7 @@ class HomeControllerTest extends TestCase
             'age' => 25,
         ], $profileOverrides));
 
-        OnlineUser::query()->create([
-            'user_id' => $user->id,
-            'provider_profile_id' => $profile->id,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-            'online_started_at' => now()->subMinutes(5),
-            'online_expires_at' => now()->addMinutes(55),
-        ]);
+        $this->createActiveOnlineUser($user, $profile->id);
 
         return $user;
     }
@@ -66,15 +58,7 @@ class HomeControllerTest extends TestCase
             'suburb' => $storedSuburb,
         ], $profileOverrides));
 
-        OnlineUser::query()->create([
-            'user_id' => $user->id,
-            'provider_profile_id' => $profile->id,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-            'online_started_at' => now()->subMinutes(5),
-            'online_expires_at' => now()->addMinutes(55),
-        ]);
+        $this->createActiveOnlineUser($user, $profile->id);
 
         Postcode::query()->create([
             'suburb' => $suburb,
@@ -85,6 +69,19 @@ class HomeControllerTest extends TestCase
         ]);
 
         return $user;
+    }
+
+    private function createActiveOnlineUser(User $user, int $providerProfileId): void
+    {
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $providerProfileId,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => now()->addMinutes(55),
+        ]);
     }
 
     // ---------------------------------------------------------------
