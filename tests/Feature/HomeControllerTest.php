@@ -11,6 +11,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class HomeControllerTest extends TestCase
@@ -125,6 +126,23 @@ class HomeControllerTest extends TestCase
             'userFavourites',
             'userBookmarks',
         ]);
+    }
+
+    public function test_favourites_page_resolves_legacy_numeric_favourite_ids_to_slugs(): void
+    {
+        $providerUser = $this->createApprovedProvider(['name' => 'Legacy Favourite', 'slug' => 'legacy-favourite']);
+        $profile = ProviderProfile::query()->where('user_id', $providerUser->id)->firstOrFail();
+        $viewer = User::factory()->create();
+
+        Cache::put("favourites_user_{$viewer->id}", [(string) $profile->id], 60);
+
+        $response = $this->actingAs($viewer)->get('/favourites');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('userFavourites', ['legacy-favourite']);
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(1, $profiles);
+        $this->assertSame('legacy-favourite', $profiles[0]['slug']);
     }
 
     public function test_home_page_shows_default_filter_values(): void
