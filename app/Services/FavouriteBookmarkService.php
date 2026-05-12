@@ -92,7 +92,7 @@ class FavouriteBookmarkService
                 ->whereNull('deleted_at')
                 ->where('profile_status', 'approved')
                 ->where('is_blocked', false)
-                ->whereIn('id', array_values(array_unique($numericIds)))
+                ->whereIn('id', array_unique($numericIds))
                 ->pluck('slug', 'id');
 
         $seen = [];
