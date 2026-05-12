@@ -444,12 +444,12 @@
                     <span class="text-xs text-gray-400">No filters found.</span>
                 @endforelse
 
-                <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
-                    <button type="submit" class="inline-flex items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]">
+                <div class="flex flex-col gap-3 pt-2">
+                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b]">
                         Apply Filters
                     </button>
 
-                    <a href="{{ route('advanced-search') }}" class="inline-flex items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b] sm:min-w-[200px]">
+                    <a href="{{ route('advanced-search') }}" class="inline-flex w-full items-center justify-center rounded-md bg-[#b58aac] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#a6749b]">
                         Reset
                     </a>
                 </div>
