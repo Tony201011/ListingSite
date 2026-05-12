@@ -27,6 +27,7 @@ class SearchController extends Controller
                 ->whereNotNull('slug')
                 ->where('slug', '!=', '')
                 ->whereNull('deleted_at')
+                ->where('is_blocked', false)
                 ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
                 ->whereHas('onlineUser', function ($query): void {
                     $query->where('status', 'online')
@@ -46,6 +47,7 @@ class SearchController extends Controller
                 ->whereNull('deleted_at')
                 ->whereNotNull('slug')
                 ->where('slug', '!=', '')
+                ->where('is_blocked', false)
                 ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
                 ->whereHas('onlineUser', function ($query): void {
                     $query->where('status', 'online')

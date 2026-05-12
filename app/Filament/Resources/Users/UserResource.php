@@ -42,9 +42,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -780,8 +780,8 @@ class UserResource extends Resource
                                         ->label('Mobile Verified')
                                         ->boolean(),
 
-                                    IconEntry::make('user.is_blocked')
-                                        ->label('Blocked')
+                                    IconEntry::make('is_blocked')
+                                        ->label('Profile Blocked')
                                         ->boolean(),
                                 ])
                                 ->columns(3)
@@ -1096,11 +1096,12 @@ class UserResource extends Resource
                 TextColumn::make('profile_status')
                     ->label('Current Profile Status')
                     ->badge()
-                    ->state(fn (ProviderProfile $record): string => $record->profile_status ?? 'pending')
+                    ->state(fn (ProviderProfile $record): string => $record->is_blocked ? 'blocked' : ($record->profile_status ?? 'pending'))
                     ->formatStateUsing(fn (string $state): string => ucfirst($state))
                     ->color(fn (string $state): string => match ($state) {
                         'approved' => 'success',
                         'rejected' => 'danger',
+                        'blocked' => 'danger',
                         default => 'warning',
                     }),
 
@@ -1138,8 +1139,8 @@ class UserResource extends Resource
                     ->trueLabel('Verified')
                     ->falseLabel('Unverified'),
 
-                SelectFilter::make('user.is_blocked')
-                    ->label('Account')
+                SelectFilter::make('is_blocked')
+                    ->label('Block Status')
                     ->options([
                         '0' => 'Active',
                         '1' => 'Blocked',
@@ -1239,24 +1240,24 @@ class UserResource extends Resource
                     ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
 
                 Action::make('block')
-                    ->label('Block User')
+                    ->label('Block Profile')
                     ->color('danger')
                     ->icon('heroicon-o-lock-closed')
                     ->requiresConfirmation()
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->user?->is_blocked && ! $record->trashed())
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->is_blocked && ! $record->trashed())
                     ->action(function (ProviderProfile $record): void {
-                        $record->user?->update(['is_blocked' => true]);
+                        $record->update(['is_blocked' => true]);
                         SendAdminProviderEmailJob::dispatch($record->user?->id, 'blocked');
                     }),
 
                 Action::make('unblock')
-                    ->label('Unblock User')
+                    ->label('Unblock Profile')
                     ->color('success')
                     ->icon('heroicon-o-lock-open')
                     ->requiresConfirmation()
-                    ->visible(fn (ProviderProfile $record): bool => $record->user?->is_blocked && ! $record->trashed())
+                    ->visible(fn (ProviderProfile $record): bool => $record->is_blocked && ! $record->trashed())
                     ->action(function (ProviderProfile $record): void {
-                        $record->user?->update(['is_blocked' => false]);
+                        $record->update(['is_blocked' => false]);
                         SendAdminProviderEmailJob::dispatch($record->user?->id, 'unblocked');
                     }),
 

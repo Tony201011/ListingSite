@@ -22,6 +22,7 @@ class DeductDailyCredits extends Command
         // (which defaults to visible).
         $userIds = ProviderProfile::query()
             ->where('profile_status', 'approved')
+            ->where('is_blocked', false)
             ->whereNull('deleted_at')
             ->where(function ($query): void {
                 $query->whereExists(function ($sub): void {

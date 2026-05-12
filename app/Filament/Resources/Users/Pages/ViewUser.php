@@ -4,14 +4,19 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
 use App\Jobs\SendAdminProviderEmailJob;
-use App\Models\ProviderProfile;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\MaxWidth;
 
 class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
+
+    protected function getContentMaxWidth(): MaxWidth|string|null
+    {
+        return MaxWidth::Full;
+    }
 
     /**
      * Header actions for the provider view page.
@@ -95,29 +100,29 @@ class ViewUser extends ViewRecord
             }
         }
 
-        // Block / Unblock – toggle the underlying user account.
+        // Block / Unblock – toggle the profile block state.
         if (! $record->trashed()) {
-            if (! $record->user?->is_blocked) {
+            if (! $record->is_blocked) {
                 $actions[] = Action::make('block')
-                    ->label('Block User')
+                    ->label('Block Profile')
                     ->icon('heroicon-o-lock-closed')
                     ->color('danger')
                     ->requiresConfirmation()
                     ->action(function () use ($record): void {
+                        $record->update(['is_blocked' => true]);
                         if ($record->user) {
-                            $record->user->update(['is_blocked' => true]);
                             SendAdminProviderEmailJob::dispatch($record->user->id, 'blocked');
                         }
                     });
             } else {
                 $actions[] = Action::make('unblock')
-                    ->label('Unblock User')
+                    ->label('Unblock Profile')
                     ->icon('heroicon-o-lock-open')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function () use ($record): void {
+                        $record->update(['is_blocked' => false]);
                         if ($record->user) {
-                            $record->user->update(['is_blocked' => false]);
                             SendAdminProviderEmailJob::dispatch($record->user->id, 'unblocked');
                         }
                     });
