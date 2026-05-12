@@ -289,12 +289,10 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
-            ->where(function (Builder $q): void {
-                $q->whereHas('onlineUser', function (Builder $inner): void {
-                    $inner->where('status', 'online')
-                        ->whereNotNull('online_expires_at')
-                        ->where('online_expires_at', '>', now());
-                })->orWhere('provider_profiles.is_featured', true);
+            ->whereHas('onlineUser', function (Builder $inner): void {
+                $inner->where('status', 'online')
+                    ->whereNotNull('online_expires_at')
+                    ->where('online_expires_at', '>', now());
             })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
