@@ -86,6 +86,11 @@ $profileTags = array_values(array_unique(array_merge(
 
         <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-8 sm:mb-12">
+                    @if($profile['is_featured'] ?? false)
+                    <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-6 py-2 rounded bg-yellow-400 text-gray-900 font-extrabold text-sm sm:text-base tracking-wide" style="letter-spacing:0.5px;">
+                        <i class="fa-solid fa-star mr-1 text-xs"></i> FEATURED
+                    </div>
+                    @endif
                     @if($availableNow)
                     <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-sm sm:text-base tracking-wide" style="letter-spacing:0.5px;">
                         AVAILABLE NOW{{ $availableTillText }}

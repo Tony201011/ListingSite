@@ -39,7 +39,9 @@ class GetProfileShowData
         abort_if($providerProfile === null, 404);
         abort_if($providerProfile->hideShowProfile?->status === 'hide', 404);
 
-        if ($providerProfile->is_blocked || ! $this->isProfileOnline($providerProfile)) {
+        $isFeatured = (bool) $providerProfile->is_featured;
+
+        if ($providerProfile->is_blocked || (! $isFeatured && ! $this->isProfileOnline($providerProfile))) {
             return [
                 'offline' => true,
                 'profile_name' => $providerProfile->name ?? '',
