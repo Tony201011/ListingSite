@@ -20,6 +20,16 @@ class EditUser extends EditRecord
 {
     use LoadsProviderMediaBeforeFill;
 
+    private const WEEK_DAYS = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+    ];
+
     protected static string $resource = UserResource::class;
 
     protected function getContentMaxWidth(): MaxWidth|string|null
@@ -153,6 +163,27 @@ class EditUser extends EditRecord
         }
 
         return $tab;
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (! isset($data['availabilities']) || ! is_array($data['availabilities'])) {
+            return $data;
+        }
+
+        $data['availabilities'] = collect($data['availabilities'])
+            ->map(function (array $availability): array {
+                if (array_key_exists('day', $availability)) {
+                    $availability['day'] = $this->normalizeAvailabilityDay($availability['day']);
+                }
+
+                return $availability;
+            })
+            ->sortBy(fn (array $availability): int => $this->availabilityDaySortOrder($availability['day'] ?? null))
+            ->values()
+            ->all();
+
+        return $data;
     }
 
     protected function updateOverviewTab(Model $record, array $data): void
@@ -299,6 +330,16 @@ class EditUser extends EditRecord
             return;
         }
 
+        $data['availabilities'] = collect($data['availabilities'])
+            ->map(function (array $availability): array {
+                if (array_key_exists('day', $availability)) {
+                    $availability['day'] = $this->normalizeAvailabilityDay($availability['day']);
+                }
+
+                return $availability;
+            })
+            ->all();
+
         $this->syncHasManyRelation(
             $record->availabilities(),
             $data['availabilities'],
@@ -353,5 +394,24 @@ class EditUser extends EditRecord
                 $relation->create($attributes);
             }
         }
+    }
+
+    private function normalizeAvailabilityDay(?string $day): ?string
+    {
+        if (! filled($day)) {
+            return $day;
+        }
+
+        $normalized = ucwords(strtolower(trim($day)));
+
+        return in_array($normalized, self::WEEK_DAYS, true) ? $normalized : $day;
+    }
+
+    private function availabilityDaySortOrder(?string $day): int
+    {
+        $normalized = $this->normalizeAvailabilityDay($day);
+        $index = array_search($normalized, self::WEEK_DAYS, true);
+
+        return $index === false ? PHP_INT_MAX : $index;
     }
 }
