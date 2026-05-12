@@ -107,4 +107,29 @@ class AdminPanelTest extends TestCase
 
         $response->assertOk();
     }
+
+    public function test_featured_filter_in_providers_listing_shows_only_featured_profiles(): void
+    {
+        $admin = $this->createAdmin();
+
+        $featuredProvider = $this->createProvider(['name' => 'Featured Account']);
+        $featuredProvider->providerProfiles()->first()->update([
+            'name' => 'Featured Profile',
+            'slug' => 'featured-profile',
+            'is_featured' => true,
+        ]);
+
+        $regularProvider = $this->createProvider(['name' => 'Regular Account']);
+        $regularProvider->providerProfiles()->first()->update([
+            'name' => 'Regular Profile',
+            'slug' => 'regular-profile',
+            'is_featured' => false,
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/providers?filters[is_featured][value]=1');
+
+        $response->assertOk();
+        $response->assertSeeText('Featured Profile');
+        $response->assertDontSeeText('Regular Profile');
+    }
 }

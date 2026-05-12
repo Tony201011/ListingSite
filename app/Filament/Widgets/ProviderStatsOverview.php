@@ -63,7 +63,10 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ->icon('heroicon-o-shield-check'),
             Stat::make('Featured Profiles', (string) $featured)
                 ->color('info')
-                ->icon('heroicon-o-star'),
+                ->icon('heroicon-o-star')
+                ->url(fn (): string => route('filament.admin.resources.providers.index', [
+                    'filters' => ['is_featured' => ['value' => '1']],
+                ])),
         ];
     }
 
