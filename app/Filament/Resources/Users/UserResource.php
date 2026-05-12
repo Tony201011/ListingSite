@@ -1209,6 +1209,14 @@ class UserResource extends Resource
                     })
                     ->placeholder('All Statuses'),
 
+                SelectFilter::make('is_featured')
+                    ->label('Featured')
+                    ->options([
+                        '1' => 'Featured',
+                        '0' => 'Not Featured',
+                    ])
+                    ->placeholder('All'),
+
                 SelectFilter::make('deleted_status')
                     ->label('Deleted Status')
                     ->options([
