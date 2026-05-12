@@ -18,7 +18,6 @@ class GetProfileShowData
         $providerProfile = ProviderProfile::query()
             ->where('slug', $slug)
             ->where('profile_status', 'approved')
-            ->where('is_blocked', false)
             ->with([
                 'profileImages',
                 'primaryProfileImage',
@@ -40,7 +39,7 @@ class GetProfileShowData
         abort_if($providerProfile === null, 404);
         abort_if($providerProfile->hideShowProfile?->status === 'hide', 404);
 
-        if (! $this->isProfileOnline($providerProfile)) {
+        if ($providerProfile->is_blocked || ! $this->isProfileOnline($providerProfile)) {
             return [
                 'offline' => true,
                 'profile_name' => $providerProfile->name ?? '',
