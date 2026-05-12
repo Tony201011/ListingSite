@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\HideShowProfile;
+use App\Models\OnlineUser;
 use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
@@ -24,13 +25,23 @@ class HomeControllerTest extends TestCase
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
-        ProviderProfile::query()->create(array_merge([
+        $profile = ProviderProfile::query()->create(array_merge([
             'user_id' => $user->id,
             'name' => 'Test Escort',
             'slug' => 'test-escort-'.$user->id,
             'profile_status' => 'approved',
             'age' => 25,
         ], $profileOverrides));
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => now()->addMinutes(55),
+        ]);
 
         return $user;
     }
@@ -46,7 +57,7 @@ class HomeControllerTest extends TestCase
             'role' => User::ROLE_PROVIDER,
         ]);
 
-        ProviderProfile::query()->create(array_merge([
+        $profile = ProviderProfile::query()->create(array_merge([
             'user_id' => $user->id,
             'name' => 'Test Escort',
             'slug' => 'test-escort-'.$user->id,
@@ -54,6 +65,16 @@ class HomeControllerTest extends TestCase
             'age' => 25,
             'suburb' => $storedSuburb,
         ], $profileOverrides));
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => now()->addMinutes(55),
+        ]);
 
         Postcode::query()->create([
             'suburb' => $suburb,
