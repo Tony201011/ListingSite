@@ -100,12 +100,6 @@
                         showSuggestions: false,
                         highlightedIndex: -1,
                         abortController: null,
-                        escortTerm: {!! \Illuminate\Support\Js::from(request('escort_name', '')) !!},
-                        escortSuggestions: [],
-                        showEscortSuggestions: false,
-                        escortHighlightedIndex: -1,
-                        escortAbortController: null,
-
                         fetchSuggestions() {
                             const q = this.term.trim();
 
@@ -173,127 +167,13 @@
                             } else {
                                 this.closeSuggestions();
                             }
-                        },
-
-                        fetchEscortSuggestions() {
-                            const q = this.escortTerm.trim();
-
-                            if (q.length < 2) {
-                                this.closeEscortSuggestions();
-                                return;
-                            }
-
-                            if (this.escortAbortController) {
-                                this.escortAbortController.abort();
-                            }
-
-                            this.escortAbortController = new AbortController();
-
-                            fetch('{{ route('api.search.suggestions') }}?q=' + encodeURIComponent(q), {
-                                signal: this.escortAbortController.signal,
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            })
-                            .then(r => r.ok ? r.json() : Promise.resolve({ suggestions: [] }))
-                            .then(data => {
-                                this.escortSuggestions = (data.suggestions || []).map(item => ({
-                                    name: item.name || '',
-                                    value: item.name || '',
-                                    slug: item.slug || '',
-                                    label: item.location || ''
-                                }));
-
-                                this.showEscortSuggestions = this.escortSuggestions.length > 0;
-                                this.escortHighlightedIndex = -1;
-                            })
-                            .catch(err => {
-                                if (err.name !== 'AbortError') {
-                                    this.closeEscortSuggestions();
-                                }
-                            });
-                        },
-
-                        selectEscortSuggestion(item) {
-                            this.escortTerm = item.value;
-                            this.closeEscortSuggestions();
-                        },
-
-                        closeEscortSuggestions() {
-                            this.showEscortSuggestions = false;
-                            this.escortHighlightedIndex = -1;
-                        },
-
-                        escortHighlightNext() {
-                            if (!this.showEscortSuggestions) return;
-                            this.escortHighlightedIndex = Math.min(this.escortHighlightedIndex + 1, this.escortSuggestions.length - 1);
-                        },
-
-                        escortHighlightPrev() {
-                            if (!this.showEscortSuggestions) return;
-                            this.escortHighlightedIndex = Math.max(this.escortHighlightedIndex - 1, -1);
-                        },
-
-                        selectEscortHighlighted() {
-                            if (this.escortHighlightedIndex >= 0 && this.escortSuggestions[this.escortHighlightedIndex]) {
-                                this.selectEscortSuggestion(this.escortSuggestions[this.escortHighlightedIndex]);
-                            } else {
-                                this.closeEscortSuggestions();
-                            }
                         }
                     }"
-                    @keydown.escape="closeSuggestions(); closeEscortSuggestions()"
-                    @click.outside="closeSuggestions(); closeEscortSuggestions()"
+                    @keydown.escape="closeSuggestions()"
+                    @click.outside="closeSuggestions()"
                     class="space-y-4"
                 >
-                    <div class="space-y-4">
-                        <div class="relative">
-                            <label for="escort_name" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Escort Name</label>
-
-                            <input
-                                id="escort_name"
-                                name="escort_name"
-                                type="text"
-                                x-model="escortTerm"
-                                @input.debounce.300ms="fetchEscortSuggestions()"
-                                @focus="fetchEscortSuggestions()"
-                                @keydown.arrow-down.prevent="escortHighlightNext()"
-                                @keydown.arrow-up.prevent="escortHighlightPrev()"
-                                @keydown.enter.prevent="selectEscortHighlighted(); $event.target.form?.submit()"
-                                placeholder="Search by escort name"
-                                class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:border-pink-400 focus:outline-none"
-                                autocomplete="off"
-                            >
-
-                            <div
-                                x-show="showEscortSuggestions && escortSuggestions.length > 0"
-                                x-cloak
-                                x-transition
-                                class="absolute left-0 right-0 top-full z-[9999] mt-1 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl"
-                            >
-                                <ul class="divide-y divide-gray-100">
-                                    <template x-for="(item, index) in escortSuggestions" :key="index">
-                                        <li>
-                                            <button
-                                                type="button"
-                                                @mousedown.prevent="selectEscortSuggestion(item)"
-                                                class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition"
-                                                :class="index === escortHighlightedIndex ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-gray-50'"
-                                                @mouseenter="escortHighlightedIndex = index"
-                                                @mouseleave="escortHighlightedIndex = -1"
-                                            >
-                                                <i class="fa-solid fa-user shrink-0 text-xs text-gray-400"></i>
-                                                <span class="truncate" x-text="item.name"></span>
-                                                <span class="ml-auto shrink-0 text-xs text-gray-400" x-show="item.label" x-text="item.label"></span>
-                                            </button>
-                                        </li>
-                                    </template>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="relative">
+                    <div class="relative">
                             <label for="location" class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700">Location</label>
 
                             <input
@@ -338,7 +218,6 @@
                                     </template>
                                 </ul>
                             </div>
-                        </div>
                     </div>
                 </div>
 
@@ -522,10 +401,13 @@
                                     <input type="hidden" name="categories[]" :value="id">
                                 </template>
 
-                                <button
-                                    type="button"
-                                    class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-sm font-semibold text-gray-700"
+                                <div
+                                    role="button"
+                                    tabindex="0"
+                                    class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-sm font-semibold text-gray-700"
                                     @click="open = !open; if (open) $dispatch('filter-opened', '{{ $group['slug'] }}')"
+                                    @keydown.enter.prevent="open = !open; if (open) $dispatch('filter-opened', '{{ $group['slug'] }}')"
+                                    @keydown.space.prevent="open = !open; if (open) $dispatch('filter-opened', '{{ $group['slug'] }}')"
                                 >
                                     <span class="text-gray-500" x-show="selected.length === 0">Please select...</span>
 
@@ -533,11 +415,11 @@
                                         <template x-for="id in selected" :key="'chip-' + id">
                                             <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
                                                 <span x-text="(options.find(o => String(o.id) === String(id)) || {}).name"></span>
-                                                <button type="button" class="text-gray-500" @click.stop="selected = selected.filter(v => String(v) !== String(id))">×</button>
+                                                <button type="button" class="ml-1 text-gray-400 hover:text-gray-700 leading-none" @click.stop="selected = selected.filter(v => String(v) !== String(id))">×</button>
                                             </span>
                                         </template>
                                     </span>
-                                </button>
+                                </div>
 
                                 <div x-cloak x-show="open" x-transition class="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3">
                                     <template x-for="option in options.filter(o => !selected.includes(String(o.id)))" :key="'opt-' + option.id">
