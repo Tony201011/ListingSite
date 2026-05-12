@@ -21,12 +21,12 @@ class FavouriteBookmarkService
 
     public function getFavourites(): array
     {
-        return Cache::get($this->cacheKey('favourites'), []);
+        return $this->getNormalizedSlugs('favourites');
     }
 
     public function getBookmarks(): array
     {
-        return Cache::get($this->cacheKey('bookmarks'), []);
+        return $this->getNormalizedSlugs('bookmarks');
     }
 
     public function slugExists(string $slug): bool
@@ -41,7 +41,7 @@ class FavouriteBookmarkService
     private function toggle(string $type, string $slug): bool
     {
         $key = $this->cacheKey($type);
-        $slugs = Cache::get($key, []);
+        $slugs = $this->getNormalizedSlugs($type);
 
         if (in_array($slug, $slugs, true)) {
             $slugs = array_values(array_filter($slugs, fn ($s) => $s !== $slug));
@@ -63,5 +63,69 @@ class FavouriteBookmarkService
         }
 
         return "{$type}_sess_".session()->getId();
+    }
+
+    private function getNormalizedSlugs(string $type): array
+    {
+        $key = $this->cacheKey($type);
+        $cached = Cache::get($key, []);
+
+        if (! is_array($cached) || $cached === []) {
+            return [];
+        }
+
+        $numericIds = [];
+        foreach ($cached as $value) {
+            if (! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized = trim((string) $value);
+            if ($normalized !== '' && ctype_digit($normalized)) {
+                $numericIds[] = (int) $normalized;
+            }
+        }
+
+        $idToSlug = empty($numericIds)
+            ? collect()
+            : ProviderProfile::query()
+                ->whereNull('deleted_at')
+                ->where('profile_status', 'approved')
+                ->where('is_blocked', false)
+                ->whereIn('id', array_values(array_unique($numericIds)))
+                ->pluck('slug', 'id');
+
+        $seen = [];
+        $normalizedSlugs = [];
+
+        foreach ($cached as $value) {
+            if (! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized = trim((string) $value);
+            if ($normalized === '') {
+                continue;
+            }
+
+            if (ctype_digit($normalized)) {
+                $resolved = $idToSlug->get((int) $normalized);
+                if (! is_string($resolved) || $resolved === '') {
+                    continue;
+                }
+                $normalized = $resolved;
+            }
+
+            if (! isset($seen[$normalized])) {
+                $seen[$normalized] = true;
+                $normalizedSlugs[] = $normalized;
+            }
+        }
+
+        if ($normalizedSlugs !== $cached) {
+            Cache::put($key, $normalizedSlugs, self::TTL_SECONDS);
+        }
+
+        return $normalizedSlugs;
     }
 }
