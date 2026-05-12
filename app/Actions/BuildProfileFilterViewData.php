@@ -736,6 +736,49 @@ class BuildProfileFilterViewData
         return $map[$uppercase] ?? null;
     }
 
+    public function getProfilesBySlugs(array $slugs): array
+    {
+        if (empty($slugs)) {
+            return [];
+        }
+
+        $profiles = ProviderProfile::query()
+            ->whereNull('provider_profiles.deleted_at')
+            ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->whereIn('provider_profiles.slug', $slugs)
+            ->with([
+                'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
+                'rates',
+                'onlineUser',
+                'availableNow',
+                'user',
+                'city',
+            ])
+            ->get();
+
+        $serviceIds = $profiles
+            ->flatMap(fn (ProviderProfile $p) => array_filter((array) ($p->services_provided ?? []), 'is_numeric'))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->all();
+
+        $categoryNames = $serviceIds
+            ? Category::query()->whereIn('id', $serviceIds)->pluck('name', 'id')
+            : collect();
+
+        // Preserve the user's saved order
+        $slugOrder = array_flip($slugs);
+
+        return $profiles
+            ->map(fn (ProviderProfile $profile) => $this->transformProfile($profile, $categoryNames))
+            ->sortBy(fn ($profile) => $slugOrder[$profile['slug']] ?? PHP_INT_MAX)
+            ->values()
+            ->all();
+    }
+
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
     {
         $primaryImage = $profile->profileImages?->first();
