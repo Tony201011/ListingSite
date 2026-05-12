@@ -54,7 +54,10 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ])),
             Stat::make('Blocked Accounts', (string) $blocked)
                 ->color('danger')
-                ->icon('heroicon-o-no-symbol'),
+                ->icon('heroicon-o-no-symbol')
+                ->url(fn (): string => route('filament.admin.resources.providers.index', [
+                    'filters' => ['is_blocked' => ['value' => '1']],
+                ])),
             Stat::make('Verified Emails', (string) $verified)
                 ->color('warning')
                 ->icon('heroicon-o-shield-check'),
