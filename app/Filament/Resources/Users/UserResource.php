@@ -1215,6 +1215,15 @@ class UserResource extends Resource
                         '1' => 'Featured',
                         '0' => 'Not Featured',
                     ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            filled($data['value'] ?? null),
+                            fn (Builder $query): Builder => $query->where(
+                                (new ProviderProfile)->getTable().'.is_featured',
+                                $data['value']
+                            )
+                        );
+                    })
                     ->placeholder('All'),
 
                 SelectFilter::make('deleted_status')
