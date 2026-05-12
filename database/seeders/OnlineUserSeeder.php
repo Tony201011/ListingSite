@@ -15,12 +15,15 @@ class OnlineUserSeeder extends Seeder
      */
     public function run(): void
     {
+        $counter = 0;
+
         ProviderProfile::query()
             ->select(['id', 'user_id'])
             ->orderBy('id')
-            ->chunk(200, function ($profiles) {
-                foreach ($profiles as $index => $profile) {
-                    $isOnline = $index % 2 === 0;
+            ->chunk(200, function ($profiles) use (&$counter) {
+                foreach ($profiles as $profile) {
+                    $isOnline = $counter % 2 === 0;
+                    $counter++;
 
                     OnlineUser::updateOrCreate(
                         ['provider_profile_id' => $profile->id],
