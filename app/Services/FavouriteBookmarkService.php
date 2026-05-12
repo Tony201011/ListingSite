@@ -131,6 +131,6 @@ class FavouriteBookmarkService
 
     private function isNumericId(string $value): bool
     {
-        return $value !== '' && ctype_digit($value);
+        return ctype_digit($value);
     }
 }
