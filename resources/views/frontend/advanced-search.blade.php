@@ -415,7 +415,7 @@
                                         <template x-for="id in selected" :key="'chip-' + id">
                                             <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
                                                 <span x-text="(options.find(o => String(o.id) === String(id)) || {}).name"></span>
-                                                <button type="button" class="ml-1 text-gray-400 hover:text-gray-700 leading-none" @click.stop="selected = selected.filter(v => String(v) !== String(id))">×</button>
+                                                <button type="button" class="ml-1 text-gray-400 hover:text-gray-700 leading-none" aria-label="Remove filter" @click.stop="selected = selected.filter(v => String(v) !== String(id))">×</button>
                                             </span>
                                         </template>
                                     </span>
