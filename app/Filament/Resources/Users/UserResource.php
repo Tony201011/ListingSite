@@ -1075,6 +1075,8 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $providerProfilesTable = (new ProviderProfile)->getTable();
+
         return $table
             ->modifyQueryUsing(function (Builder $query): Builder {
                 return $query
@@ -1215,13 +1217,10 @@ class UserResource extends Resource
                         '1' => 'Featured',
                         '0' => 'Not Featured',
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
+                    ->query(function (Builder $query, array $data) use ($providerProfilesTable): Builder {
                         return $query->when(
                             filled($data['value'] ?? null),
-                            fn (Builder $query): Builder => $query->where(
-                                (new ProviderProfile)->getTable().'.is_featured',
-                                $data['value']
-                            )
+                            fn (Builder $query): Builder => $query->where($providerProfilesTable.'.is_featured', $data['value'])
                         );
                     })
                     ->placeholder('All'),
@@ -1232,10 +1231,10 @@ class UserResource extends Resource
                         'deleted' => 'Deleted',
                         'not_deleted' => 'Not Deleted',
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
+                    ->query(function (Builder $query, array $data) use ($providerProfilesTable): Builder {
                         return match ($data['value'] ?? null) {
-                            'deleted' => $query->whereNotNull((new ProviderProfile)->getTable().'.deleted_at'),
-                            'not_deleted' => $query->whereNull((new ProviderProfile)->getTable().'.deleted_at'),
+                            'deleted' => $query->whereNotNull($providerProfilesTable.'.deleted_at'),
+                            'not_deleted' => $query->whereNull($providerProfilesTable.'.deleted_at'),
                             default => $query,
                         };
                     })
