@@ -559,6 +559,7 @@ class BuildProfileFilterViewData
             })
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
             ->join('online_users', 'online_users.provider_profile_id', '=', 'provider_profiles.id')
             ->where(function ($q) {
                 $q->whereNull('hide_show_profiles.id')
@@ -588,7 +589,8 @@ class BuildProfileFilterViewData
 
             /** @var ScoutBuilder $scoutQuery */
             $scoutQuery = ProviderProfile::search($searchTerm)
-                ->where('profile_status', 'approved');
+                ->where('profile_status', 'approved')
+                ->where('is_blocked', false);
 
             $results = $scoutQuery->take(1000)->keys();
 
