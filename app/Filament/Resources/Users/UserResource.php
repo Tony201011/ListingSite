@@ -813,9 +813,12 @@ class UserResource extends Resource
                                             TextEntry::make('profile_status')
                                                 ->label('Status')
                                                 ->badge()
+                                                ->state(fn ($record): ?string => $record->is_blocked ? 'blocked' : $record->profile_status)
+                                                ->formatStateUsing(fn (?string $state): ?string => filled($state) ? ucfirst($state) : null)
                                                 ->color(fn ($state): string => match ($state) {
                                                     'approved' => 'success',
                                                     'rejected' => 'danger',
+                                                    'blocked' => 'danger',
                                                     default => 'warning',
                                                 })
                                                 ->placeholder('-'),

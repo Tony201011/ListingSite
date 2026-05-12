@@ -56,7 +56,7 @@ class ViewUser extends ViewRecord
                         ->label('Profile')
                         ->options(
                             $profiles->mapWithKeys(fn ($p) => [
-                                $p->id => "#{$p->id}: {$p->name} ({$p->profile_status})",
+                                $p->id => "#{$p->id}: {$p->name} (".($p->is_blocked ? 'blocked' : $p->profile_status).')',
                             ])->all()
                         )
                         ->default($record->id)
