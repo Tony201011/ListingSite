@@ -134,6 +134,7 @@ class UserResource extends Resource
 
             Tabs::make('ProviderFormTabs')
                 ->persistTabInQueryString('tab')
+                ->contained(false)
                 ->tabs([
                     Tab::make('Overview')
                         ->icon('heroicon-o-user-circle')
@@ -196,7 +197,7 @@ class UserResource extends Resource
                                         ->same('password')
                                         ->dehydrated(false),
                                 ])
-                                ->columns(2)
+                                ->columns(3)
                                 ->collapsible(),
 
                             Section::make('Profile Information')
@@ -363,7 +364,7 @@ class UserResource extends Resource
                                         ->searchable()
                                         ->preload(),
                                 ])
-                                ->columns(3)
+                                ->columns(4)
                                 ->collapsible(),
 
                             Section::make('Preferences & Services')
@@ -450,7 +451,7 @@ class UserResource extends Resource
                                         })
                                         ->columnSpanFull(),
                                 ])
-                                ->columns(2)
+                                ->columns(4)
                                 ->collapsible(),
                         ]),
 
@@ -483,7 +484,7 @@ class UserResource extends Resource
                                         ->label('WhatsApp')
                                         ->maxLength(30),
                                 ])
-                                ->columns(2)
+                                ->columns(3)
                                 ->collapsible(),
                         ]),
 
@@ -741,6 +742,7 @@ class UserResource extends Resource
     {
         return $schema->schema([
             Tabs::make('ProviderDetailsTabs')
+                ->contained(false)
                 ->tabs([
                     Tab::make('Overview')
                         ->icon('heroicon-o-user-circle')
@@ -784,7 +786,7 @@ class UserResource extends Resource
                                         ->label('Profile Blocked')
                                         ->boolean(),
                                 ])
-                                ->columns(3)
+                                ->columns(4)
                                 ->collapsible(),
 
                             Section::make('Profiles')
@@ -831,7 +833,7 @@ class UserResource extends Resource
                                                 ->placeholder('-')
                                                 ->columnSpanFull(),
                                         ])
-                                        ->columns(3)
+                                        ->columns(4)
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(1)
@@ -880,7 +882,7 @@ class UserResource extends Resource
                                     TextEntry::make('bust_size_id')->label('Bust Size')->formatStateUsing(fn ($state): string => self::categoryName($state)),
                                     TextEntry::make('your_length_id')->label('Your Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
                                 ])
-                                ->columns(3)
+                                ->columns(4)
                                 ->collapsible(),
 
                             Section::make('Preferences & Services')
@@ -895,7 +897,7 @@ class UserResource extends Resource
                                     TextEntry::make('services_style')->label('Services Style')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
                                     TextEntry::make('services_provided')->label('Services Provided')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
                                 ])
-                                ->columns(2)
+                                ->columns(4)
                                 ->collapsible(),
                         ]),
 
@@ -911,7 +913,7 @@ class UserResource extends Resource
                                     TextEntry::make('website')->label('Website')->placeholder('-'),
                                     TextEntry::make('onlyfans_username')->label('OnlyFans Username')->placeholder('-'),
                                 ])
-                                ->columns(2),
+                                ->columns(3),
                         ]),
 
                     Tab::make('Images')
