@@ -3,11 +3,7 @@
     min-height: 300px;
 }
 
-/* Provider profile pages - use full available width and prevent inner scroll containers */
-.fi-main {
-    max-width: 100% !important;
-}
-
+/* Provider profile pages - prevent inner scroll containers on non-contained tabs */
 .fi-sc-tabs:not(.fi-contained) > .fi-sc-tabs-tab {
     overflow: visible !important;
     max-height: none !important;
