@@ -1301,6 +1301,18 @@ class UserResource extends Resource
                 Group::make('user.email')
                     ->label('Account Email')
                     ->collapsible(),
+                Group::make('profile_status')
+                    ->label('Profile Status')
+                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => ucfirst($record->profile_status ?? 'pending'))
+                    ->collapsible(),
+                Group::make('online_status')
+                    ->label('Online Status')
+                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline')
+                    ->collapsible(),
+                Group::make('is_featured')
+                    ->label('Featured')
+                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->is_featured ? 'Featured' : 'Not Featured')
+                    ->collapsible(),
             ])
             ->defaultGroup('user.email')
             ->defaultSort('created_at', 'desc')
