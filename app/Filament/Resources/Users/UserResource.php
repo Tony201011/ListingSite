@@ -1075,6 +1075,23 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                $providerProfilesTable = (new ProviderProfile)->getTable();
+
+                return $query
+                    ->select("{$providerProfilesTable}.*")
+                    ->selectRaw(
+                        "CASE WHEN EXISTS (
+                            SELECT 1
+                            FROM online_users
+                            WHERE online_users.provider_profile_id = {$providerProfilesTable}.id
+                              AND online_users.status = ?
+                              AND online_users.online_expires_at IS NOT NULL
+                              AND online_users.online_expires_at > ?
+                        ) THEN ? ELSE ? END AS online_status",
+                        ['online', now(), 'online', 'offline']
+                    );
+            })
             ->columns([
                 ImageColumn::make('profile_image')
                     ->label('')
