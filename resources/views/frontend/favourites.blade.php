@@ -31,6 +31,7 @@
             @forelse($profiles as $profile)
                 <article
                     class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
+                    x-cloak
                     x-show="isFavourite('{{ $profile['slug'] }}')"
                 >
                     <a href="{{ route('profile.show', ['slug' => $profile['slug']]) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
