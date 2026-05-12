@@ -48,6 +48,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -1075,6 +1076,21 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                return $query
+                    ->leftJoin('online_users as active_online_users', function (JoinClause $join): void {
+                        $join
+                            ->on('active_online_users.provider_profile_id', '=', 'provider_profiles.id')
+                            ->where('active_online_users.status', '=', 'online')
+                            ->whereNotNull('active_online_users.online_expires_at')
+                            ->where('active_online_users.online_expires_at', '>', now());
+                    })
+                    ->select('provider_profiles.*')
+                    ->selectRaw(
+                        'CASE WHEN active_online_users.id IS NULL THEN ? ELSE ? END AS online_status',
+                        ['offline', 'online']
+                    );
+            })
             ->columns([
                 ImageColumn::make('profile_image')
                     ->label('')
