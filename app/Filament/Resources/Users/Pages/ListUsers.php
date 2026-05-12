@@ -11,6 +11,24 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        if ($this->tableFilters !== null) {
+            return;
+        }
+
+        $legacyTableFilters = request()->query('tableFilters');
+
+        if (! is_array($legacyTableFilters)) {
+            return;
+        }
+
+        $this->normalizeTableFilterValuesFromQueryString($legacyTableFilters);
+        $this->tableFilters = $legacyTableFilters;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
