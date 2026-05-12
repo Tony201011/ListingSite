@@ -7,6 +7,7 @@ use App\Models\AvailableNow;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\OnlineUser;
 use App\Models\Postcode;
 use App\Models\ProfileImage;
 use App\Models\ProfileMessage;
@@ -435,6 +436,21 @@ class DummyProviderProfileSeeder extends Seeder
                 [
                     'user_id' => $user->id,
                     'status' => 'offline',
+                ],
+            );
+
+            // 10. OnlineUser (every second profile is online)
+            $isOnline = $i % 2 === 0;
+
+            OnlineUser::updateOrCreate(
+                ['provider_profile_id' => $providerProfile->id],
+                [
+                    'user_id' => $user->id,
+                    'status' => $isOnline ? 'online' : 'offline',
+                    'usage_date' => today(),
+                    'usage_count' => $isOnline ? 1 : 0,
+                    'online_started_at' => $isOnline ? now() : null,
+                    'online_expires_at' => $isOnline ? now()->addMinutes(60) : null,
                 ],
             );
         }
