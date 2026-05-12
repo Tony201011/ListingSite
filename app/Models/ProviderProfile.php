@@ -114,7 +114,8 @@ class ProviderProfile extends Model
 
     public function availabilities(): HasMany
     {
-        return $this->hasMany(Availability::class, 'provider_profile_id');
+        return $this->hasMany(Availability::class, 'provider_profile_id')
+            ->orderedByWeekday();
     }
 
     public function profileImages(): HasMany
