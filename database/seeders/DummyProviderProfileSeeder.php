@@ -45,6 +45,8 @@ class DummyProviderProfileSeeder extends Seeder
 
     private const WEBSITE_TYPES = ['adult', 'porn'];
 
+    private const ONLINE_SESSION_DURATION_MINUTES = 60;
+
     private const SAMPLE_VIDEOS = [
         'https://www.w3schools.com/html/mov_bbb.mp4',
         'https://www.w3schools.com/html/movie.mp4',
@@ -450,7 +452,7 @@ class DummyProviderProfileSeeder extends Seeder
                     'usage_date' => today(),
                     'usage_count' => $isOnline ? 1 : 0,
                     'online_started_at' => $isOnline ? now() : null,
-                    'online_expires_at' => $isOnline ? now()->addMinutes(60) : null,
+                    'online_expires_at' => $isOnline ? now()->addMinutes(self::ONLINE_SESSION_DURATION_MINUTES) : null,
                 ],
             );
         }
