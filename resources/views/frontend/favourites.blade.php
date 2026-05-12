@@ -29,10 +29,11 @@
     >
 
         {{-- Profile Cards Grid --}}
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" x-show="hasFavourites && {{ count($profiles) > 0 ? 'true' : 'false' }}">
+        <div x-cloak class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" x-show="hasFavourites && {{ count($profiles) > 0 ? 'true' : 'false' }}">
             @forelse($profiles as $profile)
                 <article
                     class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
+                    x-cloak
                     x-show="isFavourite('{{ $profile['slug'] }}')"
                 >
                     <a href="{{ route('profile.show', ['slug' => $profile['slug']]) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
@@ -155,7 +156,7 @@
         </div>
 
         {{-- Empty state (shown when no favourites, or all were removed) --}}
-        <div x-show="{{ empty($profiles) ? 'true' : '!hasFavourites' }}" class="rounded-2xl border border-dashed border-gray-300 bg-white p-16 text-center">
+        <div x-cloak x-show="{{ empty($profiles) ? 'true' : '!hasFavourites' }}" class="rounded-2xl border border-dashed border-gray-300 bg-white p-16 text-center">
             <i class="fa-regular fa-heart mb-4 text-4xl text-gray-300"></i>
             <p class="text-base font-medium text-gray-600">You haven't saved any favourites yet.</p>
             <p class="mt-1 text-sm text-gray-500">Browse listings and click the <i class="fa-regular fa-heart text-pink-400"></i> icon to save them here.</p>
