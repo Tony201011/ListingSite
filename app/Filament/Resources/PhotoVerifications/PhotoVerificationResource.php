@@ -25,6 +25,22 @@ use Illuminate\Support\HtmlString;
 
 class PhotoVerificationResource extends Resource
 {
+    private const PHOTO_GRID_STYLE = 'display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:1rem;';
+
+    private const PHOTO_CARD_STYLE = 'display:flex;flex-direction:column;gap:0.75rem;border:1px solid #e5e7eb;border-radius:0.875rem;padding:1rem;background:#fff;box-shadow:0 1px 2px rgba(15, 23, 42, 0.08);';
+
+    private const PHOTO_IMAGE_STYLE = 'width:100%;max-height:420px;border-radius:0.75rem;object-fit:contain;background:#f8fafc;';
+
+    private const PHOTO_CAPTION_STYLE = 'display:flex;flex-direction:column;gap:0.35rem;';
+
+    private const PHOTO_LABEL_STYLE = 'font-size:0.75rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;';
+
+    private const PHOTO_NAME_STYLE = 'font-size:0.95rem;font-weight:600;color:#111827;';
+
+    private const PHOTO_PATH_STYLE = 'font-size:0.8rem;color:#6b7280;word-break:break-all;';
+
+    private const PHOTO_LINK_STYLE = 'font-size:0.9rem;font-weight:600;color:#2563eb;text-decoration:none;';
+
     protected static ?string $model = PhotoVerification::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
@@ -364,7 +380,9 @@ class PhotoVerificationResource extends Resource
                     'label' => 'Photo '.($index + 1),
                     'name' => filled($photo['name'] ?? null) ? (string) $photo['name'] : null,
                     'path' => filled($photo['path'] ?? null) ? (string) $photo['path'] : null,
-                    'url' => $photoUrls[$index] ?? (filled($photo['url'] ?? null) ? (string) $photo['url'] : null),
+                    'url' => array_key_exists($index, $photoUrls)
+                        ? $photoUrls[$index]
+                        : (filled($photo['url'] ?? null) ? (string) $photo['url'] : null),
                 ];
             })
             ->values()
@@ -394,35 +412,36 @@ class PhotoVerificationResource extends Resource
         }
 
         $cards = collect($photos)
-            ->map(function (array $photo): ?string {
-                $url = $photo['url'] ?? null;
-
-                if (! filled($url)) {
-                    return null;
-                }
-
-                $label = $photo['label'] ?? 'Verification photo';
-                $name = $photo['name'] ?? $label;
-                $path = $photo['path'] ?? null;
-
-                return '<figure style="display:flex;flex-direction:column;gap:0.75rem;border:1px solid #e5e7eb;border-radius:0.875rem;padding:1rem;background:#fff;box-shadow:0 1px 2px rgba(15, 23, 42, 0.08);">'.
-                    '<img src="'.e($url).'" alt="'.e($name).'" style="width:100%;max-height:420px;border-radius:0.75rem;object-fit:contain;background:#f8fafc;">'.
-                    '<figcaption style="display:flex;flex-direction:column;gap:0.35rem;">'.
-                    '<span style="font-size:0.75rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;">'.e($label).'</span>'.
-                    '<span style="font-size:0.95rem;font-weight:600;color:#111827;">'.e($name).'</span>'.
-                    ($path
-                        ? '<span style="font-size:0.8rem;color:#6b7280;word-break:break-all;">'.e($path).'</span>'
-                        : '').
-                    '<a href="'.e($url).'" target="_blank" rel="noopener noreferrer" style="font-size:0.9rem;font-weight:600;color:#2563eb;text-decoration:none;">Open full size</a>'.
-                    '</figcaption>'.
-                    '</figure>';
-            })
+            ->map(fn (array $photo): ?string => static::buildPhotoCardHtml($photo))
             ->filter()
             ->implode('');
 
-        return new HtmlString(
-            '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:1rem;">'.$cards.'</div>'
-        );
+        return new HtmlString('<div style="'.self::PHOTO_GRID_STYLE.'">'.$cards.'</div>');
+    }
+
+    private static function buildPhotoCardHtml(array $photo): ?string
+    {
+        $url = $photo['url'] ?? null;
+
+        if (! filled($url)) {
+            return null;
+        }
+
+        $label = $photo['label'] ?? 'Verification photo';
+        $name = $photo['name'] ?? $label;
+        $path = $photo['path'] ?? null;
+
+        return '<figure style="'.self::PHOTO_CARD_STYLE.'">'.
+            '<img src="'.e($url).'" alt="'.e($name).'" style="'.self::PHOTO_IMAGE_STYLE.'">'.
+            '<figcaption style="'.self::PHOTO_CAPTION_STYLE.'">'.
+            '<span style="'.self::PHOTO_LABEL_STYLE.'">'.e($label).'</span>'.
+            '<span style="'.self::PHOTO_NAME_STYLE.'">'.e($name).'</span>'.
+            ($path
+                ? '<span style="'.self::PHOTO_PATH_STYLE.'">'.e($path).'</span>'
+                : '').
+            '<a href="'.e($url).'" target="_blank" rel="noopener noreferrer" style="'.self::PHOTO_LINK_STYLE.'">Open full size</a>'.
+            '</figcaption>'.
+            '</figure>';
     }
 
     private static function hasOtherApprovedVerification(PhotoVerification $record): bool
