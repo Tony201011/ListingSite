@@ -2,7 +2,7 @@
 
 @section('content')
 <div
-    class="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8"
+    class="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 sm:py-12 lg:px-8"
     x-data="addPhotoPage({
         uploadUrl: @js(route('photos.upload')),
         photosUrl: @js(route('photos')),
@@ -39,7 +39,7 @@
                     </button>
 
                     <a
-                        href="{{ url('/profile') }}"
+                        href="{{ url('/profile-setting') }}"
                         class="inline-flex w-full items-center justify-center rounded-full border border-pink-300 px-8 py-3 font-semibold text-pink-700 transition hover:bg-pink-50 sm:w-auto"
                     >
                         Continue setting up your profile
@@ -56,7 +56,7 @@
         class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-2 sm:items-center sm:p-4"
         @click.self="closeModal()"
     >
-        <div class="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
+        <div class="flex h-[calc(100vh-1rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:h-auto sm:max-h-[92vh]">
             <div class="flex items-center border-b border-gray-200 px-4 pt-4 sm:px-6">
                 <button
                     type="button"
@@ -171,7 +171,7 @@
                                         type="button"
                                         @click="uploadFiles()"
                                         :disabled="uploading"
-                                        class="flex w-full items-center justify-center gap-1 rounded-full bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                                        class="flex w-full items-center justify-center gap-1 rounded-full bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:py-1.5"
                                     >
                                         <svg x-show="!uploading" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
@@ -187,14 +187,14 @@
                                     <button
                                         type="button"
                                         @click="clearSelectedFiles()"
-                                        class="w-full text-center text-xs font-semibold text-red-600 hover:text-red-700 sm:w-auto"
+                                        class="rounded-full border border-red-200 px-3 py-2 text-center text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 sm:border-0 sm:px-0 sm:py-0 sm:text-left"
                                     >
                                         Delete all
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="grid max-h-60 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 overflow-y-auto p-1">
+                            <div class="grid max-h-60 grid-cols-2 gap-2 overflow-y-auto p-1 sm:grid-cols-3 sm:gap-3 md:grid-cols-4">
                                 <template x-for="(preview, index) in filePreviews" :key="preview + '-' + index">
                                     <div
                                         class="group relative aspect-square cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-gray-100"
@@ -268,7 +268,7 @@
         <button
             type="button"
             @click="prevSlide()"
-            class="absolute left-4 top-1/2 z-10 -translate-y-1/2 transform text-5xl leading-none text-white/80 hover:text-white"
+            class="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 transform items-center justify-center rounded-full bg-black/40 text-3xl leading-none text-white/90 hover:text-white sm:left-4 sm:h-auto sm:w-auto sm:bg-transparent sm:text-5xl"
             :class="{ 'cursor-not-allowed opacity-50': filePreviews.length <= 1 }"
             aria-label="Previous image"
         >
@@ -278,7 +278,7 @@
         <button
             type="button"
             @click="nextSlide()"
-            class="absolute right-4 top-1/2 z-10 -translate-y-1/2 transform text-5xl leading-none text-white/80 hover:text-white"
+            class="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 transform items-center justify-center rounded-full bg-black/40 text-3xl leading-none text-white/90 hover:text-white sm:right-4 sm:h-auto sm:w-auto sm:bg-transparent sm:text-5xl"
             :class="{ 'cursor-not-allowed opacity-50': filePreviews.length <= 1 }"
             aria-label="Next image"
         >
@@ -289,7 +289,7 @@
             <img
                 :src="filePreviews[sliderIndex]"
                 :alt="'Slide ' + (sliderIndex + 1)"
-                class="max-h-full max-w-full rounded-lg object-contain"
+                class="max-h-[85vh] max-w-full rounded-lg object-contain"
                 loading="lazy"
                 decoding="async"
             >

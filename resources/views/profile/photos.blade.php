@@ -9,7 +9,7 @@
                 'image_path' => $photo->image_path,
                 'thumbnail_path' => $photo->thumbnail_path,
                 'image_url' => $photo->image_url,
-                'thumbnail_url' => $photo->image_url,
+                'thumbnail_url' => $photo->thumbnail_url,
                 'is_primary' => (bool) ($photo->is_primary ?? false),
             ])->values()),
             setCoverUrl: @js(url('/photos/__ID__/set-cover')),
