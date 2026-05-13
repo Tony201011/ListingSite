@@ -1,21 +1,23 @@
 @php
     /** @var \App\Models\ProviderProfile $providerProfile */
     /** @var \App\Models\PhotoVerification|null $verification */
+    $galleryPreviewHeight = 120;
+    $galleryPreviewWidth = 120;
 @endphp
 
 <div class="space-y-4">
     <div class="grid gap-3 sm:grid-cols-2">
         <div>
             <div class="text-xs font-medium uppercase tracking-wide text-gray-500">Provider Name</div>
-            <div class="text-sm font-semibold text-gray-900">{{ $providerProfile->name ?: '—' }}</div>
+            <div class="text-sm font-semibold text-gray-900">{{ $providerProfile->name ?? '—' }}</div>
         </div>
         <div>
             <div class="text-xs font-medium uppercase tracking-wide text-gray-500">Profile Slug</div>
-            <div class="text-sm text-gray-900">{{ $providerProfile->slug ?: '—' }}</div>
+            <div class="text-sm text-gray-900">{{ $providerProfile->slug ?? '—' }}</div>
         </div>
         <div>
             <div class="text-xs font-medium uppercase tracking-wide text-gray-500">Provider Email</div>
-            <div class="text-sm text-gray-900">{{ $providerProfile->user?->email ?: '—' }}</div>
+            <div class="text-sm text-gray-900">{{ $providerProfile->user?->email ?? '—' }}</div>
         </div>
         <div>
             <div class="text-xs font-medium uppercase tracking-wide text-gray-500">Profile Status</div>
@@ -45,7 +47,7 @@
         <div>
             <div class="text-xs font-medium uppercase tracking-wide text-gray-500">Uploaded Verification Images</div>
             <div class="mt-2">
-                {{ \App\Support\PhotoVerificationGalleryRenderer::render($verification->photo_urls, 120, 120) }}
+                {{ \App\Support\PhotoVerificationGalleryRenderer::render($verification->photo_urls, $galleryPreviewHeight, $galleryPreviewWidth) }}
             </div>
         </div>
     @else
