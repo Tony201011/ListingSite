@@ -45,7 +45,7 @@
         <div>
             <div class="text-xs font-medium uppercase tracking-wide text-gray-500">Uploaded Verification Images</div>
             <div class="mt-2">
-                {!! \App\Support\PhotoVerificationGalleryRenderer::render($verification->photo_urls, 120, 120) !!}
+                {{ \App\Support\PhotoVerificationGalleryRenderer::render($verification->photo_urls, 120, 120) }}
             </div>
         </div>
     @else
