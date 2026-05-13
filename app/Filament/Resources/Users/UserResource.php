@@ -1243,7 +1243,7 @@ class UserResource extends Resource
                     ->label('Photo Verification')
                     ->icon('heroicon-o-camera')
                     ->color('gray')
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && $record->photoVerification()->exists())
                     ->modalHeading(fn (ProviderProfile $record): string => 'Photo Verification · '.($record->name ?? 'Provider'))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
