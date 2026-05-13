@@ -93,7 +93,7 @@
                                 </table>
                             @endif
 
-                            @if (! empty($adminNote) && $status !== 'rejected')
+                            @if (filled($adminNote) && $status !== 'rejected')
                                 <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:18px;">
                                     <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#4b5563;margin-bottom:6px;font-weight:700;">Admin Note</div>
                                     <div style="font-size:14px;color:#111827;">{{ $adminNote }}</div>
