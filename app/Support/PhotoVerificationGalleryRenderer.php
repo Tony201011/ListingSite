@@ -18,8 +18,9 @@ class PhotoVerificationGalleryRenderer
         }
 
         $safeHeight = max(50, min(500, $height));
+
         return new HtmlString(
-            '<div class="flex flex-col gap-3">'.
+            '<div class="flex flex-wrap gap-3">'.
             collect($urls)
                 ->values()
                 ->map(function (string $url, int $index) use ($safeHeight): string {
@@ -27,7 +28,7 @@ class PhotoVerificationGalleryRenderer
                     $alt = e("Verification photo {$photoNumber}");
                     $safeUrl = e($url);
 
-                    return '<img src="'.$safeUrl.'" alt="'.$alt.'" loading="lazy" decoding="async" class="w-auto max-w-full rounded-lg border border-gray-200" style="height: '.$safeHeight.'px;">';
+                    return '<img src="'.$safeUrl.'" alt="'.$alt.'" loading="lazy" decoding="async" class="w-auto max-w-full rounded-lg border border-gray-200 object-contain" style="max-height: '.$safeHeight.'px;">';
                 })
                 ->implode('')
             .'</div>'
