@@ -23,5 +23,6 @@ class PhotoVerificationGalleryRendererTest extends TestCase
         $this->assertStringContainsString('openGallery(1)', $html);
         $this->assertStringContainsString('@click.stop="openGallery(0)"', $html);
         $this->assertStringContainsString('@click.stop="openGallery(1)"', $html);
+        $this->assertSame(2, substr_count($html, '@click.stop="openGallery(1)"'));
     }
 }
