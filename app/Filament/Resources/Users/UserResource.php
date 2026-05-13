@@ -1074,12 +1074,7 @@ class UserResource extends Resource
                     ->sortable()
                     ->weight('semibold')
                     ->wrap()
-                    ->toggleable()
-                    ->formatStateUsing(fn (string $state, ProviderProfile $record): HtmlString => new HtmlString(
-                        e($state).' '.($record->onlineUser?->isCurrentlyOnline()
-                            ? '<span title="Online" class="inline-block align-middle w-2 h-2 rounded-full bg-green-500 ml-1"></span>'
-                            : '<span title="Offline" class="inline-block align-middle w-2 h-2 rounded-full bg-gray-400 ml-1"></span>')
-                    )),
+                    ->toggleable(),
 
                 TextColumn::make('user.mobile')
                     ->label('Mobile')
@@ -1104,6 +1099,12 @@ class UserResource extends Resource
                     ->badge()
                     ->state(fn (ProviderProfile $record): string => $record->is_featured ? 'Yes' : 'No')
                     ->color(fn (string $state): string => $state === 'Yes' ? 'success' : 'gray'),
+
+                TextColumn::make('online_status')
+                    ->label('Online')
+                    ->badge()
+                    ->getStateUsing(fn (ProviderProfile $record): string => $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline')
+                    ->color(fn (string $state): string => $state === 'Online' ? 'success' : 'gray'),
 
                 TextColumn::make('created_at')
                     ->label('Created')
