@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ProviderProfile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class FavouriteBookmarkService
 {
@@ -95,6 +96,30 @@ class FavouriteBookmarkService
                 ->whereIn('id', array_unique($numericIds))
                 ->pluck('slug', 'id');
 
+        $textSlugs = [];
+        foreach ($cached as $value) {
+            if (! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized = trim((string) $value);
+            if ($normalized === '' || $this->isNumericId($normalized)) {
+                continue;
+            }
+
+            $textSlugs[] = mb_strtolower($normalized);
+        }
+
+        $canonicalSlugs = empty($textSlugs)
+            ? collect()
+            : ProviderProfile::query()
+                ->whereNull('deleted_at')
+                ->where('profile_status', 'approved')
+                ->where('is_blocked', false)
+                ->whereIn(DB::raw('LOWER(slug)'), array_values(array_unique($textSlugs)))
+                ->pluck('slug')
+                ->mapWithKeys(fn ($slug) => [mb_strtolower($slug) => $slug]);
+
         $seen = [];
         $normalizedSlugs = [];
 
@@ -110,6 +135,12 @@ class FavouriteBookmarkService
 
             if ($this->isNumericId($normalized)) {
                 $resolved = $idToSlug->get((int) $normalized);
+                if ($resolved === null) {
+                    continue;
+                }
+                $normalized = $resolved;
+            } else {
+                $resolved = $canonicalSlugs->get(mb_strtolower($normalized));
                 if ($resolved === null) {
                     continue;
                 }
