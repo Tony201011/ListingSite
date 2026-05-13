@@ -26,28 +26,44 @@ class PhotoVerification extends Model
 
     protected $appends = [
         'photo_url',
+        'photo_urls',
     ];
 
     protected function photoUrl(): Attribute
     {
         return Attribute::make(
             get: function () {
+                return $this->photo_urls[0] ?? null;
+            }
+        );
+    }
+
+    protected function photoUrls(): Attribute
+    {
+        return Attribute::make(
+            get: function (): array {
                 if (empty($this->photos) || ! is_array($this->photos)) {
-                    return null;
+                    return [];
                 }
 
-                $firstPhoto = $this->photos[0] ?? null;
+                return collect($this->photos)
+                    ->map(function ($photo): ?string {
+                        if (! is_array($photo)) {
+                            return null;
+                        }
 
-                if (! $firstPhoto || ! is_array($firstPhoto)) {
-                    return null;
-                }
+                        $path = $photo['path'] ?? null;
+                        if (filled($path)) {
+                            return route('media.show', ['path' => $path]);
+                        }
 
-                $path = $firstPhoto['path'] ?? null;
-                if ($path) {
-                    return route('media.show', ['path' => $path]);
-                }
+                        $url = $photo['url'] ?? null;
 
-                return $firstPhoto['url'] ?? null;
+                        return filled($url) ? (string) $url : null;
+                    })
+                    ->filter()
+                    ->values()
+                    ->all();
             }
         );
     }

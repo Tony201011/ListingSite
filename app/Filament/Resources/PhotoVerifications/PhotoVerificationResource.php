@@ -19,6 +19,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class PhotoVerificationResource extends Resource
 {
@@ -75,9 +76,22 @@ class PhotoVerificationResource extends Resource
 
                 Section::make('Verification Photos')
                     ->schema([
-                        ImageEntry::make('photo_url')
-                            ->label('Photo')
-                            ->height(300)
+                        TextEntry::make('photo_urls')
+                            ->label('Photos')
+                            ->formatStateUsing(function (?array $state): HtmlString {
+                                if (blank($state)) {
+                                    return new HtmlString('-');
+                                }
+
+                                return new HtmlString(
+                                    collect($state)
+                                        ->map(
+                                            fn (string $url): string => '<img src="'.e($url).'" alt="Verification photo" style="height: 300px; width: auto; max-width: 100%; border-radius: 0.5rem; border: 1px solid #e5e7eb;">'
+                                        )
+                                        ->implode('<div style="height: 0.75rem;"></div>')
+                                );
+                            })
+                            ->html()
                             ->columnSpanFull(),
                     ]),
             ]);
