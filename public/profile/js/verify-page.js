@@ -13,13 +13,19 @@ function verifyPage(config) {
         isUploading: false,
 
         openModal() {
+            this.activeTab = 'files';
+            this.isDragging = false;
             this.isModalOpen = true;
+            document.body.classList.add('overflow-hidden');
         },
 
         closeModal() {
             this.isModalOpen = false;
             this.isDragging = false;
+            this.activeTab = 'files';
+            this.clearCapturedPhoto();
             this.stopCamera();
+            document.body.classList.remove('overflow-hidden');
         },
 
         switchTab(tab) {
@@ -244,7 +250,7 @@ function verifyPage(config) {
                 this.toast(data.message || 'Verification photos uploaded successfully.');
                 this.selectedFiles = [];
                 this.capturedImage = '';
-                this.stopCamera();
+                this.closeModal();
 
                 setTimeout(() => {
                     window.location.reload();

@@ -57,6 +57,8 @@ class PhotoVerificationControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('profile.verify-photo');
         $response->assertViewHasAll(['latestVerification', 'lastTwoPhotos', 'exampleImages']);
+        $response->assertSee('Upload verification photos');
+        $response->assertSee('Drag and drop photos here');
     }
 
     public function test_guest_cannot_view_verify_photo_page(): void
