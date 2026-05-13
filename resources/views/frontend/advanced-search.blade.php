@@ -54,10 +54,10 @@
 
                 labelStyle(percent) {
                     const safePercent = Math.min(100, Math.max(0, percent));
-                    const edgeThreshold = 3;
-                    const farEdgeThreshold = 100 - edgeThreshold;
+                    const EDGE_CLAMP_THRESHOLD = 3; // Keeps slider labels from overflowing container edges on small screens.
+                    const farEdgeThreshold = 100 - EDGE_CLAMP_THRESHOLD;
 
-                    if (safePercent <= edgeThreshold) {
+                    if (safePercent <= EDGE_CLAMP_THRESHOLD) {
                         return 'left: 0%; transform: none;';
                     }
                     if (safePercent >= farEdgeThreshold) {
@@ -547,6 +547,7 @@
                                     }
 
                                     img.addEventListener('load', () => this.imageLoaded = true, { once: true });
+                                    img.addEventListener('error', () => this.imageLoaded = true, { once: true });
                                 }
                             }">
                                 @if($profile['image'])
