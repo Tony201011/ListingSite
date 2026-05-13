@@ -11,6 +11,7 @@ use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
 use App\Models\Postcode;
 use App\Models\ProviderProfile;
+use App\Support\PhotoVerificationGalleryRenderer;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -50,7 +51,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class UserResource extends Resource
@@ -1032,19 +1032,7 @@ class UserResource extends Resource
 
                                     TextEntry::make('photo_urls')
                                         ->label('Photos')
-                                        ->formatStateUsing(function (?array $state): HtmlString {
-                                            if (blank($state)) {
-                                                return new HtmlString('-');
-                                            }
-
-                                            return new HtmlString(
-                                                collect($state)
-                                                    ->map(
-                                                        fn (string $url): string => '<img src="'.e($url).'" alt="Verification photo" style="height: 220px; width: auto; max-width: 100%; border-radius: 0.5rem; border: 1px solid #e5e7eb;">'
-                                                    )
-                                                    ->implode('<div style="height: 0.75rem;"></div>')
-                                            );
-                                        })
+                                        ->formatStateUsing(fn (?array $state) => PhotoVerificationGalleryRenderer::render($state, 220))
                                         ->html()
                                         ->columnSpanFull(),
                                 ])

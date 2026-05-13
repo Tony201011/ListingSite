@@ -33,7 +33,16 @@ class PhotoVerification extends Model
     {
         return Attribute::make(
             get: function () {
-                return $this->photo_urls[0] ?? null;
+                if (empty($this->photos) || ! is_array($this->photos)) {
+                    return null;
+                }
+
+                $firstPhoto = $this->photos[0] ?? null;
+                if (! $firstPhoto || ! is_array($firstPhoto)) {
+                    return null;
+                }
+
+                return $this->resolvePhotoUrl($firstPhoto);
             }
         );
     }
@@ -52,20 +61,25 @@ class PhotoVerification extends Model
                             return null;
                         }
 
-                        $path = $photo['path'] ?? null;
-                        if (filled($path)) {
-                            return route('media.show', ['path' => $path]);
-                        }
-
-                        $url = $photo['url'] ?? null;
-
-                        return filled($url) ? (string) $url : null;
+                        return $this->resolvePhotoUrl($photo);
                     })
                     ->filter()
                     ->values()
                     ->all();
             }
         );
+    }
+
+    private function resolvePhotoUrl(array $photo): ?string
+    {
+        $path = $photo['path'] ?? null;
+        if (filled($path)) {
+            return route('media.show', ['path' => $path]);
+        }
+
+        $url = $photo['url'] ?? null;
+
+        return filled($url) ? (string) $url : null;
     }
 
     public function user()
