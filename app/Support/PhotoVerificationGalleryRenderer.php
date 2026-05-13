@@ -34,11 +34,7 @@ class PhotoVerificationGalleryRenderer
     private static function normalizeUrls(array|string|null $urls): array
     {
         if (is_array($urls)) {
-            return collect($urls)
-                ->filter(fn ($url) => filled($url))
-                ->map(fn ($url): string => (string) $url)
-                ->values()
-                ->all();
+            return self::normalizeUrlArray($urls);
         }
 
         if (blank($urls)) {
@@ -46,14 +42,19 @@ class PhotoVerificationGalleryRenderer
         }
 
         $decoded = json_decode($urls, true);
-        if (is_array($decoded)) {
-            return collect($decoded)
-                ->filter(fn ($url) => filled($url))
-                ->map(fn ($url): string => (string) $url)
-                ->values()
-                ->all();
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return self::normalizeUrlArray($decoded);
         }
 
         return [(string) $urls];
+    }
+
+    private static function normalizeUrlArray(array $urls): array
+    {
+        return collect($urls)
+            ->filter(fn ($url) => filled($url))
+            ->map(fn ($url): string => (string) $url)
+            ->values()
+            ->all();
     }
 }
