@@ -41,9 +41,14 @@ class PhotoVerificationGalleryRenderer
             return [];
         }
 
-        $decoded = json_decode($urls, true, 512);
+        $trimmedUrls = trim($urls);
+        $decoded = json_decode($trimmedUrls, true, 8);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             return self::normalizeUrlArray($decoded);
+        }
+
+        if (str_starts_with($trimmedUrls, '[')) {
+            return [];
         }
 
         return [(string) $urls];
