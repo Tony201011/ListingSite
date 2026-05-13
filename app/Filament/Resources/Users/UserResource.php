@@ -9,6 +9,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
+use App\Models\PhotoVerification;
 use App\Models\Postcode;
 use App\Models\ProviderProfile;
 use BackedEnum;
@@ -1237,6 +1238,28 @@ class UserResource extends Resource
                     ->url(fn (ProviderProfile $record): string => $record->slug ? route('profile.show', ['slug' => $record->slug]) : '#')
                     ->openUrlInNewTab()
                     ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && filled($record->slug)),
+
+                Action::make('photo_verification')
+                    ->label('Photo Verification')
+                    ->icon('heroicon-o-camera')
+                    ->color('gray')
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                    ->modalHeading(fn (ProviderProfile $record): string => 'Photo Verification · '.($record->name ?? 'Provider'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->modalWidth('5xl')
+                    ->modalContent(function (ProviderProfile $record) {
+                        /** @var PhotoVerification|null $verification */
+                        $verification = $record->photoVerification()
+                            ->latest('submitted_at')
+                            ->latest('id')
+                            ->first();
+
+                        return view('filament.modals.provider-photo-verification', [
+                            'providerProfile' => $record,
+                            'verification' => $verification,
+                        ]);
+                    }),
 
                 Action::make('edit')
                     ->label('Edit')
