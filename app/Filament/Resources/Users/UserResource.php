@@ -11,7 +11,6 @@ use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
 use App\Models\Postcode;
 use App\Models\ProviderProfile;
-use App\Support\PhotoVerificationGalleryRenderer;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -28,7 +27,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -89,7 +87,6 @@ class UserResource extends Resource
             ->with([
                 'profileImages',
                 'userVideos',
-                'photoVerification',
                 'rates',
                 'availabilities',
                 'profileMessage',
@@ -116,7 +113,6 @@ class UserResource extends Resource
                     ->latest('id'),
                 'profileImages',
                 'userVideos',
-                'photoVerification',
                 'rates',
                 'availabilities',
                 'profileMessage',
@@ -1003,41 +999,6 @@ class UserResource extends Resource
                                     TextEntry::make('extra')->label('Extra')->placeholder('-'),
                                 ])
                                 ->columns(4),
-                        ]),
-
-                    Tab::make('Verification')
-                        ->icon('heroicon-o-shield-check')
-                        ->schema([
-                            RepeatableEntry::make('photoVerification')
-                                ->label('')
-                                ->schema([
-                                    TextEntry::make('status')
-                                        ->label('Status')
-                                        ->badge()
-                                        ->color(fn ($state): string => match ($state) {
-                                            'approved' => 'success',
-                                            'rejected' => 'danger',
-                                            default => 'warning',
-                                        })
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('submitted_at')
-                                        ->label('Submitted At')
-                                        ->dateTime()
-                                        ->placeholder('-'),
-
-                                    TextEntry::make('admin_note')
-                                        ->label('Admin Note')
-                                        ->placeholder('-')
-                                        ->columnSpanFull(),
-
-                                    TextEntry::make('photo_urls')
-                                        ->label('Photos')
-                                        ->formatStateUsing(fn ($state) => PhotoVerificationGalleryRenderer::render($state, 220))
-                                        ->html()
-                                        ->columnSpanFull(),
-                                ])
-                                ->columns(2),
                         ]),
 
                     Tab::make('Availability')
