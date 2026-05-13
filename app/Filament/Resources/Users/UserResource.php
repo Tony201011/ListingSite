@@ -11,6 +11,7 @@ use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
 use App\Models\Postcode;
 use App\Models\ProviderProfile;
+use App\Support\PhotoVerificationGalleryRenderer;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -50,7 +51,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class UserResource extends Resource
@@ -1030,9 +1030,10 @@ class UserResource extends Resource
                                         ->placeholder('-')
                                         ->columnSpanFull(),
 
-                                    ImageEntry::make('photo_url')
-                                        ->label('Photo')
-                                        ->height(220)
+                                    TextEntry::make('photo_urls')
+                                        ->label('Photos')
+                                        ->formatStateUsing(fn (?array $state) => PhotoVerificationGalleryRenderer::render($state, 220))
+                                        ->html()
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(2),

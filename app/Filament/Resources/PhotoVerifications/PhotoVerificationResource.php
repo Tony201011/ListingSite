@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PhotoVerifications;
 use App\Filament\Resources\PhotoVerifications\Pages\ListPhotoVerifications;
 use App\Filament\Resources\PhotoVerifications\Pages\ViewPhotoVerification;
 use App\Models\PhotoVerification;
+use App\Support\PhotoVerificationGalleryRenderer;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
@@ -75,9 +76,10 @@ class PhotoVerificationResource extends Resource
 
                 Section::make('Verification Photos')
                     ->schema([
-                        ImageEntry::make('photo_url')
-                            ->label('Photo')
-                            ->height(300)
+                        TextEntry::make('photo_urls')
+                            ->label('Photos')
+                            ->formatStateUsing(fn (?array $state) => PhotoVerificationGalleryRenderer::render($state, 300))
+                            ->html()
                             ->columnSpanFull(),
                     ]),
             ]);

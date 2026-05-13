@@ -26,6 +26,7 @@ class PhotoVerification extends Model
 
     protected $appends = [
         'photo_url',
+        'photo_urls',
     ];
 
     protected function photoUrl(): Attribute
@@ -37,19 +38,48 @@ class PhotoVerification extends Model
                 }
 
                 $firstPhoto = $this->photos[0] ?? null;
-
                 if (! $firstPhoto || ! is_array($firstPhoto)) {
                     return null;
                 }
 
-                $path = $firstPhoto['path'] ?? null;
-                if ($path) {
-                    return route('media.show', ['path' => $path]);
-                }
-
-                return $firstPhoto['url'] ?? null;
+                return $this->resolvePhotoUrl($firstPhoto);
             }
         );
+    }
+
+    protected function photoUrls(): Attribute
+    {
+        return Attribute::make(
+            get: function (): array {
+                if (empty($this->photos) || ! is_array($this->photos)) {
+                    return [];
+                }
+
+                return collect($this->photos)
+                    ->map(function ($photo): ?string {
+                        if (! is_array($photo)) {
+                            return null;
+                        }
+
+                        return $this->resolvePhotoUrl($photo);
+                    })
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+        );
+    }
+
+    private function resolvePhotoUrl(array $photo): ?string
+    {
+        $path = $photo['path'] ?? null;
+        if (filled($path)) {
+            return route('media.show', ['path' => $path]);
+        }
+
+        $url = $photo['url'] ?? null;
+
+        return filled($url) ? (string) $url : null;
     }
 
     public function user()
