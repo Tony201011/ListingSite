@@ -32,7 +32,7 @@ class SitemapController extends Controller
     public function robots(): Response
     {
         $content = "User-agent: *\n";
-        $content .= "Disallow:\n";
+        $content .= "Disallow: /admin\n";
         $content .= 'Sitemap: '.url('/sitemap.xml')."\n";
 
         return response($content, 200, [
