@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Verification {{ ucfirst($status) }}</title>
+    <title>
+        @if ($status === 'note_added')
+            Photo Verification Note Update
+        @else
+            Photo Verification {{ ucfirst($status) }}
+        @endif
+    </title>
 </head>
 <body style="margin:0;padding:0;background-color:#f8fafc;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f8fafc;padding:24px 0;">
@@ -38,7 +44,7 @@
                                         </td>
                                     </tr>
                                 </table>
-                            @else
+                            @elseif ($status === 'rejected')
                                 <p style="margin:0 0 18px 0;font-size:15px;line-height:1.7;color:#4b5563;">
                                     Unfortunately, your photo verification has been <strong style="color:#b91c1c;">rejected</strong>.
                                 </p>
@@ -66,6 +72,32 @@
                                         </td>
                                     </tr>
                                 </table>
+                            @else
+                                <p style="margin:0 0 18px 0;font-size:15px;line-height:1.7;color:#4b5563;">
+                                    An admin added a new note to your photo verification request.
+                                </p>
+
+                                @if (! empty($verificationStatus))
+                                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+                                        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#1d4ed8;margin-bottom:6px;font-weight:700;">Current Verification Status</div>
+                                        <div style="font-size:14px;color:#111827;font-weight:600;">{{ ucfirst($verificationStatus) }}</div>
+                                    </div>
+                                @endif
+
+                                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 20px 0;">
+                                    <tr>
+                                        <td style="background:#e04ecb;border-radius:999px;">
+                                            <a href="{{ $signinUrl }}" style="display:inline-block;padding:12px 22px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">Sign In To Review</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            @endif
+
+                            @if (filled($adminNote) && $status !== 'rejected')
+                                <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+                                    <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#4b5563;margin-bottom:6px;font-weight:700;">Admin Note</div>
+                                    <div style="font-size:14px;color:#111827;">{{ $adminNote }}</div>
+                                </div>
                             @endif
 
                             <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
