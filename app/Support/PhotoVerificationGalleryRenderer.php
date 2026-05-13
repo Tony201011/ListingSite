@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Log;
 
 class PhotoVerificationGalleryRenderer
 {
+    private const JSON_DECODE_DEPTH = 512;
+
     public static function render(array|string|null $urls, int $height): HtmlString
     {
         $urls = self::normalizeUrls($urls);
@@ -43,13 +45,15 @@ class PhotoVerificationGalleryRenderer
         }
 
         $trimmedUrls = trim($urls);
-        $decoded = json_decode($trimmedUrls, true, 512);
+        $decoded = json_decode($trimmedUrls, true, self::JSON_DECODE_DEPTH);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             return self::normalizeUrlArray($decoded);
         }
 
         if (str_starts_with($trimmedUrls, '[')) {
-            Log::warning('Malformed photo verification URLs JSON payload encountered while rendering gallery.');
+            Log::warning('Malformed photo verification URLs JSON payload encountered while rendering gallery.', [
+                'payload_preview' => substr($trimmedUrls, 0, 200),
+            ]);
 
             return [];
         }
