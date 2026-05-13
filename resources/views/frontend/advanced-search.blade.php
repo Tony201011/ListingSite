@@ -54,10 +54,10 @@
 
                 labelStyle(percent) {
                     const safePercent = Math.min(100, Math.max(0, percent));
-                    const EDGE_CLAMP_THRESHOLD = 3; // Keeps slider labels from overflowing container edges on small screens.
-                    const farEdgeThreshold = 100 - EDGE_CLAMP_THRESHOLD;
+                    const edgeClampThreshold = 3; // Keeps slider labels from overflowing container edges on small screens.
+                    const farEdgeThreshold = 100 - edgeClampThreshold;
 
-                    if (safePercent <= EDGE_CLAMP_THRESHOLD) {
+                    if (safePercent <= edgeClampThreshold) {
                         return 'left: 0%; transform: none;';
                     }
                     if (safePercent >= farEdgeThreshold) {
@@ -541,7 +541,7 @@
                             <div class="view-card-media relative overflow-hidden rounded-t-2xl" x-data="{
                                 imageLoaded: false,
                                 initImage(img) {
-                                    if (img.complete && img.naturalWidth > 0) {
+                                    if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
                                         this.imageLoaded = true;
                                         return;
                                     }
