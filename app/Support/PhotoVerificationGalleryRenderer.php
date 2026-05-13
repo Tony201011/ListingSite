@@ -9,7 +9,7 @@ class PhotoVerificationGalleryRenderer
 {
     private const JSON_DECODE_DEPTH = 512;
 
-    public static function render(array|string|null $urls, int $height): HtmlString
+    public static function render(array|string|null $urls, int $height = 160, int $width = 160): HtmlString
     {
         $urls = self::normalizeUrls($urls);
 
@@ -18,20 +18,28 @@ class PhotoVerificationGalleryRenderer
         }
 
         $safeHeight = max(50, min(500, $height));
+        $safeWidth = max(50, min(500, $width));
 
         return new HtmlString(
-            '<div class="flex flex-wrap gap-3">'.
+            '<div class="flex flex-wrap gap-3">' .
             collect($urls)
                 ->values()
-                ->map(function (string $url, int $index) use ($safeHeight): string {
+                ->map(function (string $url, int $index) use ($safeHeight, $safeWidth): string {
                     $photoNumber = $index + 1;
                     $alt = e("Verification photo {$photoNumber}");
                     $safeUrl = e($url);
 
-                    return '<img src="'.$safeUrl.'" alt="'.$alt.'" loading="lazy" decoding="async" class="w-auto max-w-full rounded-lg border border-gray-200 object-contain" style="max-height: '.$safeHeight.'px;">';
+                    return '<img
+                        src="' . $safeUrl . '"
+                        alt="' . $alt . '"
+                        loading="lazy"
+                        decoding="async"
+                        class="rounded-lg border border-gray-200 object-cover"
+                        style="width: ' . $safeWidth . 'px; height: ' . $safeHeight . 'px;"
+                    >';
                 })
-                ->implode('')
-            .'</div>'
+                ->implode('') .
+            '</div>'
         );
     }
 
@@ -46,7 +54,9 @@ class PhotoVerificationGalleryRenderer
         }
 
         $trimmedState = trim($urls);
+
         $decoded = json_decode($trimmedState, true, self::JSON_DECODE_DEPTH);
+
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             return self::normalizeUrlArray($decoded);
         }
