@@ -57,6 +57,7 @@ class SitemapControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertHeader('Content-Type', 'text/plain; charset=UTF-8');
+        $response->assertSee('Disallow: /admin', false);
         $response->assertSee('Sitemap: '.url('/sitemap.xml'), false);
     }
 
