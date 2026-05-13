@@ -24,7 +24,8 @@ class SendPhotoVerificationStatusEmailJob implements ShouldQueue
         public int $userId,
         public int $mailSettingId,
         public string $status,
-        public ?string $adminNote = null
+        public ?string $adminNote = null,
+        public ?string $verificationStatus = null,
     ) {}
 
     public function handle(MailgunConfigService $mailgunConfig): void
@@ -52,9 +53,12 @@ class SendPhotoVerificationStatusEmailJob implements ShouldQueue
 
         $mailgunConfig->apply($setting);
 
-        $subject = $this->status === 'approved'
-            ? 'Your Photo Verification Has Been Approved'
-            : 'Your Photo Verification Has Been Rejected';
+        $subject = match ($this->status) {
+            'approved' => 'Your Photo Verification Has Been Approved',
+            'rejected' => 'Your Photo Verification Has Been Rejected',
+            'note_added' => 'New Admin Note for Your Photo Verification',
+            default => 'Photo Verification Update',
+        };
 
         try {
             Mail::mailer('mailgun')->send(
@@ -64,6 +68,7 @@ class SendPhotoVerificationStatusEmailJob implements ShouldQueue
                     'email' => $user->email,
                     'status' => $this->status,
                     'adminNote' => $this->adminNote,
+                    'verificationStatus' => $this->verificationStatus,
                     'signinUrl' => url('/signin'),
                 ],
                 function ($message) use ($user, $subject): void {
