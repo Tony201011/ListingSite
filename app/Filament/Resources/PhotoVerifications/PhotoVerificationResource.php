@@ -279,8 +279,7 @@ class PhotoVerificationResource extends Resource
         string $status,
         ?string $adminNote = null,
         ?string $verificationStatus = null
-    ): void
-    {
+    ): void {
         if (! $record->user_id) {
             return;
         }

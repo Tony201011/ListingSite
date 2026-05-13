@@ -37,25 +37,25 @@ class PhotoVerificationGalleryRenderer
 
         return new HtmlString(
             '<div
-                x-data="' . e($alpineState) . '"
+                x-data="'.e($alpineState).'"
                 class="space-y-3"
-            >' .
-            '<div class="flex flex-wrap gap-3">' .
+            >'.
+            '<div class="flex flex-wrap gap-3">'.
             $previewUrls
                 ->values()
                 ->map(function (string $url, int $index) use ($safeHeight, $safeWidth): string {
                     return self::buildThumbnailButton($url, $index, $safeHeight, $safeWidth);
                 })
-                ->implode('') .
+                ->implode('').
             ($remainingCount > 0
                 ? '<button
                     type="button"
                     class="flex items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm font-medium text-gray-600"
-                    style="width: ' . $safeWidth . 'px; height: ' . $safeHeight . 'px;"
-                    @click="openGallery(' . $previewUrls->count() . ')"
-                >+' . e((string) $remainingCount) . ' more</button>'
-                : '') .
-            '</div>' .
+                    style="width: '.$safeWidth.'px; height: '.$safeHeight.'px;"
+                    @click="openGallery('.$previewUrls->count().')"
+                >+'.e((string) $remainingCount).' more</button>'
+                : '').
+            '</div>'.
             '<template x-teleport="body">
                 <div
                     x-show="isOpen"
@@ -98,30 +98,30 @@ class PhotoVerificationGalleryRenderer
                         </div>
 
                         <div class="flex flex-wrap gap-3 overflow-y-auto">
-                            ' . collect($urls)
+                            '.collect($urls)
                 ->values()
                 ->map(function (string $url, int $index) use ($modalId): string {
                     return '<button
                         type="button"
                         class="overflow-hidden rounded-lg border"
-                        :class="activeIndex === ' . $index . ' ? \'border-primary-500 ring-2 ring-primary-200\' : \'border-gray-200\'"
-                        data-gallery-id="' . e($modalId) . '"
-                        @click="openGallery(' . $index . ')"
+                        :class="activeIndex === '.$index.' ? \'border-primary-500 ring-2 ring-primary-200\' : \'border-gray-200\'"
+                        data-gallery-id="'.e($modalId).'"
+                        @click="openGallery('.$index.')"
                     >
                         <img
-                            src="' . e($url) . '"
-                            alt="' . e('Verification photo '.($index + 1)) . '"
+                            src="'.e($url).'"
+                            alt="'.e('Verification photo '.($index + 1)).'"
                             class="h-20 w-20 object-cover"
                             loading="lazy"
                             decoding="async"
                         >
                     </button>';
                 })
-                ->implode('') . '
+                ->implode('').'
                         </div>
                     </div>
                 </div>
-            </template>' .
+            </template>'.
             '</div>'
         );
     }
@@ -131,12 +131,12 @@ class PhotoVerificationGalleryRenderer
         return '<button
             type="button"
             class="relative overflow-hidden rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            style="width: ' . $width . 'px; height: ' . $height . 'px;"
-            @click="openGallery(' . $index . ')"
+            style="width: '.$width.'px; height: '.$height.'px;"
+            @click="openGallery('.$index.')"
         >
             <img
-                src="' . e($url) . '"
-                alt="' . e('Verification photo '.($index + 1)) . '"
+                src="'.e($url).'"
+                alt="'.e('Verification photo '.($index + 1)).'"
                 loading="lazy"
                 decoding="async"
                 class="h-full w-full object-cover"
