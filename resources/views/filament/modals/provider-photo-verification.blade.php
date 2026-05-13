@@ -6,10 +6,9 @@
 @endphp
 
 <div class="pv-modal-content">
-    <div class="pv-section">
-        <div class="pv-section-header">
-            Provider Details
-        </div>
+
+    <section class="pv-card">
+        <div class="pv-card-header">Provider Details</div>
 
         <table class="pv-table">
             <tbody>
@@ -17,14 +16,17 @@
                     <th>Provider Name</th>
                     <td>{{ $providerProfile->name ?? '—' }}</td>
                 </tr>
+
                 <tr>
                     <th>Profile Slug</th>
                     <td>{{ $providerProfile->slug ?? '—' }}</td>
                 </tr>
+
                 <tr>
                     <th>Provider Email</th>
                     <td>{{ $providerProfile->user?->email ?? '—' }}</td>
                 </tr>
+
                 <tr>
                     <th>Profile Status</th>
                     <td>
@@ -35,13 +37,11 @@
                 </tr>
             </tbody>
         </table>
-    </div>
+    </section>
 
     @if ($verification)
-        <div class="pv-section">
-            <div class="pv-section-header">
-                Verification Submission
-            </div>
+        <section class="pv-card">
+            <div class="pv-card-header">Verification Submission</div>
 
             <table class="pv-table">
                 <tbody>
@@ -53,10 +53,12 @@
                             </span>
                         </td>
                     </tr>
+
                     <tr>
                         <th>Submitted At</th>
                         <td>{{ $verification->submitted_at?->format('M d, Y h:i A') ?: '—' }}</td>
                     </tr>
+
                     <tr>
                         <th>Admin Notes</th>
                         <td>
@@ -67,14 +69,12 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </section>
 
-        <div class="pv-section">
-            <div class="pv-section-header">
-                Uploaded Verification Images
-            </div>
+        <section class="pv-card">
+            <div class="pv-card-header">Uploaded Verification Images</div>
 
-            <div class="pv-images-wrap">
+            <div class="pv-gallery-container">
                 <div class="photo-verification-gallery">
                     {!! \App\Support\PhotoVerificationGalleryRenderer::render(
                         $verification->photo_urls,
@@ -83,36 +83,38 @@
                     ) !!}
                 </div>
             </div>
-        </div>
+        </section>
     @else
         <div class="pv-empty">
             No photo verification submission is available for this provider profile yet.
         </div>
     @endif
+
 </div>
 
 <style>
     .pv-modal-content {
-        max-height: 72vh;
+        max-height: calc(100vh - 180px);
         overflow-y: auto;
-        padding: 4px 12px 4px 4px;
+        padding: 4px 8px 16px;
         display: flex;
         flex-direction: column;
-        gap: 18px;
+        gap: 22px;
     }
 
-    .pv-section {
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
+    .pv-card {
+        width: 100%;
         overflow: hidden;
         background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
     }
 
-    .pv-section-header {
-        padding: 12px 16px;
+    .pv-card-header {
+        padding: 16px 20px;
         background: #f9fafb;
         border-bottom: 1px solid #e5e7eb;
-        font-size: 13px;
+        font-size: 16px;
         font-weight: 700;
         color: #111827;
     }
@@ -132,23 +134,23 @@
     }
 
     .pv-table th {
-        width: 220px;
-        padding: 14px 16px;
+        width: 275px;
+        padding: 20px;
         background: #f9fafb;
+        border-right: 1px solid #e5e7eb;
         text-align: left;
         vertical-align: top;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 700;
         color: #6b7280;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        border-right: 1px solid #e5e7eb;
     }
 
     .pv-table td {
-        padding: 14px 16px;
+        padding: 20px;
         vertical-align: top;
-        font-size: 14px;
+        font-size: 17px;
         color: #111827;
         word-break: break-word;
     }
@@ -156,28 +158,31 @@
     .pv-badge {
         display: inline-flex;
         align-items: center;
+        padding: 6px 14px;
         border-radius: 999px;
-        background: #ecfdf5;
+        background: #d1fae5;
         color: #047857;
-        padding: 4px 10px;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 700;
     }
 
     .pv-note {
-        min-height: 44px;
-        max-height: 140px;
+        width: 100%;
+        min-height: 48px;
+        max-height: 130px;
         overflow-y: auto;
-        white-space: pre-wrap;
+        padding: 12px 14px;
         border: 1px solid #e5e7eb;
         border-radius: 10px;
         background: #f9fafb;
-        padding: 12px;
         color: #374151;
+        font-size: 15px;
+        line-height: 1.5;
+        white-space: pre-wrap;
     }
 
-    .pv-images-wrap {
-        padding: 16px;
+    .pv-gallery-container {
+        padding: 16px 20px 20px;
     }
 
     .photo-verification-gallery,
@@ -187,6 +192,7 @@
         gap: 14px !important;
         align-items: flex-start !important;
         max-width: 100% !important;
+        overflow: visible !important;
     }
 
     .photo-verification-gallery a,
@@ -194,15 +200,15 @@
     .photo-verification-gallery iframe,
     .photo-verification-gallery embed,
     .photo-verification-gallery object {
-        width: 120px !important;
-        height: 120px !important;
-        min-width: 120px !important;
-        max-width: 120px !important;
-        min-height: 120px !important;
-        max-height: 120px !important;
+        width: 150px !important;
+        height: 150px !important;
+        min-width: 150px !important;
+        max-width: 150px !important;
+        min-height: 150px !important;
+        max-height: 150px !important;
         display: block !important;
         overflow: hidden !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
     }
 
     .photo-verification-gallery img {
@@ -212,15 +218,20 @@
     }
 
     .pv-empty {
-        border: 1px dashed #d1d5db;
-        border-radius: 12px;
-        background: #f9fafb;
         padding: 16px;
-        font-size: 14px;
+        border: 1px dashed #d1d5db;
+        border-radius: 14px;
+        background: #f9fafb;
         color: #6b7280;
+        font-size: 14px;
     }
 
     @media (max-width: 640px) {
+        .pv-modal-content {
+            max-height: calc(100vh - 140px);
+            padding-right: 4px;
+        }
+
         .pv-table,
         .pv-table tbody,
         .pv-table tr,
@@ -233,10 +244,25 @@
         .pv-table th {
             border-right: none;
             border-bottom: 1px solid #e5e7eb;
+            padding: 14px 16px 8px;
         }
 
         .pv-table td {
-            border-bottom: 1px solid #e5e7eb;
+            padding: 8px 16px 16px;
+            font-size: 15px;
+        }
+
+        .photo-verification-gallery a,
+        .photo-verification-gallery img,
+        .photo-verification-gallery iframe,
+        .photo-verification-gallery embed,
+        .photo-verification-gallery object {
+            width: 120px !important;
+            height: 120px !important;
+            min-width: 120px !important;
+            max-width: 120px !important;
+            min-height: 120px !important;
+            max-height: 120px !important;
         }
     }
 </style>
