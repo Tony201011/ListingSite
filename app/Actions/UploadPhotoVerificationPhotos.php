@@ -15,13 +15,13 @@ class UploadPhotoVerificationPhotos
 {
     public function execute(ProviderProfile $profile, array $photos): ActionResult
     {
-        $countVerification = $profile->photoVerification()
+        $hasActiveVerification = $profile->photoVerification()
             ->whereNull('deleted_at')
-            ->count();
+            ->exists();
 
-        if ($countVerification >= 2) {
+        if ($hasActiveVerification) {
             return ActionResult::domainError(
-                'You have upload the maximum number of 2 verification photos. Please contact support for further assistance.',
+                'You already have a pending verification submission. Please delete your existing verification photos before uploading new ones.',
                 status: 403
             );
         }

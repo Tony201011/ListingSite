@@ -37,7 +37,12 @@ class DeletePhotoVerificationPhoto
             if (count($updatedPhotos) !== count($photos)) {
                 $disk->delete($path);
 
-                $verification->deleted_at = now();
+                if (empty($updatedPhotos)) {
+                    $verification->deleted_at = now();
+                } else {
+                    $verification->photos = $updatedPhotos;
+                }
+
                 $verification->save();
 
                 return ActionResult::success([], 'Photo deleted successfully.');
