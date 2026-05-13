@@ -28,7 +28,7 @@ class PhotoVerificationGalleryRenderer
                     $alt = e("Verification photo {$photoNumber}");
                     $safeUrl = e($url);
 
-                    return '<img src="'.$safeUrl.'" alt="'.$alt.'" loading="lazy" decoding="async" class="rounded-lg border border-gray-200" style="max-height: '.$safeHeight.'px; max-width: 100%; width: auto; height: auto; object-fit: contain;">';
+                    return '<img src="'.$safeUrl.'" alt="'.$alt.'" loading="lazy" decoding="async" class="w-auto max-w-full rounded-lg border border-gray-200 object-contain" style="max-height: '.$safeHeight.'px;">';
                 })
                 ->implode('')
             .'</div>'
