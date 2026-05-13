@@ -13,7 +13,7 @@
         <div class="grid gap-px bg-gray-200 sm:grid-cols-2">
             <div class="space-y-1 bg-white px-4 py-3">
                 <div class="text-xs font-medium uppercase tracking-wide text-gray-500">Provider Name</div>
-                <div class="text-sm font-semibold text-gray-900 break-words">{{ $providerProfile->name ?? '—' }}</div>
+                <div class="text-sm font-semibold text-gray-900 break-all">{{ $providerProfile->name ?? '—' }}</div>
             </div>
             <div class="space-y-1 bg-white px-4 py-3">
                 <div class="text-xs font-medium uppercase tracking-wide text-gray-500">Profile Slug</div>
