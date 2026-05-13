@@ -14,6 +14,7 @@ use App\Models\Postcode;
 use App\Models\ProviderProfile;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
@@ -1262,58 +1263,61 @@ class UserResource extends Resource
                         ]);
                     }),
 
-                Action::make('edit')
-                    ->label('Edit')
-                    ->url(fn (ProviderProfile $record): string => static::getUrl('edit', ['record' => $record]))
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
+                ActionGroup::make([
+                    Action::make('edit')
+                        ->label('Edit')
+                        ->url(fn (ProviderProfile $record): string => static::getUrl('edit', ['record' => $record]))
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
 
-                Action::make('block')
-                    ->label('Block Profile')
-                    ->color('danger')
-                    ->icon('heroicon-o-lock-closed')
-                    ->requiresConfirmation()
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->is_blocked && ! $record->trashed())
-                    ->action(function (ProviderProfile $record): void {
-                        $record->update(['is_blocked' => true]);
-                        SendAdminProviderEmailJob::dispatch($record->user?->id, 'blocked');
-                    }),
+                    Action::make('delete')
+                        ->label('Delete')
+                        ->color('danger')
+                        ->icon('heroicon-o-trash')
+                        ->requiresConfirmation()
+                        ->modalHeading('Delete profile')
+                        ->modalDescription('Delete this provider profile? This soft-deletes the profile and removes it from listings.')
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                        ->action(function (ProviderProfile $record): void {
+                            $record->delete();
+                        })
+                        ->successNotificationTitle('Profile deleted'),
 
-                Action::make('unblock')
-                    ->label('Unblock Profile')
-                    ->color('success')
-                    ->icon('heroicon-o-lock-open')
-                    ->requiresConfirmation()
-                    ->visible(fn (ProviderProfile $record): bool => $record->is_blocked && ! $record->trashed())
-                    ->action(function (ProviderProfile $record): void {
-                        $record->update(['is_blocked' => false]);
-                        SendAdminProviderEmailJob::dispatch($record->user?->id, 'unblocked');
-                    }),
+                    Action::make('block')
+                        ->label('Block Profile')
+                        ->color('danger')
+                        ->icon('heroicon-o-lock-closed')
+                        ->requiresConfirmation()
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->is_blocked && ! $record->trashed())
+                        ->action(function (ProviderProfile $record): void {
+                            $record->update(['is_blocked' => true]);
+                            SendAdminProviderEmailJob::dispatch($record->user?->id, 'blocked');
+                        }),
 
-                Action::make('restore')
-                    ->label('Restore')
-                    ->color('success')
-                    ->icon('heroicon-o-arrow-path')
-                    ->requiresConfirmation()
-                    ->modalHeading('Restore profile')
-                    ->modalDescription('Are you sure you want to restore this provider profile?')
-                    ->visible(fn (ProviderProfile $record): bool => $record->trashed())
-                    ->action(function (ProviderProfile $record): void {
-                        $record->restore();
-                    })
-                    ->successNotificationTitle('Profile restored'),
+                    Action::make('unblock')
+                        ->label('Unblock Profile')
+                        ->color('success')
+                        ->icon('heroicon-o-lock-open')
+                        ->requiresConfirmation()
+                        ->visible(fn (ProviderProfile $record): bool => $record->is_blocked && ! $record->trashed())
+                        ->action(function (ProviderProfile $record): void {
+                            $record->update(['is_blocked' => false]);
+                            SendAdminProviderEmailJob::dispatch($record->user?->id, 'unblocked');
+                        }),
 
-                Action::make('delete')
-                    ->label('Delete')
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->modalHeading('Delete profile')
-                    ->modalDescription('Delete this provider profile? This soft-deletes the profile and removes it from listings.')
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
-                    ->action(function (ProviderProfile $record): void {
-                        $record->delete();
-                    })
-                    ->successNotificationTitle('Profile deleted'),
+                    Action::make('restore')
+                        ->label('Restore')
+                        ->color('success')
+                        ->icon('heroicon-o-arrow-path')
+                        ->requiresConfirmation()
+                        ->modalHeading('Restore profile')
+                        ->modalDescription('Are you sure you want to restore this provider profile?')
+                        ->visible(fn (ProviderProfile $record): bool => $record->trashed())
+                        ->action(function (ProviderProfile $record): void {
+                            $record->restore();
+                        })
+                        ->successNotificationTitle('Profile restored'),
+                ])
+                    ->label('Action'),
             ])
             ->toolbarActions([])
             ->groups([
