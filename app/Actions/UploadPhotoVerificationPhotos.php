@@ -21,7 +21,7 @@ class UploadPhotoVerificationPhotos
 
         if ($hasActiveVerification) {
             return ActionResult::domainError(
-                'You already have a pending verification submission. Please delete your existing verification photos before uploading new ones.',
+                'You already have an active verification submission. Please delete your existing verification photos before uploading new ones.',
                 status: 403
             );
         }

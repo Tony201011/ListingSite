@@ -115,7 +115,7 @@ class PhotoVerificationControllerTest extends TestCase
         ]);
 
         $response->assertForbidden();
-        $response->assertJsonFragment(['message' => 'You already have a pending verification submission. Please delete your existing verification photos before uploading new ones.']);
+        $response->assertJsonFragment(['message' => 'You already have an active verification submission. Please delete your existing verification photos before uploading new ones.']);
     }
 
     public function test_upload_allowed_after_existing_record_is_soft_deleted(): void
@@ -288,7 +288,10 @@ class PhotoVerificationControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJson(['verification' => ['status' => 'pending']]);
+        // $verification was the first (now soft-deleted) record; the new upload creates a second record.
+        // assertSoftDeleted only matches soft-deleted rows, so the new active record is separate.
         $this->assertSoftDeleted('photo_verifications', ['id' => $verification->id]);
+        // 2 total rows: 1 soft-deleted (old) + 1 active (new)
         $this->assertDatabaseCount('photo_verifications', 2);
     }
 
