@@ -95,7 +95,7 @@ class PhotoVerificationResource extends Resource
                     ->description(fn (PhotoVerification $record): string => $record->user?->email ?? ''),
                 TextColumn::make('photo_urls')
                     ->label('Photos')
-                    ->formatStateUsing(fn ($state) => PhotoVerificationGalleryRenderer::render($state, 60, 60, singleMode: true))
+                    ->formatStateUsing(fn ($state) => PhotoVerificationGalleryRenderer::render($state, 60, 60, previewLimit: null, singleMode: true))
                     ->html(),
                 TextColumn::make('status')
                     ->label('Status')
