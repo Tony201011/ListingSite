@@ -29,7 +29,7 @@ class PhotoVerificationResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     protected static ?string $navigationLabel = 'Photo Verifications';
 
@@ -163,16 +163,21 @@ class PhotoVerificationResource extends Resource
                     ->action(function (PhotoVerification $record, array $data): void {
                         $record->update(['status' => 'rejected', 'admin_note' => $data['admin_note']]);
 
-                        $hasOtherApproved = PhotoVerification::query()
-                            ->when(
-                                $record->provider_profile_id,
-                                fn ($q) => $q->where('provider_profile_id', $record->provider_profile_id),
-                                fn ($q) => $q->where('user_id', $record->user_id),
-                            )
-                            ->where('status', 'approved')
-                            ->where('id', '!=', $record->id)
-                            ->whereNull('deleted_at')
-                            ->exists();
+                        $hasOtherApproved = filled($record->provider_profile_id)
+                            ? PhotoVerification::query()
+                                ->where('provider_profile_id', $record->provider_profile_id)
+                                ->where('status', 'approved')
+                                ->where('id', '!=', $record->id)
+                                ->whereNull('deleted_at')
+                                ->exists()
+                            : (filled($record->user_id)
+                                ? PhotoVerification::query()
+                                    ->where('user_id', $record->user_id)
+                                    ->where('status', 'approved')
+                                    ->where('id', '!=', $record->id)
+                                    ->whereNull('deleted_at')
+                                    ->exists()
+                                : false);
 
                         if (! $hasOtherApproved) {
                             self::updateProviderVerificationStatus($record, false);

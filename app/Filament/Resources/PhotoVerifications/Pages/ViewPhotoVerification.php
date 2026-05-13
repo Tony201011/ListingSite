@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\PhotoVerifications\Pages;
 
 use App\Filament\Resources\PhotoVerifications\PhotoVerificationResource;
+use App\Jobs\SendPhotoVerificationStatusEmailJob;
 use App\Models\PhotoVerification;
+use App\Services\Mail\ActiveMailSettingService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -27,8 +29,12 @@ class ViewPhotoVerification extends ViewRecord
                 ->action(function (): void {
                     /** @var PhotoVerification $record */
                     $record = $this->getRecord();
+
                     $record->update(['status' => 'approved']);
-                    $record->user?->providerProfile?->update(['is_verified' => true]);
+
+                    $this->updateProviderVerificationStatus($record, true);
+                    $this->dispatchVerificationEmail($record, 'approved');
+
                     $this->refreshFormData(['status', 'admin_note']);
 
                     Notification::make()
@@ -54,15 +60,27 @@ class ViewPhotoVerification extends ViewRecord
                     $record = $this->getRecord();
                     $record->update(['status' => 'rejected', 'admin_note' => $data['admin_note']]);
 
-                    $hasOtherApproved = $record->user?->photoVerification()
-                        ->where('status', 'approved')
-                        ->where('id', '!=', $record->id)
-                        ->whereNull('deleted_at')
-                        ->exists();
+                    $hasOtherApproved = filled($record->provider_profile_id)
+                        ? PhotoVerification::query()
+                            ->where('provider_profile_id', $record->provider_profile_id)
+                            ->where('status', 'approved')
+                            ->where('id', '!=', $record->id)
+                            ->whereNull('deleted_at')
+                            ->exists()
+                        : (filled($record->user_id)
+                            ? PhotoVerification::query()
+                                ->where('user_id', $record->user_id)
+                                ->where('status', 'approved')
+                                ->where('id', '!=', $record->id)
+                                ->whereNull('deleted_at')
+                                ->exists()
+                            : false);
 
                     if (! $hasOtherApproved) {
-                        $record->user?->providerProfile?->update(['is_verified' => false]);
+                        $this->updateProviderVerificationStatus($record, false);
                     }
+
+                    $this->dispatchVerificationEmail($record, 'rejected', $data['admin_note']);
 
                     $this->refreshFormData(['status', 'admin_note']);
 
@@ -72,5 +90,29 @@ class ViewPhotoVerification extends ViewRecord
                         ->send();
                 }),
         ];
+    }
+
+    private function updateProviderVerificationStatus(PhotoVerification $record, bool $isVerified): void
+    {
+        if ($record->provider_profile_id) {
+            $record->providerProfile?->update(['is_verified' => $isVerified]);
+        } else {
+            $record->user?->providerProfile?->update(['is_verified' => $isVerified]);
+        }
+    }
+
+    private function dispatchVerificationEmail(PhotoVerification $record, string $status, ?string $adminNote = null): void
+    {
+        if (! $record->user_id) {
+            return;
+        }
+
+        $mailSetting = app(ActiveMailSettingService::class)->getActiveOrLatest();
+
+        if (! $mailSetting) {
+            return;
+        }
+
+        SendPhotoVerificationStatusEmailJob::dispatch($record->user_id, $mailSetting->id, $status, $adminNote);
     }
 }
