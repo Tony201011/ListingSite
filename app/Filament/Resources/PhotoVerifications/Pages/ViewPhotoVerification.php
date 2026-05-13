@@ -64,7 +64,9 @@ class ViewPhotoVerification extends ViewRecord
                         ->when(
                             $record->provider_profile_id,
                             fn ($q) => $q->where('provider_profile_id', $record->provider_profile_id),
-                            fn ($q) => $q->where('user_id', $record->user_id),
+                            fn ($q) => filled($record->user_id)
+                                ? $q->where('user_id', $record->user_id)
+                                : $q->whereRaw('1 = 0'),
                         )
                         ->where('status', 'approved')
                         ->where('id', '!=', $record->id)
