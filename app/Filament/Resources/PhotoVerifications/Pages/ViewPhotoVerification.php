@@ -60,18 +60,21 @@ class ViewPhotoVerification extends ViewRecord
                     $record = $this->getRecord();
                     $record->update(['status' => 'rejected', 'admin_note' => $data['admin_note']]);
 
-                    $hasOtherApproved = PhotoVerification::query()
-                        ->when(
-                            $record->provider_profile_id,
-                            fn ($q) => $q->where('provider_profile_id', $record->provider_profile_id),
-                            fn ($q) => filled($record->user_id)
-                                ? $q->where('user_id', $record->user_id)
-                                : $q->whereNull('id'),
-                        )
-                        ->where('status', 'approved')
-                        ->where('id', '!=', $record->id)
-                        ->whereNull('deleted_at')
-                        ->exists();
+                    $hasOtherApproved = filled($record->provider_profile_id)
+                        ? PhotoVerification::query()
+                            ->where('provider_profile_id', $record->provider_profile_id)
+                            ->where('status', 'approved')
+                            ->where('id', '!=', $record->id)
+                            ->whereNull('deleted_at')
+                            ->exists()
+                        : (filled($record->user_id)
+                            ? PhotoVerification::query()
+                                ->where('user_id', $record->user_id)
+                                ->where('status', 'approved')
+                                ->where('id', '!=', $record->id)
+                                ->whereNull('deleted_at')
+                                ->exists()
+                            : false);
 
                     if (! $hasOtherApproved) {
                         $this->updateProviderVerificationStatus($record, false);
