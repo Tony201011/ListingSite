@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Log;
 
 class PhotoVerificationGalleryRenderer
 {
@@ -42,12 +43,14 @@ class PhotoVerificationGalleryRenderer
         }
 
         $trimmedUrls = trim($urls);
-        $decoded = json_decode($trimmedUrls, true, 8);
+        $decoded = json_decode($trimmedUrls, true, 512);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             return self::normalizeUrlArray($decoded);
         }
 
         if (str_starts_with($trimmedUrls, '[')) {
+            Log::warning('Malformed photo verification URLs JSON payload encountered while rendering gallery.');
+
             return [];
         }
 
