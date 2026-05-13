@@ -1266,6 +1266,7 @@ class UserResource extends Resource
                 ActionGroup::make([
                     Action::make('edit')
                         ->label('Edit')
+                        ->icon('heroicon-o-pencil-square')
                         ->url(fn (ProviderProfile $record): string => static::getUrl('edit', ['record' => $record]))
                         ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
 
