@@ -145,6 +145,22 @@ class HomeControllerTest extends TestCase
         $this->assertSame('legacy-favourite', $profiles[0]['slug']);
     }
 
+    public function test_favourites_page_resolves_mixed_case_favourite_slugs_to_canonical_slug(): void
+    {
+        $this->createApprovedProvider(['name' => 'Case Favourite', 'slug' => 'case-favourite']);
+        $viewer = User::factory()->create();
+
+        Cache::put("favourites_user_{$viewer->id}", ['  CASE-FAVOURITE  '], 60);
+
+        $response = $this->actingAs($viewer)->get('/favourites');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('userFavourites', ['case-favourite']);
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(1, $profiles);
+        $this->assertSame('case-favourite', $profiles[0]['slug']);
+    }
+
     public function test_home_page_shows_default_filter_values(): void
     {
         $response = $this->get('/');
