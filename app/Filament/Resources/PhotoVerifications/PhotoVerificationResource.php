@@ -7,11 +7,12 @@ use App\Filament\Resources\PhotoVerifications\Pages\ViewPhotoVerification;
 use App\Jobs\SendPhotoVerificationStatusEmailJob;
 use App\Models\PhotoVerification;
 use App\Services\Mail\ActiveMailSettingService;
-use App\Support\PhotoVerificationGalleryRenderer;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -20,9 +21,26 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class PhotoVerificationResource extends Resource
 {
+    private const PHOTO_GRID_STYLE = 'display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:1rem;';
+
+    private const PHOTO_CARD_STYLE = 'display:flex;flex-direction:column;gap:0.75rem;border:1px solid #e5e7eb;border-radius:0.875rem;padding:1rem;background:#fff;box-shadow:0 1px 2px rgba(15, 23, 42, 0.08);';
+
+    private const PHOTO_IMAGE_STYLE = 'width:100%;max-height:420px;border-radius:0.75rem;object-fit:contain;background:#f8fafc;';
+
+    private const PHOTO_CAPTION_STYLE = 'display:flex;flex-direction:column;gap:0.35rem;';
+
+    private const PHOTO_LABEL_STYLE = 'font-size:0.75rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;';
+
+    private const PHOTO_NAME_STYLE = 'font-size:0.95rem;font-weight:600;color:#111827;';
+
+    private const PHOTO_PATH_STYLE = 'font-size:0.8rem;color:#6b7280;word-break:break-all;';
+
+    private const PHOTO_LINK_STYLE = 'font-size:0.9rem;font-weight:600;color:#2563eb;text-decoration:none;';
+
     protected static ?string $model = PhotoVerification::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
@@ -48,12 +66,18 @@ class PhotoVerificationResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Provider Information')
+                Section::make('Verification Overview')
                     ->schema([
+                        TextEntry::make('id')
+                            ->label('Verification ID'),
                         TextEntry::make('user.name')
                             ->label('Provider Name'),
+                        TextEntry::make('providerProfile.name')
+                            ->label('Listing Name')
+                            ->placeholder('-'),
                         TextEntry::make('user.email')
                             ->label('Email')
+                            ->placeholder('-')
                             ->copyable(),
                         TextEntry::make('status')
                             ->label('Status')
@@ -67,18 +91,98 @@ class PhotoVerificationResource extends Resource
                             ->label('Submitted At')
                             ->dateTime()
                             ->placeholder('-'),
+                        TextEntry::make('photo_summary')
+                            ->label('Uploaded Photos')
+                            ->getStateUsing(fn (PhotoVerification $record): string => static::summarizePhotoCount($record->photo_urls))
+                            ->badge()
+                            ->color('gray'),
+                        TextEntry::make('created_at')
+                            ->label('Created')
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label('Last Updated')
+                            ->dateTime()
+                            ->placeholder('-'),
                         TextEntry::make('admin_note')
                             ->label('Admin Note')
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ])
-                    ->columns(2),
+                    ->columns(3),
 
-                Section::make('Verification Photos')
+                Section::make('User & Listing Information')
                     ->schema([
-                        TextEntry::make('photo_urls')
-                            ->label('Photos')
-                            ->formatStateUsing(fn ($state) => PhotoVerificationGalleryRenderer::render($state, 300))
+                        TextEntry::make('user.id')
+                            ->label('User ID')
+                            ->placeholder('-'),
+                        TextEntry::make('providerProfile.id')
+                            ->label('Listing ID')
+                            ->placeholder('-'),
+                        TextEntry::make('providerProfile.slug')
+                            ->label('Listing Slug')
+                            ->placeholder('-')
+                            ->copyable(),
+                        TextEntry::make('providerProfile.profile_status')
+                            ->label('Listing Status')
+                            ->badge()
+                            ->placeholder('-')
+                            ->color(fn (?string $state): string => match ($state) {
+                                'approved' => 'success',
+                                'rejected' => 'danger',
+                                'pending' => 'warning',
+                                default => 'gray',
+                            }),
+                        IconEntry::make('providerProfile.is_verified')
+                            ->label('Listing Verified')
+                            ->boolean(),
+                        IconEntry::make('providerProfile.is_blocked')
+                            ->label('Listing Blocked')
+                            ->boolean(),
+                        TextEntry::make('providerProfile.city.name')
+                            ->label('City')
+                            ->placeholder('-'),
+                        TextEntry::make('providerProfile.state.name')
+                            ->label('State')
+                            ->placeholder('-'),
+                        TextEntry::make('providerProfile.suburb')
+                            ->label('Suburb')
+                            ->placeholder('-'),
+                    ])
+                    ->columns(3),
+
+                Section::make('Submitted Details')
+                    ->schema([
+                        RepeatableEntry::make('submitted_photos')
+                            ->label('Submitted Files')
+                            ->getStateUsing(fn (PhotoVerification $record): array => static::getSubmittedPhotoDetails($record))
+                            ->schema([
+                                TextEntry::make('label')
+                                    ->label('Photo'),
+                                TextEntry::make('name')
+                                    ->label('File Name')
+                                    ->placeholder('-'),
+                                TextEntry::make('path')
+                                    ->label('Storage Path')
+                                    ->placeholder('-')
+                                    ->copyable()
+                                    ->columnSpanFull(),
+                                TextEntry::make('url')
+                                    ->label('Photo URL')
+                                    ->placeholder('-')
+                                    ->copyable()
+                                    ->url(fn (?string $state): ?string => filled($state) ? $state : null, shouldOpenInNewTab: true)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2)
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Uploaded Verification Photos')
+                    ->schema([
+                        TextEntry::make('photo_gallery')
+                            ->hiddenLabel()
+                            ->getStateUsing(fn (PhotoVerification $record): HtmlString => static::renderPhotoReviewGrid($record))
                             ->html()
                             ->columnSpanFull(),
                     ]),
@@ -93,10 +197,17 @@ class PhotoVerificationResource extends Resource
                     ->label('Provider')
                     ->searchable()
                     ->description(fn (PhotoVerification $record): string => $record->user?->email ?? ''),
-                TextColumn::make('photo_urls')
+                TextColumn::make('providerProfile.name')
+                    ->label('Listing')
+                    ->searchable()
+                    ->placeholder('-')
+                    ->description(fn (PhotoVerification $record): string => $record->providerProfile?->slug ?? ''),
+                TextColumn::make('photo_summary')
                     ->label('Photos')
-                    ->formatStateUsing(fn ($state) => PhotoVerificationGalleryRenderer::render($state, 60, 60, previewLimit: null, singleMode: true))
-                    ->html(),
+                    ->state(fn (PhotoVerification $record): string => static::summarizePhotoCount($record->photo_urls))
+                    ->badge()
+                    ->color('gray')
+                    ->description('Use View to review'),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -126,6 +237,12 @@ class PhotoVerificationResource extends Resource
                     ->default('pending'),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->color('primary')
+                    ->button(),
+
                 Action::make('approve')
                     ->label('Approve')
                     ->color('success')
@@ -182,8 +299,6 @@ class PhotoVerificationResource extends Resource
                             ->danger()
                             ->send();
                     }),
-
-                ViewAction::make(),
             ])
             ->defaultSort('submitted_at', 'desc')
             ->striped()
@@ -244,6 +359,89 @@ class PhotoVerificationResource extends Resource
         ]);
 
         static::dispatchVerificationEmail($record, 'note_added', $record->admin_note, $record->status);
+    }
+
+    public static function summarizePhotoCount(array $photoUrls): string
+    {
+        $count = count($photoUrls);
+
+        return $count === 1 ? '1 photo' : "{$count} photos";
+    }
+
+    public static function getSubmittedPhotoDetails(PhotoVerification $record): array
+    {
+        $photoUrls = $record->photo_urls;
+        $submittedPhotos = collect(is_array($record->photos) ? $record->photos : [])
+            ->values()
+            ->map(function ($photo, int $index) use ($photoUrls): array {
+                $photo = is_array($photo) ? $photo : [];
+
+                return [
+                    'label' => 'Photo '.($index + 1),
+                    'name' => filled($photo['name'] ?? null) ? (string) $photo['name'] : null,
+                    'path' => filled($photo['path'] ?? null) ? (string) $photo['path'] : null,
+                    'url' => array_key_exists($index, $photoUrls)
+                        ? $photoUrls[$index]
+                        : (filled($photo['url'] ?? null) ? (string) $photo['url'] : null),
+                ];
+            })
+            ->values()
+            ->all();
+
+        if (filled($submittedPhotos)) {
+            return $submittedPhotos;
+        }
+
+        return collect($photoUrls)
+            ->values()
+            ->map(fn (string $url, int $index): array => [
+                'label' => 'Photo '.($index + 1),
+                'name' => null,
+                'path' => null,
+                'url' => $url,
+            ])
+            ->all();
+    }
+
+    public static function renderPhotoReviewGrid(PhotoVerification $record): HtmlString
+    {
+        $photos = static::getSubmittedPhotoDetails($record);
+
+        if (blank($photos)) {
+            return new HtmlString('<span style="color: #999; font-style: italic;">No uploaded photos.</span>');
+        }
+
+        $cards = collect($photos)
+            ->map(fn (array $photo): ?string => static::buildPhotoCardHtml($photo))
+            ->filter()
+            ->implode('');
+
+        return new HtmlString('<div style="'.self::PHOTO_GRID_STYLE.'">'.$cards.'</div>');
+    }
+
+    private static function buildPhotoCardHtml(array $photo): ?string
+    {
+        $url = $photo['url'] ?? null;
+
+        if (! filled($url)) {
+            return null;
+        }
+
+        $label = $photo['label'] ?? 'Verification photo';
+        $name = $photo['name'] ?? $label;
+        $path = $photo['path'] ?? null;
+
+        return '<figure style="'.self::PHOTO_CARD_STYLE.'">'.
+            '<img src="'.e($url).'" alt="'.e($name).'" style="'.self::PHOTO_IMAGE_STYLE.'">'.
+            '<figcaption style="'.self::PHOTO_CAPTION_STYLE.'">'.
+            '<span style="'.self::PHOTO_LABEL_STYLE.'">'.e($label).'</span>'.
+            '<span style="'.self::PHOTO_NAME_STYLE.'">'.e($name).'</span>'.
+            ($path
+                ? '<span style="'.self::PHOTO_PATH_STYLE.'">'.e($path).'</span>'
+                : '').
+            '<a href="'.e($url).'" target="_blank" rel="noopener noreferrer" style="'.self::PHOTO_LINK_STYLE.'">Open full size</a>'.
+            '</figcaption>'.
+            '</figure>';
     }
 
     private static function hasOtherApprovedVerification(PhotoVerification $record): bool

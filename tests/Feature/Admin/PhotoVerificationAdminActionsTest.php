@@ -61,6 +61,44 @@ class PhotoVerificationAdminActionsTest extends TestCase
         });
     }
 
+    public function test_summarize_photo_count_returns_human_readable_total(): void
+    {
+        $verification = $this->createVerification();
+
+        $this->assertSame('2 photos', PhotoVerificationResource::summarizePhotoCount($verification->photo_urls));
+    }
+
+    public function test_get_submitted_photo_details_keeps_uploaded_metadata(): void
+    {
+        $verification = $this->createVerification();
+
+        $this->assertSame([
+            [
+                'label' => 'Photo 1',
+                'name' => 'front.jpg',
+                'path' => null,
+                'url' => 'https://example.com/photo-1.jpg',
+            ],
+            [
+                'label' => 'Photo 2',
+                'name' => 'side.jpg',
+                'path' => null,
+                'url' => 'https://example.com/photo-2.jpg',
+            ],
+        ], PhotoVerificationResource::getSubmittedPhotoDetails($verification));
+    }
+
+    public function test_render_photo_review_grid_outputs_clear_photo_cards(): void
+    {
+        $verification = $this->createVerification();
+
+        $html = PhotoVerificationResource::renderPhotoReviewGrid($verification)->toHtml();
+
+        $this->assertStringContainsString('Photo 1', $html);
+        $this->assertStringContainsString('https://example.com/photo-1.jpg', $html);
+        $this->assertStringContainsString('Open full size', $html);
+    }
+
     private function createMailSetting(): SmtpSetting
     {
         return SmtpSetting::create([
@@ -91,8 +129,8 @@ class PhotoVerificationAdminActionsTest extends TestCase
             'user_id' => $user->id,
             'provider_profile_id' => $profile->id,
             'photos' => [
-                ['url' => 'https://example.com/photo-1.jpg'],
-                ['url' => 'https://example.com/photo-2.jpg'],
+                ['url' => 'https://example.com/photo-1.jpg', 'name' => 'front.jpg'],
+                ['url' => 'https://example.com/photo-2.jpg', 'name' => 'side.jpg'],
             ],
             'status' => $status,
             'submitted_at' => now(),
