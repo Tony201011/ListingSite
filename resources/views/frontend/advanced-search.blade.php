@@ -54,10 +54,13 @@
 
                 labelStyle(percent) {
                     const safePercent = Math.min(100, Math.max(0, percent));
-                    if (safePercent <= 3) {
+                    const edgeThreshold = 3;
+                    const farEdgeThreshold = 100 - edgeThreshold;
+
+                    if (safePercent <= edgeThreshold) {
                         return 'left: 0%; transform: none;';
                     }
-                    if (safePercent >= 97) {
+                    if (safePercent >= farEdgeThreshold) {
                         return 'left: 100%; transform: translateX(-100%);';
                     }
                     return `left: ${safePercent}%; transform: translateX(-50%);`;
@@ -535,7 +538,17 @@
                         >
                             <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
-                            <div class="view-card-media relative overflow-hidden rounded-t-2xl" x-data="{ imageLoaded: false }">
+                            <div class="view-card-media relative overflow-hidden rounded-t-2xl" x-data="{
+                                imageLoaded: false,
+                                initImage(img) {
+                                    if (img.complete && img.naturalWidth > 0) {
+                                        this.imageLoaded = true;
+                                        return;
+                                    }
+
+                                    img.addEventListener('load', () => this.imageLoaded = true, { once: true });
+                                }
+                            }">
                                 @if($profile['image'])
                                     <div
                                         x-show="!imageLoaded"
@@ -548,7 +561,7 @@
                                         alt="{{ $profile['name'] }}"
                                         class="view-card-image h-52 w-full object-cover transition-[opacity,filter,transform] duration-500 group-hover:scale-105"
                                         :class="imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'"
-                                        x-init="if ($el.complete && $el.naturalWidth > 0) { imageLoaded = true; } else { $el.addEventListener('load', () => imageLoaded = true, { once: true }); }"
+                                        x-init="initImage($el)"
                                         loading="lazy"
                                         decoding="async"
                                         fetchpriority="low"
