@@ -57,7 +57,7 @@ class PhotoVerificationGalleryRenderer
                     type="button"
                     class="flex items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm font-medium text-gray-600"
                     style="width: '.$safeWidth.'px; height: '.$safeHeight.'px;"
-                    @click="openGallery('.$previewUrls->count().')"
+                    @click.stop="openGallery('.$previewUrls->count().')"
                 >+'.e((string) $remainingCount).' more</button>'
                 : '').
             '</div>'.
@@ -112,7 +112,7 @@ class PhotoVerificationGalleryRenderer
                         class="overflow-hidden rounded-lg border"
                         :class="activeIndex === '.$index.' ? \'border-primary-500 ring-2 ring-primary-200\' : \'border-gray-200\'"
                         data-gallery-id="'.e($modalId).'"
-                        @click="openGallery('.$index.')"
+                        @click.stop="openGallery('.$index.')"
                     >
                         <img
                             src="'.e($url).'"
@@ -139,7 +139,7 @@ class PhotoVerificationGalleryRenderer
             type="button"
             class="relative overflow-hidden rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
             style="width: '.$width.'px; height: '.$height.'px;"
-            @click="openGallery('.$index.')"
+            @click.stop="openGallery('.$index.')"
         >
             <img
                 src="'.e($url).'"
