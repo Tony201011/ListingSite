@@ -4,7 +4,9 @@ namespace App\Filament\Resources\PhotoVerifications;
 
 use App\Filament\Resources\PhotoVerifications\Pages\ListPhotoVerifications;
 use App\Filament\Resources\PhotoVerifications\Pages\ViewPhotoVerification;
+use App\Jobs\SendPhotoVerificationStatusEmailJob;
 use App\Models\PhotoVerification;
+use App\Services\Mail\ActiveMailSettingService;
 use App\Support\PhotoVerificationGalleryRenderer;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -138,6 +140,8 @@ class PhotoVerificationResource extends Resource
 
                         self::updateProviderVerificationStatus($record, true);
 
+                        self::dispatchVerificationEmail($record, 'approved');
+
                         Notification::make()
                             ->title('Photo verification approved')
                             ->success()
@@ -174,6 +178,8 @@ class PhotoVerificationResource extends Resource
                             self::updateProviderVerificationStatus($record, false);
                         }
 
+                        self::dispatchVerificationEmail($record, 'rejected', $data['admin_note']);
+
                         Notification::make()
                             ->title('Photo verification rejected')
                             ->danger()
@@ -203,5 +209,20 @@ class PhotoVerificationResource extends Resource
         } else {
             $record->user?->providerProfile?->update(['is_verified' => $isVerified]);
         }
+    }
+
+    private static function dispatchVerificationEmail(PhotoVerification $record, string $status, ?string $adminNote = null): void
+    {
+        if (! $record->user_id) {
+            return;
+        }
+
+        $mailSetting = app(ActiveMailSettingService::class)->getActiveOrLatest();
+
+        if (! $mailSetting) {
+            return;
+        }
+
+        SendPhotoVerificationStatusEmailJob::dispatch($record->user_id, $mailSetting->id, $status, $adminNote);
     }
 }
