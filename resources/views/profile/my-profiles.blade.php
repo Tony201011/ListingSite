@@ -139,48 +139,49 @@
                                             </div>
                                         @endif
 
-                                        {{-- Edit button --}}
-                                        <form method="POST" action="{{ route('profiles.switch-edit', $profile) }}" class="w-full sm:w-auto">
-                                            @csrf
-                                            <button
-                                                type="submit"
-                                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-center text-sm font-medium text-gray-700 transition hover:border-pink-300 hover:bg-pink-50 hover:text-pink-700 sm:w-auto"
-                                            >
-                                                Edit
-                                            </button>
-                                        </form>
-
-                                        @if((int)$activeProfileId !== $profile->id)
-                                            <form method="POST" action="{{ route('profiles.switch', $profile) }}" class="w-full sm:w-auto">
+                                        {{-- Edit / Switch / Delete buttons always on one row --}}
+                                        <div class="flex flex-row flex-wrap items-center gap-2">
+                                            <form method="POST" action="{{ route('profiles.switch-edit', $profile) }}">
                                                 @csrf
                                                 <button
                                                     type="submit"
-                                                    class="w-full rounded-lg bg-pink-600 px-3 py-1.5 text-center text-sm font-medium text-white transition hover:bg-pink-700 sm:w-auto"
+                                                    class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-center text-sm font-medium text-gray-700 transition hover:border-pink-300 hover:bg-pink-50 hover:text-pink-700"
                                                 >
-                                                    Switch
+                                                    Edit
                                                 </button>
                                             </form>
-                                        @endif
 
-                                        @if($profiles->count() > 1)
-                                            <form
-                                                method="POST"
-                                                action="{{ route('profiles.destroy', $profile) }}"
-                                                x-data
-                                                @submit.prevent="if (confirm('Delete this profile? This cannot be undone.')) $el.submit()"
-                                                class="w-full sm:w-auto"
-                                            >
-                                                @csrf
-                                                @method('DELETE')
-                                                <button
-                                                    type="submit"
-                                                    class="w-full rounded-lg bg-rose-50 px-3 py-1.5 text-center text-sm font-medium text-rose-700 transition hover:bg-rose-100 sm:w-auto"
-                                                    aria-label="Delete profile {{ $profile->name }}"
+                                            @if((int)$activeProfileId !== $profile->id)
+                                                <form method="POST" action="{{ route('profiles.switch', $profile) }}">
+                                                    @csrf
+                                                    <button
+                                                        type="submit"
+                                                        class="rounded-lg bg-pink-600 px-3 py-1.5 text-center text-sm font-medium text-white transition hover:bg-pink-700"
+                                                    >
+                                                        Switch
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            @if($profiles->count() > 1)
+                                                <form
+                                                    method="POST"
+                                                    action="{{ route('profiles.destroy', $profile) }}"
+                                                    x-data
+                                                    @submit.prevent="if (confirm('Delete this profile? This cannot be undone.')) $el.submit()"
                                                 >
-                                                    Delete
-                                                </button>
-                                            </form>
-                                        @endif
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button
+                                                        type="submit"
+                                                        class="rounded-lg bg-rose-50 px-3 py-1.5 text-center text-sm font-medium text-rose-700 transition hover:bg-rose-100"
+                                                        aria-label="Delete profile {{ $profile->name }}"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
