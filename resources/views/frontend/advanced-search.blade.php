@@ -18,7 +18,7 @@
 @endphp
 
 @section('content')
-<div class="min-h-screen bg-gray-100 text-gray-800">
+<div class="min-h-screen overflow-x-hidden bg-gray-100 text-gray-800">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="mb-4 flex items-center gap-2 text-xs text-gray-500">
             <a href="{{ url('/') }}" class="hover:text-gray-700">Home</a>
@@ -53,7 +53,13 @@
                 maxDistance: {{ $maxSearchDistance }},
 
                 labelStyle(percent) {
-                    const safePercent = Math.min(100, Math.max(0, percent));
+                     const safePercent = Math.min(100, Math.max(0, percent));
+                    if (safePercent <= 3) {
+                        return 'left: 0%; transform: none;';
+                    }
+                    if (safePercent >= 97) {
+                        return 'left: 100%; transform: translateX(-100%);';
+                    }
                     return `left: ${safePercent}%; transform: translateX(-50%);`;
                 },
 
@@ -529,12 +535,21 @@
                         >
                             <a href="{{ route('profile.show', array_merge(['slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
-                            <div class="view-card-media relative overflow-hidden rounded-t-2xl">
+                            <div class="view-card-media relative overflow-hidden rounded-t-2xl" x-data="{ imageLoaded: false }">
                                 @if($profile['image'])
+                                    <div
+                                        x-show="!imageLoaded"
+                                        x-transition.opacity.duration.300ms
+                                        class="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100"
+                                        aria-hidden="true"
+                                    ></div>
                                     <img
                                         src="{{ $profile['image'] }}"
                                         alt="{{ $profile['name'] }}"
-                                        class="view-card-image w-full object-cover transition-transform duration-500 group-hover:scale-105 h-52"
+                                        class="view-card-image h-52 w-full object-cover transition-all duration-500 group-hover:scale-105"
+                                        :class="imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'"
+                                        x-init="imageLoaded = $el.complete"
+                                        @load="imageLoaded = true"
                                         loading="lazy"
                                         decoding="async"
                                         fetchpriority="low"
