@@ -46,7 +46,7 @@ class GetMyProfilePageData
             ? $profile->photoVerification()
                 ->where('status', 'approved')
                 ->whereNull('deleted_at')
-                ->count() > 1
+                ->exists()
             : false;
 
         $shortUrlRecord = $user?->shortUrl;
