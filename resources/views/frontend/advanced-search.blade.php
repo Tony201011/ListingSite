@@ -546,9 +546,9 @@
                                     <img
                                         src="{{ $profile['image'] }}"
                                         alt="{{ $profile['name'] }}"
-                                        class="view-card-image h-52 w-full object-cover transition-all duration-500 group-hover:scale-105"
+                                        class="view-card-image h-52 w-full object-cover transition-[opacity,filter,transform] duration-500 group-hover:scale-105"
                                         :class="imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'"
-                                        x-init="imageLoaded = $el.complete"
+                                        x-init="imageLoaded = $el.complete && $el.naturalWidth > 0"
                                         @load="imageLoaded = true"
                                         loading="lazy"
                                         decoding="async"
