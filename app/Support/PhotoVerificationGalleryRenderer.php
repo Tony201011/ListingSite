@@ -3,11 +3,16 @@
 namespace App\Support;
 
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Log;
 
 class PhotoVerificationGalleryRenderer
 {
-    public static function render(?array $urls, int $height): HtmlString
+    private const JSON_DECODE_DEPTH = 512;
+
+    public static function render(array|string|null $urls, int $height): HtmlString
     {
+        $urls = self::normalizeUrls($urls);
+
         if (blank($urls)) {
             return new HtmlString('-');
         }
@@ -27,5 +32,39 @@ class PhotoVerificationGalleryRenderer
                 ->implode('')
             .'</div>'
         );
+    }
+
+    private static function normalizeUrls(array|string|null $urls): array
+    {
+        if (is_array($urls)) {
+            return self::normalizeUrlArray($urls);
+        }
+
+        if (blank($urls)) {
+            return [];
+        }
+
+        $trimmedState = trim($urls);
+        $decoded = json_decode($trimmedState, true, self::JSON_DECODE_DEPTH);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return self::normalizeUrlArray($decoded);
+        }
+
+        if (str_starts_with($trimmedState, '[')) {
+            Log::warning('Malformed photo verification URLs JSON payload encountered while rendering gallery.');
+
+            return [];
+        }
+
+        return [(string) $urls];
+    }
+
+    private static function normalizeUrlArray(array $urls): array
+    {
+        return collect($urls)
+            ->filter(fn ($url) => filled($url))
+            ->map(fn ($url): string => (string) $url)
+            ->values()
+            ->all();
     }
 }

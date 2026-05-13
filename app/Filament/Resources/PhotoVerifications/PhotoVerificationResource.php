@@ -78,7 +78,7 @@ class PhotoVerificationResource extends Resource
                     ->schema([
                         TextEntry::make('photo_urls')
                             ->label('Photos')
-                            ->formatStateUsing(fn (?array $state) => PhotoVerificationGalleryRenderer::render($state, 300))
+                            ->formatStateUsing(fn ($state) => PhotoVerificationGalleryRenderer::render($state, 300))
                             ->html()
                             ->columnSpanFull(),
                     ]),
