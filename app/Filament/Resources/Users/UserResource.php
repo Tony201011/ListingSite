@@ -1033,7 +1033,7 @@ class UserResource extends Resource
 
                                     TextEntry::make('photo_urls')
                                         ->label('Photos')
-                                        ->formatStateUsing(fn (?array $state) => PhotoVerificationGalleryRenderer::render($state, 220))
+                                        ->formatStateUsing(fn ($state) => PhotoVerificationGalleryRenderer::render($state, 220))
                                         ->html()
                                         ->columnSpanFull(),
                                 ])

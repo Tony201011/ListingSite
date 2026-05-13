@@ -6,8 +6,10 @@ use Illuminate\Support\HtmlString;
 
 class PhotoVerificationGalleryRenderer
 {
-    public static function render(?array $urls, int $height): HtmlString
+    public static function render(array|string|null $urls, int $height): HtmlString
     {
+        $urls = self::normalizeUrls($urls);
+
         if (blank($urls)) {
             return new HtmlString('-');
         }
@@ -27,5 +29,31 @@ class PhotoVerificationGalleryRenderer
                 ->implode('')
             .'</div>'
         );
+    }
+
+    private static function normalizeUrls(array|string|null $urls): array
+    {
+        if (is_array($urls)) {
+            return collect($urls)
+                ->filter(fn ($url) => filled($url))
+                ->map(fn ($url): string => (string) $url)
+                ->values()
+                ->all();
+        }
+
+        if (blank($urls)) {
+            return [];
+        }
+
+        $decoded = json_decode($urls, true);
+        if (is_array($decoded)) {
+            return collect($decoded)
+                ->filter(fn ($url) => filled($url))
+                ->map(fn ($url): string => (string) $url)
+                ->values()
+                ->all();
+        }
+
+        return [(string) $urls];
     }
 }
