@@ -53,7 +53,7 @@
                 maxDistance: {{ $maxSearchDistance }},
 
                 labelStyle(percent) {
-                     const safePercent = Math.min(100, Math.max(0, percent));
+                    const safePercent = Math.min(100, Math.max(0, percent));
                     if (safePercent <= 3) {
                         return 'left: 0%; transform: none;';
                     }
@@ -548,7 +548,7 @@
                                         alt="{{ $profile['name'] }}"
                                         class="view-card-image h-52 w-full object-cover transition-[opacity,filter,transform] duration-500 group-hover:scale-105"
                                         :class="imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'"
-                                        x-init="imageLoaded = $el.complete && $el.naturalWidth > 0"
+                                        x-init="$nextTick(() => { imageLoaded = $el.complete && $el.naturalWidth > 0; })"
                                         @load="imageLoaded = true"
                                         loading="lazy"
                                         decoding="async"
