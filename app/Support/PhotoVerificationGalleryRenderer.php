@@ -15,7 +15,8 @@ class PhotoVerificationGalleryRenderer
         array|string|null $urls,
         int $height = 160,
         int $width = 160,
-        ?int $previewLimit = null
+        ?int $previewLimit = null,
+        bool $singleMode = false
     ): HtmlString {
         $urls = self::normalizeUrls($urls);
 
@@ -23,15 +24,19 @@ class PhotoVerificationGalleryRenderer
             return new HtmlString('-');
         }
 
+        if ($singleMode) {
+            $urls = array_slice($urls, 0, 1);
+        }
+
         $safeHeight = max(50, min(500, $height));
         $safeWidth = max(50, min(500, $width));
         $previewUrls = collect($urls)
             ->when(
-                filled($previewLimit),
+                filled($previewLimit) && ! $singleMode,
                 fn ($collection) => $collection->take(max(1, (int) $previewLimit)),
             )
             ->values();
-        $remainingCount = max(count($urls) - $previewUrls->count(), 0);
+        $remainingCount = $singleMode ? 0 : max(count($urls) - $previewUrls->count(), 0);
         $modalId = 'photo-verification-gallery-'.Str::uuid();
         $alpineState = self::buildAlpineState($urls);
 
@@ -97,7 +102,8 @@ class PhotoVerificationGalleryRenderer
                             >&rarr;</button>
                         </div>
 
-                        <div class="flex flex-wrap gap-3 overflow-y-auto">
+                        '.($singleMode ? '' :
+                        '<div class="flex flex-wrap gap-3 overflow-y-auto">
                             '.collect($urls)
                 ->values()
                 ->map(function (string $url, int $index) use ($modalId): string {
@@ -118,7 +124,8 @@ class PhotoVerificationGalleryRenderer
                     </button>';
                 })
                 ->implode('').'
-                        </div>
+                        </div>'
+                ).'
                     </div>
                 </div>
             </template>'.
