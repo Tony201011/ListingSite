@@ -102,6 +102,7 @@ class SitemapService
         return ProviderProfile::query()
             ->whereNull('deleted_at')
             ->where('profile_status', 'approved')
+            ->where('is_blocked', false)
             ->whereNotNull('slug')
             ->where('slug', '!=', '')
             ->whereRaw('slug = lower(slug)')

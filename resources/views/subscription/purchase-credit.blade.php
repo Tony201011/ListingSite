@@ -9,9 +9,13 @@
         'price' => number_format($p->price, 2),
     ])->values()->toJson();
 @endphp
-<div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{
+<div id="purchase-credit-flow" class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{
     selectedPackageId: {{ $selectedPackageId ?? 'null' }},
     packages: {{ $packagesJson }},
+    step: 'select',
+    processing: false,
+    paymentError: null,
+    stripeReady: false,
     get selected() {
         return this.packages.find(p => p.id === this.selectedPackageId) ?? null;
     }
@@ -19,10 +23,10 @@
     <div class="mx-auto w-full max-w-5xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="m-0 text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight text-gray-900">Buy Credits</h1>
-                <p class="mt-2 text-xs sm:text-sm text-gray-600">One credit for every day your profile is online.</p>
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Buy Credits</h1>
+                <p class="mt-3 text-gray-600">One credit for every day your profile is online.</p>
             </div>
-            <a href="{{ route('my-profile') }}" class="text-xs sm:text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline\">&larr; Back to dashboard</a>
+            <a href="{{ route('my-profile') }}" class="text-xs sm:text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
         </div>
 
         <div class="mb-5">
@@ -55,8 +59,9 @@
                 No credit packages are currently available. Please check back later.
             </div>
         @else
-            <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
-                <form action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
+            {{-- Step 1: Package selection --}}
+            <div x-show="step === 'select'" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
+                <form id="package-form" action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
                     @csrf
 
                     <div class="rounded-xl border border-gray-100">
@@ -123,13 +128,182 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
                         <p class="text-xs text-gray-500">All prices are in Australian Dollars (AUD) and include GST.</p>
-                        <button type="submit" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
-                            Continue to checkout
-                        </button>
+                        @if($stripeEnabled)
+                            <button
+                                type="button"
+                                id="proceed-to-payment"
+                                @click="proceedToPayment($event)"
+                                :disabled="processing"
+                                class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                <span x-show="!processing">Continue to payment</span>
+                                <span x-show="processing" class="flex items-center gap-2">
+                                    <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    Processing&hellip;
+                                </span>
+                            </button>
+                        @else
+                            <button type="submit" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
+                                Continue to checkout
+                            </button>
+                        @endif
                     </div>
                 </form>
             </div>
+
+            {{-- Step 2: Stripe PaymentElement (only rendered when stripe is enabled) --}}
+            @if($stripeEnabled)
+            <div x-show="step === 'payment'" x-cloak class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6 space-y-5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">Enter payment details</h2>
+                    <button type="button" @click="step = 'select'; paymentError = null" class="text-xs font-medium text-[#e04ecb] hover:underline">&larr; Back</button>
+                </div>
+
+                <template x-if="selected">
+                    <div class="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700">
+                        <span class="font-semibold text-gray-900" x-text="selected.credits + ' credits'"></span>
+                        &mdash;
+                        <span x-text="'AUD $' + selected.price + ' (incl. GST)'"></span>
+                    </div>
+                </template>
+
+                <div x-show="paymentError" class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-sm text-rose-700" x-text="paymentError"></div>
+
+                <div id="payment-element" class="rounded-xl border border-gray-200 p-4"></div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <p class="text-xs text-gray-500">Secured by Stripe. All prices in AUD include GST.</p>
+                    <button
+                        type="button"
+                        id="submit-payment"
+                        @click="submitPayment($event)"
+                        :disabled="processing || !stripeReady"
+                        class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        <span x-show="!processing">Pay now</span>
+                        <span x-show="processing" class="flex items-center gap-2">
+                            <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Processing&hellip;
+                        </span>
+                    </button>
+                </div>
+            </div>
+            @endif
         @endif
     </div>
 </div>
 @endsection
+
+@if($stripeEnabled)
+@push('scripts')
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+(function () {
+    const stripe = Stripe('{{ $stripePublishableKey }}');
+    let elements = null;
+    let paymentElement = null;
+    let clientSecret = null;
+
+    function getAlpineData() {
+        const purchaseCreditFlow = document.getElementById('purchase-credit-flow');
+
+        return purchaseCreditFlow ? Alpine.$data(purchaseCreditFlow) : null;
+    }
+
+    window.proceedToPayment = async function () {
+        const data = getAlpineData();
+        const form = document.getElementById('package-form');
+
+        if (!data || !form) {
+            return;
+        }
+
+        const invoiceName = form.querySelector('[name="invoice_name"]').value.trim();
+
+        if (!invoiceName) {
+            alert('Please enter an invoice name.');
+            return;
+        }
+
+        if (!data.selectedPackageId) {
+            alert('Please select a credit package.');
+            return;
+        }
+
+        data.processing = true;
+        data.paymentError = null;
+
+        try {
+            const csrf = form.querySelector('[name="_token"]').value;
+
+            const response = await fetch('{{ route('purchase-credit.create-intent') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    package_id: data.selectedPackageId,
+                    invoice_name: invoiceName,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || result.error) {
+                data.paymentError = result.error || result.message || 'Failed to initialize payment. Please try again.';
+                data.processing = false;
+                return;
+            }
+
+            clientSecret = result.client_secret;
+
+            elements = stripe.elements({ clientSecret });
+            paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+
+            paymentElement.on('ready', function () {
+                data.stripeReady = true;
+            });
+
+            data.step = 'payment';
+        } catch (err) {
+            data.paymentError = 'An unexpected error occurred. Please try again.';
+        } finally {
+            data.processing = false;
+        }
+    };
+
+    window.submitPayment = async function () {
+        const data = getAlpineData();
+
+        if (!data) {
+            return;
+        }
+
+        data.processing = true;
+        data.paymentError = null;
+
+        const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: '{{ route('purchase-credit.success') }}',
+            },
+        });
+
+        if (error) {
+            data.paymentError = error.message ?? 'Payment failed. Please try again.';
+            data.processing = false;
+        }
+    };
+})();
+</script>
+@endpush
+@endif

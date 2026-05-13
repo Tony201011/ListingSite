@@ -43,6 +43,22 @@
             ['label' => 'Anti-Spam Policy', 'url' => route('anti-spam-policy')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
+        $currentPath = '/'.trim((string) request()->path(), '/');
+        $isCurrentFooterUrl = static function (?string $url) use ($currentPath): bool {
+            if (! filled($url)) {
+                return false;
+            }
+
+            $path = parse_url($url, PHP_URL_PATH);
+            if ($path === false) {
+                return false;
+            }
+
+            $normalizedPath = '/'.trim((string) ($path ?? '/'), '/');
+
+            return $normalizedPath === $currentPath;
+        };
+
         $instagramUrl = $footerWidget?->instagram_url ?: route('contact-us');
         $twitterUrl = $footerWidget?->twitter_url ?: route('contact-us');
         $facebookUrl = $footerWidget?->facebook_url ?: route('contact-us');
@@ -116,7 +132,8 @@
                     <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $navigationHeading }}</h4>
                     <ul class="space-y-2 text-gray-500">
                         @foreach($navigationLinks as $link)
-                            <li><a href="{{ $link['url'] }}" class="transition hover:text-pink-400">{{ $link['label'] }}</a></li>
+                            @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
+                            <li><a href="{{ $link['url'] }}" class="transition {{ $isActive ? 'text-pink-400 font-medium' : 'hover:text-pink-400' }}">{{ $link['label'] }}</a></li>
                         @endforeach
                     </ul>
                 </div>
@@ -127,7 +144,8 @@
                     <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $advertisersHeading }}</h4>
                     <ul class="space-y-2 text-gray-500">
                         @foreach($advertiserLinks as $link)
-                            <li><a href="{{ $link['url'] }}" class="transition hover:text-pink-400">{{ $link['label'] }}</a></li>
+                            @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
+                            <li><a href="{{ $link['url'] }}" class="transition {{ $isActive ? 'text-pink-400 font-medium' : 'hover:text-pink-400' }}">{{ $link['label'] }}</a></li>
                         @endforeach
                     </ul>
                 </div>
@@ -138,7 +156,8 @@
                     <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $legalHeading }}</h4>
                     <ul class="space-y-2 text-gray-500">
                         @foreach($legalLinks as $link)
-                            <li><a href="{{ $link['url'] }}" class="transition hover:text-pink-400">{{ $link['label'] }}</a></li>
+                            @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
+                            <li><a href="{{ $link['url'] }}" class="transition {{ $isActive ? 'text-pink-400 font-medium' : 'hover:text-pink-400' }}">{{ $link['label'] }}</a></li>
                         @endforeach
                     </ul>
 

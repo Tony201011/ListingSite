@@ -56,6 +56,17 @@ class ProfileShowControllerTest extends TestCase
         $response->assertViewIs('frontend.profile-show');
     }
 
+    public function test_profile_show_does_not_display_navigation_when_single_profile_exists(): void
+    {
+        $this->createApprovedProvider();
+
+        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+
+        $response->assertStatus(200);
+        $response->assertDontSee('PREV');
+        $response->assertDontSee('NEXT');
+    }
+
     public function test_profile_show_passes_required_view_data_keys(): void
     {
         $this->createApprovedProvider();
@@ -84,15 +95,8 @@ class ProfileShowControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    public function test_profile_show_returns_200_for_pending_profile(): void
+    public function test_profile_show_returns_404_for_unapproved_profile(): void
     {
-        // GetProfileShowData does not filter by profile_status on the show page,
-        // so pending profiles are publicly accessible just like approved ones.
-        // We also need at least one approved profile so the adjacent-navigation
-        // queries (which DO filter by 'approved') return a non-empty slug and the
-        // view can generate its prev/next route URLs without throwing.
-        $this->createApprovedProvider(['name' => 'Approved', 'slug' => 'approved-001']);
-
         $pendingUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
             'user_id' => $pendingUser->id,
@@ -103,7 +107,7 @@ class ProfileShowControllerTest extends TestCase
 
         $response = $this->get(route('profile.show', ['slug' => 'pending-profile']));
 
-        $response->assertStatus(200);
+        $response->assertStatus(404);
     }
 
     public function test_profile_show_returns_404_for_soft_deleted_profile(): void
@@ -172,6 +176,26 @@ class ProfileShowControllerTest extends TestCase
 
         $profile = $response->viewData('profile');
         $this->assertSame('jade010-10', $profile['slug']);
+    }
+
+    public function test_profile_view_data_contains_provider_user_id_for_booking(): void
+    {
+        $user = $this->createApprovedProvider();
+
+        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+
+        $profile = $response->viewData('profile');
+        $this->assertSame($user->id, $profile['user_id']);
+    }
+
+    public function test_profile_show_renders_booking_form_with_provider_user_id(): void
+    {
+        $user = $this->createApprovedProvider();
+
+        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+
+        $response->assertSee('name="user_id" value="'.$user->id.'"', false);
+        $response->assertSee('Send booking enquiry');
     }
 
     public function test_profile_view_data_defaults_rate_to_contact_for_rate_when_no_rates(): void

@@ -7,6 +7,7 @@ use App\Models\AvailableNow;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\OnlineUser;
 use App\Models\Postcode;
 use App\Models\ProfileImage;
 use App\Models\ProfileMessage;
@@ -43,6 +44,8 @@ class DummyProviderProfileSeeder extends Seeder
     private const TIME_WASTER_OPTIONS = ['no', 'yes'];
 
     private const WEBSITE_TYPES = ['adult', 'porn'];
+
+    private const ONLINE_SESSION_DURATION_MINUTES = 60;
 
     private const SAMPLE_VIDEOS = [
         'https://www.w3schools.com/html/mov_bbb.mp4',
@@ -265,9 +268,6 @@ class DummyProviderProfileSeeder extends Seeder
 
             $slug = Str::slug($name).'-'.$i;
 
-            // 3 out of 5 providers are approved; 1 pending; 1 rejected
-            $profileStatuses = ['approved', 'approved', 'approved', 'pending', 'rejected'];
-
             $providerProfile = ProviderProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -307,7 +307,7 @@ class DummyProviderProfileSeeder extends Seeder
                     'whatsapp' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 11) % 1000, ($i * 17) % 1000),
                     'is_verified' => $i % 3 === 0,
                     'is_featured' => $i <= 10,
-                    'profile_status' => $profileStatuses[$i % count($profileStatuses)],
+                    'profile_status' => 'approved',
                     'expires_at' => now()->addMonths(rand(1, 12)),
                 ],
             );
@@ -438,6 +438,21 @@ class DummyProviderProfileSeeder extends Seeder
                 [
                     'user_id' => $user->id,
                     'status' => 'offline',
+                ],
+            );
+
+            // 10. OnlineUser (every second profile is online)
+            $isOnline = $i % 2 === 0;
+
+            OnlineUser::updateOrCreate(
+                ['provider_profile_id' => $providerProfile->id],
+                [
+                    'user_id' => $user->id,
+                    'status' => $isOnline ? 'online' : 'offline',
+                    'usage_date' => today(),
+                    'usage_count' => $isOnline ? 1 : 0,
+                    'online_started_at' => $isOnline ? now() : null,
+                    'online_expires_at' => $isOnline ? now()->addMinutes(self::ONLINE_SESSION_DURATION_MINUTES) : null,
                 ],
             );
         }

@@ -101,6 +101,7 @@ Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
+Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
 Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
 
 Route::post('/favourite/{slug}', [FavouriteBookmarkController::class, 'toggleFavourite'])->name('favourite.toggle');
@@ -282,6 +283,7 @@ Route::middleware('provider.auth')->group(function () {
             /*** credit route start here */
             Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
             Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
+            Route::post('/purchase-credit/create-intent', [PurchaseCreditController::class, 'createPaymentIntent'])->name('purchase-credit.create-intent');
             Route::get('/purchase-credit/success', [PurchaseCreditController::class, 'checkoutSuccess'])->name('purchase-credit.success');
             Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
             Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');

@@ -4,6 +4,7 @@
 @endpush
 
 @section('title', $profile['name'] . ' Profile')
+@section('bodyClass', 'profile-show-page')
 
 @php
 $profileTags = array_values(array_unique(array_merge(
@@ -15,8 +16,7 @@ $profileTags = array_values(array_unique(array_merge(
 
 @section('content')
 <div class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
-    x-data="favouriteBookmark({ favourites: {{ Js::from($userFavourites ?? []) }} })"
-    x-init="init()"
+    x-data="profileShowPage({ favourites: {{ Js::from($userFavourites ?? []) }}, reportUrl: '{{ route('profile.report') }}', profileId: {{ $profile['id'] }} })"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
@@ -64,6 +64,13 @@ $profileTags = array_values(array_unique(array_merge(
 
             $profileUrl = route('profile.show', ['slug' => $profile['slug']]);
             $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . '/profile/' . $profile['slug'];
+            $locationLabel = trim((string) (
+                trim((string) ($profile['suburb'] ?? '')) !== ''
+                    ? $profile['suburb']
+                    : ($profile['city'] ?? '')
+            ));
+            $hasPrevProfile = !empty($prevProfile['slug']) && !empty($prevProfile['name']);
+            $hasNextProfile = !empty($nextProfile['slug']) && !empty($nextProfile['name']);
 
             $introTagline = '';
             $introText = strip_tags($profile['introduction_line'] ?? '');
@@ -78,6 +85,11 @@ $profileTags = array_values(array_unique(array_merge(
 
         <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-8 sm:mb-12">
+                    @if($profile['is_featured'] ?? false)
+                    <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-6 py-2 rounded bg-yellow-400 text-gray-900 font-extrabold text-sm sm:text-base tracking-wide" style="letter-spacing:0.5px;">
+                        <i class="fa-solid fa-star mr-1 text-xs"></i> FEATURED
+                    </div>
+                    @endif
                     @if($availableNow)
                     <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-sm sm:text-base tracking-wide" style="letter-spacing:0.5px;">
                         AVAILABLE NOW{{ $availableTillText }}
@@ -90,25 +102,26 @@ $profileTags = array_values(array_unique(array_merge(
                     <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-pink-600 mb-2 sm:mb-3 px-2" style="color:#e13a8b;">
                         {{ $profile['name'] }}
                     </h1>
-                    @if(!empty($profile['city']))
+                    @if(!empty($locationLabel))
                         <div class="flex items-center justify-center mt-1 sm:mt-2 mb-2 sm:mb-3">
                             <span class="text-sm sm:text-base font-semibold text-gray-400 flex items-center gap-1">
                                 <i class="fa-solid fa-location-dot text-pink-400"></i>
-                                <span class="truncate">{{ $profile['suburb'] }}</span>
+                                <span class="truncate">{{ $locationLabel }}</span>
                             </span>
                         </div>
                     @endif
                     @if(!empty($introTagline))
-                    <div class="mt-2 sm:mt-3 text-base sm:text-lg text-gray-700 font-medium px-2 truncate md:whitespace-normal md:overflow-visible md:[text-overflow:clip]">{{ $introTagline }}</div>
+                    <div class="mt-2 px-2 text-base font-medium text-gray-700 [overflow-wrap:anywhere] sm:mt-3 sm:text-lg">{{ $introTagline }}</div>
                     @endif
                 </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-start">
+            <div class="grid grid-cols-1 items-start gap-4 sm:gap-6 md:grid-cols-3">
 
 
                 <!-- Gallery (left, spans 2 columns) -->
-                <div class="md:col-span-2 flex flex-col gap-6 sm:gap-8 relative order-2 md:order-1">
+                <div class="relative order-2 flex min-w-0 flex-col gap-6 sm:gap-8 md:col-span-2 md:order-1">
                     <!-- Previous Button (left corner) -->
+                    @if($hasPrevProfile)
                     <a href="{{ route('profile.show', ['slug' => $prevProfile['slug']]) }}"
                         x-data="{
                             visible: false,
@@ -127,15 +140,14 @@ $profileTags = array_values(array_unique(array_merge(
                         x-transition:leave="transition duration-200"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-90"
-                        class="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-prev-btn md:flex"
-                        style="margin-left: 0.5rem;">
-                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
-                                <span class="flex items-center"><i class="fa-solid fa-arrow-left text-lg sm:text-xl mr-2"></i> <span class="text-xs font-semibold">PREV</span></span>
-                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate profile-nav-name">{{ $prevProfile['name'] }}</span>
-                            </button>
-                        </div>
+                        class="fixed left-4 top-1/2 z-30 -translate-y-1/2"
+                        aria-label="Previous profile"
+                        x-cloak>
+                        <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-pink-200 bg-white shadow-lg transition hover:bg-pink-50">
+                            <i class="fa-solid fa-chevron-left text-xl text-pink-600"></i>
+                        </span>
                     </a>
+                    @endif
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         @foreach(array_slice($galleryImages, 0, 2) as $img)
@@ -143,6 +155,7 @@ $profileTags = array_values(array_unique(array_merge(
                         @endforeach
                     </div>
                     <!-- Next Button (right corner) -->
+                    @if($hasNextProfile)
                     <a href="{{ route('profile.show', ['slug' => $nextProfile['slug']]) }}"
                         x-data="{
                             visible: false,
@@ -161,15 +174,14 @@ $profileTags = array_values(array_unique(array_merge(
                         x-transition:leave="transition duration-200"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-90"
-                        class="fixed right-0 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center group mobile-nav-btn-wrapper mobile-next-btn md:flex"
-                        style="margin-right: 0.5rem;">
-                        <div class="rounded-xl p-0.5 bg-white shadow-lg border border-pink-200 w-fit">
-                            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl flex flex-col items-start shadow-lg min-w-[100px] min-h-[60px] mobile-transparent-nav-btn text-left text-xs sm:text-sm">
-                                <span class="flex items-center"><span class="text-xs font-semibold">NEXT</span> <i class="fa-solid fa-arrow-right text-lg sm:text-xl ml-2"></i></span>
-                                <span class="text-sm sm:text-base font-extrabold mt-0.5 truncate profile-nav-name">{{ $nextProfile['name'] }}</span>
-                            </button>
-                        </div>
+                        class="fixed right-4 top-1/2 z-30 -translate-y-1/2"
+                        aria-label="Next profile"
+                        x-cloak>
+                        <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-pink-200 bg-white shadow-lg transition hover:bg-pink-50">
+                            <i class="fa-solid fa-chevron-right text-xl text-pink-600"></i>
+                        </span>
                     </a>
+                    @endif
                 <!-- Currently Touring Section -->
                 @if(!empty($profile['tours']))
                 <div>
@@ -334,7 +346,7 @@ $profileTags = array_values(array_unique(array_merge(
                 </div>
                 </div>
                 <!-- Info/Sidebar (right) -->
-                <div class="flex flex-col gap-4 sm:gap-6 order-1 md:order-2">
+                <div class="order-1 flex min-w-0 flex-col gap-4 sm:gap-6 md:order-2">
                     <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-6 border border-gray-100 mb-0 sm:mb-6">
                         <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2">
                             <span class="font-bold text-base sm:text-lg text-black">Info</span>
@@ -444,9 +456,10 @@ $profileTags = array_values(array_unique(array_merge(
                                 >SAVE</span>
                             </button>
                         </div>
+
                     </div>
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
-                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-4 border border-gray-100">
+                     <div class="rounded-lg border border-gray-100 bg-white p-4 shadow sm:rounded-2xl sm:p-4">
                         <h3 class="mb-2 text-base sm:text-lg font-bold text-pink-600 flex items-center gap-2">
                             <i class="fa-solid fa-user-gear text-pink-500 flex-shrink-0"></i> <span>My profile</span>
                         </h3>
@@ -540,6 +553,15 @@ $profileTags = array_values(array_unique(array_merge(
                         $nonEmptyRates = array_filter($profile['price_list'] ?? [], function ($rate) {
                             return !empty($rate['outcall']) || !empty($rate['incall']);
                         });
+                        $format_rate_value = static function ($value) {
+                            $normalizedValue = trim((string) $value);
+
+                            if ($normalizedValue === '') {
+                                return '—';
+                            }
+
+                            return str_starts_with($normalizedValue, '$') ? $normalizedValue : '$' . $normalizedValue;
+                        };
                     @endphp
                     @if(!empty($nonEmptyRates))
                     <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-4 border border-gray-100">
@@ -547,7 +569,7 @@ $profileTags = array_values(array_unique(array_merge(
                             <i class="fa-regular fa-clock text-pink-600 flex-shrink-0"></i> <span>Rates</span>
                         </h3>
                         <hr class="mb-3">
-                        <div class="overflow-x-auto rounded-lg -mx-4 sm:-mx-4 sm:mx-0">
+                         <div class="max-w-full overflow-x-auto rounded-lg">
                             <table class="min-w-full w-full text-xs sm:text-sm">
                                 <thead>
                                     <tr>
@@ -563,8 +585,8 @@ $profileTags = array_values(array_unique(array_merge(
                                     @endphp
                                     <tr class="{{ $i % 2 === 0 ? 'bg-gray-100' : '' }}">
                                         <td class="px-3 sm:px-4 py-2 font-normal text-black">{{ $sessionLabel }}</td>
-                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $rate['outcall'] ?: '—' }}</td>
-                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $rate['incall'] ?: '—' }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $format_rate_value($rate['outcall'] ?? '') }}</td>
+                                        <td class="px-3 sm:px-4 py-2 font-bold text-black">{{ $format_rate_value($rate['incall'] ?? '') }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -579,12 +601,12 @@ $profileTags = array_values(array_unique(array_merge(
                     @endphp
                     @if(!empty($nonEmptyAvailability))
                     <!-- My Availability Section -->
-                    <div class="bg-white rounded-lg sm:rounded-2xl shadow p-4 sm:p-4 border border-gray-100 mt-4 sm:mt-6">
+                     <div class="mt-4 rounded-lg border border-gray-100 bg-white p-4 shadow sm:mt-6 sm:rounded-2xl sm:p-4">
                         <h3 class="mb-2 text-base sm:text-lg font-bold flex items-center gap-2 text-pink-600">
                             <i class="fa-regular fa-calendar-days text-pink-600 flex-shrink-0"></i> <span>My availability</span>
                         </h3>
                         <hr class="mb-3">
-                        <div class="overflow-x-auto rounded-lg -mx-4 sm:-mx-4 sm:mx-0">
+                         <div class="max-w-full overflow-x-auto rounded-lg">
                             <table class="min-w-full w-full text-xs sm:text-sm">
                                 <thead>
                                     <tr>
@@ -858,34 +880,6 @@ $profileTags = array_values(array_unique(array_merge(
         {{-- Ad: Profile Bottom --}}
         @include('layouts.partials.ads', ['position' => 'profile_bottom', 'pageKey' => 'profile'])
 
-        <!-- Scroll to Top Button -->
-        <button
-            id="scroll-to-top"
-            x-data="{
-                visible: false,
-                init() {
-                    this.checkVisibility();
-                    window.addEventListener('scroll', () => this.checkVisibility(), { passive: true });
-                },
-                checkVisibility() {
-                    this.visible = window.scrollY > 300;
-                }
-            }"
-            x-show="visible"
-            x-transition:enter="transition duration-300"
-            x-transition:enter-start="opacity-0 scale-90"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition duration-200"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-90"
-            @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
-            class="fixed bottom-6 right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg transition-all hover:scale-110"
-            title="Scroll to top"
-            aria-label="Scroll to top">
-            <i class="fa-solid fa-arrow-up text-lg sm:text-xl"></i>
-        </button>
-
-
     </div>
 </div>
 
@@ -955,64 +949,6 @@ $profileTags = array_values(array_unique(array_merge(
 </div>
 
 <script>
-    if (typeof window.favouriteBookmark !== 'function') {
-        window.favouriteBookmark = function favouriteBookmark(config = {}) {
-            return {
-                favourites: Array.isArray(config.favourites) ? config.favourites.map(String) : [],
-
-                init() {
-                    const stored = window.localStorage.getItem('profile_favourites');
-
-                    if (stored) {
-                        try {
-                            const parsed = JSON.parse(stored);
-
-                            if (Array.isArray(parsed)) {
-                                this.favourites = parsed.map(String);
-                            }
-                        } catch (error) {
-                            window.localStorage.removeItem('profile_favourites');
-                        }
-                    }
-                },
-
-                normalise(slug) {
-                    return String(slug || '').trim();
-                },
-
-                isFavourite(slug) {
-                    slug = this.normalise(slug);
-                    return this.favourites.map(String).includes(slug);
-                },
-
-                toggleFavourite(slug) {
-                    slug = this.normalise(slug);
-
-                    if (!slug) {
-                        return;
-                    }
-
-                    if (this.isFavourite(slug)) {
-                        this.favourites = this.favourites.filter(item => String(item) !== slug);
-                    } else {
-                        this.favourites.push(slug);
-                    }
-
-                    window.localStorage.setItem('profile_favourites', JSON.stringify(this.favourites));
-                }
-            };
-        };
-    }
-</script>
-
-<script>
-    window.__profileShowConfig = {
-        reportUrl: '{{ route('profile.report') }}',
-        profileId: {{ $profile['id'] }}
-    };
-</script>
-
-<script>
     function submitReport(event) {
         event.preventDefault();
 
@@ -1032,7 +968,7 @@ $profileTags = array_values(array_unique(array_merge(
         const formData = new FormData(form);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
-        fetch(window.__profileShowConfig.reportUrl, {
+        fetch('{{ route('profile.report') }}', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

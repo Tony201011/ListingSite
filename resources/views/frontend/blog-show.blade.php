@@ -12,7 +12,7 @@
         <article class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-3">{{ $post['title'] }}</h1>
 
-            <p class="text-base md:text-lg text-gray-700 mb-4">{{ $post['excerpt'] }}</p>
+            <p class="text-base text-gray-700 mb-4">{{ $post['excerpt'] }}</p>
             <p class="text-sm text-gray-500 mb-6">Posted by {{ $post['author'] }} on {{ $post['date'] }}</p>
 
             @if(!empty($post['featured_image']))

@@ -57,6 +57,7 @@ class ProviderProfile extends Model
         'expires_at',
         'hold_reason',
         'anonymized_at',
+        'is_blocked',
     ];
 
     protected function casts(): array
@@ -70,6 +71,7 @@ class ProviderProfile extends Model
             'longitude' => 'decimal:7',
             'is_verified' => 'boolean',
             'is_featured' => 'boolean',
+            'is_blocked' => 'boolean',
             'membership_id' => 'integer',
             'expires_at' => 'datetime',
             'anonymized_at' => 'datetime',
@@ -112,7 +114,8 @@ class ProviderProfile extends Model
 
     public function availabilities(): HasMany
     {
-        return $this->hasMany(Availability::class, 'provider_profile_id');
+        return $this->hasMany(Availability::class, 'provider_profile_id')
+            ->orderedByWeekday();
     }
 
     public function profileImages(): HasMany
@@ -200,6 +203,6 @@ class ProviderProfile extends Model
 
     public function shouldBeSearchable(): bool
     {
-        return $this->profile_status === 'approved' && $this->deleted_at === null;
+        return $this->profile_status === 'approved' && $this->deleted_at === null && ! $this->is_blocked;
     }
 }

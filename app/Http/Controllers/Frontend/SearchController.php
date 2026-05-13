@@ -27,7 +27,13 @@ class SearchController extends Controller
                 ->whereNotNull('slug')
                 ->where('slug', '!=', '')
                 ->whereNull('deleted_at')
+                ->where('is_blocked', false)
                 ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
+                ->whereHas('onlineUser', function ($query): void {
+                    $query->where('status', 'online')
+                        ->whereNotNull('online_expires_at')
+                        ->where('online_expires_at', '>', now());
+                })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->take(self::MAX_SUGGESTIONS)
                 ->get(['id', 'name', 'slug', 'city_id', 'age'])
@@ -41,7 +47,13 @@ class SearchController extends Controller
                 ->whereNull('deleted_at')
                 ->whereNotNull('slug')
                 ->where('slug', '!=', '')
+                ->where('is_blocked', false)
                 ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
+                ->whereHas('onlineUser', function ($query): void {
+                    $query->where('status', 'online')
+                        ->whereNotNull('online_expires_at')
+                        ->where('online_expires_at', '>', now());
+                })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
                 ->with('city')

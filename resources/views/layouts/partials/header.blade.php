@@ -124,9 +124,26 @@
 
         $showTopBar = $headerWidget?->enable_top_bar ?? true;
         $showSearch = $headerWidget?->enable_search ?? true;
+        $isGirlProfilePage = request()->routeIs('profile.show');
         $showFreeTrialCta = (bool) ($headerWidget?->show_free_trial_cta ?? true);
         $freeTrialCtaText = trim((string) ($headerWidget?->free_trial_cta_text ?? 'Get 21 days for free'));
         $freeTrialCtaUrl = trim((string) ($headerWidget?->free_trial_cta_url ?? url('/signup')));
+        $normalizePath = function (string $url): string {
+            $path = '/'.trim((string) (parse_url($url, PHP_URL_PATH) ?? ''), '/');
+
+            return $path === '//' ? '/' : $path;
+        };
+        $currentPath = $normalizePath(url()->current());
+        $hasQueryString = request()->getQueryString() !== null;
+        $isNavItemActive = function (string $url) use ($currentPath, $hasQueryString, $normalizePath): bool {
+            $itemPath = $normalizePath($url);
+
+            if ($itemPath === '/') {
+                return $currentPath === '/' && ! $hasQueryString;
+            }
+
+            return $itemPath === $currentPath;
+        };
 @endphp
 
 <header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md" style="{{ $headerStyle }}">
@@ -156,7 +173,7 @@
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <!-- Main row: logo, search, actions, auth -->
-        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 lg:hidden">
+        <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 {{ $isGirlProfilePage ? 'md:hidden' : 'lg:hidden' }}">
             <!-- Logo (escortify) -->
             <a href="{{ url('/') }}" class="shrink-0">
                 @if($logoType === 'image' && filled($logoUrl))
@@ -182,7 +199,7 @@
             </form>
 
             <!-- Action links & Auth (from third image) -->
-            <div class="hidden items-center space-x-4 md:flex lg:hidden">
+            <div class="hidden items-center space-x-4 md:flex {{ $isGirlProfilePage ? '' : 'lg:hidden' }}">
                 <!-- Action links -->
                 @foreach($actionLinks as $item)
                     <a href="{{ $item['url'] }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">{{ $item['label'] }}</a>
@@ -194,13 +211,13 @@
             </div>
 
             <!-- Mobile menu button (unchanged) -->
-            <button @click="mobileMenu = !mobileMenu" class="lg:hidden text-gray-300 hover:text-white" aria-label="Toggle menu">
+            <button @click="mobileMenu = !mobileMenu" class="{{ $isGirlProfilePage ? 'md:hidden' : 'lg:hidden' }} text-gray-300 hover:text-white" aria-label="Toggle menu">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
 
         <!-- Second row: main navigation (from first & second images) -->
-        <div class="hidden items-center gap-1 border-t border-gray-800 py-3 lg:flex">
+        <div class="hidden items-center gap-1 border-t border-gray-800 py-3 {{ $isGirlProfilePage ? 'md:flex' : 'lg:flex' }}">
             <a href="{{ url('/') }}" class="mr-4 shrink-0">
                 @if($logoType === 'image' && filled($logoUrl))
                     <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
@@ -245,10 +262,17 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">{{ $item['label'] }}</a>
+                    @php $isActive = $isNavItemActive((string) $item['url']); @endphp
+                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">{{ $item['label'] }}</a>
                 @endif
             @endforeach
             <div class="ml-auto flex items-center gap-2">
+                <a href="{{ route('favourites') }}"
+                   class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition {{ request()->routeIs('favourites') ? 'bg-gray-800 text-pink-400' : 'text-gray-300 hover:bg-gray-800 hover:text-pink-400' }}"
+                   title="My Favourites">
+                    <i class="fa-solid fa-heart text-pink-500"></i>
+                    <span>Favourites</span>
+                </a>
                 @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
                     <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
                 @endif
@@ -256,8 +280,9 @@
         </div>
 
         <!-- Mobile menu (updated with all items) -->
-        <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 lg:hidden">
-            @if($showSearch)
+        <div x-cloak x-show="mobileMenu" x-transition class="space-y-3 border-t border-gray-800 py-4 {{ $isGirlProfilePage ? 'md:hidden' : 'lg:hidden' }}">
+            {{-- Match the original girl profile page layout from before the responsive header redesign (no mobile menu search block). --}}
+            @if($showSearch && ! $isGirlProfilePage)
             <form action="{{ url('/') }}" method="GET" class="px-3 pb-1" @submit="mobileMenu = false">
                 <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2">
                     <i class="fa-solid fa-magnifying-glass text-gray-500 text-xs shrink-0"></i>
@@ -302,11 +327,15 @@
                             </div>
                         </div>
                     @else
-                        <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
+                        @php $isActive = $isNavItemActive((string) $item['url']); @endphp
+                        <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 {{ $isActive ? 'bg-gray-800 font-medium text-white' : 'text-gray-200 hover:bg-gray-800' }}">{{ $item['label'] }}</a>
                     @endif
                 @endforeach
                 @guest
                 @endguest
+                <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
+                    <i class="fa-solid fa-heart text-pink-500 mr-1.5 text-xs"></i> Favourites
+                </a>
                 @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
                     <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block rounded-lg px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
                 @endif
@@ -317,5 +346,3 @@
         </div>
     </div>
 </header>
-
-

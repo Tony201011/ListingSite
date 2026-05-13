@@ -44,12 +44,28 @@ class HomeController extends Controller
 
 
 
+    public function favourites(): View
+    {
+        $favouriteSlugs = $this->favouriteBookmarkService->getFavourites();
+        $profiles = $this->buildProfileFilterViewData->getProfilesBySlugs($favouriteSlugs);
+
+        return view('frontend.favourites', [
+            'profiles' => $profiles,
+            'userFavourites' => $favouriteSlugs,
+        ]);
+    }
+
     public function showProfile(ShowProfileRequest $request, string $slug): View
     {
         $viewData = $this->getProfileShowData->execute(
             $slug,
             $request->validated()
         );
+
+        if ($viewData['offline'] ?? false) {
+            return view('frontend.profile-offline', $viewData);
+        }
+
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
 
         $this->recordProfileView->execute($slug, $request);

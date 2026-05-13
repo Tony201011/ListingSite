@@ -6,8 +6,8 @@
     $pageSubtitle = $page?->subtitle ?: 'What is your Babe Rank';
     $pageContent = $page?->content;
 @endphp
-<div class="min-h-screen bg-white">
-    <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-white overflow-x-hidden">
+    <div class="mx-auto max-w-4xl px-4 py-8 sm:py-10 sm:px-6 lg:px-8">
         <div class="mb-5">
             <a
                 href="{{ url('/profile') }}"
@@ -17,13 +17,13 @@
             </a>
         </div>
 
-        <h1 class="mb-8 border-l-4 border-[#e04ecb] pl-4 text-3xl font-bold text-gray-900 sm:text-4xl">
+        <h1 class="mb-6 sm:mb-8 border-l-4 border-[#e04ecb] pl-4 text-2xl font-bold text-gray-900 sm:text-4xl">
             {{ $pageTitle }}
         </h1>
 
         <section class="mb-10">
             @if($pageSubtitle)
-            <h2 class="mb-4 text-2xl font-semibold text-[#e04ecb] sm:text-3xl">
+            <h2 class="mb-3 sm:mb-4 text-xl font-semibold text-[#e04ecb] sm:text-3xl">
                 {{ $pageSubtitle }}
             </h2>
             @endif
@@ -33,7 +33,7 @@
                 <img
                     src="{{ \Illuminate\Support\Facades\Storage::url($page->image) }}"
                     alt="{{ $pageTitle }}"
-                    class="max-h-64 w-auto rounded-lg object-contain"
+                    class="max-h-64 w-auto max-w-full rounded-lg object-contain"
                     loading="lazy"
                     decoding="async"
                 >
@@ -105,7 +105,7 @@
             </div>
 
             @if(!empty($pageContent))
-                <article class="text-gray-700 leading-relaxed max-w-none [&_*]:text-gray-700 [&_h1]:text-gray-900 [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_h4]:text-gray-900 [&_h5]:text-gray-900 [&_h6]:text-gray-900 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-semibold [&_h4]:font-semibold [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_h1]:mt-6 [&_h2]:mt-5 [&_h3]:mt-4 [&_h1]:mb-3 [&_h2]:mb-3 [&_h3]:mb-2 [&_p]:mb-4 [&_li]:mb-1 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-pink-600 hover:[&_a]:text-pink-700">
+                <article class="text-gray-700 leading-relaxed max-w-none overflow-hidden break-words [&_*]:text-gray-700 [&_h1]:text-gray-900 [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_h4]:text-gray-900 [&_h5]:text-gray-900 [&_h6]:text-gray-900 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-semibold [&_h4]:font-semibold [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_h1]:mt-6 [&_h2]:mt-5 [&_h3]:mt-4 [&_h1]:mb-3 [&_h2]:mb-3 [&_h3]:mb-2 [&_p]:mb-4 [&_li]:mb-1 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-pink-600 hover:[&_a]:text-pink-700 [&_img]:max-w-full [&_table]:w-full [&_table]:overflow-x-auto [&_pre]:overflow-x-auto">
                     {!! $pageContent !!}
                 </article>
             @else
@@ -118,7 +118,7 @@
 
                 <hr class="my-10 border-t-2 border-gray-100">
 
-                <h2 class="mb-4 text-2xl font-semibold text-[#e04ecb] sm:text-3xl">
+                <h2 class="mb-3 sm:mb-4 text-xl font-semibold text-[#e04ecb] sm:text-3xl">
                     Examples how to increase your rank
                 </h2>
 

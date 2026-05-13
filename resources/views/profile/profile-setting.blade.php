@@ -610,7 +610,7 @@
             &rsaquo;
         </button>
 
-        <template x-if="videos.length > 0 && videos[videoIndex]">
+        <template x-if="videoOpen && videos.length > 0 && videos[videoIndex]">
             <div
                 x-show="videoOpen"
                 x-transition:enter="transition ease-out duration-300"

@@ -31,6 +31,10 @@ class ProviderStatsOverview extends StatsOverviewWidget
         $active = (clone $users)->whereHas('providerProfiles', function ($q) {
             $q->where('profile_status', 'approved');
         })->count();
+        $onlineCount = (clone $profiles)->whereHas('onlineUser', function ($q) {
+            $q->where('status', 'online')
+                ->where('online_expires_at', '>', now());
+        })->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
         $verified = (clone $users)->whereNotNull('email_verified_at')->count();
         $featured = (clone $profiles)->where('is_featured', true)->count();
@@ -42,15 +46,27 @@ class ProviderStatsOverview extends StatsOverviewWidget
             Stat::make('Active Accounts', (string) $active)
                 ->color('success')
                 ->icon('heroicon-o-check-circle'),
+            Stat::make('Online Users', (string) $onlineCount)
+                ->color('info')
+                ->icon('heroicon-o-signal')
+                ->url(fn (): string => route('filament.admin.resources.providers.index', [
+                    'filters' => ['online_status' => ['value' => 'online']],
+                ])),
             Stat::make('Blocked Accounts', (string) $blocked)
                 ->color('danger')
-                ->icon('heroicon-o-no-symbol'),
+                ->icon('heroicon-o-no-symbol')
+                ->url(fn (): string => route('filament.admin.resources.providers.index', [
+                    'filters' => ['is_blocked' => ['value' => '1']],
+                ])),
             Stat::make('Verified Emails', (string) $verified)
                 ->color('warning')
                 ->icon('heroicon-o-shield-check'),
             Stat::make('Featured Profiles', (string) $featured)
                 ->color('info')
-                ->icon('heroicon-o-star'),
+                ->icon('heroicon-o-star')
+                ->url(fn (): string => route('filament.admin.resources.providers.index', [
+                    'filters' => ['is_featured' => ['value' => '1']],
+                ])),
         ];
     }
 

@@ -1,4 +1,45 @@
 (function () {
+    let smoothScrollLinksBound = false;
+
+    function prefersReducedMotion() {
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function scrollToAnchor(target) {
+        if (!target) return;
+        target.scrollIntoView({
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+            block: 'start'
+        });
+    }
+
+    function initSmoothScrollLinks() {
+        if (smoothScrollLinksBound) return;
+        smoothScrollLinksBound = true;
+
+        document.addEventListener('click', (event) => {
+            if (!(event.target instanceof Element)) return;
+            const anchor = event.target.closest('a.smooth-scroll[href^="#"]');
+
+            if (!anchor) return;
+
+            const href = anchor.getAttribute('href') || '';
+            const targetId = href.slice(1);
+            const target = document.getElementById(targetId);
+
+            if (!target) return;
+
+            event.preventDefault();
+            scrollToAnchor(target);
+
+            if (window.history && typeof window.history.pushState === 'function') {
+                window.history.pushState(null, '', `#${targetId}`);
+            } else {
+                window.location.hash = targetId;
+            }
+        });
+    }
+
     function registerAlpineComponents(Alpine) {
         if (!Alpine || window.__profileShowAlpineRegistered) return;
         window.__profileShowAlpineRegistered = true;
@@ -30,27 +71,8 @@
             reportSuccess: '',
 
             init() {
-                this.initSmoothScroll();
                 this.initLazyImages();
                 this.initVideoAutoPause();
-            },
-
-            initSmoothScroll() {
-                document.querySelectorAll('a.smooth-scroll[href^="#"]').forEach((anchor) => {
-                    anchor.addEventListener('click', (event) => {
-                        const href = anchor.getAttribute('href') || '';
-                        const targetId = href.slice(1);
-                        const target = document.getElementById(targetId);
-
-                        if (!target) return;
-
-                        event.preventDefault();
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    });
-                });
             },
 
             initLazyImages() {
@@ -311,4 +333,6 @@
             registerAlpineComponents(window.Alpine);
         }, { once: true });
     }
+
+    initSmoothScrollLinks();
 })();

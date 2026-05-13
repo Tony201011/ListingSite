@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\HideShowProfile;
+use App\Models\OnlineUser;
 use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
@@ -10,6 +11,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class HomeControllerTest extends TestCase
@@ -24,13 +26,15 @@ class HomeControllerTest extends TestCase
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
-        ProviderProfile::query()->create(array_merge([
+        $profile = ProviderProfile::query()->create(array_merge([
             'user_id' => $user->id,
             'name' => 'Test Escort',
             'slug' => 'test-escort-'.$user->id,
             'profile_status' => 'approved',
             'age' => 25,
         ], $profileOverrides));
+
+        $this->createActiveOnlineUser($user, $profile->id);
 
         return $user;
     }
@@ -46,7 +50,7 @@ class HomeControllerTest extends TestCase
             'role' => User::ROLE_PROVIDER,
         ]);
 
-        ProviderProfile::query()->create(array_merge([
+        $profile = ProviderProfile::query()->create(array_merge([
             'user_id' => $user->id,
             'name' => 'Test Escort',
             'slug' => 'test-escort-'.$user->id,
@@ -54,6 +58,8 @@ class HomeControllerTest extends TestCase
             'age' => 25,
             'suburb' => $storedSuburb,
         ], $profileOverrides));
+
+        $this->createActiveOnlineUser($user, $profile->id);
 
         Postcode::query()->create([
             'suburb' => $suburb,
@@ -64,6 +70,19 @@ class HomeControllerTest extends TestCase
         ]);
 
         return $user;
+    }
+
+    private function createActiveOnlineUser(User $user, int $providerProfileId): void
+    {
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $providerProfileId,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => now()->addMinutes(55),
+        ]);
     }
 
     // ---------------------------------------------------------------
@@ -109,6 +128,39 @@ class HomeControllerTest extends TestCase
         ]);
     }
 
+    public function test_favourites_page_resolves_legacy_numeric_favourite_ids_to_slugs(): void
+    {
+        $providerUser = $this->createApprovedProvider(['name' => 'Legacy Favourite', 'slug' => 'legacy-favourite']);
+        $profile = ProviderProfile::query()->where('user_id', $providerUser->id)->firstOrFail();
+        $viewer = User::factory()->create();
+
+        Cache::put("favourites_user_{$viewer->id}", [(string) $profile->id], 60);
+
+        $response = $this->actingAs($viewer)->get('/favourites');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('userFavourites', ['legacy-favourite']);
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(1, $profiles);
+        $this->assertSame('legacy-favourite', $profiles[0]['slug']);
+    }
+
+    public function test_favourites_page_resolves_mixed_case_favourite_slugs_to_canonical_slug(): void
+    {
+        $this->createApprovedProvider(['name' => 'Case Favourite', 'slug' => 'case-favourite']);
+        $viewer = User::factory()->create();
+
+        Cache::put("favourites_user_{$viewer->id}", ['  CASE-FAVOURITE  '], 60);
+
+        $response = $this->actingAs($viewer)->get('/favourites');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('userFavourites', ['case-favourite']);
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(1, $profiles);
+        $this->assertSame('case-favourite', $profiles[0]['slug']);
+    }
+
     public function test_home_page_shows_default_filter_values(): void
     {
         $response = $this->get('/');
@@ -145,6 +197,20 @@ class HomeControllerTest extends TestCase
             'name' => 'Pending Escort',
             'slug' => 'pending-escort',
             'profile_status' => 'pending',
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(0, $profiles->total());
+    }
+
+    public function test_home_page_does_not_show_blocked_profiles(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Blocked Escort',
+            'slug' => 'blocked-escort',
+            'is_blocked' => true,
         ]);
 
         $response = $this->get('/');

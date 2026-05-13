@@ -3,6 +3,24 @@
     min-height: 300px;
 }
 
+/* Provider profile pages - prevent inner scroll containers on non-contained tabs */
+.fi-sc-tabs:not(.fi-contained) > .fi-sc-tabs-tab {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+}
+
+/* Ensure the admin layout scrolls at the page level, not within a fixed container */
+.fi-layout {
+    height: auto !important;
+    min-height: 100dvh;
+}
+
+.fi-main-ctn {
+    overflow: visible !important;
+    height: auto !important;
+}
+
 /* Improve admin dashboard chart sizing and layout */
 .fi-wi-chart .fi-wi-chart-canvas-ctn {
     min-height: 360px;
@@ -14,4 +32,21 @@
 
 .fi-wi-chart .fi-wi-chart-canvas-ctn canvas {
     min-height: 100% !important;
+}
+
+/* Provider listing table: prevent inner scrollbars and wrap cell content */
+.fi-resource-users .fi-ta-ctn,
+.fi-resource-users .fi-ta-content {
+    overflow: visible !important;
+}
+
+.fi-resource-users .fi-ta-table {
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+.fi-resource-users .fi-ta-table th,
+.fi-resource-users .fi-ta-table td {
+    white-space: normal !important;
+    word-break: break-word;
 }

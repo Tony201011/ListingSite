@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ProviderProfile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class FavouriteBookmarkService
 {
@@ -21,18 +22,19 @@ class FavouriteBookmarkService
 
     public function getFavourites(): array
     {
-        return Cache::get($this->cacheKey('favourites'), []);
+        return $this->getNormalizedSlugs('favourites');
     }
 
     public function getBookmarks(): array
     {
-        return Cache::get($this->cacheKey('bookmarks'), []);
+        return $this->getNormalizedSlugs('bookmarks');
     }
 
     public function slugExists(string $slug): bool
     {
         return ProviderProfile::whereNull('deleted_at')
             ->where('profile_status', 'approved')
+            ->where('is_blocked', false)
             ->where('slug', $slug)
             ->exists();
     }
@@ -40,7 +42,7 @@ class FavouriteBookmarkService
     private function toggle(string $type, string $slug): bool
     {
         $key = $this->cacheKey($type);
-        $slugs = Cache::get($key, []);
+        $slugs = $this->getNormalizedSlugs($type);
 
         if (in_array($slug, $slugs, true)) {
             $slugs = array_values(array_filter($slugs, fn ($s) => $s !== $slug));
@@ -62,5 +64,104 @@ class FavouriteBookmarkService
         }
 
         return "{$type}_sess_".session()->getId();
+    }
+
+    private function getNormalizedSlugs(string $type): array
+    {
+        $key = $this->cacheKey($type);
+        $cached = Cache::get($key, []);
+
+        if (! is_array($cached) || $cached === []) {
+            return [];
+        }
+
+        $numericIds = [];
+        foreach ($cached as $value) {
+            if (! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized = trim((string) $value);
+            if ($this->isNumericId($normalized)) {
+                $numericIds[] = (int) $normalized;
+            }
+        }
+
+        $idToSlug = empty($numericIds)
+            ? collect()
+            : ProviderProfile::query()
+                ->whereNull('deleted_at')
+                ->where('profile_status', 'approved')
+                ->where('is_blocked', false)
+                ->whereIn('id', array_unique($numericIds))
+                ->pluck('slug', 'id');
+
+        $textSlugs = [];
+        foreach ($cached as $value) {
+            if (! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized = trim((string) $value);
+            if ($normalized === '' || $this->isNumericId($normalized)) {
+                continue;
+            }
+
+            $textSlugs[] = mb_strtolower($normalized);
+        }
+
+        $canonicalSlugs = empty($textSlugs)
+            ? collect()
+            : ProviderProfile::query()
+                ->whereNull('deleted_at')
+                ->where('profile_status', 'approved')
+                ->where('is_blocked', false)
+                ->whereIn(DB::raw('LOWER(slug)'), array_values(array_unique($textSlugs)))
+                ->pluck('slug')
+                ->mapWithKeys(fn ($slug) => [mb_strtolower($slug) => $slug]);
+
+        $seen = [];
+        $normalizedSlugs = [];
+
+        foreach ($cached as $value) {
+            if (! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized = trim((string) $value);
+            if ($normalized === '') {
+                continue;
+            }
+
+            if ($this->isNumericId($normalized)) {
+                $resolved = $idToSlug->get((int) $normalized);
+                if ($resolved === null) {
+                    continue;
+                }
+                $normalized = $resolved;
+            } else {
+                $resolved = $canonicalSlugs->get(mb_strtolower($normalized));
+                if ($resolved === null) {
+                    continue;
+                }
+                $normalized = $resolved;
+            }
+
+            if (! isset($seen[$normalized])) {
+                $seen[$normalized] = true;
+                $normalizedSlugs[] = $normalized;
+            }
+        }
+
+        if ($normalizedSlugs !== $cached) {
+            Cache::put($key, $normalizedSlugs, self::TTL_SECONDS);
+        }
+
+        return $normalizedSlugs;
+    }
+
+    private function isNumericId(string $value): bool
+    {
+        return ctype_digit($value);
     }
 }

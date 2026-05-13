@@ -44,8 +44,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -83,7 +86,33 @@ class UserResource extends Resource
         return parent::getEloquentQuery()
             ->withTrashed()
             ->with([
-                'user.providerProfiles',
+                'profileImages',
+                'userVideos',
+                'photoVerification',
+                'rates',
+                'availabilities',
+                'profileMessage',
+                'onlineUser',
+                'hideShowProfile',
+                'availableNow',
+            ]);
+    }
+
+    /**
+     * Override the query used to resolve a record for edit/view pages so that
+     * ANY ProviderProfile can be loaded by ID – not just the one per-user
+     * "latest profile" that the listing restricts to. This allows the admin to
+     * switch between a provider's profiles via the "Switch Profile" header
+     * action and edit each one independently.
+     */
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return ProviderProfile::query()
+            ->withTrashed()
+            ->with([
+                'user.providerProfiles' => fn (HasMany $query): HasMany => $query
+                    ->withTrashed()
+                    ->latest('id'),
                 'profileImages',
                 'userVideos',
                 'photoVerification',
@@ -106,6 +135,7 @@ class UserResource extends Resource
 
             Tabs::make('ProviderFormTabs')
                 ->persistTabInQueryString('tab')
+                ->contained(false)
                 ->tabs([
                     Tab::make('Overview')
                         ->icon('heroicon-o-user-circle')
@@ -168,7 +198,7 @@ class UserResource extends Resource
                                         ->same('password')
                                         ->dehydrated(false),
                                 ])
-                                ->columns(2)
+                                ->columns(3)
                                 ->collapsible(),
 
                             Section::make('Profile Information')
@@ -335,7 +365,7 @@ class UserResource extends Resource
                                         ->searchable()
                                         ->preload(),
                                 ])
-                                ->columns(3)
+                                ->columns(4)
                                 ->collapsible(),
 
                             Section::make('Preferences & Services')
@@ -422,7 +452,7 @@ class UserResource extends Resource
                                         })
                                         ->columnSpanFull(),
                                 ])
-                                ->columns(2)
+                                ->columns(4)
                                 ->collapsible(),
                         ]),
 
@@ -455,7 +485,7 @@ class UserResource extends Resource
                                         ->label('WhatsApp')
                                         ->maxLength(30),
                                 ])
-                                ->columns(2)
+                                ->columns(3)
                                 ->collapsible(),
                         ]),
 
@@ -713,6 +743,7 @@ class UserResource extends Resource
     {
         return $schema->schema([
             Tabs::make('ProviderDetailsTabs')
+                ->contained(false)
                 ->tabs([
                     Tab::make('Overview')
                         ->icon('heroicon-o-user-circle')
@@ -752,11 +783,11 @@ class UserResource extends Resource
                                         ->label('Mobile Verified')
                                         ->boolean(),
 
-                                    IconEntry::make('user.is_blocked')
-                                        ->label('Blocked')
+                                    IconEntry::make('is_blocked')
+                                        ->label('Profile Blocked')
                                         ->boolean(),
                                 ])
-                                ->columns(3)
+                                ->columns(4)
                                 ->collapsible(),
 
                             Section::make('Profiles')
@@ -783,9 +814,12 @@ class UserResource extends Resource
                                             TextEntry::make('profile_status')
                                                 ->label('Status')
                                                 ->badge()
+                                                ->state(fn ($record): ?string => $record->is_blocked ? 'blocked' : $record->profile_status)
+                                                ->formatStateUsing(fn (?string $state): ?string => filled($state) ? ucfirst($state) : null)
                                                 ->color(fn ($state): string => match ($state) {
                                                     'approved' => 'success',
                                                     'rejected' => 'danger',
+                                                    'blocked' => 'danger',
                                                     default => 'warning',
                                                 })
                                                 ->placeholder('-'),
@@ -803,7 +837,7 @@ class UserResource extends Resource
                                                 ->placeholder('-')
                                                 ->columnSpanFull(),
                                         ])
-                                        ->columns(3)
+                                        ->columns(4)
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(1)
@@ -852,7 +886,7 @@ class UserResource extends Resource
                                     TextEntry::make('bust_size_id')->label('Bust Size')->formatStateUsing(fn ($state): string => self::categoryName($state)),
                                     TextEntry::make('your_length_id')->label('Your Length')->formatStateUsing(fn ($state): string => self::categoryName($state)),
                                 ])
-                                ->columns(3)
+                                ->columns(4)
                                 ->collapsible(),
 
                             Section::make('Preferences & Services')
@@ -867,7 +901,7 @@ class UserResource extends Resource
                                     TextEntry::make('services_style')->label('Services Style')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
                                     TextEntry::make('services_provided')->label('Services Provided')->formatStateUsing(fn ($state): string => self::categoryNames($state))->badge()->separator(',')->columnSpanFull(),
                                 ])
-                                ->columns(2)
+                                ->columns(4)
                                 ->collapsible(),
                         ]),
 
@@ -883,7 +917,7 @@ class UserResource extends Resource
                                     TextEntry::make('website')->label('Website')->placeholder('-'),
                                     TextEntry::make('onlyfans_username')->label('OnlyFans Username')->placeholder('-'),
                                 ])
-                                ->columns(2),
+                                ->columns(3),
                         ]),
 
                     Tab::make('Images')
@@ -1041,7 +1075,24 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $providerProfilesTable = (new ProviderProfile)->getTable();
+
         return $table
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                return $query
+                    ->leftJoin('online_users as active_online_users', function (JoinClause $join): void {
+                        $join
+                            ->on('active_online_users.provider_profile_id', '=', 'provider_profiles.id')
+                            ->where('active_online_users.status', '=', 'online')
+                            ->whereNotNull('active_online_users.online_expires_at')
+                            ->where('active_online_users.online_expires_at', '>', now());
+                    })
+                    ->select('provider_profiles.*')
+                    ->selectRaw(
+                        'CASE WHEN active_online_users.id IS NULL THEN ? ELSE ? END AS online_status',
+                        ['offline', 'online']
+                    );
+            })
             ->columns([
                 ImageColumn::make('profile_image')
                     ->label('')
@@ -1054,24 +1105,28 @@ class UserResource extends Resource
                     ->size(40),
 
                 TextColumn::make('name')
-                    ->label('Provider')
+                    ->label('Profile Name')
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->description(fn (ProviderProfile $record): string => $record->user?->email ?? ''),
+                    ->wrap()
+                    ->toggleable(),
 
                 TextColumn::make('user.mobile')
                     ->label('Mobile')
                     ->searchable()
+                    ->wrap()
                     ->toggleable(),
 
                 TextColumn::make('profile_status')
                     ->label('Status')
                     ->badge()
-                    ->state(fn (ProviderProfile $record): string => ucfirst($record->profile_status ?? 'pending'))
+                    ->state(fn (ProviderProfile $record): string => $record->is_blocked ? 'blocked' : ($record->profile_status ?? 'pending'))
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
                     ->color(fn (string $state): string => match ($state) {
                         'approved' => 'success',
                         'rejected' => 'danger',
+                        'blocked' => 'danger',
                         default => 'warning',
                     }),
 
@@ -1081,12 +1136,19 @@ class UserResource extends Resource
                     ->state(fn (ProviderProfile $record): string => $record->is_featured ? 'Yes' : 'No')
                     ->color(fn (string $state): string => $state === 'Yes' ? 'success' : 'gray'),
 
+                TextColumn::make('online_status')
+                    ->label('Online')
+                    ->badge()
+                    ->getStateUsing(fn (ProviderProfile $record): string => $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline')
+                    ->color(fn (string $state): string => $state === 'Online' ? 'success' : 'gray'),
+
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
                     ->sortable()
                     ->since()
-                    ->tooltip(fn (ProviderProfile $record): string => $record->created_at?->format('M d, Y h:i A') ?? ''),
+                    ->tooltip(fn (ProviderProfile $record): string => $record->created_at?->format('M d, Y h:i A') ?? '')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('deleted_at')
                     ->label('Deleted At')
@@ -1094,7 +1156,8 @@ class UserResource extends Resource
                     ->sortable()
                     ->since()
                     ->placeholder('—')
-                    ->color('danger'),
+                    ->color('danger')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TernaryFilter::make('user.email_verified_at')
@@ -1103,8 +1166,8 @@ class UserResource extends Resource
                     ->trueLabel('Verified')
                     ->falseLabel('Unverified'),
 
-                SelectFilter::make('user.is_blocked')
-                    ->label('Account')
+                SelectFilter::make('is_blocked')
+                    ->label('Block Status')
                     ->options([
                         '0' => 'Active',
                         '1' => 'Blocked',
@@ -1135,8 +1198,32 @@ class UserResource extends Resource
                         'pending' => 'Pending',
                         'rejected' => 'Rejected',
                     ])
-                    ->attribute('profile_status')
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            filled($data['value'] ?? null),
+                            fn (Builder $query): Builder => $query->whereHas(
+                                'user.providerProfiles',
+                                fn (Builder $profileQuery): Builder => $profileQuery
+                                    ->withTrashed()
+                                    ->where('profile_status', $data['value'])
+                            )
+                        );
+                    })
                     ->placeholder('All Statuses'),
+
+                SelectFilter::make('is_featured')
+                    ->label('Featured')
+                    ->options([
+                        '1' => 'Featured',
+                        '0' => 'Not Featured',
+                    ])
+                    ->query(function (Builder $query, array $data) use ($providerProfilesTable): Builder {
+                        return $query->when(
+                            filled($data['value'] ?? null),
+                            fn (Builder $query): Builder => $query->where($providerProfilesTable.'.is_featured', $data['value'])
+                        );
+                    })
+                    ->placeholder('All'),
 
                 SelectFilter::make('deleted_status')
                     ->label('Deleted Status')
@@ -1144,14 +1231,35 @@ class UserResource extends Resource
                         'deleted' => 'Deleted',
                         'not_deleted' => 'Not Deleted',
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
+                    ->query(function (Builder $query, array $data) use ($providerProfilesTable): Builder {
                         return match ($data['value'] ?? null) {
-                            'deleted' => $query->whereNotNull((new ProviderProfile)->getTable().'.deleted_at'),
-                            'not_deleted' => $query->whereNull((new ProviderProfile)->getTable().'.deleted_at'),
+                            'deleted' => $query->whereNotNull($providerProfilesTable.'.deleted_at'),
+                            'not_deleted' => $query->whereNull($providerProfilesTable.'.deleted_at'),
                             default => $query,
                         };
                     })
                     ->placeholder('All Profiles'),
+
+                SelectFilter::make('online_status')
+                    ->label('Online Status')
+                    ->options([
+                        'online' => 'Online',
+                        'offline' => 'Offline',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'online' => $query->whereHas('onlineUser', fn (Builder $q) => $q
+                                ->where('status', 'online')
+                                ->whereNotNull('online_expires_at')
+                                ->where('online_expires_at', '>', now())),
+                            'offline' => $query->whereDoesntHave('onlineUser', fn (Builder $q) => $q
+                                ->where('status', 'online')
+                                ->whereNotNull('online_expires_at')
+                                ->where('online_expires_at', '>', now())),
+                            default => $query,
+                        };
+                    })
+                    ->placeholder('All'),
             ])
             ->recordActions([
                 ViewAction::make()
@@ -1173,24 +1281,24 @@ class UserResource extends Resource
                     ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
 
                 Action::make('block')
-                    ->label('Block User')
+                    ->label('Block Profile')
                     ->color('danger')
                     ->icon('heroicon-o-lock-closed')
                     ->requiresConfirmation()
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->user?->is_blocked && ! $record->trashed())
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->is_blocked && ! $record->trashed())
                     ->action(function (ProviderProfile $record): void {
-                        $record->user?->update(['is_blocked' => true]);
+                        $record->update(['is_blocked' => true]);
                         SendAdminProviderEmailJob::dispatch($record->user?->id, 'blocked');
                     }),
 
                 Action::make('unblock')
-                    ->label('Unblock User')
+                    ->label('Unblock Profile')
                     ->color('success')
                     ->icon('heroicon-o-lock-open')
                     ->requiresConfirmation()
-                    ->visible(fn (ProviderProfile $record): bool => $record->user?->is_blocked && ! $record->trashed())
+                    ->visible(fn (ProviderProfile $record): bool => $record->is_blocked && ! $record->trashed())
                     ->action(function (ProviderProfile $record): void {
-                        $record->user?->update(['is_blocked' => false]);
+                        $record->update(['is_blocked' => false]);
                         SendAdminProviderEmailJob::dispatch($record->user?->id, 'unblocked');
                     }),
 
@@ -1221,6 +1329,24 @@ class UserResource extends Resource
                     ->successNotificationTitle('Profile deleted'),
             ])
             ->toolbarActions([])
+            ->groups([
+                Group::make('user.email')
+                    ->label('Account Email')
+                    ->collapsible(),
+                Group::make('profile_status')
+                    ->label('Profile Status')
+                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => ucfirst($record->profile_status ?? 'pending'))
+                    ->collapsible(),
+                Group::make('online_status')
+                    ->label('Online Status')
+                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline')
+                    ->collapsible(),
+                Group::make('is_featured')
+                    ->label('Featured')
+                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->is_featured ? 'Featured' : 'Not Featured')
+                    ->collapsible(),
+            ])
+            ->defaultGroup('user.email')
             ->defaultSort('created_at', 'desc')
             ->striped()
             ->emptyStateHeading('No providers yet')

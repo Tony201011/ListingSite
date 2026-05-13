@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- Main Content -->
-<div class="bg-[#f8fafc] min-h-screen py-10">
-    <div class="max-w-4xl mx-auto px-5">
+<div class="bg-[#f8fafc] min-h-screen py-8 sm:py-10">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6">
 
         <!-- Back button -->
         <button onclick="window.history.back()" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer">
@@ -52,7 +52,7 @@
             class="space-y-8"
         >
             <!-- Rates List -->
-            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100">
+            <div class="bg-white rounded-2xl p-5 sm:p-6 md:p-8 shadow-md border border-gray-100">
                 <div class="flex items-baseline flex-wrap gap-2 mb-2">
                     <h2 class="text-2xl font-semibold text-gray-800">Your rates</h2>
                     <span class="text-gray-500 text-sm">(not in a group)</span>
@@ -61,8 +61,8 @@
                     If you don't have many rates or there is no need to put them in separate groups, you can list them here.
                 </p>
 
-                <!-- Rates Table -->
-                <div class="overflow-x-auto mb-6">
+                <!-- Rates Table (desktop) -->
+                <div class="hidden md:block overflow-x-auto mb-6">
                     <table class="w-full border-collapse border border-gray-300 rounded-lg">
                         <thead x-show="rates.length > 0" class="bg-gray-100">
                             <tr>
@@ -78,7 +78,7 @@
                                     <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.desc || '—'"></td>
                                     <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.incall ? '$' + rate.incall : '—'"></td>
                                     <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.outcall ? '$' + rate.outcall : '—'"></td>
-                                    <td class="p-3 text-gray-800 font-medium border border-gray-300">
+                                    <td class="p-3 text-gray-800 font-medium border border-gray-300 whitespace-nowrap">
                                         <button @click="editRate(rate)" class="text-blue-500 hover:text-blue-700 mr-3" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
@@ -95,15 +95,49 @@
                     </p>
                 </div>
 
+                <!-- Rates cards (mobile) -->
+                <div class="md:hidden space-y-3 mb-6">
+                    <template x-for="(rate, index) in rates" :key="'mobile-' + rate.id">
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                            <p class="text-xs text-gray-500 mb-1">Description</p>
+                            <p class="text-gray-800 font-semibold mb-3" x-text="rate.desc || '—'"></p>
+
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <p class="text-xs text-gray-500 mb-1">Incall</p>
+                                    <p class="text-gray-800 font-medium" x-text="rate.incall ? '$' + rate.incall : '—'"></p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 mb-1">Outcall</p>
+                                    <p class="text-gray-800 font-medium" x-text="rate.outcall ? '$' + rate.outcall : '—'"></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <button @click="editRate(rate)" class="text-blue-500 hover:text-blue-700 text-sm font-medium" title="Edit">Edit</button>
+                                <button @click="confirmDelete(rate.id, index)" class="text-red-500 hover:text-red-700 text-sm font-medium" title="Delete">Delete</button>
+                            </div>
+                        </div>
+                    </template>
+                    <p x-show="rates.length === 0" class="text-gray-500 italic py-4 text-center border border-gray-200 rounded-lg">
+                        No rates added yet. Click "Add rate" to create your first rate.
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-800">Add new rate</h3>
+                    <p class="text-sm text-gray-600">Add a service title and rates, then save it to your list.</p>
+                </div>
+
                 <!-- Add / Edit Rate Button -->
-                <button x-show="!showForm" @click="openFormForAdd()" class="bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                <button x-show="!showForm" @click="openFormForAdd()" aria-label="Add a new rate" class="w-full sm:w-auto bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
                     + Add rate
                 </button>
 
                 <!-- Rate Form -->
                 <div x-show="showForm" x-transition class="mt-8">
                     <div class="bg-pink-50 border border-[#e04ecb] rounded-xl p-6">
-                        <div class="border-b border-[#e04ecb]/30 pb-4 mb-6 flex justify-between items-center">
+                        <div class="border-b border-[#e04ecb]/30 pb-4 mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center items-start gap-2">
                             <span class="text-xl font-semibold text-gray-800" x-text="editingId ? 'Edit rate' : 'Add new rate'"></span>
                             <span class="text-gray-600 text-sm">If you don't have an incall or outcall rate, leave blank</span>
                         </div>

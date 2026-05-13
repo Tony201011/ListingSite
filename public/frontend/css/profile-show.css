@@ -2,39 +2,62 @@ html {
     scroll-behavior: smooth;
 }
 
+body.profile-show-page {
+    overflow-x: hidden;
+}
+
+.profile-page-content {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
     }
 }
 
+/* Scroll-to-top button: always anchor from the bottom, never from the top */
+#smooth-scroll-top {
+    top: unset !important;
+}
+
+/* Profile Prev/Next nav buttons – centred at the bottom on all screen sizes */
+.mobile-nav-btn-wrapper {
+    position: fixed !important;
+    bottom: 1.5rem !important;
+    top: unset !important;
+    left: unset !important;
+    right: unset !important;
+    transform: none !important;
+    margin: 0 !important;
+    width: max-content;
+    /* Each button can occupy at most half the screen so they never overlap */
+    max-width: calc(50vw - 0.75rem);
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mobile-prev-btn {
+    left: 1rem !important;
+    right: unset !important;
+}
+
+.mobile-next-btn {
+    right: 1rem !important;
+    left: unset !important;
+}
+
+/* Bottom padding keeps content clear of fixed nav buttons and the scroll-to-top button */
+.profile-page-content {
+    padding-bottom: 8rem;
+}
+
 @media (max-width: 767px) {
-    .mobile-nav-btn-wrapper {
-        position: fixed !important;
-        bottom: 1.5rem !important;
-        top: unset !important;
-        left: unset !important;
-        right: unset !important;
-        transform: none !important;
-        margin: 0 !important;
-        width: max-content;
-        z-index: 50;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .mobile-prev-btn {
-        right: calc(50% + 0.25rem) !important;
-        left: unset !important;
-    }
-
-    .mobile-next-btn {
-        left: calc(50% + 0.25rem) !important;
-        right: unset !important;
-    }
-
-    /* Move the scroll-to-top button above the profile nav buttons so they don't overlap */
+    /* On mobile the prev/next buttons sit at bottom-center while the scroll-to-top
+       sits at bottom-right; on narrow screens they can overlap, so push it up. */
     #smooth-scroll-top {
         bottom: 6.5rem;
     }
@@ -45,6 +68,7 @@ html {
         color: #fff !important;
         border: 1px solid rgba(255, 192, 203, 0.5) !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        width: 100%;
     }
 
     .mobile-transparent-nav-btn span,
@@ -59,8 +83,7 @@ html {
         padding: 0.5rem 0.625rem;
     }
 
-    /* Bottom padding keeps content clear of fixed nav buttons and the
-       scroll-to-top button. Use 10rem so no content is hidden behind either element. */
+    /* A little extra padding on small screens where the buttons are larger */
     .profile-page-content {
         padding-bottom: 10rem;
     }
@@ -69,6 +92,9 @@ html {
 .profile-nav-name {
     max-width: 92px;
     display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 @media (min-width: 768px) {
@@ -113,4 +139,25 @@ html {
 #nearby-carousel {
     overscroll-behavior-x: contain;
     touch-action: pan-x pinch-zoom;
+}
+
+/* Smooth thin scrollbar for horizontally-scrollable tables */
+.profile-page-content .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+}
+
+.profile-page-content .overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+}
+
+.profile-page-content .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 9999px;
+}
+
+.profile-page-content .overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
 }

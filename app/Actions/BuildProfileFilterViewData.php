@@ -287,7 +287,13 @@ class BuildProfileFilterViewData
         $query = ProviderProfile::query()
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
+            ->whereHas('onlineUser', function (Builder $inner): void {
+                $inner->where('status', 'online')
+                    ->whereNotNull('online_expires_at')
+                    ->where('online_expires_at', '>', now());
+            })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
@@ -553,10 +559,15 @@ class BuildProfileFilterViewData
             })
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
+            ->join('online_users', 'online_users.provider_profile_id', '=', 'provider_profiles.id')
             ->where(function ($q) {
                 $q->whereNull('hide_show_profiles.id')
                     ->orWhere('hide_show_profiles.status', 'show');
             })
+            ->where('online_users.status', 'online')
+            ->whereNotNull('online_users.online_expires_at')
+            ->where('online_users.online_expires_at', '>', now())
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
             ->select('provider_profiles.id as provider_profile_id')
@@ -578,7 +589,8 @@ class BuildProfileFilterViewData
 
             /** @var ScoutBuilder $scoutQuery */
             $scoutQuery = ProviderProfile::search($searchTerm)
-                ->where('profile_status', 'approved');
+                ->where('profile_status', 'approved')
+                ->where('is_blocked', false);
 
             $results = $scoutQuery->take(1000)->keys();
 
@@ -724,6 +736,49 @@ class BuildProfileFilterViewData
         return $map[$uppercase] ?? null;
     }
 
+    public function getProfilesBySlugs(array $slugs): array
+    {
+        if (empty($slugs)) {
+            return [];
+        }
+
+        $profiles = ProviderProfile::query()
+            ->whereNull('provider_profiles.deleted_at')
+            ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->whereIn('provider_profiles.slug', $slugs)
+            ->with([
+                'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
+                'rates',
+                'onlineUser',
+                'availableNow',
+                'user',
+                'city',
+            ])
+            ->get();
+
+        $serviceIds = $profiles
+            ->flatMap(fn (ProviderProfile $p) => array_filter((array) ($p->services_provided ?? []), 'is_numeric'))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->all();
+
+        $categoryNames = $serviceIds
+            ? Category::query()->whereIn('id', $serviceIds)->pluck('name', 'id')
+            : collect();
+
+        // Preserve the user's saved order
+        $slugOrder = array_flip($slugs);
+
+        return $profiles
+            ->map(fn (ProviderProfile $profile) => $this->transformProfile($profile, $categoryNames))
+            ->sortBy(fn ($profile) => $slugOrder[$profile['slug']] ?? PHP_INT_MAX)
+            ->values()
+            ->all();
+    }
+
     private function transformProfile(ProviderProfile $profile, Collection $categoryNames): array
     {
         $primaryImage = $profile->profileImages?->first();
@@ -758,6 +813,7 @@ class BuildProfileFilterViewData
             'active' => $isOnline,
             'available_now' => $isAvailableNow,
             'verified' => $profile->is_verified,
+            'featured' => (bool) $profile->is_featured,
             'image' => $imageUrl ?? '',
             'slug' => $profile->slug,
         ];

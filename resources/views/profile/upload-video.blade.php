@@ -78,7 +78,8 @@
                 <template x-if="!selectedVideos.length">
                     <div>
                         <p class="mb-4 text-sm text-gray-600">
-                            Drag &amp; drop multiple videos here or click to choose files.
+                            <span class="hidden sm:inline">Drag &amp; drop multiple videos here or click to choose files.</span>
+                            <span class="sm:hidden">Tap the button below to choose video files.</span>
                         </p>
 
                         <button
@@ -93,12 +94,12 @@
 
                 <template x-if="selectedVideos.length">
                     <div class="space-y-4">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
                             <p class="text-sm font-semibold text-gray-700">
                                 Selected (<span x-text="selectedVideos.length"></span>)
                             </p>
 
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <button
                                     type="button"
                                     @click="uploadVideos()"
@@ -155,7 +156,7 @@
                 </template>
             </div>
 
-            <div class="mt-6 flex items-center gap-2">
+            <div class="mt-6 flex flex-wrap items-center gap-2">
                 <button
                     type="button"
                     @click="uploadVideos()"

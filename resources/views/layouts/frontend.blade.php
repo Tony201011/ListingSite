@@ -34,7 +34,7 @@
 
     @stack('styles')
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans" x-data="{
+<body class="bg-gray-900 text-gray-100 font-sans @yield('bodyClass')" x-data="{
         mobileMenu: false,
         showScrollTop: false,
         prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
