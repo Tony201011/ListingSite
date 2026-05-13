@@ -278,203 +278,222 @@
         x-show="isModalOpen"
         x-cloak
         x-transition.opacity
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        class="fixed inset-0 z-50 overflow-y-auto bg-black/60 p-3 sm:p-4"
         @click.self="closeModal()"
+        @keydown.escape.window="closeModal()"
     >
-        <div class="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center border-b border-gray-200 px-4 pt-4 sm:px-6">
-                <button
-                    type="button"
-                    @click="switchTab('files')"
-                    class="flex-1 border-b-2 pb-3 text-sm font-semibold transition sm:text-base"
-                    :class="activeTab === 'files' ? 'border-pink-600 text-pink-600' : 'border-transparent text-gray-500'"
-                >
-                    My Files
-                </button>
-
-                <button
-                    type="button"
-                    @click="switchTab('camera')"
-                    class="flex-1 border-b-2 pb-3 text-sm font-semibold transition sm:text-base"
-                    :class="activeTab === 'camera' ? 'border-pink-600 text-pink-600' : 'border-transparent text-gray-500'"
-                >
-                    Camera
-                </button>
-
-                <button
-                    type="button"
-                    @click="closeModal()"
-                    class="ml-4 text-2xl leading-none text-gray-500 hover:text-gray-700"
-                    aria-label="Close modal"
-                >
-                    &times;
-                </button>
-            </div>
-
-            <div class="bg-gray-50 p-4 sm:p-6">
-                <div x-show="activeTab === 'files'" x-cloak x-transition>
-                    <div
-                        class="rounded-xl border-2 border-dashed p-4 sm:p-6 lg:p-8 text-center transition h-40 sm:h-48 lg:h-56 flex flex-col items-center justify-center\"
-                        :class="isDragging ? 'border-pink-400 bg-pink-50' : 'border-gray-300 bg-white'"
-                        @dragenter.prevent="isDragging = true"
-                        @dragover.prevent="isDragging = true"
-                        @dragleave.prevent="isDragging = false"
-                        @drop.prevent="handleDrop($event)"
-                    >
-                        <div class="mb-2 sm:mb-4 text-3xl sm:text-4xl lg:text-5xl\">📁</div>
-                        <p class="text-base sm:text-lg font-semibold text-gray-700\">Drag &amp; drop photos here</p>
-                        <p class="mb-3 sm:mb-5 mt-1 text-xs sm:text-sm text-gray-500\">JPG, PNG, WEBP supported · min 2 photos · max 5 photos · max 10MB each</p>
+        <div class="flex min-h-full items-end justify-center sm:items-center">
+            <div
+                class="flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[90vh]"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Photo verification upload modal"
+            >
+                <div class="border-b border-gray-200 px-4 py-4 sm:px-6">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <h2 class="text-lg font-bold text-gray-900 sm:text-xl">Upload verification photos</h2>
+                            <p class="mt-1 text-sm text-gray-600">
+                                Add at least two clear photos holding your verification note.
+                            </p>
+                        </div>
 
                         <button
                             type="button"
-                            @click="openFilePicker()"
-                            class=\"inline-flex items-center rounded-lg bg-pink-600 px-4 sm:px-6 py-2 sm:py-2.5 font-medium text-white text-xs sm:text-base transition hover:bg-pink-700\"
+                            @click="closeModal()"
+                            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 text-xl leading-none text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                            aria-label="Close modal"
                         >
-                            Browse files
+                            &times;
                         </button>
-
-                        <input
-                            x-ref="fileInput"
-                            type="file"
-                            multiple
-                            accept="image/jpeg,image/jpg,image/png,image/webp"
-                            class="hidden"
-                            @change="handleFileSelect($event)"
-                        >
                     </div>
 
-                    <template x-if="selectedFiles.length > 0">
-                        <div class="mt-4 rounded-xl border border-gray-200 bg-white p-4">
-                            <div class="mb-2 flex items-center justify-between">
-                                <p class="text-sm font-semibold text-gray-700">
-                                    Selected files (<span x-text="selectedFiles.length"></span>/5)
-                                </p>
+                    <div class="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1">
+                        <button
+                            type="button"
+                            @click="switchTab('files')"
+                            class="rounded-lg px-4 py-2.5 text-sm font-semibold transition sm:text-base"
+                            :class="activeTab === 'files' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                        >
+                            My Files
+                        </button>
+
+                        <button
+                            type="button"
+                            @click="switchTab('camera')"
+                            class="rounded-lg px-4 py-2.5 text-sm font-semibold transition sm:text-base"
+                            :class="activeTab === 'camera' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                        >
+                            Camera
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
+                    <div x-show="activeTab === 'files'" x-cloak x-transition class="space-y-4">
+                        <div
+                            class="flex min-h-52 flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 text-center transition sm:min-h-60 sm:p-8"
+                            :class="isDragging ? 'border-pink-400 bg-pink-50' : 'border-gray-300 bg-white'"
+                            @dragenter.prevent="isDragging = true"
+                            @dragover.prevent="isDragging = true"
+                            @dragleave.prevent="isDragging = false"
+                            @drop.prevent="handleDrop($event)"
+                        >
+                            <div class="mb-3 text-4xl sm:text-5xl">📁</div>
+                            <p class="text-base font-semibold text-gray-700 sm:text-lg">Drag and drop photos here</p>
+                            <p class="mt-1 text-xs text-gray-500 sm:text-sm">
+                                JPG, PNG, WEBP supported · min 2 photos · max 5 photos · max 10MB each
+                            </p>
+
+                            <button
+                                type="button"
+                                @click="openFilePicker()"
+                                class="mt-5 inline-flex items-center rounded-lg bg-pink-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-pink-700 sm:px-6 sm:text-base"
+                            >
+                                Browse files
+                            </button>
+
+                            <input
+                                x-ref="fileInput"
+                                type="file"
+                                multiple
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                                class="hidden"
+                                @change="handleFileSelect($event)"
+                            >
+                        </div>
+
+                        <template x-if="selectedFiles.length > 0">
+                            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                                <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <p class="text-sm font-semibold text-gray-700">
+                                        Selected files (<span x-text="selectedFiles.length"></span>/5)
+                                    </p>
+
+                                    <button
+                                        type="button"
+                                        @click="clearSelectedFiles()"
+                                        class="text-left text-xs font-semibold text-red-600 transition hover:text-red-700 sm:text-right"
+                                    >
+                                        Delete all
+                                    </button>
+                                </div>
+
+                                <div class="max-h-64 space-y-2 overflow-y-auto pr-1">
+                                    <template x-for="(file, index) in selectedFiles" :key="file.name + file.size + index">
+                                        <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2">
+                                            <div class="min-w-0">
+                                                <p class="truncate text-sm text-gray-700" x-text="file.name"></p>
+                                                <p class="text-xs text-gray-500" x-text="formatFileSize(file.size)"></p>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                @click="removeSelectedFile(index)"
+                                                class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 transition hover:bg-red-50"
+                                                aria-label="Delete selected photo"
+                                            >
+                                                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div x-show="activeTab === 'camera'" x-cloak x-transition class="space-y-4">
+                        <div class="rounded-xl border border-gray-200 bg-white p-4">
+                            <video x-ref="video" autoplay playsinline muted class="max-h-72 w-full rounded-lg bg-gray-200 object-cover"></video>
+                            <canvas x-ref="canvas" class="hidden"></canvas>
+
+                            <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                                <button
+                                    type="button"
+                                    @click="startCamera()"
+                                    class="w-full rounded-lg bg-pink-100 px-6 py-2.5 font-medium text-pink-700 transition hover:bg-pink-200 sm:w-auto"
+                                >
+                                    Start camera
+                                </button>
 
                                 <button
                                     type="button"
-                                    @click="clearSelectedFiles()"
-                                    class="text-xs font-semibold text-red-600 hover:text-red-700"
+                                    @click="capturePhoto()"
+                                    class="w-full rounded-lg bg-pink-600 px-6 py-2.5 font-medium text-white transition hover:bg-pink-700 sm:w-auto"
                                 >
-                                    Delete all
+                                    Capture
                                 </button>
                             </div>
 
-                            <div class="max-h-48 space-y-2 overflow-y-auto">
-                                <template x-for="(file, index) in selectedFiles" :key="file.name + file.size + index">
-                                    <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-100 px-3 py-2">
-                                        <div class="min-w-0">
-                                            <p class="truncate text-sm text-gray-700" x-text="file.name"></p>
-                                            <p class="text-xs text-gray-500" x-text="formatFileSize(file.size)"></p>
-                                        </div>
+                            <template x-if="capturedImage">
+                                <div class="mt-4 border-t border-gray-200 pt-4">
+                                    <p class="mb-2 text-sm font-semibold text-gray-700">Captured preview</p>
 
+                                    <div class="relative inline-block">
                                         <button
                                             type="button"
-                                            @click="removeSelectedFile(index)"
-                                            class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 transition hover:bg-red-50"
-                                            aria-label="Delete selected photo"
+                                            @click="clearCapturedPhoto()"
+                                            class="absolute right-1.5 top-1.5 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 transition hover:bg-red-50"
+                                            aria-label="Delete captured photo"
                                         >
                                             <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                                             </svg>
                                         </button>
-                                    </div>
-                                </template>
-                            </div>
 
-                            <div class="mt-4">
-                                <button
-                                    type="button"
-                                    @click="uploadFiles()"
-                                    :disabled="isUploading || selectedFiles.length === 0"
-                                    class="w-full rounded-lg bg-pink-600 px-6 py-3 font-semibold text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                                >
-                                    <span x-show="!isUploading" x-cloak>Upload selected photos</span>
-                                    <span x-show="isUploading" x-cloak>Uploading...</span>
-                                </button>
-                            </div>
+                                        <img :src="capturedImage" alt="Captured photo" class="h-28 w-28 rounded-lg border-2 border-pink-300 object-cover" loading="lazy" decoding="async">
+                                    </div>
+
+                                    <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                                        <button
+                                            type="button"
+                                            @click="addCapturedPhotoToSelection()"
+                                            class="w-full rounded-lg bg-pink-600 px-6 py-2.5 font-medium text-white transition hover:bg-pink-700 sm:w-auto"
+                                        >
+                                            Add captured photo
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            @click="clearCapturedPhoto()"
+                                            class="w-full rounded-lg border border-gray-200 px-6 py-2.5 font-medium text-gray-700 transition hover:bg-gray-50 sm:w-auto"
+                                        >
+                                            Remove capture
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
-                    </template>
+                    </div>
                 </div>
 
-                <div x-show="activeTab === 'camera'" x-cloak x-transition>
-                    <div class="rounded-xl border border-gray-200 bg-white p-4">
-                        <video x-ref="video" autoplay playsinline muted class="max-h-72 w-full rounded-lg bg-gray-200"></video>
-                        <canvas x-ref="canvas" class="hidden"></canvas>
+                <div class="border-t border-gray-200 bg-white px-4 py-4 sm:px-6">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-sm text-gray-600">
+                            Ready to upload: <span class="font-semibold text-gray-900" x-text="selectedFiles.length"></span> / 5 photos
+                        </p>
 
-                        <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                        <div class="flex flex-col gap-3 sm:flex-row">
                             <button
                                 type="button"
-                                @click="startCamera()"
-                                class="w-full rounded-lg bg-pink-100 px-6 py-2.5 font-medium text-pink-700 transition hover:bg-pink-200 sm:w-auto"
+                                @click="closeModal()"
+                                class="w-full rounded-lg border border-gray-200 px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto"
                             >
-                                Start camera
+                                Cancel
                             </button>
 
                             <button
                                 type="button"
-                                @click="capturePhoto()"
-                                class="w-full rounded-lg bg-pink-600 px-6 py-2.5 font-medium text-white transition hover:bg-pink-700 sm:w-auto"
+                                @click="uploadFiles()"
+                                :disabled="isUploading || selectedFiles.length < 2"
+                                class="w-full rounded-lg bg-pink-600 px-6 py-3 font-semibold text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
-                                Capture
+                                <span x-show="!isUploading" x-cloak>Upload selected photos</span>
+                                <span x-show="isUploading" x-cloak>Uploading...</span>
                             </button>
                         </div>
-
-                        <template x-if="capturedImage">
-                            <div class="mt-4">
-                                <p class="mb-2 text-sm font-semibold text-gray-700">Captured preview</p>
-
-                                <div class="relative inline-block">
-                                    <button
-                                        type="button"
-                                        @click="clearCapturedPhoto()"
-                                        class="absolute right-1.5 top-1.5 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 transition hover:bg-red-50"
-                                        aria-label="Delete captured photo"
-                                    >
-                                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-
-                                    <img :src="capturedImage" alt="Captured photo" class="h-28 w-28 rounded-lg border-2 border-pink-300 object-cover" loading="lazy" decoding="async">
-                                </div>
-
-                                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
-                                    <button
-                                        type="button"
-                                        @click="addCapturedPhotoToSelection()"
-                                        class="w-full rounded-lg bg-pink-600 px-6 py-2.5 font-medium text-white transition hover:bg-pink-700 sm:w-auto"
-                                    >
-                                        Add captured photo
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        @click="clearCapturedPhoto()"
-                                        class="w-full rounded-lg border border-gray-200 px-6 py-2.5 font-medium text-gray-700 transition hover:bg-gray-50 sm:w-auto"
-                                    >
-                                        Remove capture
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template x-if="selectedFiles.length > 0">
-                            <div class="mt-6 border-t border-gray-200 pt-4">
-                                <p class="mb-3 text-sm font-semibold text-gray-700">
-                                    Ready to upload: <span x-text="selectedFiles.length"></span> file(s)
-                                </p>
-
-                                <button
-                                    type="button"
-                                    @click="uploadFiles()"
-                                    :disabled="isUploading || selectedFiles.length === 0"
-                                    class="w-full rounded-lg bg-pink-600 px-6 py-3 font-semibold text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                                >
-                                    <span x-show="!isUploading" x-cloak>Upload selected photos</span>
-                                    <span x-show="isUploading" x-cloak>Uploading...</span>
-                                </button>
-                            </div>
-                        </template>
                     </div>
                 </div>
             </div>
