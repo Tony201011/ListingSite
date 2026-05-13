@@ -5,183 +5,238 @@
     $galleryPreviewWidth = 120;
 @endphp
 
-<div class="max-h-[75vh] overflow-y-auto px-1 pr-3">
-    <div class="space-y-6">
+<div class="pv-modal-content">
+    <div class="pv-section">
+        <div class="pv-section-header">
+            Provider Details
+        </div>
 
-        {{-- Provider Details --}}
-        <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div class="border-b border-gray-200 bg-gray-50 px-4 py-3">
-                <h3 class="text-sm font-semibold text-gray-900">
-                    Provider Details
-                </h3>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                        <tr>
-                            <th class="w-1/3 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                Provider Name
-                            </th>
-                            <td class="px-4 py-3 font-medium text-gray-900 break-words">
-                                {{ $providerProfile->name ?? '—' }}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th class="w-1/3 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                Profile Slug
-                            </th>
-                            <td class="px-4 py-3 text-gray-900 break-words">
-                                {{ $providerProfile->slug ?? '—' }}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th class="w-1/3 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                Provider Email
-                            </th>
-                            <td class="px-4 py-3 text-gray-900 break-all">
-                                {{ $providerProfile->user?->email ?? '—' }}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th class="w-1/3 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                Profile Status
-                            </th>
-                            <td class="px-4 py-3 text-gray-900">
-                                {{ $providerProfile->profile_status ? ucfirst($providerProfile->profile_status) : '—' }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        @if ($verification)
-            {{-- Verification Submission --}}
-            <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div class="border-b border-gray-200 bg-gray-50 px-4 py-3">
-                    <h3 class="text-sm font-semibold text-gray-900">
-                        Verification Submission
-                    </h3>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr>
-                                <th class="w-1/3 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                    Verification Status
-                                </th>
-                                <td class="px-4 py-3 font-semibold text-gray-900">
-                                    {{ $verification->status ? ucfirst($verification->status) : '—' }}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th class="w-1/3 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                    Submitted At
-                                </th>
-                                <td class="px-4 py-3 text-gray-900">
-                                    {{ $verification->submitted_at?->format('M d, Y h:i A') ?: '—' }}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th class="w-1/3 bg-gray-50 px-4 py-3 align-top text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                    Admin Notes
-                                </th>
-                                <td class="px-4 py-3 text-gray-900">
-                                    <div class="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50 p-3 text-gray-800">
-                                        {{ $verification->admin_note ?: 'No admin notes available.' }}
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            {{-- Uploaded Verification Images --}}
-            <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div class="border-b border-gray-200 bg-gray-50 px-4 py-3">
-                    <h3 class="text-sm font-semibold text-gray-900">
-                        Uploaded Verification Images
-                    </h3>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr>
-                                <th class="w-1/3 bg-gray-50 px-4 py-3 align-top text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                    Images
-                                </th>
-                                <td class="px-4 py-3">
-                                    <div class="photo-verification-gallery">
-                                        {!! \App\Support\PhotoVerificationGalleryRenderer::render(
-                                            $verification->photo_urls,
-                                            $galleryPreviewHeight,
-                                            $galleryPreviewWidth
-                                        ) !!}
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        @else
-            <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
-                No photo verification submission is available for this provider profile yet.
-            </div>
-        @endif
-
+        <table class="pv-table">
+            <tbody>
+                <tr>
+                    <th>Provider Name</th>
+                    <td>{{ $providerProfile->name ?? '—' }}</td>
+                </tr>
+                <tr>
+                    <th>Profile Slug</th>
+                    <td>{{ $providerProfile->slug ?? '—' }}</td>
+                </tr>
+                <tr>
+                    <th>Provider Email</th>
+                    <td>{{ $providerProfile->user?->email ?? '—' }}</td>
+                </tr>
+                <tr>
+                    <th>Profile Status</th>
+                    <td>
+                        <span class="pv-badge">
+                            {{ $providerProfile->profile_status ? ucfirst($providerProfile->profile_status) : '—' }}
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
+
+    @if ($verification)
+        <div class="pv-section">
+            <div class="pv-section-header">
+                Verification Submission
+            </div>
+
+            <table class="pv-table">
+                <tbody>
+                    <tr>
+                        <th>Verification Status</th>
+                        <td>
+                            <span class="pv-badge">
+                                {{ $verification->status ? ucfirst($verification->status) : '—' }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Submitted At</th>
+                        <td>{{ $verification->submitted_at?->format('M d, Y h:i A') ?: '—' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Admin Notes</th>
+                        <td>
+                            <div class="pv-note">
+                                {{ $verification->admin_note ?: 'No admin notes available.' }}
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pv-section">
+            <div class="pv-section-header">
+                Uploaded Verification Images
+            </div>
+
+            <div class="pv-images-wrap">
+                <div class="photo-verification-gallery">
+                    {!! \App\Support\PhotoVerificationGalleryRenderer::render(
+                        $verification->photo_urls,
+                        $galleryPreviewHeight,
+                        $galleryPreviewWidth
+                    ) !!}
+                </div>
+            </div>
+        </div>
+    @else
+        <div class="pv-empty">
+            No photo verification submission is available for this provider profile yet.
+        </div>
+    @endif
 </div>
 
 <style>
+    .pv-modal-content {
+        max-height: 72vh;
+        overflow-y: auto;
+        padding: 4px 12px 4px 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .pv-section {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .pv-section-header {
+        padding: 12px 16px;
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 13px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .pv-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .pv-table tr {
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .pv-table tr:last-child {
+        border-bottom: none;
+    }
+
+    .pv-table th {
+        width: 220px;
+        padding: 14px 16px;
+        background: #f9fafb;
+        text-align: left;
+        vertical-align: top;
+        font-size: 12px;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-right: 1px solid #e5e7eb;
+    }
+
+    .pv-table td {
+        padding: 14px 16px;
+        vertical-align: top;
+        font-size: 14px;
+        color: #111827;
+        word-break: break-word;
+    }
+
+    .pv-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        background: #ecfdf5;
+        color: #047857;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .pv-note {
+        min-height: 44px;
+        max-height: 140px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #f9fafb;
+        padding: 12px;
+        color: #374151;
+    }
+
+    .pv-images-wrap {
+        padding: 16px;
+    }
+
     .photo-verification-gallery,
     .photo-verification-gallery > div {
         display: flex !important;
         flex-wrap: wrap !important;
-        gap: 12px !important;
+        gap: 14px !important;
         align-items: flex-start !important;
         max-width: 100% !important;
-        overflow: hidden !important;
     }
 
-    .photo-verification-gallery img {
+    .photo-verification-gallery a,
+    .photo-verification-gallery img,
+    .photo-verification-gallery iframe,
+    .photo-verification-gallery embed,
+    .photo-verification-gallery object {
         width: 120px !important;
         height: 120px !important;
         min-width: 120px !important;
         max-width: 120px !important;
         min-height: 120px !important;
         max-height: 120px !important;
+        display: block !important;
+        overflow: hidden !important;
+        border-radius: 12px !important;
+    }
+
+    .photo-verification-gallery img {
         object-fit: cover !important;
-        border-radius: 10px !important;
         border: 1px solid #e5e7eb !important;
         background: #f9fafb !important;
-        display: block !important;
     }
 
-    .photo-verification-gallery a {
-        display: inline-block !important;
-        width: 120px !important;
-        height: 120px !important;
-        overflow: hidden !important;
-        border-radius: 10px !important;
+    .pv-empty {
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background: #f9fafb;
+        padding: 16px;
+        font-size: 14px;
+        color: #6b7280;
     }
 
-    .photo-verification-gallery iframe,
-    .photo-verification-gallery embed,
-    .photo-verification-gallery object {
-        width: 120px !important;
-        height: 120px !important;
-        max-width: 120px !important;
-        max-height: 120px !important;
-        overflow: hidden !important;
+    @media (max-width: 640px) {
+        .pv-table,
+        .pv-table tbody,
+        .pv-table tr,
+        .pv-table th,
+        .pv-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .pv-table th {
+            border-right: none;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .pv-table td {
+            border-bottom: 1px solid #e5e7eb;
+        }
     }
 </style>
