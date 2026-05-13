@@ -94,6 +94,7 @@ class UserResource extends Resource
                 'onlineUser',
                 'hideShowProfile',
                 'availableNow',
+                'photoVerification',
             ]);
     }
 
@@ -1243,7 +1244,7 @@ class UserResource extends Resource
                     ->label('Photo Verification')
                     ->icon('heroicon-o-camera')
                     ->color('gray')
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && $record->photoVerification()->exists())
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && $record->photoVerification->isNotEmpty())
                     ->modalHeading(fn (ProviderProfile $record): string => 'Photo Verification · '.($record->name ?? 'Provider'))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
