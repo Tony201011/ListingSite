@@ -29,7 +29,7 @@ class PhotoVerificationResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     protected static ?string $navigationLabel = 'Photo Verifications';
 
