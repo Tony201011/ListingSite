@@ -75,7 +75,7 @@ class PurchaseFeatured
                 'user_id' => $user->id,
                 'amount' => -$totalCost,
                 'type' => 'used',
-                'description' => "Activated {$tierLabel} for {$days} day(s) at {$creditCostPerDay} credit(s)/day",
+                'description' => "Activated {$tierLabel} for {$days} day(s) at {$creditCostPerDay} credits/day",
                 'reference_type' => ProviderProfile::class,
                 'reference_id' => $profile->id,
             ]);

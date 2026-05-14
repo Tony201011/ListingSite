@@ -156,7 +156,7 @@
                         </div>
                         <p class="mt-1 text-xs text-gray-500">
                             Total cost:
-                            <strong class="text-gray-900" x-text="(tier.costPerDay * tier.selectedDays) + ' credits'"></strong>
+                            <strong class="font-bold text-gray-900" x-text="(tier.costPerDay * tier.selectedDays) + ' credits'"></strong>
                             <template x-if="userCredits < tier.costPerDay * tier.selectedDays">
                                 <span class="ml-1 text-red-500">(insufficient balance)</span>
                             </template>
