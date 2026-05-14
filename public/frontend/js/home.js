@@ -1,23 +1,98 @@
 document.addEventListener('DOMContentLoaded', function () {
     const scrollTopButton = document.getElementById('smooth-scroll-top');
-    if (!scrollTopButton) {
-        return;
+    if (scrollTopButton) {
+        const toggleScrollTopButton = function () {
+            const shouldShow = window.scrollY > 300;
+            scrollTopButton.classList.toggle('opacity-0', !shouldShow);
+            scrollTopButton.classList.toggle('pointer-events-none', !shouldShow);
+        };
+
+        window.addEventListener('scroll', toggleScrollTopButton, { passive: true });
+
+        scrollTopButton.addEventListener('click', function () {
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+        });
+
+        toggleScrollTopButton();
     }
 
-    const toggleScrollTopButton = function () {
-        const shouldShow = window.scrollY > 300;
-        scrollTopButton.classList.toggle('opacity-0', !shouldShow);
-        scrollTopButton.classList.toggle('pointer-events-none', !shouldShow);
-    };
-
-    window.addEventListener('scroll', toggleScrollTopButton, { passive: true });
-
-    scrollTopButton.addEventListener('click', function () {
+    document.querySelectorAll('[data-spotlight-slider]').forEach(function (slider) {
+        const track = slider.querySelector('[data-slider-track]');
+        const prevButton = slider.parentElement?.querySelector('[data-slider-prev]');
+        const nextButton = slider.parentElement?.querySelector('[data-slider-next]');
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-    });
+        let resizeObserver = null;
+        let resizeFallbackAttached = false;
 
-    toggleScrollTopButton();
+        if (!track || !prevButton || !nextButton) {
+            return;
+        }
+
+        const getScrollAmount = function () {
+            const firstSlide = track.querySelector('.spotlight-slider-slide');
+
+            if (!firstSlide) {
+                return track.clientWidth;
+            }
+
+            const trackStyles = window.getComputedStyle(track);
+            const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || '0') || 0;
+
+            return firstSlide.getBoundingClientRect().width + gap;
+        };
+
+        const updateButtons = function () {
+            const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
+            const currentScrollLeft = Math.round(track.scrollLeft);
+
+            prevButton.disabled = currentScrollLeft <= 0;
+            nextButton.disabled = currentScrollLeft >= Math.round(maxScrollLeft);
+        };
+
+        const scrollSlider = function (direction) {
+            track.scrollBy({
+                left: getScrollAmount() * direction,
+                behavior: prefersReducedMotion ? 'auto' : 'smooth',
+            });
+        };
+
+        prevButton.addEventListener('click', function () {
+            scrollSlider(-1);
+        });
+
+        nextButton.addEventListener('click', function () {
+            scrollSlider(1);
+        });
+
+        track.addEventListener('scroll', updateButtons, { passive: true });
+        track.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                scrollSlider(-1);
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                scrollSlider(1);
+            }
+        });
+        if (typeof ResizeObserver === 'function') {
+            resizeObserver = new ResizeObserver(updateButtons);
+            resizeObserver.observe(track);
+        } else {
+            window.addEventListener('resize', updateButtons);
+            resizeFallbackAttached = true;
+        }
+
+        window.addEventListener('pagehide', function () {
+            resizeObserver?.disconnect();
+
+            if (resizeFallbackAttached) {
+                window.removeEventListener('resize', updateButtons);
+            }
+        }, { once: true });
+
+        updateButtons();
+    });
 });
 
 function escortSearch(config) {

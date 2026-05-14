@@ -185,15 +185,27 @@
         {{-- Home Banner: Paid spotlight profiles (national, $5/day) --}}
         @if(!empty($homeBannerProfiles) && count($homeBannerProfiles) > 0)
             <div class="mb-6">
-                <div class="mb-3 flex items-center gap-2">
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
                         <i class="fa-solid fa-crown text-[10px]"></i> Featured Spotlight
                     </span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="spotlight-slider-button" data-slider-prev aria-label="Previous featured spotlight profiles">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button type="button" class="spotlight-slider-button" data-slider-next aria-label="Next featured spotlight profiles">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                    @foreach($homeBannerProfiles as $profile)
-                        @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'home_banner'])
-                    @endforeach
+                <div class="spotlight-slider" data-spotlight-slider>
+                    <div class="spotlight-slider-track" data-slider-track tabindex="0">
+                        @foreach($homeBannerProfiles as $profile)
+                            <div class="spotlight-slider-slide">
+                                @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'home_banner'])
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
             <hr class="mb-6 border-gray-200">
@@ -202,15 +214,27 @@
         {{-- Local Banner: Paid state-specific spotlight profiles ($2/day) --}}
         @if(!empty($localBannerProfiles) && count($localBannerProfiles) > 0)
             <div class="mb-6">
-                <div class="mb-3 flex items-center gap-2">
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
                         <i class="fa-solid fa-location-dot text-[10px]"></i> Local Spotlight
                     </span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="spotlight-slider-button" data-slider-prev aria-label="Previous local spotlight profiles">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button type="button" class="spotlight-slider-button" data-slider-next aria-label="Next local spotlight profiles">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                    @foreach($localBannerProfiles as $profile)
-                        @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'local_banner'])
-                    @endforeach
+                <div class="spotlight-slider" data-spotlight-slider>
+                    <div class="spotlight-slider-track" data-slider-track tabindex="0">
+                        @foreach($localBannerProfiles as $profile)
+                            <div class="spotlight-slider-slide">
+                                @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'local_banner'])
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
             <hr class="mb-6 border-gray-200">
