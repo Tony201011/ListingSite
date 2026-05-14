@@ -272,7 +272,7 @@
                         {{ $user?->credits ?? 0 }} <span class="text-base font-normal text-gray-500">credits available</span>
                     </p>
                     <div class="space-y-2">
-                        <a href="{{ url('/purchase-credit') }}" class="block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">Purchase credits</a>
+                        <a href="{{ url('/purchase-credit') }}" class="block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">Add balance</a>
                         <a href="{{ url('/credit-history') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Credits history</a>
                         <a href="{{ url('/purchase-history') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Purchase history</a>
                         <a href="{{ url('/membership') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Membership plans</a>
