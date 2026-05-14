@@ -208,6 +208,9 @@ class EditUser extends EditRecord
                 : ($record->profile_text ?? ''),
             'is_verified' => $data['is_verified'] ?? $record->is_verified ?? false,
             'is_featured' => $data['is_featured'] ?? $record->is_featured ?? false,
+            'featured_expires_at' => array_key_exists('featured_expires_at', $data)
+                ? $data['featured_expires_at']
+                : $record->featured_expires_at,
             'profile_status' => $data['profile_status'] ?? $record->profile_status ?? 'pending',
         ]);
     }

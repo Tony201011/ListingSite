@@ -23,6 +23,7 @@ use App\Http\Controllers\Profile\AvailabilityController;
 use App\Http\Controllers\Profile\AvailableController;
 use App\Http\Controllers\Profile\BabeRankController;
 use App\Http\Controllers\Profile\BookingController;
+use App\Http\Controllers\Profile\FeaturedController;
 use App\Http\Controllers\Profile\ForgetController;
 use App\Http\Controllers\Profile\MyProfileController;
 use App\Http\Controllers\Profile\MyRateController;
@@ -256,6 +257,11 @@ Route::middleware('provider.auth')->group(function () {
             Route::get('/set-and-forget', [ForgetController::class, 'setForget'])->name('set-and-forget');
             Route::post('/set-and-forget', [ForgetController::class, 'save'])->name('set-and-forget.save');
             /*** forget end here */
+
+            /**** featured listing route start here */
+            Route::get('/featured', [FeaturedController::class, 'featured'])->name('featured');
+            Route::post('/featured/purchase', [FeaturedController::class, 'purchase'])->name('featured.purchase');
+            /**** featured listing route end here */
 
             /**** babe rank start here */
             Route::get('/my-babe-rank', [BabeRankController::class, 'myBabeRank'])->name('my-babe-rank');

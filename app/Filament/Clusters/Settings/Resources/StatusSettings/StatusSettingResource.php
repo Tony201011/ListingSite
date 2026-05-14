@@ -90,6 +90,28 @@ class StatusSettingResource extends Resource
                         ->helperText('How long (in minutes) each Available Now session lasts.'),
                 ])
                 ->columns(2),
+
+            Section::make('Featured Listing')
+                ->description('Configure the credit cost and duration for providers to activate Featured status on their listing.')
+                ->schema([
+                    TextInput::make('featured_credit_cost')
+                        ->label('Credit Cost')
+                        ->numeric()
+                        ->minValue(1)
+                        ->maxValue(10000)
+                        ->default(5)
+                        ->required()
+                        ->helperText('Number of credits required to activate or extend Featured status.'),
+                    TextInput::make('featured_duration_days')
+                        ->label('Duration (days)')
+                        ->numeric()
+                        ->minValue(1)
+                        ->maxValue(365)
+                        ->default(7)
+                        ->required()
+                        ->helperText('How many days each Featured activation lasts. Purchases stack by extending the existing expiry.'),
+                ])
+                ->columns(2),
         ]);
     }
 
@@ -105,6 +127,10 @@ class StatusSettingResource extends Resource
                     ->label('Available: Max Uses/Day'),
                 TextColumn::make('available_now_duration_minutes')
                     ->label('Available: Duration (min)'),
+                TextColumn::make('featured_credit_cost')
+                    ->label('Featured: Credit Cost'),
+                TextColumn::make('featured_duration_days')
+                    ->label('Featured: Duration (days)'),
             ])
             ->recordActions([
                 EditAction::make(),

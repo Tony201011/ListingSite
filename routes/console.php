@@ -22,3 +22,8 @@ Schedule::command('set-and-forget:process')
     ->everyMinute()
     ->withoutOverlapping()
     ->onOneServer();
+
+Schedule::command('featured:expire')
+    ->hourly()
+    ->withoutOverlapping()
+    ->onOneServer();
