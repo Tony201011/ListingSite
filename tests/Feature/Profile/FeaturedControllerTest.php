@@ -81,6 +81,7 @@ class FeaturedControllerTest extends TestCase
         $response->assertViewHas('isFeatured', false);
         $response->assertViewHas('creditCost', 5);
         $response->assertViewHas('userCredits', 10);
+        $response->assertViewHas('creditPackages');
     }
 
     public function test_purchase_featured_returns_success_json(): void
@@ -95,18 +96,19 @@ class FeaturedControllerTest extends TestCase
                 'is_featured' => true,
                 'expires_at' => '2026-05-21T00:00:00+00:00',
                 'credit_cost' => 5,
-                'duration_days' => 7,
-            ], 'Featured activated! Your listing is now featured for 7 days.'));
+                'credit_cost_per_day' => 5,
+                'duration_days' => 1,
+            ], 'Featured activated! Your listing is now boosted for 1 day(s).'));
 
         $this->app->instance(PurchaseFeatured::class, $purchaseFeatured);
 
-        $response = $this->actingAs($user)->postJson(route('featured.purchase'));
+        $response = $this->actingAs($user)->postJson(route('featured.purchase'), ['days' => 1]);
 
         $response->assertOk();
         $response->assertJson([
             'success' => true,
             'is_featured' => true,
-            'message' => 'Featured activated! Your listing is now featured for 7 days.',
+            'message' => 'Featured activated! Your listing is now boosted for 1 day(s).',
         ]);
     }
 

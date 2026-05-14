@@ -31,31 +31,34 @@ class PurchaseFeatured
      * Purchase or extend a featured ad tier for a provider profile.
      *
      * @param  string  $tier  One of the TIER_* constants (defaults to 'normal' for backward compatibility).
+     * @param  int  $days  Number of days to purchase (1 credit-per-day unit × days = total cost).
      */
-    public function execute(User $user, ProviderProfile $profile, string $tier = self::TIER_NORMAL): ActionResult
+    public function execute(User $user, ProviderProfile $profile, string $tier = self::TIER_NORMAL, int $days = 1): ActionResult
     {
         $settings = SiteSetting::getAdTierSettings();
-        $durationDays = $settings['featured_duration_days'];
 
-        [$creditCost, $expiryColumn, $tierLabel] = $this->resolveTier($tier, $settings);
+        [$creditCostPerDay, $expiryColumn, $tierLabel] = $this->resolveTier($tier, $settings);
 
-        if ($user->credits < $creditCost) {
+        $totalCost = $creditCostPerDay * $days;
+
+        if ($user->credits < $totalCost) {
             return new ActionResult(
                 false,
                 422,
-                "You need {$creditCost} credits to activate this ad. You currently have {$user->credits} credits.",
-                $this->buildPayload($profile, $tier, $creditCost, $durationDays, $expiryColumn),
+                "You need {$totalCost} credits to activate this ad for {$days} day(s). You currently have {$user->credits} credits.",
+                $this->buildPayload($profile, $tier, $creditCostPerDay, $days, $expiryColumn),
                 'domain'
             );
         }
 
-        DB::transaction(function () use ($user, $profile, $creditCost, $durationDays, $expiryColumn, $tier, $tierLabel): void {
+        DB::transaction(function () use ($user, $profile, $totalCost, $creditCostPerDay, $days, $expiryColumn, $tier, $tierLabel): void {
             $currentExpiry = $profile->{$expiryColumn};
             $isCurrent = $currentExpiry && $currentExpiry->isFuture();
 
             // Extend from current expiry when still active, otherwise start fresh
-            $baseDate = $isCurrent ? $currentExpiry : now();
-            $newExpiry = $baseDate->addDays($durationDays);
+            // Use copy() to avoid mutating the original Carbon instance on the profile
+            $baseDate = $isCurrent ? $currentExpiry->copy() : now();
+            $newExpiry = $baseDate->addDays($days);
 
             if ($tier === self::TIER_NORMAL) {
                 $profile->is_featured = true;
@@ -66,13 +69,13 @@ class PurchaseFeatured
 
             $profile->save();
 
-            $user->decrement('credits', $creditCost);
+            $user->decrement('credits', $totalCost);
 
             CreditLog::create([
                 'user_id' => $user->id,
-                'amount' => -$creditCost,
+                'amount' => -$totalCost,
                 'type' => 'used',
-                'description' => "Activated {$tierLabel} for {$durationDays} days",
+                'description' => "Activated {$tierLabel} for {$days} day(s) at {$creditCostPerDay} credit(s)/day",
                 'reference_type' => ProviderProfile::class,
                 'reference_id' => $profile->id,
             ]);
@@ -81,8 +84,8 @@ class PurchaseFeatured
         $profile->refresh();
 
         return ActionResult::success(
-            $this->buildPayload($profile, $tier, $creditCost, $durationDays, $expiryColumn),
-            "{$tierLabel} activated! Your listing is now boosted for {$durationDays} days."
+            $this->buildPayload($profile, $tier, $creditCostPerDay, $days, $expiryColumn),
+            "{$tierLabel} activated! Your listing is now boosted for {$days} day(s)."
         );
     }
 
@@ -117,7 +120,7 @@ class PurchaseFeatured
         };
     }
 
-    private function buildPayload(ProviderProfile $profile, string $tier, int $creditCost, int $durationDays, string $expiryColumn): array
+    private function buildPayload(ProviderProfile $profile, string $tier, int $creditCostPerDay, int $days, string $expiryColumn): array
     {
         $expiresAt = $tier === self::TIER_NORMAL
             ? $profile->featured_expires_at?->toIso8601String()
@@ -127,8 +130,9 @@ class PurchaseFeatured
             'tier' => $tier,
             'is_featured' => (bool) $profile->is_featured,
             'expires_at' => $expiresAt,
-            'credit_cost' => $creditCost,
-            'duration_days' => $durationDays,
+            'credit_cost' => $creditCostPerDay,
+            'credit_cost_per_day' => $creditCostPerDay,
+            'duration_days' => $days,
         ];
     }
 }
