@@ -163,9 +163,9 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/reset-password/update', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-Route::middleware('provider.auth')->group(function () {
-    // Profile picker — no active-profile session required
-    Route::get('/select-profile', [ProfileSwitchController::class, 'selectProfile'])->name('select-profile');
+    Route::middleware('provider.auth')->group(function () {
+        // Profile picker — no active-profile session required
+        Route::get('/select-profile', [ProfileSwitchController::class, 'selectProfile'])->name('select-profile');
 
     // Profile management — no active-profile session required
     Route::get('/my-profiles', [ProfileSwitchController::class, 'index'])->name('profiles.index');
@@ -180,11 +180,22 @@ Route::middleware('provider.auth')->group(function () {
     Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
     Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
     Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');
-    Route::get('/change-email', [ProviderRegisterController::class, 'changeEmail'])->name('change-email');
-    Route::post('/change-email', [ProviderRegisterController::class, 'updateEmail'])->name('change-email.update');
+        Route::get('/change-email', [ProviderRegisterController::class, 'changeEmail'])->name('change-email');
+        Route::post('/change-email', [ProviderRegisterController::class, 'updateEmail'])->name('change-email.update');
 
-    // All routes below require an active profile to be selected in session
-    Route::middleware('profile.selected')->group(function () {
+        // Balance / credit routes — available to authenticated frontend users
+        Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
+        Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
+        Route::post('/purchase-credit/create-intent', [PurchaseCreditController::class, 'createPaymentIntent'])->name('purchase-credit.create-intent');
+        Route::get('/purchase-credit/success', [PurchaseCreditController::class, 'checkoutSuccess'])->name('purchase-credit.success');
+        Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
+        Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
+        Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
+        Route::post('/purchase-history/{purchaseTransaction}/complaint', [PurchaseCreditController::class, 'storeComplaint'])->name('purchase-history.complaint');
+        Route::get('/payment-subscription', [PaymentSubscriptionController::class, 'index'])->name('payment-subscription');
+
+        // All routes below require an active profile to be selected in session
+        Route::middleware('profile.selected')->group(function () {
         Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
         Route::get('/edit-profile', [MyProfileController::class, 'editProfile'])->name('edit-profile');
         Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
@@ -288,17 +299,6 @@ Route::middleware('provider.auth')->group(function () {
             Route::get('/profile-setting', [ProfileSettingController::class, 'viewProfileSetting'])->name('profile-setting');
             /********** profile route end here */
 
-            /*** credit route start here */
-            Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
-            Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
-            Route::post('/purchase-credit/create-intent', [PurchaseCreditController::class, 'createPaymentIntent'])->name('purchase-credit.create-intent');
-            Route::get('/purchase-credit/success', [PurchaseCreditController::class, 'checkoutSuccess'])->name('purchase-credit.success');
-            Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
-            Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
-            Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
-            Route::post('/purchase-history/{purchaseTransaction}/complaint', [PurchaseCreditController::class, 'storeComplaint'])->name('purchase-history.complaint');
-            Route::get('/payment-subscription', [PaymentSubscriptionController::class, 'index'])->name('payment-subscription');
-            /*** credit route end here */
         });
     });
 });
