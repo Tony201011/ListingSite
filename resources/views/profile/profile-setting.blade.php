@@ -488,7 +488,7 @@
 
                         <div>
                             <label for="bk-message" class="mb-1 block text-sm font-medium text-gray-700">Message</label>
-                            <textarea id="bk-message" name="message" rows="4" maxlength="2000" placeholder="Any other comments" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">{{ old('message') }}</textarea>
+                            <textarea id="bk-message" name="message" rows="3" maxlength="2000" placeholder="Any other comments" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">{{ old('message') }}</textarea>
                         </div>
 
                         <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
