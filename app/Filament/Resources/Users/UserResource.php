@@ -1340,6 +1340,39 @@ class UserResource extends Resource
                     }),
 
                 ActionGroup::make([
+                    Action::make('view_ads_featured')
+                        ->label('View Ads / Featured')
+                        ->icon('heroicon-o-megaphone')
+                        ->color('info')
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                        ->modalHeading(fn (ProviderProfile $record): string => 'Ads & Featured · '.($record->name ?? 'Provider'))
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close')
+                        ->modalContent(function (ProviderProfile $record) {
+                            $dateFormat = 'd M Y, h:i A';
+                            $statusFromExpiry = static fn ($expiry): string => match (true) {
+                                $expiry === null => 'Not Set',
+                                $expiry->isFuture() => 'Active',
+                                default => 'Expired',
+                            };
+                            $formatExpiry = static fn ($expiry): string => $expiry?->format($dateFormat) ?? 'No expiry set';
+                            $featuredStatus = ! $record->is_featured
+                                ? 'Inactive'
+                                : ($record->featured_expires_at?->isPast() ? 'Expired' : 'Active');
+
+                            $rows = [
+                                ['tier' => 'Featured Listing', 'status' => $featuredStatus, 'expiry' => $formatExpiry($record->featured_expires_at)],
+                                ['tier' => 'Free Listing', 'status' => $statusFromExpiry($record->free_listing_expires_at), 'expiry' => $formatExpiry($record->free_listing_expires_at)],
+                                ['tier' => 'Home Featured', 'status' => $statusFromExpiry($record->home_featured_expires_at), 'expiry' => $formatExpiry($record->home_featured_expires_at)],
+                                ['tier' => 'Local Banner', 'status' => $statusFromExpiry($record->local_banner_expires_at), 'expiry' => $formatExpiry($record->local_banner_expires_at)],
+                                ['tier' => 'Home Banner', 'status' => $statusFromExpiry($record->home_banner_expires_at), 'expiry' => $formatExpiry($record->home_banner_expires_at)],
+                            ];
+
+                            return view('filament.modals.provider-ads-featured-status', [
+                                'rows' => $rows,
+                            ]);
+                        }),
+
                     Action::make('edit')
                         ->label('Edit')
                         ->icon('heroicon-o-pencil-square')
