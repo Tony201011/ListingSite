@@ -44,7 +44,7 @@ class PurchaseFeaturedTest extends TestCase
         $this->createSettings(creditCost: 5, durationDays: 7);
         [$user, $profile] = $this->createProvider(credits: 10);
 
-        $result = (new PurchaseFeatured)->execute($user, $profile);
+        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_NORMAL, 1);
 
         $this->assertTrue($result->isSuccess());
 
@@ -62,7 +62,7 @@ class PurchaseFeaturedTest extends TestCase
         $this->createSettings(creditCost: 5, durationDays: 7);
         [$user, $profile] = $this->createProvider(credits: 10);
 
-        (new PurchaseFeatured)->execute($user, $profile);
+        (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_NORMAL, 1);
 
         $log = CreditLog::where('user_id', $user->id)->first();
         $this->assertNotNull($log);
@@ -75,7 +75,7 @@ class PurchaseFeaturedTest extends TestCase
         $this->createSettings(creditCost: 5, durationDays: 7);
         [$user, $profile] = $this->createProvider(credits: 2);
 
-        $result = (new PurchaseFeatured)->execute($user, $profile);
+        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_NORMAL, 1);
 
         $this->assertFalse($result->isSuccess());
         $this->assertSame(422, $result->status());
@@ -90,19 +90,35 @@ class PurchaseFeaturedTest extends TestCase
     public function test_purchase_extends_existing_featured_expiry(): void
     {
         $this->createSettings(creditCost: 5, durationDays: 7);
-        [$user, $profile] = $this->createProvider(credits: 20);
+        [$user, $profile] = $this->createProvider(credits: 100);
 
         $existingExpiry = now()->addDays(3);
         $profile->is_featured = true;
-        $profile->featured_expires_at = $existingExpiry;
+        $profile->featured_expires_at = $existingExpiry->copy();
         $profile->save();
 
-        (new PurchaseFeatured)->execute($user, $profile);
+        (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_NORMAL, 7);
 
         $profile->refresh();
         $this->assertTrue($profile->is_featured);
         // Expiry should be extended by 7 days from the existing expiry (3 + 7 = 10 days from now)
-        $this->assertTrue($profile->featured_expires_at->isAfter($existingExpiry->addDays(6)));
+        // existingExpiry is ~now+3; expected new expiry is ~now+10; check it's after now+9
+        $this->assertTrue($profile->featured_expires_at->isAfter($existingExpiry->copy()->addDays(6)));
+    }
+
+    public function test_purchase_charges_cost_per_day_times_days(): void
+    {
+        $this->createSettings(creditCost: 5, durationDays: 7);
+        [$user, $profile] = $this->createProvider(credits: 100);
+
+        (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_NORMAL, 7);
+
+        $user->refresh();
+        // 5 credits/day × 7 days = 35 credits deducted
+        $this->assertSame(65, $user->credits);
+
+        $log = CreditLog::where('user_id', $user->id)->first();
+        $this->assertSame(-35, $log->amount);
     }
 
     public function test_get_featured_state_returns_correct_data(): void
@@ -149,7 +165,7 @@ class PurchaseFeaturedTest extends TestCase
         ]);
         [$user, $profile] = $this->createProvider(credits: 20);
 
-        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_HOME_BANNER);
+        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_HOME_BANNER, 1);
 
         $this->assertTrue($result->isSuccess());
 
@@ -167,7 +183,7 @@ class PurchaseFeaturedTest extends TestCase
         ]);
         [$user, $profile] = $this->createProvider(credits: 20);
 
-        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_HOME_FEATURED);
+        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_HOME_FEATURED, 1);
 
         $this->assertTrue($result->isSuccess());
 
@@ -184,7 +200,7 @@ class PurchaseFeaturedTest extends TestCase
         ]);
         [$user, $profile] = $this->createProvider(credits: 20);
 
-        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_LOCAL_BANNER);
+        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_LOCAL_BANNER, 1);
 
         $this->assertTrue($result->isSuccess());
 
