@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const prevButton = slider.parentElement?.querySelector('[data-slider-prev]');
         const nextButton = slider.parentElement?.querySelector('[data-slider-next]');
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const scrollEdgeTolerance = 1;
         let resizeObserver = null;
         let resizeFallbackAttached = false;
 
@@ -54,8 +55,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
             const currentScrollLeft = Math.round(track.scrollLeft);
 
-            prevButton.disabled = currentScrollLeft <= 1;
-            nextButton.disabled = currentScrollLeft >= Math.round(maxScrollLeft) - 1;
+            prevButton.disabled = currentScrollLeft <= scrollEdgeTolerance;
+            nextButton.disabled = currentScrollLeft >= Math.round(maxScrollLeft) - scrollEdgeTolerance;
         };
 
         const scrollSlider = function (direction) {
