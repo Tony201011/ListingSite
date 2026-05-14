@@ -28,6 +28,8 @@ class SiteSetting extends Model
         'online_status_duration_minutes',
         'available_now_max_uses',
         'available_now_duration_minutes',
+        'featured_credit_cost',
+        'featured_duration_days',
         'fatal_error_page_enabled',
         'fatal_error_default_message',
         'fatal_error_query_param',
@@ -52,6 +54,8 @@ class SiteSetting extends Model
         'online_status_duration_minutes' => 'integer',
         'available_now_max_uses' => 'integer',
         'available_now_duration_minutes' => 'integer',
+        'featured_credit_cost' => 'integer',
+        'featured_duration_days' => 'integer',
         'fatal_error_page_enabled' => 'boolean',
         'logging_enabled' => 'boolean',
         'max_video_upload_mb' => 'integer',
@@ -121,6 +125,7 @@ class SiteSetting extends Model
         static::saved(function (): void {
             cache()->forget('site_setting.home_page_records');
             cache()->forget('site_setting.status_settings');
+            cache()->forget('site_setting.featured_settings');
             cache()->forget('site_setting.logging_enabled');
             cache()->forget('site_setting.site_password_config');
             cache()->forget('site_setting.max_video_upload_mb');
@@ -168,6 +173,18 @@ class SiteSetting extends Model
     {
         return cache()->remember('site_setting.max_video_upload_mb', now()->addMinutes(10), function () {
             return (int) (static::first()?->max_video_upload_mb ?: 100);
+        });
+    }
+
+    public static function getFeaturedSettings(): array
+    {
+        return cache()->remember('site_setting.featured_settings', now()->addMinutes(10), function () {
+            $setting = static::first();
+
+            return [
+                'featured_credit_cost' => $setting?->featured_credit_cost ?? 5,
+                'featured_duration_days' => $setting?->featured_duration_days ?? 7,
+            ];
         });
     }
 }

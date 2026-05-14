@@ -18,6 +18,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
@@ -301,6 +302,11 @@ class UserResource extends Resource
                                     Toggle::make('is_featured')
                                         ->label('Featured')
                                         ->default(false),
+
+                                    DateTimePicker::make('featured_expires_at')
+                                        ->label('Featured Expires At')
+                                        ->nullable()
+                                        ->helperText('Leave blank to have no expiry. Set a date to automatically expire the featured status.'),
 
                                     Select::make('profile_status')
                                         ->label('Profile Status')
@@ -831,6 +837,11 @@ class UserResource extends Resource
                                             IconEntry::make('is_featured')
                                                 ->label('Featured')
                                                 ->boolean(),
+
+                                            TextEntry::make('featured_expires_at')
+                                                ->label('Featured Expires')
+                                                ->dateTime()
+                                                ->placeholder('Never / Not set'),
 
                                             TextEntry::make('description')
                                                 ->label('Description')
