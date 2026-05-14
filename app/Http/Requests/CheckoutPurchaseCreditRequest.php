@@ -8,6 +8,17 @@ use Illuminate\Validation\Rule;
 
 class CheckoutPurchaseCreditRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $lockedPackageId = $this->session()->get('purchase_credit_locked_package_id');
+
+        if ($lockedPackageId) {
+            $this->merge([
+                'package_id' => $lockedPackageId,
+            ]);
+        }
+    }
+
     public function authorize(): bool
     {
         return true;

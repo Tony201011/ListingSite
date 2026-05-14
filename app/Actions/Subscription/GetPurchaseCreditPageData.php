@@ -29,6 +29,11 @@ class GetPurchaseCreditPageData
             $selectedPackageId = $defaultPackageId;
         }
 
+        $selectedPackage = $packages->firstWhere('id', $selectedPackageId);
+        $lockedPackageId = request()->boolean('lock_package') && $selectedPackage
+            ? $selectedPackage->id
+            : null;
+
         $siteSetting = SiteSetting::first();
 
         return [
@@ -37,6 +42,8 @@ class GetPurchaseCreditPageData
             'pricingPage' => $pricingPage,
             'packages' => $packages,
             'selectedPackageId' => $selectedPackageId,
+            'selectedPackage' => $selectedPackage,
+            'lockedPackageId' => $lockedPackageId,
             'stripePublishableKey' => $siteSetting?->stripe_publishable_key,
             'stripeEnabled' => (bool) ($siteSetting?->stripe_enabled && $siteSetting?->stripe_publishable_key && $siteSetting?->stripe_secret_key),
         ];

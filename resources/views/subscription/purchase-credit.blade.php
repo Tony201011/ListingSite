@@ -11,6 +11,7 @@
 @endphp
 <div id="purchase-credit-flow" class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{
     selectedPackageId: {{ $selectedPackageId ?? 'null' }},
+    lockedPackageId: {{ $lockedPackageId ?? 'null' }},
     packages: {{ $packagesJson }},
     step: 'select',
     processing: false,
@@ -63,39 +64,53 @@
             <div x-show="step === 'select'" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
                 <form id="package-form" action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
                     @csrf
-
-                    <div class="rounded-xl border border-gray-100">
-                        @foreach($packages as $index => $package)
-                            <label class="flex cursor-pointer items-center justify-between gap-3 px-4 py-4 {{ $index < $packages->count() - 1 ? 'border-b border-gray-100' : '' }}">
-                                <div class="flex items-center gap-3">
-                                    <input
-                                        type="radio"
-                                        name="package_id"
-                                        value="{{ $package->id }}"
-                                        class="h-4 w-4 border-gray-300 text-[#e04ecb] focus:ring-pink-200"
-                                        @change="selectedPackageId = {{ $package->id }}"
-                                        {{ $package->id === $selectedPackageId ? 'checked' : '' }}
-                                     >
-                                     <div>
-                                        <p class="text-sm font-semibold text-gray-900">{{ $package->credits }} credits</p>
-                                        <p class="text-xs text-gray-700">Up to {{ $package->credits }} days online &mdash; AUD ${{ number_format($package->price, 2) }} (incl. GST)</p>
-                                        @if($package->description)
-                                            <p class="text-xs text-gray-500">{{ $package->description }}</p>
-                                        @elseif($package->name)
-                                            <p class="text-xs text-gray-500">{{ $package->name }}</p>
-                                        @endif
+                    @if($lockedPackageId && $selectedPackage)
+                        <input type="hidden" name="package_id" value="{{ $lockedPackageId }}">
+                        <div class="rounded-xl border border-pink-100 bg-pink-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-[#e04ecb]">Selected membership</p>
+                            <p class="mt-2 text-lg font-bold text-gray-900">{{ $selectedPackage->credits }} credits</p>
+                            <p class="mt-1 text-sm text-gray-700">Up to {{ $selectedPackage->credits }} days online &mdash; AUD ${{ number_format($selectedPackage->price, 2) }} (incl. GST)</p>
+                            @if($selectedPackage->description)
+                                <p class="mt-1 text-xs text-gray-500">{{ $selectedPackage->description }}</p>
+                            @elseif($selectedPackage->name)
+                                <p class="mt-1 text-xs text-gray-500">{{ $selectedPackage->name }}</p>
+                            @endif
+                            <p class="mt-3 text-xs text-gray-500">This membership selection is locked for the current checkout.</p>
+                        </div>
+                    @else
+                        <div class="rounded-xl border border-gray-100">
+                            @foreach($packages as $index => $package)
+                                <label class="flex cursor-pointer items-center justify-between gap-3 px-4 py-4 {{ $index < $packages->count() - 1 ? 'border-b border-gray-100' : '' }}">
+                                    <div class="flex items-center gap-3">
+                                        <input
+                                            type="radio"
+                                            name="package_id"
+                                            value="{{ $package->id }}"
+                                            class="h-4 w-4 border-gray-300 text-[#e04ecb] focus:ring-pink-200"
+                                            @change="selectedPackageId = {{ $package->id }}"
+                                            {{ $package->id === $selectedPackageId ? 'checked' : '' }}
+                                         >
+                                         <div>
+                                            <p class="text-sm font-semibold text-gray-900">{{ $package->credits }} credits</p>
+                                            <p class="text-xs text-gray-700">Up to {{ $package->credits }} days online &mdash; AUD ${{ number_format($package->price, 2) }} (incl. GST)</p>
+                                            @if($package->description)
+                                                <p class="text-xs text-gray-500">{{ $package->description }}</p>
+                                            @elseif($package->name)
+                                                <p class="text-xs text-gray-500">{{ $package->name }}</p>
+                                            @endif
+                                        </div>
                                     </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    @click="selectedPackageId = {{ $package->id }}; $el.closest('label').querySelector('input').checked = true"
-                                    class="rounded-lg border border-[#e04ecb] px-3 py-1.5 text-xs font-semibold text-[#e04ecb] transition hover:bg-pink-50"
-                                >
-                                    Select
-                                </button>
-                            </label>
-                        @endforeach
-                    </div>
+                                    <button
+                                        type="button"
+                                        @click="selectedPackageId = {{ $package->id }}; $el.closest('label').querySelector('input').checked = true"
+                                        class="rounded-lg border border-[#e04ecb] px-3 py-1.5 text-xs font-semibold text-[#e04ecb] transition hover:bg-pink-50"
+                                    >
+                                        Select
+                                    </button>
+                                </label>
+                            @endforeach
+                        </div>
+                    @endif
 
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div class="lg:col-span-2">
