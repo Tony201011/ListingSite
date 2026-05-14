@@ -20,7 +20,7 @@
                             <span
                                 @class([
                                     'inline-flex rounded-full px-2.5 py-1 text-xs font-medium',
-                                    'bg-green-100 text-green-700' => strcasecmp($row['status'], 'Active') === 0,
+                                    'bg-green-100 text-green-700' => strtolower($row['status']) === 'active',
                                     'bg-red-100 text-red-700' => in_array(strtolower($row['status']), ['inactive', 'expired'], true),
                                     'bg-gray-100 text-gray-700' => ! in_array(strtolower($row['status']), ['active', 'inactive', 'expired'], true),
                                 ])
