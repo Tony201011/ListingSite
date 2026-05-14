@@ -279,6 +279,22 @@
                     </div>
                 </div>
 
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
+                    <h3 class="mb-3 text-lg font-bold text-gray-800">LISTING BOOST STATUS</h3>
+                    <dl class="space-y-2 text-sm text-gray-700">
+                        @foreach (($listingBoostStatuses ?? []) as $status)
+                            <div class="flex items-start justify-between gap-3">
+                                <dt class="font-medium text-gray-600">{{ $status['label'] }}</dt>
+                                <dd class="text-right">{{ $status['value'] }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+
+                    <a href="{{ route('featured') }}" class="mt-4 block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">
+                        Set & purchase boosts
+                    </a>
+                </div>
+
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">BABE RANK</h3>
                     <p class="mb-3 text-3xl font-bold text-gray-900">

@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\ProviderProfile;
 use App\Models\User;
+use Carbon\CarbonInterface;
 
 class GetMyProfilePageData
 {
@@ -60,6 +61,7 @@ class GetMyProfilePageData
             : null;
 
         $rankData = $this->calculateBabeRank->execute($profile);
+        $listingBoostStatuses = $this->buildListingBoostStatuses($profile);
 
         return [
             'user' => $user,
@@ -70,6 +72,46 @@ class GetMyProfilePageData
             'profileUrl' => $profileUrl,
             'shortUrlFull' => $shortUrlFull,
             'babeRank' => $rankData['rank'],
+            'listingBoostStatuses' => $listingBoostStatuses,
         ];
+    }
+
+    private function buildListingBoostStatuses(?ProviderProfile $profile): array
+    {
+        return [
+            [
+                'label' => 'Featured Expires',
+                'value' => $this->formatBoostStatus($profile?->featured_expires_at, 'Never / Not set', false),
+            ],
+            [
+                'label' => 'Free Listing Until',
+                'value' => $this->formatBoostStatus($profile?->free_listing_expires_at, 'Expired / Not set'),
+            ],
+            [
+                'label' => 'Home Page Featured Until',
+                'value' => $this->formatBoostStatus($profile?->home_featured_expires_at, 'Not active'),
+            ],
+            [
+                'label' => 'Local Banner Until',
+                'value' => $this->formatBoostStatus($profile?->local_banner_expires_at, 'Not active'),
+            ],
+            [
+                'label' => 'Home Banner Until',
+                'value' => $this->formatBoostStatus($profile?->home_banner_expires_at, 'Not active'),
+            ],
+        ];
+    }
+
+    private function formatBoostStatus(?CarbonInterface $value, string $placeholder, bool $mustBeFuture = true): string
+    {
+        if (! $value) {
+            return $placeholder;
+        }
+
+        if ($mustBeFuture && ! $value->isFuture()) {
+            return $placeholder;
+        }
+
+        return $value->timezone(config('app.timezone'))->format('d M Y, h:i A');
     }
 }
