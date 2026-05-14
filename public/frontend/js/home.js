@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const track = slider.querySelector('[data-slider-track]');
         const prevButton = slider.parentElement?.querySelector('[data-slider-prev]');
         const nextButton = slider.parentElement?.querySelector('[data-slider-next]');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         if (!track || !prevButton || !nextButton) {
             return;
@@ -34,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const trackStyles = window.getComputedStyle(track);
-            const gap = Number.parseFloat(trackStyles.columnGap || trackStyles.gap || '0') || 0;
+            const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || '0') || 0;
 
             return firstSlide.getBoundingClientRect().width + gap;
         };
@@ -50,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const scrollSlider = function (direction) {
             track.scrollBy({
                 left: getScrollAmount() * direction,
-                behavior: 'smooth',
+                behavior: prefersReducedMotion ? 'auto' : 'smooth',
             });
         };
 
@@ -63,6 +64,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         track.addEventListener('scroll', updateButtons, { passive: true });
+        track.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                scrollSlider(-1);
+            }
+
+            if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                scrollSlider(1);
+            }
+        });
         window.addEventListener('resize', updateButtons);
 
         if (typeof ResizeObserver === 'function') {
