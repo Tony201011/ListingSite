@@ -125,6 +125,41 @@ class MyProfileControllerTest extends TestCase
         $response->assertViewHas('stepTwoCompleted', true);
     }
 
+    public function test_my_profile_view_shows_listing_boost_status_defaults_and_purchase_entry_point(): void
+    {
+        $user = $this->createProvider();
+
+        $getMyProfilePageData = Mockery::mock(GetMyProfilePageData::class);
+        $getMyProfilePageData->shouldReceive('execute')
+            ->once()
+            ->andReturn([
+                'user' => $user,
+                'profile' => $user->providerProfile,
+                'stepOneCompleted' => true,
+                'stepTwoCompleted' => true,
+                'stepPhotoVerificationCompleted' => false,
+                'profileUrl' => null,
+                'shortUrlFull' => null,
+                'babeRank' => 42,
+            ]);
+
+        $this->app->instance(GetMyProfilePageData::class, $getMyProfilePageData);
+
+        $response = $this->actingAsProvider($user)->get(route('my-profile'));
+
+        $response->assertOk();
+        $response->assertSee('LISTING BOOST STATUS');
+        $response->assertSee('Featured Expires');
+        $response->assertSee('Never / Not set');
+        $response->assertSee('Free Listing Until');
+        $response->assertSee('Expired / Not set');
+        $response->assertSee('Home Page Featured Until');
+        $response->assertSee('Local Banner Until');
+        $response->assertSee('Home Banner Until');
+        $response->assertSee('Not active');
+        $response->assertSee(route('featured'));
+    }
+
     public function test_edit_profile_view_is_returned_for_authenticated_provider(): void
     {
         $user = $this->createProvider();
