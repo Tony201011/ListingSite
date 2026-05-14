@@ -25,6 +25,7 @@ class SendAdminProviderEmailJob implements ShouldQueue
         public string $emailType,
         public ?string $temporaryPassword = null,
         public ?string $agentName = null,
+        public ?string $adminNote = null,
     ) {}
 
     public function handle(MailgunConfigService $mailgunConfig): void
@@ -100,6 +101,8 @@ class SendAdminProviderEmailJob implements ShouldQueue
             'created' => 'account_created',
             'blocked' => 'provider_blocked',
             'unblocked' => 'provider_unblocked',
+            'photo_verification_approved' => 'photo_verification_approved',
+            'photo_verification_rejected' => 'photo_verification_rejected',
             default => $this->emailType,
         };
     }
@@ -133,6 +136,26 @@ class SendAdminProviderEmailJob implements ShouldQueue
                     'email' => $user->email,
                 ],
                 'subject' => 'Provider Account Reactivated',
+            ],
+            'photo_verification_approved' => [
+                'view' => 'emails.photo-verification-approved',
+                'data' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'adminNote' => $this->adminNote,
+                    'dashboardUrl' => url('/profile/verify-photo'),
+                ],
+                'subject' => 'Photo Verification Approved',
+            ],
+            'photo_verification_rejected' => [
+                'view' => 'emails.photo-verification-rejected',
+                'data' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'adminNote' => $this->adminNote,
+                    'dashboardUrl' => url('/profile/verify-photo'),
+                ],
+                'subject' => 'Photo Verification Rejected',
             ],
         };
     }
