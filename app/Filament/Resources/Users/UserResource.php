@@ -1359,13 +1359,43 @@ class UserResource extends Resource
                             $featuredStatus = ! $record->is_featured
                                 ? 'Inactive'
                                 : ($record->featured_expires_at?->isPast() ? 'Expired' : 'Active');
+                            $statusBadgeClass = static fn (string $status): string => match (strtolower($status)) {
+                                'active' => 'bg-green-100 text-green-700',
+                                'inactive', 'expired' => 'bg-red-100 text-red-700',
+                                default => 'bg-gray-100 text-gray-700',
+                            };
 
                             $rows = [
-                                ['tier' => 'Featured Listing', 'status' => $featuredStatus, 'expiry' => $formatExpiry($record->featured_expires_at)],
-                                ['tier' => 'Free Listing', 'status' => $statusFromExpiry($record->free_listing_expires_at), 'expiry' => $formatExpiry($record->free_listing_expires_at)],
-                                ['tier' => 'Home Featured', 'status' => $statusFromExpiry($record->home_featured_expires_at), 'expiry' => $formatExpiry($record->home_featured_expires_at)],
-                                ['tier' => 'Local Banner', 'status' => $statusFromExpiry($record->local_banner_expires_at), 'expiry' => $formatExpiry($record->local_banner_expires_at)],
-                                ['tier' => 'Home Banner', 'status' => $statusFromExpiry($record->home_banner_expires_at), 'expiry' => $formatExpiry($record->home_banner_expires_at)],
+                                [
+                                    'tier' => 'Featured Listing',
+                                    'status' => $featuredStatus,
+                                    'status_class' => $statusBadgeClass($featuredStatus),
+                                    'expiry' => $formatExpiry($record->featured_expires_at),
+                                ],
+                                [
+                                    'tier' => 'Free Listing',
+                                    'status' => $statusFromExpiry($record->free_listing_expires_at),
+                                    'status_class' => $statusBadgeClass($statusFromExpiry($record->free_listing_expires_at)),
+                                    'expiry' => $formatExpiry($record->free_listing_expires_at),
+                                ],
+                                [
+                                    'tier' => 'Home Featured',
+                                    'status' => $statusFromExpiry($record->home_featured_expires_at),
+                                    'status_class' => $statusBadgeClass($statusFromExpiry($record->home_featured_expires_at)),
+                                    'expiry' => $formatExpiry($record->home_featured_expires_at),
+                                ],
+                                [
+                                    'tier' => 'Local Banner',
+                                    'status' => $statusFromExpiry($record->local_banner_expires_at),
+                                    'status_class' => $statusBadgeClass($statusFromExpiry($record->local_banner_expires_at)),
+                                    'expiry' => $formatExpiry($record->local_banner_expires_at),
+                                ],
+                                [
+                                    'tier' => 'Home Banner',
+                                    'status' => $statusFromExpiry($record->home_banner_expires_at),
+                                    'status_class' => $statusBadgeClass($statusFromExpiry($record->home_banner_expires_at)),
+                                    'expiry' => $formatExpiry($record->home_banner_expires_at),
+                                ],
                             ];
 
                             return view('filament.modals.provider-ads-featured-status', [
