@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Minimum movement (px) used only when slide measurements are unavailable.
+    const MIN_SPOTLIGHT_SCROLL_AMOUNT = 100;
+
     const scrollTopButton = document.getElementById('smooth-scroll-top');
     if (scrollTopButton) {
         const toggleScrollTopButton = function () {
@@ -22,6 +25,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const prevButton = slider.parentElement?.querySelector('[data-slider-prev]');
         const nextButton = slider.parentElement?.querySelector('[data-slider-next]');
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // 1px tolerance avoids boundary flicker from sub-pixel scroll rounding.
+        const scrollEdgeTolerance = 1;
         let resizeObserver = null;
         let resizeFallbackAttached = false;
 
@@ -33,21 +38,30 @@ document.addEventListener('DOMContentLoaded', function () {
             const firstSlide = track.querySelector('.spotlight-slider-slide');
 
             if (!firstSlide) {
-                return track.clientWidth;
+                return Math.max(track.clientWidth, MIN_SPOTLIGHT_SCROLL_AMOUNT);
             }
 
             const trackStyles = window.getComputedStyle(track);
             const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || '0') || 0;
+            const slideWidth = firstSlide.getBoundingClientRect().width;
+            const singleSlideSpan = slideWidth + gap;
 
-            return firstSlide.getBoundingClientRect().width + gap;
+            if (singleSlideSpan < 1) {
+                console.warn('Spotlight slider has invalid slide span; using minimal fallback.');
+                return Math.max(track.clientWidth, MIN_SPOTLIGHT_SCROLL_AMOUNT);
+            }
+
+            const slidesPerView = Math.max(1, Math.floor(track.clientWidth / singleSlideSpan));
+
+            return slidesPerView * singleSlideSpan;
         };
 
         const updateButtons = function () {
             const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
             const currentScrollLeft = Math.round(track.scrollLeft);
 
-            prevButton.disabled = currentScrollLeft <= 0;
-            nextButton.disabled = currentScrollLeft >= Math.round(maxScrollLeft);
+            prevButton.disabled = currentScrollLeft <= scrollEdgeTolerance;
+            nextButton.disabled = currentScrollLeft >= Math.round(maxScrollLeft) - scrollEdgeTolerance;
         };
 
         const scrollSlider = function (direction) {
