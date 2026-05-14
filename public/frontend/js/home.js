@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Minimum movement (px) used only when slide measurements are unavailable.
+    const MIN_SPOTLIGHT_SCROLL_AMOUNT = 100;
+
     const scrollTopButton = document.getElementById('smooth-scroll-top');
     if (scrollTopButton) {
         const toggleScrollTopButton = function () {
@@ -32,10 +35,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const getScrollAmount = function () {
             const firstSlide = track.querySelector('.spotlight-slider-slide');
-            const minimumScrollAmount = 100;
 
             if (!firstSlide) {
-                return Math.max(track.clientWidth, minimumScrollAmount);
+                return Math.max(track.clientWidth, MIN_SPOTLIGHT_SCROLL_AMOUNT);
             }
 
             const trackStyles = window.getComputedStyle(track);
@@ -43,9 +45,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const slideWidth = firstSlide.getBoundingClientRect().width;
             const singleSlideSpan = slideWidth + gap;
 
-            if (singleSlideSpan <= 0) {
+            if (singleSlideSpan < 1) {
                 console.warn('Spotlight slider has invalid slide span; using minimal fallback.');
-                return Math.max(track.clientWidth, minimumScrollAmount);
+                return Math.max(track.clientWidth, MIN_SPOTLIGHT_SCROLL_AMOUNT);
             }
 
             const slidesPerView = Math.max(1, Math.floor(track.clientWidth / singleSlideSpan));
