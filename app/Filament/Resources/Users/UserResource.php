@@ -1359,13 +1359,29 @@ class UserResource extends Resource
                             $featuredStatus = ! $record->is_featured
                                 ? 'Inactive'
                                 : ($record->featured_expires_at?->isPast() ? 'Expired' : 'Active');
+                            $getStatusBadgeClass = static fn (string $status): string => match (strtolower($status)) {
+                                'active' => 'bg-green-100 text-green-700',
+                                'inactive', 'expired' => 'bg-red-100 text-red-700',
+                                default => 'bg-gray-100 text-gray-700',
+                            };
+                            $buildRow = static fn (string $tier, string $status, string $expiry) => [
+                                'tier' => $tier,
+                                'status' => $status,
+                                'status_class' => $getStatusBadgeClass($status),
+                                'expiry' => $expiry,
+                            ];
+                            $buildRowFromExpiry = static fn (string $tier, $expiry) => $buildRow(
+                                $tier,
+                                $statusFromExpiry($expiry),
+                                $formatExpiry($expiry),
+                            );
 
                             $rows = [
-                                ['tier' => 'Featured Listing', 'status' => $featuredStatus, 'expiry' => $formatExpiry($record->featured_expires_at)],
-                                ['tier' => 'Free Listing', 'status' => $statusFromExpiry($record->free_listing_expires_at), 'expiry' => $formatExpiry($record->free_listing_expires_at)],
-                                ['tier' => 'Home Featured', 'status' => $statusFromExpiry($record->home_featured_expires_at), 'expiry' => $formatExpiry($record->home_featured_expires_at)],
-                                ['tier' => 'Local Banner', 'status' => $statusFromExpiry($record->local_banner_expires_at), 'expiry' => $formatExpiry($record->local_banner_expires_at)],
-                                ['tier' => 'Home Banner', 'status' => $statusFromExpiry($record->home_banner_expires_at), 'expiry' => $formatExpiry($record->home_banner_expires_at)],
+                                $buildRow('Featured Listing', $featuredStatus, $formatExpiry($record->featured_expires_at)),
+                                $buildRowFromExpiry('Free Listing', $record->free_listing_expires_at),
+                                $buildRowFromExpiry('Home Featured', $record->home_featured_expires_at),
+                                $buildRowFromExpiry('Local Banner', $record->local_banner_expires_at),
+                                $buildRowFromExpiry('Home Banner', $record->home_banner_expires_at),
                             ];
 
                             return view('filament.modals.provider-ads-featured-status', [
