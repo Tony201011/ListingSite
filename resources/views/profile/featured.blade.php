@@ -58,10 +58,10 @@
             <h1 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">Boost Your Profile</h1>
             <p class="text-gray-600">Choose one or more ad placements to increase your visibility. Each placement is purchased for <strong x-text="durationDays"></strong> days.</p>
 
-            <div class="mt-4 flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+            <div class="mt-4 flex flex-col items-start gap-2 rounded-xl bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
                 <span class="text-sm text-gray-500">Your credit balance:</span>
                 <span class="text-lg font-bold text-gray-900" x-text="userCredits + ' credits'"></span>
-                <a href="{{ route('purchase-credit') }}" class="ml-auto text-xs font-semibold text-pink-600 underline hover:text-pink-700">Buy credits</a>
+                <a href="{{ route('purchase-credit') }}" class="text-xs font-semibold text-pink-600 underline hover:text-pink-700 sm:ml-auto">Buy credits</a>
             </div>
         </div>
 
@@ -77,18 +77,18 @@
 
         <div class="grid gap-5 sm:grid-cols-2">
             <template x-for="(tier, index) in tiers" :key="tier.key">
-                <div class="relative rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+                <div class="relative rounded-2xl border border-gray-200 bg-white p-5 pt-11 shadow-sm transition hover:shadow-md sm:pt-5"
                      :class="tier.expiresAt && new Date(tier.expiresAt) > new Date() ? 'ring-2 ring-green-400' : ''">
                     {{-- Active badge --}}
                     <template x-if="tier.expiresAt && new Date(tier.expiresAt) > new Date()">
                         <span class="absolute right-3 top-3 rounded-full bg-green-100 px-2.5 py-0.5 text-[11px] font-semibold text-green-700">Active</span>
                     </template>
 
-                    <div class="mb-3 flex items-center gap-3">
+                    <div class="mb-3 flex items-start gap-3 sm:items-center">
                         <span class="text-2xl" x-text="tier.icon"></span>
-                        <div>
+                        <div class="min-w-0">
                             <h2 class="text-base font-bold text-gray-900" x-text="tier.label"></h2>
-                            <p class="text-xs text-gray-500" x-text="tier.subtitle"></p>
+                            <p class="text-xs text-gray-500 break-words" x-text="tier.subtitle"></p>
                         </div>
                     </div>
 
@@ -107,7 +107,7 @@
                         type="button"
                         @click="purchase(tier)"
                         :disabled="loading === tier.key || userCredits < tier.cost"
-                        class="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
+                        class="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-white transition"
                         :class="[
                             userCredits >= tier.cost ? 'bg-gradient-to-r ' + tier.colorClass + ' hover:opacity-90 active:scale-95' : 'cursor-not-allowed bg-gray-200 text-gray-400',
                             loading === tier.key ? 'opacity-70' : ''
