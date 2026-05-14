@@ -101,6 +101,7 @@ Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('c
 Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
 
 Route::get('/', [HomeController::class, 'index']);
+Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
 Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
@@ -259,8 +260,8 @@ Route::middleware('provider.auth')->group(function () {
             /*** forget end here */
 
             /**** featured listing route start here */
-            Route::get('/featured', [FeaturedController::class, 'featured'])->name('featured');
-            Route::post('/featured/purchase', [FeaturedController::class, 'purchase'])->name('featured.purchase');
+            Route::get('/featured-listing', [FeaturedController::class, 'featured'])->name('featured');
+            Route::post('/featured-listing/purchase', [FeaturedController::class, 'purchase'])->name('featured.purchase');
             /**** featured listing route end here */
 
             /**** babe rank start here */

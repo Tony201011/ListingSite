@@ -244,6 +244,26 @@ class BuildProfileFilterViewData
         );
     }
 
+    /**
+     * Return all currently active featured profiles grouped by tier,
+     * for the public /featured listing page.
+     */
+    public function getFeaturedListingsData(): array
+    {
+        $homeBannerProfiles = $this->queryBannerProfiles('home_banner_expires_at');
+        $homeFeaturedProfiles = $this->queryBannerProfiles('home_featured_expires_at');
+        $localBannerProfiles = $this->queryBannerProfiles('local_banner_expires_at');
+        $featuredProfiles = $this->queryBannerProfiles('featured_expires_at');
+
+        return compact(
+            'homeBannerProfiles',
+            'homeFeaturedProfiles',
+            'localBannerProfiles',
+            'featuredProfiles',
+        );
+    }
+
+
     private function resolveProfilesPerPage(): int
     {
         $value = (int) cache()->remember(
