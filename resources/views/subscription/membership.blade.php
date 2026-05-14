@@ -33,7 +33,7 @@
                         </div>
 
                         <div class="p-5">
-                            <a href="{{ route('purchase-credit', ['package_id' => $package->id]) }}" class="block w-full rounded-lg bg-[#e04ecb] px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-[#c13ab0]">Choose Plan</a>
+                            <a href="{{ route('purchase-credit', ['package_id' => $package->id, 'lock_package' => 1]) }}" class="block w-full rounded-lg bg-[#e04ecb] px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-[#c13ab0]">Choose Plan</a>
                         </div>
                     </div>
                 @endforeach

@@ -33,7 +33,15 @@ class PurchaseCreditController extends Controller
 
     public function purchaseCredit(): View
     {
-        return view('subscription.purchase-credit', $this->getPurchaseCreditPageData->execute());
+        $data = $this->getPurchaseCreditPageData->execute();
+
+        if ($data['lockedPackageId'] ?? null) {
+            request()->session()->put('purchase_credit_locked_package_id', $data['lockedPackageId']);
+        } else {
+            request()->session()->forget('purchase_credit_locked_package_id');
+        }
+
+        return view('subscription.purchase-credit', $data);
     }
 
     public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse

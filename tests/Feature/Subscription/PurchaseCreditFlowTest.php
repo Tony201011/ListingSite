@@ -228,6 +228,88 @@ class PurchaseCreditFlowTest extends TestCase
         $this->assertDatabaseCount('purchase_transactions', 0);
     }
 
+    public function test_membership_link_locks_selected_package_on_purchase_credit_page(): void
+    {
+        $user = $this->createProvider();
+        $package = $this->createActivePackage(['credits' => 60, 'price' => '24.99']);
+
+        $response = $this->actingAsProvider($user)
+            ->get('/purchase-credit?package_id='.$package->id.'&lock_package=1');
+
+        $response->assertOk();
+        $response->assertSee('This membership selection is locked for the current checkout.');
+        $response->assertSessionHas('purchase_credit_locked_package_id', $package->id);
+    }
+
+    public function test_locked_membership_package_cannot_be_changed_during_checkout(): void
+    {
+        $user = $this->createProvider();
+        $lockedPackage = $this->createActivePackage([
+            'name' => 'Locked Pack',
+            'credits' => 60,
+            'price' => '24.99',
+            'sort_order' => 1,
+        ]);
+        $otherPackage = $this->createActivePackage([
+            'name' => 'Other Pack',
+            'credits' => 10,
+            'price' => '4.99',
+            'sort_order' => 2,
+        ]);
+
+        $this->actingAsProvider($user)
+            ->get('/purchase-credit?package_id='.$lockedPackage->id.'&lock_package=1');
+
+        $response = $this->actingAsProvider($user)->post('/purchase-credit/checkout', [
+            'package_id' => $otherPackage->id,
+            'invoice_name' => 'Locked Invoice',
+        ]);
+
+        $response->assertRedirect('/purchase-history');
+        $response->assertSessionHas(
+            'checkout_success',
+            "Checkout started for {$lockedPackage->credits} credits (AUD $".
+            number_format((float) $lockedPackage->price, 2).
+            ") under invoice name 'Locked Invoice'."
+        );
+    }
+
+    public function test_plain_purchase_credit_page_clears_membership_package_lock(): void
+    {
+        $user = $this->createProvider();
+        $lockedPackage = $this->createActivePackage([
+            'name' => 'Locked Pack',
+            'credits' => 60,
+            'price' => '24.99',
+            'sort_order' => 1,
+        ]);
+        $otherPackage = $this->createActivePackage([
+            'name' => 'Other Pack',
+            'credits' => 10,
+            'price' => '4.99',
+            'sort_order' => 2,
+        ]);
+
+        $this->actingAsProvider($user)
+            ->get('/purchase-credit?package_id='.$lockedPackage->id.'&lock_package=1');
+
+        $this->actingAsProvider($user)->get('/purchase-credit')
+            ->assertSessionMissing('purchase_credit_locked_package_id');
+
+        $response = $this->actingAsProvider($user)->post('/purchase-credit/checkout', [
+            'package_id' => $otherPackage->id,
+            'invoice_name' => 'Unlocked Invoice',
+        ]);
+
+        $response->assertRedirect('/purchase-history');
+        $response->assertSessionHas(
+            'checkout_success',
+            "Checkout started for {$otherPackage->credits} credits (AUD $".
+            number_format((float) $otherPackage->price, 2).
+            ") under invoice name 'Unlocked Invoice'."
+        );
+    }
+
     // ---------------------------------------------------------------
     // Checkout success — transaction already paid by webhook
     // ---------------------------------------------------------------
