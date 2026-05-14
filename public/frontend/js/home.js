@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const prevButton = slider.parentElement?.querySelector('[data-slider-prev]');
         const nextButton = slider.parentElement?.querySelector('[data-slider-next]');
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // 1px tolerance avoids boundary flicker from sub-pixel scroll rounding.
         const scrollEdgeTolerance = 1;
         let resizeObserver = null;
         let resizeFallbackAttached = false;
