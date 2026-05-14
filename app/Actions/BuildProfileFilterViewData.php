@@ -210,6 +210,14 @@ class BuildProfileFilterViewData
         $hasPriceFilter = $minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE;
         $hasDistanceFilter = $distanceFilter !== null;
 
+        // Load home-banner profiles (national) — shown in dedicated banner section
+        $homeBannerProfiles = $this->queryBannerProfiles('home_banner_expires_at');
+
+        // Load local-banner profiles — shown when a state filter is active
+        $localBannerProfiles = $locationStateQuery !== '' || ($locationQuery !== '' && str_contains($locationQuery, ','))
+            ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery)
+            : collect();
+
         return compact(
             'filterGroups',
             'allFilterCategories',
@@ -231,6 +239,8 @@ class BuildProfileFilterViewData
             'userLat',
             'userLng',
             'escortNameQuery',
+            'homeBannerProfiles',
+            'localBannerProfiles',
         );
     }
 
@@ -243,6 +253,66 @@ class BuildProfileFilterViewData
         );
 
         return $value >= 1 ? $value : self::DEFAULT_PROFILES_PER_PAGE;
+    }
+
+    /**
+     * Query profiles that hold a specific ad-tier banner placement (home or local).
+     * These are shown in dedicated banner strips and do NOT require the profile to be online.
+     */
+    private function queryBannerProfiles(
+        string $expiryColumn,
+        ?string $locationStateQuery = null,
+        ?string $locationQuery = null
+    ): Collection {
+        $query = ProviderProfile::query()
+            ->whereNull('provider_profiles.deleted_at')
+            ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->whereNotNull("provider_profiles.{$expiryColumn}")
+            ->where("provider_profiles.{$expiryColumn}", '>', now())
+            ->with([
+                'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
+                'rates',
+                'onlineUser',
+                'availableNow',
+                'user',
+                'city',
+            ])
+            ->orderByDesc("provider_profiles.{$expiryColumn}");
+
+        // For local banner: restrict to the state being viewed
+        if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
+            $state = $locationStateQuery ?: '';
+            if ($state === '' && $locationQuery !== null && str_contains($locationQuery, ',')) {
+                $parts = explode(',', $locationQuery, 2);
+                $state = trim($parts[1] ?? '');
+            }
+
+            if ($state !== '') {
+                $normalizedState = $this->normalizeStateAbbreviation($state) ?? strtoupper($state);
+                $fullStateName = $this->resolveStateName($normalizedState);
+
+                $query->whereHas('state', function (Builder $q) use ($fullStateName): void {
+                    $q->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
+                });
+            }
+        }
+
+        $profiles = $query->get();
+
+        $serviceIds = $profiles
+            ->flatMap(fn (ProviderProfile $p) => array_filter((array) ($p->services_provided ?? []), 'is_numeric'))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->all();
+
+        $categoryNames = $serviceIds
+            ? Category::query()->whereIn('id', $serviceIds)->pluck('name', 'id')
+            : collect();
+
+        return $profiles->map(fn (ProviderProfile $p) => $this->transformProfile($p, $categoryNames));
     }
 
     private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
@@ -289,10 +359,16 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
-            ->whereHas('onlineUser', function (Builder $inner): void {
-                $inner->where('status', 'online')
-                    ->whereNotNull('online_expires_at')
-                    ->where('online_expires_at', '>', now());
+            ->where(function (Builder $q): void {
+                // Include profiles that are online OR have an active home_featured placement
+                $q->whereHas('onlineUser', function (Builder $inner): void {
+                    $inner->where('status', 'online')
+                        ->whereNotNull('online_expires_at')
+                        ->where('online_expires_at', '>', now());
+                })->orWhere(function (Builder $inner): void {
+                    $inner->whereNotNull('provider_profiles.home_featured_expires_at')
+                        ->where('provider_profiles.home_featured_expires_at', '>', now());
+                });
             })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
@@ -440,6 +516,7 @@ class BuildProfileFilterViewData
 
                 if (! $distanceOrderingApplied) {
                     $query->orderByDesc('popularity_score')
+                        ->orderByRaw('CASE WHEN provider_profiles.home_featured_expires_at > ? THEN 1 ELSE 0 END DESC', [now()->toDateTimeString()])
                         ->orderByDesc('provider_profiles.is_featured')
                         ->orderByDesc('provider_profiles.created_at');
                 }
@@ -448,13 +525,15 @@ class BuildProfileFilterViewData
             case 'new':
                 if (! $distanceOrderingApplied) {
                     $query->orderByDesc('provider_profiles.created_at')
+                        ->orderByRaw('CASE WHEN provider_profiles.home_featured_expires_at > ? THEN 1 ELSE 0 END DESC', [now()->toDateTimeString()])
                         ->orderByDesc('provider_profiles.is_featured');
                 }
                 break;
 
             default:
                 if (! $distanceOrderingApplied) {
-                    $query->orderByDesc('provider_profiles.is_featured')
+                    $query->orderByRaw('CASE WHEN provider_profiles.home_featured_expires_at > ? THEN 1 ELSE 0 END DESC', [now()->toDateTimeString()])
+                        ->orderByDesc('provider_profiles.is_featured')
                         ->orderByDesc('provider_profiles.created_at');
                 }
                 break;
@@ -560,14 +639,22 @@ class BuildProfileFilterViewData
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
-            ->join('online_users', 'online_users.provider_profile_id', '=', 'provider_profiles.id')
+            ->leftJoin('online_users', 'online_users.provider_profile_id', '=', 'provider_profiles.id')
             ->where(function ($q) {
                 $q->whereNull('hide_show_profiles.id')
                     ->orWhere('hide_show_profiles.status', 'show');
             })
-            ->where('online_users.status', 'online')
-            ->whereNotNull('online_users.online_expires_at')
-            ->where('online_users.online_expires_at', '>', now())
+            ->where(function ($q) {
+                // Include online profiles OR home-featured profiles
+                $q->where(function ($inner) {
+                    $inner->where('online_users.status', 'online')
+                        ->whereNotNull('online_users.online_expires_at')
+                        ->where('online_users.online_expires_at', '>', now());
+                })->orWhere(function ($inner) {
+                    $inner->whereNotNull('provider_profiles.home_featured_expires_at')
+                        ->where('provider_profiles.home_featured_expires_at', '>', now());
+                });
+            })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
             ->select('provider_profiles.id as provider_profile_id')
@@ -814,6 +901,9 @@ class BuildProfileFilterViewData
             'available_now' => $isAvailableNow,
             'verified' => $profile->is_verified,
             'featured' => (bool) $profile->is_featured,
+            'home_featured' => $profile->home_featured_expires_at && $profile->home_featured_expires_at->isFuture(),
+            'local_banner' => $profile->local_banner_expires_at && $profile->local_banner_expires_at->isFuture(),
+            'home_banner' => $profile->home_banner_expires_at && $profile->home_banner_expires_at->isFuture(),
             'image' => $imageUrl ?? '',
             'slug' => $profile->slug,
         ];

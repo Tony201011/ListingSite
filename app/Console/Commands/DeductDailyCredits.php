@@ -36,6 +36,11 @@ class DeductDailyCredits extends Command
                         ->whereColumn('hide_show_profiles.provider_profile_id', 'provider_profiles.id');
                 });
             })
+            // Skip profiles that are still within their free listing period
+            ->where(function ($query): void {
+                $query->whereNull('free_listing_expires_at')
+                    ->orWhere('free_listing_expires_at', '<=', now());
+            })
             ->distinct()
             ->pluck('user_id');
 

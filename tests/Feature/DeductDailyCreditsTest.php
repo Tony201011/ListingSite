@@ -113,4 +113,69 @@ class DeductDailyCreditsTest extends TestCase
 
         $this->assertSame(0, CreditLog::query()->where('user_id', $user->id)->count());
     }
+
+    public function test_it_does_not_deduct_during_free_listing_period(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'credits' => 100,
+        ]);
+
+        $profile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Free Trial User',
+            'slug' => 'free-trial-user-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->addDays(10),
+        ]);
+
+        HideShowProfile::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'show',
+        ]);
+
+        $this->artisan('credits:deduct-daily')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'credits' => 100,
+        ]);
+
+        $this->assertDatabaseMissing('credit_logs', [
+            'user_id' => $user->id,
+            'type' => 'daily_deduction',
+        ]);
+    }
+
+    public function test_it_deducts_after_free_listing_period_expires(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'credits' => 100,
+        ]);
+
+        $profile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Post Trial User',
+            'slug' => 'post-trial-user-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        HideShowProfile::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'show',
+        ]);
+
+        $this->artisan('credits:deduct-daily')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'credits' => 99,
+        ]);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Actions\GetFeaturedState;
 use App\Actions\PurchaseFeatured;
 use App\Models\CreditLog;
 use App\Models\ProviderProfile;
@@ -113,7 +114,7 @@ class PurchaseFeaturedTest extends TestCase
         $profile->featured_expires_at = now()->addDays(7);
         $profile->save();
 
-        $state = (new \App\Actions\GetFeaturedState)->execute($profile);
+        $state = (new GetFeaturedState)->execute($profile);
 
         $this->assertTrue($state['isFeatured']);
         $this->assertNotNull($state['expiresAt']);
@@ -130,7 +131,7 @@ class PurchaseFeaturedTest extends TestCase
         $profile->featured_expires_at = now()->subDay();
         $profile->save();
 
-        $state = (new \App\Actions\GetFeaturedState)->execute($profile);
+        $state = (new GetFeaturedState)->execute($profile);
 
         $this->assertFalse($state['isFeatured']);
         $this->assertNull($state['expiresAt']);
@@ -138,5 +139,74 @@ class PurchaseFeaturedTest extends TestCase
         $profile->refresh();
         $this->assertFalse((bool) $profile->is_featured);
         $this->assertNull($profile->featured_expires_at);
+    }
+
+    public function test_purchase_home_banner_tier_sets_correct_expiry_column(): void
+    {
+        SiteSetting::query()->create([
+            'featured_duration_days' => 7,
+            'home_banner_credit_cost' => 5,
+        ]);
+        [$user, $profile] = $this->createProvider(credits: 20);
+
+        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_HOME_BANNER);
+
+        $this->assertTrue($result->isSuccess());
+
+        $profile->refresh();
+        $this->assertNotNull($profile->home_banner_expires_at);
+        $this->assertTrue($profile->home_banner_expires_at->isFuture());
+        $this->assertFalse((bool) $profile->is_featured);
+    }
+
+    public function test_purchase_home_featured_tier_sets_correct_expiry_column(): void
+    {
+        SiteSetting::query()->create([
+            'featured_duration_days' => 7,
+            'home_featured_credit_cost' => 3,
+        ]);
+        [$user, $profile] = $this->createProvider(credits: 20);
+
+        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_HOME_FEATURED);
+
+        $this->assertTrue($result->isSuccess());
+
+        $profile->refresh();
+        $this->assertNotNull($profile->home_featured_expires_at);
+        $this->assertTrue($profile->home_featured_expires_at->isFuture());
+    }
+
+    public function test_purchase_local_banner_tier_sets_correct_expiry_column(): void
+    {
+        SiteSetting::query()->create([
+            'featured_duration_days' => 7,
+            'local_banner_credit_cost' => 2,
+        ]);
+        [$user, $profile] = $this->createProvider(credits: 20);
+
+        $result = (new PurchaseFeatured)->execute($user, $profile, PurchaseFeatured::TIER_LOCAL_BANNER);
+
+        $this->assertTrue($result->isSuccess());
+
+        $profile->refresh();
+        $this->assertNotNull($profile->local_banner_expires_at);
+        $this->assertTrue($profile->local_banner_expires_at->isFuture());
+    }
+
+    public function test_get_featured_state_includes_all_tier_expiries(): void
+    {
+        $this->createSettings(creditCost: 1, durationDays: 7);
+        [$user, $profile] = $this->createProvider(credits: 10);
+
+        $profile->home_featured_expires_at = now()->addDays(3);
+        $profile->local_banner_expires_at = now()->addDays(5);
+        $profile->home_banner_expires_at = now()->addDays(7);
+        $profile->save();
+
+        $state = (new GetFeaturedState)->execute($profile);
+
+        $this->assertNotNull($state['homeFeaturedExpiresAt']);
+        $this->assertNotNull($state['localBannerExpiresAt']);
+        $this->assertNotNull($state['homeBannerExpiresAt']);
     }
 }

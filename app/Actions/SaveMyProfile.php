@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Actions\Support\ActionResult;
 use App\Models\Category;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -31,6 +32,9 @@ class SaveMyProfile
                 $profile = new ProviderProfile([
                     'user_id' => $user->id,
                     'profile_status' => 'approved',
+                    'free_listing_expires_at' => now()->addDays(
+                        SiteSetting::getAdTierSettings()['free_listing_days']
+                    ),
                 ]);
             }
 

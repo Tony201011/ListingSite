@@ -113,6 +113,48 @@ class SiteSettingResource extends Resource
                 ->required()
                 ->helperText('Maximum video file size users can upload in megabytes. Default is 100 MB.'),
 
+            Section::make('Featured & Ad Tier Pricing')
+                ->description('Credit costs and durations for featured listings and sponsored ad placements.')
+                ->schema([
+                    TextInput::make('free_listing_days')
+                        ->label('Free Listing Days (new profiles)')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(365)
+                        ->default(21)
+                        ->helperText('Number of free days before the daily listing fee kicks in for new profiles. Default is 21.'),
+                    TextInput::make('featured_duration_days')
+                        ->label('Ad Purchase Duration (days)')
+                        ->numeric()
+                        ->minValue(1)
+                        ->default(7)
+                        ->helperText('How many days each ad tier purchase covers. Default is 7 days.'),
+                    TextInput::make('featured_credit_cost')
+                        ->label('Normal Featured – Credits per Purchase')
+                        ->numeric()
+                        ->minValue(1)
+                        ->default(1)
+                        ->helperText('Credits charged when a provider activates the Normal Featured badge ($1/day equivalent).'),
+                    TextInput::make('home_featured_credit_cost')
+                        ->label('Home Page Featured – Credits per Purchase')
+                        ->numeric()
+                        ->minValue(1)
+                        ->default(3)
+                        ->helperText('Credits charged for Home Page Featured placement ($3/day equivalent).'),
+                    TextInput::make('local_banner_credit_cost')
+                        ->label('Local Banner – Credits per Purchase')
+                        ->numeric()
+                        ->minValue(1)
+                        ->default(2)
+                        ->helperText('Credits charged for the Local (state) Banner ad placement ($2/day equivalent).'),
+                    TextInput::make('home_banner_credit_cost')
+                        ->label('Home Banner – Credits per Purchase')
+                        ->numeric()
+                        ->minValue(1)
+                        ->default(5)
+                        ->helperText('Credits charged for the national Home Page Banner ad placement ($5/day equivalent).'),
+                ]),
+
             Section::make('Payment Settings')
                 ->schema([
                     Select::make('stripe_mode')
