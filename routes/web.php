@@ -260,6 +260,7 @@ Route::middleware('provider.auth')->group(function () {
             /*** forget end here */
 
             /**** featured listing route start here */
+            // Route name kept as 'featured' for backward compatibility with existing blade/test references.
             Route::get('/featured-listing', [FeaturedController::class, 'featured'])->name('featured');
             Route::post('/featured-listing/purchase', [FeaturedController::class, 'purchase'])->name('featured.purchase');
             /**** featured listing route end here */

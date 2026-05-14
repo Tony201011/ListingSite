@@ -95,7 +95,7 @@
                 <div class="mb-8">
                     <div class="mb-3 flex items-center gap-2">
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
-                            <i class="fa-solid fa-badge-check text-[10px]"></i> Featured
+                            <i class="fa-solid fa-certificate text-[10px]"></i> Featured
                         </span>
                         <span class="text-xs text-gray-500">Featured badge profiles</span>
                     </div>
