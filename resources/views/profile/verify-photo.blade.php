@@ -406,7 +406,7 @@
 
                     <div x-show="activeTab === 'camera'" x-cloak x-transition class="space-y-4">
                         <div class="rounded-xl border border-gray-200 bg-white p-4">
-                            <video x-ref="video" autoplay playsinline muted class="max-h-72 w-full rounded-lg bg-gray-200 object-cover"></video>
+                            <video x-ref="video" autoplay playsinline muted class="aspect-video max-h-72 w-full rounded-lg bg-gray-200 object-contain"></video>
                             <canvas x-ref="canvas" class="hidden"></canvas>
 
                             <div class="mt-4 flex flex-col gap-3 sm:flex-row">
@@ -431,7 +431,7 @@
                                 <div class="mt-4 border-t border-gray-200 pt-4">
                                     <p class="mb-2 text-sm font-semibold text-gray-700">Captured preview</p>
 
-                                    <div class="relative inline-block">
+                                    <div class="relative w-full max-w-md overflow-hidden rounded-lg border border-gray-200 bg-white p-2">
                                         <button
                                             type="button"
                                             @click="clearCapturedPhoto()"
@@ -443,7 +443,7 @@
                                             </svg>
                                         </button>
 
-                                        <img :src="capturedImage" alt="Captured photo" class="h-28 w-28 rounded-lg border-2 border-pink-300 object-cover" loading="lazy" decoding="async">
+                                        <img :src="capturedImage" alt="Captured photo" class="max-h-72 w-full rounded-lg border-2 border-pink-300 object-contain" loading="lazy" decoding="async">
                                     </div>
 
                                     <div class="mt-4 flex flex-col gap-3 sm:flex-row">
