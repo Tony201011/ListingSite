@@ -281,37 +281,13 @@
 
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
                     <h3 class="mb-3 text-lg font-bold text-gray-800">LISTING BOOST STATUS</h3>
-
-                    @php
-                        $formatDate = static fn ($value) => optional($value)->timezone(config('app.timezone'))->format('d M Y, h:i A');
-                        $featuredExpires = $profile?->featured_expires_at;
-                        $freeListingExpires = $profile?->free_listing_expires_at;
-                        $homeFeaturedExpires = $profile?->home_featured_expires_at;
-                        $localBannerExpires = $profile?->local_banner_expires_at;
-                        $homeBannerExpires = $profile?->home_banner_expires_at;
-                    @endphp
-
                     <dl class="space-y-2 text-sm text-gray-700">
-                        <div class="flex items-start justify-between gap-3">
-                            <dt class="font-medium text-gray-600">Featured Expires</dt>
-                            <dd class="text-right">{{ $featuredExpires ? $formatDate($featuredExpires) : 'Never / Not set' }}</dd>
-                        </div>
-                        <div class="flex items-start justify-between gap-3">
-                            <dt class="font-medium text-gray-600">Free Listing Until</dt>
-                            <dd class="text-right">{{ $freeListingExpires && $freeListingExpires->isFuture() ? $formatDate($freeListingExpires) : 'Expired / Not set' }}</dd>
-                        </div>
-                        <div class="flex items-start justify-between gap-3">
-                            <dt class="font-medium text-gray-600">Home Page Featured Until</dt>
-                            <dd class="text-right">{{ $homeFeaturedExpires && $homeFeaturedExpires->isFuture() ? $formatDate($homeFeaturedExpires) : 'Not active' }}</dd>
-                        </div>
-                        <div class="flex items-start justify-between gap-3">
-                            <dt class="font-medium text-gray-600">Local Banner Until</dt>
-                            <dd class="text-right">{{ $localBannerExpires && $localBannerExpires->isFuture() ? $formatDate($localBannerExpires) : 'Not active' }}</dd>
-                        </div>
-                        <div class="flex items-start justify-between gap-3">
-                            <dt class="font-medium text-gray-600">Home Banner Until</dt>
-                            <dd class="text-right">{{ $homeBannerExpires && $homeBannerExpires->isFuture() ? $formatDate($homeBannerExpires) : 'Not active' }}</dd>
-                        </div>
+                        @foreach (($listingBoostStatuses ?? []) as $status)
+                            <div class="flex items-start justify-between gap-3">
+                                <dt class="font-medium text-gray-600">{{ $status['label'] }}</dt>
+                                <dd class="text-right">{{ $status['value'] }}</dd>
+                            </div>
+                        @endforeach
                     </dl>
 
                     <a href="{{ route('featured') }}" class="mt-4 block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">

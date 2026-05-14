@@ -141,6 +141,13 @@ class MyProfileControllerTest extends TestCase
                 'profileUrl' => null,
                 'shortUrlFull' => null,
                 'babeRank' => 42,
+                'listingBoostStatuses' => [
+                    ['label' => 'Featured Expires', 'value' => 'Never / Not set'],
+                    ['label' => 'Free Listing Until', 'value' => 'Expired / Not set'],
+                    ['label' => 'Home Page Featured Until', 'value' => 'Not active'],
+                    ['label' => 'Local Banner Until', 'value' => 'Not active'],
+                    ['label' => 'Home Banner Until', 'value' => 'Not active'],
+                ],
             ]);
 
         $this->app->instance(GetMyProfilePageData::class, $getMyProfilePageData);
