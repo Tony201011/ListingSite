@@ -41,7 +41,8 @@
 
 <style>
     .af-modal-content {
-        max-height: calc(100vh - 180px);
+        --af-modal-offset: 180px;
+        max-height: calc(100vh - var(--af-modal-offset));
         overflow-y: auto;
         padding: 4px 8px 12px;
         display: flex;
@@ -154,7 +155,7 @@
 
     @media (max-width: 640px) {
         .af-modal-content {
-            max-height: calc(100vh - 140px);
+            --af-modal-offset: 140px;
             padding-right: 4px;
         }
 
