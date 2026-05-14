@@ -42,7 +42,7 @@
                             </p>
 
                             <a href="{{ $dashboardUrl }}" style="display:inline-block;padding:12px 24px;background:linear-gradient(90deg,#e04ecb,#c13ab0);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;">
-                                View Verification Page
+                                Go to Dashboard
                             </a>
                         </td>
                     </tr>

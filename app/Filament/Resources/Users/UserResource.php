@@ -1307,7 +1307,7 @@ class UserResource extends Resource
                         $previousStatus = $verification->status;
                         $verification->update([
                             'status' => $data['status'],
-                            'admin_note' => $data['admin_note'] ?? null,
+                            'admin_note' => $data['admin_note'],
                         ]);
 
                         if ($data['status'] !== $previousStatus && in_array($data['status'], ['approved', 'rejected'])) {
@@ -1315,14 +1315,14 @@ class UserResource extends Resource
                                 ? 'photo_verification_approved'
                                 : 'photo_verification_rejected';
 
-                            $userId = $record->user_id ?? $verification->user_id;
+                            $userId = $verification->user_id;
                             if ($userId) {
                                 SendAdminProviderEmailJob::dispatch(
                                     $userId,
                                     $emailType,
                                     null,
                                     null,
-                                    $data['admin_note'] ?? null,
+                                    $data['admin_note'],
                                 );
                             }
                         }
