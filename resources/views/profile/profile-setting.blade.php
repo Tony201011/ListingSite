@@ -445,7 +445,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('booking.enquiry') }}" class="space-y-4">
+                    <form id="booking-enquiry-form" method="POST" action="{{ route('booking.enquiry') }}" class="space-y-4">
                         @csrf
                         <input type="hidden" name="user_id" value="{{ auth()->id() }}">
 
@@ -466,7 +466,7 @@
                             </div>
 
                             <div>
-                                <label for="bk-datetime" class="mb-1 block text-sm font-medium text-gray-700">Date &amp; Time</label>
+                                <label for="bk-datetime" class="mb-1 block text-sm font-medium text-gray-700">Date & Time</label>
                                 <input id="bk-datetime" type="datetime-local" name="datetime" value="{{ old('datetime') }}" min="{{ now()->format('Y-m-d\TH:i') }}" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
                             </div>
 
@@ -491,23 +491,27 @@
                             <textarea id="bk-message" name="message" rows="3" maxlength="2000" placeholder="Any other comments" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">{{ old('message') }}</textarea>
                         </div>
 
-                        <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
-                            <button
-                                type="button"
-                                @click="bookingOpen = false"
-                                class="w-full rounded-lg border border-gray-200 px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-100 sm:w-auto"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                type="submit"
-                                class="w-full rounded-lg bg-pink-600 px-6 py-3 font-semibold text-white transition hover:bg-pink-700 sm:w-auto"
-                            >
-                                Submit
-                            </button>
-                        </div>
                     </form>
+                </div>
+
+                <div class="border-t border-gray-200 bg-white px-4 py-4 sm:px-6">
+                    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                        <button
+                            type="button"
+                            @click="bookingOpen = false"
+                            class="w-full rounded-lg border border-gray-200 px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-100 sm:w-auto"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            form="booking-enquiry-form"
+                            class="w-full rounded-lg bg-pink-600 px-6 py-3 font-semibold text-white transition hover:bg-pink-700 sm:w-auto"
+                        >
+                            Submit
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
