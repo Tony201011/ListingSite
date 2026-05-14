@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const prevButton = slider.parentElement?.querySelector('[data-slider-prev]');
         const nextButton = slider.parentElement?.querySelector('[data-slider-next]');
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let resizeObserver = null;
+        let resizeFallbackAttached = false;
 
         if (!track || !prevButton || !nextButton) {
             return;
@@ -68,19 +70,26 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.key === 'ArrowLeft') {
                 event.preventDefault();
                 scrollSlider(-1);
-            }
-
-            if (event.key === 'ArrowRight') {
+            } else if (event.key === 'ArrowRight') {
                 event.preventDefault();
                 scrollSlider(1);
             }
         });
         if (typeof ResizeObserver === 'function') {
-            const resizeObserver = new ResizeObserver(updateButtons);
+            resizeObserver = new ResizeObserver(updateButtons);
             resizeObserver.observe(track);
         } else {
             window.addEventListener('resize', updateButtons);
+            resizeFallbackAttached = true;
         }
+
+        window.addEventListener('pagehide', function () {
+            resizeObserver?.disconnect();
+
+            if (resizeFallbackAttached) {
+                window.removeEventListener('resize', updateButtons);
+            }
+        }, { once: true });
 
         updateButtons();
     });
