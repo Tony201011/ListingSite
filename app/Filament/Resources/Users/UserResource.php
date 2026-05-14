@@ -1340,6 +1340,37 @@ class UserResource extends Resource
                     }),
 
                 ActionGroup::make([
+                    Action::make('view_ads_featured')
+                        ->label('View Ads / Featured')
+                        ->icon('heroicon-o-megaphone')
+                        ->color('info')
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                        ->modalHeading(fn (ProviderProfile $record): string => 'Ads & Featured · '.($record->name ?? 'Provider'))
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close')
+                        ->modalContent(function (ProviderProfile $record): HtmlString {
+                            $formatExpiry = static fn ($expiry): string => $expiry?->format('d M Y, h:i A') ?? 'No expiry set';
+
+                            $rows = [
+                                ['Featured Listing', $record->is_featured ? 'Active' : 'Inactive', $formatExpiry($record->featured_expires_at)],
+                                ['Free Listing', $record->free_listing_expires_at?->isFuture() ? 'Active' : 'Inactive', $formatExpiry($record->free_listing_expires_at)],
+                                ['Home Featured', $record->home_featured_expires_at?->isFuture() ? 'Active' : 'Inactive', $formatExpiry($record->home_featured_expires_at)],
+                                ['Local Banner', $record->local_banner_expires_at?->isFuture() ? 'Active' : 'Inactive', $formatExpiry($record->local_banner_expires_at)],
+                                ['Home Banner', $record->home_banner_expires_at?->isFuture() ? 'Active' : 'Inactive', $formatExpiry($record->home_banner_expires_at)],
+                            ];
+
+                            $html = '<div class="space-y-2"><p class="text-sm text-gray-600">Current ad/featured visibility status for this provider profile.</p>';
+                            $html .= '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th class="text-left p-2">Type</th><th class="text-left p-2">Status</th><th class="text-left p-2">Expiry</th></tr></thead><tbody>';
+
+                            foreach ($rows as [$tier, $status, $expiry]) {
+                                $html .= '<tr><td class="p-2">'.e($tier).'</td><td class="p-2">'.e($status).'</td><td class="p-2">'.e($expiry).'</td></tr>';
+                            }
+
+                            $html .= '</tbody></table></div></div>';
+
+                            return new HtmlString($html);
+                        }),
+
                     Action::make('edit')
                         ->label('Edit')
                         ->icon('heroicon-o-pencil-square')
