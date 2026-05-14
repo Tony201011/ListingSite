@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return Math.max(track.clientWidth, minimumScrollAmount);
             }
 
-            const slidesPerView = Math.max(1, Math.floor((track.clientWidth + gap) / singleSlideSpan));
+            const slidesPerView = Math.max(1, Math.floor(track.clientWidth / singleSlideSpan));
 
             return slidesPerView * singleSlideSpan;
         };
