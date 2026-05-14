@@ -137,7 +137,7 @@
         <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 text-sm text-gray-600 shadow-sm">
             <h3 class="mb-2 font-semibold text-gray-800">How it works</h3>
             <ul class="list-inside list-disc space-y-1">
-                <li><strong>Free for 21 days</strong> — new listings are free for the first 21 days.</li>
+                <li><strong>Free for {{ $settings['free_listing_days'] }} days</strong> — new listings are free for the first {{ $settings['free_listing_days'] }} days.</li>
                 <li><strong>1 credit / day</strong> after the free period to keep your listing visible.</li>
                 <li>Each ad placement is purchased for <strong x-text="durationDays"></strong> days. Purchasing again extends the active period.</li>
                 <li>Credits can be purchased on the <a href="{{ route('purchase-credit') }}" class="font-semibold text-pink-600 underline hover:text-pink-700">credits page</a>.</li>

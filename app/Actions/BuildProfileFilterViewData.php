@@ -315,6 +315,19 @@ class BuildProfileFilterViewData
         return $profiles->map(fn (ProviderProfile $p) => $this->transformProfile($p, $categoryNames));
     }
 
+    /**
+     * Apply home-featured tier ordering so that profiles with an active
+     * home_featured_expires_at appear before non-home-featured profiles.
+     * Works with both MySQL (NOW()) and SQLite (parameterized datetime string).
+     */
+    private function applyHomeFeaturedOrdering(Builder $query): void
+    {
+        $query->orderByRaw(
+            'CASE WHEN provider_profiles.home_featured_expires_at > ? THEN 1 ELSE 0 END DESC',
+            [now()->toDateTimeString()]
+        );
+    }
+
     private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
     {
         $map = [];
@@ -515,25 +528,25 @@ class BuildProfileFilterViewData
                 ]);
 
                 if (! $distanceOrderingApplied) {
-                    $query->orderByDesc('popularity_score')
-                        ->orderByRaw('CASE WHEN provider_profiles.home_featured_expires_at > ? THEN 1 ELSE 0 END DESC', [now()->toDateTimeString()])
-                        ->orderByDesc('provider_profiles.is_featured')
+                    $query->orderByDesc('popularity_score');
+                    $this->applyHomeFeaturedOrdering($query);
+                    $query->orderByDesc('provider_profiles.is_featured')
                         ->orderByDesc('provider_profiles.created_at');
                 }
                 break;
 
             case 'new':
                 if (! $distanceOrderingApplied) {
-                    $query->orderByDesc('provider_profiles.created_at')
-                        ->orderByRaw('CASE WHEN provider_profiles.home_featured_expires_at > ? THEN 1 ELSE 0 END DESC', [now()->toDateTimeString()])
-                        ->orderByDesc('provider_profiles.is_featured');
+                    $query->orderByDesc('provider_profiles.created_at');
+                    $this->applyHomeFeaturedOrdering($query);
+                    $query->orderByDesc('provider_profiles.is_featured');
                 }
                 break;
 
             default:
                 if (! $distanceOrderingApplied) {
-                    $query->orderByRaw('CASE WHEN provider_profiles.home_featured_expires_at > ? THEN 1 ELSE 0 END DESC', [now()->toDateTimeString()])
-                        ->orderByDesc('provider_profiles.is_featured')
+                    $this->applyHomeFeaturedOrdering($query);
+                    $query->orderByDesc('provider_profiles.is_featured')
                         ->orderByDesc('provider_profiles.created_at');
                 }
                 break;
