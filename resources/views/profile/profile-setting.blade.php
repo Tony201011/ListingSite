@@ -384,107 +384,132 @@
         x-show="bookingOpen"
         x-cloak
         x-transition.opacity
-        class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 overflow-y-auto bg-black/60 p-3 sm:p-4"
         @click.self="bookingOpen = false"
     >
-        <div
-            x-show="bookingOpen"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-            class="w-full max-w-xl bg-white rounded-2xl shadow-2xl p-5 sm:p-6 max-h-[90vh] overflow-y-auto"
-        >
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-gray-900">Email booking enquiry</h2>
-                <button
-                    type="button"
-                    @click="bookingOpen = false"
-                    class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
-                >
-                    &times;
-                </button>
+        <div class="flex min-h-full items-end justify-center sm:items-center">
+            <div
+                x-show="bookingOpen"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                class="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[90vh]"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Email booking enquiry"
+            >
+                <div class="border-b border-gray-200 px-4 py-4 sm:px-6">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <h2 class="text-lg font-bold text-gray-900 sm:text-xl">Email booking enquiry</h2>
+                            <p class="mt-1 text-sm text-gray-600">
+                                Send your preferred date, duration, and booking details.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            @click="bookingOpen = false"
+                            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 text-xl leading-none text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                            aria-label="Close modal"
+                        >
+                            &times;
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto bg-gray-50 px-4 py-4 sm:px-6 sm:py-5">
+                    @if (session('success'))
+                        <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <p class="mb-2 font-semibold">Please fix the following errors:</p>
+                            <ul class="list-disc space-y-1 pl-5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('booking.enquiry') }}" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label for="bk-name" class="mb-1 block text-sm font-medium text-gray-700">Name</label>
+                                <input id="bk-name" type="text" name="name" value="{{ old('name') }}" placeholder="Your name" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
+                            </div>
+
+                            <div>
+                                <label for="bk-email" class="mb-1 block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+                                <input id="bk-email" type="email" name="email" value="{{ old('email') }}" placeholder="Your email" required class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
+                            </div>
+
+                            <div>
+                                <label for="bk-phone" class="mb-1 block text-sm font-medium text-gray-700">Phone</label>
+                                <input id="bk-phone" type="tel" name="phone" value="{{ old('phone') }}" placeholder="Your phone" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
+                            </div>
+
+                            <div>
+                                <label for="bk-datetime" class="mb-1 block text-sm font-medium text-gray-700">Date &amp; Time</label>
+                                <input id="bk-datetime" type="datetime-local" name="datetime" value="{{ old('datetime') }}" min="{{ now()->format('Y-m-d\TH:i') }}" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
+                            </div>
+
+                            <div>
+                                <label for="bk-services" class="mb-1 block text-sm font-medium text-gray-700">Services</label>
+                                <input id="bk-services" type="text" name="services" value="{{ old('services') }}" placeholder="What services are you interested in" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
+                            </div>
+
+                            <div>
+                                <label for="bk-duration" class="mb-1 block text-sm font-medium text-gray-700">Duration</label>
+                                <input id="bk-duration" type="text" name="duration" value="{{ old('duration') }}" placeholder="How long would you like to book" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="bk-location" class="mb-1 block text-sm font-medium text-gray-700">Location</label>
+                            <input id="bk-location" type="text" name="location" value="{{ old('location') }}" placeholder="Where would you like to meet" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
+                        </div>
+
+                        <div>
+                            <label for="bk-message" class="mb-1 block text-sm font-medium text-gray-700">Message</label>
+                            <textarea id="bk-message" name="message" rows="4" maxlength="2000" placeholder="Any other comments" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">{{ old('message') }}</textarea>
+                        </div>
+
+                        <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                @click="bookingOpen = false"
+                                class="w-full rounded-lg border border-gray-200 px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-100 sm:w-auto"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="w-full rounded-lg bg-pink-600 px-6 py-3 font-semibold text-white transition hover:bg-pink-700 sm:w-auto"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            @if (session('success'))
-                <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            @if ($errors->any())
-                <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    <p class="font-semibold mb-2">Please fix the following errors:</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('booking.enquiry') }}" class="space-y-3">
-                @csrf
-                <input type="hidden" name="user_id" value="{{ auth()->id() }}">
-
-                <div>
-                    <label for="bk-name" class="mb-1 block text-sm font-medium text-gray-700">Name</label>
-                    <input id="bk-name" type="text" name="name" value="{{ old('name') }}" placeholder="Your name" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
-                </div>
-                <div>
-                    <label for="bk-email" class="mb-1 block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
-                    <input id="bk-email" type="email" name="email" value="{{ old('email') }}" placeholder="Your email" required class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
-                </div>
-                <div>
-                    <label for="bk-phone" class="mb-1 block text-sm font-medium text-gray-700">Phone</label>
-                    <input id="bk-phone" type="tel" name="phone" value="{{ old('phone') }}" placeholder="Your phone" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
-                </div>
-                <div>
-                    <label for="bk-datetime" class="mb-1 block text-sm font-medium text-gray-700">Date & Time</label>
-                    <input id="bk-datetime" type="datetime-local" name="datetime" value="{{ old('datetime') }}" min="{{ now()->format('Y-m-d\TH:i') }}" class="w-full bg-white text-gray-900 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
-                </div>
-                <div>
-                    <label for="bk-services" class="mb-1 block text-sm font-medium text-gray-700">Services</label>
-                    <input id="bk-services" type="text" name="services" value="{{ old('services') }}" placeholder="What services are you interested in" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
-                </div>
-                <div>
-                    <label for="bk-duration" class="mb-1 block text-sm font-medium text-gray-700">Duration</label>
-                    <input id="bk-duration" type="text" name="duration" value="{{ old('duration') }}" placeholder="How long would you like to book" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
-                </div>
-                <div>
-                    <label for="bk-location" class="mb-1 block text-sm font-medium text-gray-700">Location</label>
-                    <input id="bk-location" type="text" name="location" value="{{ old('location') }}" placeholder="Where would you like to meet" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">
-                </div>
-                <div>
-                    <label for="bk-message" class="mb-1 block text-sm font-medium text-gray-700">Message</label>
-                    <textarea id="bk-message" name="message" rows="3" maxlength="2000" placeholder="Any other comments" class="w-full bg-white text-gray-900 placeholder:text-gray-400 px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none">{{ old('message') }}</textarea>
-                </div>
-
-                <div class="pt-2 flex gap-3">
-                    <button
-                        type="submit"
-                        class="flex-1 px-4 py-2.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-semibold transition"
-                    >
-                        Submit
-                    </button>
-
-                    <button
-                        type="button"
-                        @click="bookingOpen = false"
-                        class="px-4 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
