@@ -1350,9 +1350,10 @@ class UserResource extends Resource
                         ->modalCancelActionLabel('Close')
                         ->modalContent(function (ProviderProfile $record): HtmlString {
                             $formatExpiry = static fn ($expiry): string => $expiry?->format('d M Y, h:i A') ?? 'No expiry set';
+                            $isFeaturedActive = $record->is_featured && (! $record->featured_expires_at || $record->featured_expires_at->isFuture());
 
                             $rows = [
-                                ['Featured Listing', $record->is_featured ? 'Active' : 'Inactive', $formatExpiry($record->featured_expires_at)],
+                                ['Featured Listing', $isFeaturedActive ? 'Active' : 'Inactive', $formatExpiry($record->featured_expires_at)],
                                 ['Free Listing', $record->free_listing_expires_at?->isFuture() ? 'Active' : 'Inactive', $formatExpiry($record->free_listing_expires_at)],
                                 ['Home Featured', $record->home_featured_expires_at?->isFuture() ? 'Active' : 'Inactive', $formatExpiry($record->home_featured_expires_at)],
                                 ['Local Banner', $record->local_banner_expires_at?->isFuture() ? 'Active' : 'Inactive', $formatExpiry($record->local_banner_expires_at)],
