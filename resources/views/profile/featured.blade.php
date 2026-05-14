@@ -3,113 +3,145 @@
 @section('content')
 <div
     class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8"
-    x-data="featuredPurchase({
-        initialIsFeatured: @js((bool) $isFeatured),
-        initialExpiresAt: @js($expiresAt ?? null),
+    x-data="adTierPurchase({
         initialUserCredits: @js((int) $userCredits),
-        creditCost: @js((int) $creditCost),
         durationDays: @js((int) $durationDays),
-        purchaseUrl: @js(route('featured.purchase'))
+        purchaseUrl: @js(route('featured.purchase')),
+        tiers: @js([
+            [
+                'key'        => 'home_banner',
+                'label'      => 'Home Page Banner',
+                'subtitle'   => 'National — shown in the banner strip at the top of the home page (all Australia)',
+                'cost'       => (int) $settings['home_banner_credit_cost'],
+                'expiresAt'  => $homeBannerExpiresAt,
+                'colorClass' => 'from-purple-500 to-indigo-600',
+                'badgeClass' => 'bg-indigo-100 text-indigo-700',
+                'icon'       => '🏆',
+            ],
+            [
+                'key'        => 'home_page',
+                'label'      => 'Home Page Featured',
+                'subtitle'   => 'Show at the top of the home page listing grid — visible even when offline',
+                'cost'       => (int) $settings['home_featured_credit_cost'],
+                'expiresAt'  => $homeFeaturedExpiresAt,
+                'colorClass' => 'from-pink-500 to-rose-500',
+                'badgeClass' => 'bg-pink-100 text-pink-700',
+                'icon'       => '🌟',
+            ],
+            [
+                'key'        => 'local_banner',
+                'label'      => 'Local Banner',
+                'subtitle'   => 'State-specific — shown in the banner strip on your local area page',
+                'cost'       => (int) $settings['local_banner_credit_cost'],
+                'expiresAt'  => $localBannerExpiresAt,
+                'colorClass' => 'from-amber-500 to-orange-500',
+                'badgeClass' => 'bg-amber-100 text-amber-700',
+                'icon'       => '📍',
+            ],
+            [
+                'key'        => 'normal',
+                'label'      => 'Featured Badge',
+                'subtitle'   => 'Featured star badge on your profile card in the listing grid',
+                'cost'       => (int) $settings['normal_featured_credit_cost'],
+                'expiresAt'  => $expiresAt,
+                'colorClass' => 'from-yellow-400 to-amber-500',
+                'badgeClass' => 'bg-yellow-100 text-yellow-700',
+                'icon'       => '⭐',
+            ],
+        ])
     })"
 >
-    <div class="mx-auto max-w-3xl">
+    <div class="mx-auto max-w-4xl">
         @include('profile.partials.back-to-settings')
 
-        <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
-            <div class="mb-4 flex items-center gap-3">
-                <div
-                    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
-                    :class="isFeatured ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                    <span x-text="isFeatured ? 'Featured Active' : 'Not Featured'"></span>
-                </div>
+        <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
+            <h1 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">Boost Your Profile</h1>
+            <p class="text-gray-600">Choose one or more ad placements to increase your visibility. Each placement is purchased for <strong x-text="durationDays"></strong> days.</p>
+
+            <div class="mt-4 flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+                <span class="text-sm text-gray-500">Your credit balance:</span>
+                <span class="text-lg font-bold text-gray-900" x-text="userCredits + ' credits'"></span>
+                <a href="{{ route('purchase-credit') }}" class="ml-auto text-xs font-semibold text-pink-600 underline hover:text-pink-700">Buy credits</a>
             </div>
+        </div>
 
-            <h1 class="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl">
-                Featured Listing
-            </h1>
-
-            <p class="mb-6 text-gray-600">
-                Boost your profile by activating Featured status. Featured listings appear prominently on the site and attract more visibility.
-            </p>
-
-            <div class="mb-6 grid gap-4 sm:grid-cols-3">
-                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                    <p class="text-sm font-medium text-gray-500">Credit cost</p>
-                    <p class="mt-2 text-2xl font-bold text-pink-600" x-text="creditCost + ' ' + (creditCost === 1 ? 'credit' : 'credits')"></p>
-                </div>
-
-                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                    <p class="text-sm font-medium text-gray-500">Duration</p>
-                    <p class="mt-2 text-2xl font-bold text-gray-900" x-text="durationDays + ' ' + (durationDays === 1 ? 'day' : 'days')"></p>
-                </div>
-
-                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                    <p class="text-sm font-medium text-gray-500">Your credits</p>
-                    <p class="mt-2 text-2xl font-bold text-gray-900" x-text="userCredits"></p>
-                </div>
+        {{-- Free listing notice --}}
+        @if($freeListingExpiresAt)
+            <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                <i class="fa-solid fa-gift mr-1 text-emerald-600"></i>
+                <strong>Free listing active!</strong> Your listing is free until
+                <strong>{{ \Carbon\Carbon::parse($freeListingExpiresAt)->format('d M Y') }}</strong>.
+                After that, 1 credit per day keeps your listing visible.
             </div>
+        @endif
 
-            <div
-                x-show="isFeatured && expiresAt"
-                x-cloak
-                x-transition
-                class="mb-6 rounded-2xl border border-yellow-100 bg-yellow-50 p-4"
-            >
-                <p class="text-sm font-medium text-yellow-700">Featured expires</p>
-                <p class="mt-1 text-base font-semibold text-yellow-900" x-text="formattedExpiry"></p>
-                <p class="mt-1 text-sm text-yellow-700">Purchasing again will extend your featured period by <span x-text="durationDays"></span> more days.</p>
-            </div>
+        <div class="grid gap-5 sm:grid-cols-2">
+            <template x-for="(tier, index) in tiers" :key="tier.key">
+                <div class="relative rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+                     :class="tier.expiresAt && new Date(tier.expiresAt) > new Date() ? 'ring-2 ring-green-400' : ''">
+                    {{-- Active badge --}}
+                    <template x-if="tier.expiresAt && new Date(tier.expiresAt) > new Date()">
+                        <span class="absolute right-3 top-3 rounded-full bg-green-100 px-2.5 py-0.5 text-[11px] font-semibold text-green-700">Active</span>
+                    </template>
 
-            <button
-                type="button"
-                @click="purchase()"
-                :disabled="loading || userCredits < creditCost"
-                class="flex w-full items-center justify-center gap-2 rounded-lg px-5 py-2.5 font-semibold transition sm:w-auto"
-                :class="userCredits >= creditCost
-                    ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-                    : 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-50'"
-            >
-                <span x-show="!loading" x-cloak>
-                    <span x-text="isFeatured ? 'Extend Featured' : 'Activate Featured'"></span>
-                    <span x-text="' (' + creditCost + ' ' + (creditCost === 1 ? 'credit' : 'credits') + ')'"></span>
-                </span>
+                    <div class="mb-3 flex items-center gap-3">
+                        <span class="text-2xl" x-text="tier.icon"></span>
+                        <div>
+                            <h2 class="text-base font-bold text-gray-900" x-text="tier.label"></h2>
+                            <p class="text-xs text-gray-500" x-text="tier.subtitle"></p>
+                        </div>
+                    </div>
 
-                <span x-show="loading" x-cloak class="flex items-center gap-2">
-                    <svg
-                        class="h-4 w-4 animate-spin"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
+                    <div class="mb-4 flex items-end gap-2">
+                        <span class="text-2xl font-extrabold text-gray-900" x-text="tier.cost"></span>
+                        <span class="mb-0.5 text-sm text-gray-500">credits / <span x-text="durationDays + ' days'"></span></span>
+                    </div>
+
+                    <template x-if="tier.expiresAt && new Date(tier.expiresAt) > new Date()">
+                        <p class="mb-3 text-xs text-green-700">
+                            Expires: <span x-text="new Date(tier.expiresAt).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })"></span>
+                        </p>
+                    </template>
+
+                    <button
+                        type="button"
+                        @click="purchase(tier)"
+                        :disabled="loading === tier.key || userCredits < tier.cost"
+                        class="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
+                        :class="[
+                            userCredits >= tier.cost ? 'bg-gradient-to-r ' + tier.colorClass + ' hover:opacity-90 active:scale-95' : 'cursor-not-allowed bg-gray-200 text-gray-400',
+                            loading === tier.key ? 'opacity-70' : ''
+                        ]"
                     >
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                </span>
-            </button>
+                        <template x-if="loading !== tier.key">
+                            <span x-text="(tier.expiresAt && new Date(tier.expiresAt) > new Date()) ? 'Extend (' + tier.cost + ' credits)' : 'Activate (' + tier.cost + ' credits)'"></span>
+                        </template>
+                        <template x-if="loading === tier.key">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Processing...
+                            </span>
+                        </template>
+                    </button>
 
-            <template x-if="message">
-                <div
-                    class="mt-4 text-sm"
-                    :class="messageType === 'success' ? 'text-green-600' : 'text-red-600'"
-                    x-text="message"
-                ></div>
+                    <template x-if="messages[tier.key]">
+                        <p class="mt-2 text-xs" :class="messageTypes[tier.key] === 'success' ? 'text-green-600' : 'text-red-600'" x-text="messages[tier.key]"></p>
+                    </template>
+                </div>
             </template>
+        </div>
 
-            <div
-                x-show="userCredits < creditCost"
-                x-cloak
-                x-transition
-                class="mt-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800"
-            >
-                You need <span class="font-semibold" x-text="creditCost"></span> credits to activate Featured. You currently have <span class="font-semibold" x-text="userCredits"></span>.
-                <a href="{{ route('purchase-credit') }}" class="ml-1 font-semibold text-pink-600 underline hover:text-pink-700">Purchase credits</a>
-            </div>
+        <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 text-sm text-gray-600 shadow-sm">
+            <h3 class="mb-2 font-semibold text-gray-800">How it works</h3>
+            <ul class="list-inside list-disc space-y-1">
+                <li><strong>Free for {{ $settings['free_listing_days'] }} days</strong> — new listings are free for the first {{ $settings['free_listing_days'] }} days.</li>
+                <li><strong>1 credit / day</strong> after the free period to keep your listing visible.</li>
+                <li>Each ad placement is purchased for <strong x-text="durationDays"></strong> days. Purchasing again extends the active period.</li>
+                <li>Credits can be purchased on the <a href="{{ route('purchase-credit') }}" class="font-semibold text-pink-600 underline hover:text-pink-700">credits page</a>.</li>
+            </ul>
         </div>
     </div>
 </div>

@@ -843,6 +843,26 @@ class UserResource extends Resource
                                                 ->dateTime()
                                                 ->placeholder('Never / Not set'),
 
+                                            TextEntry::make('free_listing_expires_at')
+                                                ->label('Free Listing Until')
+                                                ->dateTime()
+                                                ->placeholder('Expired / Not set'),
+
+                                            TextEntry::make('home_featured_expires_at')
+                                                ->label('Home Page Featured Until')
+                                                ->dateTime()
+                                                ->placeholder('Not active'),
+
+                                            TextEntry::make('local_banner_expires_at')
+                                                ->label('Local Banner Until')
+                                                ->dateTime()
+                                                ->placeholder('Not active'),
+
+                                            TextEntry::make('home_banner_expires_at')
+                                                ->label('Home Banner Until')
+                                                ->dateTime()
+                                                ->placeholder('Not active'),
+
                                             TextEntry::make('description')
                                                 ->label('Description')
                                                 ->placeholder('-')

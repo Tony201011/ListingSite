@@ -58,6 +58,18 @@ class FeaturedControllerTest extends TestCase
                 'expiresAt' => null,
                 'creditCost' => 5,
                 'durationDays' => 7,
+                'homeFeaturedExpiresAt' => null,
+                'localBannerExpiresAt' => null,
+                'homeBannerExpiresAt' => null,
+                'freeListingExpiresAt' => null,
+                'settings' => [
+                    'free_listing_days' => 21,
+                    'featured_duration_days' => 7,
+                    'normal_featured_credit_cost' => 1,
+                    'home_featured_credit_cost' => 3,
+                    'local_banner_credit_cost' => 2,
+                    'home_banner_credit_cost' => 5,
+                ],
             ]);
 
         $this->app->instance(GetFeaturedState::class, $getFeaturedState);

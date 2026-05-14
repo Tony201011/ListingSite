@@ -1,27 +1,18 @@
 document.addEventListener('alpine:init', () => {
-    Alpine.data('featuredPurchase', (config = {}) => ({
-        isFeatured: Boolean(config.initialIsFeatured),
-        expiresAt: config.initialExpiresAt,
+    Alpine.data('adTierPurchase', (config = {}) => ({
         userCredits: Number(config.initialUserCredits || 0),
-        creditCost: Number(config.creditCost || 0),
         durationDays: Number(config.durationDays || 7),
         purchaseUrl: config.purchaseUrl || '',
-        loading: false,
-        message: '',
-        messageType: 'success',
+        tiers: Array.isArray(config.tiers) ? config.tiers : [],
+        loading: null,      // key of tier currently loading
+        messages: {},       // { [tier.key]: string }
+        messageTypes: {},   // { [tier.key]: 'success' | 'error' }
 
-        get formattedExpiry() {
-            if (!this.expiresAt) return '';
-            const d = new Date(this.expiresAt);
-            return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) +
-                ' at ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-        },
+        async purchase(tier) {
+            if (this.loading || this.userCredits < tier.cost) return;
 
-        async purchase() {
-            if (this.loading || this.userCredits < this.creditCost) return;
-
-            this.loading = true;
-            this.message = '';
+            this.loading = tier.key;
+            delete this.messages[tier.key];
 
             try {
                 const response = await fetch(this.purchaseUrl, {
@@ -31,6 +22,7 @@ document.addEventListener('alpine:init', () => {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                     },
+                    body: JSON.stringify({ tier: tier.key }),
                 });
 
                 const data = await response.json();
@@ -39,25 +31,31 @@ document.addEventListener('alpine:init', () => {
                     throw new Error(data.message || 'Request failed');
                 }
 
-                this.isFeatured = Boolean(data.is_featured);
-                this.expiresAt = data.expires_at ?? null;
-                this.userCredits -= this.creditCost;
+                // Update expiry for the purchased tier
+                const updated = this.tiers.find(t => t.key === tier.key);
+                if (updated) {
+                    updated.expiresAt = data.expires_at ?? null;
+                }
 
-                this.showMessage(data.message || 'Featured activated successfully!');
+                this.userCredits -= tier.cost;
+                this.showMessage(tier.key, data.message || 'Activated successfully!', 'success');
             } catch (error) {
-                this.showMessage(error.message, 'error');
+                this.showMessage(tier.key, error.message, 'error');
             } finally {
-                this.loading = false;
+                this.loading = null;
             }
         },
 
-        showMessage(msg, type = 'success') {
-            this.message = msg;
-            this.messageType = type;
+        showMessage(key, msg, type = 'success') {
+            this.messages[key] = msg;
+            this.messageTypes[key] = type;
 
             setTimeout(() => {
-                this.message = '';
-            }, 5000);
+                delete this.messages[key];
+            }, 6000);
         },
     }));
+
+    // Legacy alias – kept for backward compatibility with any existing references
+    Alpine.data('featuredPurchase', (config = {}) => Alpine.data('adTierPurchase')(config));
 });

@@ -35,10 +35,16 @@ class FeaturedController extends Controller
     {
         $this->authorize('update', ProviderProfile::class);
 
+        $validated = $request->validate([
+            'tier' => ['nullable', 'string', 'in:'.implode(',', PurchaseFeatured::TIERS)],
+        ]);
+
+        $tier = $validated['tier'] ?? PurchaseFeatured::TIER_NORMAL;
+
         $user = Auth::user();
         $profile = $this->getActiveProviderProfile->execute($user);
 
-        $result = $this->purchaseFeatured->execute($user, $profile);
+        $result = $this->purchaseFeatured->execute($user, $profile, $tier);
 
         return response()->json($result->toPayload(), $result->status());
     }

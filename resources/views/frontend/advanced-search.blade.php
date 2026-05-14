@@ -573,7 +573,11 @@
                                     </div>
                                 @endif
 
-                                @if(!empty($profile['featured']))
+                                @if(!empty($profile['home_banner']) || !empty($profile['home_featured']))
+                                    <x-featured-badge variant="ribbon" position="diagonal" label="Featured" icon="crown" />
+                                @elseif(!empty($profile['local_banner']))
+                                    <x-featured-badge variant="ribbon" position="diagonal" label="Local" icon="star" />
+                                @elseif(!empty($profile['featured']))
                                     <x-featured-badge variant="ribbon" position="diagonal" />
                                 @endif
 
