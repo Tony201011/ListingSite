@@ -75,11 +75,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 scrollSlider(1);
             }
         });
-        window.addEventListener('resize', updateButtons);
-
         if (typeof ResizeObserver === 'function') {
             const resizeObserver = new ResizeObserver(updateButtons);
             resizeObserver.observe(track);
+        } else {
+            window.addEventListener('resize', updateButtons);
         }
 
         updateButtons();

@@ -34,7 +34,6 @@ html {
     -ms-overflow-style: none;
     overscroll-behavior-x: contain;
     touch-action: pan-x pinch-zoom;
-    scroll-behavior: smooth;
 }
 
 .spotlight-slider-track::-webkit-scrollbar {
@@ -70,6 +69,12 @@ html {
 .spotlight-slider-button:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .spotlight-slider-track {
+        scroll-behavior: smooth;
+    }
 }
 
 @media (max-width: 639px) {
