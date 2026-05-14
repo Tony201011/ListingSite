@@ -32,9 +32,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const getScrollAmount = function () {
             const firstSlide = track.querySelector('.spotlight-slider-slide');
+            const minimumScrollAmount = 100;
 
             if (!firstSlide) {
-                return track.clientWidth;
+                return Math.max(track.clientWidth, minimumScrollAmount);
             }
 
             const trackStyles = window.getComputedStyle(track);
@@ -43,7 +44,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const singleSlideSpan = slideWidth + gap;
 
             if (singleSlideSpan <= 0) {
-                return track.clientWidth;
+                console.warn('Spotlight slider has invalid slide span; using minimal fallback.');
+                return Math.max(track.clientWidth, minimumScrollAmount);
             }
 
             const slidesPerView = Math.max(1, Math.floor((track.clientWidth + gap) / singleSlideSpan));
