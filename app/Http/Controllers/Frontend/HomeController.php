@@ -44,6 +44,14 @@ class HomeController extends Controller
 
 
 
+    public function featuredListings(): View
+    {
+        $data = $this->buildProfileFilterViewData->getFeaturedListingsData();
+        $data['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
+
+        return view('frontend.featured', $data);
+    }
+
     public function favourites(): View
     {
         $favouriteSlugs = $this->favouriteBookmarkService->getFavourites();
