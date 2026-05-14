@@ -38,16 +38,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const trackStyles = window.getComputedStyle(track);
             const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || '0') || 0;
+            const slideWidth = firstSlide.getBoundingClientRect().width;
+            const singleSlideSpan = slideWidth + gap;
 
-            return firstSlide.getBoundingClientRect().width + gap;
+            if (singleSlideSpan <= 0) {
+                return track.clientWidth;
+            }
+
+            const slidesPerView = Math.max(1, Math.floor((track.clientWidth + gap) / singleSlideSpan));
+
+            return slidesPerView * singleSlideSpan;
         };
 
         const updateButtons = function () {
             const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
             const currentScrollLeft = Math.round(track.scrollLeft);
 
-            prevButton.disabled = currentScrollLeft <= 0;
-            nextButton.disabled = currentScrollLeft >= Math.round(maxScrollLeft);
+            prevButton.disabled = currentScrollLeft <= 1;
+            nextButton.disabled = currentScrollLeft >= Math.round(maxScrollLeft) - 1;
         };
 
         const scrollSlider = function (direction) {
