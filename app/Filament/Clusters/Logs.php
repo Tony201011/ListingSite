@@ -26,5 +26,4 @@ class Logs extends Cluster
         return Filament::getCurrentPanel()?->getId() === 'admin'
             && SiteSetting::isLoggingEnabled();
     }
-
 }

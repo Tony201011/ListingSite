@@ -263,7 +263,6 @@ class BuildProfileFilterViewData
         );
     }
 
-
     private function resolveProfilesPerPage(): int
     {
         $value = (int) cache()->remember(

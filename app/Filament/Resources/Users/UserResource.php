@@ -1341,75 +1341,74 @@ class UserResource extends Resource
                     }),
 
                 ActionGroup::make([
-              Action::make('view_ads_featured')
-    ->label('View Ads / Featured')
-    ->icon('heroicon-o-megaphone')
-    ->color('info')
-    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
-    ->modalHeading(fn (ProviderProfile $record): string => 'Ads & Featured · ' . ($record->name ?? 'Provider'))
-    ->modalSubmitAction(false)
-    ->modalCancelActionLabel('Close')
-    ->modalWidth('3xl')
-    ->modalContent(function (ProviderProfile $record) {
-        $dateFormat = 'd M Y, h:i A';
+                    Action::make('view_ads_featured')
+                        ->label('View Ads / Featured')
+                        ->icon('heroicon-o-megaphone')
+                        ->color('info')
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                        ->modalHeading(fn (ProviderProfile $record): string => 'Ads & Featured · '.($record->name ?? 'Provider'))
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close')
+                        ->modalWidth('3xl')
+                        ->modalContent(function (ProviderProfile $record) {
+                            $dateFormat = 'd M Y, h:i A';
 
-        $statusFromExpiry = fn ($expiry): string => match (true) {
-            $expiry === null => 'Not Set',
-            $expiry->isFuture() => 'Active',
-            default => 'Expired',
-        };
+                            $statusFromExpiry = fn ($expiry): string => match (true) {
+                                $expiry === null => 'Not Set',
+                                $expiry->isFuture() => 'Active',
+                                default => 'Expired',
+                            };
 
-        $formatExpiry = fn ($expiry): string =>
-            $expiry?->format($dateFormat) ?? 'No expiry set';
+                            $formatExpiry = fn ($expiry): string => $expiry?->format($dateFormat) ?? 'No expiry set';
 
-        $featuredStatus = ! $record->is_featured
-            ? 'Inactive'
-            : ($record->featured_expires_at?->isPast() ? 'Expired' : 'Active');
+                            $featuredStatus = ! $record->is_featured
+                                ? 'Inactive'
+                                : ($record->featured_expires_at?->isPast() ? 'Expired' : 'Active');
 
-        $rows = [
-            [
-                'tier' => 'Featured Listing',
-                'status' => $featuredStatus,
-                'expiry' => $formatExpiry($record->featured_expires_at),
-            ],
-            [
-                'tier' => 'Free Listing',
-                'status' => $statusFromExpiry($record->free_listing_expires_at),
-                'expiry' => $formatExpiry($record->free_listing_expires_at),
-            ],
-            [
-                'tier' => 'Home Featured',
-                'status' => $statusFromExpiry($record->home_featured_expires_at),
-                'expiry' => $formatExpiry($record->home_featured_expires_at),
-            ],
-            [
-                'tier' => 'Local Banner',
-                'status' => $statusFromExpiry($record->local_banner_expires_at),
-                'expiry' => $formatExpiry($record->local_banner_expires_at),
-            ],
-            [
-                'tier' => 'Home Banner',
-                'status' => $statusFromExpiry($record->home_banner_expires_at),
-                'expiry' => $formatExpiry($record->home_banner_expires_at),
-            ],
-        ];
+                            $rows = [
+                                [
+                                    'tier' => 'Featured Listing',
+                                    'status' => $featuredStatus,
+                                    'expiry' => $formatExpiry($record->featured_expires_at),
+                                ],
+                                [
+                                    'tier' => 'Free Listing',
+                                    'status' => $statusFromExpiry($record->free_listing_expires_at),
+                                    'expiry' => $formatExpiry($record->free_listing_expires_at),
+                                ],
+                                [
+                                    'tier' => 'Home Featured',
+                                    'status' => $statusFromExpiry($record->home_featured_expires_at),
+                                    'expiry' => $formatExpiry($record->home_featured_expires_at),
+                                ],
+                                [
+                                    'tier' => 'Local Banner',
+                                    'status' => $statusFromExpiry($record->local_banner_expires_at),
+                                    'expiry' => $formatExpiry($record->local_banner_expires_at),
+                                ],
+                                [
+                                    'tier' => 'Home Banner',
+                                    'status' => $statusFromExpiry($record->home_banner_expires_at),
+                                    'expiry' => $formatExpiry($record->home_banner_expires_at),
+                                ],
+                            ];
 
-        return view('filament.modals.provider-ads-featured-status', compact('rows'));
-    }),
+                            return view('filament.modals.provider-ads-featured-status', compact('rows'));
+                        }),
 
-                Action::make('wallet_summary')
-                    ->label('Wallet Summary')
-                    ->icon('heroicon-o-banknotes')
-                    ->color('success')
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
-                    ->modalHeading(fn (ProviderProfile $record): string => 'Wallet Summary · ' . ($record->name ?? 'Provider'))
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close')
-                    ->modalWidth('4xl')
-                    ->modalContent(fn (ProviderProfile $record) => view('filament.modals.wallet-spend-history', [
-                        'summary' => self::getWalletSpendSummaryForProfile($record),
-                        'history' => self::getWalletSpendHistoryForProfile($record),
-                    ])),
+                    Action::make('wallet_summary')
+                        ->label('Wallet Summary')
+                        ->icon('heroicon-o-banknotes')
+                        ->color('success')
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                        ->modalHeading(fn (ProviderProfile $record): string => 'Wallet Summary · '.($record->name ?? 'Provider'))
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close')
+                        ->modalWidth('4xl')
+                        ->modalContent(fn (ProviderProfile $record) => view('filament.modals.wallet-spend-history', [
+                            'summary' => self::getWalletSpendSummaryForProfile($record),
+                            'history' => self::getWalletSpendHistoryForProfile($record),
+                        ])),
 
                     Action::make('edit')
                         ->label('Edit')
@@ -1679,4 +1678,3 @@ class UserResource extends Resource
             ->all();
     }
 }
-

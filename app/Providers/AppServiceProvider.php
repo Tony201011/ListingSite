@@ -14,13 +14,15 @@ use App\Notifications\BrandedAgentResetPasswordNotification;
 use Filament\Auth\Notifications\ResetPassword as FilamentResetPasswordNotification;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Database\QueryException;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -141,7 +143,7 @@ class AppServiceProvider extends ServiceProvider
             if (! Schema::hasTable('smtp_settings')) {
                 return;
             }
-        } catch (\Illuminate\Database\QueryException|\PDOException) {
+        } catch (QueryException|\PDOException) {
             return;
         }
 
@@ -186,7 +188,7 @@ class AppServiceProvider extends ServiceProvider
             if (! Schema::hasTable('s3_bucket_settings')) {
                 return;
             }
-        } catch (\Illuminate\Database\QueryException|\PDOException) {
+        } catch (QueryException|\PDOException) {
             return;
         }
 
@@ -240,7 +242,7 @@ class AppServiceProvider extends ServiceProvider
         // Override temporary URL generation so Filament's FileUpload previews
         // are served through the Laravel proxy instead of directly from S3/R2,
         // avoiding browser CORS errors.
-        \Illuminate\Support\Facades\Storage::disk('s3')->buildTemporaryUrlsUsing(
+        Storage::disk('s3')->buildTemporaryUrlsUsing(
             fn (string $path, \DateTimeInterface $expiration, array $options): string => route('media.show', ['path' => $path])
         );
     }

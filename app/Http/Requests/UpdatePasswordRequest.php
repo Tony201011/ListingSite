@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +21,7 @@ class UpdatePasswordRequest extends FormRequest
             'current_password' => [
                 'required',
                 function ($attribute, $value, $fail) {
-                    /** @var \App\Models\User|null $user */
+                    /** @var User|null $user */
                     $user = Auth::user();
 
                     if (! $user || ! Hash::check($value, $user->password)) {

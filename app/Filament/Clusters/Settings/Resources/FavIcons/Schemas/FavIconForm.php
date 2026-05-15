@@ -2,6 +2,7 @@
 
 namespace App\Filament\Clusters\Settings\Resources\FavIcons\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
@@ -11,7 +12,7 @@ class FavIconForm
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\FileUpload::make('icon_path')
+                FileUpload::make('icon_path')
                     ->disk('public')
                     ->directory('favicons')
                     ->image()

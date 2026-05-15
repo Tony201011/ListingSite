@@ -4,9 +4,11 @@ namespace App\Filament\Clusters\Settings\Resources\FavIcons\Tables;
 
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -16,7 +18,7 @@ class FavIconsTable
     {
         return $table
             ->columns([
-                \Filament\Tables\Columns\ImageColumn::make('icon_path')
+                ImageColumn::make('icon_path')
                     ->label('Icon')
                     ->disk('public')
                     ->height(32)
@@ -44,7 +46,7 @@ class FavIconsTable
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
                 EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -39,11 +39,6 @@ class HomeController extends Controller
         return view('frontend.advanced-search', $viewData);
     }
 
-
-
-
-
-
     public function featuredListings(): View
     {
         $data = $this->buildProfileFilterViewData->getFeaturedListingsData();
