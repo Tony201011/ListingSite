@@ -30,7 +30,7 @@ class FeaturedListingChart extends ChartWidget
             ->withoutTrashed()
             ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
             ->selectRaw('
-                SUM(CASE WHEN is_featured = 1 AND featured_expires_at IS NOT NULL AND featured_expires_at > ? THEN 1 ELSE 0 END) as normal_featured,
+                SUM(CASE WHEN is_featured = 1 AND featured_expires_at IS NOT NULL AND featured_expires_at > ? THEN 1 ELSE 0 END) as featured_listing,
                 SUM(CASE WHEN home_featured_expires_at IS NOT NULL AND home_featured_expires_at > ? THEN 1 ELSE 0 END) as home_featured,
                 SUM(CASE WHEN local_banner_expires_at IS NOT NULL AND local_banner_expires_at > ? THEN 1 ELSE 0 END) as local_banner,
                 SUM(CASE WHEN home_banner_expires_at IS NOT NULL AND home_banner_expires_at > ? THEN 1 ELSE 0 END) as home_banner
@@ -42,7 +42,7 @@ class FeaturedListingChart extends ChartWidget
                 [
                     'label' => 'Active Placements',
                     'data' => [
-                        (int) ($stats?->normal_featured ?? 0),
+                        (int) ($stats?->featured_listing ?? 0),
                         (int) ($stats?->home_featured ?? 0),
                         (int) ($stats?->local_banner ?? 0),
                         (int) ($stats?->home_banner ?? 0),
