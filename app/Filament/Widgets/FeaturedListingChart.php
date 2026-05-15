@@ -6,10 +6,11 @@ use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Carbon;
 
 class FeaturedListingChart extends ChartWidget
 {
-    protected ?string $heading = 'Featured Listing Overview';
+    protected ?string $heading = 'Featured Listings Overview';
 
     protected static ?int $sort = 12;
 
@@ -24,26 +25,34 @@ class FeaturedListingChart extends ChartWidget
 
     protected function getData(): array
     {
-        $stats = ProviderProfile::query()
+        $baseQuery = ProviderProfile::query()
             ->withoutTrashed()
-            ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
-            ->selectRaw('
-                SUM(CASE WHEN is_featured = 1 AND featured_expires_at > NOW() THEN 1 ELSE 0 END) as normal_featured,
-                SUM(CASE WHEN home_featured_expires_at > NOW() THEN 1 ELSE 0 END) as home_featured,
-                SUM(CASE WHEN local_banner_expires_at > NOW() THEN 1 ELSE 0 END) as local_banner,
-                SUM(CASE WHEN home_banner_expires_at > NOW() THEN 1 ELSE 0 END) as home_banner
-            ')
-            ->first();
+            ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER));
+
+        $now = Carbon::now();
+        $normalFeaturedCount = (clone $baseQuery)
+            ->where('is_featured', true)
+            ->where('featured_expires_at', '>', $now)
+            ->count();
+        $homeFeaturedCount = (clone $baseQuery)
+            ->where('home_featured_expires_at', '>', $now)
+            ->count();
+        $localBannerCount = (clone $baseQuery)
+            ->where('local_banner_expires_at', '>', $now)
+            ->count();
+        $homeBannerCount = (clone $baseQuery)
+            ->where('home_banner_expires_at', '>', $now)
+            ->count();
 
         return [
             'datasets' => [
                 [
                     'label' => 'Active Placements',
                     'data' => [
-                        (int) ($stats?->normal_featured ?? 0),
-                        (int) ($stats?->home_featured ?? 0),
-                        (int) ($stats?->local_banner ?? 0),
-                        (int) ($stats?->home_banner ?? 0),
+                        $normalFeaturedCount,
+                        $homeFeaturedCount,
+                        $localBannerCount,
+                        $homeBannerCount,
                     ],
                     'backgroundColor' => [
                         'rgba(59, 130, 246, 0.7)',
