@@ -72,7 +72,7 @@
         </section>
 
         <section class="pv-card">
-            <div class="pv-card-header">Uploaded Verification Images</div>
+            <div class="pv-card-header">Uploaded Verification Photo</div>
 
             <div class="pv-gallery-container">
                 <div class="photo-verification-gallery">
@@ -81,7 +81,7 @@
                         $galleryPreviewHeight,
                         $galleryPreviewWidth,
                         null,
-                        false,
+                        true,
                         false
                     ) !!}
                 </div>
