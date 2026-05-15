@@ -51,7 +51,7 @@
         ])
     })"
 >
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-5xl">
         @include('profile.partials.back-to-settings')
 
         <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
@@ -65,6 +65,19 @@
             </div>
         </div>
 
+        <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h3 class="font-semibold text-gray-800">Ad Placement Graph</h3>
+                    <p class="text-xs text-gray-500">Compare each numbered placement cost and your currently active remaining days.</p>
+                </div>
+                <span class="text-xs font-medium uppercase tracking-[0.2em] text-pink-500">Live overview</span>
+            </div>
+            <div class="relative mt-4" style="height:280px;">
+                <canvas id="featuredListingGraph"></canvas>
+            </div>
+        </div>
+
         {{-- Free listing notice --}}
         @if($freeListingExpiresAt)
             <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
@@ -75,21 +88,30 @@
             </div>
         @endif
 
-        <div class="grid gap-5 sm:grid-cols-2">
-            <template x-for="(tier, index) in tiers" :key="tier.key">
-                <div class="relative rounded-2xl border border-gray-200 bg-white p-5 pt-11 shadow-sm transition hover:shadow-md sm:pt-5"
-                     :class="tier.expiresAt && new Date(tier.expiresAt) > new Date() ? 'ring-2 ring-green-400' : ''">
-                    {{-- Active badge --}}
-                    <template x-if="tier.expiresAt && new Date(tier.expiresAt) > new Date()">
-                        <span class="absolute right-3 top-3 rounded-full bg-green-100 px-2.5 py-0.5 text-[11px] font-semibold text-green-700">Active</span>
-                    </template>
+        <div class="mb-4 flex flex-col gap-1">
+            <h2 class="text-lg font-semibold text-gray-900">Available placements</h2>
+            <p class="text-sm text-gray-500">Choose a numbered placement below to match the graph and activate or extend it instantly.</p>
+        </div>
 
-                    <div class="mb-3 flex items-start gap-3 sm:items-center">
-                        <span class="text-2xl" x-text="tier.icon"></span>
-                        <div class="min-w-0">
-                            <h2 class="text-base font-bold text-gray-900" x-text="tier.label"></h2>
-                            <p class="text-xs text-gray-500 break-words" x-text="tier.subtitle"></p>
+        <div class="grid gap-5 lg:grid-cols-2">
+            <template x-for="(tier, index) in tiers" :key="tier.key">
+                <div class="flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+                     :class="tier.expiresAt && new Date(tier.expiresAt) > new Date() ? 'ring-2 ring-green-400' : ''">
+                    <div class="mb-4 flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <span class="inline-flex h-10 min-w-10 items-center justify-center rounded-xl bg-pink-50 px-3 text-sm font-bold text-pink-600"
+                                  x-text="String(index + 1).padStart(2, '0')"></span>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-2xl" x-text="tier.icon"></span>
+                                    <h3 class="text-base font-bold text-gray-900" x-text="tier.label"></h3>
+                                </div>
+                                <p class="mt-1 text-xs break-words text-gray-500" x-text="tier.subtitle"></p>
+                            </div>
                         </div>
+                        <template x-if="tier.expiresAt && new Date(tier.expiresAt) > new Date()">
+                            <span class="shrink-0 rounded-full bg-green-100 px-2.5 py-0.5 text-[11px] font-semibold text-green-700">Active</span>
+                        </template>
                     </div>
 
                     <div class="mb-4 flex items-end gap-2">
@@ -99,9 +121,11 @@
 
                     <template x-if="tier.expiresAt && new Date(tier.expiresAt) > new Date()">
                         <p class="mb-3 text-xs text-green-700">
-                            Expires: <span x-text="new Date(tier.expiresAt).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })"></span>
-                        </p>
-                    </template>
+                             Expires: <span x-text="new Date(tier.expiresAt).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })"></span>
+                         </p>
+                     </template>
+
+                    <div class="mt-auto"></div>
 
                     <button
                         type="button"
@@ -134,22 +158,14 @@
             </template>
         </div>
 
-        <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 class="mb-2 font-semibold text-gray-800">Ad Placement Graph</h3>
-            <p class="mb-4 text-xs text-gray-500">Compare each placement cost and your currently active remaining days.</p>
-            <div class="relative" style="height:280px;">
-                <canvas id="featuredListingGraph"></canvas>
-            </div>
-        </div>
-
         <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 text-sm text-gray-600 shadow-sm">
             <h3 class="mb-2 font-semibold text-gray-800">How it works</h3>
-            <ul class="list-inside list-disc space-y-1">
+            <ol class="list-inside list-decimal space-y-1">
                 <li><strong>Free for {{ $settings['free_listing_days'] }} days</strong> — new listings are free for the first {{ $settings['free_listing_days'] }} days.</li>
                 <li><strong>1 credit / day</strong> after the free period to keep your listing visible.</li>
                 <li>Each ad placement is purchased for <strong x-text="durationDays"></strong> days. Purchasing again extends the active period.</li>
                 <li>Credits can be purchased on the <a href="{{ route('purchase-credit') }}" class="font-semibold text-pink-600 underline hover:text-pink-700">credits page</a>.</li>
-            </ul>
+            </ol>
         </div>
     </div>
 </div>
@@ -168,11 +184,27 @@
             const labels = @json($graphLabels);
             const costs = @json($graphCosts);
             const remainingDays = @json($graphRemainingDays);
+            const tierKeys = ['home_banner', 'home_page', 'local_banner', 'normal'];
+            const displayLabels = labels.map((label, index) => `${String(index + 1).padStart(2, '0')} ${label}`);
+            const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
-            new Chart(chartCanvas.getContext('2d'), {
+            const calculateRemainingDays = (expiresAt) => {
+                if (!expiresAt) return 0;
+
+                const expiryDate = new Date(expiresAt);
+                const now = new Date();
+
+                if (Number.isNaN(expiryDate.getTime()) || expiryDate <= now) {
+                    return 0;
+                }
+
+                return Math.floor((expiryDate - now) / millisecondsPerDay);
+            };
+
+            const chart = new Chart(chartCanvas.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: displayLabels,
                     datasets: [
                         {
                             label: 'Cost (credits)',
@@ -212,6 +244,18 @@
                         }
                     }
                 }
+            });
+
+            window.addEventListener('featured-tier-updated', (event) => {
+                const tierKey = event.detail?.key;
+                const tierIndex = tierKeys.indexOf(tierKey);
+
+                if (tierIndex === -1) {
+                    return;
+                }
+
+                chart.data.datasets[1].data[tierIndex] = calculateRemainingDays(event.detail?.expiresAt);
+                chart.update();
             });
         }());
     </script>
