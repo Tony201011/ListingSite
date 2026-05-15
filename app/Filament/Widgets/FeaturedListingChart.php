@@ -128,16 +128,19 @@ class FeaturedListingChart extends ChartWidget
 
         $query = CreditLog::query()
             ->where('type', 'used')
-            ->where('reference_type', ProviderProfile::class)
-            ->where('description', 'like', 'Activated % for % days');
+            ->where('reference_type', ProviderProfile::class);
 
         if ($filter !== 'all') {
             $query->whereYear('created_at', (int) $filter);
         }
 
+        $summary = $query
+            ->selectRaw('COUNT(*) as total_purchases, ABS(COALESCE(SUM(amount), 0)) as total_credits_spent')
+            ->first();
+
         $this->featuredPurchaseSummary = [
-            'total_purchases' => (int) (clone $query)->count(),
-            'total_credits_spent' => abs((int) (clone $query)->sum('amount')),
+            'total_purchases' => (int) ($summary?->total_purchases ?? 0),
+            'total_credits_spent' => (int) ($summary?->total_credits_spent ?? 0),
         ];
 
         return $this->featuredPurchaseSummary;
