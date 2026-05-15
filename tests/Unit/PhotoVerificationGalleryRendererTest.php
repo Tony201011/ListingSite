@@ -41,4 +41,20 @@ class PhotoVerificationGalleryRendererTest extends TestCase
         $this->assertStringContainsString('target="_blank"', $html);
         $this->assertStringNotContainsString('@click.stop="openGallery(0)"', $html);
     }
+
+    public function test_render_single_mode_limits_output_to_first_image(): void
+    {
+        $html = PhotoVerificationGalleryRenderer::render(
+            '["https://example.com/photo-1.jpg","https://example.com/photo-2.jpg"]',
+            60,
+            60,
+            null,
+            true,
+            false,
+        )->toHtml();
+
+        $this->assertStringContainsString('https://example.com/photo-1.jpg', $html);
+        $this->assertStringNotContainsString('https://example.com/photo-2.jpg', $html);
+        $this->assertStringNotContainsString('+1 more', $html);
+    }
 }
