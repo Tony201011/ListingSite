@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class CreditLogResource extends Resource
@@ -97,8 +98,19 @@ class CreditLogResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                TernaryFilter::make('credit_debit')
+                    ->label('Credit / Debit')
+                    ->placeholder('All')
+                    ->trueLabel('Credit')
+                    ->falseLabel('Debit')
+                    ->queries(
+                        true: fn ($query) => $query->where('amount', '>', 0),
+                        false: fn ($query) => $query->where('amount', '<', 0),
+                        blank: fn ($query) => $query,
+                    ),
                 SelectFilter::make('type')
                     ->label('Activity')
+                    ->searchable()
                     ->options([
                         'daily_deduction' => 'Daily Listing Fee',
                         'used' => 'Featured/Ad Spend',
