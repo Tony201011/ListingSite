@@ -9,6 +9,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
+use App\Models\CreditLog;
 use App\Models\PhotoVerification;
 use App\Models\Postcode;
 use App\Models\ProviderProfile;
@@ -1396,6 +1397,20 @@ class UserResource extends Resource
         return view('filament.modals.provider-ads-featured-status', compact('rows'));
     }),
 
+                Action::make('wallet_summary')
+                    ->label('Wallet Summary')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('success')
+                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                    ->modalHeading(fn (ProviderProfile $record): string => 'Wallet Summary · ' . ($record->name ?? 'Provider'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->modalWidth('4xl')
+                    ->modalContent(fn (ProviderProfile $record) => view('filament.modals.wallet-spend-history', [
+                        'summary' => self::getWalletSpendSummaryForProfile($record),
+                        'history' => self::getWalletSpendHistoryForProfile($record),
+                    ])),
+
                     Action::make('edit')
                         ->label('Edit')
                         ->icon('heroicon-o-pencil-square')
@@ -1606,4 +1621,62 @@ class UserResource extends Resource
             ->values()
             ->all();
     }
+
+    private static function getWalletSpendSummaryForProfile(ProviderProfile $record): array
+    {
+        if (! $record->user_id) {
+            return [
+                'total_balance' => 0,
+                'used_balance' => 0,
+                'remaining_balance' => 0,
+            ];
+        }
+
+        $usedBalance = (int) abs(CreditLog::query()
+            ->where('user_id', $record->user_id)
+            ->where('amount', '<', 0)
+            ->sum('amount'));
+
+        $remainingBalance = (int) ($record->user?->credits ?? 0);
+
+        return [
+            'total_balance' => $usedBalance + $remainingBalance,
+            'used_balance' => $usedBalance,
+            'remaining_balance' => $remainingBalance,
+        ];
+    }
+
+    private static function getWalletSpendHistoryForProfile(ProviderProfile $record): array
+    {
+        if (! $record->user_id) {
+            return [];
+        }
+
+        return CreditLog::query()
+            ->select([
+                'created_at',
+                'amount',
+                'description',
+                'type',
+                'reference_type',
+                'reference_id',
+            ])
+            ->where('user_id', $record->user_id)
+            ->where('amount', '<', 0)
+            ->latest('created_at')
+            ->limit(10)
+            ->get()
+            ->map(fn (CreditLog $log): array => [
+                'spent_at' => $log->created_at,
+                'credits_used' => abs($log->amount),
+                'description' => $log->description,
+                'type' => Str::of($log->type)->replace('_', ' ')->title()->toString(),
+                'reference' => $log->reference_type
+                    ? class_basename($log->reference_type).($log->reference_id ? " #{$log->reference_id}" : '')
+                    : null,
+                'details_url' => null,
+            ])
+            ->all();
+    }
 }
+
