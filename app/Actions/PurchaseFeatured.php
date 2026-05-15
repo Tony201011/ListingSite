@@ -7,6 +7,7 @@ use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseFeatured
@@ -38,6 +39,9 @@ class PurchaseFeatured
         $durationDays = $settings['featured_duration_days'];
 
         [$creditCost, $expiryColumn, $tierLabel] = $this->resolveTier($tier, $settings);
+        $isExtension = false;
+        $previousExpiry = null;
+        $newExpiry = null;
 
         if ($user->credits < $creditCost) {
             return new ActionResult(
@@ -49,12 +53,14 @@ class PurchaseFeatured
             );
         }
 
-        DB::transaction(function () use ($user, $profile, $creditCost, $durationDays, $expiryColumn, $tier, $tierLabel): void {
+        DB::transaction(function () use ($user, $profile, $creditCost, $durationDays, $expiryColumn, $tier, $tierLabel, &$isExtension, &$previousExpiry, &$newExpiry): void {
             $currentExpiry = $profile->{$expiryColumn};
-            $isCurrent = $currentExpiry && $currentExpiry->isFuture();
+            $isCurrent = $currentExpiry instanceof CarbonInterface && $currentExpiry->isFuture();
+            $isExtension = $isCurrent;
+            $previousExpiry = $isCurrent ? $currentExpiry->copy() : null;
 
             // Extend from current expiry when still active, otherwise start fresh
-            $baseDate = $isCurrent ? $currentExpiry : now();
+            $baseDate = $isCurrent ? $currentExpiry->copy() : now();
             $newExpiry = $baseDate->addDays($durationDays);
 
             if ($tier === self::TIER_NORMAL) {
@@ -79,10 +85,22 @@ class PurchaseFeatured
         });
 
         $profile->refresh();
+        app(SendFeaturedPurchaseEmail::class)->execute(
+            $user,
+            $profile,
+            $tierLabel,
+            $creditCost,
+            $durationDays,
+            $newExpiry,
+            $isExtension,
+            $previousExpiry,
+        );
 
         return ActionResult::success(
             $this->buildPayload($profile, $tier, $creditCost, $durationDays, $expiryColumn),
-            "{$tierLabel} activated! Your listing is now boosted for {$durationDays} days."
+            $isExtension
+                ? "{$tierLabel} extended! Your listing boost has been extended by {$durationDays} days."
+                : "{$tierLabel} activated! Your listing is now boosted for {$durationDays} days."
         );
     }
 
@@ -112,7 +130,7 @@ class PurchaseFeatured
             default => [
                 $settings['normal_featured_credit_cost'],
                 'featured_expires_at',
-                'Featured Listing',
+                'Featured Badge',
             ],
         };
     }

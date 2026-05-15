@@ -4,16 +4,25 @@ namespace Tests\Unit;
 
 use App\Actions\GetFeaturedState;
 use App\Actions\PurchaseFeatured;
+use App\Actions\SendFeaturedPurchaseEmail;
 use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Tests\TestCase;
 
 class PurchaseFeaturedTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+
+        parent::tearDown();
+    }
 
     private function createSettings(int $creditCost = 5, int $durationDays = 7): SiteSetting
     {
@@ -43,6 +52,20 @@ class PurchaseFeaturedTest extends TestCase
     {
         $this->createSettings(creditCost: 5, durationDays: 7);
         [$user, $profile] = $this->createProvider(credits: 10);
+        $mailer = Mockery::mock(SendFeaturedPurchaseEmail::class);
+        $mailer->shouldReceive('execute')
+            ->once()
+            ->withArgs(function (User $mailUser, ProviderProfile $mailProfile, string $tierLabel, int $creditCost, int $durationDays, $expiresAt, bool $isExtension, $previousExpiry) use ($user, $profile): bool {
+                return $mailUser->is($user)
+                    && $mailProfile->is($profile)
+                    && $tierLabel === 'Featured Badge'
+                    && $creditCost === 5
+                    && $durationDays === 7
+                    && $expiresAt !== null
+                    && $isExtension === false
+                    && $previousExpiry === null;
+            });
+        $this->app->instance(SendFeaturedPurchaseEmail::class, $mailer);
 
         $result = (new PurchaseFeatured)->execute($user, $profile);
 
@@ -74,6 +97,9 @@ class PurchaseFeaturedTest extends TestCase
     {
         $this->createSettings(creditCost: 5, durationDays: 7);
         [$user, $profile] = $this->createProvider(credits: 2);
+        $mailer = Mockery::mock(SendFeaturedPurchaseEmail::class);
+        $mailer->shouldNotReceive('execute');
+        $this->app->instance(SendFeaturedPurchaseEmail::class, $mailer);
 
         $result = (new PurchaseFeatured)->execute($user, $profile);
 
@@ -96,13 +122,28 @@ class PurchaseFeaturedTest extends TestCase
         $profile->is_featured = true;
         $profile->featured_expires_at = $existingExpiry;
         $profile->save();
+        $mailer = Mockery::mock(SendFeaturedPurchaseEmail::class);
+        $mailer->shouldReceive('execute')
+            ->once()
+            ->withArgs(function (User $mailUser, ProviderProfile $mailProfile, string $tierLabel, int $creditCost, int $durationDays, $expiresAt, bool $isExtension, $previousExpiry) use ($user, $profile, $existingExpiry): bool {
+                return $mailUser->is($user)
+                    && $mailProfile->is($profile)
+                    && $tierLabel === 'Featured Badge'
+                    && $creditCost === 5
+                    && $durationDays === 7
+                    && $expiresAt !== null
+                    && $isExtension === true
+                    && $previousExpiry?->equalTo($existingExpiry);
+            });
+        $this->app->instance(SendFeaturedPurchaseEmail::class, $mailer);
 
-        (new PurchaseFeatured)->execute($user, $profile);
+        $result = (new PurchaseFeatured)->execute($user, $profile);
 
         $profile->refresh();
         $this->assertTrue($profile->is_featured);
         // Expiry should be extended by 7 days from the existing expiry (3 + 7 = 10 days from now)
         $this->assertTrue($profile->featured_expires_at->isAfter($existingExpiry->addDays(6)));
+        $this->assertSame('Featured Badge extended! Your listing boost has been extended by 7 days.', $result->message());
     }
 
     public function test_get_featured_state_returns_correct_data(): void
