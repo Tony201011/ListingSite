@@ -134,36 +134,6 @@
             </template>
         </div>
 
-        @php
-            $graphLabels = ['Home Page Banner', 'Home Page Featured', 'Local Banner', 'Featured Badge'];
-            $graphCosts = [
-                (int) $settings['home_banner_credit_cost'],
-                (int) $settings['home_featured_credit_cost'],
-                (int) $settings['local_banner_credit_cost'],
-                (int) $settings['normal_featured_credit_cost'],
-            ];
-
-            $graphExpiresAt = [
-                $homeBannerExpiresAt,
-                $homeFeaturedExpiresAt,
-                $localBannerExpiresAt,
-                $expiresAt,
-            ];
-
-            $graphRemainingDays = collect($graphExpiresAt)->map(function ($date) {
-                if (! $date) {
-                    return 0;
-                }
-
-                $expiry = \Carbon\Carbon::parse($date);
-                if ($expiry->isPast()) {
-                    return 0;
-                }
-
-                return (int) ceil(now()->floatDiffInSeconds($expiry) / 86400);
-            })->values()->all();
-        @endphp
-
         <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <h3 class="mb-2 font-semibold text-gray-800">Ad Placement Graph</h3>
             <p class="mb-4 text-xs text-gray-500">Compare each placement cost and your currently active remaining days.</p>
@@ -192,12 +162,12 @@
         (function () {
             if (typeof Chart === 'undefined') return;
 
-            var chartCanvas = document.getElementById('featuredListingGraph');
+            const chartCanvas = document.getElementById('featuredListingGraph');
             if (!chartCanvas) return;
 
-            var labels = @json($graphLabels);
-            var costs = @json($graphCosts);
-            var remainingDays = @json($graphRemainingDays);
+            const labels = @json($graphLabels);
+            const costs = @json($graphCosts);
+            const remainingDays = @json($graphRemainingDays);
 
             new Chart(chartCanvas.getContext('2d'), {
                 type: 'bar',
@@ -233,13 +203,11 @@
                             type: 'linear',
                             position: 'left',
                             beginAtZero: true,
-                            ticks: { stepSize: 1 }
                         },
                         yDays: {
                             type: 'linear',
                             position: 'right',
                             beginAtZero: true,
-                            ticks: { stepSize: 1 },
                             grid: { drawOnChartArea: false }
                         }
                     }
