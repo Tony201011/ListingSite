@@ -79,7 +79,10 @@
                     {!! \App\Support\PhotoVerificationGalleryRenderer::render(
                         $verification->photo_urls,
                         $galleryPreviewHeight,
-                        $galleryPreviewWidth
+                        $galleryPreviewWidth,
+                        null,
+                        false,
+                        false
                     ) !!}
                 </div>
             </div>
