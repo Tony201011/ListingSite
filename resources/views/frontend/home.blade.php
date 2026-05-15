@@ -187,7 +187,7 @@
             <div class="mb-6">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
-                        <i class="fa-solid fa-crown text-[10px]"></i> Featured Spotlight
+                        <i class="fa-solid fa-crown text-[10px]"></i> Featured Spotlight Showings
                     </span>
                     <div class="flex items-center gap-2">
                         <button type="button" class="spotlight-slider-button" data-slider-prev aria-label="Previous featured spotlight profiles">
