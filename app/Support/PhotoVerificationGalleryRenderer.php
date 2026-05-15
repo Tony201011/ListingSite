@@ -16,7 +16,8 @@ class PhotoVerificationGalleryRenderer
         int $height = 160,
         int $width = 160,
         ?int $previewLimit = null,
-        bool $singleMode = false
+        bool $singleMode = false,
+        bool $enablePopup = true
     ): HtmlString {
         $urls = self::normalizeUrls($urls);
 
@@ -48,11 +49,11 @@ class PhotoVerificationGalleryRenderer
             '<div class="flex flex-wrap gap-3">'.
             $previewUrls
                 ->values()
-                ->map(function (string $url, int $index) use ($safeHeight, $safeWidth): string {
-                    return self::buildThumbnailButton($url, $index, $safeHeight, $safeWidth);
+                ->map(function (string $url, int $index) use ($safeHeight, $safeWidth, $enablePopup): string {
+                    return self::buildThumbnailButton($url, $index, $safeHeight, $safeWidth, $enablePopup);
                 })
                 ->implode('').
-            ($remainingCount > 0
+            ($remainingCount > 0 && $enablePopup
                 ? '<button
                     type="button"
                     class="flex items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm font-medium text-gray-600"
@@ -61,7 +62,7 @@ class PhotoVerificationGalleryRenderer
                 >+'.e((string) $remainingCount).' more</button>'
                 : '').
             '</div>'.
-            '<template x-teleport="body">
+            ($enablePopup ? '<template x-teleport="body">
                 <div
                     x-show="isOpen"
                     x-on:keydown.escape.window="closeGallery()"
@@ -105,9 +106,9 @@ class PhotoVerificationGalleryRenderer
                         '.($singleMode ? '' :
                         '<div class="flex flex-wrap gap-3 overflow-y-auto">
                             '.collect($urls)
-                ->values()
-                ->map(function (string $url, int $index) use ($modalId): string {
-                    return '<button
+                            ->values()
+                            ->map(function (string $url, int $index) use ($modalId): string {
+                                return '<button
                         type="button"
                         class="overflow-hidden rounded-lg border"
                         :class="activeIndex === '.$index.' ? \'border-primary-500 ring-2 ring-primary-200\' : \'border-gray-200\'"
@@ -122,19 +123,37 @@ class PhotoVerificationGalleryRenderer
                             decoding="async"
                         >
                     </button>';
-                })
-                ->implode('').'
+                            })
+                            ->implode('').'
                         </div>'
-                ).'
+            ).'
                     </div>
                 </div>
-            </template>'.
+            </template>' : '').
             '</div>'
         );
     }
 
-    private static function buildThumbnailButton(string $url, int $index, int $height, int $width): string
+    private static function buildThumbnailButton(string $url, int $index, int $height, int $width, bool $enablePopup): string
     {
+        if (! $enablePopup) {
+            return '<a
+                href="'.e($url).'"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="relative block overflow-hidden rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                style="width: '.$width.'px; height: '.$height.'px;"
+            >
+                <img
+                    src="'.e($url).'"
+                    alt="'.e('Verification photo '.($index + 1)).'"
+                    loading="lazy"
+                    decoding="async"
+                    class="h-full w-full object-cover"
+                >
+            </a>';
+        }
+
         return '<button
             type="button"
             class="relative overflow-hidden rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"

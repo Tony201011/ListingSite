@@ -25,4 +25,20 @@ class PhotoVerificationGalleryRendererTest extends TestCase
         $this->assertStringContainsString('@click.stop="openGallery(1)"', $html);
         $this->assertSame(2, substr_count($html, '@click.stop="openGallery(1)"'));
     }
+
+    public function test_render_can_disable_popup_overlay_markup(): void
+    {
+        $html = PhotoVerificationGalleryRenderer::render(
+            '["https://example.com/photo-1.jpg","https://example.com/photo-2.jpg"]',
+            60,
+            60,
+            null,
+            false,
+            false,
+        )->toHtml();
+
+        $this->assertStringNotContainsString('x-teleport="body"', $html);
+        $this->assertStringContainsString('target="_blank"', $html);
+        $this->assertStringNotContainsString('@click.stop="openGallery(0)"', $html);
+    }
 }
