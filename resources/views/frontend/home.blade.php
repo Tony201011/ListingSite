@@ -183,7 +183,7 @@
         @include('layouts.partials.ads', ['position' => 'home_top', 'pageKey' => 'home'])
 
         {{-- Home Banner: Paid spotlight profiles (national, $5/day) --}}
-        @if(!empty($homeBannerProfiles) && count($homeBannerProfiles) > 0)
+        @if(!$hasActiveFilters && !empty($homeBannerProfiles) && count($homeBannerProfiles) > 0)
             <div class="mb-6">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
@@ -212,7 +212,7 @@
         @endif
 
         {{-- Local Banner: Paid state-specific spotlight profiles ($2/day) --}}
-        @if(!empty($localBannerProfiles) && count($localBannerProfiles) > 0)
+        @if(!$hasActiveFilters && !empty($localBannerProfiles) && count($localBannerProfiles) > 0)
             <div class="mb-6">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">

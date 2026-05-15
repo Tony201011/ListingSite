@@ -365,6 +365,23 @@ class HomeControllerTest extends TestCase
         $response->assertViewHas('escortNameQuery', 'Ruby');
     }
 
+    public function test_home_page_hides_spotlight_sections_when_search_filters_are_active(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Spotlight Escort',
+            'slug' => 'spotlight-escort',
+            'home_banner_expires_at' => now()->addDay(),
+            'local_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $unfilteredResponse = $this->get('/');
+        $unfilteredResponse->assertSeeText('Featured Spotlight');
+
+        $filteredResponse = $this->get('/?escort_name=Spotlight+Escort');
+        $filteredResponse->assertDontSeeText('Featured Spotlight');
+        $filteredResponse->assertDontSeeText('Local Spotlight');
+    }
+
     // ---------------------------------------------------------------
     // Filtering by location
     // ---------------------------------------------------------------
