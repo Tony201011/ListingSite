@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -17,6 +18,8 @@ class FeaturedListingChart extends ChartWidget
     protected int|string|array $columnSpan = 1;
 
     protected ?string $maxHeight = '360px';
+
+    protected ?array $featuredPurchaseSummary = null;
 
     public static function canView(): bool
     {
@@ -103,6 +106,41 @@ class FeaturedListingChart extends ChartWidget
                 'Home Page Banner',
             ],
         ];
+    }
+
+    public function getDescription(): ?string
+    {
+        $summary = $this->getFeaturedPurchaseSummary();
+
+        return 'Transactions: '.number_format($summary['total_credits_spent']).' credits • Total purchases: '.number_format($summary['total_purchases']);
+    }
+
+    /**
+     * @return array{total_purchases:int,total_credits_spent:int}
+     */
+    private function getFeaturedPurchaseSummary(): array
+    {
+        if ($this->featuredPurchaseSummary !== null) {
+            return $this->featuredPurchaseSummary;
+        }
+
+        $filter = $this->filter ?? 'all';
+
+        $query = CreditLog::query()
+            ->where('type', 'used')
+            ->where('reference_type', ProviderProfile::class)
+            ->where('description', 'like', 'Activated % for % days');
+
+        if ($filter !== 'all') {
+            $query->whereYear('created_at', (int) $filter);
+        }
+
+        $this->featuredPurchaseSummary = [
+            'total_purchases' => (int) (clone $query)->count(),
+            'total_credits_spent' => abs((int) (clone $query)->sum('amount')),
+        ];
+
+        return $this->featuredPurchaseSummary;
     }
 
     protected function getType(): string
