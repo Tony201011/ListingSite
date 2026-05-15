@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters;
 
-use App\Filament\Clusters\Logs\Pages\SiteLogs;
 use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Clusters\Cluster;
@@ -28,10 +27,4 @@ class Logs extends Cluster
             && SiteSetting::isLoggingEnabled();
     }
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => SiteLogs::route('/'),
-        ];
-    }
 }
