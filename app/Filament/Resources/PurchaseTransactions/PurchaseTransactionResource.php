@@ -12,7 +12,6 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -120,63 +119,7 @@ class PurchaseTransactionResource extends Resource
                             ->openUrlInNewTab()
                             ->placeholder('-'),
                     ]),
-                Section::make('Wallet Spend History')
-                    ->description('Latest wallet deductions for this user account.')
-                    ->columns(1)
-                    ->schema([
-                        Section::make('Wallet Summary')
-                            ->schema([
-                                TextEntry::make('wallet_total_balance')
-                                    ->label('Total Balance')
-                                    ->state(fn (PurchaseTransaction $record): int => self::getWalletSpendSummary($record)['total_balance'])
-                                    ->badge()
-                                    ->color('info'),
-                                TextEntry::make('wallet_used_balance')
-                                    ->label('Used Balance')
-                                    ->state(fn (PurchaseTransaction $record): int => self::getWalletSpendSummary($record)['used_balance'])
-                                    ->badge()
-                                    ->color('danger'),
-                                TextEntry::make('wallet_remaining_balance')
-                                    ->label('Remaining Balance')
-                                    ->state(fn (PurchaseTransaction $record): int => self::getWalletSpendSummary($record)['remaining_balance'])
-                                    ->badge()
-                                    ->color('success'),
-                            ])
-                            ->columns(3),
-                        RepeatableEntry::make('wallet_spend_history')
-                            ->label('')
-                            ->state(fn (PurchaseTransaction $record): array => self::getWalletSpendHistory($record))
-                            ->schema([
-                                TextEntry::make('spent_at')
-                                    ->label('Spent At')
-                                    ->dateTime(),
-                                TextEntry::make('credits_used')
-                                    ->label('Credits Used')
-                                    ->badge()
-                                    ->color('danger')
-                                    ->prefix('-'),
-                                TextEntry::make('description')
-                                    ->label('Details')
-                                    ->placeholder('-'),
-                                TextEntry::make('type')
-                                    ->label('Type')
-                                    ->badge()
-                                    ->color('info'),
-                                TextEntry::make('reference')
-                                    ->label('Reference')
-                                    ->placeholder('-'),
-                                TextEntry::make('details_url')
-                                    ->label('View')
-                                    ->formatStateUsing(fn (?string $state): string => filled($state) ? 'View' : '-')
-                                    ->url(fn (?string $state): ?string => $state)
-                                    ->openUrlInNewTab()
-                                    ->icon(fn (?string $state): ?string => filled($state) ? 'heroicon-o-eye' : null)
-                                    ->badge(fn (?string $state): bool => filled($state))
-                                    ->color('info'),
-                            ])
-                            ->columns(6)
-                            ->columnSpanFull(),
-                    ]),
+
             ]);
     }
 
