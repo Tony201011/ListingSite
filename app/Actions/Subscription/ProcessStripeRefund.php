@@ -67,6 +67,7 @@ class ProcessStripeRefund
 
         DB::transaction(function () use ($transaction, $refundableCredits): void {
             $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
+            $creditsToDeduct = 0;
 
             if (! $locked || $locked->status !== 'paid') {
                 throw new \RuntimeException('Transaction is no longer eligible for refund.');
@@ -74,7 +75,8 @@ class ProcessStripeRefund
 
             $user = $locked->user;
             if ($user) {
-                $creditsToDeduct = min(max((int) $user->credits, 0), $refundableCredits);
+                $availableCredits = max((int) $user->credits, 0);
+                $creditsToDeduct = min($availableCredits, $refundableCredits);
 
                 if ($creditsToDeduct <= 0) {
                     throw new \RuntimeException('No refundable balance remains to deduct from the wallet.');
@@ -85,7 +87,7 @@ class ProcessStripeRefund
                         'transaction_id' => $locked->id,
                         'user_id' => $user->id,
                         'credits_to_deduct' => $refundableCredits,
-                        'credits_available' => $user->credits,
+                        'credits_available' => $availableCredits,
                     ]);
                 }
 
@@ -97,7 +99,7 @@ class ProcessStripeRefund
             Log::info('Transaction refunded and credits deducted', [
                 'transaction_id' => $locked->id,
                 'user_id' => $user?->id,
-                'credits_deducted' => $creditsToDeduct ?? 0,
+                'credits_deducted' => $creditsToDeduct,
             ]);
         });
     }
@@ -124,9 +126,19 @@ class ProcessStripeRefund
             ->where('amount', '<', 0)
             ->sum('amount'));
 
+        $transactionSortDate = $transaction->paid_at ?? $transaction->created_at;
+
         $paidTransactions = PurchaseTransaction::query()
             ->where('user_id', $userId)
             ->where('status', 'paid')
+            ->where(function ($query) use ($transactionSortDate, $transaction): void {
+                $query->whereRaw('COALESCE(paid_at, created_at) < ?', [$transactionSortDate])
+                    ->orWhere(function ($nestedQuery) use ($transactionSortDate, $transaction): void {
+                        $nestedQuery
+                            ->whereRaw('COALESCE(paid_at, created_at) = ?', [$transactionSortDate])
+                            ->where('id', '<=', $transaction->id);
+                    });
+            })
             ->orderByRaw('COALESCE(paid_at, created_at) ASC')
             ->orderBy('id')
             ->get(['id', 'credits']);
@@ -147,7 +159,9 @@ class ProcessStripeRefund
         }
 
         $unusedCredits = max($transactionCredits - $usedCreditsFromTransaction, 0);
-        $availableCredits = max((int) ($transaction->user()->value('credits') ?? 0), 0);
+        $transaction->loadMissing('user:id,credits');
+
+        $availableCredits = max((int) ($transaction->user?->credits ?? 0), 0);
 
         return [
             'transaction_credits' => $transactionCredits,
