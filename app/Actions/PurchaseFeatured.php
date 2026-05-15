@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
+use App\Jobs\SendFeaturedPurchaseEmailJob;
 use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
@@ -49,9 +50,12 @@ class PurchaseFeatured
             );
         }
 
-        DB::transaction(function () use ($user, $profile, $creditCost, $durationDays, $expiryColumn, $tier, $tierLabel): void {
+        $isExtension = false;
+
+        DB::transaction(function () use ($user, $profile, $creditCost, $durationDays, $expiryColumn, $tier, $tierLabel, &$isExtension): void {
             $currentExpiry = $profile->{$expiryColumn};
             $isCurrent = $currentExpiry && $currentExpiry->isFuture();
+            $isExtension = $isCurrent;
 
             // Extend from current expiry when still active, otherwise start fresh
             $baseDate = $isCurrent ? $currentExpiry : now();
@@ -79,6 +83,18 @@ class PurchaseFeatured
         });
 
         $profile->refresh();
+
+        $expiresAtFormatted = $profile->{$expiryColumn}?->format('d M Y') ?? '';
+
+        SendFeaturedPurchaseEmailJob::dispatch(
+            $user->email,
+            $user->name,
+            $tierLabel,
+            $creditCost,
+            $durationDays,
+            $expiresAtFormatted,
+            $isExtension,
+        );
 
         return ActionResult::success(
             $this->buildPayload($profile, $tier, $creditCost, $durationDays, $expiryColumn),
