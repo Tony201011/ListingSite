@@ -81,7 +81,7 @@
                         $galleryPreviewHeight,
                         $galleryPreviewWidth,
                         null,
-                        true,
+                        false,
                         false
                     ) !!}
                 </div>
