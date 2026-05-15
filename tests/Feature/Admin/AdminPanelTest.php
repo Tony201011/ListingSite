@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -52,6 +53,21 @@ class AdminPanelTest extends TestCase
         $response = $this->get('/admin');
 
         $response->assertRedirect('/admin/login');
+    }
+
+    public function test_admin_login_route_bypasses_site_password_screen(): void
+    {
+        SiteSetting::create([
+            'site_password' => 'secret123',
+            'site_password_enabled' => true,
+        ]);
+
+        $response = $this->get('/admin/login');
+
+        $response->assertOk();
+        $response->assertSeeText('Email address');
+        $response->assertDontSeeText('Enter Site Password');
+        $response->assertDontSee('action="/site-password"', false);
     }
 
     public function test_admin_user_can_access_admin_panel(): void

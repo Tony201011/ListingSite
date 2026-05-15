@@ -28,6 +28,11 @@ class SitePassword
             return $next($request);
         }
 
+        $routeName = $request->route()?->getName();
+        if (is_string($routeName) && str_starts_with($routeName, 'filament.admin.')) {
+            return $next($request);
+        }
+
         if ($request->is('admin*')) {
             return $next($request);
         }
