@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -17,6 +18,8 @@ class FeaturedListingChart extends ChartWidget
     protected int|string|array $columnSpan = 1;
 
     protected ?string $maxHeight = '360px';
+
+    protected array $featuredPurchaseSummaryByFilter = [];
 
     public static function canView(): bool
     {
@@ -103,6 +106,46 @@ class FeaturedListingChart extends ChartWidget
                 'Home Page Banner',
             ],
         ];
+    }
+
+    public function getDescription(): ?string
+    {
+        $summary = $this->getFeaturedPurchaseSummary();
+
+        return 'Credits used: '.number_format($summary['total_credits_spent']).' • Total purchases: '.number_format($summary['total_purchases']);
+    }
+
+    /**
+     * @return array{total_purchases:int,total_credits_spent:int}
+     */
+    private function getFeaturedPurchaseSummary(): array
+    {
+        $filter = $this->filter ?? 'all';
+        $cacheKey = (string) $filter;
+
+        if (array_key_exists($cacheKey, $this->featuredPurchaseSummaryByFilter)) {
+            return $this->featuredPurchaseSummaryByFilter[$cacheKey];
+        }
+
+        $query = CreditLog::query()
+            ->where('type', 'used')
+            ->where('reference_type', ProviderProfile::class)
+            ->where('amount', '<', 0);
+
+        if ($filter !== 'all') {
+            $query->whereYear('created_at', (int) $filter);
+        }
+
+        $summary = $query
+            ->selectRaw('COUNT(*) as total_purchases, ABS(COALESCE(SUM(amount), 0)) as total_credits_spent')
+            ->first();
+
+        $this->featuredPurchaseSummaryByFilter[$cacheKey] = [
+            'total_purchases' => (int) ($summary?->total_purchases ?? 0),
+            'total_credits_spent' => (int) ($summary?->total_credits_spent ?? 0),
+        ];
+
+        return $this->featuredPurchaseSummaryByFilter[$cacheKey];
     }
 
     protected function getType(): string
