@@ -230,7 +230,7 @@ class PurchaseTransactionResource extends Resource
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Refund Transaction')
-                    ->modalDescription(fn (PurchaseTransaction $record): string => "Refund \${$record->amount} to {$record->user?->name}? This will process a full refund via Stripe and deduct {$record->credits} credit(s) from their account.")
+                    ->modalDescription(fn (PurchaseTransaction $record): string => "Refund transaction for {$record->user?->name}? The Stripe refund amount and wallet deduction will be calculated from the user's unused balance.")
                     ->modalSubmitActionLabel('Yes, Refund')
                     ->visible(fn (PurchaseTransaction $record): bool => $record->status === 'paid')
                     ->action(function (PurchaseTransaction $record, ProcessStripeRefund $processStripeRefund): void {
