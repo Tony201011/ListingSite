@@ -117,7 +117,7 @@ class PurchaseTransactionResource extends Resource
                             ->placeholder('-'),
                     ]),
                 Section::make('Wallet Spend History')
-                    ->description('Latest wallet deductions for this provider account.')
+                    ->description('Latest wallet deductions for this user account.')
                     ->columns(1)
                     ->schema([
                         RepeatableEntry::make('wallet_spend_history')
@@ -308,7 +308,7 @@ class PurchaseTransactionResource extends Resource
                 'description' => $log->description,
                 'type' => Str::of($log->type)->replace('_', ' ')->title()->toString(),
                 'reference' => $log->reference_type
-                    ? class_basename($log->reference_type).($log->reference_id ? " #{$log->reference_id}" : '')
+                    ? class_basename($log->reference_type) . ($log->reference_id ? " #{$log->reference_id}" : '')
                     : null,
             ])
             ->all();
