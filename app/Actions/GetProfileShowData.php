@@ -6,7 +6,6 @@ use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
 use App\Models\ProviderProfile;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class GetProfileShowData
@@ -41,7 +40,10 @@ class GetProfileShowData
 
         $isFeatured = (bool) $providerProfile->is_featured;
 
-        if ($providerProfile->is_blocked || (! $isFeatured && ! $this->isProfileOnline($providerProfile))) {
+        if (
+            $providerProfile->is_blocked
+            || (! $isFeatured && $providerProfile->onlineUser !== null && ! $this->isProfileOnline($providerProfile))
+        ) {
             return [
                 'offline' => true,
                 'profile_name' => $providerProfile->name ?? '',
@@ -306,9 +308,6 @@ class GetProfileShowData
                 ->where('profile_status', 'approved')
                 ->where('is_blocked', false)
                 ->whereHas('user')
-                ->whereHas('onlineUser', function ($query): void {
-                    $this->applyOnlineFilter($query);
-                })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where('id', '<', $currentId)
                 ->orderByDesc('id')
@@ -319,9 +318,6 @@ class GetProfileShowData
                     ->where('profile_status', 'approved')
                     ->where('is_blocked', false)
                     ->whereHas('user')
-                    ->whereHas('onlineUser', function ($query): void {
-                        $this->applyOnlineFilter($query);
-                    })
                     ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                     ->orderByDesc('id')
                     ->first(['id', 'name', 'slug']);
@@ -331,9 +327,6 @@ class GetProfileShowData
                 ->where('profile_status', 'approved')
                 ->where('is_blocked', false)
                 ->whereHas('user')
-                ->whereHas('onlineUser', function ($query): void {
-                    $this->applyOnlineFilter($query);
-                })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where('id', '>', $currentId)
                 ->orderBy('id')
@@ -344,9 +337,6 @@ class GetProfileShowData
                     ->where('profile_status', 'approved')
                     ->where('is_blocked', false)
                     ->whereHas('user')
-                    ->whereHas('onlineUser', function ($query): void {
-                        $this->applyOnlineFilter($query);
-                    })
                     ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                     ->orderBy('id')
                     ->first(['id', 'name', 'slug']);
@@ -371,9 +361,6 @@ class GetProfileShowData
             ->where('is_blocked', false)
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
-            ->whereHas('onlineUser', function ($query): void {
-                $this->applyOnlineFilter($query);
-            })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
                 'primaryProfileImage',
@@ -444,13 +431,6 @@ class GetProfileShowData
         return $onlineUser->status === 'online'
             && $onlineUser->online_expires_at !== null
             && $onlineUser->online_expires_at > now();
-    }
-
-    private function applyOnlineFilter(Builder $query): void
-    {
-        $query->where('status', 'online')
-            ->whereNotNull('online_expires_at')
-            ->where('online_expires_at', '>', now());
     }
 
     private function normalizeMediaUrl(?string $path): ?string

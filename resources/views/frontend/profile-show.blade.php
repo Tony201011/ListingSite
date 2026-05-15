@@ -456,6 +456,16 @@ $profileTags = array_values(array_unique(array_merge(
                                 >SAVE</span>
                             </button>
                         </div>
+                        <form method="POST" action="{{ route('booking.enquiry') }}" class="mt-3 sm:mt-4">
+                            @csrf
+                            <input type="hidden" name="user_id" value="{{ $profile['user_id'] }}">
+                            <button
+                                type="submit"
+                                class="w-full rounded-lg border border-pink-300 bg-pink-50 px-4 py-2 text-sm font-semibold text-pink-700 transition hover:bg-pink-100 sm:text-base"
+                            >
+                                Send booking enquiry
+                            </button>
+                        </form>
 
                     </div>
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
