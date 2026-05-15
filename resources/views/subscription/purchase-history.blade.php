@@ -153,11 +153,26 @@
                                         @php
                                             $latestComplaint = $purchase->complaints->first();
                                         @endphp
-                                        <div x-data="{ open: false }" class="relative inline-block text-left">
+                                        <div
+                                            x-data="{
+                                                open: false,
+                                                dropTop: 0,
+                                                dropRight: 0,
+                                                openDropdown() {
+                                                    const r = this.$refs.btn.getBoundingClientRect();
+                                                    this.dropTop = r.bottom + 4; // 4px gap between button and menu
+                                                    this.dropRight = window.innerWidth - r.right;
+                                                    this.open = true;
+                                                }
+                                            }"
+                                            class="relative inline-block text-left"
+                                        >
                                             <button
+                                                x-ref="btn"
                                                 type="button"
-                                                @click="open = !open"
+                                                @click="open ? (open = false) : openDropdown()"
                                                 @click.outside="open = false"
+                                                @scroll.window="open = false"
                                                 class="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
                                             >
                                                 Action
@@ -165,6 +180,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                                 </svg>
                                             </button>
+                                            <template x-teleport="body">
                                             <div
                                                 x-show="open"
                                                 x-transition:enter="transition ease-out duration-100"
@@ -173,7 +189,8 @@
                                                 x-transition:leave="transition ease-in duration-75"
                                                 x-transition:leave-start="transform opacity-100 scale-100"
                                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                                class="absolute right-0 z-20 mt-1 w-44 origin-top-right rounded-xl border border-gray-100 bg-white py-1 shadow-lg"
+                                                :style="`top: ${dropTop}px; right: ${dropRight}px`"
+                                                class="fixed z-50 w-44 origin-top-right rounded-xl border border-gray-100 bg-white py-1 shadow-lg"
                                             >
                                                 {{-- View --}}
                                                 <button
@@ -260,6 +277,7 @@
                                                     </span>
                                                 @endif
                                             </div>
+                                            </template>
                                         </div>
                                         @if($latestComplaint)
                                             <div class="mt-1">
