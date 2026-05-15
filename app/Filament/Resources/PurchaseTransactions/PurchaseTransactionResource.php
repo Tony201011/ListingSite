@@ -26,6 +26,8 @@ class PurchaseTransactionResource extends Resource
 {
     protected static ?string $model = PurchaseTransaction::class;
 
+    private const int WALLET_SPEND_HISTORY_LIMIT = 10;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
     protected static ?string $navigationLabel = 'Transaction History';
@@ -297,10 +299,18 @@ class PurchaseTransactionResource extends Resource
         }
 
         return CreditLog::query()
+            ->select([
+                'created_at',
+                'amount',
+                'description',
+                'type',
+                'reference_type',
+                'reference_id',
+            ])
             ->where('user_id', $record->user_id)
             ->where('amount', '<', 0)
             ->latest('created_at')
-            ->limit(10)
+            ->limit(self::WALLET_SPEND_HISTORY_LIMIT)
             ->get()
             ->map(fn (CreditLog $log): array => [
                 'spent_at' => $log->created_at,
