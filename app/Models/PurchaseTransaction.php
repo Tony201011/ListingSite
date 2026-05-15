@@ -66,6 +66,27 @@ class PurchaseTransaction extends Model
         return $this->created_at->format('Y-m');
     }
 
+    public function getNormalizedReceiptUrlAttribute(): ?string
+    {
+        $url = trim((string) ($this->receipt_url ?? ''));
+
+        if ($url === '') {
+            return null;
+        }
+
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            return $url;
+        }
+
+        $urlWithScheme = 'https://'.ltrim($url, '/');
+
+        if (filter_var($urlWithScheme, FILTER_VALIDATE_URL)) {
+            return $urlWithScheme;
+        }
+
+        return null;
+    }
+
     public function complaints(): HasMany
     {
         return $this->hasMany(PurchaseComplaint::class);

@@ -115,7 +115,7 @@ class PurchaseTransactionResource extends Resource
                             ->placeholder('-'),
                         TextEntry::make('receipt_url')
                             ->label('Receipt URL')
-                            ->url(fn ($record) => $record->receipt_url)
+                            ->url(fn ($record) => $record->normalized_receipt_url)
                             ->openUrlInNewTab()
                             ->placeholder('-'),
                     ]),
@@ -228,9 +228,9 @@ class PurchaseTransactionResource extends Resource
                     ->label('View Receipt')
                     ->icon('heroicon-o-document-text')
                     ->color('info')
-                    ->url(fn (PurchaseTransaction $record): ?string => $record->receipt_url ?: null)
+                    ->url(fn (PurchaseTransaction $record): ?string => $record->normalized_receipt_url)
                     ->openUrlInNewTab()
-                    ->visible(fn (PurchaseTransaction $record): bool => ! empty($record->receipt_url)),
+                    ->visible(fn (PurchaseTransaction $record): bool => ! empty($record->normalized_receipt_url)),
 
                 Action::make('refund')
                     ->label('Refund')
