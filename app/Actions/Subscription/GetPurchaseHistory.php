@@ -2,6 +2,7 @@
 
 namespace App\Actions\Subscription;
 
+use App\Models\CreditLog;
 use App\Models\PurchaseTransaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -86,6 +87,24 @@ class GetPurchaseHistory
             'counts' => $chartCounts,
         ];
 
-        return compact('purchases', 'availableMonths', 'chartData');
+        // Wallet summary
+        $user = Auth::user();
+        $currentBalance = $user->credits ?? 0;
+        $totalPurchased = PurchaseTransaction::where('user_id', $user->id)
+            ->where('status', 'paid')
+            ->sum('credits');
+        $totalSpent = abs(
+            CreditLog::where('user_id', $user->id)
+                ->where('amount', '<', 0)
+                ->sum('amount')
+        );
+
+        $walletSummary = [
+            'current_balance' => $currentBalance,
+            'total_purchased' => (int) $totalPurchased,
+            'total_spent' => (int) $totalSpent,
+        ];
+
+        return compact('purchases', 'availableMonths', 'chartData', 'walletSummary');
     }
 }

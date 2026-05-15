@@ -153,8 +153,116 @@
                                         @php
                                             $latestComplaint = $purchase->complaints->first();
                                         @endphp
-                                        @if($purchase->status === 'paid')
-                                            @if($latestComplaint)
+                                        <div x-data="{ open: false }" class="relative inline-block text-left">
+                                            <button
+                                                type="button"
+                                                @click="open = !open"
+                                                @click.outside="open = false"
+                                                class="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                                            >
+                                                Action
+                                                <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            </button>
+                                            <div
+                                                x-show="open"
+                                                x-transition:enter="transition ease-out duration-100"
+                                                x-transition:enter-start="transform opacity-0 scale-95"
+                                                x-transition:enter-end="transform opacity-100 scale-100"
+                                                x-transition:leave="transition ease-in duration-75"
+                                                x-transition:leave-start="transform opacity-100 scale-100"
+                                                x-transition:leave-end="transform opacity-0 scale-95"
+                                                class="absolute right-0 z-20 mt-1 w-44 origin-top-right rounded-xl border border-gray-100 bg-white py-1 shadow-lg"
+                                            >
+                                                {{-- View --}}
+                                                <button
+                                                    type="button"
+                                                    @click="open = false"
+                                                    onclick="openViewModal(
+                                                        '{{ addslashes($purchase->invoice_name ?? 'N/A') }}',
+                                                        '{{ $purchase->formatted_date }}',
+                                                        {{ $purchase->credits }},
+                                                        '{{ $purchase->formatted_amount }}',
+                                                        '{{ ucfirst($purchase->status) }}'
+                                                    )"
+                                                    class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                    </svg>
+                                                    View
+                                                </button>
+
+                                                {{-- Wallet Summary --}}
+                                                <button
+                                                    type="button"
+                                                    @click="open = false"
+                                                    onclick="openWalletModal()"
+                                                    class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                                    </svg>
+                                                    Wallet Summary
+                                                </button>
+
+                                                {{-- View Receipt --}}
+                                                @if($purchase->normalized_receipt_url)
+                                                    <a
+                                                        href="{{ $purchase->normalized_receipt_url }}"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        @click="open = false"
+                                                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                    >
+                                                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                        </svg>
+                                                        View Receipt
+                                                    </a>
+                                                @else
+                                                    <span class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                        </svg>
+                                                        View Receipt
+                                                    </span>
+                                                @endif
+
+                                                {{-- Refund --}}
+                                                @if($purchase->status === 'paid' && !$latestComplaint)
+                                                    <button
+                                                        type="button"
+                                                        @click="open = false"
+                                                        onclick="openComplaintModal({{ $purchase->id }})"
+                                                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50"
+                                                    >
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                                        </svg>
+                                                        Refund
+                                                    </button>
+                                                @elseif($latestComplaint)
+                                                    <span class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                                        </svg>
+                                                        Refund
+                                                    </span>
+                                                @else
+                                                    <span class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                                        </svg>
+                                                        Refund
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @if($latestComplaint)
+                                            <div class="mt-1">
                                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
                                                     @if($latestComplaint->status === 'reviewed') bg-green-100 text-green-800
                                                     @elseif($latestComplaint->status === 'closed') bg-gray-100 text-gray-700
@@ -164,27 +272,7 @@
                                                 @if($latestComplaint->admin_reply && $latestComplaint->replied_at)
                                                     <p class="mt-1 text-xs text-gray-500">Admin replied on {{ $latestComplaint->replied_at->format('d M Y') }}</p>
                                                 @endif
-                                            @else
-                                                <div class="flex items-center gap-3">
-                                                    @if($purchase->normalized_receipt_url)
-                                                        <a href="{{ $purchase->normalized_receipt_url }}" target="_blank" rel="noopener noreferrer" class="text-[#e04ecb] hover:text-[#c13ab0] font-medium">
-                                                            View Receipt
-                                                        </a>
-                                                    @endif
-                                                    <button
-                                                        type="button"
-                                                        onclick="openComplaintModal({{ $purchase->id }})"
-                                                        class="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
-                                                    >
-                                                        <svg class="mr-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                                        </svg>
-                                                        Complaint
-                                                    </button>
-                                                </div>
-                                            @endif
-                                        @else
-                                            -
+                                            </div>
                                         @endif
                                     </td>
                                 </tr>
@@ -212,6 +300,85 @@
                     </p>
                 </div>
             @endif
+        </div>
+    </div>
+</div>
+
+<!-- View Transaction Modal -->
+<div id="view-transaction-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+            <h2 class="text-lg font-semibold text-gray-900">Transaction Details</h2>
+            <button type="button" onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="px-6 py-5 space-y-3">
+            <div class="flex justify-between py-2 border-b border-gray-50">
+                <span class="text-sm font-medium text-gray-500">Invoice Name</span>
+                <span id="view-invoice-name" class="text-sm font-semibold text-gray-900"></span>
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-50">
+                <span class="text-sm font-medium text-gray-500">Date</span>
+                <span id="view-date" class="text-sm text-gray-700"></span>
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-50">
+                <span class="text-sm font-medium text-gray-500">Credits</span>
+                <span id="view-credits" class="text-sm text-gray-700"></span>
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-50">
+                <span class="text-sm font-medium text-gray-500">Amount</span>
+                <span id="view-amount" class="text-sm font-semibold text-gray-900"></span>
+            </div>
+            <div class="flex justify-between py-2">
+                <span class="text-sm font-medium text-gray-500">Status</span>
+                <span id="view-status" class="text-sm font-semibold"></span>
+            </div>
+        </div>
+        <div class="flex justify-end border-t border-gray-100 px-6 py-4">
+            <button type="button" onclick="closeViewModal()" class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Wallet Summary Modal -->
+<div id="wallet-summary-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+            <h2 class="text-lg font-semibold text-gray-900">Wallet Summary</h2>
+            <button type="button" onclick="closeWalletModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="px-6 py-5 space-y-4">
+            <div class="grid grid-cols-3 gap-3">
+                <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-center">
+                    <p class="text-xs font-medium text-emerald-600 mb-1">Current Balance</p>
+                    <p class="text-2xl font-bold text-emerald-700">{{ $walletSummary['current_balance'] }}</p>
+                    <p class="text-xs text-emerald-500 mt-1">credits</p>
+                </div>
+                <div class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-center">
+                    <p class="text-xs font-medium text-blue-600 mb-1">Total Purchased</p>
+                    <p class="text-2xl font-bold text-blue-700">{{ $walletSummary['total_purchased'] }}</p>
+                    <p class="text-xs text-blue-500 mt-1">credits</p>
+                </div>
+                <div class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-center">
+                    <p class="text-xs font-medium text-rose-600 mb-1">Total Spent</p>
+                    <p class="text-2xl font-bold text-rose-700">{{ $walletSummary['total_spent'] }}</p>
+                    <p class="text-xs text-rose-500 mt-1">credits</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end border-t border-gray-100 px-6 py-4">
+            <button type="button" onclick="closeWalletModal()" class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">
+                Close
+            </button>
         </div>
     </div>
 </div>
@@ -267,6 +434,43 @@
 </div>
 
 <script>
+var statusColorMap = {
+    'Paid': 'text-green-700',
+    'Pending': 'text-yellow-700',
+    'Failed': 'text-red-700',
+};
+
+function openViewModal(invoiceName, date, credits, amount, status) {
+    document.getElementById('view-invoice-name').textContent = invoiceName;
+    document.getElementById('view-date').textContent = date;
+    document.getElementById('view-credits').textContent = credits;
+    document.getElementById('view-amount').textContent = amount;
+    var statusEl = document.getElementById('view-status');
+    statusEl.textContent = status;
+    statusEl.className = 'text-sm font-semibold ' + (statusColorMap[status] || 'text-gray-700');
+    var modal = document.getElementById('view-transaction-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeViewModal() {
+    var modal = document.getElementById('view-transaction-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function openWalletModal() {
+    var modal = document.getElementById('wallet-summary-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeWalletModal() {
+    var modal = document.getElementById('wallet-summary-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
 function openComplaintModal(transactionId) {
     var complaintBasePath = '{{ url('/purchase-history') }}';
     document.getElementById('complaint-form').action = complaintBasePath + '/' + encodeURIComponent(transactionId) + '/complaint';
@@ -284,6 +488,14 @@ function closeComplaintModal() {
 
 document.getElementById('complaint-modal').addEventListener('click', function(e) {
     if (e.target === this) closeComplaintModal();
+});
+
+document.getElementById('view-transaction-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeViewModal();
+});
+
+document.getElementById('wallet-summary-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeWalletModal();
 });
 </script>
 
