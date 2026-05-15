@@ -125,25 +125,34 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-xs">
-                            <thead class="bg-gray-50 dark:bg-gray-900">
+                        <table class="min-w-full table-auto divide-y divide-gray-200 text-xs dark:divide-gray-700">
+                            <colgroup>
+                                <col class="w-12">
+                                <col class="w-44">
+                                <col class="w-28">
+                                <col class="w-36">
+                                <col>
+                                <col class="w-24">
+                            </colgroup>
+
+                            <thead class="bg-gray-50 dark:bg-gray-900/60">
                                 <tr>
-                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 first:border-l dark:border-gray-700 dark:text-gray-300">
+                                    <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
                                         #
                                     </th>
-                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
                                         Timestamp
                                     </th>
-                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
                                         Level
                                     </th>
-                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
                                         Channel
                                     </th>
-                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-left font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
                                         Message
                                     </th>
-                                    <th class="border-b border-r border-t border-gray-200 px-3 py-2 text-center font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                                    <th class="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
                                         Actions
                                     </th>
                                 </tr>
@@ -152,17 +161,17 @@
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-950">
                                 @forelse ($this->logLines as $index => $entry)
                                     <tr class="align-middle hover:bg-gray-50 dark:hover:bg-gray-900/40">
-                                        <td class="border-r border-gray-200 px-3 py-2 font-mono text-gray-500 first:border-l dark:border-gray-700 dark:text-gray-400">
+                                        <td class="whitespace-nowrap px-3 py-2.5 font-mono text-gray-500 dark:text-gray-400">
                                             {{ $index + 1 }}
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-3 py-2 font-mono text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                                        <td class="whitespace-nowrap px-3 py-2.5 font-mono text-gray-700 dark:text-gray-300">
                                             <div class="whitespace-nowrap">
                                                 {{ $entry['timestamp'] ?: '—' }}
                                             </div>
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-3 py-2 dark:border-gray-700">
+                                        <td class="px-3 py-2.5">
                                             @if ($entry['level'] !== '')
                                                 @php
                                                     $levelColor = match ($entry['level']) {
@@ -183,13 +192,13 @@
                                             @endif
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-3 py-2 text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                                        <td class="px-3 py-2.5 text-gray-700 dark:text-gray-300">
                                             <div class="truncate max-w-xs">
                                                 {{ $entry['channel'] ?: '—' }}
                                             </div>
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-3 py-2 dark:border-gray-700">
+                                        <td class="px-3 py-2.5">
                                             <div class="max-w-md">
                                                 <p
                                                     class="font-mono text-gray-900 dark:text-gray-100"
@@ -206,7 +215,7 @@
                                             </div>
                                         </td>
 
-                                        <td class="border-r border-gray-200 px-3 py-2 text-center dark:border-gray-700">
+                                        <td class="px-3 py-2.5 text-center">
                                             @if ($entry['raw'] !== '')
                                                 <button
                                                     type="button"
@@ -226,7 +235,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="border-t border-gray-200 px-3 py-4 text-center text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                                        <td colspan="6" class="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
                                             {{ $this->logStatusMessage ?? 'No log entries available.' }}
                                         </td>
                                     </tr>
