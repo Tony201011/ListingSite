@@ -4,9 +4,7 @@ namespace App\Filament\Resources\PurchaseTransactions;
 
 use App\Actions\Subscription\ProcessStripeRefund;
 use App\Filament\Resources\PurchaseTransactions\Pages\ListPurchaseTransactions;
-use App\Filament\Resources\Users\UserResource;
 use App\Models\CreditLog;
-use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -297,7 +295,6 @@ class PurchaseTransactionResource extends Resource
                 'reference' => $log->reference_type
                     ? class_basename($log->reference_type).($log->reference_id ? " #{$log->reference_id}" : '')
                     : null,
-                'details_url' => self::resolveWalletSpendDetailsUrl($log),
             ])
             ->all();
     }
@@ -344,18 +341,5 @@ class PurchaseTransactionResource extends Resource
         }
 
         return $summary;
-    }
-
-    private static function resolveWalletSpendDetailsUrl(CreditLog $log): ?string
-    {
-        if (! $log->reference_type || ! $log->reference_id) {
-            return null;
-        }
-
-        return match ($log->reference_type) {
-            ProviderProfile::class => UserResource::getUrl('edit', ['record' => $log->reference_id]),
-            PurchaseTransaction::class => static::getUrl('index', ['tableSearch' => $log->reference_id]),
-            default => null,
-        };
     }
 }

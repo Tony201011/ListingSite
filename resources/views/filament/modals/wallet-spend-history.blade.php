@@ -28,7 +28,6 @@
                         <th>Details</th>
                         <th>Type</th>
                         <th>Reference</th>
-                        <th>View</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,15 +44,6 @@
                             <td>{{ $row['description'] ?: '-' }}</td>
                             <td>{{ $row['type'] ?: '-' }}</td>
                             <td>{{ $row['reference'] ?: '-' }}</td>
-                            <td>
-                                @if (filled($row['details_url']))
-                                    <a href="{{ $row['details_url'] }}" target="_blank" rel="noopener noreferrer" class="wallet-view-link">
-                                        View
-                                    </a>
-                                @else
-                                    -
-                                @endif
-                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -165,20 +155,6 @@
         font-weight: 700;
     }
 
-    .wallet-view-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 9999px;
-        border: 1px solid #c7d2fe;
-        background: #eef2ff;
-        color: #3730a3;
-        padding: 2px 10px;
-        font-size: 12px;
-        font-weight: 600;
-        text-decoration: none;
-    }
-
     .wallet-empty {
         padding: 14px 16px;
         border: 1px dashed #d1d5db;
@@ -234,12 +210,6 @@
     .dark .wallet-table td {
         color: #d1d5db;
         border-bottom-color: #1f2937;
-    }
-
-    .dark .wallet-view-link {
-        border-color: #4338ca;
-        background: rgba(67, 56, 202, 0.25);
-        color: #c7d2fe;
     }
 
     .dark .wallet-empty {
