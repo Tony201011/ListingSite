@@ -134,6 +134,44 @@
             </template>
         </div>
 
+        @php
+            $graphLabels = ['Home Page Banner', 'Home Page Featured', 'Local Banner', 'Featured Badge'];
+            $graphCosts = [
+                (int) $settings['home_banner_credit_cost'],
+                (int) $settings['home_featured_credit_cost'],
+                (int) $settings['local_banner_credit_cost'],
+                (int) $settings['normal_featured_credit_cost'],
+            ];
+
+            $graphExpiresAt = [
+                $homeBannerExpiresAt,
+                $homeFeaturedExpiresAt,
+                $localBannerExpiresAt,
+                $expiresAt,
+            ];
+
+            $graphRemainingDays = collect($graphExpiresAt)->map(function ($date) {
+                if (! $date) {
+                    return 0;
+                }
+
+                $expiry = \Carbon\Carbon::parse($date);
+                if ($expiry->isPast()) {
+                    return 0;
+                }
+
+                return (int) ceil(now()->floatDiffInSeconds($expiry) / 86400);
+            })->values()->all();
+        @endphp
+
+        <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <h3 class="mb-2 font-semibold text-gray-800">Ad Placement Graph</h3>
+            <p class="mb-4 text-xs text-gray-500">Compare each placement cost and your currently active remaining days.</p>
+            <div class="relative" style="height:280px;">
+                <canvas id="featuredListingGraph"></canvas>
+            </div>
+        </div>
+
         <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 text-sm text-gray-600 shadow-sm">
             <h3 class="mb-2 font-semibold text-gray-800">How it works</h3>
             <ul class="list-inside list-disc space-y-1">
@@ -149,4 +187,64 @@
 
 @push('scripts')
     <script src="{{ asset('profile/js/featured-purchase.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            if (typeof Chart === 'undefined') return;
+
+            var chartCanvas = document.getElementById('featuredListingGraph');
+            if (!chartCanvas) return;
+
+            var labels = @json($graphLabels);
+            var costs = @json($graphCosts);
+            var remainingDays = @json($graphRemainingDays);
+
+            new Chart(chartCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Cost (credits)',
+                            data: costs,
+                            backgroundColor: 'rgba(224, 78, 203, 0.7)',
+                            borderColor: '#e04ecb',
+                            borderWidth: 1,
+                            yAxisID: 'yCost',
+                        },
+                        {
+                            label: 'Active days left',
+                            data: remainingDays,
+                            backgroundColor: 'rgba(99, 102, 241, 0.65)',
+                            borderColor: '#6366f1',
+                            borderWidth: 1,
+                            yAxisID: 'yDays',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        yCost: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        },
+                        yDays: {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }());
+    </script>
 @endpush
