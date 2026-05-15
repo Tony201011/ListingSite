@@ -112,7 +112,7 @@ class FeaturedListingChart extends ChartWidget
     {
         $summary = $this->getFeaturedPurchaseSummary();
 
-        return 'Transactions: '.number_format($summary['total_credits_spent']).' credits • Total purchases: '.number_format($summary['total_purchases']);
+        return 'Credits used: '.number_format($summary['total_credits_spent']).' • Total purchases: '.number_format($summary['total_purchases']);
     }
 
     /**
