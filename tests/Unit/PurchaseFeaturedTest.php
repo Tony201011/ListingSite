@@ -133,7 +133,7 @@ class PurchaseFeaturedTest extends TestCase
                     && $durationDays === 7
                     && $expiresAt !== null
                     && $isExtension === true
-                    && $previousExpiry?->equalTo($existingExpiry);
+                    && $previousExpiry?->toIso8601String() === $existingExpiry->toIso8601String();
             });
         $this->app->instance(SendFeaturedPurchaseEmail::class, $mailer);
 

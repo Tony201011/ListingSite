@@ -39,9 +39,6 @@ class PurchaseFeatured
         $durationDays = $settings['featured_duration_days'];
 
         [$creditCost, $expiryColumn, $tierLabel] = $this->resolveTier($tier, $settings);
-        $isExtension = false;
-        $previousExpiry = null;
-        $newExpiry = null;
 
         if ($user->credits < $creditCost) {
             return new ActionResult(
@@ -53,10 +50,9 @@ class PurchaseFeatured
             );
         }
 
-        DB::transaction(function () use ($user, $profile, $creditCost, $durationDays, $expiryColumn, $tier, $tierLabel, &$isExtension, &$previousExpiry, &$newExpiry): void {
+        ['is_extension' => $isExtension, 'previous_expiry' => $previousExpiry, 'new_expiry' => $newExpiry] = DB::transaction(function () use ($user, $profile, $creditCost, $durationDays, $expiryColumn, $tier, $tierLabel): array {
             $currentExpiry = $profile->{$expiryColumn};
             $isCurrent = $currentExpiry instanceof CarbonInterface && $currentExpiry->isFuture();
-            $isExtension = $isCurrent;
             $previousExpiry = $isCurrent ? $currentExpiry->copy() : null;
 
             // Extend from current expiry when still active, otherwise start fresh
@@ -82,6 +78,12 @@ class PurchaseFeatured
                 'reference_type' => ProviderProfile::class,
                 'reference_id' => $profile->id,
             ]);
+
+            return [
+                'is_extension' => $isCurrent,
+                'previous_expiry' => $previousExpiry,
+                'new_expiry' => $newExpiry,
+            ];
         });
 
         $profile->refresh();
