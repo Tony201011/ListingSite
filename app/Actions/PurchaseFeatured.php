@@ -56,7 +56,7 @@ class PurchaseFeatured
             $previousExpiry = $isCurrent ? $currentExpiry->copy() : null;
 
             // Extend from current expiry when still active, otherwise start fresh
-            $baseDate = $isCurrent ? $currentExpiry->copy() : now();
+            $baseDate = $previousExpiry?->copy() ?? now();
             $newExpiry = $baseDate->addDays($durationDays);
 
             if ($tier === self::TIER_NORMAL) {
