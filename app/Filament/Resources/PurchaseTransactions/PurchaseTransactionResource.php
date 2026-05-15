@@ -268,6 +268,19 @@ class PurchaseTransactionResource extends Resource
                     ->icon('heroicon-o-eye')
                     ->modalHeading('Transaction Details'),
 
+                Action::make('wallet_spend_history')
+                    ->label('Wallet Summary')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->modalHeading(fn (PurchaseTransaction $record): string => 'Wallet Spend History · '.($record->user?->name ?? 'User'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->modalWidth('4xl')
+                    ->modalContent(fn (PurchaseTransaction $record) => view('filament.modals.wallet-spend-history', [
+                        'summary' => self::getWalletSpendSummary($record),
+                        'history' => self::getWalletSpendHistory($record),
+                    ])),
+
                 Action::make('view_receipt')
                     ->label('View Receipt')
                     ->icon('heroicon-o-document-text')
