@@ -4,7 +4,9 @@ namespace App\Filament\Resources\PurchaseTransactions;
 
 use App\Actions\Subscription\ProcessStripeRefund;
 use App\Filament\Resources\PurchaseTransactions\Pages\ListPurchaseTransactions;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\CreditLog;
+use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use BackedEnum;
 use Filament\Facades\Filament;
@@ -122,6 +124,25 @@ class PurchaseTransactionResource extends Resource
                     ->description('Latest wallet deductions for this user account.')
                     ->columns(1)
                     ->schema([
+                        Section::make('Wallet Summary')
+                            ->schema([
+                                TextEntry::make('wallet_total_balance')
+                                    ->label('Total Balance')
+                                    ->state(fn (PurchaseTransaction $record): int => self::getWalletSpendSummary($record)['total_balance'])
+                                    ->badge()
+                                    ->color('info'),
+                                TextEntry::make('wallet_used_balance')
+                                    ->label('Used Balance')
+                                    ->state(fn (PurchaseTransaction $record): int => self::getWalletSpendSummary($record)['used_balance'])
+                                    ->badge()
+                                    ->color('danger'),
+                                TextEntry::make('wallet_remaining_balance')
+                                    ->label('Remaining Balance')
+                                    ->state(fn (PurchaseTransaction $record): int => self::getWalletSpendSummary($record)['remaining_balance'])
+                                    ->badge()
+                                    ->color('success'),
+                            ])
+                            ->columns(3),
                         RepeatableEntry::make('wallet_spend_history')
                             ->label('')
                             ->state(fn (PurchaseTransaction $record): array => self::getWalletSpendHistory($record))
@@ -144,8 +165,16 @@ class PurchaseTransactionResource extends Resource
                                 TextEntry::make('reference')
                                     ->label('Reference')
                                     ->placeholder('-'),
+                                TextEntry::make('details_url')
+                                    ->label('View')
+                                    ->formatStateUsing(fn (?string $state): string => filled($state) ? 'View' : '-')
+                                    ->url(fn (?string $state): ?string => $state)
+                                    ->openUrlInNewTab()
+                                    ->icon(fn (?string $state): ?string => filled($state) ? 'heroicon-o-eye' : null)
+                                    ->badge(fn (?string $state): bool => filled($state))
+                                    ->color('info'),
                             ])
-                            ->columns(5)
+                            ->columns(6)
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -320,7 +349,48 @@ class PurchaseTransactionResource extends Resource
                 'reference' => $log->reference_type
                     ? class_basename($log->reference_type) . ($log->reference_id ? " #{$log->reference_id}" : '')
                     : null,
+                'details_url' => self::resolveWalletSpendDetailsUrl($log),
             ])
             ->all();
+    }
+
+    /**
+     * @return array{total_balance: int, used_balance: int, remaining_balance: int}
+     */
+    private static function getWalletSpendSummary(PurchaseTransaction $record): array
+    {
+        if (! $record->user_id) {
+            return [
+                'total_balance' => 0,
+                'used_balance' => 0,
+                'remaining_balance' => 0,
+            ];
+        }
+
+        $usedBalance = abs((int) CreditLog::query()
+            ->where('user_id', $record->user_id)
+            ->where('amount', '<', 0)
+            ->sum('amount'));
+
+        $remainingBalance = (int) ($record->user?->credits ?? 0);
+
+        return [
+            'total_balance' => $usedBalance + $remainingBalance,
+            'used_balance' => $usedBalance,
+            'remaining_balance' => $remainingBalance,
+        ];
+    }
+
+    private static function resolveWalletSpendDetailsUrl(CreditLog $log): ?string
+    {
+        if (! $log->reference_type || ! $log->reference_id) {
+            return null;
+        }
+
+        return match ($log->reference_type) {
+            ProviderProfile::class => UserResource::getUrl('edit', ['record' => $log->reference_id]),
+            PurchaseTransaction::class => static::getUrl('index', ['tableSearch' => $log->reference_id]),
+            default => null,
+        };
     }
 }
