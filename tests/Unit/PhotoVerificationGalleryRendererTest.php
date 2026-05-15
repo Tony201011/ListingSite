@@ -57,4 +57,23 @@ class PhotoVerificationGalleryRendererTest extends TestCase
         $this->assertStringNotContainsString('https://example.com/photo-2.jpg', $html);
         $this->assertStringNotContainsString('+1 more', $html);
     }
+
+    public function test_render_accepts_structured_photo_payloads_and_shows_all_images(): void
+    {
+        $html = PhotoVerificationGalleryRenderer::render(
+            [
+                ['url' => 'https://example.com/photo-1.jpg'],
+                ['url' => 'https://example.com/photo-2.jpg'],
+            ],
+            60,
+            60,
+            null,
+            false,
+            false,
+        )->toHtml();
+
+        $this->assertStringContainsString('https://example.com/photo-1.jpg', $html);
+        $this->assertStringContainsString('https://example.com/photo-2.jpg', $html);
+        $this->assertSame(2, substr_count($html, 'target="_blank"'));
+    }
 }

@@ -213,8 +213,21 @@ class PhotoVerificationGalleryRenderer
     private static function normalizeUrlArray(array $urls): array
     {
         return collect($urls)
-            ->filter(fn ($url) => filled($url))
-            ->map(fn ($url): string => (string) $url)
+            ->map(function ($url): ?string {
+                if (is_array($url)) {
+                    $path = $url['path'] ?? null;
+                    if (filled($path)) {
+                        return route('media.show', ['path' => $path]);
+                    }
+
+                    $arrayUrl = $url['url'] ?? null;
+
+                    return filled($arrayUrl) ? (string) $arrayUrl : null;
+                }
+
+                return filled($url) ? (string) $url : null;
+            })
+            ->filter(fn (?string $url): bool => filled($url))
             ->values()
             ->all();
     }

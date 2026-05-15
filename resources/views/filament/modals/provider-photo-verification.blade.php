@@ -77,7 +77,7 @@
             <div class="pv-gallery-container">
                 <div class="photo-verification-gallery">
                     {!! \App\Support\PhotoVerificationGalleryRenderer::render(
-                        $verification->photo_urls,
+                        $verification->photos,
                         $galleryPreviewHeight,
                         $galleryPreviewWidth,
                         null,
