@@ -193,13 +193,13 @@
                                         </td>
 
                                         <td class="px-3 py-2.5 text-gray-700 dark:text-gray-300">
-                                            <div class="max-w-xs truncate">
+                                            <div class="truncate max-w-xs">
                                                 {{ $entry['channel'] ?: '—' }}
                                             </div>
                                         </td>
 
                                         <td class="px-3 py-2.5">
-                                            <div class="max-w-xl">
+                                            <div class="max-w-md">
                                                 <p
                                                     class="font-mono text-gray-900 dark:text-gray-100"
                                                     style="
