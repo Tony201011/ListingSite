@@ -4,9 +4,11 @@ namespace App\Filament\Resources\PurchaseTransactions;
 
 use App\Actions\Subscription\ProcessStripeRefund;
 use App\Filament\Resources\PurchaseTransactions\Pages\ListPurchaseTransactions;
+use App\Models\CreditLog;
 use App\Models\PurchaseTransaction;
 use BackedEnum;
 use Filament\Facades\Filament;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -18,6 +20,7 @@ use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class PurchaseTransactionResource extends Resource
 {
@@ -112,6 +115,36 @@ class PurchaseTransactionResource extends Resource
                             ->url(fn ($record) => $record->receipt_url)
                             ->openUrlInNewTab()
                             ->placeholder('-'),
+                    ]),
+                Section::make('Wallet Spend History')
+                    ->description('Latest wallet deductions for this provider account.')
+                    ->columns(1)
+                    ->schema([
+                        RepeatableEntry::make('wallet_spend_history')
+                            ->label('')
+                            ->state(fn (PurchaseTransaction $record): array => self::getWalletSpendHistory($record))
+                            ->schema([
+                                TextEntry::make('spent_at')
+                                    ->label('Spent At')
+                                    ->dateTime(),
+                                TextEntry::make('credits_used')
+                                    ->label('Credits Used')
+                                    ->badge()
+                                    ->color('danger')
+                                    ->prefix('-'),
+                                TextEntry::make('description')
+                                    ->label('Details')
+                                    ->placeholder('-'),
+                                TextEntry::make('type')
+                                    ->label('Type')
+                                    ->badge()
+                                    ->color('info'),
+                                TextEntry::make('reference')
+                                    ->label('Reference')
+                                    ->placeholder('-'),
+                            ])
+                            ->columns(5)
+                            ->columnSpanFull(),
                     ]),
             ]);
     }
@@ -255,5 +288,29 @@ class PurchaseTransactionResource extends Resource
         return [
             'index' => ListPurchaseTransactions::route('/'),
         ];
+    }
+
+    private static function getWalletSpendHistory(PurchaseTransaction $record): array
+    {
+        if (! $record->user_id) {
+            return [];
+        }
+
+        return CreditLog::query()
+            ->where('user_id', $record->user_id)
+            ->where('amount', '<', 0)
+            ->latest('created_at')
+            ->limit(10)
+            ->get()
+            ->map(fn (CreditLog $log): array => [
+                'spent_at' => $log->created_at,
+                'credits_used' => abs($log->amount),
+                'description' => $log->description,
+                'type' => Str::of($log->type)->replace('_', ' ')->title()->toString(),
+                'reference' => $log->reference_type
+                    ? class_basename($log->reference_type).($log->reference_id ? " #{$log->reference_id}" : '')
+                    : null,
+            ])
+            ->all();
     }
 }
