@@ -106,9 +106,9 @@ class PhotoVerificationGalleryRenderer
                         '.($singleMode ? '' :
                         '<div class="flex flex-wrap gap-3 overflow-y-auto">
                             '.collect($urls)
-                ->values()
-                ->map(function (string $url, int $index) use ($modalId): string {
-                    return '<button
+                            ->values()
+                            ->map(function (string $url, int $index) use ($modalId): string {
+                                return '<button
                         type="button"
                         class="overflow-hidden rounded-lg border"
                         :class="activeIndex === '.$index.' ? \'border-primary-500 ring-2 ring-primary-200\' : \'border-gray-200\'"
@@ -123,10 +123,10 @@ class PhotoVerificationGalleryRenderer
                             decoding="async"
                         >
                     </button>';
-                })
-                ->implode('').'
+                            })
+                            ->implode('').'
                         </div>'
-                ).'
+            ).'
                     </div>
                 </div>
             </template>' : '').
