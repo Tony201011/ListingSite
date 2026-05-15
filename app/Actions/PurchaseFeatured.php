@@ -84,12 +84,9 @@ class PurchaseFeatured
 
         $profile->refresh();
 
-        $expiresAtFormatted = ($tier === self::TIER_NORMAL
-            ? $profile->featured_expires_at
-            : $profile->{$expiryColumn}
-        )?->format('d M Y') ?? '';
+        $expiresAtFormatted = $profile->{$expiryColumn}?->format('d M Y') ?? '';
 
-        SendFeaturedPurchaseEmailJob::dispatchSync(
+        SendFeaturedPurchaseEmailJob::dispatch(
             $user->email,
             $user->name,
             $tierLabel,
