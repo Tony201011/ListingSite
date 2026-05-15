@@ -81,6 +81,12 @@ class FeaturedControllerTest extends TestCase
         $response->assertViewHas('isFeatured', false);
         $response->assertViewHas('creditCost', 5);
         $response->assertViewHas('userCredits', 10);
+        $response->assertSeeInOrder([
+            'Boost Your Profile',
+            'Ad Placement Graph',
+            'Available placements',
+            'How it works',
+        ]);
     }
 
     public function test_purchase_featured_returns_success_json(): void

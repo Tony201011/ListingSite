@@ -35,6 +35,12 @@ document.addEventListener('alpine:init', () => {
                 const updated = this.tiers.find(t => t.key === tier.key);
                 if (updated) {
                     updated.expiresAt = data.expires_at ?? null;
+                    window.dispatchEvent(new CustomEvent('featured-tier-updated', {
+                        detail: {
+                            key: updated.key,
+                            expiresAt: updated.expiresAt,
+                        },
+                    }));
                 }
 
                 this.userCredits -= tier.cost;
