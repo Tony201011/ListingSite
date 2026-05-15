@@ -160,7 +160,7 @@
                                                 dropRight: 0,
                                                 openDropdown() {
                                                     const r = this.$refs.btn.getBoundingClientRect();
-                                                    this.dropTop = r.bottom + 4;
+                                                    this.dropTop = r.bottom + 4; // 4px gap between button and menu
                                                     this.dropRight = window.innerWidth - r.right;
                                                     this.open = true;
                                                 }
@@ -190,7 +190,7 @@
                                                 x-transition:leave-start="transform opacity-100 scale-100"
                                                 x-transition:leave-end="transform opacity-0 scale-95"
                                                 :style="`top: ${dropTop}px; right: ${dropRight}px`"
-                                                class="fixed z-[9999] w-44 origin-top-right rounded-xl border border-gray-100 bg-white py-1 shadow-lg"
+                                                class="fixed z-50 w-44 origin-top-right rounded-xl border border-gray-100 bg-white py-1 shadow-lg"
                                             >
                                                 {{-- View --}}
                                                 <button
