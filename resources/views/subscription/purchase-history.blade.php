@@ -434,7 +434,7 @@
 </div>
 
 <script>
-var statusColorMap = {
+const statusColorMap = {
     'Paid': 'text-green-700',
     'Pending': 'text-yellow-700',
     'Failed': 'text-red-700',
