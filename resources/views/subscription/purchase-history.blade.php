@@ -166,8 +166,8 @@
                                                 @endif
                                             @else
                                                 <div class="flex items-center gap-3">
-                                                    @if($purchase->receipt_url)
-                                                        <a href="{{ $purchase->receipt_url }}" target="_blank" rel="noopener noreferrer" class="text-[#e04ecb] hover:text-[#c13ab0] font-medium">
+                                                    @if($purchase->normalized_receipt_url)
+                                                        <a href="{{ $purchase->normalized_receipt_url }}" target="_blank" rel="noopener noreferrer" class="text-[#e04ecb] hover:text-[#c13ab0] font-medium">
                                                             View Receipt
                                                         </a>
                                                     @endif

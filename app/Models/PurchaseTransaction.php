@@ -66,6 +66,46 @@ class PurchaseTransaction extends Model
         return $this->created_at->format('Y-m');
     }
 
+    public function getNormalizedReceiptUrlAttribute(): ?string
+    {
+        $url = trim((string) ($this->receipt_url ?? ''));
+
+        if ($url === '') {
+            return null;
+        }
+
+        if (str_starts_with($url, '//')) {
+            $url = 'https:'.$url;
+        }
+
+        if ($this->isHttpUrl($url)) {
+            return $url;
+        }
+
+        if (str_contains($url, '://')) {
+            return null;
+        }
+
+        $urlWithScheme = 'https://'.$url;
+
+        if ($this->isHttpUrl($urlWithScheme)) {
+            return $urlWithScheme;
+        }
+
+        return null;
+    }
+
+    private function isHttpUrl(string $url): bool
+    {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        $scheme = strtolower(parse_url($url, PHP_URL_SCHEME) ?? '');
+
+        return in_array($scheme, ['http', 'https'], true);
+    }
+
     public function complaints(): HasMany
     {
         return $this->hasMany(PurchaseComplaint::class);
