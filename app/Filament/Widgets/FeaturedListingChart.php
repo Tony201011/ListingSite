@@ -137,7 +137,7 @@ class FeaturedListingChart extends ChartWidget
         }
 
         $summary = $query
-            ->selectRaw('COUNT(*) as total_purchases, COALESCE(SUM(-amount), 0) as total_credits_spent')
+            ->selectRaw('COUNT(*) as total_purchases, COALESCE(SUM(amount) * -1, 0) as total_credits_spent')
             ->first();
 
         $this->featuredPurchaseSummaryByFilter[$cacheKey] = [
