@@ -74,7 +74,7 @@ class AdminPanelTest extends TestCase
     {
         $admin = $this->createAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin');
+        $response = $this->actingAs($admin, 'admin')->get('/admin');
 
         $response->assertOk();
     }
@@ -84,7 +84,7 @@ class AdminPanelTest extends TestCase
         $provider = $this->createProvider();
         $profile = $provider->providerProfiles()->first();
 
-        $response = $this->actingAs($provider)
+        $response = $this->actingAs($provider, 'admin')
             ->withSession(['active_provider_profile_id' => $profile->id])
             ->get('/admin');
 
@@ -119,7 +119,7 @@ class AdminPanelTest extends TestCase
     {
         $admin = $this->createAdmin();
 
-        $response = $this->actingAs($admin)->get('/admin/providers');
+        $response = $this->actingAs($admin, 'admin')->get('/admin/providers');
 
         $response->assertOk();
     }
@@ -142,7 +142,7 @@ class AdminPanelTest extends TestCase
             'is_featured' => false,
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/providers?filters[is_featured][value]=1');
+        $response = $this->actingAs($admin, 'admin')->get('/admin/providers?filters[is_featured][value]=1');
 
         $response->assertOk();
         $response->assertSeeText('Featured Profile');

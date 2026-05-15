@@ -288,7 +288,7 @@ class ContactUsTest extends TestCase
             'is_read' => false,
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/pages/contact-inquiries');
+        $response = $this->actingAs($admin, 'admin')->get('/admin/pages/contact-inquiries');
 
         $response->assertOk();
     }
@@ -304,7 +304,7 @@ class ContactUsTest extends TestCase
             'slug' => 'provider-'.$provider->id,
         ]);
 
-        $response = $this->actingAs($provider)
+        $response = $this->actingAs($provider, 'admin')
             ->withSession(['active_provider_profile_id' => $profile->id])
             ->get('/admin/pages/contact-inquiries');
 
