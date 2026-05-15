@@ -392,17 +392,6 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
-            ->where(function (Builder $q): void {
-                // Include profiles that are online OR have an active home_featured placement
-                $q->whereHas('onlineUser', function (Builder $inner): void {
-                    $inner->where('status', 'online')
-                        ->whereNotNull('online_expires_at')
-                        ->where('online_expires_at', '>', now());
-                })->orWhere(function (Builder $inner): void {
-                    $inner->whereNotNull('provider_profiles.home_featured_expires_at')
-                        ->where('provider_profiles.home_featured_expires_at', '>', now());
-                });
-            })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
