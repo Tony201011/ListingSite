@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Filament\Resources\CreditLogs;
+
+use App\Filament\Clusters\Logs;
+use App\Filament\Resources\CreditLogs\Pages\ListCreditLogs;
+use App\Models\CreditLog;
+use App\Models\SiteSetting;
+use BackedEnum;
+use Filament\Facades\Filament;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+
+class CreditLogResource extends Resource
+{
+    protected static ?string $model = CreditLog::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
+
+    protected static ?string $navigationLabel = 'Credit Logs';
+
+    protected static ?string $modelLabel = 'Credit Log';
+
+    protected static ?string $pluralModelLabel = 'Credit Logs';
+
+    protected static ?string $slug = 'credit-logs';
+
+    protected static ?string $cluster = Logs::class;
+
+    protected static ?int $navigationSort = 11;
+
+    public static function canAccess(): bool
+    {
+        return Filament::getCurrentPanel()?->getId() === 'admin'
+            && SiteSetting::isLoggingEnabled();
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+                TextColumn::make('user.name')
+                    ->label('User')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('user.email')
+                    ->label('Email')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('amount')
+                    ->label('Credits')
+                    ->alignCenter()
+                    ->formatStateUsing(fn (int $state): string => $state > 0 ? "+{$state}" : (string) $state)
+                    ->badge()
+                    ->color(fn (int $state): string => $state >= 0 ? 'success' : 'danger')
+                    ->sortable(),
+                TextColumn::make('type')
+                    ->label('Type')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'daily_deduction' => 'Daily Listing Fee',
+                        'used' => 'Featured/Ad Spend',
+                        'purchase_credit' => 'Credit Purchase',
+                        default => str($state)->headline()->toString(),
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'daily_deduction' => 'warning',
+                        'used' => 'danger',
+                        'purchase_credit' => 'success',
+                        default => 'gray',
+                    }),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->searchable()
+                    ->limit(80)
+                    ->tooltip(fn (CreditLog $record): string => $record->description),
+                TextColumn::make('reference_type')
+                    ->label('Reference')
+                    ->formatStateUsing(fn (?string $state): string => $state ? class_basename($state) : '-')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')
+                    ->label('Logged At')
+                    ->dateTime()
+                    ->since()
+                    ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('type')
+                    ->label('Activity')
+                    ->options([
+                        'daily_deduction' => 'Daily Listing Fee',
+                        'used' => 'Featured/Ad Spend',
+                        'purchase_credit' => 'Credit Purchase',
+                    ]),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->striped()
+            ->emptyStateHeading('No credit logs yet')
+            ->emptyStateDescription('Daily listing charges, featured/ad spends, and credit purchases will appear here.');
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListCreditLogs::route('/'),
+        ];
+    }
+}
