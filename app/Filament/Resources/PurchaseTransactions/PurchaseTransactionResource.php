@@ -9,16 +9,16 @@ use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Actions\ViewAction;
-use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -347,7 +347,7 @@ class PurchaseTransactionResource extends Resource
                 'description' => $log->description,
                 'type' => Str::of($log->type)->replace('_', ' ')->title()->toString(),
                 'reference' => $log->reference_type
-                    ? class_basename($log->reference_type) . ($log->reference_id ? " #{$log->reference_id}" : '')
+                    ? class_basename($log->reference_type).($log->reference_id ? " #{$log->reference_id}" : '')
                     : null,
                 'details_url' => self::resolveWalletSpendDetailsUrl($log),
             ])
@@ -367,6 +367,16 @@ class PurchaseTransactionResource extends Resource
             ];
         }
 
+        $request = request();
+        $cacheKey = (int) $record->user_id;
+        $summaryCache = is_object($request)
+            ? (array) $request->attributes->get('wallet_spend_summary_cache', [])
+            : [];
+
+        if (isset($summaryCache[$cacheKey])) {
+            return $summaryCache[$cacheKey];
+        }
+
         $usedBalance = abs((int) CreditLog::query()
             ->where('user_id', $record->user_id)
             ->where('amount', '<', 0)
@@ -374,11 +384,18 @@ class PurchaseTransactionResource extends Resource
 
         $remainingBalance = (int) ($record->user?->credits ?? 0);
 
-        return [
+        $summary = [
             'total_balance' => $usedBalance + $remainingBalance,
             'used_balance' => $usedBalance,
             'remaining_balance' => $remainingBalance,
         ];
+
+        if (is_object($request)) {
+            $summaryCache[$cacheKey] = $summary;
+            $request->attributes->set('wallet_spend_summary_cache', $summaryCache);
+        }
+
+        return $summary;
     }
 
     private static function resolveWalletSpendDetailsUrl(CreditLog $log): ?string
