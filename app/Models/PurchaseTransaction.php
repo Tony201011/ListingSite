@@ -74,17 +74,36 @@ class PurchaseTransaction extends Model
             return null;
         }
 
-        if (filter_var($url, FILTER_VALIDATE_URL)) {
+        if (str_starts_with($url, '//')) {
+            $url = 'https:'.$url;
+        }
+
+        if ($this->isHttpUrl($url)) {
             return $url;
         }
 
-        $urlWithScheme = 'https://'.ltrim($url, '/');
+        if (str_contains($url, '://')) {
+            return null;
+        }
 
-        if (filter_var($urlWithScheme, FILTER_VALIDATE_URL)) {
+        $urlWithScheme = 'https://'.$url;
+
+        if ($this->isHttpUrl($urlWithScheme)) {
             return $urlWithScheme;
         }
 
         return null;
+    }
+
+    private function isHttpUrl(string $url): bool
+    {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        $scheme = strtolower(parse_url($url, PHP_URL_SCHEME) ?? '');
+
+        return in_array($scheme, ['http', 'https'], true);
     }
 
     public function complaints(): HasMany
