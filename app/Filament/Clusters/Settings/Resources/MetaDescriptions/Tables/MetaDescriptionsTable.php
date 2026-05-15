@@ -2,7 +2,9 @@
 
 namespace App\Filament\Clusters\Settings\Resources\MetaDescriptions\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -44,8 +46,8 @@ class MetaDescriptionsTable
             ])
             ->recordActions([
                 EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
-                \Filament\Actions\Action::make('view')
+                DeleteAction::make(),
+                Action::make('view')
                     ->icon('heroicon-o-eye')
                     ->label('View')
                     ->modalHeading('Full Meta Description')

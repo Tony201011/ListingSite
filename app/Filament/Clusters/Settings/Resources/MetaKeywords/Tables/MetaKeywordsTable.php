@@ -2,7 +2,9 @@
 
 namespace App\Filament\Clusters\Settings\Resources\MetaKeywords\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -42,14 +44,14 @@ class MetaKeywordsTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                \Filament\Actions\Action::make('view')
+                Action::make('view')
                     ->icon('heroicon-o-eye')
                     ->label('View')
                     ->modalHeading('Full Meta Keyword')
                     ->modalContent(fn ($record) => view('filament.modals.meta-keyword', ['record' => $record]))
                     ->color('info'),
                 EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

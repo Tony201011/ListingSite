@@ -7,7 +7,7 @@ use App\Models\UserVideo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UserVideo>
+ * @extends Factory<UserVideo>
  */
 class UserVideoFactory extends Factory
 {

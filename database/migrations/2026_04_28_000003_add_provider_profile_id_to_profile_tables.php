@@ -30,14 +30,14 @@ return new class extends Migration
             return;
         }
 
-        $exists = DB::selectOne("
+        $exists = DB::selectOne('
             SELECT CONSTRAINT_NAME
             FROM information_schema.KEY_COLUMN_USAGE
             WHERE TABLE_SCHEMA = DATABASE()
               AND TABLE_NAME = ?
               AND CONSTRAINT_NAME = ?
               AND REFERENCED_TABLE_NAME IS NOT NULL
-        ", [$table, $fkName]);
+        ', [$table, $fkName]);
 
         if ($exists) {
             DB::statement("ALTER TABLE `$table` DROP FOREIGN KEY `$fkName`");
@@ -50,13 +50,13 @@ return new class extends Migration
             return;
         }
 
-        $exists = DB::selectOne("
+        $exists = DB::selectOne('
             SELECT INDEX_NAME
             FROM information_schema.STATISTICS
             WHERE TABLE_SCHEMA = DATABASE()
               AND TABLE_NAME = ?
               AND INDEX_NAME = ?
-        ", [$table, $indexName]);
+        ', [$table, $indexName]);
 
         if ($exists) {
             DB::statement("ALTER TABLE `$table` DROP INDEX `$indexName`");
@@ -69,7 +69,7 @@ return new class extends Migration
 
         foreach ($allTables as $table) {
             Schema::table($table, function (Blueprint $t) use ($table) {
-                if (!Schema::hasColumn($table, 'provider_profile_id')) {
+                if (! Schema::hasColumn($table, 'provider_profile_id')) {
                     $t->unsignedBigInteger('provider_profile_id')->nullable()->after('user_id');
                 }
             });

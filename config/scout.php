@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\ProviderProfile;
+
 return [
 
     /*
@@ -140,7 +142,7 @@ return [
             'retry_interval_seconds' => env('TYPESENSE_RETRY_INTERVAL', 0.1),
         ],
         'model-settings' => [
-            \App\Models\ProviderProfile::class => [
+            ProviderProfile::class => [
                 'collection-schema' => [
                     'fields' => [
                         ['name' => 'id', 'type' => 'string'],

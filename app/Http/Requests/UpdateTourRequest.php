@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Validator;
 
 class UpdateTourRequest extends FormRequest
 {
@@ -23,9 +24,9 @@ class UpdateTourRequest extends FormRequest
         ];
     }
 
-    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function (\Illuminate\Validation\Validator $v) {
+        $validator->after(function (Validator $v) {
             $from = strtotime((string) $this->input('from'));
             $to = strtotime((string) $this->input('to'));
 

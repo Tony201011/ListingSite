@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Twilio\Rest\Client;
 
 class TwilioService
@@ -21,7 +22,7 @@ class TwilioService
      *
      * @param  string  $to  Recipient phone number (E.164 format)
      * @param  string  $message
-     * @return \Twilio\Rest\Api\V2010\Account\MessageInstance
+     * @return MessageInstance
      */
     public function sendSms($to, $message)
     {

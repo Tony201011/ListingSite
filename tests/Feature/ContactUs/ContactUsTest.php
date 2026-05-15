@@ -4,6 +4,8 @@ namespace Tests\Feature\ContactUs;
 
 use App\Actions\CreateContactInquiry;
 use App\Actions\SendContactInquiryReplyEmail;
+use App\Jobs\SendContactInquiryEmailJob;
+use App\Jobs\SendContactInquiryReplyEmailJob;
 use App\Models\ContactInquiry;
 use App\Models\ContactUsPage;
 use App\Models\ProviderProfile;
@@ -164,7 +166,7 @@ class ContactUsTest extends TestCase
             'message' => 'Please contact me.',
         ]);
 
-        Bus::assertDispatched(\App\Jobs\SendContactInquiryEmailJob::class);
+        Bus::assertDispatched(SendContactInquiryEmailJob::class);
     }
 
     public function test_contact_form_validation_requires_name_when_enabled(): void
@@ -417,7 +419,7 @@ class ContactUsTest extends TestCase
         $action = app(SendContactInquiryReplyEmail::class);
         $action->execute($inquiry);
 
-        Bus::assertDispatched(\App\Jobs\SendContactInquiryReplyEmailJob::class, function ($job) use ($inquiry) {
+        Bus::assertDispatched(SendContactInquiryReplyEmailJob::class, function ($job) use ($inquiry) {
             return $job->inquiryId === $inquiry->id;
         });
     }

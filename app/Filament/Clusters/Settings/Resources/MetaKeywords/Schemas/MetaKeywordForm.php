@@ -2,6 +2,7 @@
 
 namespace App\Filament\Clusters\Settings\Resources\MetaKeywords\Schemas;
 
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -14,7 +15,7 @@ class MetaKeywordForm
             ->components([
                 TextInput::make('page_name')
                     ->required(),
-                \Filament\Forms\Components\TagsInput::make('meta_keyword')
+                TagsInput::make('meta_keyword')
                     ->label('Meta Keywords')
                     ->placeholder('Add a keyword and press Enter')
                     ->splitKeys(['Enter', ',']),

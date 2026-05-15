@@ -15,6 +15,7 @@ class PostcodeSeeder extends Seeder
 
         if (! file_exists($csvPath) || ! is_readable($csvPath)) {
             $this->command->error("CSV file not found or not readable at: {$csvPath}");
+
             return;
         }
 
@@ -27,6 +28,7 @@ class PostcodeSeeder extends Seeder
         if (! $header) {
             $this->command->error('Invalid CSV file: missing header row.');
             fclose($handle);
+
             return;
         }
 
@@ -42,6 +44,7 @@ class PostcodeSeeder extends Seeder
         while (($data = fgetcsv($handle)) !== false) {
             if (count($data) !== count($header)) {
                 $skipped++;
+
                 continue;
             }
 
@@ -59,6 +62,7 @@ class PostcodeSeeder extends Seeder
 
             if (! $postcode || ! $suburb || ! $state) {
                 $skipped++;
+
                 continue;
             }
 
@@ -121,7 +125,7 @@ class PostcodeSeeder extends Seeder
                 try {
                     DB::table('postcodes')->insert($row);
                 } catch (Throwable $inner) {
-                    $this->command->error('Failed row: ' . json_encode($row));
+                    $this->command->error('Failed row: '.json_encode($row));
                     throw $inner;
                 }
             }

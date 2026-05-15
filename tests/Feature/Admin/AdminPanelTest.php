@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
+use Filament\Panel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -98,7 +99,7 @@ class AdminPanelTest extends TestCase
     public function test_admin_can_access_admin_panel_via_can_access_panel(): void
     {
         $admin = $this->createAdmin();
-        $panel = app(\Filament\Panel::class)::make()->id('admin');
+        $panel = app(Panel::class)::make()->id('admin');
 
         $this->assertTrue($admin->canAccessPanel($panel));
     }
@@ -106,7 +107,7 @@ class AdminPanelTest extends TestCase
     public function test_provider_cannot_access_admin_panel_via_can_access_panel(): void
     {
         $provider = $this->createProvider();
-        $panel = app(\Filament\Panel::class)::make()->id('admin');
+        $panel = app(Panel::class)::make()->id('admin');
 
         $this->assertFalse($provider->canAccessPanel($panel));
     }
