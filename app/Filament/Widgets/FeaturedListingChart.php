@@ -23,24 +23,58 @@ class FeaturedListingChart extends ChartWidget
         return Filament::getCurrentPanel()?->getId() === 'admin';
     }
 
+    private const YEAR_RANGE = 4;
+
+    protected function getFilters(): ?array
+    {
+        $currentYear = (int) Carbon::now()->year;
+        $filters = ['all' => 'All Time'];
+
+        for ($year = $currentYear; $year >= $currentYear - self::YEAR_RANGE; $year--) {
+            $filters[(string) $year] = (string) $year;
+        }
+
+        return $filters;
+    }
+
     protected function getData(): array
     {
+        $filter = $this->filter ?? 'all';
         $now = Carbon::now();
-        $stats = ProviderProfile::query()
+
+        $query = ProviderProfile::query()
             ->withoutTrashed()
-            ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
-            ->selectRaw('
-                SUM(CASE WHEN is_featured = 1 AND featured_expires_at IS NOT NULL AND featured_expires_at > ? THEN 1 ELSE 0 END) as featured_listing,
-                SUM(CASE WHEN home_featured_expires_at IS NOT NULL AND home_featured_expires_at > ? THEN 1 ELSE 0 END) as home_featured,
-                SUM(CASE WHEN local_banner_expires_at IS NOT NULL AND local_banner_expires_at > ? THEN 1 ELSE 0 END) as local_banner,
-                SUM(CASE WHEN home_banner_expires_at IS NOT NULL AND home_banner_expires_at > ? THEN 1 ELSE 0 END) as home_banner
-            ', [$now, $now, $now, $now])
-            ->first();
+            ->whereHas('user', fn ($q) => $q->where('role', User::ROLE_PROVIDER));
+
+        if ($filter === 'all') {
+            $stats = $query
+                ->selectRaw('
+                    SUM(CASE WHEN is_featured = 1 AND featured_expires_at IS NOT NULL AND featured_expires_at > ? THEN 1 ELSE 0 END) as featured_listing,
+                    SUM(CASE WHEN home_featured_expires_at IS NOT NULL AND home_featured_expires_at > ? THEN 1 ELSE 0 END) as home_featured,
+                    SUM(CASE WHEN local_banner_expires_at IS NOT NULL AND local_banner_expires_at > ? THEN 1 ELSE 0 END) as local_banner,
+                    SUM(CASE WHEN home_banner_expires_at IS NOT NULL AND home_banner_expires_at > ? THEN 1 ELSE 0 END) as home_banner
+                ', [$now, $now, $now, $now])
+                ->first();
+        } else {
+            $year = (int) $filter;
+            $start = Carbon::createFromDate($year, 1, 1)->startOfYear()->toDateTimeString();
+            $end = Carbon::createFromDate($year, 12, 31)->endOfYear()->toDateTimeString();
+            $stats = $query
+                ->selectRaw('
+                    SUM(CASE WHEN is_featured = 1 AND featured_expires_at IS NOT NULL AND featured_expires_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as featured_listing,
+                    SUM(CASE WHEN home_featured_expires_at IS NOT NULL AND home_featured_expires_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as home_featured,
+                    SUM(CASE WHEN local_banner_expires_at IS NOT NULL AND local_banner_expires_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as local_banner,
+                    SUM(CASE WHEN home_banner_expires_at IS NOT NULL AND home_banner_expires_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as home_banner
+                ', [$start, $end, $start, $end, $start, $end, $start, $end])
+                ->first();
+        }
+
+        $label = $filter === 'all' ? 'Active Placements' : "Placements in {$filter}";
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Active Placements',
+                    'label' => $label,
                     'data' => [
                         (int) ($stats?->featured_listing ?? 0),
                         (int) ($stats?->home_featured ?? 0),
