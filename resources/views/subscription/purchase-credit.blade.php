@@ -76,6 +76,12 @@
                                 <p class="mt-1 text-xs text-gray-500">{{ $selectedPackage->name }}</p>
                             @endif
                             <p class="mt-3 text-xs text-gray-500">This membership selection is locked for the current checkout.</p>
+                            <a
+                                href="{{ route('purchase-credit') }}"
+                                class="mt-3 inline-flex text-xs font-semibold text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline"
+                            >
+                                Add a fresh balance instead &rarr;
+                            </a>
                         </div>
                     @else
                         <div class="rounded-xl border border-gray-100">
