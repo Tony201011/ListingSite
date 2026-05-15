@@ -65,7 +65,9 @@ class AdminPanelTest extends TestCase
         $response = $this->get('/admin/login');
 
         $response->assertOk();
-        $response->assertDontSee('/site-password');
+        $response->assertSeeText('Email address');
+        $response->assertDontSeeText('Enter Site Password');
+        $response->assertDontSee('action="/site-password"', false);
     }
 
     public function test_admin_user_can_access_admin_panel(): void
