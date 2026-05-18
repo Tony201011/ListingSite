@@ -53,16 +53,48 @@
                             </div>
                         @endif
 
-                        @if(!empty($profile['home_banner']) || !empty($profile['home_featured']))
-                            <x-featured-badge variant="glow" position="top-right" label="Featured" icon="crown" />
-                        @elseif(!empty($profile['local_banner']))
-                            <x-featured-badge variant="glow" position="top-right" label="Local" icon="star" />
-                        @elseif(!empty($profile['featured']))
-                            <x-featured-badge variant="minimal" position="top-right" />
+                        @php
+                            $featuredBadgeVariant = null;
+                            $featuredBadgeLabel = null;
+                            $featuredBadgeIcon = 'crown';
+
+                            if (!empty($profile['home_banner']) || !empty($profile['home_featured'])) {
+                                $featuredBadgeVariant = 'glow';
+                                $featuredBadgeLabel = 'Featured';
+                            } elseif (!empty($profile['local_banner'])) {
+                                $featuredBadgeVariant = 'glow';
+                                $featuredBadgeLabel = 'Local';
+                                $featuredBadgeIcon = 'star';
+                            } elseif (!empty($profile['featured'])) {
+                                $featuredBadgeVariant = 'minimal';
+                                $featuredBadgeLabel = 'Featured';
+                            }
+
+                            $hasFeaturedBadge = $featuredBadgeVariant !== null;
+                            $hasTopBadgeRow = $profile['active'] || $hasFeaturedBadge;
+                        @endphp
+
+                        @if($hasTopBadgeRow)
+                            <div class="pointer-events-none absolute inset-x-0 top-3 z-20 px-2 sm:px-3">
+                                <div class="flex items-center gap-1 sm:gap-1.5">
+                                    @if($profile['active'])
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm sm:text-[11px] whitespace-nowrap">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
+                                        </span>
+                                    @endif
+                                    @if($hasFeaturedBadge)
+                                        <x-featured-badge :variant="$featuredBadgeVariant" position="inline" :label="$featuredBadgeLabel" :icon="$featuredBadgeIcon" />
+                                    @endif
+                                </div>
+                            </div>
                         @endif
 
                         {{-- Photo Verified / Available Now / Online badges --}}
-                        <div class="absolute left-0 top-3 z-10 flex flex-col gap-1">
+                        <div @class([
+                            'absolute left-0 z-10 flex flex-col gap-1',
+                            'top-11 sm:top-12' => $hasTopBadgeRow,
+                            'top-3' => ! $hasTopBadgeRow,
+                        ])>
                             @if($profile['verified'])
                                 <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
                                     <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
@@ -71,11 +103,6 @@
                             @if(!empty($profile['available_now']))
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0; background-color: #e13a8b;">
                                     <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
-                                </span>
-                            @endif
-                            @if($profile['active'])
-                                <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
                                 </span>
                             @endif
                         </div>
