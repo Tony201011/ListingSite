@@ -44,6 +44,14 @@ class EnsureProviderAccess
             ]);
         }
 
+        if (! $user->hasVerifiedEmail()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Please verify your email address.'], 403);
+            }
+
+            return redirect()->route('verification.notice');
+        }
+
         return $next($request);
     }
 }
