@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AvailableNow;
 use App\Models\Country;
 use App\Models\HideShowProfile;
 use App\Models\OnlineUser;
@@ -87,6 +88,19 @@ class HomeControllerTest extends TestCase
         ]);
     }
 
+    private function createActiveAvailableNow(User $user, int $providerProfileId): void
+    {
+        AvailableNow::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $providerProfileId,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'available_started_at' => now()->subMinutes(5),
+            'available_expires_at' => now()->addMinutes(55),
+        ]);
+    }
+
     // ---------------------------------------------------------------
     // Basic rendering
     // ---------------------------------------------------------------
@@ -163,6 +177,25 @@ class HomeControllerTest extends TestCase
         $this->assertSame('case-favourite', $profiles[0]['slug']);
     }
 
+    public function test_favourites_listing_shows_both_available_and_online_badges_when_both_statuses_are_active(): void
+    {
+        $provider = $this->createApprovedProvider([
+            'name' => 'Favourite Badge Escort',
+            'slug' => 'favourite-badge-escort',
+        ]);
+        $profileId = ProviderProfile::query()->where('user_id', $provider->id)->value('id');
+        $this->createActiveAvailableNow($provider, $profileId);
+
+        $viewer = User::factory()->create();
+        Cache::put("favourites_user_{$viewer->id}", ['favourite-badge-escort'], 60);
+
+        $response = $this->actingAs($viewer)->get('/favourites');
+
+        $response->assertOk();
+        $response->assertSeeText('Available Now');
+        $response->assertSeeText('Online Now');
+    }
+
     public function test_home_page_shows_default_filter_values(): void
     {
         $response = $this->get('/');
@@ -175,6 +208,38 @@ class HomeControllerTest extends TestCase
         $response->assertViewHas('girlsMode', 'all');
         $response->assertViewHas('hasAgeFilter', false);
         $response->assertViewHas('hasPriceFilter', false);
+    }
+
+    public function test_home_listing_shows_both_available_and_online_badges_when_both_statuses_are_active(): void
+    {
+        $user = $this->createApprovedProvider([
+            'name' => 'Badge Test Escort',
+            'slug' => 'badge-test-escort',
+        ]);
+        $profileId = ProviderProfile::query()->where('user_id', $user->id)->value('id');
+        $this->createActiveAvailableNow($user, $profileId);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSeeText('Available Now');
+        $response->assertSeeText('Online Now');
+    }
+
+    public function test_advanced_search_listing_shows_both_available_and_online_badges_when_both_statuses_are_active(): void
+    {
+        $user = $this->createApprovedProvider([
+            'name' => 'Advanced Badge Test Escort',
+            'slug' => 'advanced-badge-test-escort',
+        ]);
+        $profileId = ProviderProfile::query()->where('user_id', $user->id)->value('id');
+        $this->createActiveAvailableNow($user, $profileId);
+
+        $response = $this->get(route('advanced-search'));
+
+        $response->assertOk();
+        $response->assertSeeText('Available Now');
+        $response->assertSeeText('Online Now');
     }
 
     // ---------------------------------------------------------------
