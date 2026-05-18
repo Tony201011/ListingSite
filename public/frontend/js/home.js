@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('[data-featured-slider]').forEach(function (slider) {
         const track = slider.querySelector('[data-slider-track]');
-        const prevButton = slider.parentElement?.querySelector('[data-slider-prev]');
-        const nextButton = slider.parentElement?.querySelector('[data-slider-next]');
+        const prevButton = slider.querySelector('[data-slider-prev]');
+        const nextButton = slider.querySelector('[data-slider-next]');
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         // 1px tolerance avoids boundary flicker from sub-pixel scroll rounding.
         const scrollEdgeTolerance = 1;
