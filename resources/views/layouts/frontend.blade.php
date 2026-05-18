@@ -34,7 +34,19 @@
 
     @stack('styles')
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans @yield('bodyClass')" x-data="{
+@php
+    $authProtectedRoute = collect(request()->route()?->gatherMiddleware() ?? [])->contains(
+        static fn (mixed $middleware): bool => is_string($middleware)
+            && ($middleware === 'provider.auth' || str_starts_with($middleware, 'auth'))
+    );
+@endphp
+
+<body
+    class="bg-gray-900 text-gray-100 font-sans @yield('bodyClass')"
+    data-auth-protected="{{ $authProtectedRoute ? '1' : '0' }}"
+    data-signin-url="{{ route('signin') }}"
+    data-logout-url="{{ route('logout') }}"
+    x-data="{
         mobileMenu: false,
         showScrollTop: false,
         prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -44,7 +56,8 @@
                 this.showScrollTop = window.scrollY > 300;
             }, { passive: true });
         }
-    }">
+    }"
+>
 
     @include('layouts.partials.header')
 
@@ -105,6 +118,7 @@
     </button>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/auth-session-sync.js') }}"></script>
 
     <script>
         function confirmSignOut(form) {
@@ -118,7 +132,7 @@
                 confirmButtonColor: '#db2777',
             }).then(function (result) {
                 if (result.isConfirmed) {
-                    form.submit();
+                    window.authSessionSync?.submitLogout(form);
                 }
             });
         }
