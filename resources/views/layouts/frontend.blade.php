@@ -43,6 +43,7 @@
 
 <body
     class="bg-gray-900 text-gray-100 font-sans @yield('bodyClass')"
+    data-authenticated="{{ auth('web')->check() ? '1' : '0' }}"
     data-auth-protected="{{ $authProtectedRoute ? '1' : '0' }}"
     data-signin-url="{{ route('signin') }}"
     data-logout-url="{{ route('logout') }}"
@@ -137,6 +138,12 @@
             });
         }
     </script>
+
+    @if (session('auth_session_sync.type') === 'login')
+        <script>
+            window.authSessionSync?.notifyLogin(@json(session('auth_session_sync')));
+        </script>
+    @endif
 
     @stack('scripts')
 

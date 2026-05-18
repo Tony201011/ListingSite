@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Js;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -48,7 +49,23 @@ class AppServiceProvider extends ServiceProvider
 
         FilamentView::registerRenderHook(
             'panels::body.end',
-            fn (): string => '<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>',
+            function (): string {
+                $authSessionSync = session('auth_session_sync');
+
+                return implode('', array_filter([
+                    sprintf(
+                        '<script>document.body.dataset.authProtected="1";document.body.dataset.authenticated="%s";document.body.dataset.signinUrl=%s;document.body.dataset.logoutUrl=%s;</script>',
+                        auth('admin')->check() ? '1' : '0',
+                        Js::from(route('signin')),
+                        Js::from(route('logout')),
+                    ),
+                    '<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>',
+                    sprintf('<script src="%s"></script>', e(asset('js/auth-session-sync.js'))),
+                    is_array($authSessionSync) && ($authSessionSync['type'] ?? null) === 'login'
+                        ? sprintf('<script>window.authSessionSync?.notifyLogin(%s);</script>', Js::from($authSessionSync))
+                        : null,
+                ]));
+            },
         );
 
         if (! app()->runningInConsole()) {
