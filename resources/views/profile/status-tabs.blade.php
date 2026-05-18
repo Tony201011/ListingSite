@@ -83,7 +83,7 @@
                     <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
                         <p class="text-sm font-medium text-gray-500">Daily usage rule</p>
                         <p class="mt-2 text-base font-semibold text-gray-900">
-                            Use this feature up to {{ $onlineMaxUses }} {{ Str::plural('time', $onlineMaxUses) }} a day for {{ $onlineDurationMinutes % 60 === 0 ? ($onlineDurationMinutes / 60).' '.Str::plural('hour', $onlineDurationMinutes / 60) : $onlineDurationMinutes.' '.Str::plural('minute', $onlineDurationMinutes) }}.
+                            Use this feature up to {{ $onlineMaxUses }} {{ Str::plural('time', $onlineMaxUses) }} a day for {{ format_clock_duration_from_minutes($onlineDurationMinutes) }}.
                         </p>
                     </div>
 
@@ -270,7 +270,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('profile/js/online-now-toggle.js') }}"></script>
+<script src="{{ asset('profile/js/online-now-toggle.js') }}?v={{ filemtime(public_path('profile/js/online-now-toggle.js')) }}"></script>
 <script src="{{ asset('profile/js/hide-toggle.js') }}?v={{ filemtime(public_path('profile/js/hide-toggle.js')) }}"></script>
-<script src="{{ asset('profile/js/available-toggle.js') }}"></script>
+<script src="{{ asset('profile/js/available-toggle.js') }}?v={{ filemtime(public_path('profile/js/available-toggle.js')) }}"></script>
 @endpush

@@ -102,3 +102,16 @@ if (! function_exists('main_menu_items')) {
         });
     }
 }
+
+if (! function_exists('format_clock_duration_from_minutes')) {
+    function format_clock_duration_from_minutes(int $minutes): string
+    {
+        $totalSeconds = max(0, $minutes) * 60;
+        $hours = intdiv($totalSeconds, 3600);
+        $remainingSeconds = $totalSeconds % 3600;
+        $mins = intdiv($remainingSeconds, 60);
+        $seconds = $remainingSeconds % 60;
+
+        return sprintf('%02d:%02d:%02d', $hours, $mins, $seconds);
+    }
+}

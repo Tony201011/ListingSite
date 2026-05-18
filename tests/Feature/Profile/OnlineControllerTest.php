@@ -82,7 +82,7 @@ class OnlineControllerTest extends TestCase
                 'status' => 'online',
                 'remaining_uses' => 3,
                 'expires_at' => '2026-04-14T03:50:22+00:00',
-            ], 'Online Now enabled for 60 minutes.'));
+            ], 'Online Now enabled for 01:00:00.'));
 
         $this->app->instance(UpdateOnlineNowStatus::class, $updateOnlineNowStatus);
 
@@ -93,7 +93,7 @@ class OnlineControllerTest extends TestCase
         $response->assertOk();
         $response->assertJson([
             'success' => true,
-            'message' => 'Online Now enabled for 60 minutes.',
+            'message' => 'Online Now enabled for 01:00:00.',
             'status' => 'online',
         ]);
     }
