@@ -485,6 +485,7 @@ class HomeControllerTest extends TestCase
             'profile_status' => 'approved',
             'age' => 25,
             'state_id' => $state->id,
+            'suburb' => 'UNDERBOOL, VIC 0000',
             'local_banner_expires_at' => now()->addDay(),
         ]);
         $this->createActiveOnlineUser($user, ProviderProfile::query()->where('user_id', $user->id)->value('id'));
@@ -795,7 +796,7 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($names->contains('New Escort'));
     }
 
-    public function test_home_page_shows_featured_profile_even_when_offline(): void
+    public function test_home_page_hides_featured_profile_when_offline(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
@@ -822,7 +823,100 @@ class HomeControllerTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertTrue($names->contains('Featured Offline Escort'));
+        $this->assertFalse($names->contains('Featured Offline Escort'));
+    }
+
+    public function test_home_spotlight_slider_hides_offline_profiles_even_when_home_banner_is_active(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Online Spotlight Escort',
+            'slug' => 'online-spotlight-escort',
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $offlineUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $offlineProfile = ProviderProfile::query()->create([
+            'user_id' => $offlineUser->id,
+            'name' => 'Offline Spotlight Escort',
+            'slug' => 'offline-spotlight-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+        OnlineUser::query()->create([
+            'user_id' => $offlineUser->id,
+            'provider_profile_id' => $offlineProfile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/');
+
+        $homeSpotlightNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($homeSpotlightNames->contains('Online Spotlight Escort'));
+        $this->assertFalse($homeSpotlightNames->contains('Offline Spotlight Escort'));
+    }
+
+    public function test_featured_page_only_shows_online_profiles_for_all_featured_tiers(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Online Home Banner',
+            'slug' => 'online-home-banner',
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+        $this->createApprovedProvider([
+            'name' => 'Online Home Featured',
+            'slug' => 'online-home-featured',
+            'home_featured_expires_at' => now()->addDay(),
+        ]);
+        $this->createApprovedProvider([
+            'name' => 'Online Local Banner',
+            'slug' => 'online-local-banner',
+            'local_banner_expires_at' => now()->addDay(),
+        ]);
+        $this->createApprovedProvider([
+            'name' => 'Online Featured',
+            'slug' => 'online-featured',
+            'featured_expires_at' => now()->addDay(),
+        ]);
+
+        $offlineUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $offlineProfile = ProviderProfile::query()->create([
+            'user_id' => $offlineUser->id,
+            'name' => 'Offline Tier Escort',
+            'slug' => 'offline-tier-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'home_banner_expires_at' => now()->addDay(),
+            'home_featured_expires_at' => now()->addDay(),
+            'local_banner_expires_at' => now()->addDay(),
+            'featured_expires_at' => now()->addDay(),
+        ]);
+        OnlineUser::query()->create([
+            'user_id' => $offlineUser->id,
+            'provider_profile_id' => $offlineProfile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/featured');
+
+        $response->assertOk();
+        $this->assertTrue(collect($response->viewData('homeBannerProfiles'))->pluck('name')->contains('Online Home Banner'));
+        $this->assertTrue(collect($response->viewData('homeFeaturedProfiles'))->pluck('name')->contains('Online Home Featured'));
+        $this->assertTrue(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Online Local Banner'));
+        $this->assertTrue(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Online Featured'));
+
+        $this->assertFalse(collect($response->viewData('homeBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertFalse(collect($response->viewData('homeFeaturedProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertFalse(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertFalse(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
     }
 
     // ---------------------------------------------------------------
