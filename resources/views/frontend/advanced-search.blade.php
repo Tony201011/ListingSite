@@ -591,7 +591,8 @@
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0; background-color: #e13a8b;">
                                             <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
                                         </span>
-                                    @elseif($profile['active'])
+                                    @endif
+                                    @if($profile['active'])
                                         <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
                                             <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
                                         </span>
