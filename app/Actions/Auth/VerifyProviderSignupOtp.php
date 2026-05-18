@@ -96,12 +96,13 @@ class VerifyProviderSignupOtp
 
         $this->sendProviderAccountEmails->execute($user);
 
-        //  Auth::login($user);
+        Auth::login($user);
+        request()->session()->regenerate();
 
         $this->expireOtpSession($pendingKey);
 
         return ActionResult::success([
-            'redirect' => url('/signin'),
+            'redirect' => route('verification.notice'),
         ], 'Your account has been successfully created! 🎉Before you proceed further, please verify your email address..');
     }
 

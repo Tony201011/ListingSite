@@ -170,13 +170,16 @@ class SignupAndOtpFlowTest extends TestCase
         ]);
     }
 
-    public function test_otp_verify_success_does_not_log_in_the_user(): void
+    public function test_otp_verify_success_logs_in_the_unverified_user_and_redirects_to_email_notice(): void
     {
         $this->from('/signup')->post('/signup', $this->validSignupPayload());
 
-        $this->postJson('/verify-otp', ['otp' => self::DUMMY_OTP]);
+        $response = $this->postJson('/verify-otp', ['otp' => self::DUMMY_OTP]);
 
-        $this->assertGuest();
+        $response->assertOk();
+        $response->assertJsonPath('redirect', route('verification.notice'));
+        $this->assertAuthenticated();
+        $this->assertNull(auth()->user()?->email_verified_at);
     }
 
     public function test_otp_verify_success_clears_pending_session(): void

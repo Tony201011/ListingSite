@@ -19,6 +19,12 @@
             </div>
         @endif
 
+        @if ($errors->any())
+            <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 mb-6 text-sm font-medium">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
 
             <p class="text-gray-600 mb-6 text-sm leading-relaxed">
