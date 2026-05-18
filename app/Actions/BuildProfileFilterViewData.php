@@ -435,6 +435,19 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->where(function (Builder $q): void {
+                // Always show featured profiles and profiles that have never set an online status.
+                // Only show non-featured profiles that have an online record when they are
+                // currently active (status='online' with a future expiry), mirroring the
+                // offline-redirect behaviour on the individual profile page.
+                $q->where('provider_profiles.is_featured', true)
+                    ->orWhereDoesntHave('onlineUser')
+                    ->orWhereHas('onlineUser', function (Builder $onlineQ): void {
+                        $onlineQ->where('status', 'online')
+                            ->whereNotNull('online_expires_at')
+                            ->where('online_expires_at', '>', now());
+                    });
+            })
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
