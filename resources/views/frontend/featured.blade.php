@@ -36,12 +36,12 @@
             </div>
         @else
 
-            {{-- Home Page Spotlight (home banner) --}}
+            {{-- Home Page Featured Banner (home banner) --}}
             @if($homeBannerProfiles->isNotEmpty())
                 <div class="mb-8">
                     <div class="mb-3 flex items-center gap-2">
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
-                            <i class="fa-solid fa-crown text-[10px]"></i> Home Page Spotlight
+                            <i class="fa-solid fa-crown text-[10px]"></i> Home Page Featured Banner
                         </span>
                         <span class="text-xs text-gray-500">National — shown at the top of the home page</span>
                     </div>
@@ -72,12 +72,12 @@
                 <hr class="mb-8 border-gray-200">
             @endif
 
-            {{-- Local Spotlight --}}
+            {{-- Local Featured --}}
             @if($localBannerProfiles->isNotEmpty())
                 <div class="mb-8">
                     <div class="mb-3 flex items-center gap-2">
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
-                            <i class="fa-solid fa-location-dot text-[10px]"></i> Local Spotlight
+                            <i class="fa-solid fa-location-dot text-[10px]"></i> Local Featured
                         </span>
                         <span class="text-xs text-gray-500">State-specific banner profiles</span>
                     </div>

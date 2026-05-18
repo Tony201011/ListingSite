@@ -14,7 +14,7 @@
 
     if ($tierBadgeVariant === 'home_banner' || !empty($profile['home_banner'])) {
         $featuredBadgeVariant = 'ribbon';
-        $featuredBadgeLabel = 'Spotlight';
+        $featuredBadgeLabel = 'Featured';
     } elseif ($tierBadgeVariant === 'local_banner' || !empty($profile['local_banner'])) {
         $featuredBadgeVariant = 'ribbon';
         $featuredBadgeLabel = 'Local Pick';

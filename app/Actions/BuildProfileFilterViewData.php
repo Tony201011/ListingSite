@@ -157,11 +157,11 @@ class BuildProfileFilterViewData
         $rawUserLng = isset($validated['user_lng']) ? (float) $validated['user_lng'] : null;
 
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
-        // Spotlight sections are hidden when an escort_name filter is active, so do not apply
-        // the spotlight exclusion filter either (otherwise local-banner profiles would be absent
-        // from both the hidden spotlight strip AND the main results).
-        $localSpotlightStateName = $escortNameQuery === ''
-            ? $this->resolveLocalSpotlightStateName($locationQuery, $locationStateQuery)
+        // Featured sections are hidden when an escort_name filter is active, so do not apply
+        // the featured exclusion filter either (otherwise local-banner profiles would be absent
+        // from both the hidden featured strip AND the main results).
+        $localFeaturedStateName = $escortNameQuery === ''
+            ? $this->resolveLocalFeaturedStateName($locationQuery, $locationStateQuery)
             : null;
 
         $geocodedLat = null;
@@ -204,7 +204,7 @@ class BuildProfileFilterViewData
             $distanceFilter,
             $girlsMode,
             $escortNameQuery,
-            $localSpotlightStateName,
+            $localFeaturedStateName,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -218,7 +218,7 @@ class BuildProfileFilterViewData
         $hasDistanceFilter = $distanceFilter !== null;
 
         // Load home-banner profiles (national) — shown in dedicated banner section
-        // Spotlight sections are hidden when an escort_name filter is active.
+        // Featured sections are hidden when an escort_name filter is active.
         $homeBannerProfiles = $escortNameQuery === ''
             ? $this->queryBannerProfiles('home_banner_expires_at')
             : collect();
@@ -423,7 +423,7 @@ class BuildProfileFilterViewData
         ?int $distanceFilter = null,
         string $girlsMode = 'all',
         string $escortNameQuery = '',
-        ?string $localSpotlightStateName = null,
+        ?string $localFeaturedStateName = null,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -471,12 +471,12 @@ class BuildProfileFilterViewData
             }
         }
 
-        if ($localSpotlightStateName !== null) {
-            $query->where(function (Builder $q) use ($localSpotlightStateName): void {
+        if ($localFeaturedStateName !== null) {
+            $query->where(function (Builder $q) use ($localFeaturedStateName): void {
                 $q->whereNull('provider_profiles.local_banner_expires_at')
                     ->orWhere('provider_profiles.local_banner_expires_at', '<=', now())
-                    ->orWhereDoesntHave('state', function (Builder $stateQuery) use ($localSpotlightStateName): void {
-                        $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($localSpotlightStateName)]);
+                    ->orWhereDoesntHave('state', function (Builder $stateQuery) use ($localFeaturedStateName): void {
+                        $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($localFeaturedStateName)]);
                     });
             });
         }
@@ -838,7 +838,7 @@ class BuildProfileFilterViewData
         ];
     }
 
-    private function resolveLocalSpotlightStateName(string $locationQuery, string $locationStateQuery): ?string
+    private function resolveLocalFeaturedStateName(string $locationQuery, string $locationStateQuery): ?string
     {
         $state = trim($locationStateQuery);
 
