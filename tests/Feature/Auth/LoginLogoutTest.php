@@ -35,6 +35,7 @@ class LoginLogoutTest extends TestCase
         ]);
 
         $response->assertRedirect('/select-profile');
+        $response->assertSessionHas('auth_session_sync', fn (array $payload): bool => ($payload['type'] ?? null) === 'login' && filled($payload['id'] ?? null));
         $this->assertAuthenticatedAs($user);
     }
 
@@ -84,6 +85,7 @@ class LoginLogoutTest extends TestCase
         ]);
 
         $response->assertRedirect('/admin');
+        $response->assertSessionHas('auth_session_sync', fn (array $payload): bool => ($payload['type'] ?? null) === 'login' && filled($payload['id'] ?? null));
         $this->assertAuthenticated('admin');
         $this->assertGuest('web');
     }
@@ -200,6 +202,32 @@ class LoginLogoutTest extends TestCase
         $response = $this->actingAs($user)->get('/signup');
 
         $response->assertRedirect('/');
+    }
+
+    public function test_signin_page_renders_login_sync_trigger_from_session_flash(): void
+    {
+        $response = $this->withSession([
+            'auth_session_sync' => [
+                'id' => 'login-event',
+                'type' => 'login',
+                'timestamp' => now()->getTimestampMs(),
+            ],
+        ])->get('/signin');
+
+        $response->assertOk()
+            ->assertSee('data-authenticated="0"', false)
+            ->assertSee('window.authSessionSync?.notifyLogin({"id":"login-event","type":"login"', false);
+    }
+
+    public function test_authenticated_frontend_pages_mark_body_as_authenticated_for_session_sync(): void
+    {
+        $user = $this->createVerifiedUser();
+
+        $response = $this->actingAs($user)->get('/select-profile');
+
+        $response->assertOk()
+            ->assertSee('data-authenticated="1"', false)
+            ->assertSee('data-auth-protected="1"', false);
     }
 
     public function test_guest_is_redirected_from_protected_routes(): void

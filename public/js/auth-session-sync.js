@@ -7,6 +7,7 @@
 
     const logoutUrl = root.dataset.logoutUrl || '/logout';
     const signinUrl = root.dataset.signinUrl || '/signin';
+    const isAuthenticated = root.dataset.authenticated === '1';
     const isProtectedRoute = root.dataset.authProtected === '1';
     const storageKey = 'listing-site:auth-event';
     const channelName = 'listing-site-auth';
@@ -33,6 +34,15 @@
         window.location.reload();
     };
 
+    const refreshAfterLogin = () => {
+        if (redirecting || isAuthenticated) {
+            return;
+        }
+
+        redirecting = true;
+        window.location.reload();
+    };
+
     const handleAuthFailure = (status) => {
         if (![401, 419].includes(Number(status))) {
             return;
@@ -54,11 +64,18 @@
             return;
         }
 
-        if (!['logout', 'session-expired'].includes(payload.type)) {
+        if (!['login', 'logout', 'session-expired'].includes(payload.type)) {
             return;
         }
 
         handledEventIds.add(payload.id);
+
+        if (payload.type === 'login') {
+            refreshAfterLogin();
+
+            return;
+        }
+
         redirectAfterLogout();
     };
 
@@ -186,6 +203,9 @@
     }
 
     window.authSessionSync = Object.freeze({
+        notifyLogin(payload = createPayload('login')) {
+            broadcast(payload);
+        },
         notifySessionExpired() {
             handleAuthFailure(401);
         },
