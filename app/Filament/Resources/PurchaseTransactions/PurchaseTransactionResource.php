@@ -285,13 +285,13 @@ class PurchaseTransactionResource extends Resource
                 'reference_id',
             ])
             ->where('user_id', $record->user_id)
-            ->where('amount', '<', 0)
+            ->where('amount', '!=', 0)
             ->latest('created_at')
             ->limit(self::WALLET_SPEND_HISTORY_LIMIT)
             ->get()
             ->map(fn (CreditLog $log): array => [
                 'spent_at' => $log->created_at,
-                'credits_used' => abs($log->amount),
+                'credits_used' => (int) $log->amount,
                 'description' => $log->description,
                 'type' => Str::of($log->type)->replace('_', ' ')->title()->toString(),
                 'reference' => $log->reference_type
