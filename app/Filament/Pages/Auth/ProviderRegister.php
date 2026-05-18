@@ -5,6 +5,7 @@ namespace App\Filament\Pages\Auth;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\State;
 use App\Models\User;
 use Filament\Auth\Pages\Register;
@@ -78,6 +79,9 @@ class ProviderRegister extends Register
             'is_featured' => $data['is_featured'] ?? false,
             'profile_status' => $data['profile_status'] ?? 'pending',
             'expires_at' => $data['expires_at'] ?? null,
+            'free_listing_expires_at' => now()->addDays(
+                SiteSetting::getAdTierSettings()['free_listing_days']
+            ),
         ]);
 
         return $user;

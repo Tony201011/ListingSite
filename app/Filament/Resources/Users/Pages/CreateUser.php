@@ -7,6 +7,7 @@ use App\Filament\Resources\Users\UserResource;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\ProfileMessage;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -92,6 +93,9 @@ class CreateUser extends CreateRecord
             'is_verified' => $profileData['is_verified'] ?? false,
             'is_featured' => $profileData['is_featured'] ?? false,
             'profile_status' => $profileData['profile_status'] ?? 'pending',
+            'free_listing_expires_at' => now()->addDays(
+                SiteSetting::getAdTierSettings()['free_listing_days']
+            ),
         ]);
 
         $profile = ProviderProfile::query()->where('user_id', $user->id)->orderBy('id')->first();
