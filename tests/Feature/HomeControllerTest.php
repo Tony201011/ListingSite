@@ -418,6 +418,45 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($localSpotlightNames->contains('VIC Local Escort'));
     }
 
+    public function test_local_spotlight_filters_to_exact_suburb_and_state_when_state_relation_is_missing(): void
+    {
+        $macknadeUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $macknadeProfile = ProviderProfile::query()->create([
+            'user_id' => $macknadeUser->id,
+            'name' => 'Macknade Local Spotlight',
+            'slug' => 'macknade-local-spotlight',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'suburb' => 'MACKNADE, QLD 4850',
+            'local_banner_expires_at' => now()->addDay(),
+        ]);
+        $this->createActiveOnlineUser($macknadeUser, $macknadeProfile->id);
+
+        $townsvilleUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $townsvilleProfile = ProviderProfile::query()->create([
+            'user_id' => $townsvilleUser->id,
+            'name' => 'Townsville Local Spotlight',
+            'slug' => 'townsville-local-spotlight',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'suburb' => 'TOWNSVILLE, QLD 4810',
+            'local_banner_expires_at' => now()->addDay(),
+        ]);
+        $this->createActiveOnlineUser($townsvilleUser, $townsvilleProfile->id);
+
+        $this->createApprovedProviderWithSuburb('MACKNADE', 'QLD', [
+            'name' => 'Regular Macknade Escort',
+            'slug' => 'regular-macknade-escort',
+        ]);
+
+        $response = $this->get('/?location=MACKNADE%2C+QLD');
+
+        $response->assertSeeText('Local Spotlight');
+        $localSpotlightNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
+        $this->assertTrue($localSpotlightNames->contains('Macknade Local Spotlight'));
+        $this->assertFalse($localSpotlightNames->contains('Townsville Local Spotlight'));
+    }
+
     // ---------------------------------------------------------------
     // Filtering by location
     // ---------------------------------------------------------------
