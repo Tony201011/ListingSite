@@ -8,6 +8,7 @@ use App\Actions\UpdateOnlineNowStatus;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -46,6 +47,10 @@ class OnlineControllerTest extends TestCase
     public function test_online_now_view_is_returned_for_authenticated_provider(): void
     {
         $user = $this->createProvider();
+        SiteSetting::query()->create([
+            'online_status_max_uses' => 6,
+            'online_status_duration_minutes' => 90,
+        ]);
 
         $getOnlineNowState = Mockery::mock(GetOnlineNowState::class);
         $getOnlineNowState->shouldReceive('execute')
@@ -64,6 +69,7 @@ class OnlineControllerTest extends TestCase
         $response->assertViewIs('profile.online-now');
         $response->assertViewHas('onlineStatus', false);
         $response->assertViewHas('remainingUses', 4);
+        $response->assertSeeText('Use this feature up to 6 times a day for 01:30:00.');
     }
 
     public function test_update_status_to_online_returns_json_response(): void

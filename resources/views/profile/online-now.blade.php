@@ -1,6 +1,9 @@
 @extends('layouts.frontend')
 
 @section('content')
+@php
+    $statusSettings = \App\Models\SiteSetting::getStatusSettings();
+@endphp
 <div
     class="min-h-screen bg-gradient-to-b from-pink-50 via-white to-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="onlineNowToggle({
@@ -42,7 +45,7 @@
                     <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
                         <p class="text-sm font-medium text-gray-500">Daily usage rule</p>
                         <p class="mt-2 text-base font-semibold text-gray-900">
-                            Use this feature up to 4 times a day for {{ format_clock_duration_from_minutes(60) }}.
+                            Use this feature up to {{ $statusSettings['online_status_max_uses'] }} {{ \Illuminate\Support\Str::plural('time', $statusSettings['online_status_max_uses']) }} a day for {{ format_clock_duration_from_minutes($statusSettings['online_status_duration_minutes']) }}.
                         </p>
                     </div>
 

@@ -1,6 +1,9 @@
 @extends('layouts.frontend')
 
 @section('content')
+@php
+    $statusSettings = \App\Models\SiteSetting::getStatusSettings();
+@endphp
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8" x-data="{ availableNow: false, onlineNow: false }">
     <div class="max-w-6xl mx-auto">
         <button onclick="window.history.back()" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer">
@@ -108,7 +111,7 @@
 
             <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">ONLINE NOW</h3>
-                <p class="text-sm text-gray-600 mb-4">Use this feature up to 4 times a day for {{ format_clock_duration_from_minutes(60) }}.</p>
+                <p class="text-sm text-gray-600 mb-4">Use this feature up to {{ $statusSettings['online_status_max_uses'] }} {{ \Illuminate\Support\Str::plural('time', $statusSettings['online_status_max_uses']) }} a day for {{ format_clock_duration_from_minutes($statusSettings['online_status_duration_minutes']) }}.</p>
                 <button @click="onlineNow = !onlineNow" class="w-full px-4 py-2 rounded-lg transition" :class="onlineNow ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" x-text="onlineNow ? 'Enabled' : 'Online NOW'"></button>
             </div>
 

@@ -1,6 +1,9 @@
 @extends('layouts.frontend')
 
 @section('content')
+@php
+    $statusSettings = \App\Models\SiteSetting::getStatusSettings();
+@endphp
 <div
     class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="{ availableNow: false, onlineNow: false }"
@@ -355,7 +358,7 @@
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ONLINE NOW</h3>
 
                     <p class="mb-4 text-sm text-gray-600">
-                        Use this feature up to 4 times a day for {{ format_clock_duration_from_minutes(60) }}.
+                        Use this feature up to {{ $statusSettings['online_status_max_uses'] }} {{ \Illuminate\Support\Str::plural('time', $statusSettings['online_status_max_uses']) }} a day for {{ format_clock_duration_from_minutes($statusSettings['online_status_duration_minutes']) }}.
                     </p>
 
                     <button
