@@ -426,12 +426,8 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        validationError(messages) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation errors',
-                html: `<ul style="text-align:left; margin:0; padding-left:1.2rem;">${messages.map((message) => `<li>${message}</li>`).join('')}</ul>`
-            });
+        scrollToErrors() {
+            this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
         },
 
         async submitForm() {
@@ -440,7 +436,7 @@ document.addEventListener('alpine:init', () => {
             this.errors = this.validate();
 
             if (this.errors.length > 0) {
-                this.validationError(this.errors);
+                this.scrollToErrors();
                 return;
             }
 
@@ -502,14 +498,14 @@ document.addEventListener('alpine:init', () => {
                 } else if (response.status === 422) {
                     const messages = Object.values(data.errors || {}).flat();
                     this.errors = messages.length ? messages : ['Validation failed.'];
-                    this.validationError(this.errors);
+                    this.scrollToErrors();
                 } else {
-                    this.errors = [data.message || 'Unable to save profile. Please try again later.'];
+                    this.errors = [];
                     this.error(data.message || 'Unable to save profile. Please try again later.');
                 }
             } catch (error) {
                 console.error('Profile submit error:', error);
-                this.errors = ['Unable to save profile. Please check your connection and try again.'];
+                this.errors = [];
                 this.error('Unable to save profile. Please check your connection and try again.');
             } finally {
                 this.submitting = false;
