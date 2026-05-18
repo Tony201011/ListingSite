@@ -157,7 +157,12 @@ class BuildProfileFilterViewData
         $rawUserLng = isset($validated['user_lng']) ? (float) $validated['user_lng'] : null;
 
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
-        $localSpotlightStateName = $this->resolveLocalSpotlightStateName($locationQuery, $locationStateQuery);
+        // Spotlight sections are hidden when an escort_name filter is active, so do not apply
+        // the spotlight exclusion filter either (otherwise local-banner profiles would be absent
+        // from both the hidden spotlight strip AND the main results).
+        $localSpotlightStateName = $escortNameQuery === ''
+            ? $this->resolveLocalSpotlightStateName($locationQuery, $locationStateQuery)
+            : null;
 
         $geocodedLat = null;
         $geocodedLng = null;

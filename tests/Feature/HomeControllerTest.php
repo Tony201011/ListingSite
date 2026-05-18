@@ -384,6 +384,29 @@ class HomeControllerTest extends TestCase
         $filteredResponse->assertDontSeeText('Local Spotlight');
     }
 
+    public function test_local_spotlight_profile_appears_in_main_results_when_escort_name_filter_is_active(): void
+    {
+        $country = Country::query()->create(['name' => 'Australia', 'code' => 'AU']);
+        $state = State::query()->create(['country_id' => $country->id, 'name' => 'New South Wales']);
+
+        $this->createApprovedProviderWithSuburb('Sydney', 'NSW', [
+            'name' => 'Sydney Local Escort',
+            'slug' => 'sydney-local-escort',
+            'state_id' => $state->id,
+            'local_banner_expires_at' => now()->addDay(),
+        ]);
+
+        // Searching by escort_name + location with state: the profile has an active local_banner_expires_at
+        // but spotlight is hidden when escort_name filter is active.  The profile must still appear in the
+        // main results (the spotlight exclusion filter must NOT be applied).
+        $response = $this->get('/?escort_name=Sydney+Local+Escort&location=Sydney%2C+NSW');
+
+        $response->assertDontSeeText('Local Spotlight');
+        $profiles = $response->viewData('profiles');
+        $profileNames = collect($profiles->items())->pluck('name');
+        $this->assertTrue($profileNames->contains('Sydney Local Escort'));
+    }
+
     public function test_local_spotlight_shows_when_filtering_by_location_with_state(): void
     {
         $country = Country::query()->create(['name' => 'Australia', 'code' => 'AU']);
