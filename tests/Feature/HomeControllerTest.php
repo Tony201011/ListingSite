@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Country;
 use App\Models\HideShowProfile;
 use App\Models\OnlineUser;
 use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
+use App\Models\State;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -380,6 +382,29 @@ class HomeControllerTest extends TestCase
         $filteredResponse = $this->get('/?escort_name=Spotlight+Escort');
         $filteredResponse->assertDontSeeText('Featured Spotlight');
         $filteredResponse->assertDontSeeText('Local Spotlight');
+    }
+
+    public function test_local_spotlight_shows_when_filtering_by_location_with_state(): void
+    {
+        $country = Country::query()->create(['name' => 'Australia', 'code' => 'AU']);
+        $state = State::query()->create(['country_id' => $country->id, 'name' => 'Victoria']);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'VIC Local Escort',
+            'slug' => 'vic-local-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'state_id' => $state->id,
+            'local_banner_expires_at' => now()->addDay(),
+        ]);
+        $this->createActiveOnlineUser($user, ProviderProfile::query()->where('user_id', $user->id)->value('id'));
+
+        // Local Spotlight should be visible when filtering by a location with a VIC state component.
+        $response = $this->get('/?location=UNDERBOOL%2C+VIC');
+
+        $response->assertSeeText('Local Spotlight');
     }
 
     // ---------------------------------------------------------------
