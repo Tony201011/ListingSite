@@ -1361,35 +1361,66 @@ class UserResource extends Resource
 
                             $formatExpiry = fn ($expiry): string => $expiry?->format($dateFormat) ?? 'No expiry set';
 
+                            $statusClass = fn (string $status): string => match ($status) {
+                                'Active' => 'bg-green-50 text-green-700 ring-green-600/20',
+                                'Expired' => 'bg-red-50 text-red-700 ring-red-600/20',
+                                default => 'bg-gray-100 text-gray-700 ring-gray-200',
+                            };
+
                             $featuredStatus = ! $record->is_featured
                                 ? 'Inactive'
                                 : ($record->featured_expires_at?->isPast() ? 'Expired' : 'Active');
+
+                            $transactions = self::getAdFeaturedTransactionsForProfile($record, $dateFormat);
+
+                            $providerName = $record->name ?? 'N/A';
+                            $providerEmail = $record->user?->email ?? 'N/A';
 
                             $rows = [
                                 [
                                     'tier' => 'Featured Listing',
                                     'status' => $featuredStatus,
+                                    'status_class' => $statusClass($featuredStatus),
                                     'expiry' => $formatExpiry($record->featured_expires_at),
+                                    'transactions' => $transactions['featured_listing'] ?? [],
+                                    'provider_name' => $providerName,
+                                    'provider_email' => $providerEmail,
                                 ],
                                 [
                                     'tier' => 'Free Listing',
                                     'status' => $statusFromExpiry($record->free_listing_expires_at),
+                                    'status_class' => $statusClass($statusFromExpiry($record->free_listing_expires_at)),
                                     'expiry' => $formatExpiry($record->free_listing_expires_at),
+                                    'transactions' => [],
+                                    'provider_name' => $providerName,
+                                    'provider_email' => $providerEmail,
                                 ],
                                 [
                                     'tier' => 'Home Featured',
                                     'status' => $statusFromExpiry($record->home_featured_expires_at),
+                                    'status_class' => $statusClass($statusFromExpiry($record->home_featured_expires_at)),
                                     'expiry' => $formatExpiry($record->home_featured_expires_at),
+                                    'transactions' => $transactions['home_featured'] ?? [],
+                                    'provider_name' => $providerName,
+                                    'provider_email' => $providerEmail,
                                 ],
                                 [
                                     'tier' => 'Local Banner',
                                     'status' => $statusFromExpiry($record->local_banner_expires_at),
+                                    'status_class' => $statusClass($statusFromExpiry($record->local_banner_expires_at)),
                                     'expiry' => $formatExpiry($record->local_banner_expires_at),
+                                    'transactions' => $transactions['local_banner'] ?? [],
+                                    'provider_name' => $providerName,
+                                    'provider_email' => $providerEmail,
                                 ],
                                 [
                                     'tier' => 'Home Banner',
                                     'status' => $statusFromExpiry($record->home_banner_expires_at),
+                                    'status_class' => $statusClass($statusFromExpiry($record->home_banner_expires_at)),
                                     'expiry' => $formatExpiry($record->home_banner_expires_at),
+                                    'transactions' => $transactions['home_banner'] ?? [],
+                                    'provider_name' => $providerName,
+                                    'provider_email' => $providerEmail,
                                 ],
                             ];
 
@@ -1676,5 +1707,58 @@ class UserResource extends Resource
                 'details_url' => null,
             ])
             ->all();
+    }
+
+    /**
+     * Return the most-recent CreditLog entries per ad tier for the given profile.
+     *
+     * Keyed by: featured_listing | home_featured | local_banner | home_banner
+     * Free Listing is automatic (no CreditLog) and is intentionally omitted.
+     *
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    private static function getAdFeaturedTransactionsForProfile(ProviderProfile $record, string $dateFormat = 'd M Y, h:i A'): array
+    {
+        if (! $record->user_id) {
+            return [];
+        }
+
+        // Map blade-key → CreditLog description prefix
+        $tierDescriptionPrefixes = [
+            'featured_listing' => 'Activated Featured Listing',
+            'home_featured' => 'Activated Home Page Featured',
+            'local_banner' => 'Activated Local Banner',
+            'home_banner' => 'Activated Home Page Banner',
+        ];
+
+        $logs = CreditLog::query()
+            ->select(['id', 'created_at', 'amount', 'description', 'type'])
+            ->where('user_id', $record->user_id)
+            ->where('type', 'used')
+            ->where('reference_type', ProviderProfile::class)
+            ->where('reference_id', $record->id)
+            ->where('amount', '<', 0)
+            ->latest('created_at')
+            ->get();
+
+        $result = [];
+
+        foreach ($tierDescriptionPrefixes as $key => $prefix) {
+            $result[$key] = $logs
+                ->filter(fn (CreditLog $log): bool => str_starts_with((string) $log->description, $prefix))
+                ->take(5)
+                ->values()
+                ->map(fn (CreditLog $log): array => [
+                    'id' => $log->id,
+                    'credits_used' => abs($log->amount),
+                    'description' => $log->description,
+                    'purchased_at' => $log->created_at?->format($dateFormat) ?? '—',
+                    'payment_status' => 'Credits Used',
+                    'type' => Str::of($log->type)->replace('_', ' ')->title()->toString(),
+                ])
+                ->all();
+        }
+
+        return $result;
     }
 }
