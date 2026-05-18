@@ -112,6 +112,11 @@ class DeductDailyCreditsTest extends TestCase
         ]);
 
         $this->assertSame(0, CreditLog::query()->where('user_id', $user->id)->count());
+
+        $this->assertDatabaseHas('hide_show_profiles', [
+            'provider_profile_id' => $profile->id,
+            'status' => 'hide',
+        ]);
     }
 
     public function test_it_does_not_deduct_during_free_listing_period(): void
@@ -177,5 +182,57 @@ class DeductDailyCreditsTest extends TestCase
             'id' => $user->id,
             'credits' => 99,
         ]);
+    }
+
+    public function test_it_deducts_one_credit_per_visible_profile_after_free_period(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'credits' => 10,
+        ]);
+
+        $profileOne = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Multi Profile User One',
+            'slug' => 'multi-profile-user-one-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        $profileTwo = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Multi Profile User Two',
+            'slug' => 'multi-profile-user-two-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        HideShowProfile::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profileOne->id,
+            'status' => 'show',
+        ]);
+
+        HideShowProfile::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profileTwo->id,
+            'status' => 'show',
+        ]);
+
+        $this->artisan('credits:deduct-daily')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'credits' => 8,
+        ]);
+
+        $this->assertSame(
+            2,
+            CreditLog::query()
+                ->where('user_id', $user->id)
+                ->where('type', 'daily_deduction')
+                ->count()
+        );
     }
 }

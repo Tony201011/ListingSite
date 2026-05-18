@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\CreditLog;
+use App\Models\HideShowProfile;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -13,14 +14,13 @@ class DeductDailyCredits extends Command
 {
     protected $signature = 'credits:deduct-daily';
 
-    protected $description = 'Deduct 1 credit per day from users with at least one visible approved profile';
+    protected $description = 'Deduct 1 credit per day from each visible approved profile after free listing period';
 
     public function handle(): int
     {
-        // Find users who have at least one approved provider profile that is visible (show status).
-        // A profile is visible when hide_show_profiles.status = 'show' OR no hide_show_profiles row exists
-        // (which defaults to visible).
-        $userIds = ProviderProfile::query()
+        // Find approved, visible provider profiles that are outside free listing period.
+        // A profile is visible when hide_show_profiles.status = 'show' OR no hide_show_profiles row exists.
+        $profiles = ProviderProfile::query()
             ->where('profile_status', 'approved')
             ->where('is_blocked', false)
             ->whereNull('deleted_at')
@@ -41,11 +41,13 @@ class DeductDailyCredits extends Command
                 $query->whereNull('free_listing_expires_at')
                     ->orWhere('free_listing_expires_at', '<=', now());
             })
-            ->distinct()
-            ->pluck('user_id');
+            ->with('user:id,credits')
+            ->orderBy('user_id')
+            ->orderBy('id')
+            ->get(['id', 'user_id']);
 
-        if ($userIds->isEmpty()) {
-            $this->info('No users with visible approved profiles found. No credits deducted.');
+        if ($profiles->isEmpty()) {
+            $this->info('No eligible visible approved profiles found. No credits deducted.');
 
             return self::SUCCESS;
         }
@@ -53,8 +55,16 @@ class DeductDailyCredits extends Command
         $deducted = 0;
         $skipped = 0;
 
-        User::whereIn('id', $userIds)->each(function (User $user) use (&$deducted, &$skipped): void {
+        $profiles->each(function (ProviderProfile $profile) use (&$deducted, &$skipped): void {
+            $user = $profile->user;
+            if (! $user instanceof User) {
+                $skipped++;
+
+                return;
+            }
+
             if ($user->credits <= 0) {
+                $this->hideProfileForInsufficientCredits($profile);
                 $skipped++;
 
                 return;
@@ -75,6 +85,8 @@ class DeductDailyCredits extends Command
                     'amount' => -1,
                     'type' => 'daily_deduction',
                     'description' => "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
+                    'reference_type' => ProviderProfile::class,
+                    'reference_id' => $profile->id,
                 ]);
 
                 return true;
@@ -83,6 +95,7 @@ class DeductDailyCredits extends Command
             if ($wasDeducted) {
                 $deducted++;
             } else {
+                $this->hideProfileForInsufficientCredits($profile);
                 $skipped++;
             }
         });
@@ -95,5 +108,16 @@ class DeductDailyCredits extends Command
         $this->info("Daily credit deduction completed. Deducted: {$deducted}, Skipped (zero credits): {$skipped}.");
 
         return self::SUCCESS;
+    }
+
+    private function hideProfileForInsufficientCredits(ProviderProfile $profile): void
+    {
+        HideShowProfile::updateOrCreate(
+            ['provider_profile_id' => $profile->id],
+            [
+                'user_id' => $profile->user_id,
+                'status' => 'hide',
+            ]
+        );
     }
 }
