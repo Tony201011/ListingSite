@@ -167,6 +167,19 @@ class LoginLogoutTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_logged_out_session_cannot_access_json_provider_routes(): void
+    {
+        $user = $this->createVerifiedUser();
+
+        $this->actingAs($user)->post('/logout');
+
+        $response = $this->postJson('/online-status', ['status' => 'online']);
+
+        $response->assertStatus(401)
+            ->assertJson(['message' => 'Unauthenticated.']);
+        $this->assertGuest();
+    }
+
     // ---------------------------------------------------------------
     // Guest middleware
     // ---------------------------------------------------------------
