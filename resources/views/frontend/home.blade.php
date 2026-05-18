@@ -212,7 +212,9 @@
         @endif
 
         {{-- Local Banner: Paid state-specific spotlight profiles ($2/day) --}}
-        @if(!$hasActiveFilters && !empty($localBannerProfiles) && count($localBannerProfiles) > 0)
+        {{-- NOTE: shown even when a location filter is active, since localBannerProfiles is only --}}
+        {{-- populated when a location with a state abbreviation is present in the URL. --}}
+        @if(!empty($localBannerProfiles) && count($localBannerProfiles) > 0)
             <div class="mb-6">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
