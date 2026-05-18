@@ -201,7 +201,8 @@ class PurchaseTransactionResource extends Resource
                 ViewAction::make()
                     ->label('View')
                     ->icon('heroicon-o-eye')
-                    ->modalHeading('Transaction Details'),
+                    ->modalHeading('Transaction Details')
+                    ->scrollable(),
 
                 Action::make('wallet_spend_history')
                     ->label('Wallet Summary')
