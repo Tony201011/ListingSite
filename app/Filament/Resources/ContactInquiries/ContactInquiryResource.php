@@ -3,15 +3,18 @@
 namespace App\Filament\Resources\ContactInquiries;
 
 use App\Actions\SendContactInquiryReplyEmail;
-use App\Filament\Clusters\Pages;
+use App\Filament\Clusters\ContactUs;
 use App\Filament\Resources\ContactInquiries\Pages\ListContactInquiries;
+use App\Filament\Resources\ContactInquiries\Pages\ViewContactInquiry;
 use App\Models\ContactInquiry;
+use App\Models\ContactInquiryReply;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -32,7 +35,7 @@ class ContactInquiryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
 
-    protected static ?string $navigationLabel = 'Contact Inquiries';
+    protected static ?string $navigationLabel = 'Submissions';
 
     protected static ?string $modelLabel = 'Contact Inquiry';
 
@@ -40,9 +43,9 @@ class ContactInquiryResource extends Resource
 
     protected static ?string $slug = 'contact-inquiries';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $cluster = ContactUs::class;
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool
     {
@@ -52,6 +55,18 @@ class ContactInquiryResource extends Resource
     public static function canCreate(): bool
     {
         return false;
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = ContactInquiry::where('status', 'pending')->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'warning';
     }
 
     public static function infolist(Schema $schema): Schema
@@ -76,36 +91,64 @@ class ContactInquiryResource extends Resource
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
-                Section::make('Admin Reply')
+                Section::make('Status')
                     ->schema([
-                        TextEntry::make('admin_reply')
-                            ->label('Reply sent')
-                            ->placeholder('No reply sent yet')
-                            ->columnSpanFull(),
-                        TextEntry::make('replied_at')
-                            ->label('Replied at')
-                            ->dateTime()
-                            ->placeholder('Not replied yet'),
                         TextEntry::make('status')
-                            ->label('Status')
+                            ->label('Inquiry Status')
                             ->badge()
                             ->color(fn (string $state): string => match ($state) {
                                 'replied' => 'success',
                                 'closed' => 'gray',
                                 default => 'warning',
                             }),
-                    ])
-                    ->columns(2),
-                Section::make('Meta')
-                    ->schema([
+                        TextEntry::make('is_read')
+                            ->label('Read')
+                            ->badge()
+                            ->formatStateUsing(fn (bool $state): string => $state ? 'Read' : 'Unread')
+                            ->color(fn (bool $state): string => $state ? 'success' : 'warning'),
+                        TextEntry::make('replied_at')
+                            ->label('Last replied at')
+                            ->dateTime()
+                            ->placeholder('Not replied yet'),
                         TextEntry::make('created_at')
                             ->label('Received at')
                             ->dateTime(),
+                    ])
+                    ->columns(2),
+                Section::make('Reply History')
+                    ->schema([
+                        RepeatableEntry::make('replies')
+                            ->label('')
+                            ->schema([
+                                TextEntry::make('message')
+                                    ->label('Reply')
+                                    ->columnSpanFull(),
+                                TextEntry::make('email_status')
+                                    ->label('Delivery Status')
+                                    ->badge()
+                                    ->color(fn (string $state): string => match ($state) {
+                                        'delivered' => 'success',
+                                        'failed' => 'danger',
+                                        default => 'warning',
+                                    })
+                                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+                                TextEntry::make('sent_at')
+                                    ->label('Sent at')
+                                    ->dateTime()
+                                    ->placeholder('Not sent yet'),
+                                TextEntry::make('created_at')
+                                    ->label('Created at')
+                                    ->dateTime(),
+                            ])
+                            ->columns(3),
+                    ])
+                    ->collapsed(fn ($record): bool => $record->replies()->doesntExist()),
+                Section::make('Meta')
+                    ->schema([
                         TextEntry::make('updated_at')
                             ->label('Last updated')
                             ->dateTime(),
                     ])
-                    ->columns(2)
                     ->collapsed(),
             ]);
     }
@@ -139,6 +182,11 @@ class ContactInquiryResource extends Resource
                 IconColumn::make('is_read')
                     ->label('Read')
                     ->boolean(),
+                TextColumn::make('replies_count')
+                    ->label('Replies')
+                    ->counts('replies')
+                    ->badge()
+                    ->color('gray'),
                 TextColumn::make('created_at')
                     ->label('Received')
                     ->since()
@@ -161,10 +209,15 @@ class ContactInquiryResource extends Resource
                             ->required()
                             ->rows(6)
                             ->maxLength(5000)
-                            ->default(fn (ContactInquiry $record): ?string => $record->admin_reply)
                             ->helperText('This reply will be emailed to the person who submitted the contact form.'),
                     ])
                     ->action(function (ContactInquiry $record, array $data, SendContactInquiryReplyEmail $sendReply): void {
+                        $reply = ContactInquiryReply::create([
+                            'contact_inquiry_id' => $record->id,
+                            'message' => $data['admin_reply'],
+                            'email_status' => 'pending',
+                        ]);
+
                         $record->update([
                             'admin_reply' => $data['admin_reply'],
                             'status' => 'replied',
@@ -173,10 +226,11 @@ class ContactInquiryResource extends Resource
                         ]);
 
                         try {
-                            $sendReply->execute($record);
+                            $sendReply->execute($record, $reply);
                         } catch (Throwable $e) {
                             Log::warning('Contact inquiry reply email failed after saving reply.', [
                                 'contact_inquiry_id' => $record->id,
+                                'contact_inquiry_reply_id' => $reply->id,
                                 'error' => $e->getMessage(),
                             ]);
 
@@ -236,6 +290,7 @@ class ContactInquiryResource extends Resource
     {
         return [
             'index' => ListContactInquiries::route('/'),
+            'view' => ViewContactInquiry::route('/{record}'),
         ];
     }
 }

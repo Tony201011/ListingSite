@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\ContactUsPages;
 
-use App\Filament\Clusters\Pages;
+use App\Filament\Clusters\ContactUs;
 use App\Filament\Resources\ContactUsPages\Pages\ManageContactUsPages;
 use App\Models\ContactUsPage;
 use BackedEnum;
@@ -35,9 +35,9 @@ class ContactUsPageResource extends Resource
 
     protected static ?string $slug = 'contact-us';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $cluster = ContactUs::class;
 
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
     {
