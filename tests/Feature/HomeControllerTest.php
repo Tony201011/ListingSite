@@ -777,7 +777,7 @@ class HomeControllerTest extends TestCase
         $this->assertFalse($names->contains('Expired Online Escort'));
     }
 
-    public function test_home_page_shows_profile_with_no_online_user_record(): void
+    public function test_home_page_hides_profile_with_no_online_user_record(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
@@ -793,7 +793,7 @@ class HomeControllerTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertTrue($names->contains('New Escort'));
+        $this->assertFalse($names->contains('New Escort'));
     }
 
     public function test_home_page_hides_featured_profile_when_offline(): void
