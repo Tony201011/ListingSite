@@ -1,6 +1,6 @@
 <div class="wallet-modal-content">
     <p class="wallet-description">
-        Latest wallet deductions for this user account.
+        Latest wallet credit activity for this user account.
     </p>
 
     <div class="wallet-summary-grid">
@@ -19,45 +19,61 @@
     </div>
 
     @if (filled($history))
-        <div class="wallet-table-wrapper">
-            <table class="wallet-table">
-                <thead>
-                    <tr>
-                        <th>Spent At</th>
-                        <th>Credits Used</th>
-                        <th>Details</th>
-                        <th>Type</th>
-                        <th>Reference</th>
-                        <th>View</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($history as $row)
-                        <tr>
-                            <td>
-                                {{
-                                    $row['spent_at'] instanceof \Carbon\CarbonInterface
-                                        ? $row['spent_at']->format('d M Y, h:i A')
-                                        : ($row['spent_at'] ?: '-')
-                                }}
-                            </td>
-                            <td class="wallet-table-credit">-{{ number_format((int) ($row['credits_used'] ?? 0)) }}</td>
-                            <td>{{ $row['description'] ?: '-' }}</td>
-                            <td>{{ $row['type'] ?: '-' }}</td>
-                            <td>{{ $row['reference'] ?: '-' }}</td>
-                            <td>
-                                @if (filled($row['details_url']))
-                                    <a href="{{ $row['details_url'] }}" target="_blank" rel="noopener noreferrer" class="wallet-view-link">
-                                        View
-                                    </a>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <div class="wallet-table-section">
+            <div class="wallet-table-wrapper">
+                <div class="wallet-table-scroll">
+                    <table class="wallet-table">
+                        <thead>
+                            <tr>
+                                <th class="wallet-col-spent">Spent At</th>
+                                <th class="wallet-col-credits">Credits</th>
+                                <th class="wallet-col-details">Details</th>
+                                <th class="wallet-col-type">Type</th>
+                                <th class="wallet-col-reference">Reference</th>
+                                <th class="wallet-col-view">View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($history as $row)
+                                @php
+                                    $creditsUsed = (int) ($row['credits_used'] ?? 0);
+                                    $isNegative = $creditsUsed < 0;
+                                    $isPositive = $creditsUsed > 0;
+                                    $creditPrefix = $isPositive ? '+' : '';
+                                @endphp
+                                <tr>
+                                    <td class="wallet-cell-spent">
+                                        {{
+                                            $row['spent_at'] instanceof \Carbon\CarbonInterface
+                                                ? $row['spent_at']->format('d M Y, h:i A')
+                                                : ($row['spent_at'] ?: '-')
+                                        }}
+                                    </td>
+                                    <td @class([
+                                        'wallet-table-credit',
+                                        'wallet-table-credit--negative' => $isNegative,
+                                        'wallet-table-credit--positive' => $isPositive,
+                                    ])>
+                                        {{ $creditPrefix }}{{ number_format($creditsUsed) }}
+                                    </td>
+                                    <td>{{ $row['description'] ?: '-' }}</td>
+                                    <td>{{ $row['type'] ?: '-' }}</td>
+                                    <td>{{ $row['reference'] ?: '-' }}</td>
+                                    <td class="wallet-cell-view">
+                                        @if (filled($row['details_url']))
+                                            <a href="{{ $row['details_url'] }}" target="_blank" rel="noopener noreferrer" class="wallet-view-link">
+                                                View
+                                            </a>
+                                        @else
+                                            <span class="wallet-view-placeholder">-</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     @else
         <div class="wallet-empty">
@@ -68,19 +84,21 @@
 
 <style>
     .wallet-modal-content {
-        --wallet-modal-offset: 190px;
-        max-height: calc(100vh - var(--wallet-modal-offset));
-        overflow-y: auto;
-        padding: 4px 8px 12px;
+        --wallet-modal-offset: 210px;
+        --wallet-scrollbar-thumb: #9ca3af;
+        --wallet-scrollbar-track: #e5e7eb;
+        max-height: min(780px, calc(100vh - var(--wallet-modal-offset)));
+        overflow: hidden;
+        padding: 4px 8px 10px;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
     }
 
     .wallet-description {
         margin: 0;
         font-size: 14px;
-        line-height: 1.6;
+        line-height: 1.5;
         color: #4b5563;
     }
 
@@ -88,12 +106,13 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 12px;
+        margin-bottom: 4px;
     }
 
     .wallet-summary-card {
         border-radius: 12px;
         border: 1px solid #e5e7eb;
-        padding: 12px 14px;
+        padding: 12px 16px;
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -129,27 +148,60 @@
         color: #111827;
     }
 
+    .wallet-table-section {
+        min-height: 0;
+        flex: 1 1 auto;
+    }
+
     .wallet-table-wrapper {
         border: 1px solid #e5e7eb;
         border-radius: 12px;
         overflow: hidden;
         background: #fff;
+        height: 100%;
+    }
+
+    .wallet-table-scroll {
+        max-height: min(460px, calc(100vh - 420px));
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: var(--wallet-scrollbar-thumb) var(--wallet-scrollbar-track);
+    }
+
+    .wallet-table-scroll::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .wallet-table-scroll::-webkit-scrollbar-track {
+        background: var(--wallet-scrollbar-track);
+        border-radius: 9999px;
+    }
+
+    .wallet-table-scroll::-webkit-scrollbar-thumb {
+        background: var(--wallet-scrollbar-thumb);
+        border-radius: 9999px;
+        border: 2px solid var(--wallet-scrollbar-track);
     }
 
     .wallet-table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 840px;
+        table-layout: fixed;
     }
 
     .wallet-table th,
     .wallet-table td {
-        padding: 10px 12px;
+        padding: 12px;
         border-bottom: 1px solid #f3f4f6;
         font-size: 13px;
         text-align: left;
         vertical-align: top;
         color: #374151;
+        line-height: 1.45;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
 
     .wallet-table th {
@@ -158,11 +210,66 @@
         text-transform: uppercase;
         letter-spacing: 0.03em;
         color: #6b7280;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .wallet-table tbody tr {
+        transition: background-color 0.15s ease;
+    }
+
+    .wallet-table tbody tr:hover {
+        background: #f8fafc;
     }
 
     .wallet-table-credit {
-        color: #b91c1c !important;
         font-weight: 700;
+        text-align: right;
+    }
+
+    .wallet-table-credit--negative {
+        color: #b91c1c !important;
+    }
+
+    .wallet-table-credit--positive {
+        color: #15803d !important;
+    }
+
+    .wallet-cell-spent {
+        white-space: nowrap !important;
+    }
+
+    .wallet-cell-view {
+        text-align: center !important;
+        vertical-align: middle !important;
+        white-space: nowrap !important;
+    }
+
+    .wallet-col-spent {
+        width: 19%;
+    }
+
+    .wallet-col-credits {
+        width: 12%;
+        text-align: right;
+    }
+
+    .wallet-col-details {
+        width: 28%;
+    }
+
+    .wallet-col-type {
+        width: 14%;
+    }
+
+    .wallet-col-reference {
+        width: 17%;
+    }
+
+    .wallet-col-view {
+        width: 10%;
+        text-align: center;
     }
 
     .wallet-view-link {
@@ -173,10 +280,19 @@
         border: 1px solid #c7d2fe;
         background: #eef2ff;
         color: #3730a3;
-        padding: 2px 10px;
+        padding: 4px 12px;
+        min-height: 30px;
+        min-width: 62px;
         font-size: 12px;
         font-weight: 600;
         text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .wallet-view-placeholder {
+        display: inline-block;
+        min-width: 62px;
+        text-align: center;
     }
 
     .wallet-empty {
@@ -225,6 +341,11 @@
         background: #111827;
     }
 
+    .dark .wallet-table-scroll {
+        --wallet-scrollbar-thumb: #6b7280;
+        --wallet-scrollbar-track: #1f2937;
+    }
+
     .dark .wallet-table th {
         background: #1f2937;
         color: #9ca3af;
@@ -234,6 +355,18 @@
     .dark .wallet-table td {
         color: #d1d5db;
         border-bottom-color: #1f2937;
+    }
+
+    .dark .wallet-table tbody tr:hover {
+        background: rgba(55, 65, 81, 0.55);
+    }
+
+    .dark .wallet-table-credit--negative {
+        color: #fca5a5 !important;
+    }
+
+    .dark .wallet-table-credit--positive {
+        color: #86efac !important;
     }
 
     .dark .wallet-view-link {
@@ -251,6 +384,50 @@
     @media (max-width: 768px) {
         .wallet-modal-content {
             --wallet-modal-offset: 140px;
+            padding: 0 0 8px;
+            gap: 10px;
+        }
+
+        .wallet-summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .wallet-summary-card {
+            padding: 10px 12px;
+        }
+
+        .wallet-table-scroll {
+            max-height: min(56vh, calc(100vh - 360px));
+            overflow-x: auto;
+        }
+
+        .wallet-table {
+            min-width: 680px;
+        }
+
+        .wallet-table th,
+        .wallet-table td {
+            font-size: 12px;
+            padding: 10px;
+        }
+
+        .wallet-view-link {
+            min-width: 56px;
+            padding: 3px 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .wallet-modal-content {
+            --wallet-modal-offset: 110px;
+        }
+
+        .wallet-description {
+            font-size: 13px;
+        }
+
+        .wallet-summary-value {
+            font-size: 18px;
         }
     }
 </style>
