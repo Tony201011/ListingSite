@@ -134,7 +134,7 @@
                                                     </span>
                                                     <span x-show="!loading" x-text="online ? 'Online Now' : 'Go Online'"></span>
                                                 </button>
-                                                <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00'" x-text="countdown" aria-label="Time remaining" aria-live="polite"></span>
+                                                <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00:00'" x-text="countdown" aria-label="Time remaining" aria-live="polite"></span>
                                                 <span class="text-xs text-gray-400" x-show="!online" x-text="remainingUses + ' uses left'"></span>
                                             </div>
                                         @endif
