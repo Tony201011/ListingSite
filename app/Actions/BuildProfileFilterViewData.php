@@ -213,10 +213,13 @@ class BuildProfileFilterViewData
         $hasDistanceFilter = $distanceFilter !== null;
 
         // Load home-banner profiles (national) — shown in dedicated banner section
-        $homeBannerProfiles = $this->queryBannerProfiles('home_banner_expires_at');
+        // Spotlight sections are hidden when an escort_name filter is active.
+        $homeBannerProfiles = $escortNameQuery === ''
+            ? $this->queryBannerProfiles('home_banner_expires_at')
+            : collect();
 
         // Load local-banner profiles — shown when a state filter is active
-        $localBannerProfiles = $locationStateQuery !== '' || ($locationQuery !== '' && str_contains($locationQuery, ','))
+        $localBannerProfiles = $escortNameQuery === '' && ($locationStateQuery !== '' || ($locationQuery !== '' && str_contains($locationQuery, ',')))
             ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery)
             : collect();
 
