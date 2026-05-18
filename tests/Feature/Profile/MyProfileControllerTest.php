@@ -8,6 +8,7 @@ use App\Actions\SaveMyProfile;
 use App\Actions\Support\ActionResult;
 use App\Models\Category;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -76,6 +77,10 @@ class MyProfileControllerTest extends TestCase
     public function test_my_profile_view_is_returned_for_authenticated_provider(): void
     {
         $user = $this->createProvider();
+        SiteSetting::query()->create([
+            'online_status_max_uses' => 6,
+            'online_status_duration_minutes' => 90,
+        ]);
 
         $getMyProfilePageData = Mockery::mock(GetMyProfilePageData::class);
         $getMyProfilePageData->shouldReceive('execute')
@@ -97,6 +102,7 @@ class MyProfileControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('profile.my-profile-1');
+        $response->assertSeeText('Use this feature up to 6 times a day for 01:30:00.');
     }
 
     public function test_my_profile_view_passes_page_data_from_action(): void
