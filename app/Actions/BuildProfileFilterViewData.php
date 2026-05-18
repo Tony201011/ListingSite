@@ -157,6 +157,7 @@ class BuildProfileFilterViewData
         $rawUserLng = isset($validated['user_lng']) ? (float) $validated['user_lng'] : null;
 
         $resolvedLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
+        $localSpotlightStateName = $this->resolveLocalSpotlightStateName($locationQuery, $locationStateQuery);
 
         $geocodedLat = null;
         $geocodedLng = null;
@@ -198,6 +199,7 @@ class BuildProfileFilterViewData
             $distanceFilter,
             $girlsMode,
             $escortNameQuery,
+            $localSpotlightStateName,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -376,6 +378,7 @@ class BuildProfileFilterViewData
         ?int $distanceFilter = null,
         string $girlsMode = 'all',
         string $escortNameQuery = '',
+        ?string $localSpotlightStateName = null,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -416,6 +419,16 @@ class BuildProfileFilterViewData
                     });
                 }
             }
+        }
+
+        if ($localSpotlightStateName !== null) {
+            $query->where(function (Builder $q) use ($localSpotlightStateName): void {
+                $q->whereNull('provider_profiles.local_banner_expires_at')
+                    ->orWhere('provider_profiles.local_banner_expires_at', '<=', now())
+                    ->orWhereDoesntHave('state', function (Builder $stateQuery) use ($localSpotlightStateName): void {
+                        $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($localSpotlightStateName)]);
+                    });
+            });
         }
 
         if ($minAge > self::DEFAULT_MIN_AGE || $maxAge < self::DEFAULT_MAX_AGE) {
@@ -779,6 +792,24 @@ class BuildProfileFilterViewData
             'latitude' => (float) $postcode->latitude,
             'longitude' => (float) $postcode->longitude,
         ];
+    }
+
+    private function resolveLocalSpotlightStateName(string $locationQuery, string $locationStateQuery): ?string
+    {
+        $state = trim($locationStateQuery);
+
+        if ($state === '' && $locationQuery !== '' && str_contains($locationQuery, ',')) {
+            $parts = explode(',', $locationQuery, 2);
+            $state = trim($parts[1] ?? '');
+        }
+
+        if ($state === '') {
+            return null;
+        }
+
+        $normalizedState = $this->normalizeStateAbbreviation($state) ?? strtoupper($state);
+
+        return $this->resolveStateName($normalizedState);
     }
 
     private function applyExactLocationFilter(Builder $query, array $exactLocation): void

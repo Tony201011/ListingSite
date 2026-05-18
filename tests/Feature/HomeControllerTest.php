@@ -400,11 +400,22 @@ class HomeControllerTest extends TestCase
             'local_banner_expires_at' => now()->addDay(),
         ]);
         $this->createActiveOnlineUser($user, ProviderProfile::query()->where('user_id', $user->id)->value('id'));
+        $this->createApprovedProviderWithSuburb('UNDERBOOL', 'VIC', [
+            'name' => 'Regular Underbool Escort',
+            'slug' => 'regular-underbool-escort',
+        ]);
 
         // Local Spotlight should be visible when filtering by a location with a VIC state component.
         $response = $this->get('/?location=UNDERBOOL%2C+VIC');
 
         $response->assertSeeText('Local Spotlight');
+        $profiles = $response->viewData('profiles');
+        $profileNames = collect($profiles->items())->pluck('name');
+        $this->assertTrue($profileNames->contains('Regular Underbool Escort'));
+        $this->assertFalse($profileNames->contains('VIC Local Escort'));
+
+        $localSpotlightNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
+        $this->assertTrue($localSpotlightNames->contains('VIC Local Escort'));
     }
 
     // ---------------------------------------------------------------
