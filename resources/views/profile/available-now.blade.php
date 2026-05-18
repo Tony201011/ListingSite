@@ -106,5 +106,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('profile/js/available-toggle.js') }}"></script>
+    <script src="{{ asset('profile/js/available-toggle.js') }}?v={{ filemtime(public_path('profile/js/available-toggle.js')) }}"></script>
 @endpush

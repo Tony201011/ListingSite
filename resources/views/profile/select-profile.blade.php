@@ -129,5 +129,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('profile/js/my-profiles-online.js') }}"></script>
+<script src="{{ asset('profile/js/my-profiles-online.js') }}?v={{ filemtime(public_path('profile/js/my-profiles-online.js')) }}"></script>
 @endpush

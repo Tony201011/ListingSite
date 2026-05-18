@@ -87,7 +87,7 @@ class ProfileSwitchOnlineStatusTest extends TestCase
                 'status' => 'online',
                 'remaining_uses' => 3,
                 'expires_at' => '2026-04-28T10:00:00+00:00',
-            ], 'Online Now enabled for 60 minutes.'));
+            ], 'Online Now enabled for 01:00:00.'));
 
         $this->app->instance(UpdateOnlineNowStatus::class, $updateOnlineNowStatus);
 

@@ -355,7 +355,7 @@
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ONLINE NOW</h3>
 
                     <p class="mb-4 text-sm text-gray-600">
-                        Use this feature up to 4 times a day for 60 minutes.
+                        Use this feature up to 4 times a day for {{ format_clock_duration_from_minutes(60) }}.
                     </p>
 
                     <button

@@ -91,7 +91,7 @@ class UpdateOnlineNowStatus
             'status' => 'online',
             'remaining_uses' => max(0, $maxUses - $onlineUser->usage_count),
             'expires_at' => optional($onlineUser->online_expires_at)?->toIso8601String(),
-        ], "Online Now enabled for {$durationMinutes} minutes.");
+        ], 'Online Now enabled for '.format_clock_duration_from_minutes($durationMinutes).'.');
     }
 
     private function goOffline(OnlineUser $onlineUser, int $maxUses): ActionResult

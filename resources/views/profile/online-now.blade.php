@@ -42,7 +42,7 @@
                     <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
                         <p class="text-sm font-medium text-gray-500">Daily usage rule</p>
                         <p class="mt-2 text-base font-semibold text-gray-900">
-                            Use this feature up to 4 times a day for 60 minutes.
+                            Use this feature up to 4 times a day for {{ format_clock_duration_from_minutes(60) }}.
                         </p>
                     </div>
 
@@ -115,7 +115,7 @@
 </div>
 
 @push('scripts')
-<script src="{{ asset('profile/js/online-now-toggle.js') }}"></script>
+<script src="{{ asset('profile/js/online-now-toggle.js') }}?v={{ filemtime(public_path('profile/js/online-now-toggle.js')) }}"></script>
 @endpush
 
 @endsection
