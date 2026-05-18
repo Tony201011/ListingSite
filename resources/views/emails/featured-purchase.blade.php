@@ -28,7 +28,7 @@
                                 @else
                                     Your <strong>{{ $tierLabel }}</strong> placement has been activated successfully.
                                 @endif
-                                Your listing will enjoy boosted visibility for the next <strong>{{ $durationDays }} days</strong>.
+                                Your listing will enjoy boosted visibility for the next <strong>{{ $durationDays }} {{ (int) $durationDays === 1 ? 'day' : 'days' }}</strong>.
                             </p>
 
                             <div style="background:#fdf2f8;border:1px solid #fbcfe8;border-radius:10px;padding:14px 16px;margin-bottom:18px;">
@@ -44,7 +44,7 @@
                                     </tr>
                                     <tr>
                                         <td style="font-size:14px;color:#6b7280;padding:4px 0;">Duration</td>
-                                        <td style="font-size:14px;color:#111827;font-weight:600;text-align:right;">{{ $durationDays }} days</td>
+                                        <td style="font-size:14px;color:#111827;font-weight:600;text-align:right;">{{ $durationDays }} {{ (int) $durationDays === 1 ? 'day' : 'days' }}</td>
                                     </tr>
                                     <tr>
                                         <td style="font-size:14px;color:#6b7280;padding:4px 0;">Active Until</td>
