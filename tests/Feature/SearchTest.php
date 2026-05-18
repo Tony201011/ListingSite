@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -21,13 +22,23 @@ class SearchTest extends TestCase
     {
         $user = User::factory()->create(array_merge(['role' => User::ROLE_PROVIDER], $userOverrides));
 
-        ProviderProfile::query()->create(array_merge([
+        $profile = ProviderProfile::query()->create(array_merge([
             'user_id' => $user->id,
             'name' => 'Test Escort',
             'slug' => 'test-escort-'.$user->id,
             'profile_status' => 'approved',
             'age' => 25,
         ], $profileOverrides));
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => now()->addMinutes(55),
+        ]);
 
         return $user;
     }
