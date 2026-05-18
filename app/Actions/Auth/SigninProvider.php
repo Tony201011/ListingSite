@@ -25,12 +25,6 @@ class SigninProvider
             ])->withInput();
         }
 
-        if (! $user->email_verified_at) {
-            return back()->withErrors([
-                'email' => 'Please verify your email address before logging in.',
-            ])->withInput();
-        }
-
         $guard = $user->role === User::ROLE_ADMIN ? 'admin' : 'web';
 
         if (Auth::guard($guard)->attempt([
@@ -38,6 +32,10 @@ class SigninProvider
             'password' => $request->password,
         ], $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            if (! $user->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
+            }
 
             $destination = match ($user->role) {
                 User::ROLE_ADMIN => '/admin',

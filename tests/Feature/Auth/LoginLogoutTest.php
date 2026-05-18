@@ -132,7 +132,7 @@ class LoginLogoutTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_login_with_unverified_email_returns_error(): void
+    public function test_login_with_unverified_email_redirects_to_verification_notice(): void
     {
         $user = $this->createVerifiedUser(['email_verified_at' => null]);
 
@@ -141,9 +141,8 @@ class LoginLogoutTest extends TestCase
             'password' => 'CorrectPass123',
         ]);
 
-        $response->assertRedirect('/signin');
-        $response->assertSessionHasErrors(['email']);
-        $this->assertGuest();
+        $response->assertRedirect(route('verification.notice'));
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_login_validation_requires_email_and_password(): void
