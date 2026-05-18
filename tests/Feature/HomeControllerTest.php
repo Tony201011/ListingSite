@@ -485,6 +485,7 @@ class HomeControllerTest extends TestCase
             'profile_status' => 'approved',
             'age' => 25,
             'state_id' => $state->id,
+            'suburb' => 'UNDERBOOL, VIC 0000',
             'local_banner_expires_at' => now()->addDay(),
         ]);
         $this->createActiveOnlineUser($user, ProviderProfile::query()->where('user_id', $user->id)->value('id'));
