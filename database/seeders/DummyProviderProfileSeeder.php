@@ -103,6 +103,8 @@ class DummyProviderProfileSeeder extends Seeder
             $tourCityNames = ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Canberra', 'Hobart', 'Darwin'];
         }
 
+        $primaryIdentityIds = Category::query()->where('slug', 'primary-identity')
+            ->first()?->children()->pluck('id')->values()->all() ?? [];
         $attributeIds = Category::query()->where('slug', 'attributes')
             ->first()?->children()->pluck('id')->values()->all() ?? [];
         $servicesStyleIds = Category::query()->where('slug', 'services-style')
@@ -278,8 +280,8 @@ class DummyProviderProfileSeeder extends Seeder
                     'description' => "Hi, I'm {$name}. I am a professional and discreet companion offering premium companionship services. I love to meet new people and create unforgettable experiences.",
                     'introduction_line' => "Welcome to my profile! I'm {$name}, your perfect companion.",
                     'profile_text' => 'I provide a warm and genuine experience. Available for incalls and outcalls throughout the city. Contact me to arrange an unforgettable time together.',
-                    'primary_identity' => count($attributeIds) > 0
-                        ? [$this->pickFrom($attributeIds, $i)]
+                    'primary_identity' => count($primaryIdentityIds) > 0
+                        ? [$this->pickFrom($primaryIdentityIds, $i)]
                         : [],
                     'attributes' => $this->pickMultiple($attributeIds, $i, 3),
                     'services_style' => $this->pickMultiple($servicesStyleIds, $i, 4),
