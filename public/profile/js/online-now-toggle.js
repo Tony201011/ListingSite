@@ -9,7 +9,7 @@ document.addEventListener('alpine:init', () => {
         loading: false,
         message: '',
         messageType: 'success',
-        countdown: '00:00',
+        countdown: '00:00:00',
         timer: null,
 
         init() {
@@ -46,7 +46,7 @@ document.addEventListener('alpine:init', () => {
 
         updateCountdown() {
             if (!this.expiresAt) {
-                this.countdown = '00:00';
+                this.countdown = '00:00:00';
                 return;
             }
 
@@ -57,7 +57,7 @@ document.addEventListener('alpine:init', () => {
             if (diff <= 0) {
                 this.enabled = false;
                 this.expiresAt = null;
-                this.countdown = '00:00';
+                this.countdown = '00:00:00';
                 this.stopTimer();
 
                 this.showMessage('Your session has ended.', 'success');
@@ -66,10 +66,13 @@ document.addEventListener('alpine:init', () => {
             }
 
             const totalSeconds = Math.floor(diff / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
             const seconds = totalSeconds % 60;
 
             this.countdown =
+                String(hours).padStart(2, '0') +
+                ':' +
                 String(minutes).padStart(2, '0') +
                 ':' +
                 String(seconds).padStart(2, '0');
@@ -109,7 +112,7 @@ document.addEventListener('alpine:init', () => {
                     this.startTimer();
                 } else {
                     this.stopTimer();
-                    this.countdown = '00:00';
+                    this.countdown = '00:00:00';
                 }
 
                 this.showMessage(data.message || 'Status updated.');
