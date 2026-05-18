@@ -15,7 +15,7 @@ class PurchaseFeaturedTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function createSettings(int $creditCost = 5, int $durationDays = 7): SiteSetting
+    private function createSettings(int $creditCost = 5, int $durationDays = 1): SiteSetting
     {
         return SiteSetting::query()->create([
             'featured_credit_cost' => $creditCost,
@@ -41,7 +41,7 @@ class PurchaseFeaturedTest extends TestCase
 
     public function test_purchase_sets_is_featured_and_deducts_credits(): void
     {
-        $this->createSettings(creditCost: 5, durationDays: 7);
+        $this->createSettings(creditCost: 5, durationDays: 1);
         [$user, $profile] = $this->createProvider(credits: 10);
 
         $result = (new PurchaseFeatured)->execute($user, $profile);
@@ -59,7 +59,7 @@ class PurchaseFeaturedTest extends TestCase
 
     public function test_purchase_creates_credit_log_entry(): void
     {
-        $this->createSettings(creditCost: 5, durationDays: 7);
+        $this->createSettings(creditCost: 5, durationDays: 1);
         [$user, $profile] = $this->createProvider(credits: 10);
 
         (new PurchaseFeatured)->execute($user, $profile);
@@ -72,7 +72,7 @@ class PurchaseFeaturedTest extends TestCase
 
     public function test_purchase_fails_when_insufficient_credits(): void
     {
-        $this->createSettings(creditCost: 5, durationDays: 7);
+        $this->createSettings(creditCost: 5, durationDays: 1);
         [$user, $profile] = $this->createProvider(credits: 2);
 
         $result = (new PurchaseFeatured)->execute($user, $profile);
@@ -89,7 +89,7 @@ class PurchaseFeaturedTest extends TestCase
 
     public function test_purchase_extends_existing_featured_expiry(): void
     {
-        $this->createSettings(creditCost: 5, durationDays: 7);
+        $this->createSettings(creditCost: 5, durationDays: 1);
         [$user, $profile] = $this->createProvider(credits: 20);
 
         $existingExpiry = now()->addDays(3);
@@ -101,13 +101,13 @@ class PurchaseFeaturedTest extends TestCase
 
         $profile->refresh();
         $this->assertTrue($profile->is_featured);
-        // Expiry should be extended by 7 days from the existing expiry (3 + 7 = 10 days from now)
-        $this->assertTrue($profile->featured_expires_at->isAfter($existingExpiry->addDays(6)));
+        // Expiry should be extended by 1 day from the existing expiry.
+        $this->assertTrue($profile->featured_expires_at->isAfter($existingExpiry->copy()->addHours(12)));
     }
 
     public function test_get_featured_state_returns_correct_data(): void
     {
-        $this->createSettings(creditCost: 5, durationDays: 7);
+        $this->createSettings(creditCost: 5, durationDays: 1);
         [$user, $profile] = $this->createProvider(credits: 10);
 
         $profile->is_featured = true;
@@ -119,12 +119,12 @@ class PurchaseFeaturedTest extends TestCase
         $this->assertTrue($state['isFeatured']);
         $this->assertNotNull($state['expiresAt']);
         $this->assertSame(5, $state['creditCost']);
-        $this->assertSame(7, $state['durationDays']);
+        $this->assertSame(1, $state['durationDays']);
     }
 
     public function test_get_featured_state_expires_overdue_featured(): void
     {
-        $this->createSettings(creditCost: 5, durationDays: 7);
+        $this->createSettings(creditCost: 5, durationDays: 1);
         [$user, $profile] = $this->createProvider();
 
         $profile->is_featured = true;
@@ -144,7 +144,7 @@ class PurchaseFeaturedTest extends TestCase
     public function test_purchase_home_banner_tier_sets_correct_expiry_column(): void
     {
         SiteSetting::query()->create([
-            'featured_duration_days' => 7,
+            'featured_duration_days' => 1,
             'home_banner_credit_cost' => 5,
         ]);
         [$user, $profile] = $this->createProvider(credits: 20);
@@ -162,7 +162,7 @@ class PurchaseFeaturedTest extends TestCase
     public function test_purchase_home_featured_tier_sets_correct_expiry_column(): void
     {
         SiteSetting::query()->create([
-            'featured_duration_days' => 7,
+            'featured_duration_days' => 1,
             'home_featured_credit_cost' => 3,
         ]);
         [$user, $profile] = $this->createProvider(credits: 20);
@@ -179,7 +179,7 @@ class PurchaseFeaturedTest extends TestCase
     public function test_purchase_local_banner_tier_sets_correct_expiry_column(): void
     {
         SiteSetting::query()->create([
-            'featured_duration_days' => 7,
+            'featured_duration_days' => 1,
             'local_banner_credit_cost' => 2,
         ]);
         [$user, $profile] = $this->createProvider(credits: 20);
@@ -195,7 +195,7 @@ class PurchaseFeaturedTest extends TestCase
 
     public function test_get_featured_state_includes_all_tier_expiries(): void
     {
-        $this->createSettings(creditCost: 1, durationDays: 7);
+        $this->createSettings(creditCost: 1, durationDays: 1);
         [$user, $profile] = $this->createProvider(credits: 10);
 
         $profile->home_featured_expires_at = now()->addDays(3);

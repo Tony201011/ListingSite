@@ -127,8 +127,8 @@ class SiteSettingResource extends Resource
                         ->label('Ad Purchase Duration (days)')
                         ->numeric()
                         ->minValue(1)
-                        ->default(7)
-                        ->helperText('How many days each ad tier purchase covers. Default is 7 days.'),
+                        ->default(1)
+                        ->helperText('Ad tiers are charged daily. Keep this at 1 day.'),
                     TextInput::make('featured_credit_cost')
                         ->label('Normal Featured – Credits per Purchase')
                         ->numeric()

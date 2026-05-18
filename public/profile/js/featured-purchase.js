@@ -1,7 +1,7 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('adTierPurchase', (config = {}) => ({
         userCredits: Number(config.initialUserCredits || 0),
-        durationDays: Number(config.durationDays || 7),
+        durationDays: Number(config.durationDays || 1),
         purchaseUrl: config.purchaseUrl || '',
         tiers: Array.isArray(config.tiers) ? config.tiers : [],
         loading: null,      // key of tier currently loading

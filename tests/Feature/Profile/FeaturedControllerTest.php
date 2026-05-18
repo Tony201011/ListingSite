@@ -57,14 +57,14 @@ class FeaturedControllerTest extends TestCase
                 'isFeatured' => false,
                 'expiresAt' => null,
                 'creditCost' => 5,
-                'durationDays' => 7,
+                'durationDays' => 1,
                 'homeFeaturedExpiresAt' => null,
                 'localBannerExpiresAt' => null,
                 'homeBannerExpiresAt' => null,
                 'freeListingExpiresAt' => null,
                 'settings' => [
                     'free_listing_days' => 21,
-                    'featured_duration_days' => 7,
+                    'featured_duration_days' => 1,
                     'normal_featured_credit_cost' => 1,
                     'home_featured_credit_cost' => 3,
                     'local_banner_credit_cost' => 2,
@@ -101,8 +101,8 @@ class FeaturedControllerTest extends TestCase
                 'is_featured' => true,
                 'expires_at' => '2026-05-21T00:00:00+00:00',
                 'credit_cost' => 5,
-                'duration_days' => 7,
-            ], 'Featured activated! Your listing is now featured for 7 days.'));
+                'duration_days' => 1,
+            ], 'Featured activated! Your listing is now featured for 1 day.'));
 
         $this->app->instance(PurchaseFeatured::class, $purchaseFeatured);
 
@@ -112,7 +112,7 @@ class FeaturedControllerTest extends TestCase
         $response->assertJson([
             'success' => true,
             'is_featured' => true,
-            'message' => 'Featured activated! Your listing is now featured for 7 days.',
+            'message' => 'Featured activated! Your listing is now featured for 1 day.',
         ]);
     }
 
@@ -132,7 +132,7 @@ class FeaturedControllerTest extends TestCase
                     'is_featured' => false,
                     'expires_at' => null,
                     'credit_cost' => 5,
-                    'duration_days' => 7,
+                    'duration_days' => 1,
                 ],
                 'domain'
             ));

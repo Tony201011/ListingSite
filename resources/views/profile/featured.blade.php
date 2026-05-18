@@ -56,7 +56,7 @@
 
         <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
             <h1 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">Boost Your Profile</h1>
-            <p class="text-gray-600">Choose one or more ad placements to increase your visibility. Each placement is purchased for <strong x-text="durationDays"></strong> days.</p>
+            <p class="text-gray-600">Choose one or more ad placements to increase your visibility. Each placement is charged per day.</p>
 
             <div class="mt-4 flex flex-col items-start gap-2 rounded-xl bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
                 <span class="text-sm text-gray-500">Your credit balance:</span>
@@ -116,7 +116,7 @@
 
                     <div class="mb-4 flex items-end gap-2">
                         <span class="text-2xl font-extrabold text-gray-900" x-text="tier.cost"></span>
-                        <span class="mb-0.5 text-sm text-gray-500">credits / <span x-text="durationDays + ' days'"></span></span>
+                        <span class="mb-0.5 text-sm text-gray-500">credits / day</span>
                     </div>
 
                     <template x-if="tier.expiresAt && new Date(tier.expiresAt) > new Date()">
@@ -163,7 +163,7 @@
             <ol class="list-inside list-decimal space-y-1">
                 <li><strong>Free for {{ $settings['free_listing_days'] }} days</strong> — new listings are free for the first {{ $settings['free_listing_days'] }} days.</li>
                 <li><strong>1 credit / day</strong> after the free period to keep your listing visible.</li>
-                <li>Each ad placement is purchased for <strong x-text="durationDays"></strong> days. Purchasing again extends the active period.</li>
+                <li>Each ad placement is charged <strong>per day</strong>. Purchasing again extends the active period by one day.</li>
                 <li>Credits can be purchased on the <a href="{{ route('purchase-credit') }}" class="font-semibold text-pink-600 underline hover:text-pink-700">credits page</a>.</li>
             </ol>
         </div>

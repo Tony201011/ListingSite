@@ -7,13 +7,15 @@ use App\Models\SiteSetting;
 
 class GetFeaturedState
 {
+    private const AD_TIER_DURATION_DAYS = 1;
+
     public function execute(?ProviderProfile $profile): array
     {
         $settings = SiteSetting::getAdTierSettings();
 
         // Legacy / backward-compat keys (used by existing featured.blade.php and tests)
         $creditCost = $settings['normal_featured_credit_cost'];
-        $durationDays = $settings['featured_duration_days'];
+        $durationDays = self::AD_TIER_DURATION_DAYS;
 
         $isFeatured = false;
         $expiresAt = null;

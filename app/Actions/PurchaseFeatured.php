@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class PurchaseFeatured
 {
+    private const AD_TIER_DURATION_DAYS = 1;
+
     /** Valid tier identifiers */
     public const TIER_NORMAL = 'normal';
 
@@ -36,7 +38,7 @@ class PurchaseFeatured
     public function execute(User $user, ProviderProfile $profile, string $tier = self::TIER_NORMAL): ActionResult
     {
         $settings = SiteSetting::getAdTierSettings();
-        $durationDays = $settings['featured_duration_days'];
+        $durationDays = self::AD_TIER_DURATION_DAYS;
 
         [$creditCost, $expiryColumn, $tierLabel] = $this->resolveTier($tier, $settings);
 
@@ -76,7 +78,7 @@ class PurchaseFeatured
                 'user_id' => $user->id,
                 'amount' => -$creditCost,
                 'type' => 'used',
-                'description' => "Activated {$tierLabel} for {$durationDays} days",
+                'description' => "Activated {$tierLabel} for {$durationDays} day",
                 'reference_type' => ProviderProfile::class,
                 'reference_id' => $profile->id,
             ]);
@@ -98,7 +100,7 @@ class PurchaseFeatured
 
         return ActionResult::success(
             $this->buildPayload($profile, $tier, $creditCost, $durationDays, $expiryColumn),
-            "{$tierLabel} activated! Your listing is now boosted for {$durationDays} days."
+            "{$tierLabel} activated! Your listing is now boosted for {$durationDays} day."
         );
     }
 

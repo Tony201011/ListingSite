@@ -192,7 +192,7 @@ class SiteSetting extends Model
 
             return [
                 'featured_credit_cost' => $setting?->featured_credit_cost ?? 5,
-                'featured_duration_days' => $setting?->featured_duration_days ?? 7,
+                'featured_duration_days' => $setting?->featured_duration_days ?? 1,
             ];
         });
     }
@@ -204,7 +204,7 @@ class SiteSetting extends Model
 
             return [
                 'free_listing_days' => $setting?->free_listing_days ?? 21,
-                'featured_duration_days' => $setting?->featured_duration_days ?? 7,
+                'featured_duration_days' => 1,
                 // Daily credit costs per tier
                 'normal_featured_credit_cost' => $setting?->featured_credit_cost ?? 1,
                 'home_featured_credit_cost' => $setting?->home_featured_credit_cost ?? 3,

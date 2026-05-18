@@ -107,9 +107,9 @@ class StatusSettingResource extends Resource
                         ->numeric()
                         ->minValue(1)
                         ->maxValue(365)
-                        ->default(7)
+                        ->default(1)
                         ->required()
-                        ->helperText('How many days each Featured activation lasts. Purchases stack by extending the existing expiry.'),
+                        ->helperText('Featured placements are charged daily. Keep this at 1 day.'),
                 ])
                 ->columns(2),
         ]);
