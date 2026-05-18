@@ -7,6 +7,7 @@ use App\Actions\SendContactInquiryReplyEmail;
 use App\Jobs\SendContactInquiryEmailJob;
 use App\Jobs\SendContactInquiryReplyEmailJob;
 use App\Models\ContactInquiry;
+use App\Models\ContactInquiryReply;
 use App\Models\ContactUsPage;
 use App\Models\ProviderProfile;
 use App\Models\User;
@@ -290,7 +291,7 @@ class ContactUsTest extends TestCase
             'is_read' => false,
         ]);
 
-        $response = $this->actingAs($admin, 'admin')->get('/admin/pages/contact-inquiries');
+        $response = $this->actingAs($admin, 'admin')->get('/admin/contact-us/contact-inquiries');
 
         $response->assertOk();
     }
@@ -308,14 +309,14 @@ class ContactUsTest extends TestCase
 
         $response = $this->actingAs($provider, 'admin')
             ->withSession(['active_provider_profile_id' => $profile->id])
-            ->get('/admin/pages/contact-inquiries');
+            ->get('/admin/contact-us/contact-inquiries');
 
         $response->assertForbidden();
     }
 
     public function test_guest_cannot_access_contact_inquiries_admin_page(): void
     {
-        $response = $this->get('/admin/pages/contact-inquiries');
+        $response = $this->get('/admin/contact-us/contact-inquiries');
 
         $response->assertRedirect('/admin/login');
     }
@@ -416,11 +417,17 @@ class ContactUsTest extends TestCase
             'replied_at' => now(),
         ]);
 
-        $action = app(SendContactInquiryReplyEmail::class);
-        $action->execute($inquiry);
+        $reply = ContactInquiryReply::create([
+            'contact_inquiry_id' => $inquiry->id,
+            'message' => 'Our answer',
+            'email_status' => 'pending',
+        ]);
 
-        Bus::assertDispatched(SendContactInquiryReplyEmailJob::class, function ($job) use ($inquiry) {
-            return $job->inquiryId === $inquiry->id;
+        $action = app(SendContactInquiryReplyEmail::class);
+        $action->execute($inquiry, $reply);
+
+        Bus::assertDispatched(SendContactInquiryReplyEmailJob::class, function ($job) use ($inquiry, $reply) {
+            return $job->inquiryId === $inquiry->id && $job->replyId === $reply->id;
         });
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\ContactInquiry;
+use App\Models\ContactInquiryReply;
 use App\Models\EmailLog;
 use App\Services\MailgunConfigService;
 use Illuminate\Bus\Queueable;
@@ -22,15 +23,25 @@ class SendContactInquiryReplyEmailJob implements ShouldQueue
 
     public function __construct(
         public int $inquiryId,
+        public int $replyId,
     ) {}
 
     public function handle(MailgunConfigService $mailgunConfig): void
     {
         $inquiry = ContactInquiry::find($this->inquiryId);
+        $reply = ContactInquiryReply::find($this->replyId);
 
         if (! $inquiry) {
             Log::error('Contact inquiry reply email job failed: inquiry not found.', [
                 'contact_inquiry_id' => $this->inquiryId,
+            ]);
+
+            return;
+        }
+
+        if (! $reply) {
+            Log::error('Contact inquiry reply email job failed: reply not found.', [
+                'contact_inquiry_reply_id' => $this->replyId,
             ]);
 
             return;
@@ -41,6 +52,8 @@ class SendContactInquiryReplyEmailJob implements ShouldQueue
                 'contact_inquiry_id' => $inquiry->id,
             ]);
 
+            $reply->update(['email_status' => 'failed']);
+
             return;
         }
 
@@ -50,21 +63,29 @@ class SendContactInquiryReplyEmailJob implements ShouldQueue
         );
 
         if (! $setting) {
+            $reply->update(['email_status' => 'failed']);
+
             return;
         }
 
         try {
             Mail::mailer('mailgun')->send(
                 'emails.contact-inquiry-reply',
-                ['inquiry' => $inquiry],
+                ['inquiry' => $inquiry, 'reply' => $reply],
                 function ($message) use ($inquiry): void {
                     $message->to($inquiry->email, $inquiry->name ?? null)
                         ->subject('Re: '.($inquiry->subject ?: 'Your Inquiry'));
                 }
             );
 
+            $reply->update([
+                'email_status' => 'delivered',
+                'sent_at' => now(),
+            ]);
+
             Log::info('Contact inquiry reply email sent successfully', [
                 'contact_inquiry_id' => $inquiry->id,
+                'contact_inquiry_reply_id' => $reply->id,
                 'email' => $inquiry->email,
             ]);
 
@@ -76,8 +97,11 @@ class SendContactInquiryReplyEmailJob implements ShouldQueue
                 'sent_at' => now(),
             ]);
         } catch (Throwable $e) {
+            $reply->update(['email_status' => 'failed']);
+
             Log::error('Contact inquiry reply email failed', [
                 'contact_inquiry_id' => $inquiry->id,
+                'contact_inquiry_reply_id' => $reply->id,
                 'email' => $inquiry->email,
                 'exception_class' => get_class($e),
                 'error' => $e->getMessage(),

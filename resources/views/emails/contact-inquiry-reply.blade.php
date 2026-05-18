@@ -66,7 +66,7 @@
                                             <tr>
                                                 <td style="padding:20px;">
                                                     <p style="font-size:13px;color:#9d174d;margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Our reply</p>
-                                                    <p style="font-size:15px;color:#374151;margin:0;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">{{ $inquiry->admin_reply }}</p>
+                                                    <p style="font-size:15px;color:#374151;margin:0;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">{{ $reply->message }}</p>
                                                 </td>
                                             </tr>
                                         </table>
