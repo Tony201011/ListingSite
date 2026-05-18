@@ -182,26 +182,26 @@
         {{-- Ad: Home Top --}}
         @include('layouts.partials.ads', ['position' => 'home_top', 'pageKey' => 'home'])
 
-        {{-- Home Banner: Paid spotlight profiles (national, $5/day) --}}
+        {{-- Home Banner: Paid featured profiles (national, $5/day) --}}
         @if(!empty($homeBannerProfiles) && count($homeBannerProfiles) > 0)
             <div class="mb-6">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
-                        <i class="fa-solid fa-crown text-[10px]"></i> Featured Spotlight
+                        <i class="fa-solid fa-crown text-[10px]"></i> Featured
                     </span>
                     <div class="flex items-center gap-2">
-                        <button type="button" class="spotlight-slider-button" data-slider-prev aria-label="Previous featured spotlight profiles">
+                        <button type="button" class="featured-slider-button" data-slider-prev aria-label="Previous featured profiles">
                             <i class="fa-solid fa-chevron-left text-xs"></i>
                         </button>
-                        <button type="button" class="spotlight-slider-button" data-slider-next aria-label="Next featured spotlight profiles">
+                        <button type="button" class="featured-slider-button" data-slider-next aria-label="Next featured profiles">
                             <i class="fa-solid fa-chevron-right text-xs"></i>
                         </button>
                     </div>
                 </div>
-                <div class="spotlight-slider" data-spotlight-slider>
-                    <div class="spotlight-slider-track" data-slider-track tabindex="0">
+                <div class="featured-slider" data-featured-slider>
+                    <div class="featured-slider-track" data-slider-track tabindex="0">
                         @foreach($homeBannerProfiles as $profile)
-                            <div class="spotlight-slider-slide">
+                            <div class="featured-slider-slide">
                                 @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'home_banner'])
                             </div>
                         @endforeach
@@ -211,28 +211,28 @@
             <hr class="mb-6 border-gray-200">
         @endif
 
-        {{-- Local Banner: Paid state-specific spotlight profiles ($2/day) --}}
+        {{-- Local Banner: Paid state-specific featured profiles ($2/day) --}}
         {{-- NOTE: shown even when a location filter is active, since localBannerProfiles is only --}}
         {{-- populated when a location with a state abbreviation is present in the URL. --}}
         @if(!empty($localBannerProfiles) && count($localBannerProfiles) > 0)
             <div class="mb-6">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
-                        <i class="fa-solid fa-location-dot text-[10px]"></i> Local Spotlight
+                        <i class="fa-solid fa-location-dot text-[10px]"></i> Local Featured
                     </span>
                     <div class="flex items-center gap-2">
-                        <button type="button" class="spotlight-slider-button" data-slider-prev aria-label="Previous local spotlight profiles">
+                        <button type="button" class="featured-slider-button" data-slider-prev aria-label="Previous local featured profiles">
                             <i class="fa-solid fa-chevron-left text-xs"></i>
                         </button>
-                        <button type="button" class="spotlight-slider-button" data-slider-next aria-label="Next local spotlight profiles">
+                        <button type="button" class="featured-slider-button" data-slider-next aria-label="Next local featured profiles">
                             <i class="fa-solid fa-chevron-right text-xs"></i>
                         </button>
                     </div>
                 </div>
-                <div class="spotlight-slider" data-spotlight-slider>
-                    <div class="spotlight-slider-track" data-slider-track tabindex="0">
+                <div class="featured-slider" data-featured-slider>
+                    <div class="featured-slider-track" data-slider-track tabindex="0">
                         @foreach($localBannerProfiles as $profile)
-                            <div class="spotlight-slider-slide">
+                            <div class="featured-slider-slide">
                                 @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'local_banner'])
                             </div>
                         @endforeach

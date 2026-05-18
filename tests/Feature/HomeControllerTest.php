@@ -432,24 +432,24 @@ class HomeControllerTest extends TestCase
         $response->assertViewHas('escortNameQuery', 'Ruby');
     }
 
-    public function test_home_page_hides_spotlight_sections_when_search_filters_are_active(): void
+    public function test_home_page_hides_featured_sections_when_search_filters_are_active(): void
     {
         $this->createApprovedProvider([
-            'name' => 'Spotlight Escort',
-            'slug' => 'spotlight-escort',
+            'name' => 'Featured Escort',
+            'slug' => 'featured-escort',
             'home_banner_expires_at' => now()->addDay(),
             'local_banner_expires_at' => now()->addDay(),
         ]);
 
         $unfilteredResponse = $this->get('/');
-        $unfilteredResponse->assertSeeText('Featured Spotlight');
+        $unfilteredResponse->assertSeeText('Featured');
 
-        $filteredResponse = $this->get('/?escort_name=Spotlight+Escort');
-        $filteredResponse->assertDontSeeText('Featured Spotlight');
-        $filteredResponse->assertDontSeeText('Local Spotlight');
+        $filteredResponse = $this->get('/?escort_name=Featured+Escort');
+        $filteredResponse->assertDontSeeText('Featured');
+        $filteredResponse->assertDontSeeText('Local Featured');
     }
 
-    public function test_local_spotlight_profile_appears_in_main_results_when_escort_name_filter_is_active(): void
+    public function test_local_featured_profile_appears_in_main_results_when_escort_name_filter_is_active(): void
     {
         $country = Country::query()->create(['name' => 'Australia', 'code' => 'AU']);
         $state = State::query()->create(['country_id' => $country->id, 'name' => 'New South Wales']);
@@ -462,17 +462,17 @@ class HomeControllerTest extends TestCase
         ]);
 
         // Searching by escort_name + location with state: the profile has an active local_banner_expires_at
-        // but spotlight is hidden when escort_name filter is active.  The profile must still appear in the
-        // main results (the spotlight exclusion filter must NOT be applied).
+        // but featured is hidden when escort_name filter is active.  The profile must still appear in the
+        // main results (the featured exclusion filter must NOT be applied).
         $response = $this->get('/?escort_name=Sydney+Local+Escort&location=Sydney%2C+NSW');
 
-        $response->assertDontSeeText('Local Spotlight');
+        $response->assertDontSeeText('Local Featured');
         $profiles = $response->viewData('profiles');
         $profileNames = collect($profiles->items())->pluck('name');
         $this->assertTrue($profileNames->contains('Sydney Local Escort'));
     }
 
-    public function test_local_spotlight_shows_when_filtering_by_location_with_state(): void
+    public function test_local_featured_shows_when_filtering_by_location_with_state(): void
     {
         $country = Country::query()->create(['name' => 'Australia', 'code' => 'AU']);
         $state = State::query()->create(['country_id' => $country->id, 'name' => 'Victoria']);
@@ -494,26 +494,26 @@ class HomeControllerTest extends TestCase
             'slug' => 'regular-underbool-escort',
         ]);
 
-        // Local Spotlight should be visible when filtering by a location with a VIC state component.
+        // Local Featured should be visible when filtering by a location with a VIC state component.
         $response = $this->get('/?location=UNDERBOOL%2C+VIC');
 
-        $response->assertSeeText('Local Spotlight');
+        $response->assertSeeText('Local Featured');
         $profiles = $response->viewData('profiles');
         $profileNames = collect($profiles->items())->pluck('name');
         $this->assertTrue($profileNames->contains('Regular Underbool Escort'));
         $this->assertFalse($profileNames->contains('VIC Local Escort'));
 
-        $localSpotlightNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
-        $this->assertTrue($localSpotlightNames->contains('VIC Local Escort'));
+        $localFeaturedNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
+        $this->assertTrue($localFeaturedNames->contains('VIC Local Escort'));
     }
 
-    public function test_local_spotlight_filters_to_exact_suburb_and_state_when_state_relation_is_missing(): void
+    public function test_local_featured_filters_to_exact_suburb_and_state_when_state_relation_is_missing(): void
     {
         $macknadeUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $macknadeProfile = ProviderProfile::query()->create([
             'user_id' => $macknadeUser->id,
-            'name' => 'Macknade Local Spotlight',
-            'slug' => 'macknade-local-spotlight',
+            'name' => 'Macknade Local Featured',
+            'slug' => 'macknade-local-featured',
             'profile_status' => 'approved',
             'age' => 25,
             'suburb' => 'MACKNADE, QLD 4850',
@@ -524,8 +524,8 @@ class HomeControllerTest extends TestCase
         $townsvilleUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $townsvilleProfile = ProviderProfile::query()->create([
             'user_id' => $townsvilleUser->id,
-            'name' => 'Townsville Local Spotlight',
-            'slug' => 'townsville-local-spotlight',
+            'name' => 'Townsville Local Featured',
+            'slug' => 'townsville-local-featured',
             'profile_status' => 'approved',
             'age' => 25,
             'suburb' => 'TOWNSVILLE, QLD 4810',
@@ -540,10 +540,10 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/?location=MACKNADE%2C+QLD');
 
-        $response->assertSeeText('Local Spotlight');
-        $localSpotlightNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
-        $this->assertTrue($localSpotlightNames->contains('Macknade Local Spotlight'));
-        $this->assertFalse($localSpotlightNames->contains('Townsville Local Spotlight'));
+        $response->assertSeeText('Local Featured');
+        $localFeaturedNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
+        $this->assertTrue($localFeaturedNames->contains('Macknade Local Featured'));
+        $this->assertFalse($localFeaturedNames->contains('Townsville Local Featured'));
     }
 
     // ---------------------------------------------------------------
@@ -826,19 +826,19 @@ class HomeControllerTest extends TestCase
         $this->assertFalse($names->contains('Featured Offline Escort'));
     }
 
-    public function test_home_spotlight_slider_hides_offline_profiles_even_when_home_banner_is_active(): void
+    public function test_home_featured_slider_hides_offline_profiles_even_when_home_banner_is_active(): void
     {
         $this->createApprovedProvider([
-            'name' => 'Online Spotlight Escort',
-            'slug' => 'online-spotlight-escort',
+            'name' => 'Online Featured Escort',
+            'slug' => 'online-featured-escort',
             'home_banner_expires_at' => now()->addDay(),
         ]);
 
         $offlineUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $offlineProfile = ProviderProfile::query()->create([
             'user_id' => $offlineUser->id,
-            'name' => 'Offline Spotlight Escort',
-            'slug' => 'offline-spotlight-escort',
+            'name' => 'Offline Featured Escort',
+            'slug' => 'offline-featured-escort',
             'profile_status' => 'approved',
             'age' => 25,
             'home_banner_expires_at' => now()->addDay(),
@@ -855,9 +855,9 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $homeSpotlightNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
-        $this->assertTrue($homeSpotlightNames->contains('Online Spotlight Escort'));
-        $this->assertFalse($homeSpotlightNames->contains('Offline Spotlight Escort'));
+        $homeFeaturedNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($homeFeaturedNames->contains('Online Featured Escort'));
+        $this->assertFalse($homeFeaturedNames->contains('Offline Featured Escort'));
     }
 
     public function test_featured_page_only_shows_online_profiles_for_all_featured_tiers(): void
