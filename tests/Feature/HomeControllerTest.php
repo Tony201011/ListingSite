@@ -715,6 +715,117 @@ class HomeControllerTest extends TestCase
     }
 
     // ---------------------------------------------------------------
+    // Online status visibility filter
+    // ---------------------------------------------------------------
+
+    public function test_home_page_hides_profile_with_offline_online_user_record(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Offline Escort',
+            'slug' => 'offline-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        // Profile has used the online feature before, but is currently offline
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertFalse($names->contains('Offline Escort'));
+    }
+
+    public function test_home_page_hides_profile_with_expired_online_session(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Expired Online Escort',
+            'slug' => 'expired-online-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        // Profile session has expired
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subHours(2),
+            'online_expires_at' => now()->subHour(), // expired
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertFalse($names->contains('Expired Online Escort'));
+    }
+
+    public function test_home_page_shows_profile_with_no_online_user_record(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'New Escort',
+            'slug' => 'new-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+        // No OnlineUser record created — profile has never used the online feature
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('New Escort'));
+    }
+
+    public function test_home_page_shows_featured_profile_even_when_offline(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Featured Offline Escort',
+            'slug' => 'featured-offline-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'is_featured' => true,
+        ]);
+
+        // Profile is featured but currently offline
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Featured Offline Escort'));
+    }
+
+    // ---------------------------------------------------------------
     // Site password middleware
     // ---------------------------------------------------------------
 
