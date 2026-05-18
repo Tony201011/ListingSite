@@ -189,14 +189,6 @@
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
                         <i class="fa-solid fa-crown text-[10px]"></i> Featured
                     </span>
-                    <div class="flex items-center gap-2">
-                        <button type="button" class="featured-slider-button" data-slider-prev aria-label="Previous featured profiles">
-                            <i class="fa-solid fa-chevron-left text-xs"></i>
-                        </button>
-                        <button type="button" class="featured-slider-button" data-slider-next aria-label="Next featured profiles">
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
-                        </button>
-                    </div>
                 </div>
                 <div class="featured-slider" data-featured-slider>
                     <div class="featured-slider-track" data-slider-track tabindex="0">
@@ -206,6 +198,12 @@
                             </div>
                         @endforeach
                     </div>
+                    <button type="button" class="featured-slider-button" data-slider-prev aria-label="Previous featured profiles">
+                        <i class="fa-solid fa-chevron-left text-lg"></i>
+                    </button>
+                    <button type="button" class="featured-slider-button" data-slider-next aria-label="Next featured profiles">
+                        <i class="fa-solid fa-chevron-right text-lg"></i>
+                    </button>
                 </div>
             </div>
             <hr class="mb-6 border-gray-200">
@@ -220,14 +218,6 @@
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow">
                         <i class="fa-solid fa-location-dot text-[10px]"></i> Local Featured
                     </span>
-                    <div class="flex items-center gap-2">
-                        <button type="button" class="featured-slider-button" data-slider-prev aria-label="Previous local featured profiles">
-                            <i class="fa-solid fa-chevron-left text-xs"></i>
-                        </button>
-                        <button type="button" class="featured-slider-button" data-slider-next aria-label="Next local featured profiles">
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
-                        </button>
-                    </div>
                 </div>
                 <div class="featured-slider" data-featured-slider>
                     <div class="featured-slider-track" data-slider-track tabindex="0">
@@ -237,6 +227,12 @@
                             </div>
                         @endforeach
                     </div>
+                    <button type="button" class="featured-slider-button" data-slider-prev aria-label="Previous local featured profiles">
+                        <i class="fa-solid fa-chevron-left text-lg"></i>
+                    </button>
+                    <button type="button" class="featured-slider-button" data-slider-next aria-label="Next local featured profiles">
+                        <i class="fa-solid fa-chevron-right text-lg"></i>
+                    </button>
                 </div>
             </div>
             <hr class="mb-6 border-gray-200">
