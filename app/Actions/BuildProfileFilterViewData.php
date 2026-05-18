@@ -286,7 +286,7 @@ class BuildProfileFilterViewData
 
     /**
      * Query profiles that hold a specific ad-tier banner placement (home or local).
-     * These are shown in dedicated banner strips and do NOT require the profile to be online.
+     * These are shown in dedicated banner strips and must be currently online.
      */
     private function queryBannerProfiles(
         string $expiryColumn,
@@ -298,6 +298,11 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
+            ->whereHas('onlineUser', function (Builder $onlineQuery): void {
+                $onlineQuery->where('status', 'online')
+                    ->whereNotNull('online_expires_at')
+                    ->where('online_expires_at', '>', now());
+            })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->whereNotNull("provider_profiles.{$expiryColumn}")
             ->where("provider_profiles.{$expiryColumn}", '>', now())
@@ -436,12 +441,11 @@ class BuildProfileFilterViewData
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->where(function (Builder $q): void {
-                // Always show featured profiles and profiles that have never set an online status.
-                // Only show non-featured profiles that have an online record when they are
-                // currently active (status='online' with a future expiry), mirroring the
-                // offline-redirect behaviour on the individual profile page.
-                $q->where('provider_profiles.is_featured', true)
-                    ->orWhereDoesntHave('onlineUser')
+                // Show profiles that have never set an online status.
+                // For profiles with an online record, only show those currently active
+                // (status='online' with a future expiry), mirroring the offline-redirect
+                // behaviour on the individual profile page.
+                $q->whereDoesntHave('onlineUser')
                     ->orWhereHas('onlineUser', function (Builder $onlineQ): void {
                         $onlineQ->where('status', 'online')
                             ->whereNotNull('online_expires_at')
@@ -732,15 +736,9 @@ class BuildProfileFilterViewData
                     ->orWhere('hide_show_profiles.status', 'show');
             })
             ->where(function ($q) {
-                // Include online profiles OR home-featured profiles
-                $q->where(function ($inner) {
-                    $inner->where('online_users.status', 'online')
-                        ->whereNotNull('online_users.online_expires_at')
-                        ->where('online_users.online_expires_at', '>', now());
-                })->orWhere(function ($inner) {
-                    $inner->whereNotNull('provider_profiles.home_featured_expires_at')
-                        ->where('provider_profiles.home_featured_expires_at', '>', now());
-                });
+                $q->where('online_users.status', 'online')
+                    ->whereNotNull('online_users.online_expires_at')
+                    ->where('online_users.online_expires_at', '>', now());
             })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
