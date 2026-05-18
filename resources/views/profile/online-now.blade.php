@@ -1,7 +1,9 @@
 @extends('layouts.frontend')
 
 @section('content')
-@php($statusSettings = \App\Models\SiteSetting::getStatusSettings())
+@php
+    $statusSettings = \App\Models\SiteSetting::getStatusSettings();
+@endphp
 <div
     class="min-h-screen bg-gradient-to-b from-pink-50 via-white to-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="onlineNowToggle({

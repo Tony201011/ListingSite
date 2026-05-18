@@ -1,7 +1,9 @@
 @extends('layouts.frontend')
 
 @section('content')
-@php($statusSettings = \App\Models\SiteSetting::getStatusSettings())
+@php
+    $statusSettings = \App\Models\SiteSetting::getStatusSettings();
+@endphp
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8" x-data="{ availableNow: false, onlineNow: false }">
     <div class="max-w-6xl mx-auto">
         <button onclick="window.history.back()" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer">
