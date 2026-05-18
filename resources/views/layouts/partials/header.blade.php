@@ -128,6 +128,43 @@
         $showFreeTrialCta = (bool) ($headerWidget?->show_free_trial_cta ?? true);
         $freeTrialCtaText = trim((string) ($headerWidget?->free_trial_cta_text ?? 'Get 21 days for free'));
         $freeTrialCtaUrl = trim((string) ($headerWidget?->free_trial_cta_url ?? url('/signup')));
+        $defaultEscortCities = collect([
+            ['suburb' => 'Brisbane', 'state' => 'QLD'],
+            ['suburb' => 'Sydney', 'state' => 'NSW'],
+            ['suburb' => 'Melbourne', 'state' => 'VIC'],
+            ['suburb' => 'Adelaide', 'state' => 'SA'],
+            ['suburb' => 'Canberra', 'state' => 'ACT'],
+            ['suburb' => 'Perth', 'state' => 'WA'],
+            ['suburb' => 'Darwin', 'state' => 'NT'],
+            ['suburb' => 'Gold Coast', 'state' => 'QLD'],
+            ['suburb' => 'Sunshine Coast', 'state' => 'QLD'],
+            ['suburb' => 'Newcastle', 'state' => 'NSW'],
+            ['suburb' => 'Cairns', 'state' => 'QLD'],
+            ['suburb' => 'Hobart', 'state' => 'TAS'],
+        ]);
+        $escortMenuLinks = ($escortCities->isNotEmpty() ? $escortCities : $defaultEscortCities)
+            ->map(function ($city) {
+                $suburb = trim((string) ($city->suburb ?? $city['suburb'] ?? ''));
+                $state = trim((string) ($city->state ?? $city['state'] ?? ''));
+                $location = trim(collect([$suburb, $state])->filter()->implode(', '));
+
+                return [
+                    'label' => "{$suburb} escorts",
+                    'url' => url('/?location='.urlencode($location)),
+                    'search' => \Illuminate\Support\Str::lower(trim("{$suburb} {$state} escorts")),
+                ];
+            })
+            ->concat(collect([
+                ['label' => 'Touring escorts', 'url' => url('/advanced-search')],
+                ['label' => 'Escorts directory', 'url' => url('/')],
+                ['label' => 'Search for escorts', 'url' => route('advanced-search')],
+                ['label' => 'Escorts near me', 'url' => url('/advanced-search')],
+                ['label' => 'View all our escorts', 'url' => url('/')],
+            ])->map(fn (array $item) => [
+                ...$item,
+                'search' => \Illuminate\Support\Str::lower($item['label']),
+            ]))
+            ->values();
         $normalizePath = function (string $url): string {
             $path = '/'.trim((string) (parse_url($url, PHP_URL_PATH) ?? ''), '/');
 
@@ -232,33 +269,31 @@
                         <button type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white" @click="confirmSignOut($el.closest('form'))">Sign Out</button>
                     </form>
                 @elseif(strtolower($item['label']) === 'escorts')
-                    <div class="relative" x-data="{ open: false }" @click.away="open = false">
-                        <button @click="open = !open" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <div
+                        class="relative"
+                        x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
+                        @click.away="open = false; search = ''"
+                    >
+                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
                             {{ $item['label'] }}
                             <i class="fa-solid fa-chevron-down text-xs ml-1" :class="{ 'rotate-180': open }"></i>
                         </button>
-                        <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-64 rounded-lg bg-gray-800 py-2 shadow-lg z-50 max-h-80 overflow-y-auto" style="display:none;">
-                            @forelse($escortCities as $city)
-                                <a @click="open = false" href="{{ url('/?location='.urlencode($city->suburb.', '.$city->state)) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">{{ $city->suburb }} escorts</a>
-                            @empty
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Brisbane, QLD')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Brisbane escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Sydney, NSW')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sydney escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Melbourne, VIC')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Melbourne escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Adelaide, SA')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Adelaide escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Canberra, ACT')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Canberra escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Perth, WA')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Perth escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Darwin, NT')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Darwin escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Gold Coast, QLD')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Gold Coast escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Sunshine Coast, QLD')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Sunshine Coast escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Newcastle, NSW')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Newcastle escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Cairns, QLD')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Cairns escorts</a>
-                                <a @click="open = false" href="{{ url('/?location='.urlencode('Hobart, TAS')) }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Hobart escorts</a>
-                            @endforelse
-                            <a @click="open = false" href="{{ url('/advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Touring escorts</a>
-                            <a @click="open = false" href="{{ url('/') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts directory</a>
-                            <a @click="open = false" href="{{ route('advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Search for escorts</a>
-                            <a @click="open = false" href="{{ url('/advanced-search') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">Escorts near me</a>
-                            <a @click="open = false" href="{{ url('/') }}" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">View all our escorts</a>
+                        <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-72 rounded-lg bg-gray-800 py-2 shadow-lg z-50 max-h-80 overflow-y-auto" style="display:none;">
+                            <div class="px-3 pb-2">
+                                <label for="escort-menu-search" class="sr-only">Search escorts menu</label>
+                                <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2">
+                                    <i class="fa-solid fa-magnifying-glass text-xs text-gray-500"></i>
+                                    <input id="escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search escorts menu" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-700 pt-2">
+                                <template x-for="link in filteredLinks" :key="`${link.label}-${link.url}`">
+                                    <a @click="open = false; search = ''" :href="link.url" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">
+                                        <span x-text="link.label"></span>
+                                    </a>
+                                </template>
+                                <p x-show="filteredLinks.length === 0" class="px-5 py-2 text-sm text-gray-400">No matching escorts found.</p>
+                            </div>
                         </div>
                     </div>
                 @else
@@ -300,30 +335,25 @@
                             <button type="button" class="block w-full rounded-lg px-3 py-2 text-left text-gray-200 hover:bg-gray-800" @click="confirmSignOut($el.closest('form'))">Sign Out</button>
                         </form>
                     @elseif(strtolower($item['label']) === 'escorts')
-                        <div x-data="{ open: false }">
+                        <div x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }">
                             <button @click="open = !open" class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">
                                 <span>{{ $item['label'] }}</span>
                                 <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
                             </button>
                             <div x-show="open" x-transition class="ml-3 mt-1 space-y-0.5 border-l border-gray-700 pl-3">
-                                @forelse($escortCities as $city)
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode($city->suburb.', '.$city->state)) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">{{ $city->suburb }} escorts</a>
-                                @empty
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Brisbane, QLD')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Brisbane escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Sydney, NSW')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Sydney escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Melbourne, VIC')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Melbourne escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Adelaide, SA')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Adelaide escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Canberra, ACT')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Canberra escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Perth, WA')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Perth escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Darwin, NT')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Darwin escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Gold Coast, QLD')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Gold Coast escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Sunshine Coast, QLD')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Sunshine Coast escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Newcastle, NSW')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Newcastle escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Cairns, QLD')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Cairns escorts</a>
-                                    <a @click="mobileMenu = false" href="{{ url('/?location='.urlencode('Hobart, TAS')) }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Hobart escorts</a>
-                                @endforelse
-                                <a @click="mobileMenu = false" href="{{ url('/advanced-search') }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">Search for escorts</a>
-                                <a @click="mobileMenu = false" href="{{ url('/') }}" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">View all escorts</a>
+                                <div class="pr-3 pt-2">
+                                    <label for="mobile-escort-menu-search" class="sr-only">Search escorts menu</label>
+                                    <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2">
+                                        <i class="fa-solid fa-magnifying-glass text-xs text-gray-500"></i>
+                                        <input id="mobile-escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search escorts menu" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                                    </div>
+                                </div>
+                                <template x-for="link in filteredLinks" :key="`${link.label}-${link.url}`">
+                                    <a @click="mobileMenu = false; open = false; search = ''" :href="link.url" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">
+                                        <span x-text="link.label"></span>
+                                    </a>
+                                </template>
+                                <p x-show="filteredLinks.length === 0" class="rounded-lg px-3 py-2 text-sm text-gray-500">No matching escorts found.</p>
                             </div>
                         </div>
                     @else

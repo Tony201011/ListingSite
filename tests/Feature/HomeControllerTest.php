@@ -144,6 +144,15 @@ class HomeControllerTest extends TestCase
         ]);
     }
 
+    public function test_home_page_renders_search_inputs_in_escorts_navigation_menus(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $this->assertSame(2, substr_count($response->getContent(), 'placeholder="Search escorts menu"'));
+        $this->assertSame(2, substr_count($response->getContent(), 'No matching escorts found.'));
+    }
+
     public function test_favourites_page_resolves_legacy_numeric_favourite_ids_to_slugs(): void
     {
         $providerUser = $this->createApprovedProvider(['name' => 'Legacy Favourite', 'slug' => 'legacy-favourite']);
