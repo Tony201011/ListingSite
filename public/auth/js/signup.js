@@ -144,7 +144,10 @@ function signupForm(config = {}) {
             const errorContainer = this.getFieldErrorContainer(field);
             const fieldGroup = errorContainer?.parentElement;
 
-            return fieldGroup || input || errorContainer;
+            const labelByFor = input?.id ? document.querySelector(`label[for="${input.id}"]`) : null;
+            const labelInGroup = fieldGroup?.querySelector('label');
+
+            return labelByFor || labelInGroup || fieldGroup || input || errorContainer;
         },
 
         scrollAndFocusField(field) {
