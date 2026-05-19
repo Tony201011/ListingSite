@@ -128,9 +128,7 @@ function signupForm(config = {}) {
                 return;
             }
 
-            setTimeout(() => {
-                input.focus({ preventScroll: true });
-            }, this.prefersReducedMotion ? 0 : 250);
+            input.focus({ preventScroll: true });
         },
 
         findFirstFallbackInvalidElement() {
@@ -142,7 +140,7 @@ function signupForm(config = {}) {
         getFieldScrollTarget(field) {
             const input = this.getFieldRef(field);
             const errorContainer = this.getFieldErrorContainer(field);
-            const fieldGroup = errorContainer?.parentElement;
+            const fieldGroup = errorContainer?.parentElement ?? input?.parentElement;
 
             const labelByFor = input?.id ? document.querySelector(`label[for="${input.id}"]`) : null;
             const labelInGroup = fieldGroup?.querySelector('label');
@@ -157,9 +155,13 @@ function signupForm(config = {}) {
                 return;
             }
 
-            this.scrollElementIntoView(scrollTarget);
-            this.highlightField(field);
+            // Focus first (synchronously) so that any browser auto-scroll triggered by
+            // focus (e.g. on mobile where preventScroll is not always honoured) happens
+            // before our explicit scroll.  scrollElementIntoView then runs last and
+            // positions the label at the top of the viewport.
             this.focusField(field);
+            this.highlightField(field);
+            this.scrollElementIntoView(scrollTarget);
         },
 
         scrollToFirstServerError() {
