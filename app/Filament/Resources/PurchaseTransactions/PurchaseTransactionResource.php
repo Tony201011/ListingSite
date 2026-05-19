@@ -27,7 +27,7 @@ class PurchaseTransactionResource extends Resource
 {
     protected static ?string $model = PurchaseTransaction::class;
 
-    private const int WALLET_SPEND_HISTORY_LIMIT = 10;
+    private const WALLET_SPEND_HISTORY_LIMIT = 10;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
