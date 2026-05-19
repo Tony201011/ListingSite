@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\AvailabilityLogs\Pages;
 
 use App\Filament\Resources\AvailabilityLogs\AvailabilityLogResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListAvailabilityLogs extends ListRecords
+class ListAvailabilityLogs extends ListRecordsWithPageJump
 {
     protected static string $resource = AvailabilityLogResource::class;
 

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\PurchaseComplaints\Pages;
 
 use App\Filament\Resources\PurchaseComplaints\PurchaseComplaintResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListPurchaseComplaints extends ListRecords
+class ListPurchaseComplaints extends ListRecordsWithPageJump
 {
     protected static string $resource = PurchaseComplaintResource::class;
 

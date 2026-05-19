@@ -4,9 +4,9 @@ namespace App\Filament\Resources\TwilioSettings\Pages;
 
 use App\Filament\Resources\TwilioSettings\TwilioSettingResource;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListTwilioSettings extends ListRecords
+class ListTwilioSettings extends ListRecordsWithPageJump
 {
     protected static string $resource = TwilioSettingResource::class;
 

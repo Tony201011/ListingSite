@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\UserReports\Pages;
 
 use App\Filament\Resources\UserReports\UserReportResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListUserReports extends ListRecords
+class ListUserReports extends ListRecordsWithPageJump
 {
     protected static string $resource = UserReportResource::class;
 

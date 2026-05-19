@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\VideoLogs\Pages;
 
 use App\Filament\Resources\VideoLogs\VideoLogResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListVideoLogs extends ListRecords
+class ListVideoLogs extends ListRecordsWithPageJump
 {
     protected static string $resource = VideoLogResource::class;
 
