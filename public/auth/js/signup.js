@@ -75,12 +75,16 @@ function signupForm(config = {}) {
             return stickyHeaderHeight + 16;
         },
 
+        getAdditionalScrollOffset() {
+            return 120;
+        },
+
         scrollElementIntoView(element) {
             if (!element) {
                 return;
             }
 
-            const stickyOffset = this.getStickyOffset();
+            const stickyOffset = this.getStickyOffset() + this.getAdditionalScrollOffset();
             const rect = element.getBoundingClientRect();
             const bottomSpacing = 16;
 
@@ -155,13 +159,13 @@ function signupForm(config = {}) {
                 return;
             }
 
-            // Focus first (synchronously) so that any browser auto-scroll triggered by
-            // focus (e.g. on mobile where preventScroll is not always honoured) happens
-            // before our explicit scroll.  scrollElementIntoView then runs last and
-            // positions the label at the top of the viewport.
-            this.focusField(field);
-            this.highlightField(field);
             this.scrollElementIntoView(scrollTarget);
+            this.highlightField(field);
+
+            const focusDelay = this.prefersReducedMotion ? 0 : 350;
+            setTimeout(() => {
+                this.focusField(field);
+            }, focusDelay);
         },
 
         scrollToFirstServerError() {
