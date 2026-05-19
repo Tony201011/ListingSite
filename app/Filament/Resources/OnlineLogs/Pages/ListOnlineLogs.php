@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\OnlineLogs\Pages;
 
 use App\Filament\Resources\OnlineLogs\OnlineLogResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListOnlineLogs extends ListRecords
+class ListOnlineLogs extends ListRecordsWithPageJump
 {
     protected static string $resource = OnlineLogResource::class;
 

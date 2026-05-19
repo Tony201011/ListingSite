@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\EmailLogs\Pages;
 
 use App\Filament\Resources\EmailLogs\EmailLogResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListEmailLogs extends ListRecords
+class ListEmailLogs extends ListRecordsWithPageJump
 {
     protected static string $resource = EmailLogResource::class;
 

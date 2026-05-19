@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\CreditLogs\Pages;
 
 use App\Filament\Resources\CreditLogs\CreditLogResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListCreditLogs extends ListRecords
+class ListCreditLogs extends ListRecordsWithPageJump
 {
     protected static string $resource = CreditLogResource::class;
 

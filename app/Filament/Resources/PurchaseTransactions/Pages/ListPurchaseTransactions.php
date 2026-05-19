@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\PurchaseTransactions\Pages;
 
 use App\Filament\Resources\PurchaseTransactions\PurchaseTransactionResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListPurchaseTransactions extends ListRecords
+class ListPurchaseTransactions extends ListRecordsWithPageJump
 {
     protected static string $resource = PurchaseTransactionResource::class;
 

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\SmsLogs\Pages;
 
 use App\Filament\Resources\SmsLogs\SmsLogResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListSmsLogs extends ListRecords
+class ListSmsLogs extends ListRecordsWithPageJump
 {
     protected static string $resource = SmsLogResource::class;
 

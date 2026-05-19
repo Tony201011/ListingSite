@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\HideShowProfileLogs\Pages;
 
 use App\Filament\Resources\HideShowProfileLogs\HideShowProfileLogResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListHideShowProfileLogs extends ListRecords
+class ListHideShowProfileLogs extends ListRecordsWithPageJump
 {
     protected static string $resource = HideShowProfileLogResource::class;
 

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\ContactInquiries\Pages;
 
 use App\Filament\Resources\ContactInquiries\ContactInquiryResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListContactInquiries extends ListRecords
+class ListContactInquiries extends ListRecordsWithPageJump
 {
     protected static string $resource = ContactInquiryResource::class;
 

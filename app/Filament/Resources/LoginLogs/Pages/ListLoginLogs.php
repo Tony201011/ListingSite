@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\LoginLogs\Pages;
 
 use App\Filament\Resources\LoginLogs\LoginLogResource;
-use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
-class ListLoginLogs extends ListRecords
+class ListLoginLogs extends ListRecordsWithPageJump
 {
     protected static string $resource = LoginLogResource::class;
 
