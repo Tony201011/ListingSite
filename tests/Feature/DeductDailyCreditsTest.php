@@ -112,7 +112,6 @@ class DeductDailyCreditsTest extends TestCase
         ]);
 
         $this->assertSame(0, CreditLog::query()->where('user_id', $user->id)->count());
-
         $this->assertDatabaseHas('hide_show_profiles', [
             'provider_profile_id' => $profile->id,
             'status' => 'hide',
@@ -184,39 +183,27 @@ class DeductDailyCreditsTest extends TestCase
         ]);
     }
 
-    public function test_it_deducts_one_credit_per_visible_profile_after_free_period(): void
+    public function test_it_deducts_one_credit_per_visible_eligible_profile(): void
     {
         $user = User::factory()->create([
             'role' => User::ROLE_PROVIDER,
-            'credits' => 10,
+            'credits' => 5,
         ]);
 
-        $profileOne = ProviderProfile::create([
+        $firstProfile = ProviderProfile::create([
             'user_id' => $user->id,
-            'name' => 'Multi Profile User One',
-            'slug' => 'multi-profile-user-one-'.$user->id,
+            'name' => 'Profile One',
+            'slug' => 'profile-one-'.$user->id,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->subDay(),
         ]);
 
-        $profileTwo = ProviderProfile::create([
+        $secondProfile = ProviderProfile::create([
             'user_id' => $user->id,
-            'name' => 'Multi Profile User Two',
-            'slug' => 'multi-profile-user-two-'.$user->id,
+            'name' => 'Profile Two',
+            'slug' => 'profile-two-'.$user->id,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->subDay(),
-        ]);
-
-        HideShowProfile::create([
-            'user_id' => $user->id,
-            'provider_profile_id' => $profileOne->id,
-            'status' => 'show',
-        ]);
-
-        HideShowProfile::create([
-            'user_id' => $user->id,
-            'provider_profile_id' => $profileTwo->id,
-            'status' => 'show',
         ]);
 
         $this->artisan('credits:deduct-daily')
@@ -224,15 +211,59 @@ class DeductDailyCreditsTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'credits' => 8,
+            'credits' => 3,
         ]);
 
-        $this->assertSame(
-            2,
-            CreditLog::query()
-                ->where('user_id', $user->id)
-                ->where('type', 'daily_deduction')
-                ->count()
-        );
+        $this->assertSame(2, CreditLog::query()
+            ->where('user_id', $user->id)
+            ->where('type', 'daily_deduction')
+            ->count());
+    }
+
+    public function test_it_hides_unpaid_profiles_when_credits_are_insufficient(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'credits' => 1,
+        ]);
+
+        $firstProfile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Paid Profile',
+            'slug' => 'paid-profile-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        $secondProfile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Unpaid Profile',
+            'slug' => 'unpaid-profile-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        $this->artisan('credits:deduct-daily')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'credits' => 0,
+        ]);
+
+        $this->assertSame(1, CreditLog::query()
+            ->where('user_id', $user->id)
+            ->where('type', 'daily_deduction')
+            ->count());
+
+        $this->assertDatabaseHas('hide_show_profiles', [
+            'provider_profile_id' => $secondProfile->id,
+            'status' => 'hide',
+        ]);
+
+        $this->assertDatabaseMissing('hide_show_profiles', [
+            'provider_profile_id' => $firstProfile->id,
+            'status' => 'hide',
+        ]);
     }
 }

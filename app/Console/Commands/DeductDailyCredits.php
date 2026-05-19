@@ -7,6 +7,7 @@ use App\Models\HideShowProfile;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -14,13 +15,14 @@ class DeductDailyCredits extends Command
 {
     protected $signature = 'credits:deduct-daily';
 
-    protected $description = 'Deduct 1 credit per day from each visible approved profile after free listing period';
+    protected $description = 'Deduct 1 credit per day per visible approved profile and hide unpaid listings';
 
     public function handle(): int
     {
-        // Find approved, visible provider profiles that are outside free listing period.
-        // A profile is visible when hide_show_profiles.status = 'show' OR no hide_show_profiles row exists.
-        $profiles = ProviderProfile::query()
+        // Find approved profiles that are currently visible.
+        // A profile is visible when hide_show_profiles.status = 'show' OR no hide_show_profiles row exists
+        // (which defaults to visible).
+        $eligibleProfilesByUser = ProviderProfile::query()
             ->where('profile_status', 'approved')
             ->where('is_blocked', false)
             ->whereNull('deleted_at')
@@ -41,71 +43,72 @@ class DeductDailyCredits extends Command
                 $query->whereNull('free_listing_expires_at')
                     ->orWhere('free_listing_expires_at', '<=', now());
             })
-            ->with('user:id,credits')
             ->orderBy('user_id')
             ->orderBy('id')
-            ->get(['id', 'user_id']);
+            ->get(['id', 'user_id'])
+            ->groupBy('user_id');
 
-        if ($profiles->isEmpty()) {
-            $this->info('No eligible visible approved profiles found. No credits deducted.');
+        if ($eligibleProfilesByUser->isEmpty()) {
+            $this->info('No eligible visible profiles found. No credits deducted.');
 
             return self::SUCCESS;
         }
 
         $deducted = 0;
-        $skipped = 0;
+        $hiddenUnpaid = 0;
 
-        $profiles->each(function (ProviderProfile $profile) use (&$deducted, &$skipped): void {
-            $user = $profile->user;
-            if (! $user instanceof User) {
-                $skipped++;
-
-                return;
-            }
-
-            if ($user->credits <= 0) {
-                $this->hideProfileForInsufficientCredits($profile);
-                $skipped++;
-
-                return;
-            }
-
-            $wasDeducted = DB::transaction(function () use ($user): bool {
-                $locked = User::lockForUpdate()->find($user->id);
-
-                if (! $locked || $locked->credits <= 0) {
-                    return false;
+        User::whereIn('id', $eligibleProfilesByUser->keys())
+            ->each(function (User $user) use (&$deducted, &$hiddenUnpaid, $eligibleProfilesByUser): void {
+                /** @var Collection<int, ProviderProfile> $profiles */
+                $profiles = $eligibleProfilesByUser->get($user->id, collect())->values();
+                if ($profiles->isEmpty()) {
+                    return;
                 }
 
-                $currentBalance = $locked->credits;
-                $locked->decrement('credits', 1);
+                [$deductedForUser, $hiddenForUser] = DB::transaction(function () use ($user, $profiles): array {
+                    $locked = User::lockForUpdate()->find($user->id);
 
-                CreditLog::create([
-                    'user_id' => $locked->id,
-                    'amount' => -1,
-                    'type' => 'daily_deduction',
-                    'description' => "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
-                    'reference_type' => ProviderProfile::class,
-                    'reference_id' => $profile->id,
-                ]);
+                    if (! $locked) {
+                        return [0, 0];
+                    }
 
-                return true;
+                    $eligibleCount = $profiles->count();
+                    $payableCount = max(0, min($locked->credits, $eligibleCount));
+                    $profileIdsToHide = $profiles->skip($payableCount)->pluck('id');
+
+                    for ($i = 0; $i < $payableCount; $i++) {
+                        $currentBalance = $locked->credits;
+                        $locked->decrement('credits', 1);
+                        $locked->refresh();
+
+                        CreditLog::create([
+                            'user_id' => $locked->id,
+                            'amount' => -1,
+                            'type' => 'daily_deduction',
+                            'description' => "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
+                        ]);
+                    }
+
+                    foreach ($profileIdsToHide as $profileId) {
+                        HideShowProfile::updateOrCreate(
+                            ['user_id' => $locked->id, 'provider_profile_id' => $profileId],
+                            ['user_id' => $locked->id, 'status' => 'hide']
+                        );
+                    }
+
+                    return [$payableCount, $profileIdsToHide->count()];
+                });
+
+                $deducted += $deductedForUser;
+                $hiddenUnpaid += $hiddenForUser;
             });
 
-            if ($wasDeducted) {
-                $deducted++;
-            } else {
-                $this->hideProfileForInsufficientCredits($profile);
-                $skipped++;
-            }
-        });
-
         Log::info('Daily credit deduction completed', [
-            'deducted' => $deducted,
-            'skipped_insufficient_credits' => $skipped,
+            'deducted_profiles' => $deducted,
+            'hidden_unpaid_profiles' => $hiddenUnpaid,
         ]);
 
-        $this->info("Daily credit deduction completed. Deducted: {$deducted}, Skipped (zero credits): {$skipped}.");
+        $this->info("Daily credit deduction completed. Deducted profiles: {$deducted}, Hidden unpaid profiles: {$hiddenUnpaid}.");
 
         return self::SUCCESS;
     }
