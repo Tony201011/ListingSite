@@ -112,6 +112,10 @@ class DeductDailyCreditsTest extends TestCase
         ]);
 
         $this->assertSame(0, CreditLog::query()->where('user_id', $user->id)->count());
+        $this->assertDatabaseHas('hide_show_profiles', [
+            'provider_profile_id' => $profile->id,
+            'status' => 'hide',
+        ]);
     }
 
     public function test_it_does_not_deduct_during_free_listing_period(): void
@@ -176,6 +180,90 @@ class DeductDailyCreditsTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'credits' => 99,
+        ]);
+    }
+
+    public function test_it_deducts_one_credit_per_visible_eligible_profile(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'credits' => 5,
+        ]);
+
+        $firstProfile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Profile One',
+            'slug' => 'profile-one-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        $secondProfile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Profile Two',
+            'slug' => 'profile-two-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        $this->artisan('credits:deduct-daily')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'credits' => 3,
+        ]);
+
+        $this->assertSame(2, CreditLog::query()
+            ->where('user_id', $user->id)
+            ->where('type', 'daily_deduction')
+            ->count());
+    }
+
+    public function test_it_hides_unpaid_profiles_when_credits_are_insufficient(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'credits' => 1,
+        ]);
+
+        $firstProfile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Paid Profile',
+            'slug' => 'paid-profile-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        $secondProfile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => 'Unpaid Profile',
+            'slug' => 'unpaid-profile-'.$user->id,
+            'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        $this->artisan('credits:deduct-daily')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'credits' => 0,
+        ]);
+
+        $this->assertSame(1, CreditLog::query()
+            ->where('user_id', $user->id)
+            ->where('type', 'daily_deduction')
+            ->count());
+
+        $this->assertDatabaseHas('hide_show_profiles', [
+            'provider_profile_id' => $secondProfile->id,
+            'status' => 'hide',
+        ]);
+
+        $this->assertDatabaseMissing('hide_show_profiles', [
+            'provider_profile_id' => $firstProfile->id,
+            'status' => 'hide',
         ]);
     }
 }
