@@ -2,16 +2,19 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\SiteSetting;
+use App\Actions\SiteAccess\VerifySitePassword;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 class SitePassword
 {
+    public function __construct(
+        private VerifySitePassword $verifySitePassword
+    ) {}
+
     public function handle(Request $request, Closure $next): Response
     {
         if (
@@ -37,26 +40,24 @@ class SitePassword
             return $next($request);
         }
 
-        $configuredPassword = null;
-        $configurationEnabled = false;
-
-        if (Schema::hasTable('site_settings')) {
-            $config = SiteSetting::getSitePasswordConfig();
-            $configuredPassword = $config['password'] ?: null;
-            $configurationEnabled = $config['enabled'];
-        }
-
-        if (! $configurationEnabled) {
-            $envPassword = env('SITE_PASSWORD');
-            $envEnabled = filter_var(env('SITE_PASSWORD_ENABLED', false), FILTER_VALIDATE_BOOL);
-
-            if ($envEnabled && filled($envPassword)) {
-                $configuredPassword = $envPassword;
-                $configurationEnabled = true;
-            }
-        }
+        $config = $this->verifySitePassword->getResolvedConfig();
+        $configurationEnabled = (bool) ($config['enabled'] ?? false);
+        $configuredPassword = $config['password'] ?? null;
 
         $protectionEnabled = $configurationEnabled;
+
+        if ($protectionEnabled && $request->session()->get('site_access') === true) {
+            $currentFingerprint = $this->verifySitePassword->getPasswordFingerprint();
+            $sessionFingerprint = $request->session()->get('site_access_password_fingerprint');
+
+            if (
+                filled($currentFingerprint) &&
+                is_string($sessionFingerprint) &&
+                ! hash_equals($currentFingerprint, $sessionFingerprint)
+            ) {
+                $request->session()->forget(['site_access', 'site_access_password_fingerprint']);
+            }
+        }
 
         if ($protectionEnabled && $request->session()->get('site_access') !== true) {
             /** @var User|null $user */
