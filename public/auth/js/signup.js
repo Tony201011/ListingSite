@@ -15,6 +15,7 @@ function signupForm(config = {}) {
         showPasswordPopup: false,
         generatedPassword: '',
         copied: false,
+        prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 
         searchResults: [],
         showResults: false,
@@ -33,6 +34,8 @@ function signupForm(config = {}) {
             suburb: false,
             ageConfirm: false
         },
+        highlightedField: null,
+        highlightedFieldTimeout: null,
 
         init() {
             this.$nextTick(() => {
@@ -52,27 +55,93 @@ function signupForm(config = {}) {
                 confirmPassword: 'confirmPassword',
                 mobile: 'mobile',
                 suburb: 'suburb',
-                ageConfirm: 'ageConfirm'
+                ageConfirm: 'ageConfirm',
+                captcha: 'captcha'
             };
 
             return this.$refs[refMap[field]] || null;
         },
 
-        scrollAndFocusField(field) {
+        getFieldErrorContainer(field) {
+            return this.$el.querySelector(`[data-error-container="${field}"]`);
+        },
+
+        getStickyOffset() {
+            const stickyHeader = document.querySelector('header.sticky, header[class*="sticky"]');
+            const stickyHeaderHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 0;
+
+            return stickyHeaderHeight + 24;
+        },
+
+        scrollElementIntoView(element) {
+            if (!element) {
+                return;
+            }
+
+            const top = Math.max(
+                window.scrollY + element.getBoundingClientRect().top - this.getStickyOffset(),
+                0
+            );
+
+            window.scrollTo({
+                top,
+                behavior: this.prefersReducedMotion ? 'auto' : 'smooth'
+            });
+        },
+
+        highlightField(field) {
             const input = this.getFieldRef(field);
 
             if (!input) {
                 return;
             }
 
-            input.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
+            if (this.highlightedField && this.highlightedField !== input) {
+                this.highlightedField.classList.remove('signup-invalid-focus');
+            }
 
-            requestAnimationFrame(() => {
+            clearTimeout(this.highlightedFieldTimeout);
+
+            input.classList.add('signup-invalid-focus');
+            this.highlightedField = input;
+            this.highlightedFieldTimeout = setTimeout(() => {
+                input.classList.remove('signup-invalid-focus');
+                if (this.highlightedField === input) {
+                    this.highlightedField = null;
+                }
+            }, 2200);
+        },
+
+        focusField(field) {
+            const input = this.getFieldRef(field);
+
+            if (!input || typeof input.focus !== 'function') {
+                return;
+            }
+
+            setTimeout(() => {
                 input.focus({ preventScroll: true });
-            });
+            }, this.prefersReducedMotion ? 0 : 250);
+        },
+
+        findFirstFallbackInvalidElement() {
+            return this.$el.querySelector(
+                '[data-server-error="true"], .is-invalid, .error, [aria-invalid="true"], input:invalid, select:invalid, textarea:invalid'
+            );
+        },
+
+        scrollAndFocusField(field) {
+            const input = this.getFieldRef(field);
+            const errorContainer = this.getFieldErrorContainer(field);
+            const scrollTarget = errorContainer || input;
+
+            if (!scrollTarget) {
+                return;
+            }
+
+            this.scrollElementIntoView(scrollTarget);
+            this.highlightField(field);
+            this.focusField(field);
         },
 
         scrollToFirstServerError() {
@@ -85,10 +154,7 @@ function signupForm(config = {}) {
             if (field) {
                 this.scrollAndFocusField(field);
             } else {
-                firstServerError.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
+                this.scrollElementIntoView(firstServerError);
             }
         },
 
@@ -181,7 +247,18 @@ function signupForm(config = {}) {
                     const firstInvalid = this.getFirstInvalidFieldKey();
                     if (firstInvalid) {
                         this.scrollAndFocusField(firstInvalid);
+                        return;
                     }
+
+                    const fallbackInvalid = this.findFirstFallbackInvalidElement();
+                    const field = fallbackInvalid?.dataset?.field;
+
+                    if (field) {
+                        this.scrollAndFocusField(field);
+                        return;
+                    }
+
+                    this.scrollElementIntoView(fallbackInvalid);
                 });
             }
         },
