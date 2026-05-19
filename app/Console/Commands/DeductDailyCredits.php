@@ -112,4 +112,15 @@ class DeductDailyCredits extends Command
 
         return self::SUCCESS;
     }
+
+    private function hideProfileForInsufficientCredits(ProviderProfile $profile): void
+    {
+        HideShowProfile::updateOrCreate(
+            ['provider_profile_id' => $profile->id],
+            [
+                'user_id' => $profile->user_id,
+                'status' => 'hide',
+            ]
+        );
+    }
 }
