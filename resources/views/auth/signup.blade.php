@@ -23,32 +23,14 @@
 
             <p class="text-gray-600 mb-5 text-lg">Register today and enjoy these exclusive benefits:</p>
 
-            <div class="space-y-3">
-                <div class="flex items-start gap-3">
-                    <span class="text-[#e04ecb] font-bold text-xl leading-5">•</span>
-                    <span class="text-gray-700">No credit card required – zero obligations</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-[#e04ecb] font-bold text-xl leading-5">•</span>
-                    <span class="text-gray-700">First-page rankings in major cities (Sydney, Melbourne, Brisbane, Adelaide, Canberra, Gold Coast)</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-[#e04ecb] font-bold text-xl leading-5">•</span>
-                    <span class="text-gray-700">Unlimited photos and videos, Available NOW, Twitter promotions, touring pages, profile booster features and much more…</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-[#e04ecb] font-bold text-xl leading-5">•</span>
-                    <span class="text-gray-700">Advertise from $0.79 a day !!!</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-[#e04ecb] font-bold text-xl leading-5">•</span>
-                    <span class="text-gray-700">No charge when your profile is set to hidden.</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-[#e04ecb] font-bold text-xl leading-5">•</span>
-                    <span class="text-gray-700">Don't lose your profile – when not advertising you still have access to your profile.</span>
-                </div>
-            </div>
+            <ul class="space-y-3 list-disc list-inside marker:text-[#e04ecb] marker:text-lg">
+                <li class="text-gray-700">No credit card required – zero obligations</li>
+                <li class="text-gray-700">First-page rankings in major cities (Sydney, Melbourne, Brisbane, Adelaide, Canberra, Gold Coast)</li>
+                <li class="text-gray-700">Unlimited photos and videos, Available NOW, Twitter promotions, touring pages, profile booster features and much more…</li>
+                <li class="text-gray-700">Advertise from $0.79 a day !!!</li>
+                <li class="text-gray-700">No charge when your profile is set to hidden.</li>
+                <li class="text-gray-700">Don't lose your profile – when not advertising you still have access to your profile.</li>
+            </ul>
         </div>
 
         <form
@@ -63,54 +45,69 @@
             class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100"
             method="POST"
             action="{{ route('signup.submit') }}"
+            autocomplete="off"
         >
             @csrf
+            <input type="text" name="fake_username" autocomplete="username" tabindex="-1" class="hidden" aria-hidden="true">
+            <input type="password" name="fake_password" autocomplete="new-password" tabindex="-1" class="hidden" aria-hidden="true">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="mb-2">
+                <div class="min-w-0">
                     <label class="block font-semibold text-gray-800 mb-1">
                         Email address <span class="text-red-600">*</span>
                     </label>
                     <input
                         type="email"
                         name="email"
+                        x-ref="email"
                         x-model="email"
                         @blur="touched.email = true"
                         @input="touched.email = true; validateEmail()"
                         autocomplete="off"
+                        autocapitalize="none"
+                        autocorrect="off"
+                        spellcheck="false"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
-                    @error('email')
-                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
-                    @enderror
-                    <template x-if="touched.email && errors.email">
-                        <div class="text-xs text-red-600 mt-1" x-text="errors.email"></div>
-                    </template>
+                    <div class="mt-1 min-h-5">
+                        @error('email')
+                            <div class="text-xs text-red-600" data-server-error="true" data-field="email">{{ $message }}</div>
+                        @enderror
+                        <template x-if="touched.email && errors.email">
+                            <div class="text-xs text-red-600" x-text="errors.email"></div>
+                        </template>
+                    </div>
                 </div>
 
-                <div class="mb-2">
+                <div class="min-w-0">
                     <label class="block font-semibold text-gray-800 mb-1">
                         Nickname <span class="text-red-600">*</span>
                     </label>
                     <input
                         type="text"
                         name="nickname"
+                        x-ref="nickname"
                         x-model="nickname"
                         @blur="touched.nickname = true"
                         @input="touched.nickname = true; validateNickname()"
                         placeholder="e.g. SexyBabe"
                         autocomplete="off"
+                        autocapitalize="none"
+                        autocorrect="off"
+                        spellcheck="false"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
-                    @error('nickname')
-                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
-                    @enderror
-                    <template x-if="touched.nickname && errors.nickname">
-                        <div class="text-xs text-red-600 mt-1" x-text="errors.nickname"></div>
-                    </template>
+                    <div class="mt-1 min-h-5">
+                        @error('nickname')
+                            <div class="text-xs text-red-600" data-server-error="true" data-field="nickname">{{ $message }}</div>
+                        @enderror
+                        <template x-if="touched.nickname && errors.nickname">
+                            <div class="text-xs text-red-600" x-text="errors.nickname"></div>
+                        </template>
+                    </div>
                 </div>
 
-                <div class="mb-2 relative">
+                <div class="min-w-0 relative">
                     <label class="block font-semibold text-gray-800 mb-1">
                         Password <span class="text-red-600">*</span>
                     </label>
@@ -120,6 +117,7 @@
                             <input
                                 :type="showPassword ? 'text' : 'password'"
                                 name="password"
+                                x-ref="password"
                                 x-model="password"
                                 @blur="touched.password = true"
                                 @input="touched.password = true; validatePassword(); validateConfirmPassword()"
@@ -177,12 +175,14 @@
                         Generate
                     </button>
 
-                    @error('password')
-                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
-                    @enderror
-                    <template x-if="touched.password && errors.password">
-                        <div class="text-xs text-red-600 mt-1" x-text="errors.password"></div>
-                    </template>
+                    <div class="mt-1 min-h-5">
+                        @error('password')
+                            <div class="text-xs text-red-600" data-server-error="true" data-field="password">{{ $message }}</div>
+                        @enderror
+                        <template x-if="touched.password && errors.password">
+                            <div class="text-xs text-red-600" x-text="errors.password"></div>
+                        </template>
+                    </div>
 
                     <div
                         x-show="showPasswordPopup"
@@ -240,7 +240,7 @@
                     </div>
                 </div>
 
-                <div class="mb-2">
+                <div class="min-w-0">
                     <label class="block font-semibold text-gray-800 mb-1">
                         Confirm password <span class="text-red-600">*</span>
                     </label>
@@ -249,6 +249,7 @@
                         <input
                             :type="showConfirmPassword ? 'text' : 'password'"
                             name="password_confirmation"
+                            x-ref="confirmPassword"
                             x-model="confirmPassword"
                             @blur="touched.confirmPassword = true"
                             @input="touched.confirmPassword = true; validateConfirmPassword()"
@@ -274,12 +275,14 @@
                         </button>
                     </div>
 
-                    @error('password_confirmation')
-                        <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
-                    @enderror
-                    <template x-if="touched.confirmPassword && errors.confirmPassword">
-                        <div class="text-xs text-red-600 mt-1" x-text="errors.confirmPassword"></div>
-                    </template>
+                    <div class="mt-1 min-h-5">
+                        @error('password_confirmation')
+                            <div class="text-xs text-red-600" data-server-error="true" data-field="confirmPassword">{{ $message }}</div>
+                        @enderror
+                        <template x-if="touched.confirmPassword && errors.confirmPassword">
+                            <div class="text-xs text-red-600" x-text="errors.confirmPassword"></div>
+                        </template>
+                    </div>
                 </div>
             </div>
 
@@ -296,6 +299,7 @@
                     <input
                         name="mobile"
                         type="tel"
+                        x-ref="mobile"
                         x-model="mobile"
                         @blur="touched.mobile = true"
                         @input="touched.mobile = true; validateMobile()"
@@ -305,12 +309,14 @@
                     >
                 </div>
 
-                @error('mobile')
-                    <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
-                @enderror
-                <template x-if="touched.mobile && errors.mobile">
-                    <div class="text-xs text-red-600 mt-1" x-text="errors.mobile"></div>
-                </template>
+                <div class="mt-1 min-h-5">
+                    @error('mobile')
+                        <div class="text-xs text-red-600" data-server-error="true" data-field="mobile">{{ $message }}</div>
+                    @enderror
+                    <template x-if="touched.mobile && errors.mobile">
+                        <div class="text-xs text-red-600" x-text="errors.mobile"></div>
+                    </template>
+                </div>
 
                 <div class="bg-pink-50 rounded-2xl p-5 mt-4 flex gap-4 items-start">
                     <div class="w-8 h-8 bg-[#e04ecb] rounded-full flex items-center justify-center flex-shrink-0">
@@ -336,6 +342,7 @@
                 <input
                     type="text"
                     name="suburb"
+                    x-ref="suburb"
                     x-model="suburb"
                     @input="touched.suburb = true; handleSuburbInput()"
                     @blur="handleSuburbBlur()"
@@ -371,16 +378,18 @@
 
                 <div class="text-xs text-gray-500 mt-1">We'll auto-complete from our list</div>
 
-                @error('suburb')
-                    <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
-                @enderror
+                <div class="mt-1 min-h-5">
+                    @error('suburb')
+                        <div class="text-xs text-red-600" data-server-error="true" data-field="suburb">{{ $message }}</div>
+                    @enderror
 
-                <template x-if="touched.suburb && errors.suburb">
-                    <div class="text-xs text-red-600 mt-1" x-text="errors.suburb"></div>
-                </template>
+                    <template x-if="touched.suburb && errors.suburb">
+                        <div class="text-xs text-red-600" x-text="errors.suburb"></div>
+                    </template>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-center mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-start mb-6">
                 <div>
                     <label class="block font-semibold text-gray-800 mb-1">Referral code (optional)</label>
                     <input
@@ -399,6 +408,7 @@
                             name="age_confirm"
                             type="checkbox"
                             id="age_confirm"
+                            x-ref="ageConfirm"
                             x-model="ageConfirm"
                             @change="touched.ageConfirm = true; validateAgeConfirm()"
                             class="w-5 h-5 accent-[#e04ecb]"
@@ -406,12 +416,14 @@
                         >
                         <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
                     </div>
-                    @error('age_confirm')
-                        <div class="text-xs text-red-600 mt-1 pl-12">{{ $message }}</div>
-                    @enderror
-                    <template x-if="touched.ageConfirm && errors.ageConfirm">
-                        <div class="text-xs text-red-600 mt-1 pl-12" x-text="errors.ageConfirm"></div>
-                    </template>
+                    <div class="mt-1 min-h-5">
+                        @error('age_confirm')
+                            <div class="text-xs text-red-600 pl-12" data-server-error="true" data-field="ageConfirm">{{ $message }}</div>
+                        @enderror
+                        <template x-if="touched.ageConfirm && errors.ageConfirm">
+                            <div class="text-xs text-red-600 pl-12" x-text="errors.ageConfirm"></div>
+                        </template>
+                    </div>
                 </div>
             </div>
 
@@ -423,7 +435,7 @@
                         </div>
                     </div>
                     @error('g-recaptcha-response')
-                        <div class="text-xs text-red-600 mt-3 text-center">{{ $message }}</div>
+                        <div class="text-xs text-red-600 mt-3 text-center" data-server-error="true">{{ $message }}</div>
                     @enderror
                 </div>
             @endif

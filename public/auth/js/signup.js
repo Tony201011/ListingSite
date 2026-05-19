@@ -1,5 +1,7 @@
 function signupForm(config = {}) {
     return {
+        fieldOrder: ['email', 'nickname', 'password', 'confirmPassword', 'mobile', 'suburb', 'ageConfirm'],
+
         email: config.email || '',
         nickname: config.nickname || '',
         password: '',
@@ -30,6 +32,64 @@ function signupForm(config = {}) {
             mobile: false,
             suburb: false,
             ageConfirm: false
+        },
+
+        init() {
+            this.$nextTick(() => {
+                this.scrollToFirstServerError();
+            });
+        },
+
+        getFirstInvalidFieldKey() {
+            return this.fieldOrder.find(field => this.errors[field]);
+        },
+
+        getFieldRef(field) {
+            const refMap = {
+                email: 'email',
+                nickname: 'nickname',
+                password: 'password',
+                confirmPassword: 'confirmPassword',
+                mobile: 'mobile',
+                suburb: 'suburb',
+                ageConfirm: 'ageConfirm'
+            };
+
+            return this.$refs[refMap[field]] || null;
+        },
+
+        scrollAndFocusField(field) {
+            const input = this.getFieldRef(field);
+
+            if (!input) {
+                return;
+            }
+
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+            requestAnimationFrame(() => {
+                input.focus({ preventScroll: true });
+            });
+        },
+
+        scrollToFirstServerError() {
+            const firstServerError = this.$el.querySelector('[data-server-error="true"]');
+            if (!firstServerError) {
+                return;
+            }
+
+            const field = firstServerError.dataset.field;
+            if (field) {
+                this.scrollAndFocusField(field);
+            } else {
+                firstServerError.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
         },
 
         validateEmail() {
@@ -117,6 +177,12 @@ function signupForm(config = {}) {
 
             if (!this.validate()) {
                 e.preventDefault();
+                this.$nextTick(() => {
+                    const firstInvalid = this.getFirstInvalidFieldKey();
+                    if (firstInvalid) {
+                        this.scrollAndFocusField(firstInvalid);
+                    }
+                });
             }
         },
 
