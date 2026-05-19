@@ -51,6 +51,10 @@ class ListUsers extends ListRecords
 
     protected function getTableContentFooter(): ?View
     {
+        if (! isset($this->table)) {
+            return null;
+        }
+
         $recordsPerPage = $this->getTableRecordsPerPage();
 
         if (! is_numeric($recordsPerPage) || ((int) $recordsPerPage < 1)) {
