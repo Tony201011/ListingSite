@@ -21,4 +21,9 @@
         </div>
     </div>
 </div>
+<script>
+    try {
+        sessionStorage.removeItem('site_access_tab_token');
+    } catch (error) {}
+</script>
 @endsection

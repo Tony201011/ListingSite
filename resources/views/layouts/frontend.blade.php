@@ -145,6 +145,40 @@
         </script>
     @endif
 
+    @php
+        $siteAccessTabToken = session('site_access_tab_token');
+        $shouldBootstrapSiteAccessTab = session('site_access_tab_bootstrap') === true;
+    @endphp
+    @if (session('site_access') === true && is_string($siteAccessTabToken) && $siteAccessTabToken !== '')
+        <script>
+            (() => {
+                const expectedToken = @json($siteAccessTabToken);
+                const shouldBootstrap = @json($shouldBootstrapSiteAccessTab);
+                const tokenStorageKey = 'site_access_tab_token';
+
+                if (shouldBootstrap) {
+                    try {
+                        sessionStorage.setItem(tokenStorageKey, expectedToken);
+                    } catch (error) {
+                        return;
+                    }
+                }
+
+                let tabToken = null;
+
+                try {
+                    tabToken = sessionStorage.getItem(tokenStorageKey);
+                } catch (error) {
+                    return;
+                }
+
+                if (tabToken !== expectedToken) {
+                    window.location.replace('/site-password');
+                }
+            })();
+        </script>
+    @endif
+
     @stack('scripts')
 
     <script src="{{ asset('js/password-toggle.js') }}"></script>

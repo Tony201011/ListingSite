@@ -55,7 +55,7 @@ class SitePassword
                 is_string($sessionFingerprint) &&
                 ! hash_equals($currentFingerprint, $sessionFingerprint)
             ) {
-                $request->session()->forget(['site_access', 'site_access_password_fingerprint']);
+                $request->session()->forget(['site_access', 'site_access_password_fingerprint', 'site_access_tab_token', 'site_access_tab_bootstrap']);
             }
         }
 
