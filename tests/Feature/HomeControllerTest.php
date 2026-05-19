@@ -968,6 +968,43 @@ class HomeControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_site_password_submit_sets_tab_token_for_current_tab_only(): void
+    {
+        SiteSetting::query()->create([
+            'site_password' => 'secret123',
+            'site_password_enabled' => true,
+        ]);
+
+        $response = $this->post('/site-password', [
+            'password' => 'secret123',
+        ]);
+
+        $response->assertRedirect('/');
+        $response->assertSessionHas('site_access', true);
+        $response->assertSessionHas('site_access_password_fingerprint', hash('sha256', 'secret123'));
+        $response->assertSessionHas('site_access_tab_bootstrap', true);
+        $response->assertSessionHas('site_access_tab_token', static fn (mixed $token): bool => is_string($token) && $token !== '');
+    }
+
+    public function test_home_page_includes_tab_guard_script_when_site_access_tab_token_exists(): void
+    {
+        SiteSetting::query()->create([
+            'site_password' => 'secret123',
+            'site_password_enabled' => true,
+        ]);
+
+        $response = $this->withSession([
+            'site_access' => true,
+            'site_access_password_fingerprint' => hash('sha256', 'secret123'),
+            'site_access_tab_token' => 'test-tab-token',
+            'site_access_tab_bootstrap' => true,
+        ])->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('sessionStorage.setItem(tokenStorageKey, expectedToken);', false);
+        $response->assertSee("window.location.replace('/site-password');", false);
+    }
+
     public function test_home_page_requires_reentry_when_site_password_changes(): void
     {
         $siteSetting = SiteSetting::query()->create([
