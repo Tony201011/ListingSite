@@ -1,5 +1,15 @@
 @extends('layouts.frontend')
 
+@push('styles')
+    <style>
+        .signin-invalid-focus {
+            outline: 2px solid rgba(220, 38, 38, 0.35);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2) !important;
+        }
+    </style>
+@endpush
+
 @section('content')
 @include('auth.partials.recaptcha-responsive-assets')
 
@@ -55,47 +65,64 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('signin.submit') }}">
+            <form
+                x-data="signinForm()"
+                @submit="submitForm"
+                method="POST"
+                action="{{ route('signin.submit') }}"
+                novalidate
+            >
                 @csrf
 
                 <!-- Email -->
-                <div class="mb-6">
-                    <label class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
-                    <input type="email" name="email" value="{{ old('email') }}"
+                <div class="mb-6" data-field-group>
+                    <label for="signin_email" class="block font-semibold text-gray-800 mb-1">Email address <span class="text-red-600">*</span></label>
+                    <input type="email" id="signin_email" x-ref="email" name="email" value="{{ old('email') }}"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base" placeholder="Enter your email" required>
-                    @error('email')
-                        <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
-                    @enderror
+                    <div data-error-container="email">
+                        @error('email')
+                            <p class="text-red-600 text-sm mt-2" data-server-error="true" data-field="email">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Password -->
-                <div class="mb-5">
-                    <label class="block font-semibold text-gray-800 mb-1">Password <span class="text-red-600">*</span></label>
-                    <input type="password" name="password"
+                <div class="mb-5" data-field-group>
+                    <label for="signin_password" class="block font-semibold text-gray-800 mb-1">Password <span class="text-red-600">*</span></label>
+                    <input type="password" id="signin_password" x-ref="password" name="password"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base" placeholder="Enter your password" required>
-                    @error('password')
-                        <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
-                    @enderror
+                    <div data-error-container="password">
+                        @error('password')
+                            <p class="text-red-600 text-sm mt-2" data-server-error="true" data-field="password">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Keep me logged in (styled like the age confirmation pill) -->
-                <div class="mb-6">
+                <div class="mb-6" data-field-group>
                     <label for="keep_logged_in" class="flex items-center gap-2.5 bg-gray-50 px-4 py-3 rounded-xl cursor-pointer w-full sm:w-fit">
-                        <input type="checkbox" id="keep_logged_in" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="w-5 h-5 flex-shrink-0 accent-[#e04ecb]">
+                        <input type="checkbox" id="keep_logged_in" x-ref="remember" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="w-5 h-5 flex-shrink-0 accent-[#e04ecb]">
                         <span class="font-semibold text-gray-800">Keep me logged in on this device</span>
                     </label>
+                    <div data-error-container="remember">
+                        @error('remember')
+                            <p class="text-red-600 text-sm mt-2" data-server-error="true" data-field="remember">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 @if ($shouldUseRecaptcha ?? false)
-                    <div class="mb-8">
+                    <div class="mb-8" data-field-group>
                         <div class="flex justify-center">
-                            <div data-recaptcha-container class="w-full max-w-full overflow-hidden">
+                            <div data-recaptcha-container x-ref="captcha" tabindex="-1" class="w-full max-w-full overflow-hidden">
                                 <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
                             </div>
                         </div>
-                        @error('g-recaptcha-response')
-                            <p class="text-red-600 text-sm mt-2 text-center">{{ $message }}</p>
-                        @enderror
+                        <div data-error-container="captcha">
+                            @error('g-recaptcha-response')
+                                <p class="text-red-600 text-sm mt-2 text-center" data-server-error="true" data-field="captcha">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
                 @endif
@@ -120,4 +147,8 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    <script src="{{ asset('auth/js/signin.js') }}"></script>
+@endpush
 @endsection
