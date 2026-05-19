@@ -1,5 +1,15 @@
 @extends('layouts.frontend')
 
+@push('styles')
+    <style>
+        .signup-invalid-focus {
+            outline: 2px solid rgba(220, 38, 38, 0.35);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2) !important;
+        }
+    </style>
+@endpush
+
 @section('content')
 @include('auth.partials.recaptcha-responsive-assets')
 
@@ -63,13 +73,14 @@
                         x-model="email"
                         @blur="touched.email = true"
                         @input="touched.email = true; validateEmail()"
+                        :aria-invalid="errors.email ? 'true' : 'false'"
                         autocomplete="off"
                         autocapitalize="none"
                         autocorrect="off"
                         spellcheck="false"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
-                    <div class="mt-1 min-h-5">
+                    <div class="mt-1 min-h-5" data-error-container="email">
                         @error('email')
                             <div class="text-xs text-red-600" data-server-error="true" data-field="email">{{ $message }}</div>
                         @enderror
@@ -90,6 +101,7 @@
                         x-model="nickname"
                         @blur="touched.nickname = true"
                         @input="touched.nickname = true; validateNickname()"
+                        :aria-invalid="errors.nickname ? 'true' : 'false'"
                         placeholder="e.g. SexyBabe"
                         autocomplete="off"
                         autocapitalize="none"
@@ -97,7 +109,7 @@
                         spellcheck="false"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
-                    <div class="mt-1 min-h-5">
+                    <div class="mt-1 min-h-5" data-error-container="nickname">
                         @error('nickname')
                             <div class="text-xs text-red-600" data-server-error="true" data-field="nickname">{{ $message }}</div>
                         @enderror
@@ -121,6 +133,7 @@
                                 x-model="password"
                                 @blur="touched.password = true"
                                 @input="touched.password = true; validatePassword(); validateConfirmPassword()"
+                                :aria-invalid="errors.password ? 'true' : 'false'"
                                 autocomplete="new-password"
                                 class="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                             >
@@ -175,7 +188,7 @@
                         Generate
                     </button>
 
-                    <div class="mt-1 min-h-5">
+                    <div class="mt-1 min-h-5" data-error-container="password">
                         @error('password')
                             <div class="text-xs text-red-600" data-server-error="true" data-field="password">{{ $message }}</div>
                         @enderror
@@ -253,6 +266,7 @@
                             x-model="confirmPassword"
                             @blur="touched.confirmPassword = true"
                             @input="touched.confirmPassword = true; validateConfirmPassword()"
+                            :aria-invalid="errors.confirmPassword ? 'true' : 'false'"
                             autocomplete="new-password"
                             class="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                         >
@@ -275,7 +289,7 @@
                         </button>
                     </div>
 
-                    <div class="mt-1 min-h-5">
+                    <div class="mt-1 min-h-5" data-error-container="confirmPassword">
                         @error('password_confirmation')
                             <div class="text-xs text-red-600" data-server-error="true" data-field="confirmPassword">{{ $message }}</div>
                         @enderror
@@ -303,13 +317,14 @@
                         x-model="mobile"
                         @blur="touched.mobile = true"
                         @input="touched.mobile = true; validateMobile()"
+                        :aria-invalid="errors.mobile ? 'true' : 'false'"
                         placeholder="Australian mobile (e.g. 04XXXXXXXX)"
                         autocomplete="off"
                         class="flex-1 min-w-0 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     >
                 </div>
 
-                <div class="mt-1 min-h-5">
+                <div class="mt-1 min-h-5" data-error-container="mobile">
                     @error('mobile')
                         <div class="text-xs text-red-600" data-server-error="true" data-field="mobile">{{ $message }}</div>
                     @enderror
@@ -347,6 +362,7 @@
                     @input="touched.suburb = true; handleSuburbInput()"
                     @blur="handleSuburbBlur()"
                     @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
+                    :aria-invalid="errors.suburb ? 'true' : 'false'"
                     placeholder="Start typing your suburb..."
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
                     autocomplete="off"
@@ -378,7 +394,7 @@
 
                 <div class="text-xs text-gray-500 mt-1">We'll auto-complete from our list</div>
 
-                <div class="mt-1 min-h-5">
+                <div class="mt-1 min-h-5" data-error-container="suburb">
                     @error('suburb')
                         <div class="text-xs text-red-600" data-server-error="true" data-field="suburb">{{ $message }}</div>
                     @enderror
@@ -411,12 +427,13 @@
                             x-ref="ageConfirm"
                             x-model="ageConfirm"
                             @change="touched.ageConfirm = true; validateAgeConfirm()"
+                            :aria-invalid="errors.ageConfirm ? 'true' : 'false'"
                             class="w-5 h-5 accent-[#e04ecb]"
                             {{ old('age_confirm') ? 'checked' : '' }}
                         >
                         <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
                     </div>
-                    <div class="mt-1 min-h-5">
+                    <div class="mt-1 min-h-5" data-error-container="ageConfirm">
                         @error('age_confirm')
                             <div class="text-xs text-red-600 pl-12" data-server-error="true" data-field="ageConfirm">{{ $message }}</div>
                         @enderror
@@ -430,12 +447,12 @@
             @if ($shouldUseRecaptcha ?? false)
                 <div class="mb-8">
                     <div class="flex justify-center">
-                        <div data-recaptcha-container class="w-full max-w-full overflow-hidden">
+                        <div data-recaptcha-container x-ref="captcha" tabindex="-1" class="w-full max-w-full overflow-hidden">
                             <div class="g-recaptcha" data-sitekey="{{ $recaptchaSetting->site_key ?? '' }}"></div>
                         </div>
                     </div>
                     @error('g-recaptcha-response')
-                        <div class="text-xs text-red-600 mt-3 text-center" data-server-error="true">{{ $message }}</div>
+                        <div class="text-xs text-red-600 mt-3 text-center" data-server-error="true" data-field="captcha" data-error-container="captcha">{{ $message }}</div>
                     @enderror
                 </div>
             @endif
