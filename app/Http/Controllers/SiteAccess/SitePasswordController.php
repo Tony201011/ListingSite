@@ -26,9 +26,12 @@ class SitePasswordController extends Controller
         if ($this->verifySitePassword->execute($request->password)) {
             $request->session()->regenerate();
             $request->session()->put('site_access', true);
+            $request->session()->put('site_access_password_fingerprint', $this->verifySitePassword->getPasswordFingerprint());
 
             return redirect()->intended('/');
         }
+
+        $request->session()->forget('site_access_password_fingerprint');
 
         return back()->with('error', 'Wrong password');
     }

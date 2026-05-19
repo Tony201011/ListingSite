@@ -18,15 +18,39 @@ class VerifySitePassword
         return hash_equals((string) $expected, $password);
     }
 
-    private function getExpectedPassword(): ?string
+    public function getPasswordFingerprint(): ?string
+    {
+        $expected = $this->getExpectedPassword();
+
+        if (! $expected) {
+            return null;
+        }
+
+        return hash('sha256', $expected);
+    }
+
+    public function getResolvedConfig(): array
     {
         $dbPassword = null;
+        $dbEnabled = false;
 
         if (Schema::hasTable('site_settings')) {
             $config = SiteSetting::getSitePasswordConfig();
             $dbPassword = $config['password'] ?: null;
+            $dbEnabled = (bool) ($config['enabled'] ?? false);
         }
 
-        return $dbPassword ?? config('app.site_password', env('SITE_PASSWORD'));
+        $envPassword = env('SITE_PASSWORD');
+        $envEnabled = filter_var(env('SITE_PASSWORD_ENABLED', false), FILTER_VALIDATE_BOOL);
+
+        return [
+            'enabled' => $dbEnabled || ($envEnabled && filled($envPassword)),
+            'password' => $dbPassword ?? (($envEnabled && filled($envPassword)) ? $envPassword : null),
+        ];
+    }
+
+    private function getExpectedPassword(): ?string
+    {
+        return $this->getResolvedConfig()['password'];
     }
 }

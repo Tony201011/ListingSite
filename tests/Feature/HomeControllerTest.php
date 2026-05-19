@@ -968,6 +968,30 @@ class HomeControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_home_page_requires_reentry_when_site_password_changes(): void
+    {
+        $siteSetting = SiteSetting::query()->create([
+            'site_password' => 'secret123',
+            'site_password_enabled' => true,
+        ]);
+
+        $response = $this->withSession([
+            'site_access' => true,
+            'site_access_password_fingerprint' => hash('sha256', 'secret123'),
+        ])->get('/');
+
+        $response->assertStatus(200);
+
+        $siteSetting->update(['site_password' => 'secret456']);
+
+        $response = $this->withSession([
+            'site_access' => true,
+            'site_access_password_fingerprint' => hash('sha256', 'secret123'),
+        ])->get('/');
+
+        $response->assertRedirect('/site-password');
+    }
+
     public function test_admin_user_bypasses_site_password_protection(): void
     {
         SiteSetting::query()->create([
