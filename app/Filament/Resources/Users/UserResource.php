@@ -1499,6 +1499,12 @@ class UserResource extends Resource
             ])
             ->toolbarActions([])
             ->groups([
+                Group::make('user.name')
+                    ->label('Account Name')
+                    ->collapsible(),
+                Group::make('name')
+                    ->label('Profile Name')
+                    ->collapsible(),
                 Group::make('user.email')
                     ->label('Account Email')
                     ->collapsible(),
@@ -1514,8 +1520,16 @@ class UserResource extends Resource
                     ->label('Featured')
                     ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->is_featured ? 'Featured' : 'Not Featured')
                     ->collapsible(),
+                Group::make('user.created_at')
+                    ->label('Account Created')
+                    ->date()
+                    ->collapsible(),
+                Group::make('created_at')
+                    ->label('Profile Created')
+                    ->date()
+                    ->collapsible(),
             ])
-            ->defaultGroup('user.email')
+            ->defaultGroup('user.name')
             ->defaultSort('created_at', 'desc')
             ->striped()
             ->emptyStateHeading('No providers yet')
