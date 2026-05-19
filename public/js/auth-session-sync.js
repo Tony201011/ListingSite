@@ -93,13 +93,25 @@
         } catch (error) {}
     };
 
+    const isLogoutPath = (path) => {
+        if (typeof path !== 'string' || path.length === 0) {
+            return false;
+        }
+
+        if (path === logoutPath) {
+            return true;
+        }
+
+        return path === '/logout' || path.endsWith('/logout');
+    };
+
     const isLogoutForm = (form) => {
         if (!(form instanceof HTMLFormElement)) {
             return false;
         }
 
         try {
-            return new URL(form.action, window.location.origin).pathname === logoutPath;
+            return isLogoutPath(new URL(form.action, window.location.origin).pathname);
         } catch (error) {
             return false;
         }
