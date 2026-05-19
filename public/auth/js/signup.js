@@ -67,10 +67,12 @@ function signupForm(config = {}) {
         },
 
         getStickyOffset() {
-            const stickyHeader = document.querySelector('header.sticky, header[class*="sticky"]');
+            const stickyHeader = document.querySelector(
+                'header.sticky, header[class*="sticky"], header.fixed, header[class*="fixed"]'
+            );
             const stickyHeaderHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 0;
 
-            return stickyHeaderHeight + 24;
+            return stickyHeaderHeight + 16;
         },
 
         scrollElementIntoView(element) {
@@ -78,10 +80,17 @@ function signupForm(config = {}) {
                 return;
             }
 
-            const top = Math.max(
-                window.scrollY + element.getBoundingClientRect().top - this.getStickyOffset(),
-                0
-            );
+            const stickyOffset = this.getStickyOffset();
+            const rect = element.getBoundingClientRect();
+            const bottomSpacing = 16;
+
+            if (rect.top >= stickyOffset && rect.bottom <= window.innerHeight - bottomSpacing) {
+                return;
+            }
+
+            const rawTop = window.scrollY + rect.top - stickyOffset;
+            const maxScrollTop = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+            const top = Math.min(Math.max(rawTop, 0), maxScrollTop);
 
             window.scrollTo({
                 top,
@@ -130,10 +139,16 @@ function signupForm(config = {}) {
             );
         },
 
-        scrollAndFocusField(field) {
+        getFieldScrollTarget(field) {
             const input = this.getFieldRef(field);
             const errorContainer = this.getFieldErrorContainer(field);
-            const scrollTarget = errorContainer || input;
+            const fieldGroup = errorContainer?.parentElement;
+
+            return fieldGroup || input || errorContainer;
+        },
+
+        scrollAndFocusField(field) {
+            const scrollTarget = this.getFieldScrollTarget(field);
 
             if (!scrollTarget) {
                 return;
