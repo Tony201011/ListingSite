@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -167,6 +168,26 @@ class LoginLogoutTest extends TestCase
 
         $response->assertRedirect('/');
         $this->assertGuest();
+    }
+
+    public function test_logout_clears_admin_guard_in_same_session(): void
+    {
+        $provider = $this->createVerifiedUser();
+        $admin = $this->createVerifiedUser([
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        Auth::guard('admin')->login($admin, true);
+
+        $response = $this
+            ->withCookie(Auth::guard('admin')->getRecallerName(), 'remember-token')
+            ->actingAs($provider, 'web')
+            ->post('/logout');
+
+        $response->assertRedirect('/');
+        $response->assertCookieExpired(Auth::guard('admin')->getRecallerName());
+        $this->assertGuest('web');
+        $this->assertGuest('admin');
     }
 
     public function test_logged_out_session_cannot_access_json_provider_routes(): void
