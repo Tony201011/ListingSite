@@ -805,6 +805,34 @@ class HomeControllerTest extends TestCase
         $this->assertFalse($names->contains('New Escort'));
     }
 
+    public function test_home_page_includes_profile_when_legacy_online_user_row_is_linked_by_user_only(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Legacy Linked Escort',
+            'slug' => 'legacy-linked-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => now()->addMinutes(55),
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Legacy Linked Escort'));
+    }
+
     public function test_home_page_hides_featured_profile_when_offline(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
