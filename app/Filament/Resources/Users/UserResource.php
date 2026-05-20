@@ -1276,112 +1276,112 @@ class UserResource extends Resource
                     ->placeholder('All'),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->label('View as Admin')
-                    ->icon('heroicon-o-eye')
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
-
-                Action::make('view_as_provider')
-                    ->label('View as Provider')
-                    ->icon('heroicon-o-user')
-                    ->color('info')
-                    ->url(fn (ProviderProfile $record): string => $record->slug ? route('profile.show', ['slug' => $record->slug]) : '#')
-                    ->openUrlInNewTab()
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && filled($record->slug)),
-
-                Action::make('photo_verification')
-                    ->label('Photo Verification')
-                    ->icon('heroicon-o-camera')
-                    ->color('gray')
-                    ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && $record->photoVerification->isNotEmpty())
-                    ->modalHeading(fn (ProviderProfile $record): string => 'Photo Verification · '.($record->name ?? 'Provider'))
-                    ->modalSubmitActionLabel('Save')
-                    ->modalCancelActionLabel('Close')
-                    ->modalWidth('5xl')
-                    ->modalContent(function (ProviderProfile $record) {
-                        /** @var PhotoVerification|null $verification */
-                        $verification = $record->photoVerification()
-                            ->latest('submitted_at')
-                            ->latest('id')
-                            ->first();
-
-                        return view('filament.modals.provider-photo-verification', [
-                            'providerProfile' => $record,
-                            'verification' => $verification,
-                        ]);
-                    })
-                    ->form([
-                        Select::make('status')
-                            ->label('Verification Decision')
-                            ->options([
-                                'pending' => 'Pending',
-                                'approved' => 'Approved',
-                                'rejected' => 'Rejected',
-                            ])
-                            ->required(),
-                        Textarea::make('admin_note')
-                            ->label('Admin Notes')
-                            ->placeholder('Add notes for the provider (optional)...')
-                            ->rows(4),
-                    ])
-                    ->fillForm(function (ProviderProfile $record): array {
-                        /** @var PhotoVerification|null $verification */
-                        $verification = $record->photoVerification()
-                            ->latest('submitted_at')
-                            ->latest('id')
-                            ->first();
-
-                        return [
-                            'status' => $verification?->status ?? 'pending',
-                            'admin_note' => $verification?->admin_note ?? '',
-                        ];
-                    })
-                    ->action(function (ProviderProfile $record, array $data): void {
-                        /** @var PhotoVerification|null $verification */
-                        $verification = $record->photoVerification()
-                            ->latest('submitted_at')
-                            ->latest('id')
-                            ->first();
-
-                        if (! $verification) {
-                            Notification::make()
-                                ->title('No verification record found.')
-                                ->warning()
-                                ->send();
-
-                            return;
-                        }
-
-                        $previousStatus = $verification->status;
-                        $verification->update([
-                            'status' => $data['status'],
-                            'admin_note' => $data['admin_note'],
-                        ]);
-
-                        if ($data['status'] !== $previousStatus && in_array($data['status'], ['approved', 'rejected'])) {
-                            $emailType = $data['status'] === 'approved'
-                                ? 'photo_verification_approved'
-                                : 'photo_verification_rejected';
-
-                            $userId = $verification->user_id;
-                            if ($userId) {
-                                SendAdminProviderEmailJob::dispatch(
-                                    $userId,
-                                    $emailType,
-                                    null,
-                                    null,
-                                    $data['admin_note'],
-                                );
-                            }
-                        }
-
-                        Notification::make()
-                            ->title('Photo verification updated successfully.')
-                            ->success()
-                            ->send();
-                    }),
-
                 ActionGroup::make([
+                    ViewAction::make()
+                        ->label('View as Admin')
+                        ->icon('heroicon-o-eye')
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
+
+                    Action::make('view_as_provider')
+                        ->label('View as Provider')
+                        ->icon('heroicon-o-user')
+                        ->color('info')
+                        ->url(fn (ProviderProfile $record): string => $record->slug ? route('profile.show', ['slug' => $record->slug]) : '#')
+                        ->openUrlInNewTab()
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && filled($record->slug)),
+
+                    Action::make('photo_verification')
+                        ->label('Photo Verification')
+                        ->icon('heroicon-o-camera')
+                        ->color('gray')
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && $record->photoVerification->isNotEmpty())
+                        ->modalHeading(fn (ProviderProfile $record): string => 'Photo Verification · '.($record->name ?? 'Provider'))
+                        ->modalSubmitActionLabel('Save')
+                        ->modalCancelActionLabel('Close')
+                        ->modalWidth('5xl')
+                        ->modalContent(function (ProviderProfile $record) {
+                            /** @var PhotoVerification|null $verification */
+                            $verification = $record->photoVerification()
+                                ->latest('submitted_at')
+                                ->latest('id')
+                                ->first();
+
+                            return view('filament.modals.provider-photo-verification', [
+                                'providerProfile' => $record,
+                                'verification' => $verification,
+                            ]);
+                        })
+                        ->form([
+                            Select::make('status')
+                                ->label('Verification Decision')
+                                ->options([
+                                    'pending' => 'Pending',
+                                    'approved' => 'Approved',
+                                    'rejected' => 'Rejected',
+                                ])
+                                ->required(),
+                            Textarea::make('admin_note')
+                                ->label('Admin Notes')
+                                ->placeholder('Add notes for the provider (optional)...')
+                                ->rows(4),
+                        ])
+                        ->fillForm(function (ProviderProfile $record): array {
+                            /** @var PhotoVerification|null $verification */
+                            $verification = $record->photoVerification()
+                                ->latest('submitted_at')
+                                ->latest('id')
+                                ->first();
+
+                            return [
+                                'status' => $verification?->status ?? 'pending',
+                                'admin_note' => $verification?->admin_note ?? '',
+                            ];
+                        })
+                        ->action(function (ProviderProfile $record, array $data): void {
+                            /** @var PhotoVerification|null $verification */
+                            $verification = $record->photoVerification()
+                                ->latest('submitted_at')
+                                ->latest('id')
+                                ->first();
+
+                            if (! $verification) {
+                                Notification::make()
+                                    ->title('No verification record found.')
+                                    ->warning()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $previousStatus = $verification->status;
+                            $verification->update([
+                                'status' => $data['status'],
+                                'admin_note' => $data['admin_note'],
+                            ]);
+
+                            if ($data['status'] !== $previousStatus && in_array($data['status'], ['approved', 'rejected'])) {
+                                $emailType = $data['status'] === 'approved'
+                                    ? 'photo_verification_approved'
+                                    : 'photo_verification_rejected';
+
+                                $userId = $verification->user_id;
+                                if ($userId) {
+                                    SendAdminProviderEmailJob::dispatch(
+                                        $userId,
+                                        $emailType,
+                                        null,
+                                        null,
+                                        $data['admin_note'],
+                                    );
+                                }
+                            }
+
+                            Notification::make()
+                                ->title('Photo verification updated successfully.')
+                                ->success()
+                                ->send();
+                        }),
+
                     Action::make('view_ads_featured')
                         ->label('View Ads / Featured')
                         ->icon('heroicon-o-megaphone')
