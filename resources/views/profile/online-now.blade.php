@@ -10,6 +10,7 @@
     initialStatus: @js((bool) $onlineStatus),
     initialRemainingUses: @js($remainingUses),
     initialExpiresAt: @js($expiresAt ?? null),
+    initialBlockedBalance: @js((bool) $blockedBalance),
     updateUrl: @js(route('online.update-status')),
     csrfToken: @js(csrf_token())
     })"
@@ -73,7 +74,7 @@
                     <button
                         type="button"
                         @click="toggleStatus"
-                        :disabled="loading || (!enabled && remainingUses <= 0)"
+                        :disabled="loading || (!enabled && remainingUses <= 0) || (!enabled && blockedBalance)"
                         class="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition duration-200 sm:w-auto"
                         :class="enabled
                             ? 'bg-pink-600 text-white hover:bg-pink-700'
@@ -111,6 +112,14 @@
                     x-transition
                 >
                     You have reached your daily limit for Online Now. Please try again tomorrow.
+                </div>
+
+                <div
+                    class="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                    x-show="!enabled && blockedBalance"
+                    x-transition
+                >
+                    Your 21-day period has expired and your account balance is negative. Please clear your balance to go online or become available now.
                 </div>
             </div>
         </div>

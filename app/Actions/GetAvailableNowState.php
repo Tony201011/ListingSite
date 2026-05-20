@@ -16,9 +16,10 @@ class GetAvailableNowState
         $status = false;
         $remainingUses = $maxUses;
         $expiresAt = null;
+        $blockedBalance = false;
 
         if (! $profile) {
-            return compact('status', 'remainingUses', 'expiresAt');
+            return compact('status', 'remainingUses', 'expiresAt', 'blockedBalance');
         }
 
         $available = $this->getOrCreateAvailableNow($profile->id);
@@ -32,8 +33,9 @@ class GetAvailableNowState
         $status = $available->isCurrentlyAvailable();
         $remainingUses = max(0, $maxUses - $available->usage_count);
         $expiresAt = optional($available->available_expires_at)?->toIso8601String();
+        $blockedBalance = $this->isFreeListingExpiredWithNegativeBalance($profile);
 
-        return compact('status', 'remainingUses', 'expiresAt');
+        return compact('status', 'remainingUses', 'expiresAt', 'blockedBalance');
     }
 
     protected function getOrCreateAvailableNow(int $profileId): AvailableNow
@@ -63,5 +65,18 @@ class GetAvailableNowState
             $available->available_started_at = null;
             $available->available_expires_at = null;
         }
+    }
+
+    protected function isFreeListingExpiredWithNegativeBalance(ProviderProfile $profile): bool
+    {
+        $expiredAt = $profile->free_listing_expires_at;
+
+        if ($expiredAt !== null && $expiredAt->isFuture()) {
+            return false;
+        }
+
+        $profile->loadMissing('user');
+
+        return $profile->user !== null && $profile->user->credits < 0;
     }
 }

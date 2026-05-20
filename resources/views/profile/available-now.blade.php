@@ -7,6 +7,7 @@
         initialStatus: @js((bool) $status),
         initialRemainingUses: @js((int) $remainingUses),
         initialExpiresAt: @js($expiresAt ?? null),
+        initialBlockedBalance: @js((bool) $blockedBalance),
         updateUrl: @js(route('available.update-status'))
     })"
 >
@@ -46,7 +47,7 @@
             <button
                 type="button"
                 @click="toggleStatus()"
-                :disabled="loading || (!enabled && remainingUses <= 0)"
+                :disabled="loading || (!enabled && remainingUses <= 0) || (!enabled && blockedBalance)"
                 class="flex w-full items-center justify-center gap-2 rounded-lg px-5 py-2.5 font-semibold transition sm:w-auto"
                 :class="enabled
                     ? 'bg-pink-600 text-white hover:bg-pink-700'
@@ -99,6 +100,15 @@
                 class="mt-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800"
             >
                 You have reached your daily limit for Available Now. Please try again tomorrow.
+            </div>
+
+            <div
+                x-show="!enabled && blockedBalance"
+                x-cloak
+                x-transition
+                class="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+            >
+                Your 21-day period has expired and your account balance is negative. Please clear your balance to go online or become available now.
             </div>
         </div>
     </div>
