@@ -298,11 +298,6 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
-            ->whereHas('onlineUser', function (Builder $onlineQuery): void {
-                $onlineQuery->where('status', 'online')
-                    ->whereNotNull('online_expires_at')
-                    ->where('online_expires_at', '>', now());
-            })
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->whereNotNull("provider_profiles.{$expiryColumn}")
             ->where("provider_profiles.{$expiryColumn}", '>', now())
@@ -312,9 +307,12 @@ class BuildProfileFilterViewData
                 'onlineUser',
                 'availableNow',
                 'user',
+                'user.onlineUser',
                 'city',
             ])
             ->orderByDesc("provider_profiles.{$expiryColumn}");
+
+        $this->applyActiveOnlineProfileConstraint($query);
 
         // For local banner: restrict to the state being viewed
         if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
@@ -394,6 +392,28 @@ class BuildProfileFilterViewData
         );
     }
 
+    private function applyActiveOnlineProfileConstraint(Builder $query): void
+    {
+        $query->where(function (Builder $onlineConstraint): void {
+            $onlineConstraint
+                ->whereHas('onlineUser', function (Builder $onlineQuery): void {
+                    $onlineQuery->where('status', 'online')
+                        ->whereNotNull('online_expires_at')
+                        ->where('online_expires_at', '>', now());
+                })
+                ->orWhere(function (Builder $legacyConstraint): void {
+                    $legacyConstraint
+                        ->whereDoesntHave('onlineUser')
+                        ->whereHas('user.onlineUser', function (Builder $legacyOnline): void {
+                            $legacyOnline->whereNull('provider_profile_id')
+                                ->where('status', 'online')
+                                ->whereNotNull('online_expires_at')
+                                ->where('online_expires_at', '>', now());
+                        });
+                });
+        });
+    }
+
     private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
     {
         $map = [];
@@ -440,19 +460,17 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
-            ->whereHas('onlineUser', function (Builder $onlineQ): void {
-                $onlineQ->where('status', 'online')
-                    ->whereNotNull('online_expires_at')
-                    ->where('online_expires_at', '>', now());
-            })
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
                 'onlineUser',
                 'availableNow',
                 'user',
+                'user.onlineUser',
                 'city',
             ]);
+
+        $this->applyActiveOnlineProfileConstraint($query);
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
@@ -729,9 +747,22 @@ class BuildProfileFilterViewData
                     ->orWhere('hide_show_profiles.status', 'show');
             })
             ->where(function ($q) {
-                $q->where('online_users.status', 'online')
-                    ->whereNotNull('online_users.online_expires_at')
-                    ->where('online_users.online_expires_at', '>', now());
+                $q->where(function ($onlineQ) {
+                    $onlineQ->where('online_users.status', 'online')
+                        ->whereNotNull('online_users.online_expires_at')
+                        ->where('online_users.online_expires_at', '>', now());
+                })->orWhere(function ($legacyQ) {
+                    $legacyQ->whereNull('online_users.id')
+                        ->whereExists(function ($exists): void {
+                            $exists->selectRaw('1')
+                                ->from('online_users as legacy_online_users')
+                                ->whereColumn('legacy_online_users.user_id', 'provider_profiles.user_id')
+                                ->whereNull('legacy_online_users.provider_profile_id')
+                                ->where('legacy_online_users.status', 'online')
+                                ->whereNotNull('legacy_online_users.online_expires_at')
+                                ->where('legacy_online_users.online_expires_at', '>', now());
+                        });
+                });
             })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
@@ -938,6 +969,7 @@ class BuildProfileFilterViewData
                 'onlineUser',
                 'availableNow',
                 'user',
+                'user.onlineUser',
                 'city',
             ])
             ->get();
@@ -976,6 +1008,10 @@ class BuildProfileFilterViewData
         );
 
         $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
+        if (! $isOnline && $profile->onlineUser === null) {
+            $isOnline = $profile->user?->onlineUser?->provider_profile_id === null
+                && ($profile->user?->onlineUser?->isCurrentlyOnline() ?? false);
+        }
         $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
 
         return [
