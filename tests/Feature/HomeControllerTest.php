@@ -1120,4 +1120,26 @@ class HomeControllerTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_home_banner_hidden_when_location_filter_active_and_no_local_banners(): void
+    {
+        // A profile with an active home banner (national).
+        $this->createApprovedProvider([
+            'name' => 'National Banner Escort',
+            'slug' => 'national-banner-escort',
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+
+        // Unfiltered home page: home banner should be visible.
+        $unfilteredResponse = $this->get('/');
+        $this->assertNotEmpty($unfilteredResponse->viewData('homeBannerProfiles'));
+        $unfilteredResponse->assertSeeText('Featured');
+
+        // Location-filtered page with no matching profiles and no local banners:
+        // home banner must NOT be shown even though homeBannerProfiles is non-empty.
+        $filteredResponse = $this->get('/?location=AMBROSE%2C+QLD');
+        $this->assertNotEmpty($filteredResponse->viewData('homeBannerProfiles'));
+        $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
+        $filteredResponse->assertDontSeeText('Featured');
+    }
 }
