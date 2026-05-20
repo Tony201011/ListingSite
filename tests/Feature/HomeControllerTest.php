@@ -833,6 +833,44 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($names->contains('Legacy Linked Escort'));
     }
 
+    public function test_home_page_includes_profile_when_legacy_online_user_row_is_active_and_profile_linked_row_is_offline(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Legacy Online With Offline Profile Row Escort',
+            'slug' => 'legacy-online-offline-profile-row-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => now()->addMinutes(55),
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Legacy Online With Offline Profile Row Escort'));
+    }
+
     public function test_home_page_hides_featured_profile_when_offline(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
