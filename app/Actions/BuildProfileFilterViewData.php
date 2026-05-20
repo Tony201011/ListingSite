@@ -225,7 +225,7 @@ class BuildProfileFilterViewData
 
         // Load local-banner profiles — shown when a state filter is active
         $localBannerProfiles = $escortNameQuery === '' && ($locationStateQuery !== '' || ($locationQuery !== '' && str_contains($locationQuery, ',')))
-            ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery)
+            ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery, $resolvedLocation)
             : collect();
 
         return compact(
@@ -291,7 +291,8 @@ class BuildProfileFilterViewData
     private function queryBannerProfiles(
         string $expiryColumn,
         ?string $locationStateQuery = null,
-        ?string $locationQuery = null
+        ?string $locationQuery = null,
+        ?array $exactLocation = null
     ): Collection {
         $query = ProviderProfile::query()
             ->whereNull('provider_profiles.deleted_at')
@@ -318,6 +319,10 @@ class BuildProfileFilterViewData
 
         // For local banner: restrict to the state being viewed
         if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
+            if ($exactLocation !== null) {
+                $this->applyExactLocationFilter($query, $exactLocation);
+            }
+
             $state = $locationStateQuery ?: '';
 
             if ($state === '' && $locationQuery !== null && str_contains($locationQuery, ',')) {
@@ -325,7 +330,7 @@ class BuildProfileFilterViewData
                 $state = trim($parts[1] ?? '');
             }
 
-            if ($state !== '') {
+            if ($state !== '' && $exactLocation === null) {
                 $normalizedState = $this->normalizeStateAbbreviation($state) ?? strtoupper($state);
                 $fullStateName = $this->resolveStateName($normalizedState);
 
