@@ -46,19 +46,6 @@ class SitePassword
 
         $protectionEnabled = $configurationEnabled;
 
-        if ($protectionEnabled && $request->session()->get('site_access') === true) {
-            $currentFingerprint = $this->verifySitePassword->getPasswordFingerprint();
-            $sessionFingerprint = $request->session()->get('site_access_password_fingerprint');
-
-            if (
-                filled($currentFingerprint) &&
-                is_string($sessionFingerprint) &&
-                ! hash_equals($currentFingerprint, $sessionFingerprint)
-            ) {
-                $request->session()->forget(['site_access', 'site_access_password_fingerprint', 'site_access_tab_token', 'site_access_tab_bootstrap']);
-            }
-        }
-
         if ($protectionEnabled && $request->session()->get('site_access') !== true) {
             /** @var User|null $user */
             $user = Auth::user();
