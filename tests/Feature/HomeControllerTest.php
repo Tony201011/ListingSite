@@ -516,7 +516,7 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($localFeaturedNames->contains('VIC Local Escort'));
     }
 
-    public function test_local_featured_filters_to_exact_suburb_and_state_when_state_relation_is_missing(): void
+    public function test_local_featured_filters_by_state_when_location_contains_suburb_and_state(): void
     {
         $macknadeUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $macknadeProfile = ProviderProfile::query()->create([
@@ -552,7 +552,7 @@ class HomeControllerTest extends TestCase
         $response->assertSeeText('Local Featured');
         $localFeaturedNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
         $this->assertTrue($localFeaturedNames->contains('Macknade Local Featured'));
-        $this->assertFalse($localFeaturedNames->contains('Townsville Local Featured'));
+        $this->assertTrue($localFeaturedNames->contains('Townsville Local Featured'));
     }
 
     // ---------------------------------------------------------------
