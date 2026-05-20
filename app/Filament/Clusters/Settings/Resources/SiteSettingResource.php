@@ -87,6 +87,10 @@ class SiteSettingResource extends Resource
                 ->maxValue(100)
                 ->default(12)
                 ->helperText('Number of profiles displayed per page on the home page. Default is 12.'),
+            Toggle::make('online_filter_enabled')
+                ->label('Require Online Status to Show Profiles')
+                ->default(false)
+                ->helperText('When enabled, only profiles with an active online session are shown on the home page and search results. Disable this to show all approved profiles regardless of their online status.'),
             Toggle::make('fatal_error_page_enabled')
                 ->label('Enable Fatal Error Maintenance Page')
                 ->default(false)
@@ -203,6 +207,7 @@ class SiteSettingResource extends Resource
                 TextColumn::make('max_search_distance')->label('Max Distance (km)'),
                 IconColumn::make('distance_search_enabled')->label('Distance Search')->boolean(),
                 TextColumn::make('home_page_records')->label('Home Page Records'),
+                IconColumn::make('online_filter_enabled')->label('Online Filter')->boolean(),
                 IconColumn::make('fatal_error_page_enabled')->label('Fatal Error Page')->boolean(),
                 TextColumn::make('fatal_error_query_param')->label('Fatal Query Param'),
                 IconColumn::make('logging_enabled')->label('Logs Enabled')->boolean(),

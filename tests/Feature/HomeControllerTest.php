@@ -451,11 +451,11 @@ class HomeControllerTest extends TestCase
         ]);
 
         $unfilteredResponse = $this->get('/');
-        $unfilteredResponse->assertSeeText('Featured');
+        $this->assertNotEmpty($unfilteredResponse->viewData('homeBannerProfiles'));
 
         $filteredResponse = $this->get('/?escort_name=Featured+Escort');
-        $filteredResponse->assertDontSeeText('Featured');
-        $filteredResponse->assertDontSeeText('Local Featured');
+        $this->assertEmpty($filteredResponse->viewData('homeBannerProfiles'));
+        $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
     }
 
     public function test_local_featured_profile_appears_in_main_results_when_escort_name_filter_is_active(): void
@@ -730,6 +730,8 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_hides_profile_with_offline_online_user_record(): void
     {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
@@ -759,6 +761,8 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_hides_profile_with_expired_online_session(): void
     {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
@@ -788,6 +792,8 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_hides_profile_with_no_online_user_record(): void
     {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
             'user_id' => $user->id,
@@ -807,6 +813,8 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_includes_profile_when_legacy_online_user_row_is_linked_by_user_only(): void
     {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
             'user_id' => $user->id,
@@ -835,6 +843,8 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_includes_profile_when_legacy_online_user_row_is_active_and_profile_linked_row_is_offline(): void
     {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
@@ -873,6 +883,8 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_hides_featured_profile_when_offline(): void
     {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
@@ -903,6 +915,8 @@ class HomeControllerTest extends TestCase
 
     public function test_home_featured_slider_hides_offline_profiles_even_when_home_banner_is_active(): void
     {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
         $this->createApprovedProvider([
             'name' => 'Online Featured Escort',
             'slug' => 'online-featured-escort',
@@ -937,6 +951,8 @@ class HomeControllerTest extends TestCase
 
     public function test_featured_page_only_shows_online_profiles_for_all_featured_tiers(): void
     {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
         $this->createApprovedProvider([
             'name' => 'Online Home Banner',
             'slug' => 'online-home-banner',
@@ -992,6 +1008,48 @@ class HomeControllerTest extends TestCase
         $this->assertFalse(collect($response->viewData('homeFeaturedProfiles'))->pluck('name')->contains('Offline Tier Escort'));
         $this->assertFalse(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
         $this->assertFalse(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+    }
+
+    public function test_home_page_shows_offline_profile_when_online_filter_disabled(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => false]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Offline No Filter Escort',
+            'slug' => 'offline-no-filter-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+        // No OnlineUser record — profile has never been set online
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Offline No Filter Escort'));
+    }
+
+    public function test_home_page_hides_offline_profile_when_online_filter_enabled(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Offline Filter Escort',
+            'slug' => 'offline-filter-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+        // No OnlineUser record
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertFalse($names->contains('Offline Filter Escort'));
     }
 
     // ---------------------------------------------------------------
