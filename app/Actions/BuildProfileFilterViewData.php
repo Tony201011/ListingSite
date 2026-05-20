@@ -401,15 +401,11 @@ class BuildProfileFilterViewData
                         ->whereNotNull('online_expires_at')
                         ->where('online_expires_at', '>', now());
                 })
-                ->orWhere(function (Builder $legacyConstraint): void {
-                    $legacyConstraint
-                        ->whereDoesntHave('onlineUser')
-                        ->whereHas('user.onlineUser', function (Builder $legacyOnline): void {
-                            $legacyOnline->whereNull('provider_profile_id')
-                                ->where('status', 'online')
-                                ->whereNotNull('online_expires_at')
-                                ->where('online_expires_at', '>', now());
-                        });
+                ->orWhereHas('user.onlineUser', function (Builder $legacyOnline): void {
+                    $legacyOnline->whereNull('provider_profile_id')
+                        ->where('status', 'online')
+                        ->whereNotNull('online_expires_at')
+                        ->where('online_expires_at', '>', now());
                 });
         });
     }
@@ -752,16 +748,15 @@ class BuildProfileFilterViewData
                         ->whereNotNull('online_users.online_expires_at')
                         ->where('online_users.online_expires_at', '>', now());
                 })->orWhere(function ($legacyQ) {
-                    $legacyQ->whereNull('online_users.id')
-                        ->whereExists(function ($exists): void {
-                            $exists->selectRaw('1')
-                                ->from('online_users as legacy_online_users')
-                                ->whereColumn('legacy_online_users.user_id', 'provider_profiles.user_id')
-                                ->whereNull('legacy_online_users.provider_profile_id')
-                                ->where('legacy_online_users.status', 'online')
-                                ->whereNotNull('legacy_online_users.online_expires_at')
-                                ->where('legacy_online_users.online_expires_at', '>', now());
-                        });
+                    $legacyQ->whereExists(function ($exists): void {
+                        $exists->selectRaw('1')
+                            ->from('online_users as legacy_online_users')
+                            ->whereColumn('legacy_online_users.user_id', 'provider_profiles.user_id')
+                            ->whereNull('legacy_online_users.provider_profile_id')
+                            ->where('legacy_online_users.status', 'online')
+                            ->whereNotNull('legacy_online_users.online_expires_at')
+                            ->where('legacy_online_users.online_expires_at', '>', now());
+                    });
                 });
             })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
@@ -1008,7 +1003,7 @@ class BuildProfileFilterViewData
         );
 
         $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
-        if (! $isOnline && $profile->onlineUser === null) {
+        if (! $isOnline) {
             $isOnline = $profile->user?->onlineUser?->provider_profile_id === null
                 && ($profile->user?->onlineUser?->isCurrentlyOnline() ?? false);
         }
