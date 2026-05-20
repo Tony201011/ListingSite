@@ -319,50 +319,27 @@ class BuildProfileFilterViewData
         // For local banner: restrict to the state being viewed
         if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
             $state = $locationStateQuery ?: '';
-            $suburb = '';
 
             if ($state === '' && $locationQuery !== null && str_contains($locationQuery, ',')) {
                 $parts = explode(',', $locationQuery, 2);
-                $suburb = trim($parts[0] ?? '');
                 $state = trim($parts[1] ?? '');
-            } elseif ($locationQuery !== null) {
-                $suburb = trim($locationQuery);
             }
 
             if ($state !== '') {
                 $normalizedState = $this->normalizeStateAbbreviation($state) ?? strtoupper($state);
                 $fullStateName = $this->resolveStateName($normalizedState);
 
-                if ($suburb !== '') {
-                    $query->where(function (Builder $q) use ($suburb, $normalizedState, $fullStateName): void {
-                        $q->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
-                            $cityQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($suburb)])
-                                ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
-                                    $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
-                                });
-                        })->orWhereRaw(
-                            'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
-                            [mb_strtolower($suburb.', '.$normalizedState).'%']
-                        )->orWhereRaw(
-                            'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
-                            [mb_strtolower($suburb.', '.$fullStateName).'%']
-                        );
-                    });
-                }
-
-                if ($suburb === '') {
-                    $query->where(function (Builder $q) use ($fullStateName, $normalizedState): void {
-                        $q->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
-                            $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
-                        })->orWhereRaw(
-                            'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
-                            ['%, '.mb_strtolower($normalizedState).'%']
-                        )->orWhereRaw(
-                            'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
-                            ['%, '.mb_strtolower($fullStateName).'%']
-                        );
-                    });
-                }
+                $query->where(function (Builder $q) use ($fullStateName, $normalizedState): void {
+                    $q->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
+                        $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($fullStateName)]);
+                    })->orWhereRaw(
+                        'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
+                        ['%, '.mb_strtolower($normalizedState).'%']
+                    )->orWhereRaw(
+                        'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
+                        ['%, '.mb_strtolower($fullStateName).'%']
+                    );
+                });
             }
         }
 
