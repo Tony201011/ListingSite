@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Profile;
 use App\Actions\CreateBookingEnquiry;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SendBookingEnquiryRequest;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 
 class BookingController extends Controller
 {
@@ -13,10 +13,10 @@ class BookingController extends Controller
         private CreateBookingEnquiry $createBookingEnquiry
     ) {}
 
-    public function send(SendBookingEnquiryRequest $request): RedirectResponse
+    public function send(SendBookingEnquiryRequest $request): JsonResponse
     {
         $this->createBookingEnquiry->execute($request->validated());
 
-        return back()->with('success', 'Enquiry sent successfully!');
+        return response()->json(['message' => 'Enquiry sent successfully!']);
     }
 }
