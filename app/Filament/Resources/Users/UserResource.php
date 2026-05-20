@@ -1091,6 +1091,47 @@ class UserResource extends Resource
                     ->wrap()
                     ->toggleable(),
 
+                TextColumn::make('email_verification_status')
+                    ->label('Email Verification')
+                    ->badge()
+                    ->state(fn (ProviderProfile $record): string => filled($record->user?->email_verified_at) ? 'Verified' : 'Unverified')
+                    ->color(fn (string $state): string => $state === 'Verified' ? 'success' : 'gray'),
+
+                TextColumn::make('photo_verification_status')
+                    ->label('Photo Verification')
+                    ->badge()
+                    ->state(function (ProviderProfile $record): string {
+                        $verification = $record->photoVerification->reduce(
+                            function (?PhotoVerification $latest, PhotoVerification $current): ?PhotoVerification {
+                                if (! $latest) {
+                                    return $current;
+                                }
+
+                                $latestSubmittedAt = $latest->submitted_at?->getTimestamp() ?? 0;
+                                $currentSubmittedAt = $current->submitted_at?->getTimestamp() ?? 0;
+
+                                if ($currentSubmittedAt === $latestSubmittedAt) {
+                                    return $current->id > $latest->id ? $current : $latest;
+                                }
+
+                                return $currentSubmittedAt > $latestSubmittedAt ? $current : $latest;
+                            }
+                        );
+
+                        return match ($verification?->status) {
+                            'approved' => 'Approved',
+                            'rejected' => 'Rejected',
+                            'pending' => 'Pending',
+                            default => 'Not Submitted',
+                        };
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'Approved' => 'success',
+                        'Rejected' => 'danger',
+                        'Pending' => 'warning',
+                        default => 'gray',
+                    }),
+
                 TextColumn::make('profile_status')
                     ->label('Status')
                     ->badge()
