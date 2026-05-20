@@ -741,7 +741,7 @@ class HomeControllerTest extends TestCase
 
         // Profile has used the online feature before, but is currently offline
         OnlineUser::query()->create([
-            'user_id' => $user->id,
+            'user_id' => null,
             'provider_profile_id' => $profile->id,
             'status' => 'offline',
             'usage_date' => today(),
@@ -845,7 +845,7 @@ class HomeControllerTest extends TestCase
         ]);
 
         OnlineUser::query()->create([
-            'user_id' => $user->id,
+            'user_id' => null,
             'provider_profile_id' => $profile->id,
             'status' => 'offline',
             'usage_date' => today(),
