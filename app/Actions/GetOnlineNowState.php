@@ -16,9 +16,10 @@ class GetOnlineNowState
         $onlineStatus = false;
         $remainingUses = $maxUses;
         $expiresAt = null;
+        $blockedBalance = false;
 
         if (! $profile) {
-            return compact('onlineStatus', 'remainingUses', 'expiresAt');
+            return compact('onlineStatus', 'remainingUses', 'expiresAt', 'blockedBalance');
         }
 
         $onlineUser = $this->getOrCreateOnlineUser($profile->id);
@@ -32,8 +33,9 @@ class GetOnlineNowState
         $onlineStatus = $onlineUser->isCurrentlyOnline();
         $remainingUses = max(0, $maxUses - $onlineUser->usage_count);
         $expiresAt = optional($onlineUser->online_expires_at)?->toIso8601String();
+        $blockedBalance = $this->isFreeListingExpiredWithNegativeBalance($profile);
 
-        return compact('onlineStatus', 'remainingUses', 'expiresAt');
+        return compact('onlineStatus', 'remainingUses', 'expiresAt', 'blockedBalance');
     }
 
     private function getOrCreateOnlineUser(int $profileId): OnlineUser
@@ -63,5 +65,18 @@ class GetOnlineNowState
             $onlineUser->online_started_at = null;
             $onlineUser->online_expires_at = null;
         }
+    }
+
+    private function isFreeListingExpiredWithNegativeBalance(ProviderProfile $profile): bool
+    {
+        $expiredAt = $profile->free_listing_expires_at;
+
+        if ($expiredAt !== null && $expiredAt->isFuture()) {
+            return false;
+        }
+
+        $profile->loadMissing('user');
+
+        return $profile->user !== null && $profile->user->credits < 0;
     }
 }

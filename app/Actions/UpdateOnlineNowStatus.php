@@ -20,7 +20,7 @@ class UpdateOnlineNowStatus
         $this->expireIfNeeded($onlineUser);
 
         if ($status === 'online') {
-            return $this->goOnline($onlineUser, $maxUses, $durationMinutes);
+            return $this->goOnline($onlineUser, $maxUses, $durationMinutes, $profile);
         }
 
         return $this->goOffline($onlineUser, $maxUses);
@@ -57,8 +57,21 @@ class UpdateOnlineNowStatus
         }
     }
 
-    private function goOnline(OnlineUser $onlineUser, int $maxUses, int $durationMinutes): ActionResult
+    private function goOnline(OnlineUser $onlineUser, int $maxUses, int $durationMinutes, ProviderProfile $profile): ActionResult
     {
+        if ($this->isFreeListingExpiredWithNegativeBalance($profile)) {
+            return new ActionResult(
+                false,
+                422,
+                'Your 21-day period has expired and your account balance is negative. Please clear your balance to go online or become available now.',
+                [
+                    'status' => 'offline',
+                    'remaining_uses' => max(0, $maxUses - $onlineUser->usage_count),
+                ],
+                'domain'
+            );
+        }
+
         if ($onlineUser->isCurrentlyOnline()) {
             return ActionResult::success([
                 'status' => 'online',
@@ -106,5 +119,18 @@ class UpdateOnlineNowStatus
             'remaining_uses' => max(0, $maxUses - $onlineUser->usage_count),
             'expires_at' => null,
         ], 'Online Now disabled.');
+    }
+
+    private function isFreeListingExpiredWithNegativeBalance(ProviderProfile $profile): bool
+    {
+        $expiredAt = $profile->free_listing_expires_at;
+
+        if ($expiredAt !== null && $expiredAt->isFuture()) {
+            return false;
+        }
+
+        $profile->loadMissing('user');
+
+        return $profile->user !== null && $profile->user->credits < 0;
     }
 }

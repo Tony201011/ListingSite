@@ -3,6 +3,7 @@ document.addEventListener('alpine:init', () => {
         enabled: Boolean(config.initialStatus),
         remainingUses: Number(config.initialRemainingUses || 0),
         expiresAt: config.initialExpiresAt || null,
+        blockedBalance: Boolean(config.initialBlockedBalance),
         updateUrl: config.updateUrl || '',
         csrfToken: config.csrfToken || '',
 
