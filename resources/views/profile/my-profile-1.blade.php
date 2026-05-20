@@ -98,122 +98,114 @@
                     </div>
                 @endif
 
-                <div class="mb-6 space-y-1">
+                @php
+                    $activeStep = ! $stepOneCompleted
+                        ? 1
+                        : (! $stepTwoCompleted
+                            ? 2
+                            : (! $stepPhotoVerificationCompleted ? 3 : null));
+                @endphp
+
+                <div class="mb-6 space-y-3">
                     <div class="flex items-center justify-between border-b border-gray-200 py-3">
                         <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Action</span>
                         <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Completed</span>
                     </div>
 
-                    <div class="-mx-2 flex items-center justify-between rounded-lg px-2 py-4 transition hover:bg-gray-50">
-                        <div class="flex items-center">
-                            <span class="mr-4 text-lg font-semibold text-pink-600">01</span>
-                            <span class="font-medium text-gray-800">Write profile text</span>
+                    <div class="rounded-xl border px-4 py-4 transition-all duration-300 {{ $activeStep === 1 ? 'border-pink-300 bg-pink-50 shadow-sm shadow-pink-100' : ($stepOneCompleted ? 'border-green-200 bg-green-50/70' : 'border-gray-200 bg-gray-50') }}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="mr-4 text-lg font-semibold {{ $activeStep === 1 ? 'text-pink-600' : ($stepOneCompleted ? 'text-green-600' : 'text-gray-400') }}">01</span>
+                                <span class="font-medium {{ $activeStep === 1 ? 'text-pink-800' : ($stepOneCompleted ? 'text-green-700' : 'text-gray-500') }}">Write profile text</span>
+                            </div>
+
+                            @if($stepOneCompleted)
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-sm text-white">✓</span>
+                            @elseif($activeStep === 1)
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-pink-500 bg-white">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-pink-500"></span>
+                                </span>
+                            @else
+                                <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
+                            @endif
                         </div>
 
-                        @if($stepOneCompleted)
-                            <span class="text-2xl leading-none text-green-500">✓</span>
-                        @else
-                            <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
+                        @if($activeStep === 1)
+                            <a
+                                href="{{ route('edit-profile') }}"
+                                class="mt-4 inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
+                            >
+                                Write profile text
+                            </a>
                         @endif
                     </div>
 
-                    <div class="-mx-2 flex items-center justify-between rounded-lg px-2 py-4 transition hover:bg-gray-50">
-                        <div class="flex items-center">
-                            <span class="mr-4 text-lg font-semibold text-pink-600">02</span>
-                            <span class="font-medium text-gray-800">Upload photos</span>
+                    <div class="rounded-xl border px-4 py-4 transition-all duration-300 {{ $activeStep === 2 ? 'border-pink-300 bg-pink-50 shadow-sm shadow-pink-100' : ($stepTwoCompleted ? 'border-green-200 bg-green-50/70' : 'border-gray-200 bg-gray-50') }}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="mr-4 text-lg font-semibold {{ $activeStep === 2 ? 'text-pink-600' : ($stepTwoCompleted ? 'text-green-600' : 'text-gray-400') }}">02</span>
+                                <span class="font-medium {{ $activeStep === 2 ? 'text-pink-800' : ($stepTwoCompleted ? 'text-green-700' : 'text-gray-500') }}">Upload photos</span>
+                            </div>
+
+                            @if($stepTwoCompleted)
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-sm text-white">✓</span>
+                            @elseif($activeStep === 2)
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-pink-500 bg-white">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-pink-500"></span>
+                                </span>
+                            @else
+                                <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
+                            @endif
                         </div>
 
-                        @if($stepTwoCompleted)
-                            <span class="text-2xl leading-none text-green-500">✓</span>
-                        @else
-                            <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
+                        @if($activeStep === 2)
+                            <a
+                                href="{{ route('photos') }}"
+                                class="mt-4 inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
+                            >
+                                Upload photos
+                            </a>
                         @endif
                     </div>
 
-                    <div class="-mx-2 flex items-center justify-between rounded-lg px-2 py-4 transition hover:bg-gray-50">
-                        <div class="flex items-center">
-                            <span class="mr-4 text-lg font-semibold text-pink-600">03</span>
-                            <span class="font-medium text-gray-800">Verify your photos (optional)</span>
+                    <div class="rounded-xl border px-4 py-4 transition-all duration-300 {{ $activeStep === 3 ? 'border-pink-300 bg-pink-50 shadow-sm shadow-pink-100' : ($stepPhotoVerificationCompleted ? 'border-green-200 bg-green-50/70' : 'border-gray-200 bg-gray-50') }}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="mr-4 text-lg font-semibold {{ $activeStep === 3 ? 'text-pink-600' : ($stepPhotoVerificationCompleted ? 'text-green-600' : 'text-gray-400') }}">03</span>
+                                <span class="font-medium {{ $activeStep === 3 ? 'text-pink-800' : ($stepPhotoVerificationCompleted ? 'text-green-700' : 'text-gray-500') }}">Verify your photos (optional)</span>
+                            </div>
+
+                            @if($stepPhotoVerificationCompleted)
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-sm text-white">✓</span>
+                            @elseif($activeStep === 3)
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-pink-500 bg-white">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-pink-500"></span>
+                                </span>
+                            @else
+                                <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
+                            @endif
                         </div>
 
-                        @if($stepPhotoVerificationCompleted)
-                            <span class="text-2xl leading-none text-green-500">✓</span>
-                        @else
-                            <span class="inline-block h-6 w-6 rounded-full border-2 border-gray-300"></span>
+                        @if($activeStep === 3)
+                            <a
+                                href="{{ url('/verify-photo') }}"
+                                class="mt-4 inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
+                            >
+                                Verify photos
+                            </a>
                         @endif
                     </div>
                 </div>
 
-                <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                    @if($stepOneCompleted && $stepTwoCompleted)
-
-                        @if($stepPhotoVerificationCompleted)
-                            <a
-                                href="{{ url('/verify-photo') }}"
-                                class="text-sm text-gray-500 transition hover:text-gray-700"
-                            >
-                                edit your verified photos
-                            </a>
-                        @else
-                            <a
-                                href="{{ url('/verify-photo') }}"
-                                class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
-                            >
-                                Verified Photos Badges
-                            </a>
-                        @endif
-
-                        <a
-                            href="{{ route('edit-profile') }}"
-                            class="text-sm text-gray-500 transition hover:text-gray-700"
-                        >
-                            or edit your profile text
-                        </a>
-
-                        <a
-                            href="{{ route('photos') }}"
-                            class="text-sm text-gray-500 transition hover:text-gray-700"
-                        >
-                            or upload more photos
-                        </a>
-
-                    @elseif($stepOneCompleted)
-                        <a
-                            href="{{ route('photos') }}"
-                            class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
-                        >
-                            Upload photos
-                        </a>
-
-                        <a
-                            href="{{ route('edit-profile') }}"
-                            class="text-sm text-gray-500 transition hover:text-gray-700"
-                        >
-                            or edit your profile text
-                        </a>
-
-                    @elseif($stepTwoCompleted)
-                        <a
-                            href="{{ route('edit-profile') }}"
-                            class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
-                        >
-                            Complete profile text
-                        </a>
-
-                        <a
-                            href="{{ route('photos') }}"
-                            class="text-sm text-gray-500 transition hover:text-gray-700"
-                        >
-                            or manage photos
-                        </a>
-
-                    @elseif(!$stepOneCompleted && !$stepTwoCompleted && !$stepPhotoVerificationCompleted)
-                        <a
-                            href="{{ route('edit-profile') }}"
-                            class="inline-flex w-full transform items-center justify-center rounded-full border border-transparent bg-pink-600 px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-pink-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 sm:w-auto"
-                        >
-                            Write profile text
-                        </a>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                    @if($stepOneCompleted)
+                        <a href="{{ route('edit-profile') }}" class="transition hover:text-gray-700">Edit profile text</a>
+                    @endif
+                    @if($stepTwoCompleted)
+                        <a href="{{ route('photos') }}" class="transition hover:text-gray-700">Manage photos</a>
+                    @endif
+                    @if($stepPhotoVerificationCompleted)
+                        <a href="{{ url('/verify-photo') }}" class="transition hover:text-gray-700">Edit verified photos</a>
                     @endif
                 </div>
 
