@@ -454,9 +454,15 @@
                             @endif
                         @endauth
 
-                        <a href="{{ url('/change-password') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change password</a>
-                        <a href="{{ url('/change-email') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change email</a>
-                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
+                        @if($stepOneCompleted && $stepTwoCompleted)
+                            <a href="{{ url('/change-password') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change password</a>
+                            <a href="{{ url('/change-email') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change email</a>
+                            <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
+                        @else
+                            <p class="rounded-lg border border-dashed border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                                Complete steps 1 and 2 to access password, email, and account deletion actions.
+                            </p>
+                        @endif
                     </div>
                 </div>
             </div>
