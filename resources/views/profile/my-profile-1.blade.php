@@ -350,7 +350,7 @@
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ONLINE NOW</h3>
 
                     <p class="mb-4 text-sm text-gray-600">
-                        Use this feature up to {{ $statusSettings['online_status_max_uses'] }} {{ \Illuminate\Support\Str::plural('time', $statusSettings['online_status_max_uses']) }} a day for {{ format_clock_duration_from_minutes($statusSettings['online_status_duration_minutes']) }}.
+                        Mark yourself available for online enquiries and improve visibility.
                     </p>
 
                     <button

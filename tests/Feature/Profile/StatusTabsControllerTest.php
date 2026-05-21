@@ -52,7 +52,6 @@ class StatusTabsControllerTest extends TestCase
             ->once()
             ->andReturn([
                 'onlineStatus' => false,
-                'remainingUses' => 4,
                 'expiresAt' => null,
             ]);
 
@@ -81,7 +80,6 @@ class StatusTabsControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('profile.status-tabs');
         $response->assertViewHas('onlineStatus', false);
-        $response->assertViewHas('onlineRemainingUses', 4);
         $response->assertViewHas('onlineExpiresAt', null);
         $response->assertViewHas('availableStatus', false);
         $response->assertViewHas('availableRemainingUses', 2);

@@ -111,7 +111,7 @@
 
             <div class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">ONLINE NOW</h3>
-                <p class="text-sm text-gray-600 mb-4">Use this feature up to {{ $statusSettings['online_status_max_uses'] }} {{ \Illuminate\Support\Str::plural('time', $statusSettings['online_status_max_uses']) }} a day for {{ format_clock_duration_from_minutes($statusSettings['online_status_duration_minutes']) }}.</p>
+                <p class="text-sm text-gray-600 mb-4">Mark yourself available for online enquiries and improve visibility.</p>
                 <button @click="onlineNow = !onlineNow" class="w-full px-4 py-2 rounded-lg transition" :class="onlineNow ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" x-text="onlineNow ? 'Enabled' : 'Online NOW'"></button>
             </div>
 

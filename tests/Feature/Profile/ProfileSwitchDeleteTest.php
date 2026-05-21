@@ -118,7 +118,7 @@ class ProfileSwitchDeleteTest extends TestCase
         $getOnlineNowState = Mockery::mock(GetOnlineNowState::class);
         $getOnlineNowState->shouldReceive('execute')
             ->once()
-            ->andReturn(['onlineStatus' => false, 'remainingUses' => 0, 'expiresAt' => null]);
+            ->andReturn(['onlineStatus' => false, 'expiresAt' => null]);
 
         $this->app->instance(GetOnlineNowState::class, $getOnlineNowState);
 

@@ -1,14 +1,10 @@
 @extends('layouts.frontend')
 
 @section('content')
-@php
-    $statusSettings = \App\Models\SiteSetting::getStatusSettings();
-@endphp
 <div
     class="min-h-screen bg-gradient-to-b from-pink-50 via-white to-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="onlineNowToggle({
     initialStatus: @js((bool) $onlineStatus),
-    initialRemainingUses: @js($remainingUses),
     initialExpiresAt: @js($expiresAt ?? null),
     initialBlockedBalance: @js((bool) $blockedBalance),
     updateUrl: @js(route('online.update-status')),
@@ -42,19 +38,7 @@
             </div>
 
             <div class="p-6 sm:p-8">
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                        <p class="text-sm font-medium text-gray-500">Daily usage rule</p>
-                        <p class="mt-2 text-base font-semibold text-gray-900">
-                            Use this feature up to {{ $statusSettings['online_status_max_uses'] }} {{ \Illuminate\Support\Str::plural('time', $statusSettings['online_status_max_uses']) }} a day for {{ format_clock_duration_from_minutes($statusSettings['online_status_duration_minutes']) }}.
-                        </p>
-                    </div>
-
-                    <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                        <p class="text-sm font-medium text-gray-500">Remaining uses today</p>
-                        <p class="mt-2 text-2xl font-bold text-pink-600" x-text="remainingUses"></p>
-                    </div>
-                </div>
+                <div class="grid gap-4 sm:grid-cols-1">
 
                 <div
                     class="mt-4 rounded-2xl border border-green-100 bg-green-50 p-4"
@@ -74,7 +58,7 @@
                     <button
                         type="button"
                         @click="toggleStatus"
-                        :disabled="loading || (!enabled && remainingUses <= 0) || (!enabled && blockedBalance)"
+                        :disabled="loading || (!enabled && blockedBalance)"
                         class="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition duration-200 sm:w-auto"
                         :class="enabled
                             ? 'bg-pink-600 text-white hover:bg-pink-700'
@@ -104,14 +88,6 @@
                             : 'border-red-200 bg-red-50 text-red-700'"
                         x-text="message"
                     ></div>
-                </div>
-
-                <div
-                    class="mt-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800"
-                    x-show="!enabled && remainingUses <= 0"
-                    x-transition
-                >
-                    You have reached your daily limit for Online Now. Please try again tomorrow.
                 </div>
 
                 <div
