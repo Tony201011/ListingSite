@@ -5,6 +5,7 @@ namespace Tests\Feature\Profile;
 use App\Actions\GetOnlineNowState;
 use App\Actions\Support\ActionResult;
 use App\Actions\UpdateOnlineNowStatus;
+use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,6 +35,37 @@ class ProfileSwitchOnlineStatusTest extends TestCase
         }
 
         return [$user, $profiles];
+    }
+
+    private function markProfileAsComplete(ProviderProfile $profile): void
+    {
+        $profile->update([
+            'introduction_line' => 'Intro',
+            'profile_text' => 'Complete profile text',
+            'age_group_id' => 1,
+            'hair_color_id' => 1,
+            'hair_length_id' => 1,
+            'ethnicity_id' => 1,
+            'body_type_id' => 1,
+            'bust_size_id' => 1,
+            'your_length_id' => 1,
+            'availability' => 'available',
+            'contact_method' => 'phone',
+            'phone_contact_preference' => 'call',
+            'time_waster_shield' => 'enabled',
+            'primary_identity' => [1],
+            'attributes' => [1],
+            'services_style' => [1],
+            'services_provided' => [1],
+        ]);
+    }
+
+    private function addProfilePhoto(ProviderProfile $profile): void
+    {
+        ProfileImage::factory()->create([
+            'user_id' => $profile->user_id,
+            'provider_profile_id' => $profile->id,
+        ]);
     }
 
     public function test_my_profiles_index_includes_online_states(): void
@@ -75,6 +107,8 @@ class ProfileSwitchOnlineStatusTest extends TestCase
     {
         [$user, $profiles] = $this->createProviderWithProfiles(2);
         $profile = $profiles[1];
+        $this->markProfileAsComplete($profile);
+        $this->addProfilePhoto($profile);
 
         $updateOnlineNowStatus = Mockery::mock(UpdateOnlineNowStatus::class);
         $updateOnlineNowStatus->shouldReceive('execute')
@@ -127,6 +161,41 @@ class ProfileSwitchOnlineStatusTest extends TestCase
 
         $response->assertOk();
         $response->assertJson(['success' => true, 'status' => 'offline']);
+    }
+
+    public function test_owner_cannot_set_profile_online_when_profile_is_incomplete(): void
+    {
+        [$user, $profiles] = $this->createProviderWithProfiles(1);
+        $profile = $profiles[0];
+
+        $response = $this->actingAs($user)->postJson(
+            route('profiles.online-status', $profile),
+            ['status' => 'online']
+        );
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Please complete your profile in Edit Profile and upload at least one photo before going online.',
+        ]);
+    }
+
+    public function test_owner_cannot_set_profile_online_when_profile_has_no_photo(): void
+    {
+        [$user, $profiles] = $this->createProviderWithProfiles(1);
+        $profile = $profiles[0];
+        $this->markProfileAsComplete($profile);
+
+        $response = $this->actingAs($user)->postJson(
+            route('profiles.online-status', $profile),
+            ['status' => 'online']
+        );
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Please complete your profile in Edit Profile and upload at least one photo before going online.',
+        ]);
     }
 
     public function test_user_cannot_set_online_status_for_another_users_profile(): void
