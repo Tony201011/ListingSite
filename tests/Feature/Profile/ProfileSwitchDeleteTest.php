@@ -1,0 +1,100 @@
+<?php
+
+namespace Tests\Feature\Profile;
+
+use App\Models\ProviderProfile;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class ProfileSwitchDeleteTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_owner_can_delete_selected_profiles(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profileOne = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' One',
+            'slug' => 'provider-'.$user->id.'-one',
+        ]);
+        $profileTwo = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' Two',
+            'slug' => 'provider-'.$user->id.'-two',
+        ]);
+        $profileThree = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' Three',
+            'slug' => 'provider-'.$user->id.'-three',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profileTwo->id])
+            ->delete(route('profiles.destroy-selected'), [
+                'profile_ids' => [$profileOne->id, $profileTwo->id],
+            ]);
+
+        $response->assertRedirect(route('profiles.index'));
+        $response->assertSessionHas('success', '2 selected profiles deleted.');
+        $response->assertSessionHas('active_provider_profile_id', $profileThree->id);
+        $this->assertSoftDeleted('provider_profiles', ['id' => $profileOne->id]);
+        $this->assertSoftDeleted('provider_profiles', ['id' => $profileTwo->id]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $profileThree->id, 'deleted_at' => null]);
+    }
+
+    public function test_owner_cannot_delete_all_profiles_using_selected_delete(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profileOne = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' One',
+            'slug' => 'provider-'.$user->id.'-one',
+        ]);
+        $profileTwo = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' Two',
+            'slug' => 'provider-'.$user->id.'-two',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from(route('profiles.index'))
+            ->delete(route('profiles.destroy-selected'), [
+                'profile_ids' => [$profileOne->id, $profileTwo->id],
+            ]);
+
+        $response->assertRedirect(route('profiles.index'));
+        $response->assertSessionHasErrors('profile_ids');
+        $this->assertDatabaseHas('provider_profiles', ['id' => $profileOne->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $profileTwo->id, 'deleted_at' => null]);
+    }
+
+    public function test_owner_cannot_delete_other_users_profiles_using_selected_delete(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $ownProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' One',
+            'slug' => 'provider-'.$user->id.'-one',
+        ]);
+
+        $otherUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $otherProfile = ProviderProfile::query()->create([
+            'user_id' => $otherUser->id,
+            'name' => $otherUser->name.' One',
+            'slug' => 'provider-'.$otherUser->id.'-one',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from(route('profiles.index'))
+            ->delete(route('profiles.destroy-selected'), [
+                'profile_ids' => [$ownProfile->id, $otherProfile->id],
+            ]);
+
+        $response->assertRedirect(route('profiles.index'));
+        $response->assertSessionHasErrors('profile_ids');
+        $this->assertDatabaseHas('provider_profiles', ['id' => $ownProfile->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $otherProfile->id, 'deleted_at' => null]);
+    }
+}
