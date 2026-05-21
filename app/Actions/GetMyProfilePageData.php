@@ -39,9 +39,19 @@ class GetMyProfilePageData
                 ! empty($profile->services_provided);
         }
 
-        $stepTwoCompleted = $profile
-            ? $profile->profileImages()->whereNull('deleted_at')->count() > 0
-            : false;
+        $stepTwoCompleted = false;
+
+        if ($profile) {
+            $stepTwoCompleted = $profile->profileImages()
+                ->whereNull('deleted_at')
+                ->exists();
+        }
+
+        if (! $stepTwoCompleted && $user) {
+            $stepTwoCompleted = $user->profileImages()
+                ->whereNull('deleted_at')
+                ->exists();
+        }
 
         $stepPhotoVerificationCompleted = $profile
             ? $profile->photoVerification()
