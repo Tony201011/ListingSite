@@ -32,7 +32,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('account.destroy') }}" method="POST" class="space-y-5">
+            <form id="delete-account-form" action="{{ route('account.destroy') }}" method="POST" class="space-y-5">
                 @csrf
                 @method('DELETE')
 
@@ -73,7 +73,7 @@
                         type="submit"
                         class="inline-flex items-center px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition"
                     >
-                        Delete my account permanently
+                        Send account delete email
                     </button>
 
                     <a href="{{ route('contact-us') }}" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-[#e04ecb] hover:bg-[#c13ab0] text-white text-sm font-semibold transition">
@@ -89,3 +89,42 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            const deleteForm = document.getElementById('delete-account-form');
+
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', async function (event) {
+                    event.preventDefault();
+
+                    const result = await Swal.fire({
+                        title: 'Send delete confirmation email?',
+                        text: 'We will send a secure confirmation link to your email. Your account will be deleted only after you click that link.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Send email',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#dc2626',
+                    });
+
+                    if (result.isConfirmed) {
+                        deleteForm.submit();
+                    }
+                });
+            }
+        })();
+    </script>
+
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Email sent',
+                text: @json(session('success')),
+                confirmButtonColor: '#db2777',
+            });
+        </script>
+    @endif
+@endpush

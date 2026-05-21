@@ -80,6 +80,10 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
     ->middleware(['signed'])
     ->name('verification.verify');
 
+Route::get('/delete-account/confirm/{id}/{hash}', [AccountController::class, 'confirmDestroy'])
+    ->middleware(['signed'])
+    ->name('account.confirm-destroy');
+
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
     ->middleware(['auth:web', 'throttle:'.config('security.throttles.verification_send', '6,1')])
     ->name('verification.send');
