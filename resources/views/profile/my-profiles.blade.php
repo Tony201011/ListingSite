@@ -158,31 +158,6 @@
                                     </div>
 
                                     <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
-                                        {{-- Online Now toggle (only available for approved profiles) --}}
-                                        @if($profile->profile_status === 'approved')
-                                            <div class="flex flex-col items-start gap-1 sm:items-end">
-                                                <button
-                                                    type="button"
-                                                    @click="toggleOnline"
-                                                    :disabled="loading || (!online && remainingUses <= 0)"
-                                                    class="w-full rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition sm:w-auto"
-                                                    :class="online
-                                                        ? 'bg-green-600 text-white hover:bg-green-700'
-                                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50'"
-                                                >
-                                                    <span x-show="loading" class="flex items-center gap-1">
-                                                        <svg class="h-3 w-3 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                                        </svg>
-                                                    </span>
-                                                    <span x-show="!loading" x-text="online ? 'Online Now' : 'Go Online'"></span>
-                                                </button>
-                                                <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00:00'" x-text="countdown" aria-label="Time remaining" aria-live="polite"></span>
-                                                <span class="text-xs text-gray-400" x-show="!online" x-text="remainingUses + ' uses left'"></span>
-                                            </div>
-                                        @endif
-
                                         {{-- Edit / Switch / Delete buttons always on one row --}}
                                         <div class="flex flex-row flex-wrap items-center gap-2">
                                             <form method="POST" action="{{ route('profiles.switch-edit', $profile) }}">
