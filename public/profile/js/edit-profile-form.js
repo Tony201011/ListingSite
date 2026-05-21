@@ -2,8 +2,8 @@
 const editorInstances = new Map();
 const IMAGE_LOAD_TIMEOUT_MS = 8000;
 
-window.editProfileForm = function (config = {}) {
-    return {
+document.addEventListener('alpine:init', () => {
+    Alpine.data('editProfileForm', (config = {}) => ({
         name: config.initial?.name || '',
         email: config.initial?.email || '',
         phone: config.initial?.phone || '',
@@ -40,66 +40,13 @@ window.editProfileForm = function (config = {}) {
         suburbSelected: Boolean(config.initial?.suburbSelected),
 
         submitting: false,
-        fieldErrors: {},
+        errors: Array.isArray(config.initial?.serverErrors) ? config.initial.serverErrors : [],
 
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
 
         init() {
-            this.fieldErrors = this.normalizeErrors(config.initial?.serverErrors);
-
-            if (typeof window.Quill === 'undefined') {
-                console.warn('Quill is not available; continuing without rich text editors.');
-                return;
-            }
-
             this.initEditors();
-        },
-
-        normalizeErrors(rawErrors) {
-            if (!rawErrors || typeof rawErrors !== 'object') {
-                return {};
-            }
-
-            if (Array.isArray(rawErrors)) {
-                return rawErrors.length > 0 ? { _form: rawErrors } : {};
-            }
-
-            return Object.entries(rawErrors).reduce((carry, [field, messages]) => {
-                if (Array.isArray(messages) && messages.length > 0) {
-                    carry[field] = messages;
-                } else if (typeof messages === 'string' && messages.trim() !== '') {
-                    carry[field] = [messages];
-                }
-
-                return carry;
-            }, {});
-        },
-
-        hasFieldError(field) {
-            if (Array.isArray(this.fieldErrors[field]) && this.fieldErrors[field].length > 0) {
-                return true;
-            }
-
-            return Object.entries(this.fieldErrors).some(([key, messages]) => (
-                key.startsWith(`${field}.`) &&
-                Array.isArray(messages) &&
-                messages.length > 0
-            ));
-        },
-
-        getFieldError(field) {
-            if (Array.isArray(this.fieldErrors[field]) && this.fieldErrors[field].length > 0) {
-                return this.fieldErrors[field][0];
-            }
-
-            const nestedError = Object.entries(this.fieldErrors).find(([key, messages]) => (
-                key.startsWith(`${field}.`) &&
-                Array.isArray(messages) &&
-                messages.length > 0
-            ));
-
-            return nestedError ? nestedError[1][0] : '';
         },
 
         getEditor(key) {
@@ -125,10 +72,6 @@ window.editProfileForm = function (config = {}) {
         },
 
         createEditor(elementId, modelKey, placeholder, options = {}) {
-            if (typeof window.Quill === 'undefined') {
-                return;
-            }
-
             const element = document.querySelector(`#${elementId}`);
 
             if (!element || editorInstances.has(elementId)) {
@@ -429,42 +372,37 @@ window.editProfileForm = function (config = {}) {
         },
 
         validate() {
-            const errors = {};
-            const setFieldError = (field, message) => {
-                if (!errors[field]) {
-                    errors[field] = [message];
-                }
-            };
+            const errors = [];
 
-            if (!this.name.trim()) setFieldError('name', 'Profile name is required.');
+            if (!this.name.trim()) errors.push('Profile name is required.');
 
             if (!this.suburb.trim()) {
-                setFieldError('suburb', 'Suburb is required.');
+                errors.push('Suburb is required.');
             } else if (!this.suburbSelected) {
-                setFieldError('suburb', 'Please choose a location from the dropdown list, which appears while typing.');
+                errors.push('Please choose a location from the dropdown list, which appears while typing.');
             }
 
             const plainIntroductionLine = this.stripHtml(this.introduction_line);
-            if (!plainIntroductionLine) setFieldError('introduction_line', 'Introduction line is required.');
+            if (!plainIntroductionLine) errors.push('Introduction line is required.');
 
             const plainProfileText = this.stripHtml(this.profile_text);
-            if (!plainProfileText) setFieldError('profile_text', 'Profile text is required.');
+            if (!plainProfileText) errors.push('Profile text is required.');
 
-            if (!this.age_group) setFieldError('age_group', 'Age group is required.');
-            if (!this.hair_color) setFieldError('hair_color', 'Hair color is required.');
-            if (!this.hair_length) setFieldError('hair_length', 'Hair length is required.');
-            if (!this.ethnicity) setFieldError('ethnicity', 'Ethnicity is required.');
-            if (!this.body_type) setFieldError('body_type', 'Body type is required.');
-            if (!this.bust_size) setFieldError('bust_size', 'Bust size is required.');
-            if (!this.your_length) setFieldError('your_length', 'Your length is required.');
-            if (this.primaryIdentity.length === 0) setFieldError('primary_identity', 'Primary identity is required.');
-            if (this.attributes.length === 0) setFieldError('attributes', 'Attributes are required.');
-            if (this.servicesStyle.length === 0) setFieldError('services_style', 'Services & style are required.');
-            if (this.services_provided.length === 0) setFieldError('services_provided', 'Services provided are required.');
-            if (!this.availability) setFieldError('availability', 'Availability is required.');
-            if (!this.contact_method) setFieldError('contact_method', 'Contact method is required.');
-            if (!this.phone_contact) setFieldError('phone_contact', 'Phone contact preference is required.');
-            if (!this.time_waster) setFieldError('time_waster', 'Time waster shield preference is required.');
+            if (!this.age_group) errors.push('Age group is required.');
+            if (!this.hair_color) errors.push('Hair color is required.');
+            if (!this.hair_length) errors.push('Hair length is required.');
+            if (!this.ethnicity) errors.push('Ethnicity is required.');
+            if (!this.body_type) errors.push('Body type is required.');
+            if (!this.bust_size) errors.push('Bust size is required.');
+            if (!this.your_length) errors.push('Your length is required.');
+            if (this.primaryIdentity.length === 0) errors.push('Primary identity is required.');
+            if (this.attributes.length === 0) errors.push('Attributes are required.');
+            if (this.servicesStyle.length === 0) errors.push('Services & style are required.');
+            if (this.services_provided.length === 0) errors.push('Services provided are required.');
+            if (!this.availability) errors.push('Availability is required.');
+            if (!this.contact_method) errors.push('Contact method is required.');
+            if (!this.phone_contact) errors.push('Phone contact preference is required.');
+            if (!this.time_waster) errors.push('Time waster shield preference is required.');
 
             return errors;
         },
@@ -489,26 +427,15 @@ window.editProfileForm = function (config = {}) {
         },
 
         scrollToErrors() {
-            this.$nextTick(() => {
-                const visibleError = document.querySelector(
-                    'p.text-red-600:not([x-cloak]):not([style*="display: none"])'
-                );
-
-                if (visibleError) {
-                    visibleError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    return;
-                }
-
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
+            this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
         },
 
         async submitForm() {
             this.syncHiddenEditorInputs();
 
-            this.fieldErrors = this.validate();
+            this.errors = this.validate();
 
-            if (Object.keys(this.fieldErrors).length > 0) {
+            if (this.errors.length > 0) {
                 this.scrollToErrors();
                 return;
             }
@@ -566,31 +493,23 @@ window.editProfileForm = function (config = {}) {
                 }
 
                 if (response.ok) {
-                    this.fieldErrors = {};
+                    this.errors = [];
                     this.toast(data.message || 'Profile updated successfully.');
                 } else if (response.status === 422) {
-                    this.fieldErrors = this.normalizeErrors(data.errors || {});
+                    const messages = Object.values(data.errors || {}).flat();
+                    this.errors = messages.length ? messages : ['Validation failed.'];
                     this.scrollToErrors();
                 } else {
-                    this.fieldErrors = {};
+                    this.errors = [];
                     this.error(data.message || 'Unable to save profile. Please try again later.');
                 }
             } catch (error) {
                 console.error('Profile submit error:', error);
-                this.fieldErrors = {};
+                this.errors = [];
                 this.error('Unable to save profile. Please check your connection and try again.');
             } finally {
                 this.submitting = false;
             }
         }
-    };
-};
-
-const registerEditProfileForm = () => {
-    if (window.Alpine?.data) {
-        window.Alpine.data('editProfileForm', window.editProfileForm);
-    }
-};
-
-registerEditProfileForm();
-document.addEventListener('alpine:init', registerEditProfileForm);
+    }));
+});
