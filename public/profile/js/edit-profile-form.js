@@ -586,6 +586,11 @@ window.editProfileForm = function (config = {}) {
     };
 };
 
-document.addEventListener('alpine:init', () => {
-    Alpine.data('editProfileForm', window.editProfileForm);
-});
+const registerEditProfileForm = () => {
+    if (window.Alpine?.data) {
+        window.Alpine.data('editProfileForm', window.editProfileForm);
+    }
+};
+
+registerEditProfileForm();
+document.addEventListener('alpine:init', registerEditProfileForm);
