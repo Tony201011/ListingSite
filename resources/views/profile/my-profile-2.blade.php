@@ -9,7 +9,7 @@
 @section('content')
 <div
     class="bg-white min-h-screen py-10 px-4"
-    x-data="window.editProfileForm({
+    x-data="editProfileForm({
         initial: {
             name: @js(old('name', $profile_name ?? '')),
             email: @js(old('email', $user->email ?? '')),
@@ -41,7 +41,7 @@
             onlyfans_username: @js(old('onlyfans_username', $profile->onlyfans_username ?? '')),
 
             suburbSelected: @js((bool) old('suburb', $profile->suburb ?? '')),
-            serverErrors: @js($errors->toArray()),
+            serverErrors: @js($errors->all()),
         },
         submitUrl: @js(url()->current()),
         csrfToken: @js(csrf_token())
@@ -63,6 +63,28 @@
         <form method="POST" @submit.prevent="submitForm" id="editProfileForm" class="space-y-8">
             @csrf
 
+            @if ($errors->any())
+                <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
+                    <p class="font-semibold">Please fix the following errors:</p>
+                    <ul class="mt-2 list-disc list-inside text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <template x-if="errors.length > 0">
+                <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
+                    <p class="font-semibold">Please fix the following errors:</p>
+                    <ul class="mt-2 list-disc list-inside text-sm">
+                        <template x-for="(error, index) in errors" :key="index">
+                            <li x-text="error"></li>
+                        </template>
+                    </ul>
+                </div>
+            </template>
+
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-6">Basic information</h2>
 
@@ -76,7 +98,6 @@
                             class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
                             placeholder="e.g. Jenny"
                         >
-                        <p x-cloak x-show="hasFieldError('name')" x-text="getFieldError('name')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -131,7 +152,6 @@
                         </div>
 
                         <p class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
-                        <p x-cloak x-show="hasFieldError('suburb')" x-text="getFieldError('suburb')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -161,7 +181,6 @@
                         id="introduction_line_editor"
                         class="w-full"
                     ></div>
-                    <p x-cloak x-show="hasFieldError('introduction_line')" x-text="getFieldError('introduction_line')" class="mt-1 text-sm font-medium text-red-600"></p>
                 </div>
             </div>
 
@@ -194,7 +213,6 @@
                     id="profile_text_editor"
                     class="w-full"
                 ></div>
-                <p x-cloak x-show="hasFieldError('profile_text')" x-text="getFieldError('profile_text')" class="mt-1 text-sm font-medium text-red-600"></p>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -209,7 +227,6 @@
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-cloak x-show="hasFieldError('age_group')" x-text="getFieldError('age_group')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -220,7 +237,6 @@
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-cloak x-show="hasFieldError('hair_color')" x-text="getFieldError('hair_color')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -231,7 +247,6 @@
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-cloak x-show="hasFieldError('hair_length')" x-text="getFieldError('hair_length')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -242,7 +257,6 @@
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-cloak x-show="hasFieldError('ethnicity')" x-text="getFieldError('ethnicity')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -253,7 +267,6 @@
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-cloak x-show="hasFieldError('body_type')" x-text="getFieldError('body_type')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -264,7 +277,6 @@
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-cloak x-show="hasFieldError('bust_size')" x-text="getFieldError('bust_size')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -275,7 +287,6 @@
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-cloak x-show="hasFieldError('your_length')" x-text="getFieldError('your_length')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -298,7 +309,6 @@
                                 </span>
                             @endforeach
                         </div>
-                        <p x-cloak x-show="hasFieldError('primary_identity')" x-text="getFieldError('primary_identity')" class="mt-2 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -314,7 +324,6 @@
                                 </span>
                             @endforeach
                         </div>
-                        <p x-cloak x-show="hasFieldError('attributes')" x-text="getFieldError('attributes')" class="mt-2 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -330,7 +339,6 @@
                                 </span>
                             @endforeach
                         </div>
-                        <p x-cloak x-show="hasFieldError('services_style')" x-text="getFieldError('services_style')" class="mt-2 text-sm font-medium text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -354,7 +362,6 @@
                         </label>
                     @endforeach
                 </div>
-                <p x-cloak x-show="hasFieldError('services_provided')" x-text="getFieldError('services_provided')" class="mt-2 text-sm font-medium text-red-600"></p>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -371,7 +378,6 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p x-cloak x-show="hasFieldError('availability')" x-text="getFieldError('availability')" class="mt-2 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -385,7 +391,6 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p x-cloak x-show="hasFieldError('contact_method')" x-text="getFieldError('contact_method')" class="mt-2 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -398,7 +403,6 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p x-cloak x-show="hasFieldError('phone_contact')" x-text="getFieldError('phone_contact')" class="mt-2 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
@@ -411,7 +415,6 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p x-cloak x-show="hasFieldError('time_waster')" x-text="getFieldError('time_waster')" class="mt-2 text-sm font-medium text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -428,7 +431,6 @@
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-1">Website</label>
                         <input name="website" type="text" x-model="website" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
-                        <p x-cloak x-show="hasFieldError('website')" x-text="getFieldError('website')" class="mt-1 text-sm font-medium text-red-600"></p>
                     </div>
 
                     <div>
