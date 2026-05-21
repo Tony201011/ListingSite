@@ -47,6 +47,12 @@ window.editProfileForm = function (config = {}) {
 
         init() {
             this.fieldErrors = this.normalizeErrors(config.initial?.serverErrors);
+
+            if (typeof window.Quill === 'undefined') {
+                console.warn('Quill is not available; continuing without rich text editors.');
+                return;
+            }
+
             this.initEditors();
         },
 
@@ -119,6 +125,10 @@ window.editProfileForm = function (config = {}) {
         },
 
         createEditor(elementId, modelKey, placeholder, options = {}) {
+            if (typeof window.Quill === 'undefined') {
+                return;
+            }
+
             const element = document.querySelector(`#${elementId}`);
 
             if (!element || editorInstances.has(elementId)) {
