@@ -37,10 +37,21 @@ document.addEventListener('alpine:init', () => {
         updateCountdown() {
             if (!this.expiresAt) {
                 this.countdown = '00:00:00';
+                this.stopTimer();
                 return;
             }
 
-            const diff = new Date(this.expiresAt).getTime() - Date.now();
+            const expiry = new Date(this.expiresAt).getTime();
+            if (!Number.isFinite(expiry)) {
+                this.online = false;
+                this.expiresAt = null;
+                this.countdown = '00:00:00';
+                this.stopTimer();
+                this.showMessage('Session ended.', 'error');
+                return;
+            }
+
+            const diff = expiry - Date.now();
 
             if (diff <= 0) {
                 this.online = false;

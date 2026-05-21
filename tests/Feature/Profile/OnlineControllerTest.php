@@ -8,8 +8,10 @@ use App\Actions\UpdateOnlineNowStatus;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Mockery;
 use Tests\TestCase;
 
@@ -95,6 +97,31 @@ class OnlineControllerTest extends TestCase
             'message' => 'Online Now enabled for 01:00:00.',
             'status' => 'online',
         ]);
+    }
+
+    public function test_update_status_to_online_uses_default_duration_when_setting_is_invalid(): void
+    {
+        Carbon::setTestNow('2026-05-21 11:00:00');
+
+        try {
+            SiteSetting::query()->create([
+                'online_status_duration_minutes' => 0,
+            ]);
+
+            $user = $this->createProvider();
+
+            $response = $this->actingAs($user)->postJson(route('online.update-status'), [
+                'status' => 'online',
+            ]);
+
+            $response->assertOk();
+            $response->assertJsonPath('success', true);
+            $response->assertJsonPath('status', 'online');
+            $response->assertJsonPath('message', 'Online Now enabled for 01:00:00.');
+            $response->assertJsonPath('expires_at', '2026-05-21T12:00:00+00:00');
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_update_status_to_offline_returns_json_response(): void
