@@ -10,6 +10,7 @@ use App\Actions\Auth\SigninProvider;
 use App\Actions\Auth\SignupProvider;
 use App\Actions\Auth\VerifyProviderSignupOtp;
 use App\Actions\Support\ActionResult;
+use App\Http\Middleware\CheckProfileSteps;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -208,6 +209,8 @@ class ProviderRegisterControllerTest extends TestCase
 
     public function test_change_password_returns_view(): void
     {
+        $this->withoutMiddleware(CheckProfileSteps::class);
+
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get(route('change-password'));
@@ -218,6 +221,8 @@ class ProviderRegisterControllerTest extends TestCase
 
     public function test_update_password_returns_json_response_from_action(): void
     {
+        $this->withoutMiddleware(CheckProfileSteps::class);
+
         $user = User::factory()->create();
 
         $changeProviderPassword = Mockery::mock(ChangeProviderPassword::class);
