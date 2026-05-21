@@ -170,6 +170,7 @@ Route::middleware('provider.auth')->group(function () {
     // Profile management — no active-profile session required
     Route::get('/my-profiles', [ProfileSwitchController::class, 'index'])->name('profiles.index');
     Route::post('/my-profiles', [ProfileSwitchController::class, 'store'])->name('profiles.store');
+    Route::delete('/my-profiles/delete-selected', [ProfileSwitchController::class, 'destroySelected'])->name('profiles.destroy-selected');
     Route::post('/my-profiles/{profile}/switch', [ProfileSwitchController::class, 'switchTo'])->name('profiles.switch');
     Route::post('/my-profiles/{profile}/switch-edit', [ProfileSwitchController::class, 'switchToEdit'])->name('profiles.switch-edit');
     Route::post('/my-profiles/{profile}/online-status', [ProfileSwitchController::class, 'updateOnlineStatus'])->name('profiles.online-status');

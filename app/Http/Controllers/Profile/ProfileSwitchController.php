@@ -145,6 +145,60 @@ class ProfileSwitchController extends Controller
             ->with('success', 'Profile deleted.');
     }
 
+    public function destroySelected(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'profile_ids' => ['required', 'array', 'min:1'],
+            'profile_ids.*' => ['integer', 'distinct'],
+        ], [
+            'profile_ids.required' => 'Select at least one profile to delete.',
+        ]);
+
+        $selectedIds = collect($validated['profile_ids'])
+            ->map(fn (mixed $id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $ownedIds = $user->providerProfiles()
+            ->whereIn('id', $selectedIds)
+            ->pluck('id');
+
+        if ($ownedIds->count() !== $selectedIds->count()) {
+            return back()->withErrors([
+                'profile_ids' => 'You can only delete your own selected profiles.',
+            ]);
+        }
+
+        $totalProfiles = $user->providerProfiles()->count();
+        if ($ownedIds->count() >= $totalProfiles) {
+            return back()->withErrors([
+                'profile_ids' => 'You must keep at least one profile. To remove everything, delete your account.',
+            ]);
+        }
+
+        $activeProfileId = (int) session('active_provider_profile_id');
+        if ($activeProfileId !== 0 && $ownedIds->contains($activeProfileId)) {
+            $newActive = $user->providerProfiles()
+                ->whereNotIn('id', $ownedIds)
+                ->orderBy('id')
+                ->first();
+
+            session(['active_provider_profile_id' => $newActive?->id]);
+        }
+
+        ProviderProfile::query()
+            ->where('user_id', $user->id)
+            ->whereIn('id', $ownedIds)
+            ->delete();
+
+        $deletedCount = $ownedIds->count();
+
+        return redirect()->route('profiles.index')
+            ->with('success', $deletedCount === 1 ? 'Selected profile deleted.' : "{$deletedCount} selected profiles deleted.");
+    }
+
     private function authorizeProfileOwnership(ProviderProfile $profile): void
     {
         if ($profile->user_id !== Auth::id()) {

@@ -27,6 +27,39 @@
             </div>
         @endif
 
+        @if($errors->any())
+            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                <ul class="list-disc space-y-1 pl-5">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if($profiles->count() > 1)
+            <form
+                id="delete-selected-profiles-form"
+                method="POST"
+                action="{{ route('profiles.destroy-selected') }}"
+                class="mb-4 flex flex-col gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                x-data
+                @submit.prevent="if (confirm('Delete selected profiles? This cannot be undone.')) $el.submit()"
+            >
+                @csrf
+                @method('DELETE')
+                <p class="text-sm text-rose-800">
+                    Select specific profiles below, then delete only the selected ones.
+                </p>
+                <button
+                    type="submit"
+                    class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+                >
+                    Delete selected profiles
+                </button>
+            </form>
+        @endif
+
         <div
             class="mb-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
             x-data="{
@@ -57,6 +90,19 @@
                             >
                                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div class="flex min-w-0 items-center gap-3">
+                                        @if($profiles->count() > 1)
+                                            <label class="inline-flex items-center gap-2 text-xs font-medium text-gray-600">
+                                                <input
+                                                    type="checkbox"
+                                                    name="profile_ids[]"
+                                                    value="{{ $profile->id }}"
+                                                    form="delete-selected-profiles-form"
+                                                    class="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
+                                                >
+                                                Select
+                                            </label>
+                                        @endif
+
                                         {{-- Profile avatar --}}
                                         <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-gray-200">
                                             @if($profile->primaryProfileImage?->thumbnail_url)
@@ -225,6 +271,13 @@
                 >
                     + Create New Profile
                 </button>
+
+                <a
+                    href="{{ route('account.delete-page') }}"
+                    class="mt-3 inline-flex w-full items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-6 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 sm:mt-0 sm:ml-2 sm:w-auto"
+                >
+                    Delete account altogether
+                </a>
 
             </div>
 
