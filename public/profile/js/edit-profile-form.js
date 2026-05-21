@@ -479,7 +479,18 @@ document.addEventListener('alpine:init', () => {
         },
 
         scrollToErrors() {
-            this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            this.$nextTick(() => {
+                const visibleError = document.querySelector(
+                    'p.text-red-600:not([x-cloak]):not([style*="display: none"])'
+                );
+
+                if (visibleError) {
+                    visibleError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
         },
 
         async submitForm() {
