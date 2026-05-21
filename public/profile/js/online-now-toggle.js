@@ -1,7 +1,6 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('onlineNowToggle', (config = {}) => ({
         enabled: Boolean(config.initialStatus),
-        remainingUses: Number(config.initialRemainingUses || 0),
         expiresAt: config.initialExpiresAt || null,
         blockedBalance: Boolean(config.initialBlockedBalance),
         updateUrl: config.updateUrl || '',
@@ -106,7 +105,6 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.enabled = data.status === 'online';
-                this.remainingUses = data.remaining_uses ?? this.remainingUses;
                 this.expiresAt = data.expires_at ?? null;
 
                 if (this.enabled && this.expiresAt) {

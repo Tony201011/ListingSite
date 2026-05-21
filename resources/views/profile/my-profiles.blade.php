@@ -74,13 +74,12 @@
                 @else
                     <div class="mb-6 space-y-3">
                         @foreach($profiles as $profile)
-                            @php $state = $onlineStates[$profile->id] ?? ['onlineStatus' => false, 'remainingUses' => 0, 'expiresAt' => null]; @endphp
+                            @php $state = $onlineStates[$profile->id] ?? ['onlineStatus' => false, 'expiresAt' => null]; @endphp
                             <div
                                 class="rounded-xl border border-gray-100 bg-gray-50 px-4 py-4 transition hover:bg-gray-100"
                                 x-data="profileOnlineToggle({
                                     profileId: @js($profile->id),
                                     initialStatus: @js((bool) $state['onlineStatus']),
-                                    initialRemainingUses: @js($state['remainingUses']),
                                     initialExpiresAt: @js($state['expiresAt'] ?? null),
                                     updateUrl: @js(route('profiles.online-status', $profile)),
                                     csrfToken: @js(csrf_token())
@@ -164,7 +163,7 @@
                                                 <button
                                                     type="button"
                                                     @click="toggleOnline"
-                                                    :disabled="loading || (!online && remainingUses <= 0)"
+                                                    :disabled="loading"
                                                     class="w-full rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition sm:w-auto"
                                                     :class="online
                                                         ? 'bg-green-600 text-white hover:bg-green-700'
@@ -179,7 +178,6 @@
                                                     <span x-show="!loading" x-text="online ? 'Online Now' : 'Go Online'"></span>
                                                 </button>
                                                 <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00:00'" x-text="countdown" aria-label="Time remaining" aria-live="polite"></span>
-                                                <span class="text-xs text-gray-400" x-show="!online" x-text="remainingUses + ' uses left'"></span>
                                             </div>
                                         @endif
 

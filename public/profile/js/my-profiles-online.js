@@ -1,7 +1,6 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('profileOnlineToggle', (config = {}) => ({
         online: Boolean(config.initialStatus),
-        remainingUses: Number(config.initialRemainingUses || 0),
         expiresAt: config.initialExpiresAt || null,
         updateUrl: config.updateUrl || '',
         csrfToken: config.csrfToken || '',
@@ -86,7 +85,6 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.online = data.status === 'online';
-                this.remainingUses = data.remaining_uses ?? this.remainingUses;
                 this.expiresAt = data.expires_at ?? null;
 
                 if (this.online && this.expiresAt) {

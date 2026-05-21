@@ -4,22 +4,17 @@ namespace App\Actions;
 
 use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
-use App\Models\SiteSetting;
 
 class GetOnlineNowState
 {
     public function execute(?ProviderProfile $profile): array
     {
-        $settings = SiteSetting::getStatusSettings();
-        $maxUses = $settings['online_status_max_uses'];
-
         $onlineStatus = false;
-        $remainingUses = $maxUses;
         $expiresAt = null;
         $blockedBalance = false;
 
         if (! $profile) {
-            return compact('onlineStatus', 'remainingUses', 'expiresAt', 'blockedBalance');
+            return compact('onlineStatus', 'expiresAt', 'blockedBalance');
         }
 
         $onlineUser = $this->getOrCreateOnlineUser($profile->id);
@@ -31,11 +26,10 @@ class GetOnlineNowState
         }
 
         $onlineStatus = $onlineUser->isCurrentlyOnline();
-        $remainingUses = max(0, $maxUses - $onlineUser->usage_count);
         $expiresAt = optional($onlineUser->online_expires_at)?->toIso8601String();
         $blockedBalance = $this->isFreeListingExpiredWithNegativeBalance($profile);
 
-        return compact('onlineStatus', 'remainingUses', 'expiresAt', 'blockedBalance');
+        return compact('onlineStatus', 'expiresAt', 'blockedBalance');
     }
 
     private function getOrCreateOnlineUser(int $profileId): OnlineUser

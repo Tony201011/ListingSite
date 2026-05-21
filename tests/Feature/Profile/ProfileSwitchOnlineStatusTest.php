@@ -75,7 +75,7 @@ class ProfileSwitchOnlineStatusTest extends TestCase
         $getOnlineNowState = Mockery::mock(GetOnlineNowState::class);
         $getOnlineNowState->shouldReceive('execute')
             ->twice()
-            ->andReturn(['onlineStatus' => false, 'remainingUses' => 4, 'expiresAt' => null]);
+            ->andReturn(['onlineStatus' => false, 'expiresAt' => null]);
 
         $this->app->instance(GetOnlineNowState::class, $getOnlineNowState);
 
@@ -92,7 +92,7 @@ class ProfileSwitchOnlineStatusTest extends TestCase
         $getOnlineNowState = Mockery::mock(GetOnlineNowState::class);
         $getOnlineNowState->shouldReceive('execute')
             ->twice()
-            ->andReturn(['onlineStatus' => true, 'remainingUses' => 3, 'expiresAt' => null]);
+            ->andReturn(['onlineStatus' => true, 'expiresAt' => null]);
 
         $this->app->instance(GetOnlineNowState::class, $getOnlineNowState);
 
@@ -119,7 +119,6 @@ class ProfileSwitchOnlineStatusTest extends TestCase
             )
             ->andReturn(ActionResult::success([
                 'status' => 'online',
-                'remaining_uses' => 3,
                 'expires_at' => '2026-04-28T10:00:00+00:00',
             ], 'Online Now enabled for 01:00:00.'));
 
@@ -148,7 +147,6 @@ class ProfileSwitchOnlineStatusTest extends TestCase
             )
             ->andReturn(ActionResult::success([
                 'status' => 'offline',
-                'remaining_uses' => 4,
                 'expires_at' => null,
             ], 'Online Now disabled.'));
 

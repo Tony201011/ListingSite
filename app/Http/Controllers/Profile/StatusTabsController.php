@@ -31,13 +31,11 @@ class StatusTabsController extends Controller
 
         return view('profile.status-tabs', [
             'onlineStatus' => $onlineData['onlineStatus'],
-            'onlineRemainingUses' => $onlineData['remainingUses'],
             'onlineExpiresAt' => $onlineData['expiresAt'],
             'availableStatus' => $availableData['status'],
             'availableRemainingUses' => $availableData['remainingUses'],
             'availableExpiresAt' => $availableData['expiresAt'],
             'visibilityStatus' => $visibilityData['status'],
-            'onlineMaxUses' => $statusSettings['online_status_max_uses'],
             'onlineDurationMinutes' => $statusSettings['online_status_duration_minutes'],
             'availableMaxUses' => $statusSettings['available_now_max_uses'],
             'availableDurationMinutes' => $statusSettings['available_now_duration_minutes'],
