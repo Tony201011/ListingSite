@@ -439,25 +439,7 @@
                         </div>
                     @endif
 
-                    <div class="space-y-2">
-                        @auth
-                            @if (!auth()->user()->hasVerifiedEmail())
-                                <form method="POST" action="{{ route('verification.send') }}">
-                                    @csrf
-                                    <button
-                                        type="submit"
-                                        class="block w-full rounded-lg bg-blue-50 px-4 py-2 text-center text-blue-700 transition hover:bg-blue-100"
-                                    >
-                                        Verify email
-                                    </button>
-                                </form>
-                            @endif
-                        @endauth
 
-                        <a href="{{ url('/change-password') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change password</a>
-                        <a href="{{ url('/change-email') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change email</a>
-                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
-                    </div>
                 </div>
             </div>
 
@@ -479,6 +461,26 @@
         @endif
     </div>
 </div>
+
+                    <div class="space-y-2">
+                        @auth
+                            @if (!auth()->user()->hasVerifiedEmail())
+                                <form method="POST" action="{{ route('verification.send') }}">
+                                    @csrf
+                                    <button
+                                        type="submit"
+                                        class="block w-full rounded-lg bg-blue-50 px-4 py-2 text-center text-blue-700 transition hover:bg-blue-100"
+                                    >
+                                        Verify email
+                                    </button>
+                                </form>
+                            @endif
+                        @endauth
+
+                        <a href="{{ url('/change-password') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change password</a>
+                        <a href="{{ url('/change-email') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change email</a>
+                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
+                    </div>
 @endsection
 
 @push('scripts')
