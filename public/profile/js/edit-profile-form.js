@@ -40,13 +40,42 @@ document.addEventListener('alpine:init', () => {
         suburbSelected: Boolean(config.initial?.suburbSelected),
 
         submitting: false,
-        errors: Array.isArray(config.initial?.serverErrors) ? config.initial.serverErrors : [],
+        fieldErrors: {},
 
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
 
         init() {
+            this.fieldErrors = this.normalizeErrors(config.initial?.serverErrors);
             this.initEditors();
+        },
+
+        normalizeErrors(rawErrors) {
+            if (!rawErrors || typeof rawErrors !== 'object') {
+                return {};
+            }
+
+            if (Array.isArray(rawErrors)) {
+                return rawErrors.length > 0 ? { _form: rawErrors } : {};
+            }
+
+            return Object.entries(rawErrors).reduce((carry, [field, messages]) => {
+                if (Array.isArray(messages) && messages.length > 0) {
+                    carry[field] = messages;
+                } else if (typeof messages === 'string' && messages.trim() !== '') {
+                    carry[field] = [messages];
+                }
+
+                return carry;
+            }, {});
+        },
+
+        hasFieldError(field) {
+            return Array.isArray(this.fieldErrors[field]) && this.fieldErrors[field].length > 0;
+        },
+
+        getFieldError(field) {
+            return this.hasFieldError(field) ? this.fieldErrors[field][0] : '';
         },
 
         getEditor(key) {
@@ -372,37 +401,42 @@ document.addEventListener('alpine:init', () => {
         },
 
         validate() {
-            const errors = [];
+            const errors = {};
+            const setFieldError = (field, message) => {
+                if (!errors[field]) {
+                    errors[field] = [message];
+                }
+            };
 
-            if (!this.name.trim()) errors.push('Profile name is required.');
+            if (!this.name.trim()) setFieldError('name', 'Profile name is required.');
 
             if (!this.suburb.trim()) {
-                errors.push('Suburb is required.');
+                setFieldError('suburb', 'Suburb is required.');
             } else if (!this.suburbSelected) {
-                errors.push('Please choose a location from the dropdown list, which appears while typing.');
+                setFieldError('suburb', 'Please choose a location from the dropdown list, which appears while typing.');
             }
 
             const plainIntroductionLine = this.stripHtml(this.introduction_line);
-            if (!plainIntroductionLine) errors.push('Introduction line is required.');
+            if (!plainIntroductionLine) setFieldError('introduction_line', 'Introduction line is required.');
 
             const plainProfileText = this.stripHtml(this.profile_text);
-            if (!plainProfileText) errors.push('Profile text is required.');
+            if (!plainProfileText) setFieldError('profile_text', 'Profile text is required.');
 
-            if (!this.age_group) errors.push('Age group is required.');
-            if (!this.hair_color) errors.push('Hair color is required.');
-            if (!this.hair_length) errors.push('Hair length is required.');
-            if (!this.ethnicity) errors.push('Ethnicity is required.');
-            if (!this.body_type) errors.push('Body type is required.');
-            if (!this.bust_size) errors.push('Bust size is required.');
-            if (!this.your_length) errors.push('Your length is required.');
-            if (this.primaryIdentity.length === 0) errors.push('Primary identity is required.');
-            if (this.attributes.length === 0) errors.push('Attributes are required.');
-            if (this.servicesStyle.length === 0) errors.push('Services & style are required.');
-            if (this.services_provided.length === 0) errors.push('Services provided are required.');
-            if (!this.availability) errors.push('Availability is required.');
-            if (!this.contact_method) errors.push('Contact method is required.');
-            if (!this.phone_contact) errors.push('Phone contact preference is required.');
-            if (!this.time_waster) errors.push('Time waster shield preference is required.');
+            if (!this.age_group) setFieldError('age_group', 'Age group is required.');
+            if (!this.hair_color) setFieldError('hair_color', 'Hair color is required.');
+            if (!this.hair_length) setFieldError('hair_length', 'Hair length is required.');
+            if (!this.ethnicity) setFieldError('ethnicity', 'Ethnicity is required.');
+            if (!this.body_type) setFieldError('body_type', 'Body type is required.');
+            if (!this.bust_size) setFieldError('bust_size', 'Bust size is required.');
+            if (!this.your_length) setFieldError('your_length', 'Your length is required.');
+            if (this.primaryIdentity.length === 0) setFieldError('primary_identity', 'Primary identity is required.');
+            if (this.attributes.length === 0) setFieldError('attributes', 'Attributes are required.');
+            if (this.servicesStyle.length === 0) setFieldError('services_style', 'Services & style are required.');
+            if (this.services_provided.length === 0) setFieldError('services_provided', 'Services provided are required.');
+            if (!this.availability) setFieldError('availability', 'Availability is required.');
+            if (!this.contact_method) setFieldError('contact_method', 'Contact method is required.');
+            if (!this.phone_contact) setFieldError('phone_contact', 'Phone contact preference is required.');
+            if (!this.time_waster) setFieldError('time_waster', 'Time waster shield preference is required.');
 
             return errors;
         },
@@ -433,9 +467,9 @@ document.addEventListener('alpine:init', () => {
         async submitForm() {
             this.syncHiddenEditorInputs();
 
-            this.errors = this.validate();
+            this.fieldErrors = this.validate();
 
-            if (this.errors.length > 0) {
+            if (Object.keys(this.fieldErrors).length > 0) {
                 this.scrollToErrors();
                 return;
             }
@@ -493,19 +527,18 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 if (response.ok) {
-                    this.errors = [];
+                    this.fieldErrors = {};
                     this.toast(data.message || 'Profile updated successfully.');
                 } else if (response.status === 422) {
-                    const messages = Object.values(data.errors || {}).flat();
-                    this.errors = messages.length ? messages : ['Validation failed.'];
+                    this.fieldErrors = this.normalizeErrors(data.errors || {});
                     this.scrollToErrors();
                 } else {
-                    this.errors = [];
+                    this.fieldErrors = {};
                     this.error(data.message || 'Unable to save profile. Please try again later.');
                 }
             } catch (error) {
                 console.error('Profile submit error:', error);
-                this.errors = [];
+                this.fieldErrors = {};
                 this.error('Unable to save profile. Please check your connection and try again.');
             } finally {
                 this.submitting = false;
