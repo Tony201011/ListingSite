@@ -2,8 +2,8 @@
 const editorInstances = new Map();
 const IMAGE_LOAD_TIMEOUT_MS = 8000;
 
-document.addEventListener('alpine:init', () => {
-    Alpine.data('editProfileForm', (config = {}) => ({
+window.editProfileForm = function (config = {}) {
+    return {
         name: config.initial?.name || '',
         email: config.initial?.email || '',
         phone: config.initial?.phone || '',
@@ -573,5 +573,9 @@ document.addEventListener('alpine:init', () => {
                 this.submitting = false;
             }
         }
-    }));
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('editProfileForm', window.editProfileForm);
 });
