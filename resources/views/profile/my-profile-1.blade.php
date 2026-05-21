@@ -4,7 +4,6 @@
 @php
     $statusSettings = \App\Models\SiteSetting::getStatusSettings();
 @endphp
-
 <div
     class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="{ availableNow: false, onlineNow: false }"
@@ -32,6 +31,7 @@
                             class="mb-4 flex items-start justify-between gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700"
                         >
                             <span>{{ session('success') }}</span>
+
                             <button
                                 type="button"
                                 @click="showSuccess = false"
@@ -51,6 +51,7 @@
                             class="mb-4 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
                         >
                             <span>{{ session('error') }}</span>
+
                             <button
                                 type="button"
                                 @click="showError = false"
@@ -72,14 +73,12 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
-                            <span>
-                                Active profile: <strong>{{ $profile->name }}</strong>
+                            <span>Active profile: <strong>{{ $profile->name }}</strong>
                                 @if($profile->slug)
                                     <span class="ml-1 text-xs text-pink-500">({{ $profile->slug }})</span>
                                 @endif
                             </span>
                         </div>
-
                         <a
                             href="{{ route('profiles.index') }}"
                             class="text-sm font-medium text-pink-600 underline-offset-2 hover:underline"
@@ -89,10 +88,7 @@
                     </div>
                 @else
                     <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3">
-                        <span class="text-sm font-medium text-pink-800">
-                            No profile yet — complete the steps below to create one.
-                        </span>
-
+                        <span class="text-sm font-medium text-pink-800">No profile yet — complete the steps below to create one.</span>
                         <a
                             href="{{ route('profiles.index') }}"
                             class="text-sm font-medium text-pink-600 underline-offset-2 hover:underline"
@@ -205,11 +201,9 @@
                     @if($stepOneCompleted)
                         <a href="{{ route('edit-profile') }}" class="transition hover:text-gray-700">Edit profile text</a>
                     @endif
-
                     @if($stepTwoCompleted)
                         <a href="{{ route('photos') }}" class="transition hover:text-gray-700">Manage photos</a>
                     @endif
-
                     @if($stepPhotoVerificationCompleted)
                         <a href="{{ url('/verify-photo') }}" class="transition hover:text-gray-700">Edit verified photos</a>
                     @endif
@@ -269,12 +263,9 @@
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">CREDITS</h3>
-
                     <p class="mb-3 text-3xl font-bold text-gray-900">
-                        {{ $user?->credits ?? 0 }}
-                        <span class="text-base font-normal text-gray-500">credits available</span>
+                        {{ $user?->credits ?? 0 }} <span class="text-base font-normal text-gray-500">credits available</span>
                     </p>
-
                     <div class="space-y-2">
                         <a href="{{ url('/purchase-credit') }}" class="block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">Add balance</a>
                         <a href="{{ url('/credit-history') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Credits history</a>
@@ -285,7 +276,6 @@
 
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
                     <h3 class="mb-3 text-lg font-bold text-gray-800">LISTING BOOST STATUS</h3>
-
                     <dl class="space-y-2 text-sm text-gray-700">
                         @foreach (($listingBoostStatuses ?? []) as $status)
                             <div class="flex items-start justify-between gap-3">
@@ -302,16 +292,12 @@
 
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">BABE RANK</h3>
-
                     <p class="mb-3 text-3xl font-bold text-gray-900">
-                        {{ $babeRank }}
-                        <span class="text-base font-normal text-gray-500">out of 100</span>
+                        {{ $babeRank }} <span class="text-base font-normal text-gray-500">out of 100</span>
                     </p>
-
                     <a href="{{ url('/babe-rank-read-more') }}" class="text-sm font-medium text-pink-600 hover:text-pink-700">
                         Read more about BabeRank
                     </a>
-
                     <ul class="mt-3 list-inside list-disc space-y-1 text-sm text-gray-600">
                         <li>Set your short URL</li>
                         <li>Set your availability</li>
@@ -323,13 +309,10 @@
 
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">YOUR RATES</h3>
-
                     <p class="mb-2 text-sm font-medium text-pink-600">13 May 2022:</p>
-
                     <p class="mb-4 text-sm text-gray-600">
                         With this feature you can easily add your rates and choose how they appear on your profile.
                     </p>
-
                     <a href="{{ url('/my-rate') }}" class="block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">
                         NEW Configure your rates
                     </a>
@@ -337,11 +320,9 @@
 
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">YOUR AVAILABILITY</h3>
-
                     <p class="mb-4 text-sm text-gray-600">
                         You have not set your availability. This gives your BabeRank a boost of 70%.
                     </p>
-
                     <button
                         type="button"
                         @click="window.location.href='{{ route('availability.show') }}'"
@@ -353,11 +334,9 @@
 
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">AVAILABLE NOW</h3>
-
                     <p class="mb-4 text-sm text-gray-600">
                         Promote your availability twice a day for two hours.
                     </p>
-
                     <button
                         type="button"
                         @click="window.location.href='{{ route('available-now') }}'"
@@ -371,9 +350,7 @@
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ONLINE NOW</h3>
 
                     <p class="mb-4 text-sm text-gray-600">
-                        Use this feature up to {{ $statusSettings['online_status_max_uses'] }}
-                        {{ \Illuminate\Support\Str::plural('time', $statusSettings['online_status_max_uses']) }}
-                        a day for {{ format_clock_duration_from_minutes($statusSettings['online_status_duration_minutes']) }}.
+                        Use this feature up to {{ $statusSettings['online_status_max_uses'] }} {{ \Illuminate\Support\Str::plural('time', $statusSettings['online_status_max_uses']) }} a day for {{ format_clock_duration_from_minutes($statusSettings['online_status_duration_minutes']) }}.
                     </p>
 
                     <button
@@ -387,7 +364,6 @@
 
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">Referral Code</h3>
-
                     <p class="mb-4 text-sm text-gray-600">
                         Share your referral code with friends and earn rewards.
                     </p>
@@ -406,7 +382,6 @@
                     >
                         <div class="flex items-center justify-between rounded-lg bg-gray-100 px-4 py-2">
                             <span class="font-medium text-gray-800" x-text="code"></span>
-
                             <button
                                 type="button"
                                 @click="copyCode()"
@@ -432,48 +407,43 @@
                     </div>
                 </div>
 
-
-            </div>
-
-            <div class="mt-8 rounded-xl border border-gray-100 bg-white p-5 sm:p-6">
-                <p class="mb-2 font-medium text-gray-700">
-                    You can be found on Hotescorts with the following URLs
-                </p>
-
-                @if($profileUrl)
-                    <a href="{{ $profileUrl }}" target="_blank" class="block break-all font-semibold text-pink-600 hover:underline">
-                        {{ $profileUrl }}
-                    </a>
-                @endif
-
-                @if($shortUrlFull)
-                    <a href="{{ $shortUrlFull }}" target="_blank" class="mt-1 block break-all font-semibold text-pink-600 hover:underline">
-                        {{ $shortUrlFull }}
-                    </a>
-                @endif
-            </div>
-        @endif
-                        <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ACCOUNT SECURITY</h3>
-
                     <p class="mb-4 text-sm text-gray-600">
                         Manage your password and account access settings.
                     </p>
 
-                    <div class="mb-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-
-                        Profile complete
-                    </div>
+                    @if($stepOneCompleted && $stepTwoCompleted)
+                        <div class="mb-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Profile complete
+                        </div>
+                    @else
+                        <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                            <div class="mb-1 flex items-center gap-2 font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                Profile incomplete
+                            </div>
+                            <ul class="ml-6 list-disc space-y-0.5 text-xs">
+                                @if(!$stepOneCompleted)
+                                    <li><a href="{{ route('edit-profile') }}" class="underline underline-offset-2 hover:text-amber-900">Write profile text</a> to unlock account settings</li>
+                                @endif
+                                @if(!$stepTwoCompleted)
+                                    <li><a href="{{ route('photos') }}" class="underline underline-offset-2 hover:text-amber-900">Upload at least one photo</a> to unlock account settings</li>
+                                @endif
+                            </ul>
+                        </div>
+                    @endif
 
                     <div class="space-y-2">
                         @auth
                             @if (!auth()->user()->hasVerifiedEmail())
                                 <form method="POST" action="{{ route('verification.send') }}">
                                     @csrf
-
                                     <button
                                         type="submit"
                                         class="block w-full rounded-lg bg-blue-50 px-4 py-2 text-center text-blue-700 transition hover:bg-blue-100"
@@ -484,17 +454,34 @@
                             @endif
                         @endauth
 
-                        <a href="{{ url('/change-password') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">
-                            Change password
-                        </a>
+                        <a href="{{ url('/change-password') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change password</a>
+                        <a href="{{ url('/change-email') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change email</a>
+                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
+                    </div>
+                </div>
+            </div>
 
-                        <a href="{{ url('/change-email') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">
-                            Change email
-                        </a>
+            <div class="mt-8 rounded-xl border border-gray-100 bg-white p-5 sm:p-6">
+                <p class="mb-2 font-medium text-gray-700">
+                    You can be found on Hotescorts with the following URLs
+                </p>
+                @if($profileUrl)
+                    <a href="{{ $profileUrl }}" target="_blank" class="block break-all font-semibold text-pink-600 hover:underline">
+                        {{ $profileUrl }}
+                    </a>
+                @endif
+                @if($shortUrlFull)
+                    <a href="{{ $shortUrlFull }}" target="_blank" class="mt-1 block break-all font-semibold text-pink-600 hover:underline">
+                        {{ $shortUrlFull }}
+                    </a>
+                @endif
+            </div>
+        @endif
+                <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
+                    <h3 class="mb-2 text-lg font-bold text-gray-800">ACCOUNT SECURITY</h3>
 
-                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">
-                            Delete account
-                        </a>
+                    <div class="space-y-2">
+                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
                     </div>
                 </div>
     </div>
