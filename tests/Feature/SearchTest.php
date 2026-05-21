@@ -37,7 +37,7 @@ class SearchTest extends TestCase
             'usage_date' => today(),
             'usage_count' => 1,
             'online_started_at' => now()->subMinutes(5),
-            'online_expires_at' => now()->addMinutes(55),
+            'online_expires_at' => null,
         ]);
 
         return $user;

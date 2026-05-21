@@ -22,8 +22,6 @@
                 x-data="profileOnlineToggle({
                     profileId: @js($profile->id),
                     initialStatus: @js($isOnline),
-                    initialRemainingUses: @js($state['remainingUses']),
-                    initialExpiresAt: @js($state['expiresAt'] ?? null),
                     updateUrl: @js(route('profiles.online-status', $profile)),
                     csrfToken: @js(csrf_token())
                 })"

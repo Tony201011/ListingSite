@@ -84,7 +84,7 @@ class HomeControllerTest extends TestCase
             'usage_date' => today(),
             'usage_count' => 1,
             'online_started_at' => now()->subMinutes(5),
-            'online_expires_at' => now()->addMinutes(55),
+            'online_expires_at' => null,
         ]);
     }
 
@@ -759,20 +759,20 @@ class HomeControllerTest extends TestCase
         $this->assertFalse($names->contains('Offline Escort'));
     }
 
-    public function test_home_page_hides_profile_with_expired_online_session(): void
+    public function test_home_page_shows_profile_with_online_status_regardless_of_expires_at(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
-            'name' => 'Expired Online Escort',
-            'slug' => 'expired-online-escort',
+            'name' => 'Online Escort With Past Expires',
+            'slug' => 'online-escort-with-past-expires',
             'profile_status' => 'approved',
             'age' => 25,
         ]);
 
-        // Profile session has expired
+        // Profile has status = 'online'; online_expires_at is no longer enforced
         OnlineUser::query()->create([
             'user_id' => $user->id,
             'provider_profile_id' => $profile->id,
@@ -780,14 +780,14 @@ class HomeControllerTest extends TestCase
             'usage_date' => today(),
             'usage_count' => 1,
             'online_started_at' => now()->subHours(2),
-            'online_expires_at' => now()->subHour(), // expired
+            'online_expires_at' => now()->subHour(),
         ]);
 
         $response = $this->get('/');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Expired Online Escort'));
+        $this->assertTrue($names->contains('Online Escort With Past Expires'));
     }
 
     public function test_home_page_hides_profile_with_no_online_user_record(): void
@@ -831,7 +831,7 @@ class HomeControllerTest extends TestCase
             'usage_date' => today(),
             'usage_count' => 1,
             'online_started_at' => now()->subMinutes(5),
-            'online_expires_at' => now()->addMinutes(55),
+            'online_expires_at' => null,
         ]);
 
         $response = $this->get('/');
@@ -871,7 +871,7 @@ class HomeControllerTest extends TestCase
             'usage_date' => today(),
             'usage_count' => 1,
             'online_started_at' => now()->subMinutes(5),
-            'online_expires_at' => now()->addMinutes(55),
+            'online_expires_at' => null,
         ]);
 
         $response = $this->get('/');

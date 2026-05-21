@@ -381,15 +381,11 @@ class BuildProfileFilterViewData
         $query->where(function (Builder $onlineConstraint): void {
             $onlineConstraint
                 ->whereHas('onlineUser', function (Builder $onlineQuery): void {
-                    $onlineQuery->where('status', 'online')
-                        ->whereNotNull('online_expires_at')
-                        ->where('online_expires_at', '>', now());
+                    $onlineQuery->where('status', 'online');
                 })
                 ->orWhereHas('user.onlineUser', function (Builder $legacyOnline): void {
                     $legacyOnline->whereNull('provider_profile_id')
-                        ->where('status', 'online')
-                        ->whereNotNull('online_expires_at')
-                        ->where('online_expires_at', '>', now());
+                        ->where('status', 'online');
                 });
         });
     }
@@ -730,18 +726,14 @@ class BuildProfileFilterViewData
             })
             ->where(function ($q) {
                 $q->where(function ($onlineQ) {
-                    $onlineQ->where('online_users.status', 'online')
-                        ->whereNotNull('online_users.online_expires_at')
-                        ->where('online_users.online_expires_at', '>', now());
+                    $onlineQ->where('online_users.status', 'online');
                 })->orWhere(function ($legacyQ) {
                     $legacyQ->whereExists(function ($exists): void {
                         $exists->selectRaw('1')
                             ->from('online_users as legacy_online_users')
                             ->whereColumn('legacy_online_users.user_id', 'provider_profiles.user_id')
                             ->whereNull('legacy_online_users.provider_profile_id')
-                            ->where('legacy_online_users.status', 'online')
-                            ->whereNotNull('legacy_online_users.online_expires_at')
-                            ->where('legacy_online_users.online_expires_at', '>', now());
+                            ->where('legacy_online_users.status', 'online');
                     });
                 });
             })

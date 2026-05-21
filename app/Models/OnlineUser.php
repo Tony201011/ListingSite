@@ -33,9 +33,7 @@ class OnlineUser extends Model
 
     public function isCurrentlyOnline(): bool
     {
-        return $this->status === 'online'
-            && $this->online_expires_at
-            && now()->lessThan($this->online_expires_at);
+        return $this->status === 'online';
     }
 
     public function resetDailyUsageIfNeeded(): void
@@ -43,9 +41,6 @@ class OnlineUser extends Model
         if (! $this->usage_date || ! $this->usage_date->isToday()) {
             $this->usage_date = today();
             $this->usage_count = 0;
-            $this->status = 'offline';
-            $this->online_started_at = null;
-            $this->online_expires_at = null;
         }
     }
 }

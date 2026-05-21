@@ -11,7 +11,6 @@ use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Mockery;
 use Tests\TestCase;
 
@@ -82,8 +81,8 @@ class OnlineControllerTest extends TestCase
             )
             ->andReturn(ActionResult::success([
                 'status' => 'online',
-                'expires_at' => '2026-04-14T03:50:22+00:00',
-            ], 'Online Now enabled for 01:00:00.'));
+                'expires_at' => null,
+            ], 'Online Now enabled.'));
 
         $this->app->instance(UpdateOnlineNowStatus::class, $updateOnlineNowStatus);
 
@@ -94,34 +93,24 @@ class OnlineControllerTest extends TestCase
         $response->assertOk();
         $response->assertJson([
             'success' => true,
-            'message' => 'Online Now enabled for 01:00:00.',
+            'message' => 'Online Now enabled.',
             'status' => 'online',
         ]);
     }
 
-    public function test_update_status_to_online_uses_default_duration_when_setting_is_invalid(): void
+    public function test_update_status_to_online_returns_no_expiry(): void
     {
-        Carbon::setTestNow('2026-05-21 11:00:00');
+        $user = $this->createProvider();
 
-        try {
-            SiteSetting::query()->create([
-                'online_status_duration_minutes' => 0,
-            ]);
+        $response = $this->actingAs($user)->postJson(route('online.update-status'), [
+            'status' => 'online',
+        ]);
 
-            $user = $this->createProvider();
-
-            $response = $this->actingAs($user)->postJson(route('online.update-status'), [
-                'status' => 'online',
-            ]);
-
-            $response->assertOk();
-            $response->assertJsonPath('success', true);
-            $response->assertJsonPath('status', 'online');
-            $response->assertJsonPath('message', 'Online Now enabled for 01:00:00.');
-            $response->assertJsonPath('expires_at', '2026-05-21T12:00:00+00:00');
-        } finally {
-            Carbon::setTestNow();
-        }
+        $response->assertOk();
+        $response->assertJsonPath('success', true);
+        $response->assertJsonPath('status', 'online');
+        $response->assertJsonPath('message', 'Online Now enabled.');
+        $response->assertJsonPath('expires_at', null);
     }
 
     public function test_update_status_to_offline_returns_json_response(): void

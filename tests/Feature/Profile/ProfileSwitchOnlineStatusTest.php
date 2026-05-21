@@ -119,8 +119,8 @@ class ProfileSwitchOnlineStatusTest extends TestCase
             )
             ->andReturn(ActionResult::success([
                 'status' => 'online',
-                'expires_at' => '2026-04-28T10:00:00+00:00',
-            ], 'Online Now enabled for 01:00:00.'));
+                'expires_at' => null,
+            ], 'Online Now enabled.'));
 
         $this->app->instance(UpdateOnlineNowStatus::class, $updateOnlineNowStatus);
 
