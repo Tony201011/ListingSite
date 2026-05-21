@@ -2,14 +2,22 @@
 
 namespace Tests\Feature\Profile;
 
+use App\Actions\GetOnlineNowState;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Tests\TestCase;
 
 class ProfileSwitchDeleteTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
 
     public function test_owner_can_delete_selected_profiles(): void
     {
@@ -96,5 +104,28 @@ class ProfileSwitchDeleteTest extends TestCase
         $response->assertSessionHasErrors('profile_ids');
         $this->assertDatabaseHas('provider_profiles', ['id' => $ownProfile->id, 'deleted_at' => null]);
         $this->assertDatabaseHas('provider_profiles', ['id' => $otherProfile->id, 'deleted_at' => null]);
+    }
+
+    public function test_single_remaining_profile_still_shows_individual_delete_button(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' One',
+            'slug' => 'provider-'.$user->id.'-one',
+        ]);
+
+        $getOnlineNowState = Mockery::mock(GetOnlineNowState::class);
+        $getOnlineNowState->shouldReceive('execute')
+            ->once()
+            ->andReturn(['onlineStatus' => false, 'remainingUses' => 0, 'expiresAt' => null]);
+
+        $this->app->instance(GetOnlineNowState::class, $getOnlineNowState);
+
+        $response = $this->actingAs($user)->get(route('profiles.index'));
+
+        $response->assertOk();
+        $response->assertSee(route('profiles.destroy', $profile), false);
+        $response->assertDontSee('delete-selected-profiles-form', false);
     }
 }
