@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Http\Middleware\CheckProfileSteps;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,6 +31,8 @@ class PasswordChangeTest extends TestCase
 
     public function test_password_change_with_valid_data_succeeds(): void
     {
+        $this->withoutMiddleware(CheckProfileSteps::class);
+
         $user = $this->createUser();
         $profile = $user->providerProfiles()->first();
 
@@ -50,6 +53,8 @@ class PasswordChangeTest extends TestCase
 
     public function test_password_change_with_wrong_current_password_fails(): void
     {
+        $this->withoutMiddleware(CheckProfileSteps::class);
+
         $user = $this->createUser();
         $profile = $user->providerProfiles()->first();
 
@@ -70,6 +75,8 @@ class PasswordChangeTest extends TestCase
 
     public function test_password_change_requires_confirmation(): void
     {
+        $this->withoutMiddleware(CheckProfileSteps::class);
+
         $user = $this->createUser();
         $profile = $user->providerProfiles()->first();
 
@@ -87,6 +94,8 @@ class PasswordChangeTest extends TestCase
 
     public function test_password_change_requires_all_fields(): void
     {
+        $this->withoutMiddleware(CheckProfileSteps::class);
+
         $user = $this->createUser();
         $profile = $user->providerProfiles()->first();
 
@@ -111,6 +120,8 @@ class PasswordChangeTest extends TestCase
 
     public function test_password_change_page_is_accessible_to_authenticated_user(): void
     {
+        $this->withoutMiddleware(CheckProfileSteps::class);
+
         $user = $this->createUser();
         $profile = $user->providerProfiles()->first();
 
@@ -120,5 +131,35 @@ class PasswordChangeTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('auth.change-password');
+    }
+
+    public function test_password_change_is_blocked_when_profile_steps_are_incomplete(): void
+    {
+        $user = $this->createUser();
+        $profile = $user->providerProfiles()->first();
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->postJson('/change-password', [
+                'current_password' => 'OldPassword123',
+                'new_password' => 'NewSecurePass456',
+                'new_password_confirmation' => 'NewSecurePass456',
+            ]);
+
+        $response->assertStatus(403);
+        $response->assertJson(['message' => 'Please complete your profile first.']);
+    }
+
+    public function test_change_email_page_is_blocked_when_profile_steps_are_incomplete(): void
+    {
+        $user = $this->createUser();
+        $profile = $user->providerProfiles()->first();
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get('/change-email');
+
+        $response->assertRedirect(route('my-profile'));
+        $response->assertSessionHas('error', 'Please complete your profile first.');
     }
 }

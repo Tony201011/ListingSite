@@ -178,10 +178,12 @@ Route::middleware('provider.auth')->group(function () {
     // Account management — no active-profile session required
     Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
     Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
-    Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
-    Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');
-    Route::get('/change-email', [ProviderRegisterController::class, 'changeEmail'])->name('change-email');
-    Route::post('/change-email', [ProviderRegisterController::class, 'updateEmail'])->name('change-email.update');
+    Route::middleware(['profile.steps'])->group(function () {
+        Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
+        Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');
+        Route::get('/change-email', [ProviderRegisterController::class, 'changeEmail'])->name('change-email');
+        Route::post('/change-email', [ProviderRegisterController::class, 'updateEmail'])->name('change-email.update');
+    });
 
     // Balance / credit routes — available to authenticated frontend users
     Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
