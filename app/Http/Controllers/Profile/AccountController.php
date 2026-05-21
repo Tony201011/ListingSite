@@ -38,19 +38,17 @@ class AccountController extends Controller
         try {
             $this->sendDeleteConfirmationEmail($user);
 
-            return back()->with(
-                'success',
-                'A delete confirmation email has been sent. Click the link in your email to permanently delete your account.'
-            );
+            return back()
+                ->with('success', 'A delete confirmation email has been sent. Click the link in your email to permanently delete your account.')
+                ->with('delete_account_email_sent', true);
         } catch (Throwable $e) {
             report($e);
 
-            return back()->with(
-                'error',
-                config('app.debug')
+            return back()
+                ->with('error', config('app.debug')
                     ? $e->getMessage()
-                    : 'Something went wrong while deleting your account.'
-            );
+                    : 'Something went wrong while deleting your account.')
+                ->with('delete_account_email_error', true);
         }
     }
 

@@ -456,7 +456,7 @@
 
                         <a href="{{ url('/change-password') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change password</a>
                         <a href="{{ url('/change-email') }}" class="block w-full rounded-lg bg-gray-100 px-4 py-2 text-center text-gray-700 transition hover:bg-gray-200">Change email</a>
-                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
+                        <button type="button" data-delete-account-trigger class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</button>
                     </div>
                 </div>
             </div>
@@ -482,14 +482,108 @@
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ACCOUNT SECURITY</h3>
 
                     <div class="space-y-2">
-                        <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
+                        <button type="button" data-delete-account-trigger class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</button>
                     </div>
                 </div>
         @endif
     </div>
 </div>
+
+
+<form id="my-profile-delete-account-form" action="{{ route('account.destroy') }}" method="POST" class="hidden">
+    @csrf
+    @method('DELETE')
+    <input type="hidden" name="password" id="my-profile-delete-password">
+    <input type="hidden" name="confirmation_text" id="my-profile-delete-confirmation">
+    <input type="hidden" name="delete_account_origin" value="my-profile">
+</form>
+
 @endsection
 
 @push('scripts')
+
 <script src="{{ asset('profile/js/referral-copy.js') }}"></script>
+<script>
+    (function () {
+        const form = document.getElementById('my-profile-delete-account-form');
+        const passwordInput = document.getElementById('my-profile-delete-password');
+        const confirmationInput = document.getElementById('my-profile-delete-confirmation');
+
+        if (!form || !window.Swal) {
+            return;
+        }
+
+
+        document.querySelectorAll('[data-delete-account-trigger]').forEach((trigger) => {
+            trigger.addEventListener('click', async function () {
+                const result = await Swal.fire({
+                    title: 'Delete account?',
+                    html: `
+                        <p style="margin-bottom: 12px; font-size: 14px; color: #4b5563;">
+                            We will send a secure confirmation link to your email.
+                            Your account will be deleted only after clicking that email link.
+                        </p>
+                        <input id="swal-delete-password" type="password" class="swal2-input" placeholder="Enter your password">
+                        <input id="swal-delete-confirm" type="text" class="swal2-input" placeholder="Type DELETE">
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Send email',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#dc2626',
+                    focusConfirm: false,
+                    preConfirm: () => {
+                        const password = document.getElementById('swal-delete-password')?.value ?? '';
+                        const confirmationText = document.getElementById('swal-delete-confirm')?.value ?? '';
+
+                        if (!password) {
+                            Swal.showValidationMessage('Password is required.');
+                            return false;
+                        }
+
+                        if (confirmationText !== 'DELETE') {
+                            Swal.showValidationMessage('Please type DELETE exactly.');
+                            return false;
+                        }
+
+                        return { password, confirmationText };
+                    }
+                });
+
+                if (result.isConfirmed && result.value) {
+                    passwordInput.value = result.value.password;
+                    confirmationInput.value = result.value.confirmationText;
+                    form.submit();
+                }
+            });
+        });
+
+        @if (session('delete_account_email_sent'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Email sent',
+                text: @json(session('success')),
+                confirmButtonColor: '#db2777',
+            });
+        @endif
+
+        @if (session('delete_account_email_error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Could not send email',
+                text: @json(session('error')),
+                confirmButtonColor: '#db2777',
+            });
+        @endif
+
+        @if (old('delete_account_origin') === 'my-profile' && $errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Could not send email',
+                html: @json(collect($errors->all())->map(fn ($message) => '• '.$message)->implode('<br>')),
+                confirmButtonColor: '#db2777',
+            });
+        @endif
+    })();
+</script>
 @endpush
