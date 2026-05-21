@@ -1,5 +1,5 @@
-document.addEventListener('alpine:init', () => {
-    Alpine.data('availabilityForm', (config = {}) => ({
+window.availabilityForm = function (config = {}) {
+    return {
         form: config.initialForm || {},
         updateUrl: config.updateUrl,
         csrfToken: config.csrfToken,
@@ -277,5 +277,9 @@ document.addEventListener('alpine:init', () => {
                 text: message
             });
         }
-    }));
+    };
+};
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('availabilityForm', window.availabilityForm);
 });
