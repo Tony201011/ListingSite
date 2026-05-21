@@ -477,6 +477,7 @@
                 @endif
             </div>
         @endif
+        @if(!$stepOneCompleted && !$stepTwoCompleted)
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ACCOUNT SECURITY</h3>
 
@@ -484,6 +485,7 @@
                         <a href="{{ url('/delete-account') }}" class="block w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-rose-700 transition hover:bg-rose-100">Delete account</a>
                     </div>
                 </div>
+        @endif
     </div>
 </div>
 @endsection
