@@ -9,7 +9,7 @@
 @section('content')
 <div
     class="bg-white min-h-screen py-10 px-4"
-    x-data="editProfileForm({
+    x-data="window.editProfileForm({
         initial: {
             name: @js(old('name', $profile_name ?? '')),
             email: @js(old('email', $user->email ?? '')),
