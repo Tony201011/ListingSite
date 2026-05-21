@@ -13,7 +13,7 @@ class UpdateOnlineNowStatus
     public function execute(ProviderProfile $profile, ?string $status): ActionResult
     {
         $settings = SiteSetting::getStatusSettings();
-        $durationMinutes = $settings['online_status_duration_minutes'];
+        $durationMinutes = $this->resolveDurationMinutes($settings['online_status_duration_minutes'] ?? null);
 
         $onlineUser = $this->getOrCreateOnlineUser($profile);
 
@@ -112,5 +112,21 @@ class UpdateOnlineNowStatus
         $profile->loadMissing('user');
 
         return $profile->user !== null && $profile->user->credits < 0;
+    }
+
+    private function resolveDurationMinutes(mixed $configuredDuration): int
+    {
+        if (is_int($configuredDuration) && $configuredDuration >= 1 && $configuredDuration <= 1440) {
+            return $configuredDuration;
+        }
+
+        if (is_numeric($configuredDuration)) {
+            $duration = (int) $configuredDuration;
+            if ($duration >= 1 && $duration <= 1440) {
+                return $duration;
+            }
+        }
+
+        return 60;
     }
 }
