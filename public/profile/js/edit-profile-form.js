@@ -71,11 +71,29 @@ document.addEventListener('alpine:init', () => {
         },
 
         hasFieldError(field) {
-            return Array.isArray(this.fieldErrors[field]) && this.fieldErrors[field].length > 0;
+            if (Array.isArray(this.fieldErrors[field]) && this.fieldErrors[field].length > 0) {
+                return true;
+            }
+
+            return Object.entries(this.fieldErrors).some(([key, messages]) => (
+                key.startsWith(`${field}.`) &&
+                Array.isArray(messages) &&
+                messages.length > 0
+            ));
         },
 
         getFieldError(field) {
-            return this.hasFieldError(field) ? this.fieldErrors[field][0] : '';
+            if (Array.isArray(this.fieldErrors[field]) && this.fieldErrors[field].length > 0) {
+                return this.fieldErrors[field][0];
+            }
+
+            const nestedError = Object.entries(this.fieldErrors).find(([key, messages]) => (
+                key.startsWith(`${field}.`) &&
+                Array.isArray(messages) &&
+                messages.length > 0
+            ));
+
+            return nestedError ? nestedError[1][0] : '';
         },
 
         getEditor(key) {
