@@ -41,8 +41,8 @@
 
         {{-- Day-wise session table --}}
         @if (! empty($activity['days']))
-            <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-                <div class="overflow-x-auto">
+            <div class="al-table-wrapper overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <div class="al-table-scroll overflow-x-auto">
                     <table class="al-table w-full border-collapse">
                         <thead>
                             <tr>
@@ -131,6 +131,9 @@
         color: #6b7280;
         border-bottom: 1px solid #e5e7eb;
         white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1;
     }
 
     .al-table td {
@@ -191,6 +194,18 @@
     .al-badge--offline {
         background: #f3f4f6;
         color: #6b7280;
+    }
+
+    .al-table-wrapper {
+        max-height: min(70vh, calc(100vh - 260px));
+    }
+
+    .al-table-scroll {
+        max-height: inherit;
+        overflow-y: auto;
+        overflow-x: auto;
+        overscroll-behavior: contain;
+        scroll-behavior: smooth;
     }
 </style>
 @endsection
