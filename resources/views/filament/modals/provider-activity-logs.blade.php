@@ -19,6 +19,21 @@
     </div>
 
     @if (! empty($activity['history']))
+        @php
+            $chartHistory = array_reverse($activity['history']);
+            $chartLabels  = array_column($chartHistory, 'date');
+            $chartLogins  = array_column($chartHistory, 'login_count');
+            $chartMinutes = array_map(
+                fn ($row) => round(($row['time_spent_seconds'] ?? 0) / 60, 1),
+                $chartHistory
+            );
+            $chartId = 'pa-chart-' . $provider->id;
+        @endphp
+
+        <div class="pa-chart-wrapper">
+            <canvas id="{{ $chartId }}" class="pa-chart-canvas"></canvas>
+        </div>
+
         <div class="pa-table-wrapper">
             <table class="pa-table">
                 <thead>
@@ -43,6 +58,112 @@
                 </tbody>
             </table>
         </div>
+
+        <script>
+        (function () {
+            var chartId   = {{ Js::from($chartId) }};
+            var labels    = {{ Js::from($chartLabels) }};
+            var logins    = {{ Js::from($chartLogins) }};
+            var minutes   = {{ Js::from($chartMinutes) }};
+
+            function buildChart() {
+                var canvas = document.getElementById(chartId);
+                if (! canvas) { return; }
+                if (canvas._paChart) { canvas._paChart.destroy(); }
+
+                var isDark = document.documentElement.classList.contains('dark');
+                var gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+                var labelColor = isDark ? '#9ca3af' : '#6b7280';
+
+                canvas._paChart = new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: 'Login Count',
+                                data: logins,
+                                backgroundColor: 'rgba(99,102,241,0.75)',
+                                borderColor: 'rgba(99,102,241,1)',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                yAxisID: 'yLogins',
+                                order: 2,
+                            },
+                            {
+                                type: 'line',
+                                label: 'Time Online (min)',
+                                data: minutes,
+                                borderColor: 'rgba(245,158,11,1)',
+                                backgroundColor: 'rgba(245,158,11,0.15)',
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                pointBackgroundColor: 'rgba(245,158,11,1)',
+                                tension: 0.35,
+                                fill: true,
+                                yAxisID: 'yMinutes',
+                                order: 1,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: labelColor, boxWidth: 12, padding: 14, font: { size: 12 } },
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (ctx) {
+                                        if (ctx.datasetIndex === 1) {
+                                            return ' Time Online: ' + ctx.parsed.y + ' min';
+                                        }
+                                        return ' Logins: ' + ctx.parsed.y;
+                                    },
+                                },
+                            },
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: labelColor, maxRotation: 45, font: { size: 11 } },
+                                grid:  { color: gridColor },
+                            },
+                            yLogins: {
+                                type: 'linear',
+                                position: 'left',
+                                beginAtZero: true,
+                                ticks: { color: 'rgba(99,102,241,1)', stepSize: 1, font: { size: 11 } },
+                                grid: { color: gridColor },
+                                title: { display: true, text: 'Login Count', color: 'rgba(99,102,241,1)', font: { size: 11 } },
+                            },
+                            yMinutes: {
+                                type: 'linear',
+                                position: 'right',
+                                beginAtZero: true,
+                                ticks: { color: 'rgba(245,158,11,1)', font: { size: 11 } },
+                                grid: { drawOnChartArea: false },
+                                title: { display: true, text: 'Time Online (min)', color: 'rgba(245,158,11,1)', font: { size: 11 } },
+                            },
+                        },
+                    },
+                });
+            }
+
+            function loadChartJs(callback) {
+                if (window.Chart) { callback(); return; }
+                var script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+                script.onload = callback;
+                document.head.appendChild(script);
+            }
+
+            loadChartJs(buildChart);
+        })();
+        </script>
     @else
         <div class="pa-empty">
             No login activity found for this provider yet.
@@ -93,6 +214,18 @@
         font-size: 18px;
         font-weight: 700;
         color: #111827;
+    }
+
+    .pa-chart-wrapper {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #fff;
+        padding: 12px 14px 8px;
+    }
+
+    .pa-chart-canvas {
+        max-height: 260px;
+        width: 100% !important;
     }
 
     .pa-table-wrapper {
@@ -151,6 +284,11 @@
 
     .dark .pa-summary-value {
         color: #f9fafb;
+    }
+
+    .dark .pa-chart-wrapper {
+        border-color: #374151;
+        background: #111827;
     }
 
     .dark .pa-table-wrapper {
