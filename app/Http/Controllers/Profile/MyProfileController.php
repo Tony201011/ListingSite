@@ -5,12 +5,11 @@ namespace App\Http\Controllers\Profile;
 use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetMyProfilePageData;
 use App\Actions\GetMyProfileStepTwoData;
+use App\Actions\GetProviderActivityLogs;
 use App\Actions\SaveMyProfile;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveMyProfileRequest;
-use App\Models\LoginLog;
 use App\Models\ProviderProfile;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +23,7 @@ class MyProfileController extends Controller
         private GetMyProfileStepTwoData $getMyProfileStepTwoData,
         private SaveMyProfile $saveMyProfile,
         private GetActiveProviderProfile $getActiveProviderProfile,
+        private GetProviderActivityLogs $getProviderActivityLogs,
     ) {}
 
     public function activityLogs(): View|RedirectResponse
@@ -32,7 +32,7 @@ class MyProfileController extends Controller
 
         $this->authorize('view', ProviderProfile::class);
 
-        $activity = $this->buildActivityData($user->id);
+        $activity = $this->getProviderActivityLogs->execute((int) $user->id);
 
         return view('profile.activity-logs', [
             'user'     => $user,

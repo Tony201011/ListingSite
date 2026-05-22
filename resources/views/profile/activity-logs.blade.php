@@ -16,7 +16,15 @@
         <p class="mb-8 text-sm text-gray-500">Your login session history for the last 90 days.</p>
 
         {{-- Summary cards --}}
-        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Provider Name</p>
+                <p class="mt-1 text-base font-bold text-gray-900">{{ $user->name ?? 'N/A' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Provider Email</p>
+                <p class="mt-1 text-base font-bold text-gray-900 break-all">{{ $user->email ?? 'N/A' }}</p>
+            </div>
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                 <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Total Logins</p>
                 <p class="mt-1 text-3xl font-bold text-gray-900">{{ number_format($activity['total_logins']) }}</p>
@@ -64,7 +72,7 @@
                                 {{-- Individual sessions --}}
                                 @foreach ($day['sessions'] as $session)
                                     <tr class="al-session-row">
-                                        <td></td>
+                                        <td>{{ $session['date'] ?? $day['date'] }}</td>
                                         <td></td>
                                         <td>{{ $session['login_at'] }}</td>
                                         <td>{{ $session['logout_at'] }}</td>

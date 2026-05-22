@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Actions\GetProviderActivityLogs;
 use App\Concerns\ResolvesProfileCategoryValues;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
@@ -10,7 +11,6 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
 use App\Models\CreditLog;
-use App\Models\LoginLog;
 use App\Models\PhotoVerification;
 use App\Models\Postcode;
 use App\Models\ProviderProfile;
@@ -1509,7 +1509,7 @@ class UserResource extends Resource
                         ->modalCancelActionLabel('Close')
                         ->modalWidth('4xl')
                         ->modalContent(fn (ProviderProfile $record) => view('filament.modals.provider-activity-logs', [
-                            'activity' => self::getProviderActivityLogs($record),
+                            'activity' => app(GetProviderActivityLogs::class)->execute((int) $record->user_id),
                             'provider' => $record,
                         ])),
 
