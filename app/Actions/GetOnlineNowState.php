@@ -17,7 +17,7 @@ class GetOnlineNowState
             return compact('onlineStatus', 'expiresAt', 'blockedBalance');
         }
 
-        $onlineUser = $this->getOrCreateOnlineUser($profile->id);
+        $onlineUser = $this->getOrCreateOnlineUser($profile);
 
         if ($onlineUser->isDirty()) {
             $onlineUser->save();
@@ -29,11 +29,12 @@ class GetOnlineNowState
         return compact('onlineStatus', 'expiresAt', 'blockedBalance');
     }
 
-    private function getOrCreateOnlineUser(int $profileId): OnlineUser
+    private function getOrCreateOnlineUser(ProviderProfile $profile): OnlineUser
     {
         $onlineUser = OnlineUser::firstOrCreate(
-            ['provider_profile_id' => $profileId],
+            ['provider_profile_id' => $profile->id],
             [
+                'user_id' => $profile->user_id,
                 'status' => 'offline',
                 'usage_date' => today(),
                 'usage_count' => 0,
@@ -41,6 +42,10 @@ class GetOnlineNowState
         );
 
         $onlineUser->resetDailyUsageIfNeeded();
+
+        if ($onlineUser->user_id !== $profile->user_id) {
+            $onlineUser->user_id = $profile->user_id;
+        }
 
         return $onlineUser;
     }

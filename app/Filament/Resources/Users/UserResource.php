@@ -1509,7 +1509,7 @@ class UserResource extends Resource
                         ->modalCancelActionLabel('Close')
                         ->modalWidth('4xl')
                         ->modalContent(fn (ProviderProfile $record) => view('filament.modals.provider-activity-logs', [
-                            'activity' => app(GetProviderActivityLogs::class)->execute((int) $record->user_id),
+                            'activity' => app(GetProviderActivityLogs::class)->execute($record),
                             'provider' => $record,
                         ])),
 

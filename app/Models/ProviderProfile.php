@@ -163,6 +163,11 @@ class ProviderProfile extends Model
         return $this->hasOne(OnlineUser::class, 'provider_profile_id');
     }
 
+    public function providerOnlineLogs(): HasMany
+    {
+        return $this->hasMany(ProviderOnlineLog::class, 'provider_profile_id');
+    }
+
     public function availableNow(): HasOne
     {
         return $this->hasOne(AvailableNow::class, 'provider_profile_id');
