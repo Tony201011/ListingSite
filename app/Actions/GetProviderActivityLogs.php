@@ -10,7 +10,12 @@ use Illuminate\Support\Facades\Schema;
 
 class GetProviderActivityLogs
 {
-    public function execute(?ProviderProfile $profile, int $lookbackDays = 90): array
+    public function execute(
+        ?ProviderProfile $profile,
+        int $lookbackDays = 90,
+        ?Carbon $dateFrom = null,
+        ?Carbon $dateTo = null,
+    ): array
     {
         $empty = [
             'total_logins'             => 0,
@@ -30,15 +35,16 @@ class GetProviderActivityLogs
         }
 
         $now = now();
+        [$rangeStart, $rangeEnd] = $this->resolveDateRange($now, $lookbackDays, $dateFrom, $dateTo);
 
         $sessions = ProviderOnlineLog::query()
             ->where('provider_profile_id', $profile->id)
-            ->where('went_online_at', '>=', $now->copy()->subDays($lookbackDays)->startOfDay())
+            ->whereBetween('went_online_at', [$rangeStart, $rangeEnd])
             ->orderByDesc('went_online_at')
             ->get();
 
         if ($sessions->isEmpty()) {
-            $legacyActivity = $this->getLegacyUserActivity($profile, $lookbackDays, $now);
+            $legacyActivity = $this->getLegacyUserActivity($profile, $rangeStart, $rangeEnd, $now);
 
             if ($legacyActivity !== null) {
                 return $legacyActivity;
@@ -114,7 +120,12 @@ class GetProviderActivityLogs
         ];
     }
 
-    private function getLegacyUserActivity(ProviderProfile $profile, int $lookbackDays, Carbon $now): ?array
+    private function getLegacyUserActivity(
+        ProviderProfile $profile,
+        Carbon $rangeStart,
+        Carbon $rangeEnd,
+        Carbon $now,
+    ): ?array
     {
         if (! Schema::hasColumns('login_logs', ['logged_out_at', 'duration_seconds'])) {
             return null;
@@ -122,7 +133,7 @@ class GetProviderActivityLogs
 
         $sessions = LoginLog::query()
             ->where('user_id', $profile->user_id)
-            ->where('created_at', '>=', $now->copy()->subDays($lookbackDays)->startOfDay())
+            ->whereBetween('created_at', [$rangeStart, $rangeEnd])
             ->orderByDesc('created_at')
             ->get();
 
@@ -205,5 +216,24 @@ class GetProviderActivityLogs
         $remainingSeconds = $seconds % 60;
 
         return sprintf('%02dh %02dm %02ds', $hours, $minutes, $remainingSeconds);
+    }
+
+    private function resolveDateRange(
+        Carbon $now,
+        int $lookbackDays,
+        ?Carbon $dateFrom,
+        ?Carbon $dateTo,
+    ): array {
+        if ($dateFrom && $dateTo) {
+            return [
+                $dateFrom->copy()->startOfDay(),
+                $dateTo->copy()->endOfDay(),
+            ];
+        }
+
+        return [
+            $now->copy()->subDays($lookbackDays)->startOfDay(),
+            $now->copy()->endOfDay(),
+        ];
     }
 }
