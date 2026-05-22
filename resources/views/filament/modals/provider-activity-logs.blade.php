@@ -34,8 +34,128 @@
             $chartMinutes = $activity['chart_minutes'] ?? [];
         @endphp
 
-        <div class="pa-chart-wrapper">
-            <canvas id="{{ $chartId }}" class="pa-chart-canvas"></canvas>
+        <div
+            class="pa-chart-wrapper"
+            x-data="{
+                labels: {{ \Illuminate\Support\Js::from($chartLabels) }},
+                logins: {{ \Illuminate\Support\Js::from($chartLogins) }},
+                minutes: {{ \Illuminate\Support\Js::from($chartMinutes) }},
+                chart: null,
+                init() {
+                    this.loadChartJs().then(() => this.renderChart()).catch(() => {});
+                },
+                renderChart() {
+                    if (! window.Chart || ! this.$refs.canvas) {
+                        return;
+                    }
+
+                    if (this.chart) {
+                        this.chart.destroy();
+                    }
+
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+                    const labelColor = isDark ? '#9ca3af' : '#6b7280';
+
+                    this.chart = new window.Chart(this.$refs.canvas, {
+                        type: 'bar',
+                        data: {
+                            labels: this.labels,
+                            datasets: [
+                                {
+                                    type: 'bar',
+                                    label: 'Session Count',
+                                    data: this.logins,
+                                    backgroundColor: 'rgba(99,102,241,0.75)',
+                                    borderColor: 'rgba(99,102,241,1)',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    yAxisID: 'yLogins',
+                                    order: 2,
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'Time Online (min)',
+                                    data: this.minutes,
+                                    borderColor: 'rgba(245,158,11,1)',
+                                    backgroundColor: 'rgba(245,158,11,0.15)',
+                                    borderWidth: 2,
+                                    pointRadius: 4,
+                                    pointBackgroundColor: 'rgba(245,158,11,1)',
+                                    tension: 0.35,
+                                    fill: true,
+                                    yAxisID: 'yMinutes',
+                                    order: 1,
+                                },
+                            ],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            interaction: { mode: 'index', intersect: false },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: { color: labelColor, boxWidth: 12, padding: 14, font: { size: 12 } },
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (ctx) {
+                                            if (ctx.datasetIndex === 1) {
+                                                return ' Time Online: ' + ctx.parsed.y + ' min';
+                                            }
+
+                                            return ' Sessions: ' + ctx.parsed.y;
+                                        },
+                                    },
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    ticks: { color: labelColor, maxRotation: 45, font: { size: 11 } },
+                                    grid:  { color: gridColor },
+                                },
+                                yLogins: {
+                                    type: 'linear',
+                                    position: 'left',
+                                    beginAtZero: true,
+                                    ticks: { color: 'rgba(99,102,241,1)', stepSize: 1, font: { size: 11 } },
+                                    grid: { color: gridColor },
+                                    title: { display: true, text: 'Session Count', color: 'rgba(99,102,241,1)', font: { size: 11 } },
+                                },
+                                yMinutes: {
+                                    type: 'linear',
+                                    position: 'right',
+                                    beginAtZero: true,
+                                    ticks: { color: 'rgba(245,158,11,1)', font: { size: 11 } },
+                                    grid: { drawOnChartArea: false },
+                                    title: { display: true, text: 'Time Online (min)', color: 'rgba(245,158,11,1)', font: { size: 11 } },
+                                },
+                            },
+                        },
+                    });
+                },
+                loadChartJs() {
+                    if (window.Chart) {
+                        return Promise.resolve();
+                    }
+
+                    if (! window.__providerActivityChartLoader) {
+                        window.__providerActivityChartLoader = new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+                            script.onload = resolve;
+                            script.onerror = reject;
+                            document.head.appendChild(script);
+                        });
+                    }
+
+                    return window.__providerActivityChartLoader;
+                },
+            }"
+            x-init="init()"
+        >
+            <canvas x-ref="canvas" id="{{ $chartId }}" class="pa-chart-canvas"></canvas>
         </div>
 
         <div class="pa-table-wrapper">
@@ -83,111 +203,6 @@
             </table>
         </div>
 
-        <script>
-        (function () {
-            var chartId   = {{ Js::from($chartId) }};
-            var labels    = {{ Js::from($chartLabels) }};
-            var logins    = {{ Js::from($chartLogins) }};
-            var minutes   = {{ Js::from($chartMinutes) }};
-
-            function buildChart() {
-                var canvas = document.getElementById(chartId);
-                if (! canvas) { return; }
-                if (canvas._paChart) { canvas._paChart.destroy(); }
-
-                var isDark = document.documentElement.classList.contains('dark');
-                var gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
-                var labelColor = isDark ? '#9ca3af' : '#6b7280';
-
-                canvas._paChart = new Chart(canvas, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                type: 'bar',
-                                label: 'Session Count',
-                                data: logins,
-                                backgroundColor: 'rgba(99,102,241,0.75)',
-                                borderColor: 'rgba(99,102,241,1)',
-                                borderWidth: 1,
-                                borderRadius: 4,
-                                yAxisID: 'yLogins',
-                                order: 2,
-                            },
-                            {
-                                type: 'line',
-                                label: 'Time Online (min)',
-                                data: minutes,
-                                borderColor: 'rgba(245,158,11,1)',
-                                backgroundColor: 'rgba(245,158,11,0.15)',
-                                borderWidth: 2,
-                                pointRadius: 4,
-                                pointBackgroundColor: 'rgba(245,158,11,1)',
-                                tension: 0.35,
-                                fill: true,
-                                yAxisID: 'yMinutes',
-                                order: 1,
-                            },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: { color: labelColor, boxWidth: 12, padding: 14, font: { size: 12 } },
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (ctx) {
-                                        if (ctx.datasetIndex === 1) {
-                                            return ' Time Online: ' + ctx.parsed.y + ' min';
-                                        }
-                                            return ' Sessions: ' + ctx.parsed.y;
-                                    },
-                                },
-                            },
-                        },
-                        scales: {
-                            x: {
-                                ticks: { color: labelColor, maxRotation: 45, font: { size: 11 } },
-                                grid:  { color: gridColor },
-                            },
-                            yLogins: {
-                                type: 'linear',
-                                position: 'left',
-                                beginAtZero: true,
-                                ticks: { color: 'rgba(99,102,241,1)', stepSize: 1, font: { size: 11 } },
-                                grid: { color: gridColor },
-                                title: { display: true, text: 'Session Count', color: 'rgba(99,102,241,1)', font: { size: 11 } },
-                            },
-                            yMinutes: {
-                                type: 'linear',
-                                position: 'right',
-                                beginAtZero: true,
-                                ticks: { color: 'rgba(245,158,11,1)', font: { size: 11 } },
-                                grid: { drawOnChartArea: false },
-                                title: { display: true, text: 'Time Online (min)', color: 'rgba(245,158,11,1)', font: { size: 11 } },
-                            },
-                        },
-                    },
-                });
-            }
-
-            function loadChartJs(callback) {
-                if (window.Chart) { callback(); return; }
-                var script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
-                script.onload = callback;
-                document.head.appendChild(script);
-            }
-
-            loadChartJs(buildChart);
-        })();
-        </script>
     @else
         <div class="pa-empty">
             No online/offline activity found for this profile yet.
