@@ -83,11 +83,11 @@
             </div>
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                 <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Total Time Online</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900">{{ $activity['total_online_duration'] }}</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900" id="al-total-online">{{ $activity['total_online_duration'] }}</p>
             </div>
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                 <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Current Session</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900">{{ $activity['current_session_duration'] }}</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900" id="al-current-session">{{ $activity['current_session_duration'] }}</p>
             </div>
         </div>
 
@@ -185,6 +185,36 @@
 
                 window.location.reload();
             });
+        })();
+    </script>
+    <script>
+        (function () {
+            var currentSeconds = @json($activity['current_session_seconds'] ?? 0);
+            var totalSeconds   = @json($activity['total_online_seconds'] ?? 0);
+
+            if (currentSeconds <= 0) {
+                return;
+            }
+
+            var currentEl = document.getElementById('al-current-session');
+            var totalEl   = document.getElementById('al-total-online');
+
+            function formatDuration(s) {
+                s = Math.max(0, s);
+                var h = Math.floor(s / 3600);
+                var m = Math.floor((s % 3600) / 60);
+                var sec = s % 60;
+                return String(h).padStart(2, '0') + 'h ' +
+                       String(m).padStart(2, '0') + 'm ' +
+                       String(sec).padStart(2, '0') + 's';
+            }
+
+            setInterval(function () {
+                currentSeconds += 1;
+                totalSeconds   += 1;
+                if (currentEl) { currentEl.textContent = formatDuration(currentSeconds); }
+                if (totalEl)   { totalEl.textContent   = formatDuration(totalSeconds);   }
+            }, 1000);
         })();
     </script>
 @endpush
