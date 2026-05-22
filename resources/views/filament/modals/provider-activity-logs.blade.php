@@ -179,9 +179,7 @@
                                     {{ $day['date'] }}
                                     <span class="pa-day-sessions">{{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}</span>
                                 </td>
-                                <td colspan="3" class="pa-day-total">
-                                    Daily total: {{ $day['total_duration'] }}
-                                </td>
+                                <td colspan="3" class="pa-day-total"></td>
                                 <td></td>
                             </tr>
                             {{-- Individual session rows --}}

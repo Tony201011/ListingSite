@@ -273,8 +273,7 @@ class ActivityLogsOnlineStatusTest extends TestCase
                 return ($activity['total_sessions'] ?? null) === 1
                     && ($activity['total_online_seconds'] ?? null) === 3600;
             })
-            ->assertSee('01h 00m 00s')
-            ->assertSee('Daily total: 01h 00m 00s');
+            ->assertSee('01h 00m 00s');
     }
 
     private function createCompleteProfile(): array

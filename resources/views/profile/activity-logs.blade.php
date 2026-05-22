@@ -103,9 +103,7 @@
                                             {{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}
                                         </span>
                                     </td>
-                                    <td colspan="2" class="al-day-total">
-                                        Daily total: <strong>{{ $day['total_duration'] }}</strong>
-                                    </td>
+                                    <td colspan="2" class="al-day-total"></td>
                                     <td></td>
                                 </tr>
                                 {{-- Individual sessions --}}
