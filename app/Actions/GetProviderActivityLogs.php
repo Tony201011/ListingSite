@@ -15,19 +15,18 @@ class GetProviderActivityLogs
         int $lookbackDays = 90,
         ?Carbon $dateFrom = null,
         ?Carbon $dateTo = null,
-    ): array
-    {
+    ): array {
         $empty = [
-            'total_logins'             => 0,
-            'total_sessions'           => 0,
-            'total_online_seconds'     => 0,
-            'total_online_duration'    => $this->formatDuration(0),
-            'current_session_seconds'  => 0,
+            'total_logins' => 0,
+            'total_sessions' => 0,
+            'total_online_seconds' => 0,
+            'total_online_duration' => $this->formatDuration(0),
+            'current_session_seconds' => 0,
             'current_session_duration' => $this->formatDuration(0),
-            'days'                     => [],
-            'chart_labels'             => [],
-            'chart_logins'             => [],
-            'chart_minutes'            => [],
+            'days' => [],
+            'chart_labels' => [],
+            'chart_logins' => [],
+            'chart_minutes' => [],
         ];
 
         if (! $profile?->exists) {
@@ -87,23 +86,23 @@ class GetProviderActivityLogs
                 $dayTotalSeconds += $sessionSeconds;
 
                 $sessionRows[] = [
-                    'date'             => $loginAt->format('d M Y'),
-                    'login_at'         => $loginAt->format('h:i A'),
-                    'logout_at'        => $logoutDisplay,
-                    'duration'         => $this->formatDuration($sessionSeconds),
+                    'date' => $loginAt->format('d M Y'),
+                    'login_at' => $loginAt->format('h:i A'),
+                    'logout_at' => $logoutDisplay,
+                    'duration' => $this->formatDuration($sessionSeconds),
                     'duration_seconds' => $sessionSeconds,
-                    'status'           => $status,
-                    'is_current'       => $isOpen,
+                    'status' => $status,
+                    'is_current' => $isOpen,
                 ];
             }
 
             $days[] = [
-                'date'           => Carbon::parse($dateKey)->format('d M Y'),
-                'date_key'       => $dateKey,
-                'session_count'  => count($sessionRows),
+                'date' => Carbon::parse($dateKey)->format('d M Y'),
+                'date_key' => $dateKey,
+                'session_count' => count($sessionRows),
                 'total_duration' => $this->formatDuration($dayTotalSeconds),
-                'total_seconds'  => $dayTotalSeconds,
-                'sessions'       => $sessionRows,
+                'total_seconds' => $dayTotalSeconds,
+                'sessions' => $sessionRows,
             ];
         }
 
@@ -113,16 +112,16 @@ class GetProviderActivityLogs
         $chartDays = array_slice(array_reverse($days), 0, 30);
 
         return [
-            'total_logins'             => $sessions->count(),
-            'total_sessions'           => $sessions->count(),
-            'total_online_seconds'     => $totalOnlineSeconds,
-            'total_online_duration'    => $this->formatDuration($totalOnlineSeconds),
-            'current_session_seconds'  => $currentSessionSeconds,
+            'total_logins' => $sessions->count(),
+            'total_sessions' => $sessions->count(),
+            'total_online_seconds' => $totalOnlineSeconds,
+            'total_online_duration' => $this->formatDuration($totalOnlineSeconds),
+            'current_session_seconds' => $currentSessionSeconds,
             'current_session_duration' => $this->formatDuration($currentSessionSeconds),
-            'days'                     => $days,
-            'chart_labels'             => array_column($chartDays, 'date'),
-            'chart_logins'             => array_column($chartDays, 'session_count'),
-            'chart_minutes'            => array_map(fn ($day) => round($day['total_seconds'] / 60, 1), $chartDays),
+            'days' => $days,
+            'chart_labels' => array_column($chartDays, 'date'),
+            'chart_logins' => array_column($chartDays, 'session_count'),
+            'chart_minutes' => array_map(fn ($day) => round($day['total_seconds'] / 60, 1), $chartDays),
         ];
     }
 
@@ -131,8 +130,7 @@ class GetProviderActivityLogs
         Carbon $rangeStart,
         Carbon $rangeEnd,
         Carbon $now,
-    ): ?array
-    {
+    ): ?array {
         if (! Schema::hasColumns('login_logs', ['logged_out_at', 'duration_seconds'])) {
             return null;
         }
@@ -181,23 +179,23 @@ class GetProviderActivityLogs
                 $dayTotalSeconds += $sessionSeconds;
 
                 $sessionRows[] = [
-                    'date'             => $loginAt->format('d M Y'),
-                    'login_at'         => $loginAt->format('h:i A'),
-                    'logout_at'        => $logoutDisplay,
-                    'duration'         => $this->formatDuration($sessionSeconds),
+                    'date' => $loginAt->format('d M Y'),
+                    'login_at' => $loginAt->format('h:i A'),
+                    'logout_at' => $logoutDisplay,
+                    'duration' => $this->formatDuration($sessionSeconds),
                     'duration_seconds' => $sessionSeconds,
-                    'status'           => $status,
-                    'is_current'       => $isOpen,
+                    'status' => $status,
+                    'is_current' => $isOpen,
                 ];
             }
 
             $days[] = [
-                'date'           => Carbon::parse($dateKey)->format('d M Y'),
-                'date_key'       => $dateKey,
-                'session_count'  => count($sessionRows),
+                'date' => Carbon::parse($dateKey)->format('d M Y'),
+                'date_key' => $dateKey,
+                'session_count' => count($sessionRows),
                 'total_duration' => $this->formatDuration($dayTotalSeconds),
-                'total_seconds'  => $dayTotalSeconds,
-                'sessions'       => $sessionRows,
+                'total_seconds' => $dayTotalSeconds,
+                'sessions' => $sessionRows,
             ];
         }
 
@@ -207,16 +205,16 @@ class GetProviderActivityLogs
         $chartDays = array_slice(array_reverse($days), 0, 30);
 
         return [
-            'total_logins'             => $sessions->count(),
-            'total_sessions'           => $sessions->count(),
-            'total_online_seconds'     => $totalOnlineSeconds,
-            'total_online_duration'    => $this->formatDuration($totalOnlineSeconds),
-            'current_session_seconds'  => $currentSessionSeconds,
+            'total_logins' => $sessions->count(),
+            'total_sessions' => $sessions->count(),
+            'total_online_seconds' => $totalOnlineSeconds,
+            'total_online_duration' => $this->formatDuration($totalOnlineSeconds),
+            'current_session_seconds' => $currentSessionSeconds,
             'current_session_duration' => $this->formatDuration($currentSessionSeconds),
-            'days'                     => $days,
-            'chart_labels'             => array_column($chartDays, 'date'),
-            'chart_logins'             => array_column($chartDays, 'session_count'),
-            'chart_minutes'            => array_map(fn ($day) => round($day['total_seconds'] / 60, 1), $chartDays),
+            'days' => $days,
+            'chart_labels' => array_column($chartDays, 'date'),
+            'chart_logins' => array_column($chartDays, 'session_count'),
+            'chart_minutes' => array_map(fn ($day) => round($day['total_seconds'] / 60, 1), $chartDays),
         ];
     }
 

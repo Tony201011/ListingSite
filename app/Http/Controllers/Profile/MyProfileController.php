@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Profile;
 
 use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetMyProfilePageData;
-use App\Actions\GetProfileSpendingHistory;
 use App\Actions\GetMyProfileStepTwoData;
+use App\Actions\GetProfileSpendingHistory;
 use App\Actions\GetProviderActivityLogs;
 use App\Actions\SaveMyProfile;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveMyProfileRequest;
 use App\Models\ProviderProfile;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -46,10 +46,10 @@ class MyProfileController extends Controller
         );
 
         return view('profile.activity-logs', [
-            'user'     => $user,
-            'profile'  => $profile,
+            'user' => $user,
+            'profile' => $profile,
             'activity' => $activity,
-            'filters'  => $filters,
+            'filters' => $filters,
         ]);
     }
 
