@@ -5,6 +5,14 @@
 
     <div class="pa-summary-grid">
         <section class="pa-summary-card">
+            <span class="pa-summary-label">Provider Name</span>
+            <span class="pa-summary-meta">{{ $provider->name ?? 'N/A' }}</span>
+        </section>
+        <section class="pa-summary-card">
+            <span class="pa-summary-label">Provider Email</span>
+            <span class="pa-summary-meta">{{ $provider->user?->email ?? 'N/A' }}</span>
+        </section>
+        <section class="pa-summary-card">
             <span class="pa-summary-label">Total Logins</span>
             <span class="pa-summary-value">{{ number_format((int) ($activity['total_logins'] ?? 0)) }}</span>
         </section>
@@ -58,7 +66,7 @@
                         {{-- Individual session rows --}}
                         @foreach ($day['sessions'] as $session)
                             <tr class="pa-session-row">
-                                <td></td>
+                                <td>{{ $session['date'] ?? $day['date'] }}</td>
                                 <td></td>
                                 <td>{{ $session['login_at'] }}</td>
                                 <td>{{ $session['logout_at'] }}</td>
@@ -232,6 +240,13 @@
         color: #111827;
     }
 
+    .pa-summary-meta {
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+        line-height: 1.35;
+    }
+
     .pa-chart-wrapper {
         border: 1px solid #e5e7eb;
         border-radius: 10px;
@@ -340,6 +355,7 @@
     .dark .pa-summary-card { border-color: #374151; background: #111827; }
     .dark .pa-summary-label { color: #9ca3af; }
     .dark .pa-summary-value { color: #f9fafb; }
+    .dark .pa-summary-meta { color: #f9fafb; }
     .dark .pa-chart-wrapper { border-color: #374151; background: #111827; }
     .dark .pa-table-wrapper { border-color: #374151; background: #111827; }
     .dark .pa-table th { background: #1f2937; color: #9ca3af; border-bottom-color: #374151; }
@@ -353,4 +369,3 @@
     .dark .pa-badge--offline { background: #374151; color: #9ca3af; }
     .dark .pa-empty { border-color: #4b5563; background: #1f2937; color: #d1d5db; }
 </style>
-
