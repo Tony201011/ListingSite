@@ -17,6 +17,17 @@ document.addEventListener('alpine:init', () => {
             return this.photos.find(p => p.is_primary) || null;
         },
 
+        preserveScrollPosition() {
+            const previousScrollY = window.scrollY;
+
+            requestAnimationFrame(() => {
+                window.scrollTo({
+                    top: previousScrollY,
+                    behavior: 'auto'
+                });
+            });
+        },
+
         openSlider(index) {
             this.sliderIndex = index;
             this.sliderOpen = true;
@@ -63,6 +74,7 @@ document.addEventListener('alpine:init', () => {
                     ...p,
                     is_primary: p.id === id
                 }));
+                this.preserveScrollPosition();
 
                 this.toast(data.message || 'Cover updated');
 
@@ -126,6 +138,7 @@ document.addEventListener('alpine:init', () => {
                         this.sliderIndex--;
                     }
                 }
+                this.preserveScrollPosition();
 
                 this.toast(data.message || 'Photo deleted');
 
