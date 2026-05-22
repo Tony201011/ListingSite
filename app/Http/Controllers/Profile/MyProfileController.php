@@ -43,6 +43,18 @@ class MyProfileController extends Controller
         ]);
     }
 
+    public function spendingHistory(): View|RedirectResponse
+    {
+        $user = Auth::user();
+
+        $this->authorize('view', ProviderProfile::class);
+
+        $profile = $this->getActiveProviderProfile->execute($user);
+        $data = $this->getProfileSpendingHistory->execute($profile);
+
+        return view('profile.spending-history', $data);
+    }
+
     public function myProfile(): View|RedirectResponse
     {
         $user = Auth::user();
