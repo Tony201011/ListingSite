@@ -77,6 +77,7 @@ class DeductDailyCredits extends Command
                     $profileIdsToHide = $profiles->skip($payableCount)->pluck('id');
 
                     for ($i = 0; $i < $payableCount; $i++) {
+                        $profile = $profiles[$i];
                         $currentBalance = $locked->credits;
                         $locked->decrement('credits', 1);
                         $locked->refresh();
@@ -86,6 +87,8 @@ class DeductDailyCredits extends Command
                             'amount' => -1,
                             'type' => 'daily_deduction',
                             'description' => "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
+                            'reference_type' => ProviderProfile::class,
+                            'reference_id' => $profile->id,
                         ]);
                     }
 

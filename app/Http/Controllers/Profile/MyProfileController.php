@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Profile;
 
 use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetMyProfilePageData;
+use App\Actions\GetProfileSpendingHistory;
 use App\Actions\GetMyProfileStepTwoData;
 use App\Actions\GetProviderActivityLogs;
 use App\Actions\SaveMyProfile;
@@ -23,6 +24,7 @@ class MyProfileController extends Controller
         private GetMyProfileStepTwoData $getMyProfileStepTwoData,
         private SaveMyProfile $saveMyProfile,
         private GetActiveProviderProfile $getActiveProviderProfile,
+        private GetProfileSpendingHistory $getProfileSpendingHistory,
         private GetProviderActivityLogs $getProviderActivityLogs,
     ) {}
 
@@ -38,6 +40,22 @@ class MyProfileController extends Controller
             'user'     => $user,
             'activity' => $activity,
         ]);
+    }
+
+    public function spendingHistory(): View|RedirectResponse
+    {
+        $user = Auth::user();
+
+        $this->authorize('view', ProviderProfile::class);
+
+        $profile = $this->getActiveProviderProfile->execute($user);
+
+        if (! $profile) {
+            return redirect()->route('profiles.index')
+                ->with('error', 'Please select a profile first.');
+        }
+
+        return view('profile.spending-history', $this->getProfileSpendingHistory->execute($profile));
     }
 
     private function buildActivityData(int $userId): array

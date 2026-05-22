@@ -165,6 +165,7 @@ class MyProfileControllerTest extends TestCase
         $response->assertSee('Home Banner Until');
         $response->assertSee('Not active');
         $response->assertSee(route('featured'));
+        $response->assertSee(route('profile-spending-history'));
     }
 
     public function test_edit_profile_view_is_returned_for_authenticated_provider(): void
