@@ -159,48 +159,50 @@
         </div>
 
         <div class="pa-table-wrapper">
-            <table class="pa-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Sessions</th>
-                        <th>Login Time</th>
-                        <th>Logout Time</th>
-                        <th>Duration</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($activity['days'] as $day)
-                        {{-- Day header row --}}
-                        <tr class="pa-day-row">
-                            <td colspan="2" class="pa-day-header">
-                                {{ $day['date'] }}
-                                <span class="pa-day-sessions">{{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}</span>
-                            </td>
-                            <td colspan="3" class="pa-day-total">
-                                Daily total: {{ $day['total_duration'] }}
-                            </td>
-                            <td></td>
+            <div class="pa-table-scroll">
+                <table class="pa-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sessions</th>
+                            <th>Login Time</th>
+                            <th>Logout Time</th>
+                            <th>Duration</th>
+                            <th>Status</th>
                         </tr>
-                        {{-- Individual session rows --}}
-                        @foreach ($day['sessions'] as $session)
-                            <tr class="pa-session-row">
-                                <td>{{ $session['date'] ?? $day['date'] }}</td>
-                                <td></td>
-                                <td>{{ $session['login_at'] }}</td>
-                                <td>{{ $session['logout_at'] }}</td>
-                                <td>{{ $session['duration'] }}</td>
-                                <td>
-                                    <span class="pa-badge pa-badge--{{ $session['is_current'] ? 'online' : 'offline' }}">
-                                        {{ $session['status'] }}
-                                    </span>
+                    </thead>
+                    <tbody>
+                        @foreach ($activity['days'] as $day)
+                            {{-- Day header row --}}
+                            <tr class="pa-day-row">
+                                <td colspan="2" class="pa-day-header">
+                                    {{ $day['date'] }}
+                                    <span class="pa-day-sessions">{{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}</span>
                                 </td>
+                                <td colspan="3" class="pa-day-total">
+                                    Daily total: {{ $day['total_duration'] }}
+                                </td>
+                                <td></td>
                             </tr>
+                            {{-- Individual session rows --}}
+                            @foreach ($day['sessions'] as $session)
+                                <tr class="pa-session-row">
+                                    <td>{{ $session['date'] ?? $day['date'] }}</td>
+                                    <td></td>
+                                    <td>{{ $session['login_at'] }}</td>
+                                    <td>{{ $session['logout_at'] }}</td>
+                                    <td>{{ $session['duration'] }}</td>
+                                    <td>
+                                        <span class="pa-badge pa-badge--{{ $session['is_current'] ? 'online' : 'offline' }}">
+                                            {{ $session['status'] }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
                         @endforeach
-                    @endforeach
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     @else
@@ -212,12 +214,13 @@
 
 <style>
     .pa-modal-content {
-        max-height: calc(100vh - 180px);
-        overflow: auto;
+        max-height: min(82vh, calc(100vh - 150px));
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         gap: 12px;
         padding: 4px;
+        min-height: 0;
     }
 
     .pa-description {
@@ -267,6 +270,7 @@
         border-radius: 10px;
         background: #fff;
         padding: 12px 14px 8px;
+        flex: 0 0 auto;
     }
 
     .pa-chart-canvas {
@@ -277,14 +281,26 @@
     .pa-table-wrapper {
         border: 1px solid #e5e7eb;
         border-radius: 10px;
-        overflow: auto;
         background: #fff;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .pa-table-scroll {
+        height: 100%;
+        max-height: 100%;
+        overflow-x: auto;
+        overflow-y: auto;
+        min-height: 0;
+        overscroll-behavior: contain;
+        scroll-behavior: smooth;
     }
 
     .pa-table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 600px;
+        min-width: 720px;
     }
 
     .pa-table th,
@@ -304,6 +320,7 @@
         color: #6b7280;
         position: sticky;
         top: 0;
+        z-index: 1;
     }
 
     .pa-day-row td {

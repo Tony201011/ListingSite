@@ -1507,7 +1507,7 @@ class UserResource extends Resource
                         ->modalHeading(fn (ProviderProfile $record): string => 'Provider Activity Logs · '.($record->name ?? 'Provider'))
                         ->modalSubmitAction(false)
                         ->modalCancelActionLabel('Close')
-                        ->modalWidth('4xl')
+                        ->modalWidth('6xl')
                         ->modalContent(fn (ProviderProfile $record) => view('filament.modals.provider-activity-logs', [
                             'activity' => app(GetProviderActivityLogs::class)->execute($record),
                             'provider' => $record,
