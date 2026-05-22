@@ -1,6 +1,6 @@
 <div class="pa-modal-content">
     <p class="pa-description">
-        Login activity summary for {{ $provider->name ?? 'this provider' }} ({{ $provider->user?->email ?? 'N/A' }}).
+        Login activity for {{ $provider->name ?? 'this provider' }} ({{ $provider->user?->email ?? 'N/A' }}).
     </p>
 
     <div class="pa-summary-grid">
@@ -18,16 +18,12 @@
         </section>
     </div>
 
-    @if (! empty($activity['history']))
+    @if (! empty($activity['days']))
         @php
-            $chartHistory = array_reverse($activity['history']);
-            $chartLabels  = array_column($chartHistory, 'date');
-            $chartLogins  = array_column($chartHistory, 'login_count');
-            $chartMinutes = array_map(
-                fn ($row) => round(($row['time_spent_seconds'] ?? 0) / 60, 1),
-                $chartHistory
-            );
-            $chartId = 'pa-chart-' . $provider->id;
+            $chartId      = 'pa-chart-' . $provider->id;
+            $chartLabels  = $activity['chart_labels']  ?? [];
+            $chartLogins  = $activity['chart_logins']  ?? [];
+            $chartMinutes = $activity['chart_minutes'] ?? [];
         @endphp
 
         <div class="pa-chart-wrapper">
@@ -39,21 +35,41 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Login Count</th>
-                        <th>First Login</th>
-                        <th>Last Login</th>
-                        <th>Time Spent Online</th>
+                        <th>Sessions</th>
+                        <th>Login Time</th>
+                        <th>Logout Time</th>
+                        <th>Duration</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($activity['history'] as $row)
-                        <tr>
-                            <td>{{ $row['date'] ?? '-' }}</td>
-                            <td>{{ number_format((int) ($row['login_count'] ?? 0)) }}</td>
-                            <td>{{ $row['first_login'] ?? '-' }}</td>
-                            <td>{{ $row['last_login'] ?? '-' }}</td>
-                            <td>{{ $row['time_spent'] ?? '00h 00m' }}</td>
+                    @foreach ($activity['days'] as $day)
+                        {{-- Day header row --}}
+                        <tr class="pa-day-row">
+                            <td colspan="2" class="pa-day-header">
+                                {{ $day['date'] }}
+                                <span class="pa-day-sessions">{{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}</span>
+                            </td>
+                            <td colspan="3" class="pa-day-total">
+                                Daily total: {{ $day['total_duration'] }}
+                            </td>
+                            <td></td>
                         </tr>
+                        {{-- Individual session rows --}}
+                        @foreach ($day['sessions'] as $session)
+                            <tr class="pa-session-row">
+                                <td></td>
+                                <td></td>
+                                <td>{{ $session['login_at'] }}</td>
+                                <td>{{ $session['logout_at'] }}</td>
+                                <td>{{ $session['duration'] }}</td>
+                                <td>
+                                    <span class="pa-badge pa-badge--{{ $session['is_current'] ? 'online' : 'offline' }}">
+                                        {{ $session['status'] }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
                     @endforeach
                 </tbody>
             </table>
@@ -238,12 +254,12 @@
     .pa-table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 620px;
+        min-width: 600px;
     }
 
     .pa-table th,
     .pa-table td {
-        padding: 10px 12px;
+        padding: 8px 12px;
         border-bottom: 1px solid #f3f4f6;
         text-align: left;
         font-size: 13px;
@@ -260,6 +276,56 @@
         top: 0;
     }
 
+    .pa-day-row td {
+        background: #f0f4ff;
+        border-top: 2px solid #c7d2fe;
+        border-bottom: 1px solid #c7d2fe;
+    }
+
+    .pa-day-header {
+        font-weight: 700;
+        font-size: 13px !important;
+        color: #3730a3 !important;
+    }
+
+    .pa-day-sessions {
+        margin-left: 8px;
+        font-weight: 400;
+        font-size: 11px;
+        color: #6366f1;
+    }
+
+    .pa-day-total {
+        font-size: 12px !important;
+        color: #4b5563 !important;
+        font-weight: 600;
+    }
+
+    .pa-session-row td {
+        padding-left: 24px;
+        background: #fff;
+    }
+
+    .pa-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .pa-badge--online {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .pa-badge--offline {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
     .pa-empty {
         border: 1px dashed #d1d5db;
         border-radius: 10px;
@@ -269,47 +335,22 @@
         font-size: 14px;
     }
 
-    .dark .pa-description {
-        color: #d1d5db;
-    }
-
-    .dark .pa-summary-card {
-        border-color: #374151;
-        background: #111827;
-    }
-
-    .dark .pa-summary-label {
-        color: #9ca3af;
-    }
-
-    .dark .pa-summary-value {
-        color: #f9fafb;
-    }
-
-    .dark .pa-chart-wrapper {
-        border-color: #374151;
-        background: #111827;
-    }
-
-    .dark .pa-table-wrapper {
-        border-color: #374151;
-        background: #111827;
-    }
-
-    .dark .pa-table th {
-        background: #1f2937;
-        color: #9ca3af;
-        border-bottom-color: #374151;
-    }
-
-    .dark .pa-table td {
-        color: #d1d5db;
-        border-bottom-color: #1f2937;
-    }
-
-    .dark .pa-empty {
-        border-color: #4b5563;
-        background: #1f2937;
-        color: #d1d5db;
-    }
+    /* Dark mode */
+    .dark .pa-description { color: #d1d5db; }
+    .dark .pa-summary-card { border-color: #374151; background: #111827; }
+    .dark .pa-summary-label { color: #9ca3af; }
+    .dark .pa-summary-value { color: #f9fafb; }
+    .dark .pa-chart-wrapper { border-color: #374151; background: #111827; }
+    .dark .pa-table-wrapper { border-color: #374151; background: #111827; }
+    .dark .pa-table th { background: #1f2937; color: #9ca3af; border-bottom-color: #374151; }
+    .dark .pa-table td { color: #d1d5db; border-bottom-color: #1f2937; }
+    .dark .pa-day-row td { background: #1e2a4a; border-top-color: #3730a3; border-bottom-color: #3730a3; }
+    .dark .pa-day-header { color: #a5b4fc !important; }
+    .dark .pa-day-sessions { color: #818cf8; }
+    .dark .pa-day-total { color: #9ca3af !important; }
+    .dark .pa-session-row td { background: #111827; }
+    .dark .pa-badge--online { background: #14532d; color: #86efac; }
+    .dark .pa-badge--offline { background: #374151; color: #9ca3af; }
+    .dark .pa-empty { border-color: #4b5563; background: #1f2937; color: #d1d5db; }
 </style>
+

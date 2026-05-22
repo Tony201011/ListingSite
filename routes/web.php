@@ -204,6 +204,7 @@ Route::middleware('provider.auth')->group(function () {
     // All routes below require an active profile to be selected in session
     Route::middleware('profile.selected')->group(function () {
         Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
+        Route::get('/activity-logs', [MyProfileController::class, 'activityLogs'])->name('activity-logs');
         Route::get('/edit-profile', [MyProfileController::class, 'editProfile'])->name('edit-profile');
         Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
         Route::get('/add-photos', [PhotoController::class, 'index'])->name('add-photos');

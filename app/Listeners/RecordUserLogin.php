@@ -10,7 +10,7 @@ class RecordUserLogin
 {
     public function handle(Login $event): void
     {
-        LoginLog::create([
+        $log = LoginLog::create([
             'user_id' => $event->user->getKey(),
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
@@ -19,6 +19,8 @@ class RecordUserLogin
         if (app()->runningInConsole() || ! request()->hasSession()) {
             return;
         }
+
+        request()->session()->put('login_log_id', $log->id);
 
         request()->session()->flash('auth_session_sync', [
             'id' => (string) Str::uuid(),
