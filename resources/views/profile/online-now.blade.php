@@ -6,6 +6,7 @@
     x-data="onlineNowToggle({
     initialStatus: @js((bool) $onlineStatus),
     initialExpiresAt: @js($expiresAt ?? null),
+    initialOnlineStartedAt: @js($onlineStartedAt ?? null),
     initialBlockedBalance: @js((bool) $blockedBalance),
     updateUrl: @js(route('online.update-status')),
     csrfToken: @js(csrf_token())
@@ -48,8 +49,8 @@
                     <p class="text-sm font-medium text-green-700">Online session timer</p>
                     <div class="mt-2 flex items-center gap-3">
                         <div class="rounded-xl bg-white px-4 py-3 shadow-sm border border-green-100">
-                            <p class="text-xs uppercase tracking-wide text-gray-500">Time left</p>
-                            <p class="mt-1 text-2xl font-bold text-green-600 tabular-nums" x-text="countdown"></p>
+                            <p class="text-xs uppercase tracking-wide text-gray-500">Time Online</p>
+                            <p class="mt-1 text-2xl font-bold text-green-600 tabular-nums" x-text="elapsed"></p>
                         </div>
                     </div>
                 </div>
