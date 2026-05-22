@@ -277,6 +277,39 @@ class ActivityLogsOnlineStatusTest extends TestCase
             ->assertSee('Daily total: 01h 00m 00s');
     }
 
+    public function test_activity_logs_uses_stored_duration_when_timestamp_diff_is_zero(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Selected Profile',
+            'slug' => 'selected-profile',
+        ]);
+
+        Carbon::setTestNow('2026-05-22 11:30:00');
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => Carbon::parse('2026-05-22 09:00:00'),
+            'went_offline_at' => Carbon::parse('2026-05-22 09:00:00'),
+            'duration_seconds' => 3600,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get(route('activity-logs'));
+
+        $response->assertOk()
+            ->assertViewHas('activity', function (array $activity): bool {
+                return ($activity['total_sessions'] ?? null) === 1
+                    && ($activity['total_online_seconds'] ?? null) === 3600;
+            })
+            ->assertSee('01h 00m 00s')
+            ->assertSee('Daily total: 01h 00m 00s');
+    }
+
     private function createCompleteProfile(): array
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
