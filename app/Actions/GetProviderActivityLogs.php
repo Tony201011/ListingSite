@@ -2,15 +2,17 @@
 
 namespace App\Actions;
 
-use App\Models\LoginLog;
+use App\Models\ProviderOnlineLog;
+use App\Models\ProviderProfile;
 use Carbon\Carbon;
 
 class GetProviderActivityLogs
 {
-    public function execute(int $userId, int $lookbackDays = 90): array
+    public function execute(?ProviderProfile $profile, int $lookbackDays = 90): array
     {
         $empty = [
             'total_logins'             => 0,
+            'total_sessions'           => 0,
             'total_online_seconds'     => 0,
             'total_online_duration'    => $this->formatDurationFromSeconds(0),
             'current_session_seconds'  => 0,
@@ -21,23 +23,23 @@ class GetProviderActivityLogs
             'chart_minutes'            => [],
         ];
 
-        if ($userId <= 0) {
+        if (! $profile?->exists) {
             return $empty;
         }
 
         $now = now();
 
-        $sessions = LoginLog::query()
-            ->where('user_id', $userId)
-            ->where('created_at', '>=', $now->copy()->subDays($lookbackDays)->startOfDay())
-            ->orderByDesc('created_at')
+        $sessions = ProviderOnlineLog::query()
+            ->where('provider_profile_id', $profile->id)
+            ->where('went_online_at', '>=', $now->copy()->subDays($lookbackDays)->startOfDay())
+            ->orderByDesc('went_online_at')
             ->get();
 
         if ($sessions->isEmpty()) {
             return $empty;
         }
 
-        $grouped = $sessions->groupBy(fn (LoginLog $log): string => Carbon::parse($log->created_at)->format('Y-m-d'));
+        $grouped = $sessions->groupBy(fn (ProviderOnlineLog $log): string => Carbon::parse($log->went_online_at)->format('Y-m-d'));
 
         $days = [];
         $currentSessionSeconds = 0;
@@ -47,8 +49,8 @@ class GetProviderActivityLogs
             $dayTotalSeconds = 0;
 
             foreach ($daySessions as $log) {
-                $loginAt = Carbon::parse($log->created_at);
-                $isOpen = $log->logged_out_at === null;
+                $loginAt = Carbon::parse($log->went_online_at);
+                $isOpen = $log->went_offline_at === null;
 
                 if ($isOpen) {
                     $sessionSeconds = max(0, (int) $now->diffInSeconds($loginAt));
@@ -57,8 +59,8 @@ class GetProviderActivityLogs
                     $currentSessionSeconds = max($currentSessionSeconds, $sessionSeconds);
                 } else {
                     $sessionSeconds = (int) ($log->duration_seconds
-                        ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
-                    $logoutDisplay = Carbon::parse($log->logged_out_at)->format('h:i A');
+                        ?? max(0, Carbon::parse($log->went_offline_at)->diffInSeconds($loginAt)));
+                    $logoutDisplay = Carbon::parse($log->went_offline_at)->format('h:i A');
                     $status = 'Offline';
                 }
 
@@ -92,6 +94,7 @@ class GetProviderActivityLogs
 
         return [
             'total_logins'             => $sessions->count(),
+            'total_sessions'           => $sessions->count(),
             'total_online_seconds'     => $totalOnlineSeconds,
             'total_online_duration'    => $this->formatDurationFromSeconds($totalOnlineSeconds),
             'current_session_seconds'  => $currentSessionSeconds,

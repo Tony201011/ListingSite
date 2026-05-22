@@ -1,5 +1,6 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('profileOnlineToggle', (config = {}) => ({
+        profileId: Number(config.profileId || 0),
         online: Boolean(config.initialStatus),
         updateUrl: config.updateUrl || '',
         csrfToken: config.csrfToken || '',
@@ -7,6 +8,16 @@ document.addEventListener('alpine:init', () => {
         loading: false,
         message: '',
         messageType: 'success',
+
+        init() {
+            window.profileOnlineSync?.subscribe?.((payload) => {
+                if (Number(payload?.profileId) !== this.profileId) {
+                    return;
+                }
+
+                this.online = payload.status === 'online';
+            });
+        },
 
         async toggleOnline() {
             if (this.loading || !this.updateUrl) return;
@@ -32,6 +43,10 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.online = data.status === 'online';
+                window.profileOnlineSync?.notify({
+                    profileId: this.profileId,
+                    status: data.status,
+                });
 
                 this.showMessage(data.message || 'Status updated.');
             } catch (error) {

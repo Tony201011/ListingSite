@@ -1,11 +1,11 @@
 <div class="pa-modal-content">
     <p class="pa-description">
-        Login activity for {{ $provider->name ?? 'this provider' }} ({{ $provider->user?->email ?? 'N/A' }}).
+        Online and offline session activity for {{ $provider->name ?? 'this provider' }} ({{ $provider->user?->email ?? 'N/A' }}).
     </p>
 
     <div class="pa-summary-grid">
         <section class="pa-summary-card">
-            <span class="pa-summary-label">Provider Name</span>
+            <span class="pa-summary-label">Profile Name</span>
             <span class="pa-summary-meta">{{ $provider->name ?? 'N/A' }}</span>
         </section>
         <section class="pa-summary-card">
@@ -13,8 +13,8 @@
             <span class="pa-summary-meta">{{ $provider->user?->email ?? 'N/A' }}</span>
         </section>
         <section class="pa-summary-card">
-            <span class="pa-summary-label">Total Logins</span>
-            <span class="pa-summary-value">{{ number_format((int) ($activity['total_logins'] ?? 0)) }}</span>
+            <span class="pa-summary-label">Total Sessions</span>
+            <span class="pa-summary-value">{{ number_format((int) ($activity['total_sessions'] ?? $activity['total_logins'] ?? 0)) }}</span>
         </section>
         <section class="pa-summary-card">
             <span class="pa-summary-label">Total Time Online</span>
@@ -106,7 +106,7 @@
                         datasets: [
                             {
                                 type: 'bar',
-                                label: 'Login Count',
+                                label: 'Session Count',
                                 data: logins,
                                 backgroundColor: 'rgba(99,102,241,0.75)',
                                 borderColor: 'rgba(99,102,241,1)',
@@ -146,7 +146,7 @@
                                         if (ctx.datasetIndex === 1) {
                                             return ' Time Online: ' + ctx.parsed.y + ' min';
                                         }
-                                        return ' Logins: ' + ctx.parsed.y;
+                                            return ' Sessions: ' + ctx.parsed.y;
                                     },
                                 },
                             },
@@ -162,7 +162,7 @@
                                 beginAtZero: true,
                                 ticks: { color: 'rgba(99,102,241,1)', stepSize: 1, font: { size: 11 } },
                                 grid: { color: gridColor },
-                                title: { display: true, text: 'Login Count', color: 'rgba(99,102,241,1)', font: { size: 11 } },
+                                title: { display: true, text: 'Session Count', color: 'rgba(99,102,241,1)', font: { size: 11 } },
                             },
                             yMinutes: {
                                 type: 'linear',
@@ -190,7 +190,7 @@
         </script>
     @else
         <div class="pa-empty">
-            No login activity found for this provider yet.
+            No online/offline activity found for this profile yet.
         </div>
     @endif
 </div>

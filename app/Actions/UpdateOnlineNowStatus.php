@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Models\OnlineUser;
+use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
 
 
@@ -17,7 +18,7 @@ class UpdateOnlineNowStatus
             return $this->goOnline($onlineUser, $profile);
         }
 
-        return $this->goOffline($onlineUser);
+        return $this->goOffline($onlineUser, $profile);
     }
 
     private function getOrCreateOnlineUser(ProviderProfile $profile): OnlineUser
@@ -33,6 +34,11 @@ class UpdateOnlineNowStatus
         );
 
         $onlineUser->resetDailyUsageIfNeeded();
+
+        if ($onlineUser->user_id !== $profile->user_id) {
+            $onlineUser->user_id = $profile->user_id;
+            $onlineUser->save();
+        }
 
         return $onlineUser;
     }
@@ -50,17 +56,24 @@ class UpdateOnlineNowStatus
         }
 
         if ($onlineUser->isCurrentlyOnline()) {
+            $this->ensureOpenSessionLog($profile);
+
             return ActionResult::success([
                 'status' => 'online',
                 'expires_at' => null,
             ], 'You are already online.');
         }
 
+        $this->closeOpenSessionLogs($profile);
+
         $onlineUser->status = 'online';
         $onlineUser->usage_date = today();
+        $onlineUser->usage_count += 1;
         $onlineUser->online_started_at = now();
         $onlineUser->online_expires_at = null;
         $onlineUser->save();
+
+        $this->ensureOpenSessionLog($profile);
 
         return ActionResult::success([
             'status' => 'online',
@@ -68,17 +81,54 @@ class UpdateOnlineNowStatus
         ], 'Online Now enabled.');
     }
 
-    private function goOffline(OnlineUser $onlineUser): ActionResult
+    private function goOffline(OnlineUser $onlineUser, ProviderProfile $profile): ActionResult
     {
         $onlineUser->status = 'offline';
         $onlineUser->online_started_at = null;
         $onlineUser->online_expires_at = null;
         $onlineUser->save();
 
+        $this->closeOpenSessionLogs($profile);
+
         return ActionResult::success([
             'status' => 'offline',
             'expires_at' => null,
         ], 'Online Now disabled.');
+    }
+
+    private function ensureOpenSessionLog(ProviderProfile $profile): void
+    {
+        $openLog = ProviderOnlineLog::query()
+            ->where('provider_profile_id', $profile->id)
+            ->whereNull('went_offline_at')
+            ->latest('went_online_at')
+            ->first();
+
+        if ($openLog) {
+            return;
+        }
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $profile->user_id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => now(),
+        ]);
+    }
+
+    private function closeOpenSessionLogs(ProviderProfile $profile): void
+    {
+        $closedAt = now();
+
+        ProviderOnlineLog::query()
+            ->where('provider_profile_id', $profile->id)
+            ->whereNull('went_offline_at')
+            ->get()
+            ->each(function (ProviderOnlineLog $log) use ($closedAt): void {
+                $log->update([
+                    'went_offline_at' => $closedAt,
+                    'duration_seconds' => max(0, (int) $closedAt->diffInSeconds($log->went_online_at)),
+                ]);
+            });
     }
 
     private function isFreeListingExpiredWithNegativeBalance(ProviderProfile $profile): bool

@@ -13,21 +13,21 @@
         </button>
 
         <h1 class="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Activity Logs</h1>
-        <p class="mb-8 text-sm text-gray-500">Your login session history for the last 90 days.</p>
+        <p class="mb-8 text-sm text-gray-500">Online and offline session history for {{ $profile?->name ?? 'your selected profile' }} during the last 90 days.</p>
 
         {{-- Summary cards --}}
         <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Provider Name</p>
-                <p class="mt-1 text-base font-bold text-gray-900">{{ $user->name ?? 'N/A' }}</p>
+                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Profile Name</p>
+                <p class="mt-1 text-base font-bold text-gray-900">{{ $profile?->name ?? 'N/A' }}</p>
             </div>
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                 <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Provider Email</p>
                 <p class="mt-1 text-base font-bold text-gray-900 break-all">{{ $user->email ?? 'N/A' }}</p>
             </div>
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Total Logins</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900">{{ number_format($activity['total_logins']) }}</p>
+                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Total Sessions</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900">{{ number_format($activity['total_sessions'] ?? $activity['total_logins']) }}</p>
             </div>
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                 <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Total Time Online</p>
@@ -91,12 +91,33 @@
             </div>
         @else
             <div class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center text-gray-500">
-                No login activity found yet.
+                No online/offline activity found yet.
             </div>
         @endif
 
     </div>
 </div>
+
+@push('scripts')
+    <script src="{{ asset('profile/js/profile-online-sync.js') }}?v={{ filemtime(public_path('profile/js/profile-online-sync.js')) }}"></script>
+    <script>
+        (function () {
+            const currentProfileId = @json($profile?->id);
+
+            if (! currentProfileId || ! window.profileOnlineSync?.subscribe) {
+                return;
+            }
+
+            window.profileOnlineSync.subscribe(function (payload) {
+                if (Number(payload?.profileId) !== Number(currentProfileId)) {
+                    return;
+                }
+
+                window.location.reload();
+            });
+        })();
+    </script>
+@endpush
 
 <style>
     .al-table th {
