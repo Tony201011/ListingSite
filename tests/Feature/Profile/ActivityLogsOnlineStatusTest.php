@@ -108,6 +108,8 @@ class ActivityLogsOnlineStatusTest extends TestCase
                     && ($activity['total_online_seconds'] ?? null) === 5400;
             })
             ->assertSee('Selected Profile')
+            ->assertSee('01h 30m 00s')
+            ->assertSee('00h 30m 00s')
             ->assertSee('Total Sessions')
             ->assertDontSee('Other Profile');
     }

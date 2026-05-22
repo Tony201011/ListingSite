@@ -111,7 +111,8 @@ class GetProviderActivityLogs
         $seconds = max(0, $seconds);
         $hours = intdiv($seconds, 3600);
         $minutes = intdiv($seconds % 3600, 60);
+        $remainingSeconds = $seconds % 60;
 
-        return sprintf('%02dh %02dm', $hours, $minutes);
+        return sprintf('%02dh %02dm %02ds', $hours, $minutes, $remainingSeconds);
     }
 }
