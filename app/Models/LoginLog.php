@@ -11,6 +11,12 @@ class LoginLog extends Model
         'user_id',
         'ip_address',
         'user_agent',
+        'logged_out_at',
+        'duration_seconds',
+    ];
+
+    protected $casts = [
+        'logged_out_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

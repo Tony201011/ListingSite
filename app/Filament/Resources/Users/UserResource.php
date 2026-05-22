@@ -1849,60 +1849,115 @@ class UserResource extends Resource
 
     private static function getProviderActivityLogs(ProviderProfile $record): array
     {
+        $empty = [
+            'total_logins'             => 0,
+            'total_online_seconds'     => 0,
+            'total_online_duration'    => self::formatDurationFromSeconds(0),
+            'current_session_seconds'  => 0,
+            'current_session_duration' => self::formatDurationFromSeconds(0),
+            'days'                     => [],
+            'chart_labels'             => [],
+            'chart_logins'             => [],
+            'chart_minutes'            => [],
+        ];
+
         if (! $record->user_id) {
-            return [
-                'total_logins' => 0,
-                'total_online_seconds' => 0,
-                'total_online_duration' => self::formatDurationFromSeconds(0),
-                'current_session_seconds' => 0,
-                'current_session_duration' => self::formatDurationFromSeconds(0),
-                'history' => [],
+            return $empty;
+        }
+
+        // Detect if the provider currently has an open (unfinished) login session.
+        $openLog = LoginLog::where('user_id', $record->user_id)
+            ->whereNull('logged_out_at')
+            ->latest()
+            ->first();
+
+        $currentSessionSeconds = 0;
+        if ($openLog) {
+            $currentSessionSeconds = max(0, (int) now()->diffInSeconds($openLog->created_at));
+        }
+
+        // Fetch all individual sessions for the last 90 days, newest first.
+        $sessions = LoginLog::where('user_id', $record->user_id)
+            ->where('created_at', '>=', now()->subDays(90)->startOfDay())
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($sessions->isEmpty()) {
+            return array_merge($empty, [
+                'current_session_seconds'  => $currentSessionSeconds,
+                'current_session_duration' => self::formatDurationFromSeconds($currentSessionSeconds),
+            ]);
+        }
+
+        // Group sessions by date (calendar day of login).
+        $grouped = $sessions->groupBy(fn (LoginLog $log): string => Carbon::parse($log->created_at)->format('Y-m-d'));
+
+        $days = [];
+
+        foreach ($grouped as $dateKey => $daySessions) {
+            $sessionRows = [];
+            $dayTotalSeconds = 0;
+
+            foreach ($daySessions as $log) {
+                $loginAt = Carbon::parse($log->created_at);
+                $isOpen  = $log->logged_out_at === null;
+
+                if ($isOpen) {
+                    // Currently active session – duration calculated from login time.
+                    $sessionSeconds = $currentSessionSeconds;
+                    $logoutDisplay  = '—';
+                    $status         = 'Online';
+                } else {
+                    $sessionSeconds = (int) ($log->duration_seconds
+                        ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
+                    $logoutDisplay  = Carbon::parse($log->logged_out_at)->format('h:i A');
+                    $status         = 'Offline';
+                }
+
+                $dayTotalSeconds += $sessionSeconds;
+
+                $sessionRows[] = [
+                    'login_at'         => $loginAt->format('h:i A'),
+                    'logout_at'        => $logoutDisplay,
+                    'duration'         => self::formatDurationFromSeconds($sessionSeconds),
+                    'duration_seconds' => $sessionSeconds,
+                    'status'           => $status,
+                    'is_current'       => $isOpen,
+                ];
+            }
+
+            $days[] = [
+                'date'            => Carbon::parse($dateKey)->format('d M Y'),
+                'date_key'        => $dateKey,
+                'session_count'   => count($sessionRows),
+                'total_duration'  => self::formatDurationFromSeconds($dayTotalSeconds),
+                'total_seconds'   => $dayTotalSeconds,
+                'sessions'        => $sessionRows,
             ];
         }
 
-        $dailyHistory = LoginLog::query()
-            ->selectRaw('DATE(created_at) as login_date')
-            ->selectRaw('COUNT(*) as login_count')
-            ->selectRaw('MIN(created_at) as first_login_at')
-            ->selectRaw('MAX(created_at) as last_login_at')
-            ->where('user_id', $record->user_id)
-            ->groupByRaw('DATE(created_at)')
-            ->orderByDesc('login_date')
-            ->limit(90)
-            ->get()
-            ->map(function (LoginLog $log): array {
-                $firstLogin = filled($log->first_login_at) ? Carbon::parse($log->first_login_at) : null;
-                $lastLogin = filled($log->last_login_at) ? Carbon::parse($log->last_login_at) : null;
-                $onlineSeconds = $firstLogin && $lastLogin
-                    ? max(0, $lastLogin->diffInSeconds($firstLogin))
-                    : 0;
+        // Sort days newest-first (already grouped newest-first, but sort to be safe).
+        usort($days, fn ($a, $b) => strcmp($b['date_key'], $a['date_key']));
 
-                return [
-                    'date' => filled($log->login_date) ? Carbon::parse($log->login_date)->format('d M Y') : '-',
-                    'login_count' => (int) ($log->login_count ?? 0),
-                    'time_spent_seconds' => $onlineSeconds,
-                    'time_spent' => self::formatDurationFromSeconds($onlineSeconds),
-                    'first_login' => $firstLogin?->format('h:i A') ?? '-',
-                    'last_login' => $lastLogin?->format('h:i A') ?? '-',
-                ];
-            })
-            ->values();
+        $totalLogins       = $sessions->count();
+        $totalOnlineSeconds = array_sum(array_column($days, 'total_seconds'));
 
-        $currentSessionSeconds = 0;
-        if ($record->onlineUser?->status === 'online' && $record->onlineUser?->online_started_at) {
-            $currentSessionSeconds = max(0, now()->diffInSeconds($record->onlineUser->online_started_at));
-        }
-
-        $totalLogins = (int) $dailyHistory->sum('login_count');
-        $totalOnlineSeconds = (int) $dailyHistory->sum('time_spent_seconds') + $currentSessionSeconds;
+        // Build chart data (oldest → newest, last 30 days max).
+        $chartDays    = array_slice(array_reverse($days), 0, 30);
+        $chartLabels  = array_column($chartDays, 'date');
+        $chartLogins  = array_column($chartDays, 'session_count');
+        $chartMinutes = array_map(fn ($d) => round($d['total_seconds'] / 60, 1), $chartDays);
 
         return [
-            'total_logins' => $totalLogins,
-            'total_online_seconds' => $totalOnlineSeconds,
-            'total_online_duration' => self::formatDurationFromSeconds($totalOnlineSeconds),
-            'current_session_seconds' => $currentSessionSeconds,
+            'total_logins'             => $totalLogins,
+            'total_online_seconds'     => $totalOnlineSeconds,
+            'total_online_duration'    => self::formatDurationFromSeconds($totalOnlineSeconds),
+            'current_session_seconds'  => $currentSessionSeconds,
             'current_session_duration' => self::formatDurationFromSeconds($currentSessionSeconds),
-            'history' => $dailyHistory->all(),
+            'days'                     => $days,
+            'chart_labels'             => $chartLabels,
+            'chart_logins'             => $chartLogins,
+            'chart_minutes'            => $chartMinutes,
         ];
     }
 

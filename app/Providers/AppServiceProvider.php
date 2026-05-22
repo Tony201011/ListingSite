@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\LogPasswordResetNotificationEmail;
 use App\Listeners\RecordUserLogin;
+use App\Listeners\RecordUserLogout;
 use App\Models\FooterText;
 use App\Models\FooterWidget;
 use App\Models\HeaderWidget;
@@ -14,6 +15,7 @@ use App\Notifications\BrandedAgentResetPasswordNotification;
 use Filament\Auth\Notifications\ResetPassword as FilamentResetPasswordNotification;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\QueryException;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Events\NotificationSent;
@@ -80,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureStorageFromDatabase();
 
         Event::listen(Login::class, RecordUserLogin::class);
+        Event::listen(Logout::class, RecordUserLogout::class);
         Event::listen(NotificationSent::class, LogPasswordResetNotificationEmail::class);
         Event::listen(NotificationFailed::class, LogPasswordResetNotificationEmail::class);
     }
