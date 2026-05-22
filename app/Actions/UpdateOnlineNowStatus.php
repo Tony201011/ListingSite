@@ -61,6 +61,7 @@ class UpdateOnlineNowStatus
             return ActionResult::success([
                 'status' => 'online',
                 'expires_at' => null,
+                'online_started_at' => $onlineUser->online_started_at?->toIso8601String(),
             ], 'You are already online.');
         }
 
@@ -78,6 +79,7 @@ class UpdateOnlineNowStatus
         return ActionResult::success([
             'status' => 'online',
             'expires_at' => null,
+            'online_started_at' => $onlineUser->online_started_at->toIso8601String(),
         ], 'Online Now enabled.');
     }
 

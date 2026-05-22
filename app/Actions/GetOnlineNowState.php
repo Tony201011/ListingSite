@@ -24,9 +24,10 @@ class GetOnlineNowState
         }
 
         $onlineStatus = $onlineUser->isCurrentlyOnline();
+        $onlineStartedAt = $onlineStatus ? $onlineUser->online_started_at?->toIso8601String() : null;
         $blockedBalance = $this->isFreeListingExpiredWithNegativeBalance($profile);
 
-        return compact('onlineStatus', 'expiresAt', 'blockedBalance');
+        return compact('onlineStatus', 'expiresAt', 'onlineStartedAt', 'blockedBalance');
     }
 
     private function getOrCreateOnlineUser(ProviderProfile $profile): OnlineUser
