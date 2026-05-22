@@ -53,6 +53,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema as SchemaFacade;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -1847,4 +1848,136 @@ class UserResource extends Resource
         return $result;
     }
 
+    private static function getProviderActivityLogs(ProviderProfile $record): array
+    {
+        $hasLogoutTracking = SchemaFacade::hasColumns('login_logs', ['logged_out_at', 'duration_seconds']);
+
+        $empty = [
+            'total_logins'             => 0,
+            'total_online_seconds'     => 0,
+            'total_online_duration'    => self::formatDurationFromSeconds(0),
+            'current_session_seconds'  => 0,
+            'current_session_duration' => self::formatDurationFromSeconds(0),
+            'days'                     => [],
+            'chart_labels'             => [],
+            'chart_logins'             => [],
+            'chart_minutes'            => [],
+        ];
+
+        if (! $record->user_id) {
+            return $empty;
+        }
+
+        // Detect if the provider currently has an open (unfinished) login session.
+        $openLog = null;
+        if ($hasLogoutTracking) {
+            $openLog = LoginLog::where('user_id', $record->user_id)
+                ->whereNull('logged_out_at')
+                ->latest()
+                ->first();
+        }
+
+        $currentSessionSeconds = 0;
+        if ($openLog) {
+            $currentSessionSeconds = max(0, (int) now()->diffInSeconds($openLog->created_at));
+        }
+
+        // Fetch all individual sessions for the last 90 days, newest first.
+        $sessions = LoginLog::where('user_id', $record->user_id)
+            ->where('created_at', '>=', now()->subDays(90)->startOfDay())
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($sessions->isEmpty()) {
+            return array_merge($empty, [
+                'current_session_seconds'  => $currentSessionSeconds,
+                'current_session_duration' => self::formatDurationFromSeconds($currentSessionSeconds),
+            ]);
+        }
+
+        // Group sessions by date (calendar day of login).
+        $grouped = $sessions->groupBy(fn (LoginLog $log): string => Carbon::parse($log->created_at)->format('Y-m-d'));
+
+        $days = [];
+
+        foreach ($grouped as $dateKey => $daySessions) {
+            $sessionRows = [];
+            $dayTotalSeconds = 0;
+
+            foreach ($daySessions as $log) {
+                $loginAt = Carbon::parse($log->created_at);
+                $isOpen  = $hasLogoutTracking && $log->logged_out_at === null;
+
+                if ($isOpen) {
+                    // Currently active session – duration calculated from login time.
+                    $sessionSeconds = $currentSessionSeconds;
+                    $logoutDisplay  = '—';
+                    $status         = 'Online';
+                } else {
+                    if ($hasLogoutTracking && $log->logged_out_at) {
+                        $sessionSeconds = (int) ($log->duration_seconds
+                            ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
+                        $logoutDisplay = Carbon::parse($log->logged_out_at)->format('h:i A');
+                    } else {
+                        $sessionSeconds = 0;
+                        $logoutDisplay = '—';
+                    }
+                    $status         = 'Offline';
+                }
+
+                $dayTotalSeconds += $sessionSeconds;
+
+                $sessionRows[] = [
+                    'login_at'         => $loginAt->format('h:i A'),
+                    'logout_at'        => $logoutDisplay,
+                    'duration'         => self::formatDurationFromSeconds($sessionSeconds),
+                    'duration_seconds' => $sessionSeconds,
+                    'status'           => $status,
+                    'is_current'       => $isOpen,
+                ];
+            }
+
+            $days[] = [
+                'date'            => Carbon::parse($dateKey)->format('d M Y'),
+                'date_key'        => $dateKey,
+                'session_count'   => count($sessionRows),
+                'total_duration'  => self::formatDurationFromSeconds($dayTotalSeconds),
+                'total_seconds'   => $dayTotalSeconds,
+                'sessions'        => $sessionRows,
+            ];
+        }
+
+        // Sort days newest-first (already grouped newest-first, but sort to be safe).
+        usort($days, fn ($a, $b) => strcmp($b['date_key'], $a['date_key']));
+
+        $totalLogins       = $sessions->count();
+        $totalOnlineSeconds = array_sum(array_column($days, 'total_seconds'));
+
+        // Build chart data (oldest → newest, last 30 days max).
+        $chartDays    = array_slice(array_reverse($days), 0, 30);
+        $chartLabels  = array_column($chartDays, 'date');
+        $chartLogins  = array_column($chartDays, 'session_count');
+        $chartMinutes = array_map(fn ($d) => round($d['total_seconds'] / 60, 1), $chartDays);
+
+        return [
+            'total_logins'             => $totalLogins,
+            'total_online_seconds'     => $totalOnlineSeconds,
+            'total_online_duration'    => self::formatDurationFromSeconds($totalOnlineSeconds),
+            'current_session_seconds'  => $currentSessionSeconds,
+            'current_session_duration' => self::formatDurationFromSeconds($currentSessionSeconds),
+            'days'                     => $days,
+            'chart_labels'             => $chartLabels,
+            'chart_logins'             => $chartLogins,
+            'chart_minutes'            => $chartMinutes,
+        ];
+    }
+
+    private static function formatDurationFromSeconds(int $seconds): string
+    {
+        $seconds = max(0, $seconds);
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+
+        return sprintf('%02dh %02dm', $hours, $minutes);
+    }
 }
