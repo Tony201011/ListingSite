@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\OnlineUser;
+use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +15,13 @@ use Tests\TestCase;
 class LoginLogoutTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
+    }
 
     private function createVerifiedUser(array $overrides = []): User
     {
@@ -188,6 +198,57 @@ class LoginLogoutTest extends TestCase
         $response->assertCookieExpired(Auth::guard('admin')->getRecallerName());
         $this->assertGuest('web');
         $this->assertGuest('admin');
+    }
+
+    public function test_logout_closes_open_online_sessions_and_calculates_duration(): void
+    {
+        Carbon::setTestNow('2026-05-22 11:30:00');
+
+        $user = $this->createVerifiedUser([
+            'role' => User::ROLE_PROVIDER,
+        ]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Selected Profile',
+            'slug' => 'selected-profile-'.$user->id,
+        ]);
+
+        $startedAt = now()->copy()->subHour()->subMinutes(45);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => $startedAt,
+            'online_expires_at' => null,
+        ]);
+
+        $sessionLog = ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => $startedAt,
+            'went_offline_at' => null,
+            'duration_seconds' => null,
+        ]);
+
+        $response = $this->actingAs($user)->post('/logout');
+
+        $response->assertRedirect('/');
+        $this->assertGuest();
+
+        $onlineUser = OnlineUser::query()->where('user_id', $user->id)->first();
+        $this->assertNotNull($onlineUser);
+        $this->assertSame('offline', $onlineUser->status);
+        $this->assertNull($onlineUser->online_started_at);
+        $this->assertNull($onlineUser->online_expires_at);
+
+        $sessionLog->refresh();
+        $this->assertNotNull($sessionLog->went_offline_at);
+        $this->assertSame(6300, $sessionLog->duration_seconds);
+        $this->assertTrue($sessionLog->went_offline_at->equalTo(now()));
     }
 
     public function test_logged_out_session_cannot_access_json_provider_routes(): void
