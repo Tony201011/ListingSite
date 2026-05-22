@@ -428,9 +428,7 @@ class GetProfileShowData
             return false;
         }
 
-        return $onlineUser->status === 'online'
-            && $onlineUser->online_expires_at !== null
-            && $onlineUser->online_expires_at > now();
+        return $onlineUser->isCurrentlyOnline();
     }
 
     private function normalizeMediaUrl(?string $path): ?string
