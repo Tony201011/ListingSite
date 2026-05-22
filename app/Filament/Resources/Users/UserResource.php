@@ -53,7 +53,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Schema as SchemaFacade;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -1850,7 +1850,7 @@ class UserResource extends Resource
 
     private static function getProviderActivityLogs(ProviderProfile $record): array
     {
-        $hasLogoutTracking = Schema::hasColumns('login_logs', ['logged_out_at', 'duration_seconds']);
+        $hasLogoutTracking = SchemaFacade::hasColumns('login_logs', ['logged_out_at', 'duration_seconds']);
 
         $empty = [
             'total_logins'             => 0,
