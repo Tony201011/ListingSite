@@ -174,7 +174,7 @@
                                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                                         </svg>
                                                     </span>
-                                                    <span x-show="!loading" x-text="online ? 'Online Now' : 'Go Online'"></span>
+                                                    <span x-show="!loading" x-text="online ? 'Go Offline' : 'Go Online'"></span>
                                                 </button>
                                             </div>
                                         @endif
