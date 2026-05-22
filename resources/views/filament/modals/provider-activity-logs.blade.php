@@ -18,11 +18,11 @@
         </section>
         <section class="pa-summary-card">
             <span class="pa-summary-label">Total Time Online</span>
-            <span class="pa-summary-value">{{ $activity['total_online_duration'] ?? '00h 00m' }}</span>
+            <span class="pa-summary-value">{{ $activity['total_online_duration'] ?? '00h 00m 00s' }}</span>
         </section>
         <section class="pa-summary-card">
             <span class="pa-summary-label">Current Session</span>
-            <span class="pa-summary-value">{{ $activity['current_session_duration'] ?? '00h 00m' }}</span>
+            <span class="pa-summary-value">{{ $activity['current_session_duration'] ?? '00h 00m 00s' }}</span>
         </section>
     </div>
 

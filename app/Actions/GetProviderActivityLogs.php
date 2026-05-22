@@ -21,9 +21,9 @@ class GetProviderActivityLogs
             'total_logins'             => 0,
             'total_sessions'           => 0,
             'total_online_seconds'     => 0,
-            'total_online_duration'    => $this->formatDurationFromSeconds(0),
+            'total_online_duration'    => $this->formatDuration(0),
             'current_session_seconds'  => 0,
-            'current_session_duration' => $this->formatDurationFromSeconds(0),
+            'current_session_duration' => $this->formatDuration(0),
             'days'                     => [],
             'chart_labels'             => [],
             'chart_logins'             => [],
@@ -64,17 +64,23 @@ class GetProviderActivityLogs
 
             foreach ($daySessions as $log) {
                 $loginAt = Carbon::parse($log->went_online_at);
-                $isOpen = $log->went_offline_at === null;
+                $logoutAt = $log->went_offline_at ? Carbon::parse($log->went_offline_at) : null;
+                $statusValue = strtoupper((string) ($log->status ?? ''));
+                $isOpen = $logoutAt === null && ($statusValue === '' || $statusValue === 'ONLINE');
+                $sessionSeconds = $this->calculateSessionSeconds(
+                    $loginAt,
+                    $logoutAt,
+                    $log->duration_seconds,
+                    $isOpen,
+                    $now,
+                );
 
                 if ($isOpen) {
-                    $sessionSeconds = max(0, (int) $now->diffInSeconds($loginAt));
                     $logoutDisplay = '—';
                     $status = 'Online';
                     $currentSessionSeconds = max($currentSessionSeconds, $sessionSeconds);
                 } else {
-                    $sessionSeconds = (int) ($log->duration_seconds
-                        ?? max(0, Carbon::parse($log->went_offline_at)->diffInSeconds($loginAt)));
-                    $logoutDisplay = Carbon::parse($log->went_offline_at)->format('h:i A');
+                    $logoutDisplay = $logoutAt?->format('h:i A') ?? '—';
                     $status = 'Offline';
                 }
 
@@ -84,7 +90,7 @@ class GetProviderActivityLogs
                     'date'             => $loginAt->format('d M Y'),
                     'login_at'         => $loginAt->format('h:i A'),
                     'logout_at'        => $logoutDisplay,
-                    'duration'         => $this->formatDurationFromSeconds($sessionSeconds),
+                    'duration'         => $this->formatDuration($sessionSeconds),
                     'duration_seconds' => $sessionSeconds,
                     'status'           => $status,
                     'is_current'       => $isOpen,
@@ -95,7 +101,7 @@ class GetProviderActivityLogs
                 'date'           => Carbon::parse($dateKey)->format('d M Y'),
                 'date_key'       => $dateKey,
                 'session_count'  => count($sessionRows),
-                'total_duration' => $this->formatDurationFromSeconds($dayTotalSeconds),
+                'total_duration' => $this->formatDuration($dayTotalSeconds),
                 'total_seconds'  => $dayTotalSeconds,
                 'sessions'       => $sessionRows,
             ];
@@ -110,9 +116,9 @@ class GetProviderActivityLogs
             'total_logins'             => $sessions->count(),
             'total_sessions'           => $sessions->count(),
             'total_online_seconds'     => $totalOnlineSeconds,
-            'total_online_duration'    => $this->formatDurationFromSeconds($totalOnlineSeconds),
+            'total_online_duration'    => $this->formatDuration($totalOnlineSeconds),
             'current_session_seconds'  => $currentSessionSeconds,
-            'current_session_duration' => $this->formatDurationFromSeconds($currentSessionSeconds),
+            'current_session_duration' => $this->formatDuration($currentSessionSeconds),
             'days'                     => $days,
             'chart_labels'             => array_column($chartDays, 'date'),
             'chart_logins'             => array_column($chartDays, 'session_count'),
@@ -152,17 +158,23 @@ class GetProviderActivityLogs
 
             foreach ($daySessions as $log) {
                 $loginAt = Carbon::parse($log->created_at);
-                $isOpen = $log->logged_out_at === null;
+                $logoutAt = $log->logged_out_at ? Carbon::parse($log->logged_out_at) : null;
+                $statusValue = strtoupper((string) ($log->status ?? ''));
+                $isOpen = $logoutAt === null && ($statusValue === '' || $statusValue === 'ONLINE');
+                $sessionSeconds = $this->calculateSessionSeconds(
+                    $loginAt,
+                    $logoutAt,
+                    $log->duration_seconds,
+                    $isOpen,
+                    $now,
+                );
 
                 if ($isOpen) {
-                    $sessionSeconds = max(0, (int) $now->diffInSeconds($loginAt));
                     $logoutDisplay = '—';
                     $status = 'Online';
                     $currentSessionSeconds = max($currentSessionSeconds, $sessionSeconds);
                 } else {
-                    $sessionSeconds = (int) ($log->duration_seconds
-                        ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
-                    $logoutDisplay = Carbon::parse($log->logged_out_at)->format('h:i A');
+                    $logoutDisplay = $logoutAt?->format('h:i A') ?? '—';
                     $status = 'Offline';
                 }
 
@@ -172,7 +184,7 @@ class GetProviderActivityLogs
                     'date'             => $loginAt->format('d M Y'),
                     'login_at'         => $loginAt->format('h:i A'),
                     'logout_at'        => $logoutDisplay,
-                    'duration'         => $this->formatDurationFromSeconds($sessionSeconds),
+                    'duration'         => $this->formatDuration($sessionSeconds),
                     'duration_seconds' => $sessionSeconds,
                     'status'           => $status,
                     'is_current'       => $isOpen,
@@ -183,7 +195,7 @@ class GetProviderActivityLogs
                 'date'           => Carbon::parse($dateKey)->format('d M Y'),
                 'date_key'       => $dateKey,
                 'session_count'  => count($sessionRows),
-                'total_duration' => $this->formatDurationFromSeconds($dayTotalSeconds),
+                'total_duration' => $this->formatDuration($dayTotalSeconds),
                 'total_seconds'  => $dayTotalSeconds,
                 'sessions'       => $sessionRows,
             ];
@@ -198,9 +210,9 @@ class GetProviderActivityLogs
             'total_logins'             => $sessions->count(),
             'total_sessions'           => $sessions->count(),
             'total_online_seconds'     => $totalOnlineSeconds,
-            'total_online_duration'    => $this->formatDurationFromSeconds($totalOnlineSeconds),
+            'total_online_duration'    => $this->formatDuration($totalOnlineSeconds),
             'current_session_seconds'  => $currentSessionSeconds,
-            'current_session_duration' => $this->formatDurationFromSeconds($currentSessionSeconds),
+            'current_session_duration' => $this->formatDuration($currentSessionSeconds),
             'days'                     => $days,
             'chart_labels'             => array_column($chartDays, 'date'),
             'chart_logins'             => array_column($chartDays, 'session_count'),
@@ -208,14 +220,37 @@ class GetProviderActivityLogs
         ];
     }
 
-    private function formatDurationFromSeconds(int $seconds): string
-    {
-        $seconds = max(0, $seconds);
-        $hours = intdiv($seconds, 3600);
-        $minutes = intdiv($seconds % 3600, 60);
-        $remainingSeconds = $seconds % 60;
+    private function calculateSessionSeconds(
+        Carbon $loginAt,
+        ?Carbon $logoutAt,
+        ?int $storedDuration,
+        bool $isOnline,
+        Carbon $now,
+    ): int {
+        if ($logoutAt) {
+            return max(0, (int) $logoutAt->diffInSeconds($loginAt));
+        }
 
-        return sprintf('%02dh %02dm %02ds', $hours, $minutes, $remainingSeconds);
+        if ($isOnline) {
+            return max(0, (int) $now->diffInSeconds($loginAt));
+        }
+
+        return max(0, (int) ($storedDuration ?? 0));
+    }
+
+    private function formatDuration(int $totalSeconds): string
+    {
+        $totalSeconds = max(0, $totalSeconds);
+        $hours = intdiv($totalSeconds, 3600);
+        $minutes = intdiv($totalSeconds % 3600, 60);
+        $seconds = $totalSeconds % 60;
+
+        return sprintf(
+            '%sh %sm %ss',
+            str_pad((string) $hours, 2, '0', STR_PAD_LEFT),
+            str_pad((string) $minutes, 2, '0', STR_PAD_LEFT),
+            str_pad((string) $seconds, 2, '0', STR_PAD_LEFT),
+        );
     }
 
     private function resolveDateRange(
