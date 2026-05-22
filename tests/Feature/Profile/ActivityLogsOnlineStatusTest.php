@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Profile;
 
+use App\Models\LoginLog;
 use App\Models\ProfileImage;
 use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
@@ -112,6 +113,44 @@ class ActivityLogsOnlineStatusTest extends TestCase
             ->assertSee('00h 30m 00s')
             ->assertSee('Total Sessions')
             ->assertDontSee('Other Profile');
+    }
+
+    public function test_activity_logs_page_falls_back_to_legacy_login_logs_when_profile_logs_absent(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Selected Profile',
+            'slug' => 'selected-profile',
+        ]);
+
+        Carbon::setTestNow('2026-05-22 11:30:00');
+
+        LoginLog::query()->create([
+            'user_id' => $user->id,
+            'created_at' => now()->copy()->subHours(2)->subMinutes(45),
+            'logged_out_at' => now()->copy()->subHours(1)->subMinutes(45),
+            'duration_seconds' => 3600,
+        ]);
+
+        LoginLog::query()->create([
+            'user_id' => $user->id,
+            'created_at' => now()->copy()->subMinutes(45),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get(route('activity-logs'));
+
+        $response->assertOk()
+            ->assertViewHas('activity', function (array $activity): bool {
+                return ($activity['total_sessions'] ?? null) === 2
+                    && ($activity['current_session_seconds'] ?? null) === 2700
+                    && ($activity['total_online_seconds'] ?? null) === 6300;
+            })
+            ->assertSee('01h 45m 00s')
+            ->assertSee('00h 45m 00s');
     }
 
     private function createCompleteProfile(): array

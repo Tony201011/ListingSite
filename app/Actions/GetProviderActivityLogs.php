@@ -2,9 +2,11 @@
 
 namespace App\Actions;
 
+use App\Models\LoginLog;
 use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class GetProviderActivityLogs
 {
@@ -36,6 +38,12 @@ class GetProviderActivityLogs
             ->get();
 
         if ($sessions->isEmpty()) {
+            $legacyActivity = $this->getLegacyUserActivity($profile, $lookbackDays, $now);
+
+            if ($legacyActivity !== null) {
+                return $legacyActivity;
+            }
+
             return $empty;
         }
 
@@ -61,6 +69,89 @@ class GetProviderActivityLogs
                     $sessionSeconds = (int) ($log->duration_seconds
                         ?? max(0, Carbon::parse($log->went_offline_at)->diffInSeconds($loginAt)));
                     $logoutDisplay = Carbon::parse($log->went_offline_at)->format('h:i A');
+                    $status = 'Offline';
+                }
+
+                $dayTotalSeconds += $sessionSeconds;
+
+                $sessionRows[] = [
+                    'date'             => $loginAt->format('d M Y'),
+                    'login_at'         => $loginAt->format('h:i A'),
+                    'logout_at'        => $logoutDisplay,
+                    'duration'         => $this->formatDurationFromSeconds($sessionSeconds),
+                    'duration_seconds' => $sessionSeconds,
+                    'status'           => $status,
+                    'is_current'       => $isOpen,
+                ];
+            }
+
+            $days[] = [
+                'date'           => Carbon::parse($dateKey)->format('d M Y'),
+                'date_key'       => $dateKey,
+                'session_count'  => count($sessionRows),
+                'total_duration' => $this->formatDurationFromSeconds($dayTotalSeconds),
+                'total_seconds'  => $dayTotalSeconds,
+                'sessions'       => $sessionRows,
+            ];
+        }
+
+        usort($days, fn ($a, $b) => strcmp($b['date_key'], $a['date_key']));
+
+        $totalOnlineSeconds = array_sum(array_column($days, 'total_seconds'));
+        $chartDays = array_slice(array_reverse($days), 0, 30);
+
+        return [
+            'total_logins'             => $sessions->count(),
+            'total_sessions'           => $sessions->count(),
+            'total_online_seconds'     => $totalOnlineSeconds,
+            'total_online_duration'    => $this->formatDurationFromSeconds($totalOnlineSeconds),
+            'current_session_seconds'  => $currentSessionSeconds,
+            'current_session_duration' => $this->formatDurationFromSeconds($currentSessionSeconds),
+            'days'                     => $days,
+            'chart_labels'             => array_column($chartDays, 'date'),
+            'chart_logins'             => array_column($chartDays, 'session_count'),
+            'chart_minutes'            => array_map(fn ($day) => round($day['total_seconds'] / 60, 1), $chartDays),
+        ];
+    }
+
+    private function getLegacyUserActivity(ProviderProfile $profile, int $lookbackDays, Carbon $now): ?array
+    {
+        if (! Schema::hasColumns('login_logs', ['logged_out_at', 'duration_seconds'])) {
+            return null;
+        }
+
+        $sessions = LoginLog::query()
+            ->where('user_id', $profile->user_id)
+            ->where('created_at', '>=', $now->copy()->subDays($lookbackDays)->startOfDay())
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($sessions->isEmpty()) {
+            return null;
+        }
+
+        $grouped = $sessions->groupBy(fn (LoginLog $log): string => Carbon::parse($log->created_at)->format('Y-m-d'));
+
+        $days = [];
+        $currentSessionSeconds = 0;
+
+        foreach ($grouped as $dateKey => $daySessions) {
+            $sessionRows = [];
+            $dayTotalSeconds = 0;
+
+            foreach ($daySessions as $log) {
+                $loginAt = Carbon::parse($log->created_at);
+                $isOpen = $log->logged_out_at === null;
+
+                if ($isOpen) {
+                    $sessionSeconds = max(0, (int) $now->diffInSeconds($loginAt));
+                    $logoutDisplay = '—';
+                    $status = 'Online';
+                    $currentSessionSeconds = max($currentSessionSeconds, $sessionSeconds);
+                } else {
+                    $sessionSeconds = (int) ($log->duration_seconds
+                        ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
+                    $logoutDisplay = Carbon::parse($log->logged_out_at)->format('h:i A');
                     $status = 'Offline';
                 }
 
