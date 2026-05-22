@@ -102,6 +102,7 @@
         </div>
     </div>
 </div>
+</div>
 
 @push('scripts')
 <script src="{{ asset('profile/js/online-now-toggle.js') }}?v={{ filemtime(public_path('profile/js/online-now-toggle.js')) }}"></script>
