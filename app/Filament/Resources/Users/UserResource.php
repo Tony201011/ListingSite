@@ -10,10 +10,12 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\Category;
 use App\Models\CreditLog;
+use App\Models\LoginLog;
 use App\Models\PhotoVerification;
 use App\Models\Postcode;
 use App\Models\ProviderProfile;
 use BackedEnum;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
@@ -1496,6 +1498,20 @@ class UserResource extends Resource
                             'history' => self::getWalletSpendHistoryForProfile($record),
                         ])),
 
+                    Action::make('activity_logs')
+                        ->label('Activity Logs')
+                        ->icon('heroicon-o-chart-bar')
+                        ->color('warning')
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                        ->modalHeading(fn (ProviderProfile $record): string => 'Provider Activity Logs · '.($record->name ?? 'Provider'))
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close')
+                        ->modalWidth('4xl')
+                        ->modalContent(fn (ProviderProfile $record) => view('filament.modals.provider-activity-logs', [
+                            'activity' => self::getProviderActivityLogs($record),
+                            'provider' => $record,
+                        ])),
+
                     Action::make('edit')
                         ->label('Edit')
                         ->icon('heroicon-o-pencil-square')
@@ -1829,5 +1845,73 @@ class UserResource extends Resource
         }
 
         return $result;
+    }
+
+    private static function getProviderActivityLogs(ProviderProfile $record): array
+    {
+        if (! $record->user_id) {
+            return [
+                'total_logins' => 0,
+                'total_online_seconds' => 0,
+                'total_online_duration' => self::formatDurationFromSeconds(0),
+                'current_session_seconds' => 0,
+                'current_session_duration' => self::formatDurationFromSeconds(0),
+                'history' => [],
+            ];
+        }
+
+        $dailyHistory = LoginLog::query()
+            ->selectRaw('DATE(created_at) as login_date')
+            ->selectRaw('COUNT(*) as login_count')
+            ->selectRaw('MIN(created_at) as first_login_at')
+            ->selectRaw('MAX(created_at) as last_login_at')
+            ->where('user_id', $record->user_id)
+            ->groupByRaw('DATE(created_at)')
+            ->orderByDesc('login_date')
+            ->limit(90)
+            ->get()
+            ->map(function (LoginLog $log): array {
+                $firstLogin = filled($log->first_login_at) ? Carbon::parse($log->first_login_at) : null;
+                $lastLogin = filled($log->last_login_at) ? Carbon::parse($log->last_login_at) : null;
+                $onlineSeconds = $firstLogin && $lastLogin
+                    ? max(0, $lastLogin->diffInSeconds($firstLogin))
+                    : 0;
+
+                return [
+                    'date' => filled($log->login_date) ? Carbon::parse($log->login_date)->format('d M Y') : '-',
+                    'login_count' => (int) ($log->login_count ?? 0),
+                    'time_spent_seconds' => $onlineSeconds,
+                    'time_spent' => self::formatDurationFromSeconds($onlineSeconds),
+                    'first_login' => $firstLogin?->format('h:i A') ?? '-',
+                    'last_login' => $lastLogin?->format('h:i A') ?? '-',
+                ];
+            })
+            ->values();
+
+        $currentSessionSeconds = 0;
+        if ($record->onlineUser?->status === 'online' && $record->onlineUser?->online_started_at) {
+            $currentSessionSeconds = max(0, now()->diffInSeconds($record->onlineUser->online_started_at));
+        }
+
+        $totalLogins = (int) $dailyHistory->sum('login_count');
+        $totalOnlineSeconds = (int) $dailyHistory->sum('time_spent_seconds') + $currentSessionSeconds;
+
+        return [
+            'total_logins' => $totalLogins,
+            'total_online_seconds' => $totalOnlineSeconds,
+            'total_online_duration' => self::formatDurationFromSeconds($totalOnlineSeconds),
+            'current_session_seconds' => $currentSessionSeconds,
+            'current_session_duration' => self::formatDurationFromSeconds($currentSessionSeconds),
+            'history' => $dailyHistory->all(),
+        ];
+    }
+
+    private static function formatDurationFromSeconds(int $seconds): string
+    {
+        $seconds = max(0, $seconds);
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+
+        return sprintf('%02dh %02dm', $hours, $minutes);
     }
 }
