@@ -13,7 +13,59 @@
         </button>
 
         <h1 class="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Activity Logs</h1>
-        <p class="mb-8 text-sm text-gray-500">Online and offline session history for {{ $profile?->name ?? 'your selected profile' }} during the last 90 days.</p>
+        <p class="mb-6 text-sm text-gray-500">Online and offline session history for {{ $profile?->name ?? 'your selected profile' }} during {{ $filters['label'] ?? 'last 90 days' }}.</p>
+
+        @if ($errors->any())
+            <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        <form method="GET" action="{{ route('activity-logs') }}" class="mb-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm" aria-label="Activity log filters">
+            <div class="mb-4 flex flex-wrap gap-2">
+                @foreach (['30d' => 'Last 30 days', '90d' => 'Last 90 days', 'custom' => 'Custom range'] as $value => $label)
+                    <label class="al-range-option {{ ($filters['range'] ?? '90d') === $value ? 'is-active' : '' }}">
+                        <input
+                            type="radio"
+                            name="range"
+                            value="{{ $value }}"
+                            {{ ($filters['range'] ?? '90d') === $value ? 'checked' : '' }}
+                            class="al-range-input"
+                        >
+                        <span>{{ $label }}</span>
+                    </label>
+                @endforeach
+            </div>
+
+            <div class="al-custom-range grid grid-cols-1 gap-3 sm:grid-cols-2 {{ ($filters['range'] ?? '90d') === 'custom' ? '' : 'hidden' }}">
+                <label class="block">
+                    <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">From date</span>
+                    <input
+                        type="date"
+                        name="date_from"
+                        value="{{ old('date_from', $filters['date_from_value'] ?? '') }}"
+                        class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                    >
+                </label>
+                <label class="block">
+                    <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">To date</span>
+                    <input
+                        type="date"
+                        name="date_to"
+                        value="{{ old('date_to', $filters['date_to_value'] ?? '') }}"
+                        class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                    >
+                </label>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <p class="text-xs text-gray-500">Use a preset duration or choose a custom calendar range.</p>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('activity-logs') }}" class="inline-flex h-10 items-center rounded-lg border border-gray-200 px-4 text-sm font-medium text-gray-600 transition hover:bg-gray-50">Reset</a>
+                    <button type="submit" class="inline-flex h-10 items-center rounded-lg bg-[#e04ecb] px-4 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">Apply filter</button>
+                </div>
+            </div>
+        </form>
 
         {{-- Summary cards --}}
         <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -103,6 +155,24 @@
     <script>
         (function () {
             const currentProfileId = @json($profile?->id);
+            const rangeInputs = document.querySelectorAll('.al-range-input');
+            const customRange = document.querySelector('.al-custom-range');
+
+            const toggleCustomRange = function () {
+                const selectedRange = document.querySelector('.al-range-input:checked')?.value;
+
+                if (! customRange) {
+                    return;
+                }
+
+                customRange.classList.toggle('hidden', selectedRange !== 'custom');
+            };
+
+            rangeInputs.forEach(function (input) {
+                input.addEventListener('change', toggleCustomRange);
+            });
+
+            toggleCustomRange();
 
             if (! currentProfileId || ! window.profileOnlineSync?.subscribe) {
                 return;
@@ -198,6 +268,31 @@
 
     .al-table-wrapper {
         max-height: min(70vh, calc(100vh - 260px));
+    }
+
+    .al-range-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #e5e7eb;
+        border-radius: 9999px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #4b5563;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .al-range-option.is-active {
+        border-color: #e04ecb;
+        background: #fdf2f8;
+        color: #be185d;
+    }
+
+    .al-range-input {
+        accent-color: #e04ecb;
     }
 
     .al-table-scroll {

@@ -153,6 +153,95 @@ class ActivityLogsOnlineStatusTest extends TestCase
             ->assertSee('00h 45m 00s');
     }
 
+    public function test_activity_logs_page_supports_last_30_days_filter(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Selected Profile',
+            'slug' => 'selected-profile',
+        ]);
+
+        Carbon::setTestNow('2026-05-22 11:30:00');
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => now()->copy()->subDays(10)->subHour(),
+            'went_offline_at' => now()->copy()->subDays(10),
+            'duration_seconds' => 3600,
+        ]);
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => now()->copy()->subDays(45)->subHour(),
+            'went_offline_at' => now()->copy()->subDays(45),
+            'duration_seconds' => 3600,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get(route('activity-logs', ['range' => '30d']));
+
+        $response->assertOk()
+            ->assertViewHas('filters', fn (array $filters): bool => ($filters['range'] ?? null) === '30d')
+            ->assertViewHas('activity', fn (array $activity): bool => ($activity['total_sessions'] ?? null) === 1)
+            ->assertSee('during last 30 days')
+            ->assertDontSee('07 Apr 2026');
+    }
+
+    public function test_activity_logs_page_supports_custom_date_range_filter(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Selected Profile',
+            'slug' => 'selected-profile',
+        ]);
+
+        Carbon::setTestNow('2026-05-22 11:30:00');
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => Carbon::parse('2026-05-03 09:00:00'),
+            'went_offline_at' => Carbon::parse('2026-05-03 10:00:00'),
+            'duration_seconds' => 3600,
+        ]);
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => Carbon::parse('2026-05-18 09:00:00'),
+            'went_offline_at' => Carbon::parse('2026-05-18 10:30:00'),
+            'duration_seconds' => 5400,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get(route('activity-logs', [
+                'range' => 'custom',
+                'date_from' => '2026-05-01',
+                'date_to' => '2026-05-10',
+            ]));
+
+        $response->assertOk()
+            ->assertViewHas('filters', function (array $filters): bool {
+                return ($filters['range'] ?? null) === 'custom'
+                    && ($filters['date_from_value'] ?? null) === '2026-05-01'
+                    && ($filters['date_to_value'] ?? null) === '2026-05-10';
+            })
+            ->assertViewHas('activity', function (array $activity): bool {
+                return ($activity['total_sessions'] ?? null) === 1
+                    && ($activity['total_online_seconds'] ?? null) === 3600;
+            })
+            ->assertSee('during 01 May 2026 to 10 May 2026')
+            ->assertDontSee('18 May 2026');
+    }
+
     private function createCompleteProfile(): array
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
