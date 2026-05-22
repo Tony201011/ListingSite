@@ -68,7 +68,7 @@
         </form>
 
         {{-- Summary cards --}}
-        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                 <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Profile Name</p>
                 <p class="mt-1 text-base font-bold text-gray-900">{{ $profile?->name ?? 'N/A' }}</p>
@@ -76,18 +76,6 @@
             <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                 <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Provider Email</p>
                 <p class="mt-1 text-base font-bold text-gray-900 break-all">{{ $user->email ?? 'N/A' }}</p>
-            </div>
-            <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Total Sessions</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900">{{ number_format($activity['total_sessions'] ?? $activity['total_logins']) }}</p>
-            </div>
-            <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Total Time Online</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900" id="al-total-online">{{ $activity['total_online_duration'] }}</p>
-            </div>
-            <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Current Session</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900" id="al-current-session">{{ $activity['current_session_duration'] }}</p>
             </div>
         </div>
 
@@ -102,7 +90,6 @@
                                 <th>Sessions</th>
                                 <th>Login Time</th>
                                 <th>Logout Time</th>
-                                <th>Duration</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -116,7 +103,7 @@
                                             {{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}
                                         </span>
                                     </td>
-                                    <td colspan="3" class="al-day-total">
+                                    <td colspan="2" class="al-day-total">
                                         Daily total: <strong>{{ $day['total_duration'] }}</strong>
                                     </td>
                                     <td></td>
@@ -128,7 +115,6 @@
                                         <td></td>
                                         <td>{{ $session['login_at'] }}</td>
                                         <td>{{ $session['logout_at'] }}</td>
-                                        <td>{{ $session['duration'] }}</td>
                                         <td>
                                             <span class="al-badge al-badge--{{ $session['is_current'] ? 'online' : 'offline' }}">
                                                 {{ $session['status'] }}
@@ -185,36 +171,6 @@
 
                 window.location.reload();
             });
-        })();
-    </script>
-    <script>
-        (function () {
-            var currentSeconds = @json($activity['current_session_seconds'] ?? 0);
-            var totalSeconds   = @json($activity['total_online_seconds'] ?? 0);
-
-            if (currentSeconds <= 0) {
-                return;
-            }
-
-            var currentEl = document.getElementById('al-current-session');
-            var totalEl   = document.getElementById('al-total-online');
-
-            function formatDuration(s) {
-                s = Math.max(0, s);
-                var h = Math.floor(s / 3600);
-                var m = Math.floor((s % 3600) / 60);
-                var sec = s % 60;
-                return String(h).padStart(2, '0') + 'h ' +
-                       String(m).padStart(2, '0') + 'm ' +
-                       String(sec).padStart(2, '0') + 's';
-            }
-
-            setInterval(function () {
-                currentSeconds += 1;
-                totalSeconds   += 1;
-                if (currentEl) { currentEl.textContent = formatDuration(currentSeconds); }
-                if (totalEl)   { totalEl.textContent   = formatDuration(totalSeconds);   }
-            }, 1000);
         })();
     </script>
 @endpush

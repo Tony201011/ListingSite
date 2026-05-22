@@ -111,7 +111,9 @@ class ActivityLogsOnlineStatusTest extends TestCase
             ->assertSee('Selected Profile')
             ->assertSee('01h 30m 00s')
             ->assertSee('00h 30m 00s')
-            ->assertSee('Total Sessions')
+            ->assertDontSee('Total Sessions')
+            ->assertDontSee('Total Time Online')
+            ->assertDontSee('Current Session')
             ->assertDontSee('Other Profile');
     }
 
