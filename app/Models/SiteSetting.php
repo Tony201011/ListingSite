@@ -170,7 +170,7 @@ class SiteSetting extends Model
     public static function isOnlineFilterEnabled(): bool
     {
         return cache()->remember('site_setting.online_filter_enabled', now()->addMinutes(10), function () {
-            return (bool) (static::first()?->online_filter_enabled ?? false);
+            return (bool) (static::first()?->online_filter_enabled ?? true);
         });
     }
 

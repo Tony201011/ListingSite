@@ -32,6 +32,10 @@ class SiteSettingSeeder extends Seeder
             $attributes['fatal_error_query_param'] = 'fatal_message';
         }
 
+        if (in_array('online_filter_enabled', $columns, true)) {
+            $attributes['online_filter_enabled'] = true;
+        }
+
         SiteSetting::updateOrCreate(['id' => 1], $attributes);
     }
 }
