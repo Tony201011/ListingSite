@@ -19,14 +19,11 @@ class GetOnlineNowState
 
         $onlineUser = $this->getOrCreateOnlineUser($profile->id);
 
-        $this->expireIfNeeded($onlineUser);
-
         if ($onlineUser->isDirty()) {
             $onlineUser->save();
         }
 
         $onlineStatus = $onlineUser->isCurrentlyOnline();
-        $expiresAt = optional($onlineUser->online_expires_at)?->toIso8601String();
         $blockedBalance = $this->isFreeListingExpiredWithNegativeBalance($profile);
 
         return compact('onlineStatus', 'expiresAt', 'blockedBalance');
@@ -46,19 +43,6 @@ class GetOnlineNowState
         $onlineUser->resetDailyUsageIfNeeded();
 
         return $onlineUser;
-    }
-
-    private function expireIfNeeded(OnlineUser $onlineUser): void
-    {
-        if (
-            $onlineUser->status === 'online' &&
-            $onlineUser->online_expires_at &&
-            now()->greaterThanOrEqualTo($onlineUser->online_expires_at)
-        ) {
-            $onlineUser->status = 'offline';
-            $onlineUser->online_started_at = null;
-            $onlineUser->online_expires_at = null;
-        }
     }
 
     private function isFreeListingExpiredWithNegativeBalance(ProviderProfile $profile): bool

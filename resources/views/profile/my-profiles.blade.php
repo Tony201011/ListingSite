@@ -80,7 +80,6 @@
                                 x-data="profileOnlineToggle({
                                     profileId: @js($profile->id),
                                     initialStatus: @js((bool) $state['onlineStatus']),
-                                    initialExpiresAt: @js($state['expiresAt'] ?? null),
                                     updateUrl: @js(route('profiles.online-status', $profile)),
                                     csrfToken: @js(csrf_token())
                                 })"
@@ -177,7 +176,6 @@
                                                     </span>
                                                     <span x-show="!loading" x-text="online ? 'Online Now' : 'Go Online'"></span>
                                                 </button>
-                                                <span class="text-xs text-gray-400" x-show="online && countdown !== '00:00:00'" x-text="countdown" aria-label="Time remaining" aria-live="polite"></span>
                                             </div>
                                         @endif
 

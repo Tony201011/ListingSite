@@ -5,22 +5,16 @@ namespace App\Actions;
 use App\Actions\Support\ActionResult;
 use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
-use App\Models\SiteSetting;
 
 
 class UpdateOnlineNowStatus
 {
     public function execute(ProviderProfile $profile, ?string $status): ActionResult
     {
-        $settings = SiteSetting::getStatusSettings();
-        $durationMinutes = $this->resolveDurationMinutes($settings['online_status_duration_minutes'] ?? null);
-
         $onlineUser = $this->getOrCreateOnlineUser($profile);
 
-        $this->expireIfNeeded($onlineUser);
-
         if ($status === 'online') {
-            return $this->goOnline($onlineUser, $durationMinutes, $profile);
+            return $this->goOnline($onlineUser, $profile);
         }
 
         return $this->goOffline($onlineUser);
@@ -43,21 +37,7 @@ class UpdateOnlineNowStatus
         return $onlineUser;
     }
 
-    private function expireIfNeeded(OnlineUser $onlineUser): void
-    {
-        if (
-            $onlineUser->status === 'online' &&
-            $onlineUser->online_expires_at &&
-            now()->greaterThanOrEqualTo($onlineUser->online_expires_at)
-        ) {
-            $onlineUser->status = 'offline';
-            $onlineUser->online_started_at = null;
-            $onlineUser->online_expires_at = null;
-            $onlineUser->save();
-        }
-    }
-
-    private function goOnline(OnlineUser $onlineUser, int $durationMinutes, ProviderProfile $profile): ActionResult
+    private function goOnline(OnlineUser $onlineUser, ProviderProfile $profile): ActionResult
     {
         if ($this->isFreeListingExpiredWithNegativeBalance($profile)) {
             return new ActionResult(
@@ -72,20 +52,20 @@ class UpdateOnlineNowStatus
         if ($onlineUser->isCurrentlyOnline()) {
             return ActionResult::success([
                 'status' => 'online',
-                'expires_at' => optional($onlineUser->online_expires_at)?->toIso8601String(),
+                'expires_at' => null,
             ], 'You are already online.');
         }
 
         $onlineUser->status = 'online';
         $onlineUser->usage_date = today();
         $onlineUser->online_started_at = now();
-        $onlineUser->online_expires_at = now()->addMinutes($durationMinutes);
+        $onlineUser->online_expires_at = null;
         $onlineUser->save();
 
         return ActionResult::success([
             'status' => 'online',
-            'expires_at' => optional($onlineUser->online_expires_at)?->toIso8601String(),
-        ], 'Online Now enabled for '.format_clock_duration_from_minutes($durationMinutes).'.');
+            'expires_at' => null,
+        ], 'Online Now enabled.');
     }
 
     private function goOffline(OnlineUser $onlineUser): ActionResult
@@ -112,21 +92,5 @@ class UpdateOnlineNowStatus
         $profile->loadMissing('user');
 
         return $profile->user !== null && $profile->user->credits < 0;
-    }
-
-    private function resolveDurationMinutes(mixed $configuredDuration): int
-    {
-        if (is_int($configuredDuration) && $configuredDuration >= 1 && $configuredDuration <= 1440) {
-            return $configuredDuration;
-        }
-
-        if (is_numeric($configuredDuration)) {
-            $duration = (int) $configuredDuration;
-            if ($duration >= 1 && $duration <= 1440) {
-                return $duration;
-            }
-        }
-
-        return 60;
     }
 }

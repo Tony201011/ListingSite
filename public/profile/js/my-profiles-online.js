@@ -1,76 +1,12 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('profileOnlineToggle', (config = {}) => ({
         online: Boolean(config.initialStatus),
-        expiresAt: config.initialExpiresAt || null,
         updateUrl: config.updateUrl || '',
         csrfToken: config.csrfToken || '',
 
         loading: false,
         message: '',
         messageType: 'success',
-        countdown: '00:00:00',
-        timer: null,
-
-        init() {
-            if (this.online && this.expiresAt) {
-                this.startTimer();
-            }
-        },
-
-        destroy() {
-            this.stopTimer();
-        },
-
-        startTimer() {
-            this.stopTimer();
-            this.updateCountdown();
-            this.timer = setInterval(() => this.updateCountdown(), 1000);
-        },
-
-        stopTimer() {
-            if (this.timer) {
-                clearInterval(this.timer);
-                this.timer = null;
-            }
-        },
-
-        updateCountdown() {
-            if (!this.expiresAt) {
-                this.countdown = '00:00:00';
-                this.stopTimer();
-                return;
-            }
-
-            const expiry = new Date(this.expiresAt).getTime();
-            if (!Number.isFinite(expiry)) {
-                this.online = false;
-                this.expiresAt = null;
-                this.countdown = '00:00:00';
-                this.stopTimer();
-                this.showMessage('Session ended.', 'error');
-                return;
-            }
-
-            const diff = expiry - Date.now();
-
-            if (diff <= 0) {
-                this.online = false;
-                this.expiresAt = null;
-                this.countdown = '00:00:00';
-                this.stopTimer();
-                this.showMessage('Session ended.', 'success');
-                return;
-            }
-
-            const totalSeconds = Math.floor(diff / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            this.countdown =
-                String(hours).padStart(2, '0') + ':' +
-                String(minutes).padStart(2, '0') + ':' +
-                String(seconds).padStart(2, '0');
-        },
 
         async toggleOnline() {
             if (this.loading || !this.updateUrl) return;
@@ -96,14 +32,6 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.online = data.status === 'online';
-                this.expiresAt = data.expires_at ?? null;
-
-                if (this.online && this.expiresAt) {
-                    this.startTimer();
-                } else {
-                    this.stopTimer();
-                    this.countdown = '00:00:00';
-                }
 
                 this.showMessage(data.message || 'Status updated.');
             } catch (error) {
