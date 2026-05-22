@@ -5,6 +5,7 @@ document.addEventListener('alpine:init', () => {
         isDragging: false,
         selectedFiles: [],
         filePreviews: [],
+        uploadedPreviews: [],
         stream: null,
         uploading: false,
         sliderOpen: false,
@@ -24,6 +25,8 @@ document.addEventListener('alpine:init', () => {
         clearMessages() {
             this.successMessage = '';
             this.errorMessage = '';
+            this.uploadedPreviews.forEach((url) => URL.revokeObjectURL(url));
+            this.uploadedPreviews = [];
         },
 
         openModal() {
@@ -109,8 +112,12 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        clearSelectedFiles() {
-            this.filePreviews.forEach((url) => URL.revokeObjectURL(url));
+        clearSelectedFiles(excludeUrls = []) {
+            this.filePreviews.forEach((url) => {
+                if (!excludeUrls.includes(url)) {
+                    URL.revokeObjectURL(url);
+                }
+            });
             this.filePreviews = [];
             this.selectedFiles = [];
             this.sliderIndex = 0;
@@ -251,16 +258,9 @@ document.addEventListener('alpine:init', () => {
                     throw new Error(result.message || 'Upload failed.');
                 }
 
-                this.successMessage = result.message || 'Upload successful.';
-                this.clearSelectedFiles();
-
-                setTimeout(() => {
-                    this.closeModal();
-
-                    if (this.photosUrl) {
-                        window.location.href = this.photosUrl;
-                    }
-                }, 1200);
+                this.uploadedPreviews = [...this.filePreviews];
+                this.clearSelectedFiles(this.uploadedPreviews);
+                this.successMessage = result.message || 'Photos uploaded successfully.';
             } catch (error) {
                 this.errorMessage = error.message || 'Something went wrong.';
             } finally {
@@ -296,6 +296,7 @@ document.addEventListener('alpine:init', () => {
         cleanupResources() {
             this.stopCamera();
             this.filePreviews.forEach((url) => URL.revokeObjectURL(url));
+            this.uploadedPreviews.forEach((url) => URL.revokeObjectURL(url));
         }
     }));
 });
