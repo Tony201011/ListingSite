@@ -225,15 +225,19 @@ class GetProviderActivityLogs
         bool $isOnline,
         Carbon $now,
     ): int {
+        $storedDuration = max(0, (int) ($storedDuration ?? 0));
+
         if ($logoutAt) {
-            return max(0, (int) $logoutAt->diffInSeconds($loginAt));
+            $computedDuration = max(0, (int) $logoutAt->diffInSeconds($loginAt));
+
+            return max($computedDuration, $storedDuration);
         }
 
         if ($isOnline) {
             return max(0, (int) $now->diffInSeconds($loginAt));
         }
 
-        return max(0, (int) ($storedDuration ?? 0));
+        return $storedDuration;
     }
 
     private function formatDuration(int $totalSeconds): string
