@@ -51,7 +51,6 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -1053,17 +1052,26 @@ class UserResource extends Resource
         return $table
             ->modifyQueryUsing(function (Builder $query): Builder {
                 return $query
-                    ->leftJoin('online_users as active_online_users', function (JoinClause $join): void {
-                        $join
-                            ->on('active_online_users.provider_profile_id', '=', 'provider_profiles.id')
-                            ->where('active_online_users.status', '=', 'online')
-                            ->whereNotNull('active_online_users.online_expires_at')
-                            ->where('active_online_users.online_expires_at', '>', now());
-                    })
                     ->select('provider_profiles.*')
                     ->selectRaw(
-                        'CASE WHEN active_online_users.id IS NULL THEN ? ELSE ? END AS online_status',
-                        ['offline', 'online']
+                        <<<'SQL'
+                        CASE
+                            WHEN EXISTS (
+                                SELECT 1
+                                FROM online_users
+                                WHERE online_users.provider_profile_id = provider_profiles.id
+                                AND online_users.status = ?
+                            ) OR EXISTS (
+                                SELECT 1
+                                FROM online_users AS legacy_online_users
+                                WHERE legacy_online_users.user_id = provider_profiles.user_id
+                                AND legacy_online_users.provider_profile_id IS NULL
+                                AND legacy_online_users.status = ?
+                            ) THEN ?
+                            ELSE ?
+                        END AS online_status
+                        SQL,
+                        ['online', 'online', 'online', 'offline']
                     );
             })
             ->columns([
@@ -1153,7 +1161,7 @@ class UserResource extends Resource
                 TextColumn::make('online_status')
                     ->label('Online')
                     ->badge()
-                    ->getStateUsing(fn (ProviderProfile $record): string => $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline')
+                    ->getStateUsing(fn (ProviderProfile $record): string => $record->online_status === 'online' ? 'Online' : 'Offline')
                     ->color(fn (string $state): string => $state === 'Online' ? 'success' : 'gray'),
 
                 TextColumn::make('created_at')
@@ -1262,14 +1270,20 @@ class UserResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
-                            'online' => $query->whereHas('onlineUser', fn (Builder $q) => $q
-                                ->where('status', 'online')
-                                ->whereNotNull('online_expires_at')
-                                ->where('online_expires_at', '>', now())),
-                            'offline' => $query->whereDoesntHave('onlineUser', fn (Builder $q) => $q
-                                ->where('status', 'online')
-                                ->whereNotNull('online_expires_at')
-                                ->where('online_expires_at', '>', now())),
+                            'online' => $query->where(function (Builder $onlineConstraint): void {
+                                $onlineConstraint
+                                    ->whereHas('onlineUser', fn (Builder $onlineQuery) => $onlineQuery->where('status', 'online'))
+                                    ->orWhereHas('user.onlineUser', fn (Builder $legacyOnlineQuery) => $legacyOnlineQuery
+                                        ->whereNull('provider_profile_id')
+                                        ->where('status', 'online'));
+                            }),
+                            'offline' => $query->where(function (Builder $offlineConstraint): void {
+                                $offlineConstraint
+                                    ->whereDoesntHave('onlineUser', fn (Builder $onlineQuery) => $onlineQuery->where('status', 'online'))
+                                    ->whereDoesntHave('user.onlineUser', fn (Builder $legacyOnlineQuery) => $legacyOnlineQuery
+                                        ->whereNull('provider_profile_id')
+                                        ->where('status', 'online'));
+                            }),
                             default => $query,
                         };
                     })
