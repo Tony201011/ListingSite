@@ -4,11 +4,16 @@ namespace App\Listeners;
 
 use App\Models\LoginLog;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Schema;
 
 class RecordUserLogout
 {
     public function handle(Logout $event): void
     {
+        if (! Schema::hasColumns('login_logs', ['logged_out_at', 'duration_seconds'])) {
+            return;
+        }
+
         if (app()->runningInConsole() || ! request()->hasSession()) {
             return;
         }

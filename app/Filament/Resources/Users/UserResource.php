@@ -53,6 +53,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -1849,6 +1850,8 @@ class UserResource extends Resource
 
     private static function getProviderActivityLogs(ProviderProfile $record): array
     {
+        $hasLogoutTracking = Schema::hasColumns('login_logs', ['logged_out_at', 'duration_seconds']);
+
         $empty = [
             'total_logins'             => 0,
             'total_online_seconds'     => 0,
@@ -1866,10 +1869,13 @@ class UserResource extends Resource
         }
 
         // Detect if the provider currently has an open (unfinished) login session.
-        $openLog = LoginLog::where('user_id', $record->user_id)
-            ->whereNull('logged_out_at')
-            ->latest()
-            ->first();
+        $openLog = null;
+        if ($hasLogoutTracking) {
+            $openLog = LoginLog::where('user_id', $record->user_id)
+                ->whereNull('logged_out_at')
+                ->latest()
+                ->first();
+        }
 
         $currentSessionSeconds = 0;
         if ($openLog) {
@@ -1900,7 +1906,7 @@ class UserResource extends Resource
 
             foreach ($daySessions as $log) {
                 $loginAt = Carbon::parse($log->created_at);
-                $isOpen  = $log->logged_out_at === null;
+                $isOpen  = $hasLogoutTracking && $log->logged_out_at === null;
 
                 if ($isOpen) {
                     // Currently active session – duration calculated from login time.
@@ -1908,9 +1914,14 @@ class UserResource extends Resource
                     $logoutDisplay  = '—';
                     $status         = 'Online';
                 } else {
-                    $sessionSeconds = (int) ($log->duration_seconds
-                        ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
-                    $logoutDisplay  = Carbon::parse($log->logged_out_at)->format('h:i A');
+                    if ($hasLogoutTracking && $log->logged_out_at) {
+                        $sessionSeconds = (int) ($log->duration_seconds
+                            ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
+                        $logoutDisplay = Carbon::parse($log->logged_out_at)->format('h:i A');
+                    } else {
+                        $sessionSeconds = 0;
+                        $logoutDisplay = '—';
+                    }
                     $status         = 'Offline';
                 }
 

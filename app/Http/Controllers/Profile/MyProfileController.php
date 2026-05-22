@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class MyProfileController extends Controller
@@ -41,16 +42,21 @@ class MyProfileController extends Controller
 
     private function buildActivityData(int $userId): array
     {
+        $hasLogoutTracking = Schema::hasColumns('login_logs', ['logged_out_at', 'duration_seconds']);
+
         $formatDuration = static function (int $seconds): string {
             $seconds = max(0, $seconds);
 
             return sprintf('%02dh %02dm', intdiv($seconds, 3600), intdiv($seconds % 3600, 60));
         };
 
-        $openLog = LoginLog::where('user_id', $userId)
-            ->whereNull('logged_out_at')
-            ->latest()
-            ->first();
+        $openLog = null;
+        if ($hasLogoutTracking) {
+            $openLog = LoginLog::where('user_id', $userId)
+                ->whereNull('logged_out_at')
+                ->latest()
+                ->first();
+        }
 
         $currentSessionSeconds = $openLog
             ? max(0, (int) now()->diffInSeconds($openLog->created_at))
@@ -80,16 +86,21 @@ class MyProfileController extends Controller
 
             foreach ($daySessions as $log) {
                 $loginAt = Carbon::parse($log->created_at);
-                $isOpen  = $log->logged_out_at === null;
+                $isOpen  = $hasLogoutTracking && $log->logged_out_at === null;
 
                 if ($isOpen) {
                     $sessionSeconds = $currentSessionSeconds;
                     $logoutDisplay  = '—';
                     $status         = 'Online';
                 } else {
-                    $sessionSeconds = (int) ($log->duration_seconds
-                        ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
-                    $logoutDisplay  = Carbon::parse($log->logged_out_at)->format('h:i A');
+                    if ($hasLogoutTracking && $log->logged_out_at) {
+                        $sessionSeconds = (int) ($log->duration_seconds
+                            ?? max(0, Carbon::parse($log->logged_out_at)->diffInSeconds($loginAt)));
+                        $logoutDisplay = Carbon::parse($log->logged_out_at)->format('h:i A');
+                    } else {
+                        $sessionSeconds = 0;
+                        $logoutDisplay = '—';
+                    }
                     $status         = 'Offline';
                 }
 
