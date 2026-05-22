@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Profile;
 
 use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetMyProfilePageData;
+use App\Actions\GetProfileSpendingHistory;
 use App\Actions\GetMyProfileStepTwoData;
 use App\Actions\GetProviderActivityLogs;
 use App\Actions\SaveMyProfile;
@@ -22,6 +23,7 @@ class MyProfileController extends Controller
         private GetMyProfileStepTwoData $getMyProfileStepTwoData,
         private SaveMyProfile $saveMyProfile,
         private GetActiveProviderProfile $getActiveProviderProfile,
+        private GetProfileSpendingHistory $getProfileSpendingHistory,
         private GetProviderActivityLogs $getProviderActivityLogs,
     ) {}
 

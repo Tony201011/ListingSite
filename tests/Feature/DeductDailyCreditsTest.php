@@ -46,6 +46,8 @@ class DeductDailyCreditsTest extends TestCase
             'amount' => -1,
             'type' => 'daily_deduction',
             'description' => 'Your current credits balance is 243. You are charged 1 credit per day while your profile is visible.',
+            'reference_type' => ProviderProfile::class,
+            'reference_id' => $profile->id,
         ]);
     }
 
@@ -218,6 +220,19 @@ class DeductDailyCreditsTest extends TestCase
             ->where('user_id', $user->id)
             ->where('type', 'daily_deduction')
             ->count());
+
+        $this->assertDatabaseHas('credit_logs', [
+            'user_id' => $user->id,
+            'type' => 'daily_deduction',
+            'reference_type' => ProviderProfile::class,
+            'reference_id' => $firstProfile->id,
+        ]);
+        $this->assertDatabaseHas('credit_logs', [
+            'user_id' => $user->id,
+            'type' => 'daily_deduction',
+            'reference_type' => ProviderProfile::class,
+            'reference_id' => $secondProfile->id,
+        ]);
     }
 
     public function test_it_hides_unpaid_profiles_when_credits_are_insufficient(): void

@@ -205,6 +205,7 @@ Route::middleware('provider.auth')->group(function () {
     Route::middleware('profile.selected')->group(function () {
         Route::get('/my-profile', [MyProfileController::class, 'myProfile'])->name('my-profile');
         Route::get('/activity-logs', [MyProfileController::class, 'activityLogs'])->name('activity-logs');
+        Route::get('/profile-spending-history', [MyProfileController::class, 'spendingHistory'])->name('profile-spending-history');
         Route::get('/edit-profile', [MyProfileController::class, 'editProfile'])->name('edit-profile');
         Route::post('/edit-profile', [MyProfileController::class, 'save'])->name('edit-profile.save');
         Route::get('/add-photos', [PhotoController::class, 'index'])->name('add-photos');
