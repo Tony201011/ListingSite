@@ -1031,6 +1031,24 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($names->contains('Offline No Filter Escort'));
     }
 
+    public function test_home_page_hides_offline_profile_when_online_filter_setting_missing(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Offline Default Filter Escort',
+            'slug' => 'offline-default-filter-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertFalse($names->contains('Offline Default Filter Escort'));
+    }
+
     public function test_home_page_hides_offline_profile_when_online_filter_enabled(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
