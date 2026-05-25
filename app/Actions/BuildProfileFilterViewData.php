@@ -891,8 +891,18 @@ class BuildProfileFilterViewData
         $suburb = trim((string) $exactLocation['suburb']);
         $state = strtoupper(trim((string) $exactLocation['state']));
         $fullStateName = $this->resolveStateName($state);
+        $normalizedSuburb = mb_strtolower($suburb);
+        $normalizedState = mb_strtolower($state);
+        $normalizedFullStateName = mb_strtolower($fullStateName);
 
-        $query->where(function (Builder $outer) use ($suburb, $state, $fullStateName): void {
+        $query->where(function (Builder $outer) use (
+            $suburb,
+            $state,
+            $fullStateName,
+            $normalizedSuburb,
+            $normalizedState,
+            $normalizedFullStateName
+        ): void {
             $outer->whereHas('city', function (Builder $cityQuery) use ($suburb, $fullStateName): void {
                 $cityQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($suburb)])
                     ->whereHas('state', function (Builder $stateQuery) use ($fullStateName): void {
@@ -902,6 +912,18 @@ class BuildProfileFilterViewData
                 $profileQuery->whereRaw(
                     'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
                     [mb_strtolower($suburb.', '.$state).'%']
+                );
+            })->orWhere(function (Builder $profileQuery) use (
+                $normalizedSuburb,
+                $normalizedState,
+                $normalizedFullStateName
+            ): void {
+                $profileQuery->whereRaw(
+                    'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
+                    ["{$normalizedSuburb} {$normalizedState}%"]
+                )->orWhereRaw(
+                    'LOWER(TRIM(provider_profiles.suburb)) LIKE ?',
+                    ["{$normalizedSuburb} {$normalizedFullStateName}%"]
                 );
             });
         });
