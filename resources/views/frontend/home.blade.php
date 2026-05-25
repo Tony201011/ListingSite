@@ -40,8 +40,6 @@
                 <form method="GET" action="{{ route('escorts.search') }}" @submit="handleFormSubmit($event)">
                     <template x-if="distanceSearchEnabled">
                         <span>
-                            <input type="hidden" name="user_lat" :value="userLat">
-                            <input type="hidden" name="user_lng" :value="userLng">
                             <template x-if="searchMode === 'suburb' && (locationEnabled || term.trim() !== '')">
                                 <input type="hidden" name="distance" :value="distance">
                             </template>
@@ -130,7 +128,7 @@
                 $newGirlsQuery = array_merge($currentQuery, ['girls' => 'new']);
                 $allGirlsQuery = array_merge($currentQuery, ['girls' => 'all']);
                 $popularGirlsQuery = array_merge($currentQuery, ['girls' => 'popular']);
-                $girlsUrl = fn (array $query): string => url('/').'?'.http_build_query($query);
+                $girlsUrl = fn (array $query): string => url()->current().(! empty($query) ? '?'.http_build_query($query) : '');
             @endphp
             <div class="flex flex-wrap items-center gap-2">
                 <a

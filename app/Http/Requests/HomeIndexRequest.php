@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\LocationSlugService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,21 +15,41 @@ class HomeIndexRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        /** @var LocationSlugService $locationSlugService */
+        $locationSlugService = app(LocationSlugService::class);
+
         $routeSearchName = trim((string) $this->route('search_name', ''));
         $seoSearchName = $routeSearchName !== ''
             ? str_replace('-', ' ', urldecode($routeSearchName))
             : '';
         $escortName = trim((string) $this->input('escort_name', ''));
 
+        $routeLocationData = null;
+        $routeLocationSlug = trim((string) $this->route('location_slug', ''));
+        if ($routeLocationSlug !== '') {
+            $routeLocationData = $locationSlugService->parseSlug($routeLocationSlug);
+        }
+
+        $legacyRouteLocationSlug = trim((string) $this->route('legacy_location_slug', ''));
+        if ($routeLocationData === null && $legacyRouteLocationSlug !== '') {
+            $routeLocationData = $locationSlugService->parseSlug($legacyRouteLocationSlug);
+        }
+
         $routeSuburb = trim((string) $this->route('suburb', ''));
         $routeState = trim((string) $this->route('state', ''));
-        $locationFromRoute = '';
-        if ($routeSuburb !== '') {
-            $suburb = ucwords(str_replace('-', ' ', urldecode($routeSuburb)));
-            $state = $routeState !== '' ? strtoupper(urldecode($routeState)) : '';
-            $locationFromRoute = $state !== '' ? "{$suburb}, {$state}" : $suburb;
+        if ($routeLocationData === null && $routeSuburb !== '') {
+            $routeLocationData = $locationSlugService->fromSuburbAndState(
+                urldecode($routeSuburb),
+                $routeState !== '' ? urldecode($routeState) : null
+            );
         }
+
+        $locationFromRoute = (string) ($routeLocationData['location'] ?? '');
         $location = $locationFromRoute !== '' ? $locationFromRoute : trim((string) $this->input('location', ''));
+        $locationState = trim((string) $this->input('location_state', ''));
+        if ($routeLocationData !== null && ! empty($routeLocationData['state'])) {
+            $locationState = (string) $routeLocationData['state'];
+        }
 
         $this->merge([
             'categories' => is_array($this->input('categories')) ? $this->input('categories') : [],
@@ -37,7 +58,9 @@ class HomeIndexRequest extends FormRequest
             'min_price' => $this->input('min_price', 150),
             'max_price' => $this->input('max_price', 400),
             'location' => $location,
-            'location_state' => trim((string) $this->input('location_state', '')),
+            'location_state' => $locationState,
+            'location_slug' => $routeLocationData['slug'] ?? null,
+            'location_from_route' => $routeLocationData !== null,
             'escort_name' => $escortName !== '' ? $escortName : $seoSearchName,
             'user_lat' => $this->input('user_lat'),
             'user_lng' => $this->input('user_lng'),
@@ -60,6 +83,8 @@ class HomeIndexRequest extends FormRequest
             'max_price' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'location' => ['nullable', 'string', 'max:255'],
             'location_state' => ['nullable', 'string', 'max:255'],
+            'location_slug' => ['nullable', 'string', 'max:255'],
+            'location_from_route' => ['nullable', 'boolean'],
             'escort_name' => ['nullable', 'string', 'max:255'],
             'user_lat' => ['nullable', 'numeric', 'between:-90,90'],
             'user_lng' => ['nullable', 'numeric', 'between:-180,180'],

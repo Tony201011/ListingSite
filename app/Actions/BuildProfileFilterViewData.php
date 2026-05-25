@@ -11,6 +11,7 @@ use App\Models\SiteSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder as ScoutBuilder;
 
@@ -133,6 +134,8 @@ class BuildProfileFilterViewData
         }
 
         $locationQuery = trim((string) ($validated['location'] ?? ''));
+        $locationSlug = trim((string) ($validated['location_slug'] ?? ''));
+        $locationFromRoute = (bool) ($validated['location_from_route'] ?? false);
         $girlsMode = (string) ($validated['girls'] ?? 'all');
         $locationStateQuery = trim((string) ($validated['location_state'] ?? ''));
         $escortNameQuery = trim((string) ($validated['escort_name'] ?? ''));
@@ -246,6 +249,7 @@ class BuildProfileFilterViewData
             'distanceFilter',
             'hasDistanceFilter',
             'distanceSearchEnabled',
+            'locationSlug',
             'userLat',
             'userLng',
             'escortNameQuery',
@@ -622,8 +626,8 @@ class BuildProfileFilterViewData
         }
 
         $appendParams = array_filter([
-            'location' => $locationQuery ?: null,
-            'location_state' => $locationStateQuery ?: null,
+            'location' => $locationFromRoute ? null : ($locationQuery ?: null),
+            'location_state' => $locationFromRoute ? null : ($locationStateQuery ?: null),
             'escort_name' => $escortNameQuery ?: null,
             'min_age' => $minAge !== self::DEFAULT_MIN_AGE ? $minAge : null,
             'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
@@ -807,14 +811,18 @@ class BuildProfileFilterViewData
             ];
         }
 
-        $matchedStates = Postcode::query()
-            ->whereRaw('UPPER(TRIM(suburb)) = ?', [mb_strtoupper($locationQuery)])
-            ->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->pluck('state')
-            ->map(fn ($state) => strtoupper(trim((string) $state)))
-            ->unique()
-            ->values();
+        $matchedStates = Cache::remember(
+            'search.location.states.'.mb_strtolower($locationQuery),
+            now()->addHours(12),
+            fn () => Postcode::query()
+                ->whereRaw('UPPER(TRIM(suburb)) = ?', [mb_strtoupper($locationQuery)])
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->pluck('state')
+                ->map(fn ($state) => strtoupper(trim((string) $state)))
+                ->unique()
+                ->values()
+        );
 
         if ($matchedStates->count() === 1) {
             $state = $matchedStates->first();
@@ -830,22 +838,30 @@ class BuildProfileFilterViewData
 
     private function resolveLocationCoordinates(string $suburb, string $state): ?array
     {
-        $postcode = Postcode::query()
-            ->whereRaw('UPPER(TRIM(suburb)) = ?', [mb_strtoupper(trim($suburb))])
-            ->whereRaw('UPPER(TRIM(state)) = ?', [mb_strtoupper(trim($state))])
-            ->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->orderBy('postcode')
-            ->first(['latitude', 'longitude']);
+        $cacheKey = sprintf(
+            'search.location.coordinates.%s.%s',
+            mb_strtolower(trim($suburb)),
+            mb_strtolower(trim($state))
+        );
 
-        if ($postcode === null) {
-            return null;
-        }
+        return Cache::remember($cacheKey, now()->addHours(12), function () use ($suburb, $state): ?array {
+            $postcode = Postcode::query()
+                ->whereRaw('UPPER(TRIM(suburb)) = ?', [mb_strtoupper(trim($suburb))])
+                ->whereRaw('UPPER(TRIM(state)) = ?', [mb_strtoupper(trim($state))])
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->orderBy('postcode')
+                ->first(['latitude', 'longitude']);
 
-        return [
-            'latitude' => (float) $postcode->latitude,
-            'longitude' => (float) $postcode->longitude,
-        ];
+            if ($postcode === null) {
+                return null;
+            }
+
+            return [
+                'latitude' => (float) $postcode->latitude,
+                'longitude' => (float) $postcode->longitude,
+            ];
+        });
     }
 
     private function resolveLocalFeaturedStateName(string $locationQuery, string $locationStateQuery): ?string
