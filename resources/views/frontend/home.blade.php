@@ -37,7 +37,7 @@
                     locationEnabled: {{ ($distanceSearchEnabled && $userLat !== null && $userLng !== null) ? 'true' : 'false' }},
                     distanceSearchEnabled: {{ $distanceSearchEnabled ? 'true' : 'false' }}
                 })" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
-                <form method="GET" action="{{ url('/') }}" @submit="handleFormSubmit($event)">
+                <form method="GET" action="{{ route('escorts.search') }}" @submit="handleFormSubmit($event)">
                     <template x-if="distanceSearchEnabled">
                         <span>
                             <input type="hidden" name="user_lat" :value="userLat">
