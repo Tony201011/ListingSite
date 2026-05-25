@@ -78,10 +78,11 @@ class SitemapService
         $profiles = $this->approvedProfilesQuery()
             ->orderBy('id')
             ->forPage($page, $this->profileSitemapPageSize())
-            ->get(['slug', 'updated_at']);
+            ->with(['state', 'city'])
+            ->get(['id', 'slug', 'profile_sequence', 'state_id', 'city_id', 'suburb', 'updated_at']);
 
         $urls = $profiles->map(fn (ProviderProfile $profile) => $this->urlEntry(
-            route('profile.show', ['slug' => $profile->slug]),
+            $profile->getEscortUrl(),
             $profile->updated_at,
             'daily',
             '0.8',

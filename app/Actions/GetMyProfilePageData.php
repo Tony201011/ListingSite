@@ -52,8 +52,8 @@ class GetMyProfilePageData
 
         $shortUrlRecord = $user?->shortUrl;
 
-        $profileUrl = $profile?->slug
-            ? route('profile.show', ['slug' => $profile->slug])
+        $profileUrl = $profile?->slug && $profile?->profile_sequence
+            ? $profile->getEscortUrl()
             : null;
 
         $shortUrlFull = $shortUrlRecord?->short_url

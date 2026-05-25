@@ -44,15 +44,20 @@ class SaveMyProfile
                 10
             );
 
-            $newName = $validated['name'] ?? $user->name;
-            $nameChanged = $profile->name !== $newName;
-            $profile->name = $newName;
+            $profile->name = $validated['name'] ?? $user->name;
 
-            if (! $profile->slug || $nameChanged) {
-                $profile->slug = $this->generateUniqueProviderProfileSlug->execute(
-                    $profile->name,
-                    $profile->id ?: null,
-                );
+            // Always regenerate the slug from the current name so that URL stays
+            // in sync when the provider renames their profile.
+            $newSlug = $this->generateUniqueProviderProfileSlug->execute($profile->name);
+
+            $slugChanged = $profile->slug !== $newSlug;
+            $profile->slug = $newSlug;
+
+            // Assign or re-assign profile_sequence when the slug changes or the
+            // profile is brand-new (no sequence yet).  Use withTrashed() so that
+            // sequences from deleted profiles are never reused.
+            if ($slugChanged || ! $profile->profile_sequence) {
+                $profile->profile_sequence = $this->getNextSequence($newSlug, $profile->id);
             }
 
             $profile->fill([
@@ -103,6 +108,17 @@ class SaveMyProfile
         });
 
         return ActionResult::success(['profile_id' => $profile->id], 'Profile updated successfully.');
+    }
+
+    private function getNextSequence(string $slug, int|null $excludeId = null): int
+    {
+        $query = ProviderProfile::withTrashed()->where('slug', $slug);
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return ($query->max('profile_sequence') ?? 0) + 1;
     }
 
     private function validateCategorySelections(array $validated): void

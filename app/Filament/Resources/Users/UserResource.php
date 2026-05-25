@@ -1301,7 +1301,7 @@ class UserResource extends Resource
                         ->label('View as Provider')
                         ->icon('heroicon-o-user')
                         ->color('info')
-                        ->url(fn (ProviderProfile $record): string => $record->slug ? route('profile.show', ['slug' => $record->slug]) : '#')
+                        ->url(fn (ProviderProfile $record): string => filled($record->slug) && $record->profile_sequence ? $record->getEscortUrl() : '#')
                         ->openUrlInNewTab()
                         ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && filled($record->slug)),
 

@@ -27,11 +27,25 @@ class ProfileShowControllerTest extends TestCase
             'user_id' => $user->id,
             'name' => 'Jade',
             'slug' => 'jade010-10',
+            'profile_sequence' => 1,
             'profile_status' => 'approved',
             'age' => 24,
         ], $profileOverrides));
 
         return $user;
+    }
+
+    /**
+     * Generate the new 4-segment escort profile URL for use in assertions.
+     */
+    private function profileUrl(string $slug, int $sequence = 1): string
+    {
+        return route('profile.show', [
+            'state'       => 'au',
+            'suburb'      => 'australia',
+            'slug'        => $slug,
+            'sequence_id' => str_pad((string) $sequence, 3, '0', STR_PAD_LEFT),
+        ]);
     }
 
     // ---------------------------------------------------------------
@@ -42,7 +56,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertStatus(200);
     }
@@ -51,7 +65,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertViewIs('frontend.profile-show');
     }
@@ -60,7 +74,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertStatus(200);
         $response->assertDontSee('PREV');
@@ -71,7 +85,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertViewHasAll([
             'profile',
@@ -90,7 +104,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_show_returns_404_for_unknown_slug(): void
     {
-        $response = $this->get(route('profile.show', ['slug' => 'does-not-exist']));
+        $response = $this->get($this->profileUrl('does-not-exist'));
 
         $response->assertStatus(404);
     }
@@ -105,7 +119,7 @@ class ProfileShowControllerTest extends TestCase
             'profile_status' => 'pending',
         ]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'pending-profile']));
+        $response = $this->get($this->profileUrl('pending-profile'));
 
         $response->assertStatus(404);
     }
@@ -116,7 +130,7 @@ class ProfileShowControllerTest extends TestCase
 
         ProviderProfile::query()->where('user_id', $user->id)->first()->delete();
 
-        $response = $this->get(route('profile.show', ['slug' => 'deleted-profile']));
+        $response = $this->get($this->profileUrl('deleted-profile'));
 
         $response->assertStatus(404);
     }
@@ -132,7 +146,7 @@ class ProfileShowControllerTest extends TestCase
             'status' => 'hide',
         ]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'hidden-profile']));
+        $response = $this->get($this->profileUrl('hidden-profile'));
 
         $response->assertStatus(404);
     }
@@ -148,7 +162,7 @@ class ProfileShowControllerTest extends TestCase
             'status' => 'show',
         ]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'visible-profile']));
+        $response = $this->get($this->profileUrl('visible-profile'));
 
         $response->assertStatus(200);
     }
@@ -161,7 +175,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider(['name' => 'Jade', 'age' => 24]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertSame('Jade', $profile['name']);
@@ -172,7 +186,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertSame('jade010-10', $profile['slug']);
@@ -182,7 +196,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $user = $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertSame($user->id, $profile['user_id']);
@@ -192,7 +206,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $user = $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertSee('name="user_id" value="'.$user->id.'"', false);
         $response->assertSee('Send booking enquiry');
@@ -202,7 +216,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertSame('Contact for rate', $profile['rate']);
@@ -221,7 +235,7 @@ class ProfileShowControllerTest extends TestCase
             'outcall' => '$350',
         ]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertSame('$300', $profile['rate']);
@@ -240,7 +254,7 @@ class ProfileShowControllerTest extends TestCase
             'outcall' => '$350',
         ]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertSame('$350', $profile['rate']);
@@ -254,7 +268,7 @@ class ProfileShowControllerTest extends TestCase
         Rate::query()->create(['user_id' => $user->id, 'provider_profile_id' => $profileId, 'description' => '30 min', 'incall' => '$150', 'outcall' => '$180']);
         Rate::query()->create(['user_id' => $user->id, 'provider_profile_id' => $profileId, 'description' => '1 hour', 'incall' => '$250', 'outcall' => '$300']);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertCount(2, $profile['price_list']);
@@ -264,7 +278,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profileStats = $response->viewData('profileStats');
         $labels = array_column($profileStats, 'label');
@@ -282,7 +296,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider(['age_group_id' => null]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profileStats = $response->viewData('profileStats');
         $ageGroupStat = collect($profileStats)->firstWhere('label', 'Age group');
@@ -294,7 +308,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider(['is_verified' => true]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertTrue($profile['is_verified']);
@@ -304,7 +318,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider(['is_featured' => true]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $profile = $response->viewData('profile');
         $this->assertTrue($profile['is_featured']);
@@ -318,22 +332,24 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $prevProfile = $response->viewData('prevProfile');
         $nextProfile = $response->viewData('nextProfile');
 
         $this->assertArrayHasKey('slug', $prevProfile);
         $this->assertArrayHasKey('name', $prevProfile);
+        $this->assertArrayHasKey('profile_url', $prevProfile);
         $this->assertArrayHasKey('slug', $nextProfile);
         $this->assertArrayHasKey('name', $nextProfile);
+        $this->assertArrayHasKey('profile_url', $nextProfile);
     }
 
     public function test_prev_and_next_profile_wrap_around_to_same_profile_when_only_one_exists(): void
     {
         $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $prevProfile = $response->viewData('prevProfile');
         $nextProfile = $response->viewData('nextProfile');
@@ -349,7 +365,7 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
         $this->createApprovedProvider(['name' => 'Bella', 'slug' => 'bella-001']);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $prevProfile = $response->viewData('prevProfile');
         $nextProfile = $response->viewData('nextProfile');
@@ -366,7 +382,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $this->assertIsArray($response->viewData('nearbyProfiles'));
     }
@@ -376,7 +392,7 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
         $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $nearbyNames = array_column($response->viewData('nearbyProfiles'), 'name');
         $this->assertNotContains('Jade', $nearbyNames);
@@ -391,7 +407,7 @@ class ProfileShowControllerTest extends TestCase
             $this->createApprovedProvider(['name' => "Escort {$i}", 'slug' => "escort-{$i}"]);
         }
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $this->assertLessThanOrEqual(6, count($response->viewData('nearbyProfiles')));
     }
@@ -401,12 +417,13 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider(['slug' => 'jade010-10']);
         $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $nearby = $response->viewData('nearbyProfiles');
         $this->assertNotEmpty($nearby, 'Expected at least one nearby profile to be returned');
 
         $this->assertArrayHasKey('slug', $nearby[0]);
+        $this->assertArrayHasKey('profile_url', $nearby[0]);
         $this->assertArrayHasKey('name', $nearby[0]);
         $this->assertArrayHasKey('image', $nearby[0]);
         $this->assertArrayHasKey('city', $nearby[0]);
@@ -421,7 +438,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $this->assertEmpty($response->viewData('selectedCategoryNames'));
     }
@@ -437,7 +454,7 @@ class ProfileShowControllerTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10', 'categories' => [$category->id]]));
+        $response = $this->get($this->profileUrl('jade010-10').'?'.http_build_query(['categories' => [$category->id]]));
 
         $this->assertContains('Brunette', $response->viewData('selectedCategoryNames'));
     }
@@ -446,7 +463,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider();
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10', 'categories' => [99999]]));
+        $response = $this->get($this->profileUrl('jade010-10').'?'.http_build_query(['categories' => [99999]]));
 
         $response->assertSessionHasErrors(['categories.0']);
     }
@@ -462,7 +479,7 @@ class ProfileShowControllerTest extends TestCase
             'is_active' => false,
         ]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10', 'categories' => [$category->id]]));
+        $response = $this->get($this->profileUrl('jade010-10').'?'.http_build_query(['categories' => [$category->id]]));
 
         $response->assertSessionHasErrors(['categories.0']);
     }
@@ -480,7 +497,7 @@ class ProfileShowControllerTest extends TestCase
             'site_password_enabled' => true,
         ]);
 
-        $response = $this->get(route('profile.show', ['slug' => 'jade010-10']));
+        $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertRedirect('/site-password');
     }
@@ -495,7 +512,7 @@ class ProfileShowControllerTest extends TestCase
         ]);
 
         $response = $this->withSession(['site_access' => true])
-            ->get(route('profile.show', ['slug' => 'jade010-10']));
+            ->get($this->profileUrl('jade010-10'));
 
         $response->assertStatus(200);
     }
@@ -512,7 +529,7 @@ class ProfileShowControllerTest extends TestCase
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
         $response = $this->actingAs($admin)
-            ->get(route('profile.show', ['slug' => 'jade010-10']));
+            ->get($this->profileUrl('jade010-10'));
 
         $response->assertStatus(200);
     }

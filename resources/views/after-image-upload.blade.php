@@ -127,7 +127,7 @@
 
         <div class="mt-8 bg-white rounded-xl border border-gray-100 p-5 sm:p-6">
             <p class="text-gray-700 font-medium mb-2">You can be found on Hotescorts with the following URL's</p>
-            <p class="text-pink-600 font-semibold break-all">Hotescorts.com.au/escorts/vic/melbourne/sourabh-wadhwa</p>
+            <p class="text-pink-600 font-semibold break-all">Hotescorts.com.au/escorts/vic/melbourne/sourabh-wadhwa/001</p>
         </div>
     </div>
 </div>

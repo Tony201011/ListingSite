@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 
 class ProviderProfile extends Model
@@ -18,6 +19,7 @@ class ProviderProfile extends Model
         'user_id',
         'name',
         'slug',
+        'profile_sequence',
         'age',
         'description',
         'introduction_line',
@@ -72,6 +74,7 @@ class ProviderProfile extends Model
             'country_id' => 'integer',
             'state_id' => 'integer',
             'city_id' => 'integer',
+            'profile_sequence' => 'integer',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'is_verified' => 'boolean',
@@ -192,6 +195,81 @@ class ProviderProfile extends Model
     {
         return $this->hasMany(UserReport::class);
     }
+
+    // -----------------------------------------------------------------------
+    // Escort URL helpers
+    // -----------------------------------------------------------------------
+
+    /**
+     * Return the lowercase, 2-3 character state abbreviation for use in
+     * the escort URL (e.g. "vic", "nsw", "qld").  Falls back to "au" when the
+     * profile has no linked state.
+     */
+    public function getStateSlug(): string
+    {
+        static $map = [
+            'Australian Capital Territory' => 'act',
+            'New South Wales' => 'nsw',
+            'Victoria' => 'vic',
+            'Queensland' => 'qld',
+            'Western Australia' => 'wa',
+            'South Australia' => 'sa',
+            'Tasmania' => 'tas',
+            'Northern Territory' => 'nt',
+        ];
+
+        $stateName = $this->state?->name ?? '';
+
+        return $map[$stateName] ?? (Str::slug($stateName) ?: 'au');
+    }
+
+    /**
+     * Return the slugified suburb/city name for use in the escort URL
+     * (e.g. "melbourne", "sydney").  Falls back to "australia" when neither
+     * a city record nor a suburb string is available.
+     */
+    public function getSuburbSlug(): string
+    {
+        $cityName = $this->city?->name ?? '';
+
+        if ($cityName === '') {
+            $suburb = $this->suburb ?? '';
+            $cityName = str_contains($suburb, ',')
+                ? trim(explode(',', $suburb, 2)[0])
+                : $suburb;
+        }
+
+        return Str::slug($cityName) ?: 'australia';
+    }
+
+    /**
+     * Return the zero-padded 3-digit sequence string used in the URL
+     * (e.g. "001", "012", "123").
+     */
+    public function getSequenceFormatted(): string
+    {
+        return str_pad((string) ($this->profile_sequence ?? 1), 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Return the full SEO-friendly escort profile URL:
+     *   /escorts/{state}/{suburb}/{slug}/{sequence_id}
+     *
+     * Relations `state` and `city` are lazy-loaded if not already loaded.
+     */
+    public function getEscortUrl(): string
+    {
+        $this->loadMissing(['state', 'city']);
+
+        return route('profile.show', [
+            'state'       => $this->getStateSlug(),
+            'suburb'      => $this->getSuburbSlug(),
+            'slug'        => $this->slug,
+            'sequence_id' => $this->getSequenceFormatted(),
+        ]);
+    }
+
+    // -----------------------------------------------------------------------
 
     public function searchableAs(): string
     {

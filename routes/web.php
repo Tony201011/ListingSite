@@ -108,7 +108,17 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
-Route::get('/profile/{slug}', [HomeController::class, 'showProfile'])->name('profile.show');
+Route::get('/escorts/{state}/{suburb}/{slug}/{sequence_id}', [HomeController::class, 'showProfile'])
+    ->where([
+        'state'       => '[a-z]{2,3}',
+        'suburb'      => '[a-z0-9-]+',
+        'slug'        => '[a-z0-9-]+',
+        'sequence_id' => '[0-9]{3}',
+    ])
+    ->name('profile.show');
+
+// Legacy redirect: old /profile/{slug} URLs → new SEO URL (301)
+Route::get('/profile/{slug}', [HomeController::class, 'redirectOldProfile'])->name('profile.show.legacy');
 
 Route::post('/favourite/{slug}', [FavouriteBookmarkController::class, 'toggleFavourite'])->name('favourite.toggle');
 Route::post('/bookmark/{slug}', [FavouriteBookmarkController::class, 'toggleBookmark'])->name('bookmark.toggle');
