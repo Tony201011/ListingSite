@@ -83,6 +83,18 @@ function verifyPage(config) {
             return [this.pendingPhoto1, this.pendingPhoto2].filter(Boolean).length;
         },
 
+        getRemainingPhotoSlots() {
+            return Math.max(0, 2 - this.existingPhotoCount);
+        },
+
+        getModalRequiredPhotoCount() {
+            return this.getRemainingPhotoSlots();
+        },
+
+        getPhotoCountLabel(count) {
+            return `${count} photo${count === 1 ? '' : 's'}`;
+        },
+
         canUploadSlotPhotos() {
             const totalPhotos = this.existingPhotoCount + this.getPendingSlotCount();
 
@@ -194,9 +206,15 @@ function verifyPage(config) {
 
         addFiles(files) {
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const maxFiles = this.getModalRequiredPhotoCount();
             const existingKeys = new Set(
                 this.selectedFiles.map((file) => `${file.name}-${file.size}-${file.lastModified || 0}`)
             );
+
+            if (maxFiles <= 0) {
+                this.error('You have no remaining verification photo slots.');
+                return;
+            }
 
             for (const file of files) {
                 if (!allowedTypes.includes(file.type)) {
@@ -214,8 +232,8 @@ function verifyPage(config) {
                     continue;
                 }
 
-                if (this.selectedFiles.length >= 2) {
-                    this.error('You can upload a maximum of 2 photos.');
+                if (this.selectedFiles.length >= maxFiles) {
+                    this.error(`You can upload a maximum of ${this.getPhotoCountLabel(maxFiles)}.`);
                     break;
                 }
 
@@ -318,8 +336,15 @@ function verifyPage(config) {
                 return;
             }
 
-            if (this.selectedFiles.length >= 2) {
-                this.error('You can upload a maximum of 2 photos.');
+            const maxFiles = this.getModalRequiredPhotoCount();
+
+            if (maxFiles <= 0) {
+                this.error('You have no remaining verification photo slots.');
+                return;
+            }
+
+            if (this.selectedFiles.length >= maxFiles) {
+                this.error(`You can upload a maximum of ${this.getPhotoCountLabel(maxFiles)}.`);
                 return;
             }
 
@@ -340,13 +365,20 @@ function verifyPage(config) {
         },
 
         async uploadFiles() {
-            if (this.selectedFiles.length < 2) {
-                this.error('Please select at least two photos.');
+            const requiredPhotos = this.getModalRequiredPhotoCount();
+
+            if (requiredPhotos <= 0) {
+                this.error('You have no remaining verification photo slots.');
                 return;
             }
 
-            if (this.selectedFiles.length > 2) {
-                this.error('You can upload a maximum of 2 photos.');
+            if (this.selectedFiles.length < requiredPhotos) {
+                this.error(`Please select ${this.getPhotoCountLabel(requiredPhotos)}.`);
+                return;
+            }
+
+            if (this.selectedFiles.length > requiredPhotos) {
+                this.error(`You can upload a maximum of ${this.getPhotoCountLabel(requiredPhotos)}.`);
                 return;
             }
 
