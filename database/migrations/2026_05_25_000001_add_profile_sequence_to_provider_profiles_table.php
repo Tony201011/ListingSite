@@ -15,13 +15,10 @@ return new class extends Migration
             $table->unsignedSmallInteger('profile_sequence')->nullable()->after('slug');
         });
 
-        // Populate profile_sequence for all existing profiles.
-        // Group profiles by a "base slug" derived from the profile name, then assign
-        // sequences 1, 2, 3 … in ascending ID order within each group.
-        $profiles = DB::table('provider_profiles')
-            ->whereNull('deleted_at')
-            ->orderBy('id')
-            ->get(['id', 'name', 'slug']);
+        // Drop the old unique index on slug before rewriting existing slugs.
+        Schema::table('provider_profiles', function (Blueprint $table): void {
+            $table->dropUnique('provider_profiles_slug_unique');
+        });
 
         // Also include soft-deleted so sequence numbers from deleted profiles are reserved.
         $allProfiles = DB::table('provider_profiles')
@@ -52,10 +49,8 @@ return new class extends Migration
             $table->unsignedSmallInteger('profile_sequence')->default(1)->nullable(false)->change();
         });
 
-        // Replace the unique index on slug alone with a composite unique on (slug, profile_sequence).
+        // Add a composite unique on (slug, profile_sequence).
         Schema::table('provider_profiles', function (Blueprint $table): void {
-            // Drop the old unique index on slug (index name matches the Laravel convention).
-            $table->dropUnique('provider_profiles_slug_unique');
             $table->unique(['slug', 'profile_sequence']);
         });
     }
