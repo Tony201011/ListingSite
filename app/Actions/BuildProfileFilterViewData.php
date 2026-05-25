@@ -625,9 +625,13 @@ class BuildProfileFilterViewData
                 break;
         }
 
+        $appendLocationFromRoute = isset($locationFromRoute)
+            ? (bool) $locationFromRoute
+            : (bool) ($validated['location_from_route'] ?? false);
+
         $appendParams = array_filter([
-            'location' => $locationFromRoute ? null : ($locationQuery ?: null),
-            'location_state' => $locationFromRoute ? null : ($locationStateQuery ?: null),
+            'location' => $appendLocationFromRoute ? null : ($locationQuery ?: null),
+            'location_state' => $appendLocationFromRoute ? null : ($locationStateQuery ?: null),
             'escort_name' => $escortNameQuery ?: null,
             'min_age' => $minAge !== self::DEFAULT_MIN_AGE ? $minAge : null,
             'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
