@@ -199,21 +199,11 @@ class HomeController extends Controller
         $canonicalRoutePath = trim((string) parse_url($canonicalPath, PHP_URL_PATH), '/');
 
         $query = $request->query();
-        unset(
-            $query['location'],
-            $query['location_state'],
-            $query['location_slug'],
-            $query['location_from_route'],
-            $query['user_lat'],
-            $query['user_lng']
-        );
+        unset($query['location'], $query['location_state'], $query['user_lat'], $query['user_lng']);
         $queryString = http_build_query($query);
         $targetUrl = $queryString !== '' ? "{$canonicalPath}?{$queryString}" : $canonicalPath;
 
-        $hasLegacyLocationQuery = $request->query('location') !== null
-            || $request->query('location_state') !== null
-            || $request->query('location_slug') !== null
-            || $request->query('location_from_route') !== null;
+        $hasLegacyLocationQuery = $request->query('location') !== null || $request->query('location_state') !== null;
 
         if ($currentPath !== $canonicalRoutePath) {
             return $targetUrl;
