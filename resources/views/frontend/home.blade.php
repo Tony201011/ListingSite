@@ -42,7 +42,9 @@
                         <span>
                             <input type="hidden" name="user_lat" :value="userLat">
                             <input type="hidden" name="user_lng" :value="userLng">
-                            <input type="hidden" name="distance" :value="(searchMode === 'suburb' && (locationEnabled || term.trim() !== '')) ? distance : ''">
+                            <template x-if="searchMode === 'suburb' && (locationEnabled || term.trim() !== '')">
+                                <input type="hidden" name="distance" :value="distance">
+                            </template>
                         </span>
                     </template>
 
