@@ -3,6 +3,7 @@ function verifyPage(config) {
         uploadUrl: config.uploadUrl || '',
         deleteUrl: config.deleteUrl || '',
         csrfToken: config.csrfToken || '',
+        existingPhotoCount: Number(config.existingPhotoCount || 0),
 
         isModalOpen: false,
         activeTab: 'files',
@@ -78,9 +79,19 @@ function verifyPage(config) {
             }
         },
 
+        getPendingSlotCount() {
+            return [this.pendingPhoto1, this.pendingPhoto2].filter(Boolean).length;
+        },
+
+        canUploadSlotPhotos() {
+            const totalPhotos = this.existingPhotoCount + this.getPendingSlotCount();
+
+            return this.getPendingSlotCount() > 0 && totalPhotos === 2;
+        },
+
         async uploadSlotPhotos() {
-            if (!this.pendingPhoto1 || !this.pendingPhoto2) {
-                this.error('Please add both Photo 1 and Photo 2 before uploading.');
+            if (!this.canUploadSlotPhotos()) {
+                this.error('Please fill the remaining verification photo slots before uploading.');
                 return;
             }
 
@@ -121,6 +132,7 @@ function verifyPage(config) {
                 this.pendingPhoto2 = null;
                 this.previewUrl1 = '';
                 this.previewUrl2 = '';
+                this.existingPhotoCount = 2;
 
                 setTimeout(() => window.location.reload(), 1200);
             } catch (err) {

@@ -10,7 +10,8 @@
     x-data="verifyPage({
         uploadUrl: @js(route('photo-verification.upload')),
         deleteUrl: @js(route('photo-verification.delete-photo')),
-        csrfToken: @js(csrf_token())
+        csrfToken: @js(csrf_token()),
+        existingPhotoCount: @js(count($verificationPhotos))
     })"
 >
     <div class="mx-auto max-w-5xl space-y-6">
@@ -348,9 +349,9 @@
             </div>
 
             {{-- Inline upload button shown when both pending photos are ready --}}
-            <template x-if="pendingPhoto1 && pendingPhoto2">
+            <template x-if="canUploadSlotPhotos()">
                 <div class="mt-4 flex items-center justify-between gap-4 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3">
-                    <p class="text-sm font-medium text-pink-800">Both photos ready — click to submit for review.</p>
+                    <p class="text-sm font-medium text-pink-800">Required photos ready — click to submit for review.</p>
                     <button
                         type="button"
                         @click="uploadSlotPhotos()"
