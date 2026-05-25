@@ -44,10 +44,15 @@ class SaveMyProfile
                 10
             );
 
-            $profile->name = $validated['name'] ?? $user->name;
+            $newName = $validated['name'] ?? $user->name;
+            $nameChanged = $profile->name !== $newName;
+            $profile->name = $newName;
 
-            if (! $profile->slug) {
-                $profile->slug = $this->generateUniqueProviderProfileSlug->execute($profile->name);
+            if (! $profile->slug || $nameChanged) {
+                $profile->slug = $this->generateUniqueProviderProfileSlug->execute(
+                    $profile->name,
+                    $profile->id ?: null,
+                );
             }
 
             $profile->fill([
