@@ -40,7 +40,7 @@ class SearchController extends Controller
                 })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->take(self::MAX_SUGGESTIONS)
-                ->get(['id', 'name', 'slug', 'city_id', 'age'])
+                ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age'])
                 ->load('city');
         } catch (\Throwable $e) {
             Log::warning('Scout search unavailable, falling back to database search.', [
@@ -67,16 +67,35 @@ class SearchController extends Controller
                 ->with('city')
                 ->orderBy('name')
                 ->take(self::MAX_SUGGESTIONS)
-                ->get(['id', 'name', 'slug', 'city_id', 'age']);
+                ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age']);
         }
 
         $suggestions = $results->map(fn (ProviderProfile $profile) => [
             'name' => $profile->name,
             'slug' => $profile->slug,
-            'location' => $profile->city?->name ?? '',
+            'location' => $this->resolveLocationLabel($profile),
             'age' => $profile->age,
         ])->values();
 
         return response()->json(['suggestions' => $suggestions]);
+    }
+
+    private function resolveLocationLabel(ProviderProfile $profile): string
+    {
+        $cityName = trim((string) ($profile->city?->name ?? ''));
+
+        if ($cityName !== '') {
+            return $cityName;
+        }
+
+        $suburb = trim((string) ($profile->suburb ?? ''));
+
+        if ($suburb === '') {
+            return '';
+        }
+
+        $suburb = preg_replace('/\s+\d{4}\s*$/', '', $suburb) ?? $suburb;
+
+        return trim(strtok($suburb, ',') ?: $suburb);
     }
 }

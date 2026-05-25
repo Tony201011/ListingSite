@@ -671,6 +671,23 @@ class SearchTest extends TestCase
         }
     }
 
+    public function test_search_suggestions_use_profile_suburb_when_city_is_missing(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Suburb Suggestion Escort',
+            'slug' => 'suburb-suggestion-escort',
+            'suburb' => 'Mount Gambier, SA 5290',
+        ]);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Suburb+Suggestion+Escort');
+
+        $response->assertOk();
+        $suggestion = collect($response->json('suggestions'))->firstWhere('slug', 'suburb-suggestion-escort');
+
+        $this->assertNotNull($suggestion);
+        $this->assertSame('Mount Gambier', $suggestion['location']);
+    }
+
     public function test_search_suggestions_returns_at_most_8_results(): void
     {
         // Create 10 approved profiles
