@@ -36,17 +36,21 @@ class ProfileShowControllerTest extends TestCase
         return $user;
     }
 
-    /**
-     * Generate the new 4-segment escort profile URL for use in assertions.
-     */
-    private function profileUrl(string $slug, int $sequence = 1): string
+    private function profileUrl(string $slug, int $sequence = 1, bool $includeSequence = false): string
     {
-        return route('profile.show', [
+        $params = [
             'state'       => 'au',
             'suburb'      => 'australia',
             'slug'        => $slug,
-            'sequence_id' => str_pad((string) $sequence, 3, '0', STR_PAD_LEFT),
-        ]);
+        ];
+
+        if ($includeSequence) {
+            $params['sequence_id'] = str_pad((string) $sequence, 3, '0', STR_PAD_LEFT);
+
+            return route('profile.show', $params);
+        }
+
+        return route('profile.show.no-sequence', $params);
     }
 
     // ---------------------------------------------------------------
@@ -60,6 +64,27 @@ class ProfileShowControllerTest extends TestCase
         $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertStatus(200);
+    }
+
+    public function test_sequence_url_redirects_to_clean_canonical_url_when_single_profile_exists(): void
+    {
+        $this->createApprovedProvider(['slug' => 'jade-single']);
+
+        $response = $this->get($this->profileUrl('jade-single', 1, true));
+
+        $response->assertRedirect($this->profileUrl('jade-single'));
+        $response->assertStatus(301);
+    }
+
+    public function test_clean_url_redirects_to_sequence_url_when_multiple_profiles_share_slug_and_location(): void
+    {
+        $this->createApprovedProvider(['slug' => 'jade-multi', 'profile_sequence' => 1]);
+        $this->createApprovedProvider(['slug' => 'jade-multi', 'profile_sequence' => 2]);
+
+        $response = $this->get($this->profileUrl('jade-multi'));
+
+        $response->assertRedirect($this->profileUrl('jade-multi', 1, true));
+        $response->assertStatus(301);
     }
 
     public function test_profile_show_renders_correct_view(): void

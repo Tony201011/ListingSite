@@ -26,17 +26,12 @@ class SitemapControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * Build the expected SEO-friendly escort URL for a given slug.
-     * Since test profiles have no state/city the URL falls back to au/australia.
-     */
     private function profileUrl(string $slug): string
     {
-        return route('profile.show', [
+        return route('profile.show.no-sequence', [
             'state'       => 'au',
             'suburb'      => 'australia',
             'slug'        => $slug,
-            'sequence_id' => '001',
         ]);
     }
 

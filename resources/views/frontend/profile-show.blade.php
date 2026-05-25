@@ -4,6 +4,7 @@
 @endpush
 
 @section('title', $profile['name'] . ' Profile')
+@section('canonical', $profile['profile_url'] ?? url()->current())
 @section('bodyClass', 'profile-show-page')
 
 @php
@@ -62,7 +63,7 @@ $profileTags = array_values(array_unique(array_merge(
                 ? ' - AVAILABLE TILL ' . \Carbon\Carbon::parse($availableExpiresAt)->format('g:ia')
                 : '';
 
-            $profileUrl = $profile['profile_url'] ?? route('profile.show', ['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug'], 'sequence_id' => '001']);
+            $profileUrl = $profile['profile_url'] ?? route('profile.show.no-sequence', ['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug']]);
             $profileUrlDisplay = parse_url($profileUrl, PHP_URL_HOST) . parse_url($profileUrl, PHP_URL_PATH);
             $locationLabel = trim((string) (
                 trim((string) ($profile['suburb'] ?? '')) !== ''
@@ -122,7 +123,7 @@ $profileTags = array_values(array_unique(array_merge(
                 <div class="relative order-2 flex min-w-0 flex-col gap-6 sm:gap-8 md:col-span-2 md:order-1">
                     <!-- Previous Button (left corner) -->
                     @if($hasPrevProfile)
-                    <a href="{{ $prevProfile['profile_url'] ?? route('profile.show', ['state' => 'au', 'suburb' => 'australia', 'slug' => $prevProfile['slug'], 'sequence_id' => '001']) }}"
+                    <a href="{{ $prevProfile['profile_url'] ?? route('profile.show.no-sequence', ['state' => 'au', 'suburb' => 'australia', 'slug' => $prevProfile['slug']]) }}"
                         x-data="{
                             visible: false,
                             init() {
@@ -156,7 +157,7 @@ $profileTags = array_values(array_unique(array_merge(
                     </div>
                     <!-- Next Button (right corner) -->
                     @if($hasNextProfile)
-                    <a href="{{ $nextProfile['profile_url'] ?? route('profile.show', ['state' => 'au', 'suburb' => 'australia', 'slug' => $nextProfile['slug'], 'sequence_id' => '001']) }}"
+                    <a href="{{ $nextProfile['profile_url'] ?? route('profile.show.no-sequence', ['state' => 'au', 'suburb' => 'australia', 'slug' => $nextProfile['slug']]) }}"
                         x-data="{
                             visible: false,
                             init() {
@@ -761,7 +762,7 @@ $profileTags = array_values(array_unique(array_merge(
                         @foreach($nearbyProfiles as $nearby)
                             <article class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 flex-shrink-0"
                                 :style="`width: ${_cardW > 0 ? _cardW + 'px' : '300px'};`">
-                                <a href="{{ $nearby['profile_url'] ?? route('profile.show', array_merge(['state' => 'au', 'suburb' => 'australia', 'slug' => $nearby['slug'], 'sequence_id' => '001'], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
+                                <a href="{{ $nearby['profile_url'] ?? route('profile.show.no-sequence', array_merge(['state' => 'au', 'suburb' => 'australia', 'slug' => $nearby['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $nearby['name'] }}"></a>
 
                                 <div class="relative overflow-hidden rounded-t-2xl">
                                     @if(!empty($nearby['image']))

@@ -34,7 +34,7 @@
                     x-cloak
                     x-show="isFavourite('{{ $profile['slug'] }}')"
                 >
-                    <a href="{{ $profile['profile_url'] ?? route('profile.show', ['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug'], 'sequence_id' => '001']) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
+                    <a href="{{ $profile['profile_url'] ?? route('profile.show.no-sequence', ['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug']]) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
                     {{-- Image --}}
                     <div class="relative overflow-hidden rounded-t-2xl">
