@@ -98,8 +98,9 @@ function verifyPage(config) {
             this.isUploadingSlots = true;
 
             const formData = new FormData();
-            formData.append('photos[]', this.pendingPhoto1);
-            formData.append('photos[]', this.pendingPhoto2);
+            [this.pendingPhoto1, this.pendingPhoto2]
+                .filter(Boolean)
+                .forEach((photo) => formData.append('photos[]', photo));
 
             try {
                 const response = await fetch(this.uploadUrl, {
