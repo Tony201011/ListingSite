@@ -268,13 +268,15 @@ class DummyProviderProfileSeeder extends Seeder
             $stateId = $cityModel ? $cityModel->state_id : (count($states) > 0 ? $states[$i % count($states)] : null);
             $countryId = $cityModel ? ($cityModel->state?->country_id ?? null) : (count($countries) > 0 ? $countries[$i % count($countries)] : null);
 
-            $slug = Str::slug($name).'-'.$i;
+            $slug = Str::slug($name) ?: 'profile';
+            $profileSequence = (ProviderProfile::withTrashed()->where('slug', $slug)->max('profile_sequence') ?? 0) + 1;
 
             $providerProfile = ProviderProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'name' => $name,
                     'slug' => $slug,
+                    'profile_sequence' => $profileSequence,
                     'suburb' => $this->pickFrom($suburbs, $i),
                     'age' => rand(21, 45),
                     'description' => "Hi, I'm {$name}. I am a professional and discreet companion offering premium companionship services. I love to meet new people and create unforgettable experiences.",

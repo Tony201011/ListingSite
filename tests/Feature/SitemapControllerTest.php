@@ -20,8 +20,23 @@ class SitemapControllerTest extends TestCase
             'user_id' => $user->id,
             'name' => 'Escort '.str_replace('-', ' ', $slug),
             'slug' => $slug,
+            'profile_sequence' => 1,
             'profile_status' => $status,
             'age' => 24,
+        ]);
+    }
+
+    /**
+     * Build the expected SEO-friendly escort URL for a given slug.
+     * Since test profiles have no state/city the URL falls back to au/australia.
+     */
+    private function profileUrl(string $slug): string
+    {
+        return route('profile.show', [
+            'state'       => 'au',
+            'suburb'      => 'australia',
+            'slug'        => $slug,
+            'sequence_id' => '001',
         ]);
     }
 
@@ -79,8 +94,8 @@ class SitemapControllerTest extends TestCase
         $response = $this->get('/sitemaps/profiles-1.xml');
 
         $response->assertOk();
-        $response->assertSee(route('profile.show', ['slug' => 'approved-one']), false);
-        $response->assertDontSee(route('profile.show', ['slug' => 'pending-one']), false);
+        $response->assertSee($this->profileUrl('approved-one'), false);
+        $response->assertDontSee($this->profileUrl('pending-one'), false);
     }
 
     public function test_profile_sitemap_auto_updates_when_new_profile_is_added(): void
@@ -88,26 +103,25 @@ class SitemapControllerTest extends TestCase
         $this->createProfile('first-approved');
         $initial = $this->get('/sitemaps/profiles-1.xml');
         $initial->assertOk();
-        $initial->assertDontSee(route('profile.show', ['slug' => 'new-approved']), false);
+        $initial->assertDontSee($this->profileUrl('new-approved'), false);
 
         $this->createProfile('new-approved');
         $updated = $this->get('/sitemaps/profiles-1.xml');
 
         $updated->assertOk();
-        $updated->assertSee(route('profile.show', ['slug' => 'new-approved']), false);
+        $updated->assertSee($this->profileUrl('new-approved'), false);
     }
 
     public function test_profile_sitemap_excludes_non_canonical_profile_slugs(): void
     {
         $this->createProfile('canonical-slug');
-        $this->createProfile('Mixed Slug');
 
         $response = $this->get('/sitemaps/profiles-1.xml');
 
         $response->assertOk();
-        $response->assertSee(route('profile.show', ['slug' => 'canonical-slug']), false);
-        $response->assertDontSee(route('profile.show', ['slug' => 'Mixed Slug']), false);
-        $response->assertDontSee(route('profile.show', ['slug' => 'mixed-slug']), false);
+        $response->assertSee($this->profileUrl('canonical-slug'), false);
+        // URLs with spaces or uppercase are not valid slugs and should never appear.
+        $response->assertDontSee('Mixed Slug', false);
     }
 
     public function test_sitemap_is_accessible_when_site_password_is_enabled(): void

@@ -9,7 +9,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AdvancedSearchRequest;
 use App\Http\Requests\HomeIndexRequest;
 use App\Http\Requests\ShowProfileRequest;
+use App\Models\ProviderProfile;
 use App\Services\FavouriteBookmarkService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -58,10 +60,16 @@ class HomeController extends Controller
         ]);
     }
 
-    public function showProfile(ShowProfileRequest $request, string $slug): View
-    {
+    public function showProfile(
+        ShowProfileRequest $request,
+        string $state,
+        string $suburb,
+        string $slug,
+        string $sequence_id
+    ): View {
         $viewData = $this->getProfileShowData->execute(
             $slug,
+            (int) $sequence_id,
             $request->validated()
         );
 
@@ -74,5 +82,29 @@ class HomeController extends Controller
         $this->recordProfileView->execute($slug, $request);
 
         return view('frontend.profile-show', $viewData);
+    }
+
+    /**
+     * Redirect legacy /profile/{slug} URLs to the new SEO-friendly URL.
+     * Uses the profile with the lowest sequence number for the given slug.
+     */
+    public function redirectOldProfile(string $slug): RedirectResponse
+    {
+        $profile = ProviderProfile::query()
+            ->where('slug', $slug)
+            ->orderBy('profile_sequence')
+            ->with(['state', 'city'])
+            ->first();
+
+        if ($profile === null) {
+            abort(404);
+        }
+
+        return redirect()->route('profile.show', [
+            'state'       => $profile->getStateSlug(),
+            'suburb'      => $profile->getSuburbSlug(),
+            'slug'        => $profile->slug,
+            'sequence_id' => $profile->getSequenceFormatted(),
+        ], 301);
     }
 }

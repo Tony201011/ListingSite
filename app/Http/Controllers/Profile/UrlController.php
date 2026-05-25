@@ -58,6 +58,6 @@ class UrlController extends Controller
             abort(404);
         }
 
-        return redirect()->route('profile.show', ['slug' => $record->providerProfile->slug]);
+        return redirect()->to($record->providerProfile->getEscortUrl());
     }
 }

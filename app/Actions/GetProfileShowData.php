@@ -12,10 +12,11 @@ class GetProfileShowData
 {
     use ResolvesProfileCategoryIds;
 
-    public function execute(string $slug, array $validated): array
+    public function execute(string $slug, int $sequenceId, array $validated): array
     {
         $providerProfile = ProviderProfile::query()
             ->where('slug', $slug)
+            ->where('profile_sequence', $sequenceId)
             ->where('profile_status', 'approved')
             ->with([
                 'profileImages',
@@ -237,6 +238,8 @@ class GetProfileShowData
             'id' => $providerProfile->id,
             'user_id' => $providerProfile->user_id,
             'slug' => $providerProfile->slug,
+            'profile_sequence' => $providerProfile->profile_sequence,
+            'profile_url' => $providerProfile->getEscortUrl(),
             'name' => $providerProfile->name,
             'age' => $providerProfile->age,
             'description' => $providerProfile->description ?? '',
@@ -303,6 +306,8 @@ class GetProfileShowData
 
     private function getAdjacentProfile(int $currentId, string $direction): array
     {
+        $selectColumns = ['id', 'name', 'slug', 'profile_sequence', 'state_id', 'city_id', 'suburb'];
+
         if ($direction === 'prev') {
             $adjacent = ProviderProfile::query()
                 ->where('profile_status', 'approved')
@@ -311,7 +316,8 @@ class GetProfileShowData
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where('id', '<', $currentId)
                 ->orderByDesc('id')
-                ->first(['id', 'name', 'slug']);
+                ->with(['state', 'city'])
+                ->first($selectColumns);
 
             if ($adjacent === null) {
                 $adjacent = ProviderProfile::query()
@@ -320,7 +326,8 @@ class GetProfileShowData
                     ->whereHas('user')
                     ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                     ->orderByDesc('id')
-                    ->first(['id', 'name', 'slug']);
+                    ->with(['state', 'city'])
+                    ->first($selectColumns);
             }
         } else {
             $adjacent = ProviderProfile::query()
@@ -330,7 +337,8 @@ class GetProfileShowData
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where('id', '>', $currentId)
                 ->orderBy('id')
-                ->first(['id', 'name', 'slug']);
+                ->with(['state', 'city'])
+                ->first($selectColumns);
 
             if ($adjacent === null) {
                 $adjacent = ProviderProfile::query()
@@ -339,17 +347,19 @@ class GetProfileShowData
                     ->whereHas('user')
                     ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                     ->orderBy('id')
-                    ->first(['id', 'name', 'slug']);
+                    ->with(['state', 'city'])
+                    ->first($selectColumns);
             }
         }
 
         if ($adjacent === null) {
-            return ['slug' => '', 'name' => ''];
+            return ['slug' => '', 'name' => '', 'profile_url' => ''];
         }
 
         return [
             'slug' => $adjacent->slug ?? '',
             'name' => $adjacent->name ?? '',
+            'profile_url' => $adjacent->getEscortUrl(),
         ];
     }
 
@@ -369,6 +379,7 @@ class GetProfileShowData
                 'availableNow',
                 'user',
                 'city',
+                'state',
             ])
             ->orderByDesc('is_featured')
             ->orderByDesc('created_at')
@@ -399,6 +410,7 @@ class GetProfileShowData
 
                 return [
                     'slug' => $profile->slug ?? '',
+                    'profile_url' => $profile->getEscortUrl(),
                     'name' => $profile->name ?? '',
                     'image' => $imageUrl ?? '',
                     'city' => $profile->city?->name ?? '',

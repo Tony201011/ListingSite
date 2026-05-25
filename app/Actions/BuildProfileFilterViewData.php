@@ -310,6 +310,7 @@ class BuildProfileFilterViewData
                 'user',
                 'user.onlineUser',
                 'city',
+                'state',
             ])
             ->orderByDesc("provider_profiles.{$expiryColumn}");
 
@@ -444,6 +445,7 @@ class BuildProfileFilterViewData
                 'user',
                 'user.onlineUser',
                 'city',
+                'state',
             ]);
 
         if (SiteSetting::isOnlineFilterEnabled()) {
@@ -944,6 +946,7 @@ class BuildProfileFilterViewData
                 'user',
                 'user.onlineUser',
                 'city',
+                'state',
             ])
             ->get();
 
@@ -1011,6 +1014,7 @@ class BuildProfileFilterViewData
             'home_banner' => $profile->home_banner_expires_at && $profile->home_banner_expires_at->isFuture(),
             'image' => $imageUrl ?? '',
             'slug' => $profile->slug,
+            'profile_url' => $profile->getEscortUrl(),
         ];
     }
 

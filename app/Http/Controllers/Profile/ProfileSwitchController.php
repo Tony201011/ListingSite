@@ -91,11 +91,14 @@ class ProfileSwitchController extends Controller
 
         $slug = $this->generateSlug->execute($validated['name']);
 
+        $sequence = (ProviderProfile::withTrashed()->where('slug', $slug)->max('profile_sequence') ?? 0) + 1;
+
         $profile = ProviderProfile::create([
             'user_id' => $user->id,
             'name' => $validated['name'],
             'phone' => $validated['phone'] ?? null,
             'slug' => $slug,
+            'profile_sequence' => $sequence,
         ]);
 
         session(['active_provider_profile_id' => $profile->id]);
