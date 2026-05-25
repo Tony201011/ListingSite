@@ -3,6 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Models\LoginLog;
+use App\Models\Category;
 use App\Models\ProfileImage;
 use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
@@ -311,6 +312,10 @@ class ActivityLogsOnlineStatusTest extends TestCase
     private function createCompleteProfile(): array
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $category = Category::query()->firstOrCreate(
+            ['slug' => 'test-category'],
+            ['name' => 'Test Category']
+        );
 
         $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
@@ -318,13 +323,13 @@ class ActivityLogsOnlineStatusTest extends TestCase
             'slug' => 'profile-one',
             'introduction_line' => 'Intro',
             'profile_text' => 'Complete profile text',
-            'age_group_id' => 1,
-            'hair_color_id' => 1,
-            'hair_length_id' => 1,
-            'ethnicity_id' => 1,
-            'body_type_id' => 1,
-            'bust_size_id' => 1,
-            'your_length_id' => 1,
+            'age_group_id' => $category->id,
+            'hair_color_id' => $category->id,
+            'hair_length_id' => $category->id,
+            'ethnicity_id' => $category->id,
+            'body_type_id' => $category->id,
+            'bust_size_id' => $category->id,
+            'your_length_id' => $category->id,
             'availability' => 'available',
             'contact_method' => 'phone',
             'phone_contact_preference' => 'call',

@@ -303,7 +303,17 @@ class LoginLogoutTest extends TestCase
 
     public function test_authenticated_frontend_pages_mark_body_as_authenticated_for_session_sync(): void
     {
-        $user = $this->createVerifiedUser();
+        $user = $this->createVerifiedUser(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Profile A',
+            'slug' => 'profile-a-'.$user->id,
+        ]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Profile B',
+            'slug' => 'profile-b-'.$user->id,
+        ]);
 
         $response = $this->actingAs($user)->get('/select-profile');
 
