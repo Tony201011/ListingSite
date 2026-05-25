@@ -123,8 +123,75 @@
                                 @endif
                             </div>
                         @else
-                            <div class="mb-3 flex h-56 w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
-                                <span class="text-sm text-gray-400">No uploaded photo yet</span>
+                            {{-- Interactive drag-and-drop zone for Photo 1 --}}
+                            <div
+                                class="relative mb-3 rounded-lg border-2 border-dashed transition-colors duration-150 cursor-pointer"
+                                :class="isDraggingSlot1 ? 'border-pink-400 bg-pink-50' : 'border-gray-300 bg-gray-50 hover:border-pink-300 hover:bg-pink-50/50'"
+                                @click="openSlotFilePicker(1)"
+                                @dragenter.prevent="isDraggingSlot1 = true"
+                                @dragover.prevent="isDraggingSlot1 = true"
+                                @dragleave.prevent="if (!$el.contains($event.relatedTarget)) isDraggingSlot1 = false"
+                                @drop.prevent="handleSlotDrop($event, 1)"
+                                role="button"
+                                tabindex="0"
+                                @keydown.enter.prevent="openSlotFilePicker(1)"
+                                @keydown.space.prevent="openSlotFilePicker(1)"
+                                aria-label="Upload Photo 1 — drag and drop or press Enter to browse"
+                            >
+                                <template x-if="previewUrl1">
+                                    <div class="relative">
+                                        <img
+                                            :src="previewUrl1"
+                                            alt="Photo 1 preview"
+                                            class="h-56 w-full rounded-lg object-cover"
+                                            loading="lazy"
+                                            decoding="async"
+                                        >
+                                        <div class="pointer-events-none absolute inset-0 flex items-end justify-center rounded-lg pb-2">
+                                            <span class="rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white">
+                                                Click or drag to replace
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            @click.stop="removeSlotFile(1)"
+                                            class="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 shadow hover:bg-red-50"
+                                            aria-label="Remove Photo 1"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                                <template x-if="!previewUrl1">
+                                    <div class="flex h-56 flex-col items-center justify-center p-4 text-center pointer-events-none">
+                                        <svg
+                                            class="mb-3 h-10 w-10 transition-colors"
+                                            :class="isDraggingSlot1 ? 'text-pink-400' : 'text-gray-300'"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            aria-hidden="true"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                                        </svg>
+                                        <p
+                                            class="text-sm font-medium transition-colors"
+                                            :class="isDraggingSlot1 ? 'text-pink-600' : 'text-gray-600'"
+                                            x-text="isDraggingSlot1 ? 'Drop photo here' : 'Drag & drop or click to browse'"
+                                        ></p>
+                                        <p class="mt-1 text-xs text-gray-400">JPG, PNG, WEBP · max 10 MB</p>
+                                    </div>
+                                </template>
+                                <input
+                                    x-ref="slotFileInput1"
+                                    type="file"
+                                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                                    class="hidden"
+                                    @change="handleSlotFileSelect($event, 1)"
+                                >
                             </div>
                         @endif
                     </div>
@@ -201,8 +268,75 @@
                                 @endif
                             </div>
                         @else
-                            <div class="mb-3 flex h-56 w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
-                                <span class="text-sm text-gray-400">No uploaded photo yet</span>
+                            {{-- Interactive drag-and-drop zone for Photo 2 --}}
+                            <div
+                                class="relative mb-3 rounded-lg border-2 border-dashed transition-colors duration-150 cursor-pointer"
+                                :class="isDraggingSlot2 ? 'border-pink-400 bg-pink-50' : 'border-gray-300 bg-gray-50 hover:border-pink-300 hover:bg-pink-50/50'"
+                                @click="openSlotFilePicker(2)"
+                                @dragenter.prevent="isDraggingSlot2 = true"
+                                @dragover.prevent="isDraggingSlot2 = true"
+                                @dragleave.prevent="if (!$el.contains($event.relatedTarget)) isDraggingSlot2 = false"
+                                @drop.prevent="handleSlotDrop($event, 2)"
+                                role="button"
+                                tabindex="0"
+                                @keydown.enter.prevent="openSlotFilePicker(2)"
+                                @keydown.space.prevent="openSlotFilePicker(2)"
+                                aria-label="Upload Photo 2 — drag and drop or press Enter to browse"
+                            >
+                                <template x-if="previewUrl2">
+                                    <div class="relative">
+                                        <img
+                                            :src="previewUrl2"
+                                            alt="Photo 2 preview"
+                                            class="h-56 w-full rounded-lg object-cover"
+                                            loading="lazy"
+                                            decoding="async"
+                                        >
+                                        <div class="pointer-events-none absolute inset-0 flex items-end justify-center rounded-lg pb-2">
+                                            <span class="rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white">
+                                                Click or drag to replace
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            @click.stop="removeSlotFile(2)"
+                                            class="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 shadow hover:bg-red-50"
+                                            aria-label="Remove Photo 2"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                                <template x-if="!previewUrl2">
+                                    <div class="flex h-56 flex-col items-center justify-center p-4 text-center pointer-events-none">
+                                        <svg
+                                            class="mb-3 h-10 w-10 transition-colors"
+                                            :class="isDraggingSlot2 ? 'text-pink-400' : 'text-gray-300'"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            aria-hidden="true"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                                        </svg>
+                                        <p
+                                            class="text-sm font-medium transition-colors"
+                                            :class="isDraggingSlot2 ? 'text-pink-600' : 'text-gray-600'"
+                                            x-text="isDraggingSlot2 ? 'Drop photo here' : 'Drag & drop or click to browse'"
+                                        ></p>
+                                        <p class="mt-1 text-xs text-gray-400">JPG, PNG, WEBP · max 10 MB</p>
+                                    </div>
+                                </template>
+                                <input
+                                    x-ref="slotFileInput2"
+                                    type="file"
+                                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                                    class="hidden"
+                                    @change="handleSlotFileSelect($event, 2)"
+                                >
                             </div>
                         @endif
                     </div>
@@ -213,6 +347,22 @@
                 </div>
             </div>
 
+            {{-- Inline upload button shown when both pending photos are ready --}}
+            <template x-if="pendingPhoto1 && pendingPhoto2">
+                <div class="mt-4 flex items-center justify-between gap-4 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3">
+                    <p class="text-sm font-medium text-pink-800">Both photos ready — click to submit for review.</p>
+                    <button
+                        type="button"
+                        @click="uploadSlotPhotos()"
+                        :disabled="isUploadingSlots"
+                        class="shrink-0 rounded-lg bg-pink-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <span x-show="!isUploadingSlots" x-cloak>Upload &amp; submit</span>
+                        <span x-show="isUploadingSlots" x-cloak>Uploading…</span>
+                    </button>
+                </div>
+            </template>
+
             <p class="mt-6 text-sm text-gray-600">
                 We do <span class="font-semibold">not</span> publish verification photos. If needed, you can also contact support:
                 <a href="mailto:alice@hotescorts.com.au" class="font-medium text-pink-700 hover:text-pink-800">
@@ -221,7 +371,7 @@
             </p>
 
             <p class="mt-3 text-sm font-semibold text-pink-700">
-                Profiles without verification can still be listed. Verification adds a “Photos Verified” badge.
+                Profiles without verification can still be listed. Verification adds a "Photos Verified" badge.
             </p>
 
             <div class="mt-6 flex flex-col gap-3 sm:flex-row">
