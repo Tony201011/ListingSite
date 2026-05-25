@@ -7,6 +7,7 @@ use App\Models\PhotoVerification;
 use App\Models\ProviderProfile;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
@@ -15,11 +16,14 @@ class UploadPhotoVerificationPhotos
 {
     public function execute(ProviderProfile $profile, array $photos): ActionResult
     {
-        $hasActiveVerification = $profile->photoVerification()
+        $activeVerification = $profile->photoVerification()
             ->whereNull('deleted_at')
-            ->exists();
+            ->latest('created_at')
+            ->first();
 
-        if ($hasActiveVerification) {
+        $existingPhotos = Arr::wrap($activeVerification?->photos);
+
+        if ($activeVerification && count($existingPhotos) >= 2) {
             return ActionResult::domainError(
                 'You already have an active verification submission. Please delete your existing verification photos before uploading new ones.',
                 status: 403
@@ -72,13 +76,21 @@ class UploadPhotoVerificationPhotos
                 ];
             }
 
-            $verification = PhotoVerification::create([
-                'user_id' => $profile->user_id,
-                'provider_profile_id' => $profile->id,
-                'photos' => $uploadedPhotos,
-                'status' => 'pending',
-                'submitted_at' => now(),
-            ]);
+            if ($activeVerification) {
+                $verification = $activeVerification;
+                $verification->photos = array_values(array_merge($existingPhotos, $uploadedPhotos));
+                $verification->status = 'pending';
+                $verification->submitted_at = now();
+                $verification->save();
+            } else {
+                $verification = PhotoVerification::create([
+                    'user_id' => $profile->user_id,
+                    'provider_profile_id' => $profile->id,
+                    'photos' => $uploadedPhotos,
+                    'status' => 'pending',
+                    'submitted_at' => now(),
+                ]);
+            }
 
             return ActionResult::success([
                 'verification' => [
