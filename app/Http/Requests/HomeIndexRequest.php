@@ -14,6 +14,12 @@ class HomeIndexRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $routeSearchName = trim((string) $this->route('search_name', ''));
+        $seoSearchName = $routeSearchName !== ''
+            ? str_replace('-', ' ', urldecode($routeSearchName))
+            : '';
+        $escortName = trim((string) $this->input('escort_name', ''));
+
         $this->merge([
             'categories' => is_array($this->input('categories')) ? $this->input('categories') : [],
             'min_age' => $this->input('min_age', 18),
@@ -22,7 +28,7 @@ class HomeIndexRequest extends FormRequest
             'max_price' => $this->input('max_price', 400),
             'location' => trim((string) $this->input('location', '')),
             'location_state' => trim((string) $this->input('location_state', '')),
-            'escort_name' => trim((string) $this->input('escort_name', '')),
+            'escort_name' => $escortName !== '' ? $escortName : $seoSearchName,
             'user_lat' => $this->input('user_lat'),
             'user_lng' => $this->input('user_lng'),
             'distance' => $this->input('distance'),

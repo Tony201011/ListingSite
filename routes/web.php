@@ -105,6 +105,8 @@ Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('c
 Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
 
 Route::get('/', [HomeController::class, 'index']);
+Route::get('/escorts/search/name/{search_name}', [HomeController::class, 'index'])
+    ->name('escorts.search.name');
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
