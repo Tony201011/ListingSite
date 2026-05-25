@@ -12,6 +12,126 @@ function verifyPage(config) {
         stream: null,
         isUploading: false,
 
+        // Per-slot drag-and-drop state
+        pendingPhoto1: null,
+        pendingPhoto2: null,
+        previewUrl1: '',
+        previewUrl2: '',
+        isDraggingSlot1: false,
+        isDraggingSlot2: false,
+        isUploadingSlots: false,
+
+        // --- Per-slot drag-and-drop ---
+
+        openSlotFilePicker(slot) {
+            const ref = slot === 1 ? this.$refs.slotFileInput1 : this.$refs.slotFileInput2;
+            if (ref) ref.click();
+        },
+
+        handleSlotDrop(event, slot) {
+            if (slot === 1) this.isDraggingSlot1 = false;
+            else this.isDraggingSlot2 = false;
+
+            const files = Array.from(event.dataTransfer.files || []);
+            if (files.length > 0) this.setSlotFile(slot, files[0]);
+        },
+
+        handleSlotFileSelect(event, slot) {
+            const files = Array.from(event.target.files || []);
+            if (files.length > 0) this.setSlotFile(slot, files[0]);
+            event.target.value = '';
+        },
+
+        setSlotFile(slot, file) {
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+            if (!allowedTypes.includes(file.type)) {
+                this.error('Only JPG, PNG, and WebP images are allowed.');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                this.error('Each photo must be 10 MB or smaller.');
+                return;
+            }
+
+            if (slot === 1) {
+                if (this.previewUrl1) URL.revokeObjectURL(this.previewUrl1);
+                this.pendingPhoto1 = file;
+                this.previewUrl1 = URL.createObjectURL(file);
+            } else {
+                if (this.previewUrl2) URL.revokeObjectURL(this.previewUrl2);
+                this.pendingPhoto2 = file;
+                this.previewUrl2 = URL.createObjectURL(file);
+            }
+        },
+
+        removeSlotFile(slot) {
+            if (slot === 1) {
+                if (this.previewUrl1) URL.revokeObjectURL(this.previewUrl1);
+                this.pendingPhoto1 = null;
+                this.previewUrl1 = '';
+            } else {
+                if (this.previewUrl2) URL.revokeObjectURL(this.previewUrl2);
+                this.pendingPhoto2 = null;
+                this.previewUrl2 = '';
+            }
+        },
+
+        async uploadSlotPhotos() {
+            if (!this.pendingPhoto1 || !this.pendingPhoto2) {
+                this.error('Please add both Photo 1 and Photo 2 before uploading.');
+                return;
+            }
+
+            this.isUploadingSlots = true;
+
+            const formData = new FormData();
+            formData.append('photos[]', this.pendingPhoto1);
+            formData.append('photos[]', this.pendingPhoto2);
+
+            try {
+                const response = await fetch(this.uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error('Server returned an invalid response.');
+                }
+
+                if (!response.ok) {
+                    if (data.errors) {
+                        const firstGroup = Object.values(data.errors)[0];
+                        throw new Error(Array.isArray(firstGroup) ? firstGroup[0] : (data.message || 'Upload failed.'));
+                    }
+                    throw new Error(data.message || 'Upload failed.');
+                }
+
+                this.toast(data.message || 'Verification photos uploaded successfully.');
+                this.pendingPhoto1 = null;
+                this.pendingPhoto2 = null;
+                this.previewUrl1 = '';
+                this.previewUrl2 = '';
+
+                setTimeout(() => window.location.reload(), 1200);
+            } catch (err) {
+                this.error(err.message || 'Something went wrong while uploading.');
+            } finally {
+                this.isUploadingSlots = false;
+            }
+        },
+
+        // --- Modal ---
+
         openModal() {
             this.activeTab = 'files';
             this.isDragging = false;
