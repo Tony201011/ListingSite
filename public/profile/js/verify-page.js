@@ -201,8 +201,8 @@ function verifyPage(config) {
                     continue;
                 }
 
-                if (this.selectedFiles.length >= 5) {
-                    this.error('You can upload a maximum of 5 photos.');
+                if (this.selectedFiles.length >= 2) {
+                    this.error('You can upload a maximum of 2 photos.');
                     break;
                 }
 
@@ -305,8 +305,8 @@ function verifyPage(config) {
                 return;
             }
 
-            if (this.selectedFiles.length >= 5) {
-                this.error('You can upload a maximum of 5 photos.');
+            if (this.selectedFiles.length >= 2) {
+                this.error('You can upload a maximum of 2 photos.');
                 return;
             }
 
@@ -329,6 +329,11 @@ function verifyPage(config) {
         async uploadFiles() {
             if (this.selectedFiles.length < 2) {
                 this.error('Please select at least two photos.');
+                return;
+            }
+
+            if (this.selectedFiles.length > 2) {
+                this.error('You can upload a maximum of 2 photos.');
                 return;
             }
 
