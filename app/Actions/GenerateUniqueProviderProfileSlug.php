@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
  */
 class GenerateUniqueProviderProfileSlug
 {
-    public function execute(string $name): string
+    public function execute(string $name, ?int $excludeProfileId = null): string
     {
         return Str::slug($name) ?: 'profile';
     }
