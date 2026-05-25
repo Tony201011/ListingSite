@@ -841,7 +841,7 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($names->contains('Legacy Linked Escort'));
     }
 
-    public function test_home_page_includes_profile_when_legacy_online_user_row_is_active_and_profile_linked_row_is_offline(): void
+    public function test_home_page_hides_profile_when_profile_linked_row_is_offline_even_if_legacy_online_row_exists(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -878,7 +878,7 @@ class HomeControllerTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertTrue($names->contains('Legacy Online With Offline Profile Row Escort'));
+        $this->assertFalse($names->contains('Legacy Online With Offline Profile Row Escort'));
     }
 
     public function test_home_page_hides_featured_profile_when_offline(): void
@@ -1010,7 +1010,7 @@ class HomeControllerTest extends TestCase
         $this->assertFalse(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
     }
 
-    public function test_home_page_shows_offline_profile_when_online_filter_disabled(): void
+    public function test_home_page_hides_offline_profile_even_when_online_filter_disabled(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => false]);
 
@@ -1028,7 +1028,7 @@ class HomeControllerTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertTrue($names->contains('Offline No Filter Escort'));
+        $this->assertFalse($names->contains('Offline No Filter Escort'));
     }
 
     public function test_home_page_hides_offline_profile_when_online_filter_setting_missing(): void
