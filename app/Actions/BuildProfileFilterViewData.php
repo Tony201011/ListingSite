@@ -208,7 +208,6 @@ class BuildProfileFilterViewData
             $girlsMode,
             $escortNameQuery,
             $localFeaturedStateName,
-            $locationFromRoute,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -428,7 +427,6 @@ class BuildProfileFilterViewData
         string $girlsMode = 'all',
         string $escortNameQuery = '',
         ?string $localFeaturedStateName = null,
-        bool $locationFromRoute = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
