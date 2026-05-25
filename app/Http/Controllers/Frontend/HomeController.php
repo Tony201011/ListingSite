@@ -187,6 +187,9 @@ class HomeController extends Controller
             return null;
         }
 
+        $rawQuery = [];
+        parse_str((string) $request->server('QUERY_STRING', ''), $rawQuery);
+
         $location = trim((string) ($validated['location'] ?? ''));
         $locationState = trim((string) ($validated['location_state'] ?? ''));
         $locationData = $this->locationSlugService->fromLocationText($location, $locationState);
@@ -198,7 +201,7 @@ class HomeController extends Controller
         $canonicalPath = route('escorts.search.slug', ['location_slug' => $locationData['slug']]);
         $canonicalRoutePath = trim((string) parse_url($canonicalPath, PHP_URL_PATH), '/');
 
-        $query = $request->query();
+        $query = $rawQuery;
         unset(
             $query['location'],
             $query['location_state'],
@@ -210,10 +213,10 @@ class HomeController extends Controller
         $queryString = http_build_query($query);
         $targetUrl = $queryString !== '' ? "{$canonicalPath}?{$queryString}" : $canonicalPath;
 
-        $hasLegacyLocationQuery = $request->query('location') !== null
-            || $request->query('location_state') !== null
-            || $request->query('location_slug') !== null
-            || $request->query('location_from_route') !== null;
+        $hasLegacyLocationQuery = array_key_exists('location', $rawQuery)
+            || array_key_exists('location_state', $rawQuery)
+            || array_key_exists('location_slug', $rawQuery)
+            || array_key_exists('location_from_route', $rawQuery);
 
         if ($currentPath !== $canonicalRoutePath) {
             return $targetUrl;
