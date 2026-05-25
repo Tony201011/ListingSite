@@ -205,6 +205,14 @@ class SearchTest extends TestCase
         $response->assertRedirect('/escorts/search/melbourne-vic?distance=250');
     }
 
+    public function test_escorts_search_slug_route_strips_legacy_location_query_params(): void
+    {
+        $response = $this->get('/escorts/search/melbourne-vic?min_age=18&max_age=40&min_price=150&max_price=400&location_slug=melbourne-vic&location_from_route=1&escort_name=&girls=all');
+
+        $response->assertStatus(301);
+        $response->assertRedirect('/escorts/search/melbourne-vic?min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
+    }
+
     // ===============================================================
     // Home page – pagination
     // ===============================================================
