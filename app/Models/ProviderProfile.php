@@ -209,25 +209,52 @@ class ProviderProfile extends Model
 
     /**
      * Return the lowercase, 2-3 character state abbreviation for use in
-     * the escort URL (e.g. "vic", "nsw", "qld").  Falls back to "au" when the
-     * profile has no linked state.
+     * the escort URL (e.g. "vic", "nsw", "qld"). Falls back to parsing the
+     * state from suburb text (e.g. "Melbourne, VIC 3000"), then to "au".
      */
     public function getStateSlug(): string
     {
         static $map = [
-            'Australian Capital Territory' => 'act',
-            'New South Wales' => 'nsw',
-            'Victoria' => 'vic',
-            'Queensland' => 'qld',
-            'Western Australia' => 'wa',
-            'South Australia' => 'sa',
-            'Tasmania' => 'tas',
-            'Northern Territory' => 'nt',
+            'australian capital territory' => 'act',
+            'act' => 'act',
+            'new south wales' => 'nsw',
+            'nsw' => 'nsw',
+            'victoria' => 'vic',
+            'vic' => 'vic',
+            'queensland' => 'qld',
+            'qld' => 'qld',
+            'western australia' => 'wa',
+            'wa' => 'wa',
+            'south australia' => 'sa',
+            'sa' => 'sa',
+            'tasmania' => 'tas',
+            'tas' => 'tas',
+            'northern territory' => 'nt',
+            'nt' => 'nt',
         ];
 
-        $stateName = $this->state?->name ?? '';
+        $stateName = trim((string) ($this->state?->name ?? ''));
 
-        return $map[$stateName] ?? (Str::slug($stateName) ?: 'au');
+        if ($stateName === '') {
+            $suburb = trim((string) ($this->suburb ?? ''));
+
+            if (str_contains($suburb, ',')) {
+                $parts = array_values(array_filter(array_map('trim', explode(',', $suburb))));
+                $locationTail = strtolower((string) end($parts));
+
+                if ($locationTail !== '') {
+                    if (preg_match('/\b(act|nsw|vic|qld|wa|sa|tas|nt)\b/i', $locationTail, $matches) === 1) {
+                        return strtolower($matches[1]);
+                    }
+
+                    $stateName = trim((string) preg_replace('/\s+\d{4}\b/', '', (string) end($parts)));
+                }
+            }
+        }
+
+        $normalizedStateName = strtolower(trim(preg_replace('/\s+/', ' ', $stateName) ?? $stateName));
+
+        return $map[$normalizedStateName] ?? (Str::slug($stateName) ?: 'au');
     }
 
     /**
