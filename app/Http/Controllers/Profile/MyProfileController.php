@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -65,8 +66,23 @@ class MyProfileController extends Controller
             'date_to' => [
                 'nullable',
                 'date',
-                'after_or_equal:date_from',
                 Rule::requiredIf(fn (): bool => $request->query('range') === 'custom'),
+                function (string $attribute, mixed $value, \Closure $fail) use ($request): void {
+                    $dateFrom = $request->input('date_from');
+
+                    if (! $dateFrom || ! $value) {
+                        return;
+                    }
+
+                    $validator = Validator::make(
+                        ['date_from' => $dateFrom, 'date_to' => $value],
+                        ['date_to' => 'after_or_equal:date_from']
+                    );
+
+                    if ($validator->fails()) {
+                        $fail('The date to field must be a date after or equal to date from.');
+                    }
+                },
             ],
         ]);
 

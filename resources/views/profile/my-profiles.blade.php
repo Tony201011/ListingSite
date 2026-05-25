@@ -455,25 +455,27 @@
                     });
                 });
 
-                // ─── Delete selected profiles ──────────────────────────────────
-                const deleteSelectedForm = document.getElementById('delete-selected-profiles-form');
-                if (deleteSelectedForm) {
-                    deleteSelectedForm.addEventListener('submit', async function (e) {
-                        e.preventDefault();
-                        const result = await Swal.fire({
-                            title: 'Delete selected profiles?',
-                            text: 'This cannot be undone.',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Delete',
-                            cancelButtonText: 'Cancel',
-                            confirmButtonColor: '#dc2626',
+                @if($profiles->count() > 1)
+                    // ─── Delete selected profiles ──────────────────────────────────
+                    const deleteSelectedForm = document.getElementById('delete-selected-profiles-form');
+                    if (deleteSelectedForm) {
+                        deleteSelectedForm.addEventListener('submit', async function (e) {
+                            e.preventDefault();
+                            const result = await Swal.fire({
+                                title: 'Delete selected profiles?',
+                                text: 'This cannot be undone.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Delete',
+                                cancelButtonText: 'Cancel',
+                                confirmButtonColor: '#dc2626',
+                            });
+                            if (result.isConfirmed) {
+                                deleteSelectedForm.submit();
+                            }
                         });
-                        if (result.isConfirmed) {
-                            deleteSelectedForm.submit();
-                        }
-                    });
-                }
+                    }
+                @endif
 
                 // ─── Flash messages ────────────────────────────────────────────
                 @if (session('delete_account_email_sent'))
