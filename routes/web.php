@@ -106,14 +106,20 @@ Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/escorts/search', [HomeController::class, 'index'])->name('escorts.search');
+Route::get('/escorts/search/name/{search_name}', [HomeController::class, 'index'])
+    ->name('escorts.search.name');
+Route::get('/escorts/search/{location_slug}', [HomeController::class, 'index'])
+    ->where(['location_slug' => '(?!name$|location$)[a-z0-9-]+'])
+    ->name('escorts.search.slug');
+Route::get('/escorts/search/location/{legacy_location_slug}', [HomeController::class, 'index'])
+    ->where(['legacy_location_slug' => '[a-z0-9-]+'])
+    ->name('escorts.search.location.legacy');
 Route::get('/escorts/search/location/{suburb}/{state}', [HomeController::class, 'index'])
     ->where(['suburb' => '[a-z0-9-]+', 'state' => '[a-z0-9-]+'])
     ->name('escorts.search.location');
 Route::get('/escorts/search/location/{suburb}', [HomeController::class, 'index'])
     ->where(['suburb' => '[a-z0-9-]+'])
     ->name('escorts.search.location.no-state');
-Route::get('/escorts/search/name/{search_name}', [HomeController::class, 'index'])
-    ->name('escorts.search.name');
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');

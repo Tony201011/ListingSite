@@ -316,9 +316,8 @@ function escortSearch(config) {
                 const state = parts[1] ? this.toSeoSearchName(parts[1]) : '';
 
                 if (suburb !== '') {
-                    path = state !== ''
-                        ? '/escorts/search/location/' + encodeURIComponent(suburb) + '/' + encodeURIComponent(state)
-                        : '/escorts/search/location/' + encodeURIComponent(suburb);
+                    const slug = state !== '' ? (suburb + '-' + state) : suburb;
+                    path = '/escorts/search/' + encodeURIComponent(slug);
                 } else {
                     path = '/escorts/search/';
                 }
@@ -327,9 +326,7 @@ function escortSearch(config) {
             }
 
             const params = new URLSearchParams();
-            if (this.distanceSearchEnabled && this.locationEnabled && this.userLat !== '' && this.userLng !== '') {
-                params.set('user_lat', this.userLat);
-                params.set('user_lng', this.userLng);
+            if (this.distanceSearchEnabled && (this.locationEnabled || locationText !== '')) {
                 params.set('distance', this.distance);
             }
 
