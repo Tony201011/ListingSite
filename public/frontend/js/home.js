@@ -125,6 +125,28 @@ function escortSearch(config) {
         distanceSearchEnabled: config.distanceSearchEnabled ?? true,
         geoError: '',
 
+        toSeoSearchName(value) {
+            return String(value || '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+        },
+
+        submitForm(form) {
+            if (!form) {
+                return;
+            }
+
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+                return;
+            }
+
+            form.submit();
+        },
+
         requestLocation() {
             this.geoError = '';
             if (!navigator.geolocation) {
@@ -225,7 +247,7 @@ function escortSearch(config) {
 
             // Wait for Alpine.js to apply the updated :name binding before submitting,
             // so the correct field name (location or escort_name) is sent.
-            this.$nextTick(() => form.submit());
+            this.$nextTick(() => this.submitForm(form));
         },
 
         closeSuggestions() {
@@ -249,11 +271,11 @@ function escortSearch(config) {
                 // we submit explicitly below so the caller controls timing.
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
                 // Wait for Alpine.js to apply the updated :name binding before submitting.
-                this.$nextTick(() => event.target.closest('form')?.submit());
+                this.$nextTick(() => this.submitForm(event.target.closest('form')));
                 return;
             }
             this.closeSuggestions();
-            event.target.closest('form')?.submit();
+            this.submitForm(event.target.closest('form'));
         },
 
         handleFormSubmit(event) {
@@ -263,9 +285,24 @@ function escortSearch(config) {
                 // we submit explicitly below so the caller controls timing.
                 this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
                 // Wait for Alpine.js to apply the updated :name binding before submitting.
-                this.$nextTick(() => event.target.closest('form')?.submit());
+                this.$nextTick(() => this.submitForm(event.target.closest('form')));
                 return;
             }
+
+            if (this.searchMode === 'username') {
+                const seoSearchName = this.toSeoSearchName(this.term);
+
+                if (seoSearchName === '') {
+                    event.preventDefault();
+                    this.closeSuggestions();
+                    return;
+                }
+
+                event.preventDefault();
+                window.location.assign('/escorts/search/name/' + encodeURIComponent(seoSearchName));
+                return;
+            }
+
             this.closeSuggestions();
         }
     };

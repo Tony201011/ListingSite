@@ -135,6 +135,14 @@ class SearchTest extends TestCase
         $response->assertViewHas('escortNameQuery', 'Sara');
     }
 
+    public function test_home_page_supports_seo_name_search_route(): void
+    {
+        $response = $this->get('/escorts/search/name/sara-jane');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('escortNameQuery', 'sara jane');
+    }
+
     // ===============================================================
     // Home page – pagination
     // ===============================================================
@@ -175,6 +183,19 @@ class SearchTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(0, $profiles->total());
+    }
+
+    public function test_home_page_search_by_name_filters_results_via_seo_route(): void
+    {
+        $this->createApprovedProvider(['name' => 'Sara Jane', 'slug' => 'sara-jane']);
+        $this->createApprovedProvider(['name' => 'Mia Stone', 'slug' => 'mia-stone']);
+
+        $response = $this->get('/escorts/search/name/sara-jane');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Sara Jane'));
+        $this->assertFalse($names->contains('Mia Stone'));
     }
 
     public function test_home_page_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
