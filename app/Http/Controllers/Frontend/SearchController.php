@@ -32,9 +32,11 @@ class SearchController extends Controller
                 ->where(function ($onlineQuery): void {
                     $onlineQuery
                         ->whereHas('onlineUser', fn ($q) => $q->where('status', 'online'))
-                        ->orWhereHas('user.onlineUser', fn ($q) => $q
-                            ->whereNull('provider_profile_id')
-                            ->where('status', 'online'));
+                        ->orWhere(fn ($legacy) => $legacy
+                            ->whereDoesntHave('onlineUser')
+                            ->whereHas('user.onlineUser', fn ($q) => $q
+                                ->whereNull('provider_profile_id')
+                                ->where('status', 'online')));
                 })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->take(self::MAX_SUGGESTIONS)
@@ -54,9 +56,11 @@ class SearchController extends Controller
                 ->where(function ($onlineConstraint): void {
                     $onlineConstraint
                         ->whereHas('onlineUser', fn ($q) => $q->where('status', 'online'))
-                        ->orWhereHas('user.onlineUser', fn ($q) => $q
-                            ->whereNull('provider_profile_id')
-                            ->where('status', 'online'));
+                        ->orWhere(fn ($legacy) => $legacy
+                            ->whereDoesntHave('onlineUser')
+                            ->whereHas('user.onlineUser', fn ($q) => $q
+                                ->whereNull('provider_profile_id')
+                                ->where('status', 'online')));
                 })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
@@ -76,4 +80,3 @@ class SearchController extends Controller
         return response()->json(['suggestions' => $suggestions]);
     }
 }
-

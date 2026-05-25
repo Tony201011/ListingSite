@@ -384,9 +384,13 @@ class BuildProfileFilterViewData
                 ->whereHas('onlineUser', function (Builder $onlineQuery): void {
                     $onlineQuery->where('status', 'online');
                 })
-                ->orWhereHas('user.onlineUser', function (Builder $legacyOnline): void {
-                    $legacyOnline->whereNull('provider_profile_id')
-                        ->where('status', 'online');
+                ->orWhere(function (Builder $legacyConstraint): void {
+                    $legacyConstraint
+                        ->whereDoesntHave('onlineUser')
+                        ->whereHas('user.onlineUser', function (Builder $legacyOnline): void {
+                            $legacyOnline->whereNull('provider_profile_id')
+                                ->where('status', 'online');
+                        });
                 });
         });
     }
@@ -730,7 +734,11 @@ class BuildProfileFilterViewData
                 $q->where(function ($onlineQ) {
                     $onlineQ->where('online_users.status', 'online');
                 })->orWhere(function ($legacyQ) {
-                    $legacyQ->whereExists(function ($exists): void {
+                    $legacyQ->whereNotExists(function ($noProfileRow): void {
+                        $noProfileRow->selectRaw('1')
+                            ->from('online_users as profile_online_users')
+                            ->whereColumn('profile_online_users.provider_profile_id', 'provider_profiles.id');
+                    })->whereExists(function ($exists): void {
                         $exists->selectRaw('1')
                             ->from('online_users as legacy_online_users')
                             ->whereColumn('legacy_online_users.user_id', 'provider_profiles.user_id')
@@ -984,7 +992,7 @@ class BuildProfileFilterViewData
         );
 
         $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
-        if (! $isOnline) {
+        if (! $isOnline && $profile->onlineUser === null) {
             $isOnline = $profile->user?->onlineUser?->provider_profile_id === null
                 && ($profile->user?->onlineUser?->isCurrentlyOnline() ?? false);
         }
