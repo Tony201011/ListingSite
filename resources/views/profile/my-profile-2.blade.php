@@ -382,7 +382,7 @@
 
                     <div>
                         <label class="block font-semibold text-[#e04ecb] mb-2">How can people contact you?</label>
-                        <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: {{ $contactEmail ?? 's8813w@gmail.com' }}</p>
+                        <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: {{ $contactEmail ?? 'Not configured' }}</p>
                         <div class="flex flex-wrap gap-4">
                             @foreach($contactMethodOptions ?? [] as $option)
                                 <label class="flex items-center gap-2">

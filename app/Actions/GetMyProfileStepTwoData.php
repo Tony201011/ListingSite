@@ -21,10 +21,13 @@ class GetMyProfileStepTwoData
             $profile = $user?->providerProfile;
         }
 
-        $contactEmail = SiteSetting::query()
-            ->whereNotNull('contact_email')
-            ->latest('id')
-            ->value('contact_email') ?? 's8813w@gmail.com';
+        $contactEmail = $profile?->user?->email
+            ?? $user?->email
+            ?? SiteSetting::query()
+                ->whereNotNull('contact_email')
+                ->latest('id')
+                ->value('contact_email')
+            ?? config('mail.from.address');
 
         $selected = [
             'age_group' => $profile?->age_group_id,
