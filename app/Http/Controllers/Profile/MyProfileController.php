@@ -16,7 +16,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -74,12 +73,7 @@ class MyProfileController extends Controller
                         return;
                     }
 
-                    $validator = Validator::make(
-                        ['date_from' => $dateFrom, 'date_to' => $value],
-                        ['date_to' => 'after_or_equal:date_from']
-                    );
-
-                    if ($validator->fails()) {
+                    if (Carbon::parse((string) $value)->lt(Carbon::parse((string) $dateFrom))) {
                         $fail('The date to field must be a date after or equal to date from.');
                     }
                 },

@@ -5,6 +5,7 @@ namespace Tests\Feature\Profile;
 use App\Actions\GetOnlineNowState;
 use App\Actions\Support\ActionResult;
 use App\Actions\UpdateOnlineNowStatus;
+use App\Models\Category;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
 use App\Models\User;
@@ -39,16 +40,21 @@ class ProfileSwitchOnlineStatusTest extends TestCase
 
     private function markProfileAsComplete(ProviderProfile $profile): void
     {
+        $category = Category::query()->firstOrCreate(
+            ['slug' => 'test-category'],
+            ['name' => 'Test Category']
+        );
+
         $profile->update([
             'introduction_line' => 'Intro',
             'profile_text' => 'Complete profile text',
-            'age_group_id' => 1,
-            'hair_color_id' => 1,
-            'hair_length_id' => 1,
-            'ethnicity_id' => 1,
-            'body_type_id' => 1,
-            'bust_size_id' => 1,
-            'your_length_id' => 1,
+            'age_group_id' => $category->id,
+            'hair_color_id' => $category->id,
+            'hair_length_id' => $category->id,
+            'ethnicity_id' => $category->id,
+            'body_type_id' => $category->id,
+            'bust_size_id' => $category->id,
+            'your_length_id' => $category->id,
             'availability' => 'available',
             'contact_method' => 'phone',
             'phone_contact_preference' => 'call',
