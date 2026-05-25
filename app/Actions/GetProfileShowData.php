@@ -6,6 +6,7 @@ use App\Concerns\ResolvesProfileCategoryIds;
 use App\Models\Category;
 use App\Models\ProviderProfile;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class GetProfileShowData
@@ -372,12 +373,27 @@ class GetProfileShowData
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->where(function (Builder $onlineConstraint): void {
+                $onlineConstraint
+                    ->whereHas('onlineUser', function (Builder $onlineQuery): void {
+                        $onlineQuery->where('status', 'online');
+                    })
+                    ->orWhere(function (Builder $legacyConstraint): void {
+                        $legacyConstraint
+                            ->whereDoesntHave('onlineUser')
+                            ->whereHas('user.onlineUser', function (Builder $legacyOnline): void {
+                                $legacyOnline->whereNull('provider_profile_id')
+                                    ->where('status', 'online');
+                            });
+                    });
+            })
             ->with([
                 'primaryProfileImage',
                 'rates',
                 'onlineUser',
                 'availableNow',
                 'user',
+                'user.onlineUser',
                 'city',
                 'state',
             ])
@@ -407,6 +423,12 @@ class GetProfileShowData
 
                 $firstRate = $profile->rates?->first();
                 $rateDisplay = $this->formatRate($firstRate);
+                $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
+
+                if (! $isOnline) {
+                    $isOnline = $profile->user?->onlineUser?->provider_profile_id === null
+                        && ($profile->user?->onlineUser?->isCurrentlyOnline() ?? false);
+                }
 
                 return [
                     'slug' => $profile->slug ?? '',
@@ -423,7 +445,7 @@ class GetProfileShowData
                     'out_call' => trim((string) ($firstRate?->outcall ?? '')),
                     'age' => $profile->age,
                     'verified' => $profile->is_verified,
-                    'active' => $profile->onlineUser?->isCurrentlyOnline() ?? false,
+                    'active' => $isOnline,
                     'available_now' => $profile->availableNow?->isCurrentlyAvailable() ?? false,
                     'date' => $profile->created_at->format('d/m/Y'),
                 ];

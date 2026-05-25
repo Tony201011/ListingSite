@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\HideShowProfile;
+use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
 use App\Models\Rate;
 use App\Models\SiteSetting;
@@ -428,6 +429,54 @@ class ProfileShowControllerTest extends TestCase
         $this->assertArrayHasKey('image', $nearby[0]);
         $this->assertArrayHasKey('city', $nearby[0]);
         $this->assertArrayHasKey('rate', $nearby[0]);
+    }
+
+    public function test_nearby_profiles_exclude_offline_profiles(): void
+    {
+        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
+
+        $onlineUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
+        $offlineUser = $this->createApprovedProvider(['name' => 'Mia', 'slug' => 'mia-001']);
+
+        OnlineUser::query()->create([
+            'user_id' => $onlineUser->id,
+            'provider_profile_id' => $onlineUser->providerProfile->id,
+            'status' => 'online',
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $offlineUser->id,
+            'provider_profile_id' => $offlineUser->providerProfile->id,
+            'status' => 'offline',
+        ]);
+
+        $response = $this->get($this->profileUrl('jade010-10'));
+
+        $nearbyNames = array_column($response->viewData('nearbyProfiles'), 'name');
+        $this->assertContains('Ruby', $nearbyNames);
+        $this->assertNotContains('Mia', $nearbyNames);
+    }
+
+    public function test_nearby_profiles_include_legacy_user_online_records(): void
+    {
+        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
+        $legacyOnlineUser = $this->createApprovedProvider(['name' => 'Luna', 'slug' => 'luna-001']);
+
+        OnlineUser::query()->create([
+            'user_id' => $legacyOnlineUser->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+        ]);
+
+        $response = $this->get($this->profileUrl('jade010-10'));
+
+        $nearbyProfiles = $response->viewData('nearbyProfiles');
+        $nearbyNames = array_column($nearbyProfiles, 'name');
+        $legacyProfile = collect($nearbyProfiles)->firstWhere('name', 'Luna');
+
+        $this->assertContains('Luna', $nearbyNames);
+        $this->assertNotNull($legacyProfile);
+        $this->assertTrue($legacyProfile['active']);
     }
 
     // ---------------------------------------------------------------
