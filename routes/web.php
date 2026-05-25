@@ -105,6 +105,13 @@ Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('c
 Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
 
 Route::get('/', [HomeController::class, 'index']);
+Route::get('/escorts/search', [HomeController::class, 'index'])->name('escorts.search');
+Route::get('/escorts/search/location/{suburb}/{state}', [HomeController::class, 'index'])
+    ->where(['suburb' => '[a-z0-9-]+', 'state' => '[a-z0-9-]+'])
+    ->name('escorts.search.location');
+Route::get('/escorts/search/location/{suburb}', [HomeController::class, 'index'])
+    ->where(['suburb' => '[a-z0-9-]+'])
+    ->name('escorts.search.location.no-state');
 Route::get('/escorts/search/name/{search_name}', [HomeController::class, 'index'])
     ->name('escorts.search.name');
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');

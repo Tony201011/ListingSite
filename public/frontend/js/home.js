@@ -303,7 +303,38 @@ function escortSearch(config) {
                 return;
             }
 
+            // suburb / location mode – build a clean SEO-friendly URL
+            event.preventDefault();
             this.closeSuggestions();
+
+            const locationText = this.term.trim();
+            let path;
+
+            if (locationText !== '') {
+                const parts = locationText.split(',').map(function (s) { return s.trim(); });
+                const suburb = this.toSeoSearchName(parts[0]);
+                const state = parts[1] ? this.toSeoSearchName(parts[1]) : '';
+
+                if (suburb !== '') {
+                    path = state !== ''
+                        ? '/escorts/search/location/' + encodeURIComponent(suburb) + '/' + encodeURIComponent(state)
+                        : '/escorts/search/location/' + encodeURIComponent(suburb);
+                } else {
+                    path = '/escorts/search/';
+                }
+            } else {
+                path = '/escorts/search/';
+            }
+
+            const params = new URLSearchParams();
+            if (this.distanceSearchEnabled && this.locationEnabled && this.userLat !== '' && this.userLng !== '') {
+                params.set('user_lat', this.userLat);
+                params.set('user_lng', this.userLng);
+                params.set('distance', this.distance);
+            }
+
+            const qs = params.toString();
+            window.location.assign(path + (qs ? '?' + qs : ''));
         }
     };
 }

@@ -143,6 +143,52 @@ class SearchTest extends TestCase
         $response->assertViewHas('escortNameQuery', 'sara jane');
     }
 
+    public function test_escorts_search_base_route_returns_home_view(): void
+    {
+        $response = $this->get('/escorts/search/');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('locationQuery', '');
+    }
+
+    public function test_escorts_search_location_route_with_suburb_and_state(): void
+    {
+        $response = $this->get('/escorts/search/location/melbourne/vic');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('locationQuery', 'Melbourne, VIC');
+    }
+
+    public function test_escorts_search_location_route_with_suburb_only(): void
+    {
+        $response = $this->get('/escorts/search/location/sydney');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('locationQuery', 'Sydney');
+    }
+
+    public function test_escorts_search_location_route_multi_word_suburb(): void
+    {
+        $response = $this->get('/escorts/search/location/mount-gambier/sa');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('locationQuery', 'Mount Gambier, SA');
+    }
+
+    public function test_escorts_search_location_route_filters_profiles(): void
+    {
+        $this->createApprovedProvider(['name' => 'Melbourne Escort', 'slug' => 'melbourne-escort', 'suburb' => 'Melbourne, VIC 3000']);
+        $this->createApprovedProvider(['name' => 'Sydney Escort', 'slug' => 'sydney-escort', 'suburb' => 'Sydney, NSW 2000']);
+
+        $response = $this->get('/escorts/search/location/melbourne/vic');
+
+        $response->assertStatus(200);
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Melbourne Escort'));
+        $this->assertFalse($names->contains('Sydney Escort'));
+    }
+
     // ===============================================================
     // Home page – pagination
     // ===============================================================

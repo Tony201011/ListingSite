@@ -20,13 +20,23 @@ class HomeIndexRequest extends FormRequest
             : '';
         $escortName = trim((string) $this->input('escort_name', ''));
 
+        $routeSuburb = trim((string) $this->route('suburb', ''));
+        $routeState = trim((string) $this->route('state', ''));
+        $locationFromRoute = '';
+        if ($routeSuburb !== '') {
+            $suburb = ucwords(str_replace('-', ' ', urldecode($routeSuburb)));
+            $state = $routeState !== '' ? strtoupper(urldecode($routeState)) : '';
+            $locationFromRoute = $state !== '' ? "{$suburb}, {$state}" : $suburb;
+        }
+        $location = $locationFromRoute !== '' ? $locationFromRoute : trim((string) $this->input('location', ''));
+
         $this->merge([
             'categories' => is_array($this->input('categories')) ? $this->input('categories') : [],
             'min_age' => $this->input('min_age', 18),
             'max_age' => $this->input('max_age', 40),
             'min_price' => $this->input('min_price', 150),
             'max_price' => $this->input('max_price', 400),
-            'location' => trim((string) $this->input('location', '')),
+            'location' => $location,
             'location_state' => trim((string) $this->input('location_state', '')),
             'escort_name' => $escortName !== '' ? $escortName : $seoSearchName,
             'user_lat' => $this->input('user_lat'),
