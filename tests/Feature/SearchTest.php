@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -174,6 +175,42 @@ class SearchTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(0, $profiles->total());
+    }
+
+    public function test_home_page_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Legacy Offline Home Search',
+            'slug' => 'legacy-offline-home-search',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        $response = $this->get('/?escort_name=Legacy+Offline+Home+Search');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertFalse($names->contains('Legacy Offline Home Search'));
     }
 
     // ===============================================================
@@ -472,6 +509,40 @@ class SearchTest extends TestCase
         $suggestions = $response->json('suggestions');
         $names = array_column($suggestions, 'name');
         $this->assertNotContains('PendingSearchable', $names);
+    }
+
+    public function test_search_suggestions_exclude_profile_marked_offline_even_with_legacy_online_row(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Legacy Offline Suggestion',
+            'slug' => 'legacy-offline-suggestion',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Legacy+Offline+Suggestion');
+
+        $response->assertOk();
+        $names = array_column($response->json('suggestions'), 'name');
+        $this->assertNotContains('Legacy Offline Suggestion', $names);
     }
 
     public function test_search_suggestions_returns_suggestions_with_correct_shape_when_results_found(): void
