@@ -118,6 +118,13 @@ Route::get('/escorts/{state}/{suburb}/{slug}/{sequence_id}', [HomeController::cl
         'sequence_id' => '[0-9]{3}',
     ])
     ->name('profile.show');
+Route::get('/escorts/{state}/{suburb}/{slug}', [HomeController::class, 'showProfile'])
+    ->where([
+        'state'  => '[a-z]{2,3}',
+        'suburb' => '[a-z0-9-]+',
+        'slug'   => '[a-z0-9-]+',
+    ])
+    ->name('profile.show.no-sequence');
 
 // Legacy redirect: old /profile/{slug} URLs → new SEO URL (301)
 Route::get('/profile/{slug}', [HomeController::class, 'redirectOldProfile'])->name('profile.show.legacy');

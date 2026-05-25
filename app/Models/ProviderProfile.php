@@ -15,6 +15,13 @@ class ProviderProfile extends Model
 {
     use HasFactory, Searchable, SoftDeletes;
 
+    /**
+     * Cache of public profile counts grouped by slug and location key.
+     *
+     * @var array<string, array<string, int>>
+     */
+    private static array $publicSlugLocationCounts = [];
+
     protected $fillable = [
         'user_id',
         'name',
@@ -252,8 +259,55 @@ class ProviderProfile extends Model
     }
 
     /**
+     * Determine whether this profile needs the sequence segment to keep the URL
+     * unique for the current slug + location.
+     */
+    public function shouldIncludeSequenceInUrl(): bool
+    {
+        $slug = trim((string) $this->slug);
+
+        if ($slug === '') {
+            return true;
+        }
+
+        $this->loadMissing(['state', 'city']);
+
+        $locationKey = $this->getStateSlug().'|'.$this->getSuburbSlug();
+
+        if (! array_key_exists($slug, self::$publicSlugLocationCounts)) {
+            $profiles = self::query()
+                ->where('slug', $slug)
+                ->where('profile_status', 'approved')
+                ->where('is_blocked', false)
+                ->whereHas('user')
+                ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
+                ->with(['state', 'city'])
+                ->get(['id', 'slug', 'state_id', 'city_id', 'suburb']);
+
+            $counts = [];
+
+            foreach ($profiles as $profile) {
+                $key = $profile->getStateSlug().'|'.$profile->getSuburbSlug();
+                $counts[$key] = ($counts[$key] ?? 0) + 1;
+            }
+
+            self::$publicSlugLocationCounts[$slug] = $counts;
+        }
+
+        $counts = self::$publicSlugLocationCounts[$slug];
+        $matchedLocationCount = $counts[$locationKey] ?? 0;
+
+        if ($matchedLocationCount > 0) {
+            return $matchedLocationCount > 1;
+        }
+
+        return array_sum($counts) > 1;
+    }
+
+    /**
      * Return the full SEO-friendly escort profile URL:
-     *   /escorts/{state}/{suburb}/{slug}/{sequence_id}
+     *   /escorts/{state}/{suburb}/{slug}
+     * or /escorts/{state}/{suburb}/{slug}/{sequence_id} when needed for uniqueness.
      *
      * Relations `state` and `city` are lazy-loaded if not already loaded.
      */
@@ -261,12 +315,19 @@ class ProviderProfile extends Model
     {
         $this->loadMissing(['state', 'city']);
 
-        return route('profile.show', [
+        $routeParams = [
             'state'       => $this->getStateSlug(),
             'suburb'      => $this->getSuburbSlug(),
             'slug'        => $this->slug,
-            'sequence_id' => $this->getSequenceFormatted(),
-        ]);
+        ];
+
+        if ($this->shouldIncludeSequenceInUrl()) {
+            $routeParams['sequence_id'] = $this->getSequenceFormatted();
+
+            return route('profile.show', $routeParams);
+        }
+
+        return route('profile.show.no-sequence', $routeParams);
     }
 
     // -----------------------------------------------------------------------

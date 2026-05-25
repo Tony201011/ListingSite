@@ -34,7 +34,7 @@
 <article
     class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
 >
-    <a href="{{ $profile['profile_url'] ?? route('profile.show', array_merge(['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug'], 'sequence_id' => '001'], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
+    <a href="{{ $profile['profile_url'] ?? route('profile.show.no-sequence', array_merge(['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
     {{-- Image --}}
     <div class="relative overflow-hidden rounded-t-2xl">

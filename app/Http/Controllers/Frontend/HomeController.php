@@ -12,6 +12,7 @@ use App\Http\Requests\ShowProfileRequest;
 use App\Models\ProviderProfile;
 use App\Services\FavouriteBookmarkService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -65,11 +66,24 @@ class HomeController extends Controller
         string $state,
         string $suburb,
         string $slug,
-        string $sequence_id
-    ): View {
+        ?string $sequence_id = null
+    ): View|RedirectResponse {
+        $matchedProfiles = $this->getRouteMatchedProfiles($state, $suburb, $slug);
+
+        abort_if($matchedProfiles->isEmpty(), 404);
+
+        $profile = $this->resolveProfileForRequest($matchedProfiles, $sequence_id);
+        $canonicalUrl = $this->buildCanonicalProfileUrl($profile);
+
+        if ($this->shouldRedirectToCanonical($request, $canonicalUrl)) {
+            $query = $request->getQueryString();
+
+            return redirect()->to($query ? "{$canonicalUrl}?{$query}" : $canonicalUrl, 301);
+        }
+
         $viewData = $this->getProfileShowData->execute(
-            $slug,
-            (int) $sequence_id,
+            $profile->slug,
+            (int) $profile->profile_sequence,
             $request->validated()
         );
 
@@ -100,11 +114,59 @@ class HomeController extends Controller
             abort(404);
         }
 
-        return redirect()->route('profile.show', [
-            'state'       => $profile->getStateSlug(),
-            'suburb'      => $profile->getSuburbSlug(),
-            'slug'        => $profile->slug,
-            'sequence_id' => $profile->getSequenceFormatted(),
-        ], 301);
+        return redirect()->to($profile->getEscortUrl(), 301);
+    }
+
+    private function getRouteMatchedProfiles(string $state, string $suburb, string $slug): Collection
+    {
+        $state = strtolower(trim($state));
+        $suburb = strtolower(trim($suburb));
+
+        $profiles = ProviderProfile::query()
+            ->where('slug', $slug)
+            ->where('profile_status', 'approved')
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
+            ->with(['state', 'city'])
+            ->get(['id', 'slug', 'profile_sequence', 'state_id', 'city_id', 'suburb']);
+
+        $locationMatches = $profiles->filter(function (ProviderProfile $profile) use ($state, $suburb): bool {
+            return $profile->getStateSlug() === $state && $profile->getSuburbSlug() === $suburb;
+        })->values();
+
+        return $locationMatches->isNotEmpty()
+            ? $locationMatches
+            : $profiles->sortBy('profile_sequence')->values();
+    }
+
+    private function resolveProfileForRequest(Collection $profiles, ?string $sequenceId): ProviderProfile
+    {
+        if ($profiles->count() === 1) {
+            return $profiles->first();
+        }
+
+        if ($sequenceId !== null) {
+            $sequence = (int) $sequenceId;
+            $profile = $profiles->firstWhere('profile_sequence', $sequence);
+
+            abort_if($profile === null, 404);
+
+            return $profile;
+        }
+
+        return $profiles->sortBy('profile_sequence')->first();
+    }
+
+    private function buildCanonicalProfileUrl(ProviderProfile $profile): string
+    {
+        return $profile->getEscortUrl();
+    }
+
+    private function shouldRedirectToCanonical(ShowProfileRequest $request, string $canonicalUrl): bool
+    {
+        $currentPath = trim($request->getPathInfo(), '/');
+        $canonicalPath = trim((string) parse_url($canonicalUrl, PHP_URL_PATH), '/');
+
+        return $currentPath !== $canonicalPath;
     }
 }
