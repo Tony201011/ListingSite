@@ -314,9 +314,7 @@ class BuildProfileFilterViewData
             ])
             ->orderByDesc("provider_profiles.{$expiryColumn}");
 
-        if (SiteSetting::isOnlineFilterEnabled()) {
-            $this->applyActiveOnlineProfileConstraint($query);
-        }
+        $this->applyActiveOnlineProfileConstraint($query);
 
         // For local banner: restrict to the state being viewed
         if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
@@ -452,9 +450,7 @@ class BuildProfileFilterViewData
                 'state',
             ]);
 
-        if (SiteSetting::isOnlineFilterEnabled()) {
-            $this->applyActiveOnlineProfileConstraint($query);
-        }
+        $this->applyActiveOnlineProfileConstraint($query);
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {

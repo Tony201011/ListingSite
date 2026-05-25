@@ -213,6 +213,86 @@ class SearchTest extends TestCase
         $this->assertFalse($names->contains('Legacy Offline Home Search'));
     }
 
+    public function test_advanced_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => false]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Legacy Offline Advanced Search',
+            'slug' => 'legacy-offline-advanced-search',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        $response = $this->get(route('advanced-search').'?escort_name=Legacy+Offline+Advanced+Search');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertFalse($names->contains('Legacy Offline Advanced Search'));
+    }
+
+    public function test_location_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => false]);
+
+        $this->createApprovedProvider([
+            'name' => 'Location Online Escort',
+            'slug' => 'location-online-escort',
+            'suburb' => 'Mount Gambier, SA 5290',
+        ]);
+
+        $offlineUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $offlineProfile = ProviderProfile::query()->create([
+            'user_id' => $offlineUser->id,
+            'name' => 'Location Offline Escort',
+            'slug' => 'location-offline-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'suburb' => 'Mount Gambier, SA 5290',
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $offlineUser->id,
+            'provider_profile_id' => $offlineProfile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $offlineUser->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        $response = $this->get('/?location=Mount+Gambier%2C+SA');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Location Online Escort'));
+        $this->assertFalse($names->contains('Location Offline Escort'));
+    }
+
     // ===============================================================
     // Advanced search – basic
     // ===============================================================
