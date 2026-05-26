@@ -445,7 +445,8 @@
                         <div class="min-w-0">
                             <h2 class="text-lg font-bold text-gray-900 sm:text-xl">Upload verification photos</h2>
                             <p class="mt-1 text-sm text-gray-600">
-                                Add at least two clear photos holding your verification note.
+                                Add <span class="font-semibold" x-text="getPhotoCountLabel(getModalRequiredPhotoCount())"></span>
+                                holding your verification note.
                             </p>
                         </div>
 
@@ -493,7 +494,11 @@
                             <div class="mb-3 text-4xl sm:text-5xl">📁</div>
                             <p class="text-base font-semibold text-gray-700 sm:text-lg">Drag and drop photos here</p>
                             <p class="mt-1 text-xs text-gray-500 sm:text-sm">
-                                JPG, PNG, WEBP supported · min 2 photos · max 2 photos · max 10MB each
+                                JPG, PNG, WEBP supported · required
+                                <span x-text="getPhotoCountLabel(getModalRequiredPhotoCount())"></span>
+                                · max
+                                <span x-text="getPhotoCountLabel(getModalRequiredPhotoCount())"></span>
+                                · max 10MB each
                             </p>
 
                             <button
@@ -518,7 +523,9 @@
                             <div class="rounded-xl border border-gray-200 bg-white p-4">
                                 <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                     <p class="text-sm font-semibold text-gray-700">
-                                        Selected files (<span x-text="selectedFiles.length"></span>/2)
+                                        Selected files (
+                                        <span x-text="selectedFiles.length"></span>/<span x-text="getModalRequiredPhotoCount()"></span>
+                                        )
                                     </p>
 
                                     <button
@@ -623,7 +630,9 @@
                 <div class="border-t border-gray-200 bg-white px-4 py-4 sm:px-6">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <p class="text-sm text-gray-600">
-                            Ready to upload: <span class="font-semibold text-gray-900" x-text="selectedFiles.length"></span> / 2 photos
+                            Ready to upload:
+                            <span class="font-semibold text-gray-900" x-text="selectedFiles.length"></span>
+                            / <span x-text="getModalRequiredPhotoCount()"></span> photos
                         </p>
 
                         <div class="flex flex-col gap-3 sm:flex-row">
@@ -638,7 +647,7 @@
                             <button
                                 type="button"
                                 @click="uploadFiles()"
-                                :disabled="isUploading || selectedFiles.length !== 2"
+                                :disabled="isUploading || selectedFiles.length !== getModalRequiredPhotoCount() || getModalRequiredPhotoCount() === 0"
                                 class="w-full rounded-lg bg-pink-600 px-6 py-3 font-semibold text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
                                 <span x-show="!isUploading" x-cloak>Upload selected photos</span>
