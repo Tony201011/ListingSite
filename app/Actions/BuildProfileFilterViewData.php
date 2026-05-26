@@ -468,7 +468,7 @@ class BuildProfileFilterViewData
                 'state',
             ]);
 
-        if (! $includeOfflineProfiles) {
+        if (! $includeOfflineProfiles && $escortNameQuery === '') {
             $this->applyActiveOnlineProfileConstraint($query);
         }
 
