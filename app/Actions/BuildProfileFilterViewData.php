@@ -319,6 +319,10 @@ class BuildProfileFilterViewData
                 'rates',
                 'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
                 'city',
                 'state',
@@ -443,6 +447,10 @@ class BuildProfileFilterViewData
                 'rates',
                 'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
                 'city',
                 'state',
@@ -947,6 +955,10 @@ class BuildProfileFilterViewData
                 'rates',
                 'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
                 'city',
                 'state',
@@ -1006,7 +1018,7 @@ class BuildProfileFilterViewData
             'description' => $profile->description ?? '',
             'active' => $isOnline,
             'available_now' => $isAvailableNow,
-            'verified' => $profile->is_verified,
+            'verified' => $profile->photoVerification->isNotEmpty(),
             'featured' => (bool) $profile->is_featured,
             'home_featured' => $profile->home_featured_expires_at && $profile->home_featured_expires_at->isFuture(),
             'local_banner' => $profile->local_banner_expires_at && $profile->local_banner_expires_at->isFuture(),
