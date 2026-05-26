@@ -152,6 +152,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return $this->hasOne(OnlineUser::class);
     }
 
+    public function legacyOnlineUsers(): HasMany
+    {
+        return $this->hasMany(OnlineUser::class)
+            ->whereNull('provider_profile_id');
+    }
+
     public function hideShowProfile(): HasOne
     {
         return $this->hasOne(HideShowProfile::class);

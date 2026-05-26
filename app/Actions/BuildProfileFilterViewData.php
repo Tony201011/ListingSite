@@ -333,7 +333,7 @@ class BuildProfileFilterViewData
                 'onlineUser',
                 'availableNow',
                 'user',
-                'user.onlineUser',
+                'user.legacyOnlineUsers',
                 'city',
                 'state',
             ])
@@ -410,9 +410,8 @@ class BuildProfileFilterViewData
                 ->orWhere(function (Builder $legacyConstraint): void {
                     $legacyConstraint
                         ->whereDoesntHave('onlineUser')
-                        ->whereHas('user.onlineUser', function (Builder $legacyOnline): void {
-                            $legacyOnline->whereNull('provider_profile_id')
-                                ->where('status', 'online');
+                        ->whereHas('user.legacyOnlineUsers', function (Builder $legacyOnline): void {
+                            $legacyOnline->where('status', 'online');
                         });
                 });
         });
@@ -471,7 +470,7 @@ class BuildProfileFilterViewData
                 'onlineUser',
                 'availableNow',
                 'user',
-                'user.onlineUser',
+                'user.legacyOnlineUsers',
                 'city',
                 'state',
             ]);
@@ -990,7 +989,7 @@ class BuildProfileFilterViewData
                 'onlineUser',
                 'availableNow',
                 'user',
-                'user.onlineUser',
+                'user.legacyOnlineUsers',
                 'city',
                 'state',
             ])
@@ -1031,8 +1030,9 @@ class BuildProfileFilterViewData
 
         $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
         if (! $isOnline && $profile->onlineUser === null) {
-            $isOnline = $profile->user?->onlineUser?->provider_profile_id === null
-                && ($profile->user?->onlineUser?->isCurrentlyOnline() ?? false);
+            $legacyOnlineUsers = $profile->user?->legacyOnlineUsers;
+            $isOnline = $legacyOnlineUsers !== null
+                && $legacyOnlineUsers->contains(fn ($onlineUser) => $onlineUser->isCurrentlyOnline());
         }
         $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
 
