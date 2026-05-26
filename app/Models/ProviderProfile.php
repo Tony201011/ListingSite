@@ -213,7 +213,9 @@ class ProviderProfile extends Model
     {
         return $query->whereHas(
             'onlineUsers',
-            fn (Builder $onlineQuery): Builder => $onlineQuery->where('status', 'online')
+            fn (Builder $onlineQuery): Builder => $onlineQuery
+                ->whereNotNull('provider_profile_id')
+                ->where('status', 'online')
         );
     }
 
@@ -221,7 +223,9 @@ class ProviderProfile extends Model
     {
         return $query->whereDoesntHave(
             'onlineUsers',
-            fn (Builder $onlineQuery): Builder => $onlineQuery->where('status', 'online')
+            fn (Builder $onlineQuery): Builder => $onlineQuery
+                ->whereNotNull('provider_profile_id')
+                ->where('status', 'online')
         );
     }
 
@@ -234,6 +238,7 @@ class ProviderProfile extends Model
         }
 
         return $this->onlineUsers()
+            ->whereNotNull('provider_profile_id')
             ->where('status', 'online')
             ->exists();
     }
