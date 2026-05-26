@@ -158,7 +158,7 @@
 
     .pv-table th {
         width: 275px;
-        padding: 20px;
+        padding: 14px;
         background: #f9fafb;
         border-right: 1px solid #e5e7eb;
         text-align: left;
@@ -171,7 +171,7 @@
     }
 
     .pv-table td {
-        padding: 20px;
+        padding: 13px;
         vertical-align: top;
         font-size: 17px;
         color: #111827;
