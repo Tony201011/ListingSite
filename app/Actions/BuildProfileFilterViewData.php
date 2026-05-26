@@ -1002,7 +1002,7 @@ class BuildProfileFilterViewData
             'height' => '',
             'service_1' => $services[0] ?? '',
             'service_2' => $services[1] ?? '',
-            'date' => $profile->created_at->format('d/m/Y'),
+            'date' => $this->formatRelativeDate($profile->created_at),
             'description' => $profile->description ?? '',
             'active' => $isOnline,
             'available_now' => $isAvailableNow,
@@ -1043,5 +1043,31 @@ class BuildProfileFilterViewData
         $digits = preg_replace('/[^\d]/', '', $value);
 
         return $digits !== '' ? (int) $digits : 0;
+    }
+
+    private function formatRelativeDate(\Carbon\Carbon $date): string
+    {
+        $today = now()->startOfDay();
+        $diffDays = (int) $date->startOfDay()->diffInDays($today, false);
+
+        if ($diffDays === 0) {
+            return 'Today';
+        }
+
+        if ($diffDays === 1) {
+            return 'Yesterday';
+        }
+
+        if ($diffDays <= 6) {
+            return "{$diffDays} days ago";
+        }
+
+        if ($diffDays <= 29) {
+            $weeks = (int) ceil($diffDays / 7);
+
+            return $weeks === 1 ? '1 week ago' : "{$weeks} weeks ago";
+        }
+
+        return $date->format('d/m/Y');
     }
 }
