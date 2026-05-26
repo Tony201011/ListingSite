@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\RecaptchaLogs\Pages;
 
-use App\Filament\Resources\RecaptchaLogs\RecaptchaLogResource;
 use App\Filament\Resources\Pages\ListRecordsWithPageJump;
+use App\Filament\Resources\RecaptchaLogs\RecaptchaLogResource;
 
 class ListRecaptchaLogs extends ListRecordsWithPageJump
 {

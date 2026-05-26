@@ -25,8 +25,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Js;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Js;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

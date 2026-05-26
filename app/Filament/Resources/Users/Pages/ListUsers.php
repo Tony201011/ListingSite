@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Widgets\ProviderStatsOverview;
 use Filament\Actions\CreateAction;
-use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
 class ListUsers extends ListRecordsWithPageJump
 {

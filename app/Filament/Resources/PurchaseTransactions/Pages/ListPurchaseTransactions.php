@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\PurchaseTransactions\Pages;
 
-use App\Filament\Resources\PurchaseTransactions\PurchaseTransactionResource;
 use App\Filament\Resources\Pages\ListRecordsWithPageJump;
+use App\Filament\Resources\PurchaseTransactions\PurchaseTransactionResource;
 
 class ListPurchaseTransactions extends ListRecordsWithPageJump
 {

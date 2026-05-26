@@ -8,7 +8,6 @@ use App\Actions\UpdateOnlineNowStatus;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
 use App\Models\ProviderProfile;
-use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;

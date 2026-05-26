@@ -125,17 +125,17 @@ Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name(
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
 Route::get('/escorts/{state}/{suburb}/{slug}/{sequence_id}', [HomeController::class, 'showProfile'])
     ->where([
-        'state'       => '[a-z]{2,3}',
-        'suburb'      => '[a-z0-9-]+',
-        'slug'        => '[a-z0-9-]+',
+        'state' => '[a-z]{2,3}',
+        'suburb' => '[a-z0-9-]+',
+        'slug' => '[a-z0-9-]+',
         'sequence_id' => '[0-9]{3}',
     ])
     ->name('profile.show');
 Route::get('/escorts/{state}/{suburb}/{slug}', [HomeController::class, 'showProfile'])
     ->where([
-        'state'  => '[a-z]{2,3}',
+        'state' => '[a-z]{2,3}',
         'suburb' => '[a-z0-9-]+',
-        'slug'   => '[a-z0-9-]+',
+        'slug' => '[a-z0-9-]+',
     ])
     ->name('profile.show.no-sequence');
 

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\TwilioSettings\Pages;
 
+use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 use App\Filament\Resources\TwilioSettings\TwilioSettingResource;
 use Filament\Actions\CreateAction;
-use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 
 class ListTwilioSettings extends ListRecordsWithPageJump
 {

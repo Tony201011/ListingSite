@@ -7,7 +7,6 @@ use App\Models\OnlineUser;
 use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
 
-
 class UpdateOnlineNowStatus
 {
     public function execute(ProviderProfile $profile, ?string $status): ActionResult
