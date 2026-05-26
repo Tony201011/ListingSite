@@ -306,6 +306,37 @@ class HomeControllerTest extends TestCase
         $this->assertCount(2, $response->viewData('profiles'));
     }
 
+    public function test_online_count_matches_admin_online_card_total(): void
+    {
+        $approvedUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $approvedProfile = ProviderProfile::query()->create([
+            'user_id' => $approvedUser->id,
+            'name' => 'Approved Online Profile',
+            'slug' => 'approved-online-profile',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+        $this->createActiveOnlineUser($approvedUser, $approvedProfile->id);
+
+        $pendingUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $pendingProfile = ProviderProfile::query()->create([
+            'user_id' => $pendingUser->id,
+            'name' => 'Pending Online Profile',
+            'slug' => 'pending-online-profile',
+            'profile_status' => 'pending',
+            'age' => 25,
+        ]);
+        $this->createActiveOnlineUser($pendingUser, $pendingProfile->id);
+
+        $response = $this->get('/');
+
+        $this->assertSame(
+            ProviderProfile::query()->withoutTrashed()->whereCurrentlyOnline()->count(),
+            $response->viewData('onlineCount')
+        );
+        $this->assertSame(1, $response->viewData('profiles')->total());
+    }
+
     public function test_home_page_lists_each_online_profile_for_same_provider_account(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
