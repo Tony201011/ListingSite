@@ -33,7 +33,7 @@ class OnlineUser extends Model
 
     public function isCurrentlyOnline(): bool
     {
-        return $this->status === 'online';
+        return $this->provider_profile_id !== null && $this->status === 'online';
     }
 
     public function resetDailyUsageIfNeeded(): void
