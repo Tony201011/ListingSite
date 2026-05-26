@@ -35,7 +35,7 @@ class HomeController extends Controller
             return redirect()->to($canonicalUrl, 301);
         }
 
-        $viewData = $this->buildProfileFilterViewData->execute($validated);
+        $viewData = $this->buildProfileFilterViewData->execute($validated, includeOfflineProfiles: true);
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
         $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 

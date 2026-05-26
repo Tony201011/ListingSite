@@ -973,7 +973,7 @@ class HomeControllerTest extends TestCase
     // Online status visibility filter
     // ---------------------------------------------------------------
 
-    public function test_home_page_does_not_show_profile_with_offline_online_user_record(): void
+    public function test_home_page_shows_profile_with_offline_online_user_record_without_online_badge(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1000,7 +1000,8 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayNotHasKey('Offline Escort', $profiles->all());
+        $this->assertArrayHasKey('Offline Escort', $profiles->all());
+        $this->assertFalse($profiles['Offline Escort']['active']);
         $response->assertDontSeeText('Online Now');
     }
 
@@ -1074,7 +1075,7 @@ class HomeControllerTest extends TestCase
         $offlineResponse->assertDontSeeText('Online Now');
     }
 
-    public function test_home_page_does_not_show_profile_with_no_online_user_record(): void
+    public function test_home_page_shows_profile_with_no_online_user_record_as_offline(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1091,7 +1092,8 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayNotHasKey('New Escort', $profiles->all());
+        $this->assertArrayHasKey('New Escort', $profiles->all());
+        $this->assertFalse($profiles['New Escort']['active']);
     }
 
     public function test_home_page_does_not_mark_profile_online_when_only_legacy_online_user_row_exists(): void
@@ -1120,10 +1122,11 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayNotHasKey('Legacy Linked Escort', $profiles->all());
+        $this->assertArrayHasKey('Legacy Linked Escort', $profiles->all());
+        $this->assertFalse($profiles['Legacy Linked Escort']['active']);
     }
 
-    public function test_home_page_does_not_show_profile_when_profile_linked_row_is_offline_even_if_legacy_online_row_exists(): void
+    public function test_home_page_keeps_profile_offline_when_profile_linked_row_is_offline_even_if_legacy_online_row_exists(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1159,7 +1162,8 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayNotHasKey('Legacy Online With Offline Profile Row Escort', $profiles->all());
+        $this->assertArrayHasKey('Legacy Online With Offline Profile Row Escort', $profiles->all());
+        $this->assertFalse($profiles['Legacy Online With Offline Profile Row Escort']['active']);
     }
 
     public function test_home_page_ignores_legacy_online_rows_when_syncing_profile_active_state(): void
@@ -1206,7 +1210,8 @@ class HomeControllerTest extends TestCase
         $profiles = collect($response->viewData('profiles')->items());
         $legacyProfileData = $profiles->firstWhere('name', $legacyProfile->name);
 
-        $this->assertNull($legacyProfileData);
+        $this->assertNotNull($legacyProfileData);
+        $this->assertFalse($legacyProfileData['active']);
     }
 
     public function test_home_page_hides_featured_profile_when_offline(): void
@@ -1338,7 +1343,7 @@ class HomeControllerTest extends TestCase
         $this->assertFalse(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
     }
 
-    public function test_home_page_does_not_show_offline_profile_when_online_filter_disabled(): void
+    public function test_home_page_shows_offline_profile_even_when_online_filter_disabled(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => false]);
 
@@ -1355,10 +1360,11 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayNotHasKey('Offline No Filter Escort', $profiles->all());
+        $this->assertArrayHasKey('Offline No Filter Escort', $profiles->all());
+        $this->assertFalse($profiles['Offline No Filter Escort']['active']);
     }
 
-    public function test_home_page_does_not_show_offline_profile_when_online_filter_setting_missing(): void
+    public function test_home_page_shows_offline_profile_when_online_filter_setting_missing(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
@@ -1372,10 +1378,11 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayNotHasKey('Offline Default Filter Escort', $profiles->all());
+        $this->assertArrayHasKey('Offline Default Filter Escort', $profiles->all());
+        $this->assertFalse($profiles['Offline Default Filter Escort']['active']);
     }
 
-    public function test_home_page_does_not_show_offline_profile_when_online_filter_enabled(): void
+    public function test_home_page_shows_offline_profile_when_online_filter_enabled(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1392,7 +1399,8 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayNotHasKey('Offline Filter Escort', $profiles->all());
+        $this->assertArrayHasKey('Offline Filter Escort', $profiles->all());
+        $this->assertFalse($profiles['Offline Filter Escort']['active']);
     }
 
     // ---------------------------------------------------------------
