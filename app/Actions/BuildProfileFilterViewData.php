@@ -742,13 +742,16 @@ class BuildProfileFilterViewData
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
-            ->leftJoin('online_users', 'online_users.provider_profile_id', '=', 'provider_profiles.id')
             ->where(function ($q) {
                 $q->whereNull('hide_show_profiles.id')
                     ->orWhere('hide_show_profiles.status', 'show');
             })
-            ->where(function ($q) {
-                $q->where('online_users.status', 'online');
+            ->whereExists(function ($query) {
+                $query->selectRaw('1')
+                    ->from('online_users')
+                    ->whereColumn('online_users.provider_profile_id', 'provider_profiles.id')
+                    ->whereNotNull('online_users.provider_profile_id')
+                    ->where('online_users.status', 'online');
             })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
