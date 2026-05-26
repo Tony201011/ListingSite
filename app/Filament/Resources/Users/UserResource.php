@@ -1366,6 +1366,10 @@ class UserResource extends Resource
                                 'admin_note' => $data['admin_note'],
                             ]);
 
+                            $record->update([
+                                'is_verified' => $data['status'] === 'approved',
+                            ]);
+
                             if ($data['status'] !== $previousStatus && in_array($data['status'], ['approved', 'rejected'])) {
                                 $emailType = $data['status'] === 'approved'
                                     ? 'photo_verification_approved'
