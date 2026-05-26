@@ -276,7 +276,7 @@ class SearchTest extends TestCase
         $this->assertFalse($names->contains('Mia Stone'));
     }
 
-    public function test_home_page_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
+    public function test_home_page_name_search_includes_offline_profile(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -297,22 +297,14 @@ class SearchTest extends TestCase
             'usage_count' => 1,
         ]);
 
-        OnlineUser::query()->create([
-            'user_id' => $user->id,
-            'provider_profile_id' => null,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-        ]);
-
         $response = $this->get('/?escort_name=Legacy+Offline+Home+Search');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Legacy Offline Home Search'));
+        $this->assertTrue($names->contains('Legacy Offline Home Search'));
     }
 
-    public function test_advanced_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
+    public function test_advanced_search_name_search_includes_offline_profile(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => false]);
 
@@ -333,19 +325,11 @@ class SearchTest extends TestCase
             'usage_count' => 1,
         ]);
 
-        OnlineUser::query()->create([
-            'user_id' => $user->id,
-            'provider_profile_id' => null,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-        ]);
-
         $response = $this->get(route('advanced-search').'?escort_name=Legacy+Offline+Advanced+Search');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Legacy Offline Advanced Search'));
+        $this->assertTrue($names->contains('Legacy Offline Advanced Search'));
     }
 
     public function test_location_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
