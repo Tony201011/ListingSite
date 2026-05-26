@@ -29,17 +29,22 @@ class HomeControllerTest extends TestCase
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
-        $profile = ProviderProfile::query()->create(array_merge([
+        $profile = $this->createApprovedProfile($user, $profileOverrides);
+
+        $this->createActiveOnlineUser($user, $profile->id);
+
+        return $user;
+    }
+
+    private function createApprovedProfile(User $user, array $profileOverrides = []): ProviderProfile
+    {
+        return ProviderProfile::query()->create(array_merge([
             'user_id' => $user->id,
             'name' => 'Test Escort',
             'slug' => 'test-escort-'.$user->id,
             'profile_status' => 'approved',
             'age' => 25,
         ], $profileOverrides));
-
-        $this->createActiveOnlineUser($user, $profile->id);
-
-        return $user;
     }
 
     private function createApprovedProviderWithSuburb(string $suburb, string $state, array $profileOverrides = []): User
@@ -247,8 +252,46 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $this->assertSame(2, $response->viewData('onlineCount'));
+        $this->assertSame(4, $response->viewData('onlineCount'));
         $this->assertCount(2, $response->viewData('profiles'));
+    }
+
+    public function test_home_page_lists_each_online_profile_for_same_provider_account(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $firstProfile = $this->createApprovedProfile($user, [
+            'name' => 'Account Profile One',
+            'slug' => 'account-profile-one',
+        ]);
+        $secondProfile = $this->createApprovedProfile($user, [
+            'name' => 'Account Profile Two',
+            'slug' => 'account-profile-two',
+        ]);
+
+        $this->createActiveOnlineUser($user, $firstProfile->id);
+        $this->createActiveOnlineUser($user, $secondProfile->id);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 3,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+
+        $this->assertSame(2, $response->viewData('onlineCount'));
+        $this->assertSame(2, $profiles->total());
+        $this->assertSame(
+            [$firstProfile->getEscortUrl(), $secondProfile->getEscortUrl()],
+            collect($profiles->items())->pluck('profile_url')->sort()->values()->all()
+        );
     }
 
     public function test_home_page_displays_online_user_counter_when_profiles_are_online(): void

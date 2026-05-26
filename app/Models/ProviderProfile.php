@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -173,6 +174,11 @@ class ProviderProfile extends Model
         return $this->hasOne(OnlineUser::class, 'provider_profile_id');
     }
 
+    public function onlineUsers(): HasMany
+    {
+        return $this->hasMany(OnlineUser::class, 'provider_profile_id');
+    }
+
     public function providerOnlineLogs(): HasMany
     {
         return $this->hasMany(ProviderOnlineLog::class, 'provider_profile_id');
@@ -201,6 +207,35 @@ class ProviderProfile extends Model
     public function reports(): HasMany
     {
         return $this->hasMany(UserReport::class);
+    }
+
+    public function scopeWhereCurrentlyOnline(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'onlineUsers',
+            fn (Builder $onlineQuery): Builder => $onlineQuery->where('status', 'online')
+        );
+    }
+
+    public function scopeWhereCurrentlyOffline(Builder $query): Builder
+    {
+        return $query->whereDoesntHave(
+            'onlineUsers',
+            fn (Builder $onlineQuery): Builder => $onlineQuery->where('status', 'online')
+        );
+    }
+
+    public function isCurrentlyOnline(): bool
+    {
+        if ($this->relationLoaded('onlineUsers')) {
+            return $this->onlineUsers->contains(
+                fn (OnlineUser $onlineUser): bool => $onlineUser->isCurrentlyOnline()
+            );
+        }
+
+        return $this->onlineUsers()
+            ->where('status', 'online')
+            ->exists();
     }
 
     // -----------------------------------------------------------------------
