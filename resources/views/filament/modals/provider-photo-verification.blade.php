@@ -96,7 +96,7 @@
                         $galleryPreviewWidth,
                         null,
                         false,
-                        false
+                        true
                     ) !!}
 
                 </div>
@@ -220,16 +220,12 @@
         width: 100% !important;
     }
 
-    /* renderer wrapper fix */
-    .photo-verification-gallery > div {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 18px !important;
-        width: 100% !important;
-    }
-
-    .photo-verification-gallery a {
-        display: block !important;
+    .photo-verification-gallery a,
+    .photo-verification-gallery button,
+    .photo-verification-gallery img,
+    .photo-verification-gallery iframe,
+    .photo-verification-gallery embed,
+    .photo-verification-gallery object {
         width: 150px !important;
         height: 150px !important;
         min-width: 150px !important;
@@ -239,11 +235,7 @@
 
         overflow: hidden !important;
         border-radius: 14px !important;
-        border: 1px solid #e5e7eb !important;
-        background: #ffffff !important;
-
-        position: relative !important;
-        flex-shrink: 0 !important;
+        cursor: pointer !important;
     }
 
     .photo-verification-gallery img,
@@ -308,7 +300,12 @@
             font-size: 15px;
         }
 
-        .photo-verification-gallery a {
+        .photo-verification-gallery a,
+        .photo-verification-gallery button,
+        .photo-verification-gallery img,
+        .photo-verification-gallery iframe,
+        .photo-verification-gallery embed,
+        .photo-verification-gallery object {
             width: 120px !important;
             height: 120px !important;
             min-width: 120px !important;
