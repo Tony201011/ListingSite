@@ -13,8 +13,6 @@ class LoginLog extends Model
         'user_agent',
         'logged_out_at',
         'duration_seconds',
-        'created_at',
-        'updated_at',
     ];
 
     protected $casts = [

@@ -72,6 +72,10 @@ class AccountControllerTest extends TestCase
         $response->assertRedirect('/delete-account');
         $response->assertSessionHas('success');
 
+        Mail::assertSent(function ($mail) use ($user) {
+            return $mail->hasTo($user->email);
+        });
+
         $this->assertDatabaseHas('email_logs', [
             'recipient' => $user->email,
             'subject' => 'Confirm Account Deletion',

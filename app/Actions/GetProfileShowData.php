@@ -381,13 +381,9 @@ class GetProfileShowData
                     ->orWhere(function (Builder $legacyConstraint): void {
                         $legacyConstraint
                             ->whereDoesntHave('onlineUser')
-                            ->where(function (Builder $legacyState): void {
-                                $legacyState
-                                    ->whereDoesntHave('user.onlineUser')
-                                    ->orWhereHas('user.onlineUser', function (Builder $legacyOnline): void {
-                                        $legacyOnline->whereNull('provider_profile_id')
-                                            ->where('status', 'online');
-                                    });
+                            ->whereHas('user.onlineUser', function (Builder $legacyOnline): void {
+                                $legacyOnline->whereNull('provider_profile_id')
+                                    ->where('status', 'online');
                             });
                     });
             })

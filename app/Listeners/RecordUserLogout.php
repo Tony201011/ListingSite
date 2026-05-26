@@ -12,7 +12,7 @@ class RecordUserLogout
 {
     public function handle(Logout $event): void
     {
-        if (! request()->hasSession()) {
+        if (app()->runningInConsole() || ! request()->hasSession()) {
             return;
         }
 
@@ -30,7 +30,7 @@ class RecordUserLogout
 
             if ($log) {
                 $loggedOutAt = now();
-                $durationSeconds = max(0, (int) $log->created_at->diffInSeconds($loggedOutAt, true));
+                $durationSeconds = max(0, (int) $loggedOutAt->diffInSeconds($log->created_at));
 
                 $log->update([
                     'logged_out_at' => $loggedOutAt,
@@ -56,7 +56,7 @@ class RecordUserLogout
                 ->each(function (ProviderOnlineLog $log) use ($closedAt): void {
                     $log->update([
                         'went_offline_at' => $closedAt,
-                        'duration_seconds' => max(0, (int) $log->went_online_at->diffInSeconds($closedAt, true)),
+                        'duration_seconds' => max(0, (int) $closedAt->diffInSeconds($log->went_online_at)),
                     ]);
                 });
         }
