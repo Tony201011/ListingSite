@@ -68,19 +68,19 @@
             </div>
         @endif
 
-        {{-- Photo Verified / Available Now / Online badges --}}
+        {{-- Verified Photo / Available Now badges --}}
         <div @class([
-            'absolute left-0 z-10 flex flex-col gap-1',
-            'top-11 sm:top-12' => $hasTopBadgeRow,
+            'pointer-events-none absolute left-3 right-3 z-20 flex flex-wrap items-start gap-1.5',
+            'top-12 sm:top-14' => $hasTopBadgeRow,
             'top-3' => ! $hasTopBadgeRow,
         ])>
             @if($profile['verified'])
-                <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                    <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
+                <span class="inline-flex items-center gap-1 rounded-full bg-cyan-500/95 px-3 py-1 text-[10px] font-semibold text-white shadow-sm ring-1 ring-white/20 sm:text-[11px] whitespace-nowrap">
+                    <i class="fa-solid fa-camera text-[9px]"></i> Verified Photo
                 </span>
             @endif
             @if(!empty($profile['available_now']))
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0; background-color: #e13a8b;">
+                <span class="inline-flex items-center gap-1 rounded-full bg-fuchsia-500/95 px-3 py-1 text-[10px] font-semibold text-white shadow-sm ring-1 ring-white/20 sm:text-[11px] whitespace-nowrap">
                     <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
                 </span>
             @endif

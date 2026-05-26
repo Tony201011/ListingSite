@@ -8,6 +8,7 @@ use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -319,6 +320,10 @@ class BuildProfileFilterViewData
                 'rates',
                 'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
                 'city',
                 'state',
@@ -443,6 +448,10 @@ class BuildProfileFilterViewData
                 'rates',
                 'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
                 'city',
                 'state',
@@ -947,6 +956,10 @@ class BuildProfileFilterViewData
                 'rates',
                 'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
                 'city',
                 'state',
@@ -1006,7 +1019,7 @@ class BuildProfileFilterViewData
             'description' => $profile->description ?? '',
             'active' => $isOnline,
             'available_now' => $isAvailableNow,
-            'verified' => $profile->is_verified,
+            'verified' => $profile->photoVerification->isNotEmpty(),
             'featured' => (bool) $profile->is_featured,
             'home_featured' => $profile->home_featured_expires_at && $profile->home_featured_expires_at->isFuture(),
             'local_banner' => $profile->local_banner_expires_at && $profile->local_banner_expires_at->isFuture(),
@@ -1045,7 +1058,7 @@ class BuildProfileFilterViewData
         return $digits !== '' ? (int) $digits : 0;
     }
 
-    private function formatRelativeDate(\Carbon\Carbon $date): string
+    private function formatRelativeDate(Carbon $date): string
     {
         $today = now()->startOfDay();
         $diffDays = (int) $date->startOfDay()->diffInDays($today, false);

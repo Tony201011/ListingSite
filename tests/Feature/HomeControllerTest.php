@@ -6,6 +6,7 @@ use App\Models\AvailableNow;
 use App\Models\Country;
 use App\Models\HideShowProfile;
 use App\Models\OnlineUser;
+use App\Models\PhotoVerification;
 use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
@@ -103,6 +104,17 @@ class HomeControllerTest extends TestCase
             'usage_count' => 1,
             'available_started_at' => now()->subMinutes(5),
             'available_expires_at' => now()->addMinutes(55),
+        ]);
+    }
+
+    private function createPhotoVerification(User $user, int $providerProfileId, string $status): void
+    {
+        PhotoVerification::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $providerProfileId,
+            'photos' => [['path' => 'verification/test/photo.jpg']],
+            'status' => $status,
+            'submitted_at' => now(),
         ]);
     }
 
@@ -292,6 +304,42 @@ class HomeControllerTest extends TestCase
             [$firstProfile->getEscortUrl(), $secondProfile->getEscortUrl()],
             collect($profiles->items())->pluck('profile_url')->sort()->values()->all()
         );
+    }
+
+    public function test_home_page_shows_verified_photo_badge_for_approved_photo_verification(): void
+    {
+        $user = $this->createApprovedProvider([
+            'name' => 'Approved Photo Provider',
+            'slug' => 'approved-photo-provider',
+            'is_verified' => false,
+        ]);
+
+        $this->createPhotoVerification($user, $user->providerProfile->id, 'approved');
+
+        $response = $this->get('/');
+
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+
+        $this->assertTrue($profiles['Approved Photo Provider']['verified']);
+        $response->assertSee('Verified Photo');
+    }
+
+    public function test_home_page_does_not_show_verified_photo_badge_without_approved_photo_verification(): void
+    {
+        $user = $this->createApprovedProvider([
+            'name' => 'Pending Photo Provider',
+            'slug' => 'pending-photo-provider',
+            'is_verified' => true,
+        ]);
+
+        $this->createPhotoVerification($user, $user->providerProfile->id, 'pending');
+
+        $response = $this->get('/');
+
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+
+        $this->assertFalse($profiles['Pending Photo Provider']['verified']);
+        $response->assertDontSee('Verified Photo');
     }
 
     public function test_home_page_displays_online_user_counter_when_profiles_are_online(): void
