@@ -228,13 +228,13 @@ class GetProviderActivityLogs
         $storedDuration = max(0, (int) ($storedDuration ?? 0));
 
         if ($logoutAt) {
-            $computedDuration = max(0, (int) $loginAt->diffInSeconds($logoutAt, true));
+            $computedDuration = max(0, (int) $logoutAt->diffInSeconds($loginAt));
 
             return max($computedDuration, $storedDuration);
         }
 
         if ($isOnline) {
-            return max(0, (int) $loginAt->diffInSeconds($now, true));
+            return max(0, (int) $now->diffInSeconds($loginAt));
         }
 
         return $storedDuration;

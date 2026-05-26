@@ -31,7 +31,7 @@ class RecordUserLogin
             'user_agent' => request()->userAgent(),
         ]);
 
-        if (! request()->hasSession()) {
+        if (app()->runningInConsole() || ! request()->hasSession()) {
             return;
         }
 
