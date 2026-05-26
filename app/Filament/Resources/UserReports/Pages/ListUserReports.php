@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\UserReports\Pages;
 
-use App\Filament\Resources\UserReports\UserReportResource;
 use App\Filament\Resources\Pages\ListRecordsWithPageJump;
+use App\Filament\Resources\UserReports\UserReportResource;
 
 class ListUserReports extends ListRecordsWithPageJump
 {

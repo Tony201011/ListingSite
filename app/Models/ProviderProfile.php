@@ -343,9 +343,9 @@ class ProviderProfile extends Model
         $this->loadMissing(['state', 'city']);
 
         $routeParams = [
-            'state'       => $this->getStateSlug(),
-            'suburb'      => $this->getSuburbSlug(),
-            'slug'        => $this->slug,
+            'state' => $this->getStateSlug(),
+            'suburb' => $this->getSuburbSlug(),
+            'slug' => $this->slug,
         ];
 
         if ($this->shouldIncludeSequenceInUrl()) {

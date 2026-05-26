@@ -34,4 +34,3 @@ class ProviderProfileUrlStateSlugTest extends TestCase
         $this->assertSame('au', $profile->getStateSlug());
     }
 }
-

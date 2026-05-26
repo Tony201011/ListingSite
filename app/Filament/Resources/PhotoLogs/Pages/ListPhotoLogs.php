@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\PhotoLogs\Pages;
 
-use App\Filament\Resources\PhotoLogs\PhotoLogResource;
 use App\Filament\Resources\Pages\ListRecordsWithPageJump;
+use App\Filament\Resources\PhotoLogs\PhotoLogResource;
 
 class ListPhotoLogs extends ListRecordsWithPageJump
 {

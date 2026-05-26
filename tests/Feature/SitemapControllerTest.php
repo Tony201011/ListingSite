@@ -29,9 +29,9 @@ class SitemapControllerTest extends TestCase
     private function profileUrl(string $slug): string
     {
         return route('profile.show.no-sequence', [
-            'state'       => 'au',
-            'suburb'      => 'australia',
-            'slug'        => $slug,
+            'state' => 'au',
+            'suburb' => 'australia',
+            'slug' => $slug,
         ]);
     }
 

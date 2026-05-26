@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\VideoLogs\Pages;
 
-use App\Filament\Resources\VideoLogs\VideoLogResource;
 use App\Filament\Resources\Pages\ListRecordsWithPageJump;
+use App\Filament\Resources\VideoLogs\VideoLogResource;
 
 class ListVideoLogs extends ListRecordsWithPageJump
 {
