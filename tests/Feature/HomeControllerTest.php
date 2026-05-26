@@ -119,6 +119,19 @@ class HomeControllerTest extends TestCase
         $response->assertViewIs('frontend.home');
     }
 
+    public function test_home_page_limits_listing_to_two_profiles(): void
+    {
+        $this->createApprovedProvider(['name' => 'Escort One', 'slug' => 'escort-one']);
+        $this->createApprovedProvider(['name' => 'Escort Two', 'slug' => 'escort-two']);
+        $this->createApprovedProvider(['name' => 'Escort Three', 'slug' => 'escort-three']);
+        $this->createApprovedProvider(['name' => 'Escort Four', 'slug' => 'escort-four']);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(2, $profiles->items());
+    }
+
     public function test_home_page_passes_required_view_data(): void
     {
         $response = $this->get('/');
@@ -141,106 +154,7 @@ class HomeControllerTest extends TestCase
             'maxSearchDistance',
             'userFavourites',
             'userBookmarks',
-            'onlineCount',
         ]);
-    }
-
-    public function test_online_count_counts_unique_profiles_not_sessions(): void
-    {
-        // User A has 3 legacy online_users rows (provider_profile_id=NULL) — simulating
-        // multiple sessions / tabs for the same user — plus one profile-linked row.
-        $userA = User::factory()->create(['role' => User::ROLE_PROVIDER]);
-        ProviderProfile::query()->create([
-            'user_id' => $userA->id,
-            'name' => 'Profile A',
-            'slug' => 'profile-a',
-            'profile_status' => 'approved',
-            'age' => 25,
-        ]);
-        $profileA = ProviderProfile::query()->where('user_id', $userA->id)->first();
-        // Profile-linked online_users row
-        OnlineUser::query()->create([
-            'user_id' => $userA->id,
-            'provider_profile_id' => $profileA->id,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-            'online_started_at' => now()->subMinutes(5),
-            'online_expires_at' => null,
-        ]);
-        // 3 legacy (NULL provider_profile_id) rows for the same user — simulate multiple sessions
-        foreach (range(1, 3) as $i) {
-            OnlineUser::query()->create([
-                'user_id' => $userA->id,
-                'provider_profile_id' => null,
-                'status' => 'online',
-                'usage_date' => today(),
-                'usage_count' => $i,
-                'online_started_at' => now()->subMinutes(5),
-                'online_expires_at' => null,
-            ]);
-        }
-
-        // User B has a single profile-linked online_users row
-        $userB = User::factory()->create(['role' => User::ROLE_PROVIDER]);
-        ProviderProfile::query()->create([
-            'user_id' => $userB->id,
-            'name' => 'Profile B',
-            'slug' => 'profile-b',
-            'profile_status' => 'approved',
-            'age' => 25,
-        ]);
-        $profileB = ProviderProfile::query()->where('user_id', $userB->id)->first();
-        OnlineUser::query()->create([
-            'user_id' => $userB->id,
-            'provider_profile_id' => $profileB->id,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-            'online_started_at' => now()->subMinutes(5),
-            'online_expires_at' => null,
-        ]);
-
-        $response = $this->get('/');
-
-        // onlineCount must be 2 (one per unique profile), not 4 (raw online_users rows) or 5
-        $this->assertSame(2, $response->viewData('onlineCount'));
-    }
-
-    public function test_online_count_ignores_offline_sessions(): void
-    {
-        // One profile with an offline online_users row
-        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
-        ProviderProfile::query()->create([
-            'user_id' => $user->id,
-            'name' => 'Offline Profile',
-            'slug' => 'offline-profile-count',
-            'profile_status' => 'approved',
-            'age' => 25,
-        ]);
-        $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
-        OnlineUser::query()->create([
-            'user_id' => $user->id,
-            'provider_profile_id' => $profile->id,
-            'status' => 'offline',
-            'usage_date' => today(),
-            'usage_count' => 1,
-            'online_started_at' => null,
-            'online_expires_at' => null,
-        ]);
-
-        $response = $this->get('/');
-
-        $this->assertSame(0, $response->viewData('onlineCount'));
-    }
-
-    public function test_home_page_displays_online_user_counter_when_profiles_are_online(): void
-    {
-        $this->createApprovedProvider(['name' => 'Online Escort', 'slug' => 'online-escort-counter']);
-
-        $response = $this->get('/');
-
-        $response->assertSee('online');
     }
 
     public function test_home_page_renders_search_inputs_in_escorts_navigation_menus(): void

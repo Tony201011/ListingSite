@@ -232,8 +232,6 @@ class BuildProfileFilterViewData
             ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery, $resolvedLocation)
             : collect();
 
-        $onlineCount = $this->getUniqueOnlineCount();
-
         return compact(
             'filterGroups',
             'allFilterCategories',
@@ -258,7 +256,6 @@ class BuildProfileFilterViewData
             'escortNameQuery',
             'homeBannerProfiles',
             'localBannerProfiles',
-            'onlineCount',
         );
     }
 
@@ -279,19 +276,6 @@ class BuildProfileFilterViewData
             'localBannerProfiles',
             'featuredProfiles',
         );
-    }
-
-    private function getUniqueOnlineCount(): int
-    {
-        $query = ProviderProfile::query()
-            ->whereNull('deleted_at')
-            ->where('profile_status', 'approved')
-            ->where('is_blocked', false)
-            ->whereHas('user');
-
-        $this->applyActiveOnlineProfileConstraint($query);
-
-        return $query->count();
     }
 
     private function resolveProfilesPerPage(?int $profilesPerPage = null): int
