@@ -1000,8 +1000,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayHasKey('Offline Escort', $profiles->all());
-        $this->assertFalse($profiles['Offline Escort']['active']);
+        $this->assertArrayNotHasKey('Offline Escort', $profiles->all());
         $response->assertDontSeeText('Online Now');
     }
 
@@ -1070,7 +1069,7 @@ class HomeControllerTest extends TestCase
         $offlineResponse = $this->get('/');
         $offlineProfiles = collect($offlineResponse->viewData('profiles')->items())->keyBy('name');
 
-        $this->assertFalse($offlineProfiles['Synced Escort']['active']);
+        $this->assertArrayNotHasKey('Synced Escort', $offlineProfiles->all());
         $this->assertSame(0, $offlineResponse->viewData('onlineCount'));
         $offlineResponse->assertDontSeeText('Online Now');
     }
@@ -1092,8 +1091,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayHasKey('New Escort', $profiles->all());
-        $this->assertFalse($profiles['New Escort']['active']);
+        $this->assertArrayNotHasKey('New Escort', $profiles->all());
     }
 
     public function test_home_page_does_not_mark_profile_online_when_only_legacy_online_user_row_exists(): void
@@ -1122,8 +1120,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayHasKey('Legacy Linked Escort', $profiles->all());
-        $this->assertFalse($profiles['Legacy Linked Escort']['active']);
+        $this->assertArrayNotHasKey('Legacy Linked Escort', $profiles->all());
     }
 
     public function test_home_page_keeps_profile_offline_when_profile_linked_row_is_offline_even_if_legacy_online_row_exists(): void
@@ -1162,8 +1159,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayHasKey('Legacy Online With Offline Profile Row Escort', $profiles->all());
-        $this->assertFalse($profiles['Legacy Online With Offline Profile Row Escort']['active']);
+        $this->assertArrayNotHasKey('Legacy Online With Offline Profile Row Escort', $profiles->all());
     }
 
     public function test_home_page_ignores_legacy_online_rows_when_syncing_profile_active_state(): void
@@ -1210,8 +1206,7 @@ class HomeControllerTest extends TestCase
         $profiles = collect($response->viewData('profiles')->items());
         $legacyProfileData = $profiles->firstWhere('name', $legacyProfile->name);
 
-        $this->assertNotNull($legacyProfileData);
-        $this->assertFalse($legacyProfileData['active']);
+        $this->assertNull($legacyProfileData);
     }
 
     public function test_home_page_hides_featured_profile_when_offline(): void
@@ -1360,8 +1355,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayHasKey('Offline No Filter Escort', $profiles->all());
-        $this->assertFalse($profiles['Offline No Filter Escort']['active']);
+        $this->assertArrayNotHasKey('Offline No Filter Escort', $profiles->all());
     }
 
     public function test_home_page_shows_offline_profile_when_online_filter_setting_missing(): void
@@ -1378,8 +1372,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayHasKey('Offline Default Filter Escort', $profiles->all());
-        $this->assertFalse($profiles['Offline Default Filter Escort']['active']);
+        $this->assertArrayNotHasKey('Offline Default Filter Escort', $profiles->all());
     }
 
     public function test_home_page_shows_offline_profile_when_online_filter_enabled(): void
@@ -1399,8 +1392,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayHasKey('Offline Filter Escort', $profiles->all());
-        $this->assertFalse($profiles['Offline Filter Escort']['active']);
+        $this->assertArrayNotHasKey('Offline Filter Escort', $profiles->all());
     }
 
     // ---------------------------------------------------------------
