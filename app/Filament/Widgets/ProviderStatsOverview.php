@@ -31,17 +31,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
         $active = (clone $users)->whereHas('providerProfiles', function ($q) {
             $q->where('profile_status', 'approved');
         })->count();
-        $onlineCount = (clone $profiles)->where(function ($query): void {
-            $query
-                ->whereHas('onlineUser', function ($onlineQuery): void {
-                    $onlineQuery->where('status', 'online');
-                })
-                ->orWhereHas('user.onlineUser', function ($legacyOnlineQuery): void {
-                    $legacyOnlineQuery
-                        ->whereNull('provider_profile_id')
-                        ->where('status', 'online');
-                });
-        })->count();
+        $onlineCount = (clone $profiles)->whereCurrentlyOnline()->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
         $verified = (clone $users)->whereNotNull('email_verified_at')->count();
         $featured = (clone $profiles)->where('is_featured', true)->count();

@@ -232,7 +232,7 @@ class BuildProfileFilterViewData
             ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery, $resolvedLocation)
             : collect();
 
-        $onlineCount = $profiles->count();
+        $onlineCount = $profiles->total();
 
         return compact(
             'filterGroups',
@@ -317,10 +317,9 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUser',
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'user',
-                'user.legacyOnlineUsers',
                 'city',
                 'state',
             ])
@@ -389,19 +388,7 @@ class BuildProfileFilterViewData
 
     private function applyActiveOnlineProfileConstraint(Builder $query): void
     {
-        $query->where(function (Builder $onlineConstraint): void {
-            $onlineConstraint
-                ->whereHas('onlineUser', function (Builder $onlineQuery): void {
-                    $onlineQuery->where('status', 'online');
-                })
-                ->orWhere(function (Builder $legacyConstraint): void {
-                    $legacyConstraint
-                        ->whereDoesntHave('onlineUser')
-                        ->whereHas('user.legacyOnlineUsers', function (Builder $legacyOnline): void {
-                            $legacyOnline->where('status', 'online');
-                        });
-                });
-        });
+        $query->whereCurrentlyOnline();
     }
 
     private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
@@ -454,10 +441,9 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUser',
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'user',
-                'user.legacyOnlineUsers',
                 'city',
                 'state',
             ]);
@@ -743,21 +729,7 @@ class BuildProfileFilterViewData
                     ->orWhere('hide_show_profiles.status', 'show');
             })
             ->where(function ($q) {
-                $q->where(function ($onlineQ) {
-                    $onlineQ->where('online_users.status', 'online');
-                })->orWhere(function ($legacyQ) {
-                    $legacyQ->whereNotExists(function ($noProfileRow): void {
-                        $noProfileRow->selectRaw('1')
-                            ->from('online_users as profile_online_users')
-                            ->whereColumn('profile_online_users.provider_profile_id', 'provider_profiles.id');
-                    })->whereExists(function ($exists): void {
-                        $exists->selectRaw('1')
-                            ->from('online_users as legacy_online_users')
-                            ->whereColumn('legacy_online_users.user_id', 'provider_profiles.user_id')
-                            ->whereNull('legacy_online_users.provider_profile_id')
-                            ->where('legacy_online_users.status', 'online');
-                    });
-                });
+                $q->where('online_users.status', 'online');
             })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
@@ -973,10 +945,9 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUser',
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'user',
-                'user.legacyOnlineUsers',
                 'city',
                 'state',
             ])
@@ -1015,12 +986,7 @@ class BuildProfileFilterViewData
             $categoryNames
         );
 
-        $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
-        if (! $isOnline && $profile->onlineUser === null) {
-            $legacyOnlineUsers = $profile->user?->legacyOnlineUsers;
-            $isOnline = $legacyOnlineUsers !== null
-                && $legacyOnlineUsers->contains(fn ($onlineUser) => $onlineUser->isCurrentlyOnline());
-        }
+        $isOnline = $profile->isCurrentlyOnline();
         $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
 
         return [
