@@ -8,6 +8,7 @@ use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -1057,7 +1058,7 @@ class BuildProfileFilterViewData
         return $digits !== '' ? (int) $digits : 0;
     }
 
-    private function formatRelativeDate(\Carbon\Carbon $date): string
+    private function formatRelativeDate(Carbon $date): string
     {
         $today = now()->startOfDay();
         $diffDays = (int) $date->startOfDay()->diffInDays($today, false);

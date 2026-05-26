@@ -318,7 +318,7 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = collect($response->viewData('profiles'))->keyBy('name');
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
 
         $this->assertTrue($profiles['Approved Photo Provider']['verified']);
         $response->assertSee('Verified Photo');
@@ -336,7 +336,7 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = collect($response->viewData('profiles'))->keyBy('name');
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
 
         $this->assertFalse($profiles['Pending Photo Provider']['verified']);
         $response->assertDontSee('Verified Photo');
