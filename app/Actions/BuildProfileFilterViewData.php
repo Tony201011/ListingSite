@@ -328,7 +328,7 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUsers' => fn ($q) => $q->whereNotNull('provider_profile_id')->where('status', 'online'),
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'photoVerification' => fn ($q) => $q
                     ->where('status', 'approved')
@@ -457,7 +457,7 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUsers' => fn ($q) => $q->whereNotNull('provider_profile_id')->where('status', 'online'),
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'photoVerification' => fn ($q) => $q
                     ->where('status', 'approved')
@@ -970,7 +970,7 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUsers' => fn ($q) => $q->whereNotNull('provider_profile_id')->where('status', 'online'),
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'photoVerification' => fn ($q) => $q
                     ->where('status', 'approved')
