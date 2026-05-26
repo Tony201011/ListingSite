@@ -234,6 +234,23 @@ class HomeControllerTest extends TestCase
         $this->assertSame(0, $response->viewData('onlineCount'));
     }
 
+    public function test_online_count_matches_visible_profiles_on_current_page(): void
+    {
+        SiteSetting::query()->create([
+            'home_page_records' => 2,
+        ]);
+
+        $this->createApprovedProvider(['name' => 'Visible One', 'slug' => 'visible-one']);
+        $this->createApprovedProvider(['name' => 'Visible Two', 'slug' => 'visible-two']);
+        $this->createApprovedProvider(['name' => 'Hidden By Pagination One', 'slug' => 'hidden-by-pagination-one']);
+        $this->createApprovedProvider(['name' => 'Hidden By Pagination Two', 'slug' => 'hidden-by-pagination-two']);
+
+        $response = $this->get('/');
+
+        $this->assertSame(2, $response->viewData('onlineCount'));
+        $this->assertCount(2, $response->viewData('profiles'));
+    }
+
     public function test_home_page_displays_online_user_counter_when_profiles_are_online(): void
     {
         $this->createApprovedProvider(['name' => 'Online Escort', 'slug' => 'online-escort-counter']);
