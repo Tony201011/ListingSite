@@ -533,7 +533,151 @@
             <div x-cloak>
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     @forelse($profiles as $profile)
-                        @include('frontend.partials.profile-card', ['profile' => $profile])
+                        <article
+                            class="view-card group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300"
+                        >
+                            <a href="{{ $profile['profile_url'] ?? route('profile.show.no-sequence', array_merge(['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
+
+                            <div class="view-card-media relative overflow-hidden rounded-t-2xl" x-data="{
+                                imageLoaded: false,
+                                initImage(img) {
+                                    if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+                                        this.imageLoaded = true;
+                                        return;
+                                    }
+
+                                    img.addEventListener('load', () => this.imageLoaded = true, { once: true });
+                                    img.addEventListener('error', () => this.imageLoaded = true, { once: true });
+                                }
+                            }">
+                                @if($profile['image'])
+                                    <div
+                                        x-show="!imageLoaded"
+                                        x-transition.opacity.duration.300ms
+                                        class="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100"
+                                        aria-hidden="true"
+                                    ></div>
+                                    <img
+                                        src="{{ $profile['image'] }}"
+                                        alt="{{ $profile['name'] }}"
+                                        class="view-card-image h-52 w-full object-cover transition-[opacity,filter,transform] duration-500 group-hover:scale-105"
+                                        :class="imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'"
+                                        x-init="initImage($el)"
+                                        loading="lazy"
+                                        decoding="async"
+                                        fetchpriority="low"
+                                    >
+                                @else
+                                    <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
+                                        <i class="fa-solid fa-image text-4xl"></i>
+                                    </div>
+                                @endif
+
+                                @php
+                                    $featuredBadgeVariant = null;
+                                    $featuredBadgeLabel = null;
+                                    $featuredBadgeIcon = 'crown';
+
+                                    if (!empty($profile['home_banner']) || !empty($profile['home_featured'])) {
+                                        $featuredBadgeVariant = 'ribbon';
+                                        $featuredBadgeLabel = 'Featured';
+                                    } elseif (!empty($profile['local_banner'])) {
+                                        $featuredBadgeVariant = 'ribbon';
+                                        $featuredBadgeLabel = 'Local';
+                                        $featuredBadgeIcon = 'star';
+                                    } elseif (!empty($profile['featured'])) {
+                                        $featuredBadgeVariant = 'ribbon';
+                                        $featuredBadgeLabel = 'Featured';
+                                    }
+
+                                    $hasFeaturedBadge = $featuredBadgeVariant !== null;
+                                    $hasTopBadgeRow = $profile['active'] || $hasFeaturedBadge;
+                                @endphp
+
+                                @if($hasTopBadgeRow)
+                                    <div class="pointer-events-none absolute inset-x-0 top-3 z-20 px-2 sm:px-3">
+                                        <div class="flex items-center gap-1 sm:gap-1.5">
+                                            @if($profile['active'])
+                                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm sm:text-[11px] whitespace-nowrap">
+                                                    <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
+                                                </span>
+                                            @endif
+                                            @if($hasFeaturedBadge)
+                                                <x-featured-badge :variant="$featuredBadgeVariant" position="inline" :label="$featuredBadgeLabel" :icon="$featuredBadgeIcon" />
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <div @class([
+                                    'absolute left-0 z-10 flex flex-col gap-1',
+                                    'top-11 sm:top-12' => $hasTopBadgeRow,
+                                    'top-3' => ! $hasTopBadgeRow,
+                                ])>
+                                    @if($profile['verified'])
+                                        <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
+                                            <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
+                                        </span>
+                                    @endif
+                                    @if(!empty($profile['available_now']))
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0; background-color: #e13a8b;">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="p-3.5">
+                                <div class="mb-2 flex items-center justify-between">
+                                    <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
+                                    <div class="flex items-center gap-2 text-gray-400 relative z-20">
+                                        <button
+                                            type="button"
+                                            @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
+                                            :class="isFavourite('{{ $profile['slug'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
+                                            class="transition-colors"
+                                            title="Favourite"
+                                        >
+                                            <i :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
+                                        </button>
+
+                                        {{-- @if($profile['age'])
+                                            <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none">{{ $profile['age'] }}</span>
+                                        @endif --}}
+                                    </div>
+                                </div>
+
+                                <h3 class="text-sm font-medium text-gray-800 truncate">
+                                    {{ $profile['name'] }}@if($profile['suburb']) <span class="text-gray-400 font-normal">({{ $profile['suburb'] }})</span>@endif
+                                </h3>
+
+                                <p class="mt-0.5 text-2xl font-bold text-gray-900">
+                                    {{ $profile['rate'] }}
+                                </p>
+
+                                <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
+                                    @if($profile['city'] || $profile['suburb'])
+                                        <span class="inline-flex items-center gap-1">
+                                            <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
+                                            {{ $profile['suburb'] ?: $profile['city'] }}
+                                        </span>
+                                    @endif
+                                    @if(!empty($profile['service_1']))
+                                        <span class="inline-flex items-center gap-1">
+                                            <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
+                                            {{ $profile['service_1'] }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                @if(!empty($profile['service_2']) || !empty($profile['description']))
+                                    <div class="mt-2 text-[12px] text-gray-600 line-clamp-2">
+                                        <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
+                                        {{ !empty($profile['service_2']) ? $profile['service_2'] : $profile['description'] }}
+                                    </div>
+                                @endif
+                            </div>
+                        </article>
                     @empty
                         <div class="col-span-full rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
                             <i class="fa-solid fa-magnifying-glass mb-4 text-3xl text-gray-400"></i>
