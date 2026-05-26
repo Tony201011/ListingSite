@@ -46,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->assets([
                 Css::make('admin-custom', asset('css/admin-custom.css')),
             ])
+            ->globalSearch(false)
             ->authGuard('admin')
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
