@@ -55,7 +55,11 @@ class BuildProfileFilterViewData
         'time-waster-shield' => 'time_waster_shield',
     ];
 
-    public function execute(array $validated, ?int $profilesPerPage = null): array
+    public function execute(
+        array $validated,
+        ?int $profilesPerPage = null,
+        bool $includeOfflineProfiles = false
+    ): array
     {
         $filterSlugs = [
             'hair-color',
@@ -210,6 +214,7 @@ class BuildProfileFilterViewData
             $escortNameQuery,
             $localFeaturedStateName,
             $profilesPerPage,
+            $includeOfflineProfiles,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -233,7 +238,9 @@ class BuildProfileFilterViewData
             ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery, $resolvedLocation)
             : collect();
 
-        $onlineCount = $profiles->total();
+        $onlineCount = $includeOfflineProfiles
+            ? collect($profiles->items())->where('active', true)->count()
+            : $profiles->total();
 
         return compact(
             'filterGroups',
@@ -427,6 +434,7 @@ class BuildProfileFilterViewData
         string $escortNameQuery = '',
         ?string $localFeaturedStateName = null,
         ?int $profilesPerPage = null,
+        bool $includeOfflineProfiles = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -457,7 +465,9 @@ class BuildProfileFilterViewData
                 'state',
             ]);
 
-        $this->applyActiveOnlineProfileConstraint($query);
+        if (! $includeOfflineProfiles) {
+            $this->applyActiveOnlineProfileConstraint($query);
+        }
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
