@@ -119,6 +119,19 @@ class HomeControllerTest extends TestCase
         $response->assertViewIs('frontend.home');
     }
 
+    public function test_home_page_limits_listing_to_two_profiles(): void
+    {
+        $this->createApprovedProvider(['name' => 'Escort One', 'slug' => 'escort-one']);
+        $this->createApprovedProvider(['name' => 'Escort Two', 'slug' => 'escort-two']);
+        $this->createApprovedProvider(['name' => 'Escort Three', 'slug' => 'escort-three']);
+        $this->createApprovedProvider(['name' => 'Escort Four', 'slug' => 'escort-four']);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(2, $profiles->items());
+    }
+
     public function test_home_page_passes_required_view_data(): void
     {
         $response = $this->get('/');
