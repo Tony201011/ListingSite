@@ -18,6 +18,8 @@ use Illuminate\View\View;
 
 class HomeController extends Controller
 {
+    private const HOME_LISTING_LIMIT = 2;
+
     public function __construct(
         private BuildProfileFilterViewData $buildProfileFilterViewData,
         private GetProfileShowData $getProfileShowData,
@@ -35,7 +37,7 @@ class HomeController extends Controller
             return redirect()->to($canonicalUrl, 301);
         }
 
-        $viewData = $this->buildProfileFilterViewData->execute($validated);
+        $viewData = $this->buildProfileFilterViewData->execute($validated, self::HOME_LISTING_LIMIT);
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
         $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 

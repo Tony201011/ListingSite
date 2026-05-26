@@ -54,7 +54,7 @@ class BuildProfileFilterViewData
         'time-waster-shield' => 'time_waster_shield',
     ];
 
-    public function execute(array $validated): array
+    public function execute(array $validated, ?int $profilesPerPage = null): array
     {
         $filterSlugs = [
             'hair-color',
@@ -208,6 +208,7 @@ class BuildProfileFilterViewData
             $girlsMode,
             $escortNameQuery,
             $localFeaturedStateName,
+            $profilesPerPage,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -277,8 +278,12 @@ class BuildProfileFilterViewData
         );
     }
 
-    private function resolveProfilesPerPage(): int
+    private function resolveProfilesPerPage(?int $profilesPerPage = null): int
     {
+        if ($profilesPerPage !== null) {
+            return max(1, $profilesPerPage);
+        }
+
         $value = (int) cache()->remember(
             'site_setting.home_page_records',
             now()->addHour(),
@@ -427,6 +432,7 @@ class BuildProfileFilterViewData
         string $girlsMode = 'all',
         string $escortNameQuery = '',
         ?string $localFeaturedStateName = null,
+        ?int $profilesPerPage = null,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -647,7 +653,7 @@ class BuildProfileFilterViewData
         }
 
         $paginator = $query
-            ->paginate($this->resolveProfilesPerPage())
+            ->paginate($this->resolveProfilesPerPage($profilesPerPage))
             ->appends($appendParams);
 
         $serviceIds = $paginator->getCollection()
