@@ -240,7 +240,10 @@ class BuildProfileFilterViewData
 
         $onlineCount = $includeOfflineProfiles
             ? collect($profiles->items())->where('active', true)->count()
-            : $profiles->total();
+            : ProviderProfile::query()
+                ->withoutTrashed()
+                ->whereCurrentlyOnline()
+                ->count();
 
         return compact(
             'filterGroups',
