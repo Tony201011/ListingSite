@@ -306,6 +306,65 @@ class HomeControllerTest extends TestCase
         $this->assertCount(2, $response->viewData('profiles'));
     }
 
+    public function test_online_count_uses_shared_public_online_scope(): void
+    {
+        SiteSetting::query()->create([
+            'home_page_records' => 1,
+        ]);
+
+        $this->createApprovedProvider([
+            'name' => 'Visible Online',
+            'slug' => 'visible-online',
+        ]);
+
+        $visibleOfflineUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $visibleOfflineProfile = $this->createApprovedProfile($visibleOfflineUser, [
+            'name' => 'Visible Offline',
+            'slug' => 'visible-offline',
+        ]);
+        OnlineUser::query()->create([
+            'user_id' => $visibleOfflineUser->id,
+            'provider_profile_id' => $visibleOfflineProfile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        $this->createApprovedProvider([
+            'name' => 'Blocked Online',
+            'slug' => 'blocked-online',
+            'is_blocked' => true,
+        ]);
+
+        $hiddenUser = $this->createApprovedProvider([
+            'name' => 'Hidden Online',
+            'slug' => 'hidden-online',
+        ]);
+
+        HideShowProfile::query()->create([
+            'user_id' => $hiddenUser->id,
+            'provider_profile_id' => $hiddenUser->providerProfile->id,
+            'status' => 'hide',
+        ]);
+
+        $response = $this->get('/');
+
+        $expectedOnlineCount = ProviderProfile::query()
+            ->visibleOnHomepage()
+            ->whereCurrentlyOnline()
+            ->count();
+
+        $this->assertSame(1, $response->viewData('onlineCount'));
+        $this->assertSame($expectedOnlineCount, $response->viewData('onlineCount'));
+
+        $profiles = collect($response->viewData('profiles')->items());
+        $this->assertTrue($profiles->contains(fn (array $profile): bool => $profile['name'] === 'Visible Online' && $profile['active']));
+        $this->assertFalse($profiles->contains(fn (array $profile): bool => $profile['name'] === 'Blocked Online' && $profile['active']));
+        $this->assertFalse($profiles->contains(fn (array $profile): bool => $profile['name'] === 'Hidden Online' && $profile['active']));
+    }
+
     public function test_home_page_lists_each_online_profile_for_same_provider_account(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);

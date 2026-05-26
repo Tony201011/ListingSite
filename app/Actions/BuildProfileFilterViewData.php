@@ -217,6 +217,28 @@ class BuildProfileFilterViewData
             $includeOfflineProfiles,
         );
 
+        $onlineProfiles = $includeOfflineProfiles
+            ? $this->queryProfiles(
+                $locationQuery,
+                $locationStateQuery,
+                $minAge,
+                $maxAge,
+                $minPrice,
+                $maxPrice,
+                $selectedCategoryIds,
+                $categoryToParentSlug,
+                $categoryNameById,
+                $userLat,
+                $userLng,
+                $distanceFilter,
+                $girlsMode,
+                $escortNameQuery,
+                $localFeaturedStateName,
+                $profilesPerPage,
+                includeOfflineProfiles: false,
+            )
+            : null;
+
         $allFilterCategoriesCollection = collect($allFilterCategories);
 
         $selectedCategoryItems = $allFilterCategoriesCollection
@@ -239,7 +261,7 @@ class BuildProfileFilterViewData
             : collect();
 
         $onlineCount = $includeOfflineProfiles
-            ? collect($profiles->items())->where('active', true)->count()
+            ? $onlineProfiles?->total() ?? 0
             : $profiles->total();
 
         return compact(
@@ -315,11 +337,7 @@ class BuildProfileFilterViewData
         ?array $exactLocation = null
     ): Collection {
         $query = ProviderProfile::query()
-            ->whereNull('provider_profiles.deleted_at')
-            ->where('provider_profiles.profile_status', 'approved')
-            ->where('provider_profiles.is_blocked', false)
-            ->whereHas('user')
-            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->visibleOnHomepage()
             ->whereNotNull("provider_profiles.{$expiryColumn}")
             ->where("provider_profiles.{$expiryColumn}", '>', now())
             ->with([
@@ -446,11 +464,7 @@ class BuildProfileFilterViewData
         }
 
         $query = ProviderProfile::query()
-            ->whereNull('provider_profiles.deleted_at')
-            ->where('provider_profiles.profile_status', 'approved')
-            ->where('provider_profiles.is_blocked', false)
-            ->whereHas('user')
-            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->visibleOnHomepage()
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
@@ -955,11 +969,7 @@ class BuildProfileFilterViewData
         }
 
         $profiles = ProviderProfile::query()
-            ->whereNull('provider_profiles.deleted_at')
-            ->where('provider_profiles.profile_status', 'approved')
-            ->where('provider_profiles.is_blocked', false)
-            ->whereHas('user')
-            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->visibleOnHomepage()
             ->whereIn('provider_profiles.slug', $slugs)
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),

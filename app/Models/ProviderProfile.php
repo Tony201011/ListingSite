@@ -217,6 +217,16 @@ class ProviderProfile extends Model
         );
     }
 
+    public function scopeVisibleOnHomepage(Builder $query): Builder
+    {
+        return $query
+            ->whereNull('provider_profiles.deleted_at')
+            ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn (Builder $hideQuery): Builder => $hideQuery->where('status', 'hide'));
+    }
+
     public function scopeWhereCurrentlyOffline(Builder $query): Builder
     {
         return $query->whereDoesntHave(
