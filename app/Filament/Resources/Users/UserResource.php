@@ -1321,9 +1321,19 @@ class UserResource extends Resource
                                 ->latest('id')
                                 ->first();
 
+                            $verificationPhotos = $record->photoVerification()
+                                ->latest('submitted_at')
+                                ->latest('id')
+                                ->get()
+                                ->pluck('photos')
+                                ->flatten(1)
+                                ->values()
+                                ->all();
+
                             return view('filament.modals.provider-photo-verification', [
                                 'providerProfile' => $record,
                                 'verification' => $verification,
+                                'verificationPhotos' => $verificationPhotos,
                             ]);
                         })
                         ->form([
