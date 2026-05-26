@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\AvailableNow;
+use App\Models\Category;
 use App\Models\Country;
 use App\Models\HideShowProfile;
 use App\Models\OnlineUser;
 use App\Models\PhotoVerification;
 use App\Models\Postcode;
+use App\Models\ProfileImage;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
@@ -115,6 +117,42 @@ class HomeControllerTest extends TestCase
             'photos' => [['path' => 'verification/test/photo.jpg']],
             'status' => $status,
             'submitted_at' => now(),
+        ]);
+    }
+
+    private function markProfileAsComplete(ProviderProfile $profile): void
+    {
+        $category = Category::query()->firstOrCreate(
+            ['slug' => 'test-category'],
+            ['name' => 'Test Category']
+        );
+
+        $profile->update([
+            'introduction_line' => 'Intro',
+            'profile_text' => 'Complete profile text',
+            'age_group_id' => $category->id,
+            'hair_color_id' => $category->id,
+            'hair_length_id' => $category->id,
+            'ethnicity_id' => $category->id,
+            'body_type_id' => $category->id,
+            'bust_size_id' => $category->id,
+            'your_length_id' => $category->id,
+            'availability' => 'available',
+            'contact_method' => 'phone',
+            'phone_contact_preference' => 'call',
+            'time_waster_shield' => 'enabled',
+            'primary_identity' => [1],
+            'attributes' => [1],
+            'services_style' => [1],
+            'services_provided' => [1],
+        ]);
+    }
+
+    private function addProfilePhoto(ProviderProfile $profile): void
+    {
+        ProfileImage::factory()->create([
+            'user_id' => $profile->user_id,
+            'provider_profile_id' => $profile->id,
         ]);
     }
 
@@ -935,7 +973,7 @@ class HomeControllerTest extends TestCase
     // Online status visibility filter
     // ---------------------------------------------------------------
 
-    public function test_home_page_hides_profile_with_offline_online_user_record(): void
+    public function test_home_page_shows_profile_with_offline_online_user_record_without_online_badge(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -961,9 +999,10 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = $response->viewData('profiles');
-        $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Offline Escort'));
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayHasKey('Offline Escort', $profiles->all());
+        $this->assertFalse($profiles['Offline Escort']['active']);
+        $response->assertDontSeeText('Online Now');
     }
 
     public function test_home_page_shows_profile_with_online_status_regardless_of_expires_at(): void
@@ -997,7 +1036,46 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($names->contains('Online Escort With Past Expires'));
     }
 
-    public function test_home_page_hides_profile_with_no_online_user_record(): void
+    public function test_home_page_reflects_profile_status_changes_from_my_profiles(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Synced Escort',
+            'slug' => 'synced-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        $this->markProfileAsComplete($profile);
+        $this->addProfilePhoto($profile);
+
+        $this->actingAs($user)->postJson(route('profiles.online-status', $profile), [
+            'status' => 'online',
+        ])->assertOk()->assertJson(['status' => 'online']);
+
+        $onlineResponse = $this->get('/');
+        $onlineProfiles = collect($onlineResponse->viewData('profiles')->items())->keyBy('name');
+
+        $this->assertTrue($onlineProfiles['Synced Escort']['active']);
+        $this->assertSame(1, $onlineResponse->viewData('onlineCount'));
+        $onlineResponse->assertSeeText('Online Now');
+
+        $this->actingAs($user)->postJson(route('profiles.online-status', $profile), [
+            'status' => 'offline',
+        ])->assertOk()->assertJson(['status' => 'offline']);
+
+        $offlineResponse = $this->get('/');
+        $offlineProfiles = collect($offlineResponse->viewData('profiles')->items())->keyBy('name');
+
+        $this->assertFalse($offlineProfiles['Synced Escort']['active']);
+        $this->assertSame(0, $offlineResponse->viewData('onlineCount'));
+        $offlineResponse->assertDontSeeText('Online Now');
+    }
+
+    public function test_home_page_shows_profile_with_no_online_user_record_as_offline(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1013,12 +1091,12 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = $response->viewData('profiles');
-        $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('New Escort'));
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayHasKey('New Escort', $profiles->all());
+        $this->assertFalse($profiles['New Escort']['active']);
     }
 
-    public function test_home_page_includes_profile_when_legacy_online_user_row_is_linked_by_user_only(): void
+    public function test_home_page_does_not_mark_profile_online_when_only_legacy_online_user_row_exists(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1043,12 +1121,12 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = $response->viewData('profiles');
-        $names = collect($profiles->items())->pluck('name');
-        $this->assertTrue($names->contains('Legacy Linked Escort'));
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayHasKey('Legacy Linked Escort', $profiles->all());
+        $this->assertFalse($profiles['Legacy Linked Escort']['active']);
     }
 
-    public function test_home_page_hides_profile_when_profile_linked_row_is_offline_even_if_legacy_online_row_exists(): void
+    public function test_home_page_keeps_profile_offline_when_profile_linked_row_is_offline_even_if_legacy_online_row_exists(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1083,12 +1161,12 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = $response->viewData('profiles');
-        $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Legacy Online With Offline Profile Row Escort'));
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayHasKey('Legacy Online With Offline Profile Row Escort', $profiles->all());
+        $this->assertFalse($profiles['Legacy Online With Offline Profile Row Escort']['active']);
     }
 
-    public function test_home_page_marks_legacy_online_profile_active_even_when_user_has_other_profile_linked_rows(): void
+    public function test_home_page_ignores_legacy_online_rows_when_syncing_profile_active_state(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1133,7 +1211,7 @@ class HomeControllerTest extends TestCase
         $legacyProfileData = $profiles->firstWhere('name', $legacyProfile->name);
 
         $this->assertNotNull($legacyProfileData);
-        $this->assertTrue($legacyProfileData['active']);
+        $this->assertFalse($legacyProfileData['active']);
     }
 
     public function test_home_page_hides_featured_profile_when_offline(): void
@@ -1265,7 +1343,7 @@ class HomeControllerTest extends TestCase
         $this->assertFalse(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
     }
 
-    public function test_home_page_hides_offline_profile_even_when_online_filter_disabled(): void
+    public function test_home_page_shows_offline_profile_even_when_online_filter_disabled(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => false]);
 
@@ -1281,12 +1359,12 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = $response->viewData('profiles');
-        $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Offline No Filter Escort'));
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayHasKey('Offline No Filter Escort', $profiles->all());
+        $this->assertFalse($profiles['Offline No Filter Escort']['active']);
     }
 
-    public function test_home_page_hides_offline_profile_when_online_filter_setting_missing(): void
+    public function test_home_page_shows_offline_profile_when_online_filter_setting_missing(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         ProviderProfile::query()->create([
@@ -1299,12 +1377,12 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = $response->viewData('profiles');
-        $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Offline Default Filter Escort'));
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayHasKey('Offline Default Filter Escort', $profiles->all());
+        $this->assertFalse($profiles['Offline Default Filter Escort']['active']);
     }
 
-    public function test_home_page_hides_offline_profile_when_online_filter_enabled(): void
+    public function test_home_page_shows_offline_profile_when_online_filter_enabled(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1320,9 +1398,9 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        $profiles = $response->viewData('profiles');
-        $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Offline Filter Escort'));
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayHasKey('Offline Filter Escort', $profiles->all());
+        $this->assertFalse($profiles['Offline Filter Escort']['active']);
     }
 
     // ---------------------------------------------------------------
