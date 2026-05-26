@@ -116,8 +116,9 @@ class PhotoVerificationControllerTest extends TestCase
             ],
         ]);
 
-        $response->assertForbidden();
-        $response->assertJsonFragment(['message' => 'You already have an active verification submission. Please delete your existing verification photos before uploading new ones.']);
+        $response->assertStatus(422);
+        $response->assertJsonFragment(['message' => 'Validation failed.']);
+        $response->assertJsonValidationErrors(['photos']);
     }
 
     public function test_upload_allowed_after_existing_record_is_soft_deleted(): void
