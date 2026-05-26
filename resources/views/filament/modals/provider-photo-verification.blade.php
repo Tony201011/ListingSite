@@ -45,13 +45,11 @@
     </section>
 
     @if ($verification)
-
         <section class="pv-card">
             <div class="pv-card-header">Verification Submission</div>
 
             <table class="pv-table">
                 <tbody>
-
                     <tr>
                         <th>Verification Status</th>
                         <td>
@@ -63,9 +61,7 @@
 
                     <tr>
                         <th>Submitted At</th>
-                        <td>
-                            {{ $verification->submitted_at?->format('M d, Y h:i A') ?: '—' }}
-                        </td>
+                        <td>{{ $verification->submitted_at?->format('M d, Y h:i A') ?: '—' }}</td>
                     </tr>
 
                     <tr>
@@ -76,20 +72,15 @@
                             </div>
                         </td>
                     </tr>
-
                 </tbody>
             </table>
         </section>
 
         <section class="pv-card">
-            <div class="pv-card-header">
-                Uploaded Verification Photos
-            </div>
+            <div class="pv-card-header">Uploaded Verification Photos</div>
 
             <div class="pv-gallery-container">
-
                 <div class="photo-verification-gallery">
-
                     {!! \App\Support\PhotoVerificationGalleryRenderer::render(
                         $verificationPhotos,
                         $galleryPreviewHeight,
@@ -98,28 +89,23 @@
                         false,
                         true
                     ) !!}
-
                 </div>
-
             </div>
         </section>
-
     @else
-
         <div class="pv-empty">
             No photo verification submission is available for this provider profile yet.
         </div>
-
     @endif
 
 </div>
 
 <style>
-
     .pv-modal-content {
-        max-height: calc(100vh - 180px);
+        max-height: calc(100vh - 120px);
         overflow-y: auto;
-        padding: 4px 8px 16px;
+        overflow-x: hidden;
+        padding: 8px 10px 28px;
         display: flex;
         flex-direction: column;
         gap: 22px;
@@ -127,7 +113,7 @@
 
     .pv-card {
         width: 100%;
-        overflow: hidden;
+        overflow: visible;
         background: #ffffff;
         border: 1px solid #e5e7eb;
         border-radius: 16px;
@@ -140,53 +126,62 @@
         font-size: 16px;
         font-weight: 700;
         color: #111827;
+        line-height: 1.4;
     }
 
     .pv-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         table-layout: fixed;
     }
 
     .pv-table tr {
-        border-bottom: 1px solid #e5e7eb;
+        min-height: 72px;
     }
 
-    .pv-table tr:last-child {
-        border-bottom: none;
+    .pv-table tr:not(:last-child) th,
+    .pv-table tr:not(:last-child) td {
+        border-bottom: 1px solid #e5e7eb;
     }
 
     .pv-table th {
         width: 275px;
-        padding: 20px;
+        padding: 22px 20px;
         background: #f9fafb;
         border-right: 1px solid #e5e7eb;
         text-align: left;
-        vertical-align: top;
+        vertical-align: middle;
         font-size: 14px;
         font-weight: 700;
         color: #6b7280;
         text-transform: uppercase;
         letter-spacing: 0.04em;
+        line-height: 1.4;
+        white-space: normal;
     }
 
     .pv-table td {
-        padding: 20px;
-        vertical-align: top;
+        padding: 22px 20px;
+        vertical-align: middle;
         font-size: 17px;
         color: #111827;
+        line-height: 1.5;
         word-break: break-word;
+        overflow: visible;
     }
 
     .pv-badge {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         padding: 6px 14px;
         border-radius: 999px;
         background: #d1fae5;
         color: #047857;
         font-size: 14px;
         font-weight: 700;
+        line-height: 1.2;
     }
 
     .pv-note {
@@ -202,15 +197,13 @@
         font-size: 15px;
         line-height: 1.5;
         white-space: pre-wrap;
+        box-sizing: border-box;
     }
 
     .pv-gallery-container {
         padding: 20px;
+        overflow: visible;
     }
-
-    /* =========================================
-       FIXED IMAGE GALLERY CSS
-    ========================================= */
 
     .photo-verification-gallery {
         display: flex !important;
@@ -218,23 +211,37 @@
         align-items: flex-start !important;
         gap: 18px !important;
         width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+    }
+
+    .photo-verification-gallery > div {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 18px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
     }
 
     .photo-verification-gallery a,
-    .photo-verification-gallery button,
-    .photo-verification-gallery img,
-    .photo-verification-gallery iframe,
-    .photo-verification-gallery embed,
-    .photo-verification-gallery object {
+    .photo-verification-gallery button {
+        display: block !important;
         width: 150px !important;
         height: 150px !important;
         min-width: 150px !important;
         max-width: 150px !important;
         min-height: 150px !important;
         max-height: 150px !important;
-
         overflow: hidden !important;
         border-radius: 14px !important;
+        border: 1px solid #e5e7eb !important;
+        background: #ffffff !important;
+        position: relative !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
         cursor: pointer !important;
     }
 
@@ -243,21 +250,18 @@
     .photo-verification-gallery embed,
     .photo-verification-gallery object {
         display: block !important;
-
         width: 100% !important;
         height: 100% !important;
-
         min-width: 100% !important;
         min-height: 100% !important;
-
         max-width: 100% !important;
         max-height: 100% !important;
-
         object-fit: cover !important;
         object-position: center !important;
-
         border-radius: 14px !important;
         background: #f3f4f6 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .pv-empty {
@@ -269,15 +273,10 @@
         font-size: 14px;
     }
 
-    /* =========================================
-       MOBILE RESPONSIVE
-    ========================================= */
-
     @media (max-width: 640px) {
-
         .pv-modal-content {
-            max-height: calc(100vh - 140px);
-            padding-right: 4px;
+            max-height: calc(100vh - 100px);
+            padding: 6px 4px 24px;
         }
 
         .pv-table,
@@ -296,16 +295,12 @@
         }
 
         .pv-table td {
-            padding: 8px 16px 16px;
+            padding: 10px 16px 18px;
             font-size: 15px;
         }
 
         .photo-verification-gallery a,
-        .photo-verification-gallery button,
-        .photo-verification-gallery img,
-        .photo-verification-gallery iframe,
-        .photo-verification-gallery embed,
-        .photo-verification-gallery object {
+        .photo-verification-gallery button {
             width: 120px !important;
             height: 120px !important;
             min-width: 120px !important;
@@ -314,5 +309,4 @@
             max-height: 120px !important;
         }
     }
-
 </style>
