@@ -83,7 +83,7 @@
                         $galleryPreviewWidth,
                         null,
                         false,
-                        false
+                        true
                     ) !!}
                 </div>
             </div>
@@ -200,6 +200,7 @@
     }
 
     .photo-verification-gallery a,
+    .photo-verification-gallery button,
     .photo-verification-gallery img,
     .photo-verification-gallery iframe,
     .photo-verification-gallery embed,
@@ -213,6 +214,7 @@
         display: block !important;
         overflow: hidden !important;
         border-radius: 14px !important;
+        cursor: pointer !important;
     }
 
     .photo-verification-gallery img {
@@ -257,6 +259,7 @@
         }
 
         .photo-verification-gallery a,
+        .photo-verification-gallery button,
         .photo-verification-gallery img,
         .photo-verification-gallery iframe,
         .photo-verification-gallery embed,
