@@ -29,6 +29,7 @@ class GetProfileShowData
                 'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'profileMessage',
+                'photoVerification' => fn ($q) => $q->where('status', 'approved')->orderByDesc('submitted_at')->limit(1),
                 'user',
                 'city',
                 'state',
@@ -285,6 +286,7 @@ class GetProfileShowData
             'suburb' => $this->extractSuburbName($providerProfile->suburb ?? ''),
             'contact_method' => $providerProfile->contact_method ?? '',
             'phone_contact_preference' => $providerProfile->phone_contact_preference ?? '',
+            'photos_verified' => $providerProfile->photoVerification->isNotEmpty(),
         ];
     }
 
