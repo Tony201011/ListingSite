@@ -980,6 +980,54 @@ class HomeControllerTest extends TestCase
         $this->assertFalse($names->contains('Legacy Online With Offline Profile Row Escort'));
     }
 
+    public function test_home_page_marks_legacy_online_profile_active_even_when_user_has_other_profile_linked_rows(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $legacyProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Legacy Active Escort',
+            'slug' => 'legacy-active-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+        $otherProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Other Profile Escort',
+            'slug' => 'other-profile-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $otherProfile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/');
+        $profiles = collect($response->viewData('profiles')->items());
+        $legacyProfileData = $profiles->firstWhere('name', $legacyProfile->name);
+
+        $this->assertNotNull($legacyProfileData);
+        $this->assertTrue($legacyProfileData['active']);
+    }
+
     public function test_home_page_hides_featured_profile_when_offline(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
