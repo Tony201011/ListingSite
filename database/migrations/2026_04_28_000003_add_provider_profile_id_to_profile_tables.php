@@ -47,6 +47,18 @@ return new class extends Migration
     private function dropIndexIfExists(string $table, string $indexName): void
     {
         if (DB::getDriverName() === 'sqlite') {
+            $exists = DB::selectOne("
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'index'
+                  AND tbl_name = ?
+                  AND name = ?
+            ", [$table, $indexName]);
+
+            if ($exists) {
+                DB::statement("DROP INDEX {$indexName}");
+            }
+
             return;
         }
 
