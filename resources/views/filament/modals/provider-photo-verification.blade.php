@@ -145,7 +145,7 @@
     .pv-table {
         width: 100%;
         border-collapse: collapse;
-        table-layout: auto;
+        table-layout: fixed;
     }
 
     .pv-table tr {
@@ -157,9 +157,7 @@
     }
 
     .pv-table th {
-        width: 38%;
-        min-width: 120px;
-        max-width: 220px;
+        width: 275px;
         padding: 20px;
         background: #f9fafb;
         border-right: 1px solid #e5e7eb;
@@ -170,7 +168,6 @@
         color: #6b7280;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        white-space: nowrap;
     }
 
     .pv-table td {
@@ -179,7 +176,6 @@
         font-size: 17px;
         color: #111827;
         word-break: break-word;
-        overflow-wrap: anywhere;
     }
 
     .pv-badge {
@@ -224,29 +220,18 @@
         width: 100% !important;
     }
 
-    /* Renderer wraps images in an inner flex row — override to column */
-    .photo-verification-gallery > div,
-    .photo-verification-gallery > div > div {
-        display: flex !important;
-        flex-direction: column !important;
-        flex-wrap: nowrap !important;
-        align-items: flex-start !important;
-        gap: 18px !important;
-        width: 100% !important;
-    }
-
     .photo-verification-gallery a,
     .photo-verification-gallery button,
     .photo-verification-gallery img,
     .photo-verification-gallery iframe,
     .photo-verification-gallery embed,
     .photo-verification-gallery object {
-        width: 200px !important;
-        height: 200px !important;
-        min-width: 200px !important;
-        max-width: 200px !important;
-        min-height: 200px !important;
-        max-height: 200px !important;
+        width: 150px !important;
+        height: 150px !important;
+        min-width: 150px !important;
+        max-width: 150px !important;
+        min-height: 150px !important;
+        max-height: 150px !important;
 
         overflow: hidden !important;
         border-radius: 14px !important;
@@ -321,12 +306,12 @@
         .photo-verification-gallery iframe,
         .photo-verification-gallery embed,
         .photo-verification-gallery object {
-            width: 150px !important;
-            height: 150px !important;
-            min-width: 150px !important;
-            max-width: 150px !important;
-            min-height: 150px !important;
-            max-height: 150px !important;
+            width: 120px !important;
+            height: 120px !important;
+            min-width: 120px !important;
+            max-width: 120px !important;
+            min-height: 120px !important;
+            max-height: 120px !important;
         }
     }
 
