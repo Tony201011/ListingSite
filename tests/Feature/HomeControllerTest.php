@@ -29,17 +29,22 @@ class HomeControllerTest extends TestCase
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
-        $profile = ProviderProfile::query()->create(array_merge([
+        $profile = $this->createApprovedProfile($user, $profileOverrides);
+
+        $this->createActiveOnlineUser($user, $profile->id);
+
+        return $user;
+    }
+
+    private function createApprovedProfile(User $user, array $profileOverrides = []): ProviderProfile
+    {
+        return ProviderProfile::query()->create(array_merge([
             'user_id' => $user->id,
             'name' => 'Test Escort',
             'slug' => 'test-escort-'.$user->id,
             'profile_status' => 'approved',
             'age' => 25,
         ], $profileOverrides));
-
-        $this->createActiveOnlineUser($user, $profile->id);
-
-        return $user;
     }
 
     private function createApprovedProviderWithSuburb(string $suburb, string $state, array $profileOverrides = []): User
@@ -232,6 +237,61 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $this->assertSame(0, $response->viewData('onlineCount'));
+    }
+
+    public function test_online_count_matches_visible_profiles_on_current_page(): void
+    {
+        SiteSetting::query()->create([
+            'home_page_records' => 2,
+        ]);
+
+        $this->createApprovedProvider(['name' => 'Visible One', 'slug' => 'visible-one']);
+        $this->createApprovedProvider(['name' => 'Visible Two', 'slug' => 'visible-two']);
+        $this->createApprovedProvider(['name' => 'Hidden By Pagination One', 'slug' => 'hidden-by-pagination-one']);
+        $this->createApprovedProvider(['name' => 'Hidden By Pagination Two', 'slug' => 'hidden-by-pagination-two']);
+
+        $response = $this->get('/');
+
+        $this->assertSame(4, $response->viewData('onlineCount'));
+        $this->assertCount(2, $response->viewData('profiles'));
+    }
+
+    public function test_home_page_lists_each_online_profile_for_same_provider_account(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $firstProfile = $this->createApprovedProfile($user, [
+            'name' => 'Account Profile One',
+            'slug' => 'account-profile-one',
+        ]);
+        $secondProfile = $this->createApprovedProfile($user, [
+            'name' => 'Account Profile Two',
+            'slug' => 'account-profile-two',
+        ]);
+
+        $this->createActiveOnlineUser($user, $firstProfile->id);
+        $this->createActiveOnlineUser($user, $secondProfile->id);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 3,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+
+        $this->assertSame(2, $response->viewData('onlineCount'));
+        $this->assertSame(2, $profiles->total());
+        $this->assertSame(
+            [$firstProfile->getEscortUrl(), $secondProfile->getEscortUrl()],
+            collect($profiles->items())->pluck('profile_url')->sort()->values()->all()
+        );
     }
 
     public function test_home_page_displays_online_user_counter_when_profiles_are_online(): void
@@ -978,6 +1038,54 @@ class HomeControllerTest extends TestCase
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
         $this->assertFalse($names->contains('Legacy Online With Offline Profile Row Escort'));
+    }
+
+    public function test_home_page_marks_legacy_online_profile_active_even_when_user_has_other_profile_linked_rows(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $legacyProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Legacy Active Escort',
+            'slug' => 'legacy-active-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+        $otherProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Other Profile Escort',
+            'slug' => 'other-profile-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $otherProfile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/');
+        $profiles = collect($response->viewData('profiles')->items());
+        $legacyProfileData = $profiles->firstWhere('name', $legacyProfile->name);
+
+        $this->assertNotNull($legacyProfileData);
+        $this->assertTrue($legacyProfileData['active']);
     }
 
     public function test_home_page_hides_featured_profile_when_offline(): void
