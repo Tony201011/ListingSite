@@ -189,10 +189,11 @@
         padding: 16px 20px 20px;
     }
 
+    /* FIXED VERIFICATION IMAGE LAYOUT */
     .photo-verification-gallery,
     .photo-verification-gallery > div {
         display: flex !important;
-        flex-wrap: wrap !important;
+        flex-direction: column !important;
         gap: 14px !important;
         align-items: flex-start !important;
         max-width: 100% !important;
