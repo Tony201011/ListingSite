@@ -1,6 +1,7 @@
 @php
     /** @var \App\Models\ProviderProfile $providerProfile */
     /** @var \App\Models\PhotoVerification|null $verification */
+    $verificationPhotos = is_array($verificationPhotos ?? null) ? $verificationPhotos : ($verification?->photos ?? []);
     $galleryPreviewHeight = 120;
     $galleryPreviewWidth = 120;
 @endphp
@@ -72,12 +73,12 @@
         </section>
 
         <section class="pv-card">
-            <div class="pv-card-header">Uploaded Verification Photo</div>
+            <div class="pv-card-header">Uploaded Verification Photos</div>
 
             <div class="pv-gallery-container">
                 <div class="photo-verification-gallery">
                     {!! \App\Support\PhotoVerificationGalleryRenderer::render(
-                        $verification->photos,
+                        $verificationPhotos,
                         $galleryPreviewHeight,
                         $galleryPreviewWidth,
                         null,
