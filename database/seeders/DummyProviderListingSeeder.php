@@ -22,10 +22,11 @@ class DummyProviderListingSeeder extends Seeder
             ->all();
 
         $providers = User::query()
-            ->where('email', 'regexp', '^provider[0-9]+@yopmail\\.com$')
+            ->where('email', 'like', 'provider%@yopmail.com')
             ->orderBy('id')
             ->take(1000)
-            ->get();
+            ->get()
+            ->filter(fn (User $user): bool => preg_match('/^provider\d+@yopmail\.com$/', $user->email) === 1);
 
         foreach ($providers as $index => $provider) {
             $listingNumber = $index + 1;
