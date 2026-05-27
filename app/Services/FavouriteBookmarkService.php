@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\ProviderProfile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 
 class FavouriteBookmarkService
 {
@@ -115,7 +115,7 @@ class FavouriteBookmarkService
             $textSlugs[] = mb_strtolower($normalized);
         }
 
-        $canonicalSlugs = empty($textSlugs)
+        $canonicalSlugIds = empty($textSlugs)
             ? collect()
             : ProviderProfile::query()
                 ->whereNull('deleted_at')
@@ -125,14 +125,14 @@ class FavouriteBookmarkService
                 ->orderBy('profile_sequence')
                 ->orderBy('id')
                 ->get(['id', 'slug'])
-                ->reduce(function (Collection $carry, ProviderProfile $profile): Collection {
-                    $key = mb_strtolower((string) $profile->slug);
-                    if (! $carry->has($key)) {
-                        $carry->put($key, (string) $profile->id);
-                    }
-
-                    return $carry;
-                }, collect());
+                ->groupBy(fn (ProviderProfile $profile) => mb_strtolower((string) $profile->slug))
+                ->map(
+                    fn (Collection $profiles): array => $profiles
+                        ->pluck('id')
+                        ->map(fn ($id) => (string) $id)
+                        ->values()
+                        ->all()
+                );
 
         $seen = [];
         $normalizedIds = [];
@@ -151,18 +151,24 @@ class FavouriteBookmarkService
                 if (! $validIds->has($normalized)) {
                     continue;
                 }
-                $normalized = (string) $normalized;
+                if (! isset($seen[$normalized])) {
+                    $seen[$normalized] = true;
+                    $normalizedIds[] = (string) $normalized;
+                }
             } else {
-                $resolved = $canonicalSlugs->get(mb_strtolower($normalized));
-                if ($resolved === null) {
+                $resolvedIds = $canonicalSlugIds->get(mb_strtolower($normalized), []);
+                if ($resolvedIds === []) {
                     continue;
                 }
-                $normalized = $resolved;
-            }
 
-            if (! isset($seen[$normalized])) {
-                $seen[$normalized] = true;
-                $normalizedIds[] = $normalized;
+                foreach ($resolvedIds as $resolvedId) {
+                    if (isset($seen[$resolvedId])) {
+                        continue;
+                    }
+
+                    $seen[$resolvedId] = true;
+                    $normalizedIds[] = $resolvedId;
+                }
             }
         }
 

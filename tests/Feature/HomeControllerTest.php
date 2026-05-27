@@ -465,7 +465,7 @@ class HomeControllerTest extends TestCase
         $response = $this->actingAs($viewer)->get('/favourites');
 
         $response->assertStatus(200);
-        $response->assertViewHas('userFavourites', ['legacy-favourite']);
+        $response->assertViewHas('userFavourites', [(string) $profile->id]);
         $profiles = $response->viewData('profiles');
         $this->assertCount(1, $profiles);
         $this->assertSame('legacy-favourite', $profiles[0]['slug']);
@@ -473,7 +473,8 @@ class HomeControllerTest extends TestCase
 
     public function test_favourites_page_resolves_mixed_case_favourite_slugs_to_canonical_slug(): void
     {
-        $this->createApprovedProvider(['name' => 'Case Favourite', 'slug' => 'case-favourite']);
+        $providerUser = $this->createApprovedProvider(['name' => 'Case Favourite', 'slug' => 'case-favourite']);
+        $profile = ProviderProfile::query()->where('user_id', $providerUser->id)->firstOrFail();
         $viewer = User::factory()->create();
 
         Cache::put("favourites_user_{$viewer->id}", ['  CASE-FAVOURITE  '], 60);
@@ -481,10 +482,38 @@ class HomeControllerTest extends TestCase
         $response = $this->actingAs($viewer)->get('/favourites');
 
         $response->assertStatus(200);
-        $response->assertViewHas('userFavourites', ['case-favourite']);
+        $response->assertViewHas('userFavourites', [(string) $profile->id]);
         $profiles = $response->viewData('profiles');
         $this->assertCount(1, $profiles);
         $this->assertSame('case-favourite', $profiles[0]['slug']);
+    }
+
+    public function test_favourites_page_resolves_legacy_slug_to_all_profiles_with_same_slug(): void
+    {
+        $firstProvider = $this->createApprovedProvider([
+            'name' => 'Shared Favourite One',
+            'slug' => 'shared-favourite',
+            'profile_sequence' => 1,
+        ]);
+        $secondProvider = $this->createApprovedProvider([
+            'name' => 'Shared Favourite Two',
+            'slug' => 'shared-favourite',
+            'profile_sequence' => 2,
+        ]);
+        $viewer = User::factory()->create();
+
+        Cache::put("favourites_user_{$viewer->id}", ['shared-favourite'], 60);
+
+        $response = $this->actingAs($viewer)->get('/favourites');
+
+        $firstProfileId = (string) ProviderProfile::query()->where('user_id', $firstProvider->id)->value('id');
+        $secondProfileId = (string) ProviderProfile::query()->where('user_id', $secondProvider->id)->value('id');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('userFavourites', [$firstProfileId, $secondProfileId]);
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(2, $profiles);
+        $this->assertSame([$firstProfileId, $secondProfileId], array_map(fn (array $profile): string => (string) $profile['id'], $profiles));
     }
 
     public function test_favourites_listing_shows_both_available_and_online_badges_when_both_statuses_are_active(): void
