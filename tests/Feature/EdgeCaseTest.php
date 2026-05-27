@@ -66,7 +66,6 @@ class EdgeCaseTest extends TestCase
             'email' => $email,
             'mobile' => $mobile,
             'password' => Hash::make('password123'),
-            'suburb' => 'Sydney',
             'maskMobile' => '******5678',
             'role' => User::ROLE_PROVIDER,
             'mobile_verified' => false,

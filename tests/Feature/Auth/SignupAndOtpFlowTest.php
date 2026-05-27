@@ -41,7 +41,6 @@ class SignupAndOtpFlowTest extends TestCase
             'password' => 'SecurePass123',
             'password_confirmation' => 'SecurePass123',
             'mobile' => self::DUMMY_MOBILE,
-            'suburb' => 'Sydney',
             'age_confirm' => '1',
         ], $overrides);
     }
@@ -55,7 +54,7 @@ class SignupAndOtpFlowTest extends TestCase
         $response = $this->from('/signup')->post('/signup', []);
 
         $response->assertRedirect('/signup');
-        $response->assertSessionHasErrors(['email', 'nickname', 'password', 'mobile', 'suburb', 'age_confirm']);
+        $response->assertSessionHasErrors(['email', 'nickname', 'password', 'mobile', 'age_confirm']);
     }
 
     public function test_signup_rejects_invalid_mobile_format(): void
@@ -180,6 +179,19 @@ class SignupAndOtpFlowTest extends TestCase
         $response->assertJsonPath('redirect', route('verification.notice'));
         $this->assertAuthenticated();
         $this->assertNull(auth()->user()?->email_verified_at);
+    }
+
+    public function test_otp_verify_success_does_not_auto_create_profile(): void
+    {
+        $this->from('/signup')->post('/signup', $this->validSignupPayload());
+
+        $this->postJson('/verify-otp', ['otp' => self::DUMMY_OTP])->assertOk();
+
+        $user = User::query()->where('email', 'newprovider@example.com')->firstOrFail();
+
+        $this->assertDatabaseMissing('provider_profiles', [
+            'user_id' => $user->id,
+        ]);
     }
 
     public function test_otp_verify_success_clears_pending_session(): void

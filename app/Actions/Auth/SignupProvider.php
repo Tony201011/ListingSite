@@ -35,7 +35,6 @@ class SignupProvider
             'email' => $validated['email'],
             'mobile' => $normalizedMobile,
             'password' => Hash::make($validated['password']),
-            'suburb' => $validated['suburb'],
             'maskMobile' => $phone->toMasked(),
             'role' => User::ROLE_PROVIDER,
             'mobile_verified' => false,
