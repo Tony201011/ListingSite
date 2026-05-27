@@ -306,6 +306,17 @@ class HomeControllerTest extends TestCase
         $this->assertCount(2, $response->viewData('profiles'));
     }
 
+    public function test_online_count_matches_filtered_listing_total(): void
+    {
+        $this->createApprovedProvider(['name' => 'Filter Match One', 'slug' => 'filter-match-one']);
+        $this->createApprovedProvider(['name' => 'Filter Match Two', 'slug' => 'filter-match-two']);
+
+        $response = $this->get('/?escort_name=One');
+
+        $this->assertSame(1, $response->viewData('onlineCount'));
+        $this->assertSame(1, $response->viewData('profiles')->total());
+    }
+
     public function test_online_count_matches_admin_online_card_total(): void
     {
         $approvedUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
