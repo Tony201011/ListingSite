@@ -1244,6 +1244,92 @@ class HomeControllerTest extends TestCase
         $this->assertNull($otherProfileData);
     }
 
+    public function test_home_page_distance_filter_includes_legacy_online_profile_without_profile_linked_row(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        Postcode::query()->create([
+            'suburb' => 'Sydney',
+            'state' => 'NSW',
+            'postcode' => '2000',
+            'latitude' => -33.8688,
+            'longitude' => 151.2093,
+        ]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Distance Legacy Online Escort',
+            'slug' => 'distance-legacy-online-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'suburb' => 'Sydney, NSW 2000',
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/?distance=20&user_lat=-33.8688&user_lng=151.2093');
+
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayHasKey('Distance Legacy Online Escort', $profiles->all());
+    }
+
+    public function test_home_page_distance_filter_keeps_profile_offline_when_profile_linked_row_is_offline_even_with_legacy_online_row(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        Postcode::query()->create([
+            'suburb' => 'Sydney',
+            'state' => 'NSW',
+            'postcode' => '2000',
+            'latitude' => -33.8688,
+            'longitude' => 151.2093,
+        ]);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Distance Legacy Offline Escort',
+            'slug' => 'distance-legacy-offline-escort',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'suburb' => 'Sydney, NSW 2000',
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => null,
+            'online_expires_at' => null,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subMinutes(5),
+            'online_expires_at' => null,
+        ]);
+
+        $response = $this->get('/?distance=20&user_lat=-33.8688&user_lng=151.2093');
+
+        $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
+        $this->assertArrayNotHasKey('Distance Legacy Offline Escort', $profiles->all());
+    }
+
     public function test_home_page_hides_featured_profile_when_offline(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
