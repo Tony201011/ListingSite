@@ -22,35 +22,16 @@ class SearchController extends Controller
         }
 
         try {
-            $results = ProviderProfile::search($term)
-                ->where('profile_status', 'approved')
-                ->query(fn ($query) => $query
-                    ->whereNotNull('slug')
-                    ->where('slug', '!=', '')
-                    ->whereNull('deleted_at')
-                    ->where('is_blocked', false)
-                    ->whereHas('user', fn ($userQuery) => $userQuery->where('role', User::ROLE_PROVIDER))
-                    ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide')))
-                ->take(self::MAX_SUGGESTIONS)
-                ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age'])
-                ->load('city');
+            $results = $this->queryScoutSuggestions($term);
         } catch (\Throwable $e) {
             Log::warning('Scout search unavailable, falling back to database search.', [
                 'error' => $e->getMessage(),
             ]);
-            $results = ProviderProfile::query()
-                ->where('profile_status', 'approved')
-                ->whereNull('deleted_at')
-                ->whereNotNull('slug')
-                ->where('slug', '!=', '')
-                ->where('is_blocked', false)
-                ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
-                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
-                ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
-                ->with('city')
-                ->orderBy('name')
-                ->take(self::MAX_SUGGESTIONS)
-                ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age']);
+            $results = collect();
+        }
+
+        if ($results->isEmpty()) {
+            $results = $this->queryDatabaseSuggestions($term);
         }
 
         $suggestions = $results->map(fn (ProviderProfile $profile) => [
@@ -80,5 +61,38 @@ class SearchController extends Controller
         $suburb = preg_replace('/\s+\d{4}\s*$/', '', $suburb) ?? $suburb;
 
         return trim(strtok($suburb, ',') ?: $suburb);
+    }
+
+    private function queryScoutSuggestions(string $term)
+    {
+        return ProviderProfile::search($term)
+            ->where('profile_status', 'approved')
+            ->query(fn ($query) => $query
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->whereNull('deleted_at')
+                ->where('is_blocked', false)
+                ->whereHas('user', fn ($userQuery) => $userQuery->where('role', User::ROLE_PROVIDER))
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide')))
+            ->take(self::MAX_SUGGESTIONS)
+            ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age'])
+            ->load('city');
+    }
+
+    private function queryDatabaseSuggestions(string $term)
+    {
+        return ProviderProfile::query()
+            ->where('profile_status', 'approved')
+            ->whereNull('deleted_at')
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->where('is_blocked', false)
+            ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
+            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
+            ->with('city')
+            ->orderBy('name')
+            ->take(self::MAX_SUGGESTIONS)
+            ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age']);
     }
 }
