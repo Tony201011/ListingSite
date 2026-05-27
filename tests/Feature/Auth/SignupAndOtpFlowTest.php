@@ -41,7 +41,6 @@ class SignupAndOtpFlowTest extends TestCase
             'password' => 'SecurePass123',
             'password_confirmation' => 'SecurePass123',
             'mobile' => self::DUMMY_MOBILE,
-            'suburb' => 'Sydney',
             'age_confirm' => '1',
         ], $overrides);
     }
@@ -55,7 +54,7 @@ class SignupAndOtpFlowTest extends TestCase
         $response = $this->from('/signup')->post('/signup', []);
 
         $response->assertRedirect('/signup');
-        $response->assertSessionHasErrors(['email', 'nickname', 'password', 'mobile', 'suburb', 'age_confirm']);
+        $response->assertSessionHasErrors(['email', 'nickname', 'password', 'mobile', 'age_confirm']);
     }
 
     public function test_signup_rejects_invalid_mobile_format(): void

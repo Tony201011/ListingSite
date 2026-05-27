@@ -59,9 +59,9 @@ class ProfileSwitchController extends Controller
         $user = Auth::user();
         $profiles = $user->providerProfiles()->orderBy('id')->with('primaryProfileImage')->get();
 
-        // No profiles yet — send straight to dashboard to set up the first one
+        // No profiles yet — send them to the profiles page to create their first one
         if ($profiles->isEmpty()) {
-            return redirect()->route('my-profile');
+            return redirect()->route('profiles.index');
         }
 
         // Exactly one profile — auto-select and proceed
