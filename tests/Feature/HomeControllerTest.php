@@ -1469,7 +1469,7 @@ class HomeControllerTest extends TestCase
         $this->assertFalse(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
     }
 
-    public function test_home_page_shows_offline_profile_even_when_online_filter_disabled(): void
+    public function test_home_page_does_not_show_offline_profile_even_when_online_filter_disabled(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => false]);
 
