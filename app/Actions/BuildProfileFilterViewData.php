@@ -206,6 +206,7 @@ class BuildProfileFilterViewData
             $escortNameQuery,
             $localFeaturedStateName,
         );
+        $onlineCount = $profiles->total();
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
 
@@ -249,6 +250,7 @@ class BuildProfileFilterViewData
             'userLat',
             'userLng',
             'escortNameQuery',
+            'onlineCount',
             'homeBannerProfiles',
             'localBannerProfiles',
         );
@@ -636,8 +638,14 @@ class BuildProfileFilterViewData
             $appendParams['categories'][] = $categoryId;
         }
 
+        $profilesPerPage = $this->resolveProfilesPerPage();
+        if (SiteSetting::isOnlineFilterEnabled()) {
+            $totalOnlineProfiles = (clone $query)->count('provider_profiles.id');
+            $profilesPerPage = max($profilesPerPage, max(1, $totalOnlineProfiles));
+        }
+
         $paginator = $query
-            ->paginate($this->resolveProfilesPerPage())
+            ->paginate($profilesPerPage)
             ->appends($appendParams);
 
         $serviceIds = $paginator->getCollection()
