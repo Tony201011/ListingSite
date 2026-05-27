@@ -211,19 +211,19 @@ class GetProviderActivityLogs
         bool $isOnline,
         Carbon $now,
     ): int {
-        $storedDuration = max(0, (int) ($storedDuration ?? 0));
-
         if ($logoutAt) {
-            $computedDuration = max(0, (int) $loginAt->diffInSeconds($logoutAt, true));
-
-            return max($computedDuration, $storedDuration);
+            return $logoutAt->lessThanOrEqualTo($loginAt)
+                ? 0
+                : max(0, (int) $loginAt->diffInSeconds($logoutAt));
         }
 
         if ($isOnline) {
-            return max(0, (int) $loginAt->diffInSeconds($now, true));
+            return $now->lessThanOrEqualTo($loginAt)
+                ? 0
+                : max(0, (int) $loginAt->diffInSeconds($now));
         }
 
-        return $storedDuration;
+        return 0;
     }
 
     private function formatDuration(int $totalSeconds): string

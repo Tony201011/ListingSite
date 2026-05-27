@@ -317,7 +317,50 @@ class ActivityLogsOnlineStatusTest extends TestCase
             ->assertSee('01h 00m 00s');
     }
 
-    public function test_activity_logs_uses_stored_duration_when_timestamp_diff_is_zero(): void
+    public function test_activity_logs_ignores_inflated_stored_duration_and_sums_daily_total_from_session_timestamps(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Selected Profile',
+            'slug' => 'selected-profile',
+        ]);
+
+        Carbon::setTestNow('2026-05-22 12:00:00');
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => Carbon::parse('2026-05-22 02:42:00'),
+            'went_offline_at' => Carbon::parse('2026-05-22 06:26:00'),
+            'duration_seconds' => 1048940,
+        ]);
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => Carbon::parse('2026-05-22 08:00:00'),
+            'went_offline_at' => Carbon::parse('2026-05-22 09:30:00'),
+            'duration_seconds' => 999999,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get(route('activity-logs'));
+
+        $response->assertOk()
+            ->assertViewHas('activity', function (array $activity): bool {
+                return ($activity['total_sessions'] ?? null) === 2
+                    && ($activity['total_online_seconds'] ?? null) === 18840
+                    && ($activity['days'][0]['total_seconds'] ?? null) === 18840;
+            })
+            ->assertSee('03h 44m 00s')
+            ->assertSee('01h 30m 00s')
+            ->assertSee('Daily total: 05h 14m 00s');
+    }
+
+    public function test_activity_logs_returns_zero_duration_when_login_and_logout_match(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
@@ -344,9 +387,10 @@ class ActivityLogsOnlineStatusTest extends TestCase
         $response->assertOk()
             ->assertViewHas('activity', function (array $activity): bool {
                 return ($activity['total_sessions'] ?? null) === 1
-                    && ($activity['total_online_seconds'] ?? null) === 3600;
+                    && ($activity['total_online_seconds'] ?? null) === 0
+                    && ($activity['days'][0]['total_seconds'] ?? null) === 0;
             })
-            ->assertSee('01h 00m 00s');
+            ->assertSee('00h 00m 00s');
     }
 
     public function test_activity_logs_groups_and_formats_session_times_using_app_timezone(): void
