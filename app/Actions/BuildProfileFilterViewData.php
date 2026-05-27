@@ -299,13 +299,7 @@ class BuildProfileFilterViewData
             return max(1, $profilesPerPage);
         }
 
-        $value = (int) cache()->remember(
-            'site_setting.home_page_records',
-            now()->addHour(),
-            fn () => SiteSetting::query()->value('home_page_records') ?? self::DEFAULT_PROFILES_PER_PAGE
-        );
-
-        return $value >= 1 ? $value : self::DEFAULT_PROFILES_PER_PAGE;
+        return self::DEFAULT_PROFILES_PER_PAGE;
     }
 
     /**
