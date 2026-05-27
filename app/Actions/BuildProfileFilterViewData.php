@@ -924,9 +924,9 @@ class BuildProfileFilterViewData
         return $map[$uppercase] ?? null;
     }
 
-    public function getProfilesBySlugs(array $slugs): array
+    public function getProfilesBySlugs(array $profileIds): array
     {
-        if (empty($slugs)) {
+        if (empty($profileIds)) {
             return [];
         }
 
@@ -936,7 +936,7 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
-            ->whereIn('provider_profiles.slug', $slugs)
+            ->whereIn('provider_profiles.id', $profileIds)
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
@@ -960,11 +960,11 @@ class BuildProfileFilterViewData
             : collect();
 
         // Preserve the user's saved order
-        $slugOrder = array_flip($slugs);
+        $profileIdOrder = array_flip(array_map('strval', $profileIds));
 
         return $profiles
             ->map(fn (ProviderProfile $profile) => $this->transformProfile($profile, $categoryNames))
-            ->sortBy(fn ($profile) => $slugOrder[$profile['slug']] ?? PHP_INT_MAX)
+            ->sortBy(fn ($profile) => $profileIdOrder[(string) $profile['id']] ?? PHP_INT_MAX)
             ->values()
             ->all();
     }
@@ -986,6 +986,7 @@ class BuildProfileFilterViewData
         $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
 
         return [
+            'id' => $profile->id,
             'name' => $profile->name,
             'age' => $profile->age,
             'rate' => $rateDisplay,
