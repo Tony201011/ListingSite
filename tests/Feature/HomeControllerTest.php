@@ -465,7 +465,7 @@ class HomeControllerTest extends TestCase
         $response = $this->actingAs($viewer)->get('/favourites');
 
         $response->assertStatus(200);
-        $response->assertViewHas('userFavourites', ['legacy-favourite']);
+        $response->assertViewHas('userFavourites', [(string) $profile->id]);
         $profiles = $response->viewData('profiles');
         $this->assertCount(1, $profiles);
         $this->assertSame('legacy-favourite', $profiles[0]['slug']);
@@ -473,7 +473,8 @@ class HomeControllerTest extends TestCase
 
     public function test_favourites_page_resolves_mixed_case_favourite_slugs_to_canonical_slug(): void
     {
-        $this->createApprovedProvider(['name' => 'Case Favourite', 'slug' => 'case-favourite']);
+        $providerUser = $this->createApprovedProvider(['name' => 'Case Favourite', 'slug' => 'case-favourite']);
+        $profile = ProviderProfile::query()->where('user_id', $providerUser->id)->firstOrFail();
         $viewer = User::factory()->create();
 
         Cache::put("favourites_user_{$viewer->id}", ['  CASE-FAVOURITE  '], 60);
@@ -481,7 +482,7 @@ class HomeControllerTest extends TestCase
         $response = $this->actingAs($viewer)->get('/favourites');
 
         $response->assertStatus(200);
-        $response->assertViewHas('userFavourites', ['case-favourite']);
+        $response->assertViewHas('userFavourites', [(string) $profile->id]);
         $profiles = $response->viewData('profiles');
         $this->assertCount(1, $profiles);
         $this->assertSame('case-favourite', $profiles[0]['slug']);
