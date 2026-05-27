@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -173,6 +174,11 @@ class ProviderProfile extends Model
         return $this->hasOne(OnlineUser::class, 'provider_profile_id');
     }
 
+    public function onlineUsers(): HasMany
+    {
+        return $this->hasMany(OnlineUser::class, 'provider_profile_id');
+    }
+
     public function providerOnlineLogs(): HasMany
     {
         return $this->hasMany(ProviderOnlineLog::class, 'provider_profile_id');
@@ -201,6 +207,85 @@ class ProviderProfile extends Model
     public function reports(): HasMany
     {
         return $this->hasMany(UserReport::class);
+    }
+
+    public function scopeWhereCurrentlyOnline(Builder $query): Builder
+    {
+        return $query->where(function (Builder $q): void {
+            // Profile-linked online row (standard mechanism)
+            $q->whereHas(
+                'onlineUsers',
+                fn (Builder $onlineQuery): Builder => $onlineQuery
+                    ->whereNotNull('provider_profile_id')
+                    ->where('status', 'online')
+            )
+            // OR: no profile-linked row at all AND user has a legacy online row
+                ->orWhere(function (Builder $q): void {
+                    $q->whereDoesntHave(
+                        'onlineUsers',
+                        fn (Builder $onlineQuery): Builder => $onlineQuery->whereNotNull('provider_profile_id')
+                    )->whereHas(
+                        'user',
+                        fn (Builder $userQuery): Builder => $userQuery->whereHas(
+                            'legacyOnlineUsers',
+                            fn (Builder $onlineQuery): Builder => $onlineQuery->where('status', 'online')
+                        )
+                    );
+                });
+        });
+    }
+
+    public function scopeWhereCurrentlyOffline(Builder $query): Builder
+    {
+        // Offline = no profile-linked online row AND NOT (no profile-linked row + legacy online row)
+        return $query->whereDoesntHave(
+            'onlineUsers',
+            fn (Builder $onlineQuery): Builder => $onlineQuery
+                ->whereNotNull('provider_profile_id')
+                ->where('status', 'online')
+        )->where(function (Builder $q): void {
+            // Either has a profile-linked row (but it's not online) …
+            $q->whereHas(
+                'onlineUsers',
+                fn (Builder $onlineQuery): Builder => $onlineQuery->whereNotNull('provider_profile_id')
+            )
+            // … or the user has no legacy online row
+                ->orWhereDoesntHave(
+                    'user',
+                    fn (Builder $userQuery): Builder => $userQuery->whereHas(
+                        'legacyOnlineUsers',
+                        fn (Builder $onlineQuery): Builder => $onlineQuery->where('status', 'online')
+                    )
+                );
+        });
+    }
+
+    public function isCurrentlyOnline(): bool
+    {
+        // Check profile-linked row first
+        if ($this->relationLoaded('onlineUsers')) {
+            if ($this->onlineUsers->contains(fn (OnlineUser $onlineUser): bool => $onlineUser->isCurrentlyOnline())) {
+                return true;
+            }
+            // Has a profile-linked row (not online) — don't fall through to legacy
+            if ($this->onlineUsers->isNotEmpty()) {
+                return false;
+            }
+        } else {
+            if ($this->onlineUsers()->whereNotNull('provider_profile_id')->where('status', 'online')->exists()) {
+                return true;
+            }
+            // Has any profile-linked row — don't fall through to legacy
+            if ($this->onlineUsers()->whereNotNull('provider_profile_id')->exists()) {
+                return false;
+            }
+        }
+
+        // No profile-linked row at all — check legacy user-level online row
+        return $this->user()->whereHas(
+            'legacyOnlineUsers',
+            fn (Builder $q): Builder => $q->where('status', 'online')
+        )->exists();
     }
 
     // -----------------------------------------------------------------------
@@ -343,9 +428,9 @@ class ProviderProfile extends Model
         $this->loadMissing(['state', 'city']);
 
         $routeParams = [
-            'state'       => $this->getStateSlug(),
-            'suburb'      => $this->getSuburbSlug(),
-            'slug'        => $this->slug,
+            'state' => $this->getStateSlug(),
+            'suburb' => $this->getSuburbSlug(),
+            'slug' => $this->slug,
         ];
 
         if ($this->shouldIncludeSequenceInUrl()) {

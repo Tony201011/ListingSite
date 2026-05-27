@@ -1062,17 +1062,11 @@ class UserResource extends Resource
                                 FROM online_users
                                 WHERE online_users.provider_profile_id = provider_profiles.id
                                 AND online_users.status = ?
-                            ) OR EXISTS (
-                                SELECT 1
-                                FROM online_users AS legacy_online_users
-                                WHERE legacy_online_users.user_id = provider_profiles.user_id
-                                AND legacy_online_users.provider_profile_id IS NULL
-                                AND legacy_online_users.status = ?
                             ) THEN ?
                             ELSE ?
                         END AS online_status
                         SQL,
-                        ['online', 'online', 'online', 'offline']
+                        ['online', 'online', 'offline']
                     );
             })
             ->columns([
@@ -1271,20 +1265,8 @@ class UserResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
-                            'online' => $query->where(function (Builder $onlineConstraint): void {
-                                $onlineConstraint
-                                    ->whereHas('onlineUser', fn (Builder $onlineQuery) => $onlineQuery->where('status', 'online'))
-                                    ->orWhereHas('user.onlineUser', fn (Builder $legacyOnlineQuery) => $legacyOnlineQuery
-                                        ->whereNull('provider_profile_id')
-                                        ->where('status', 'online'));
-                            }),
-                            'offline' => $query->where(function (Builder $offlineConstraint): void {
-                                $offlineConstraint
-                                    ->whereDoesntHave('onlineUser', fn (Builder $onlineQuery) => $onlineQuery->where('status', 'online'))
-                                    ->whereDoesntHave('user.onlineUser', fn (Builder $legacyOnlineQuery) => $legacyOnlineQuery
-                                        ->whereNull('provider_profile_id')
-                                        ->where('status', 'online'));
-                            }),
+                            'online' => $query->whereCurrentlyOnline(),
+                            'offline' => $query->whereCurrentlyOffline(),
                             default => $query,
                         };
                     })
@@ -1321,9 +1303,19 @@ class UserResource extends Resource
                                 ->latest('id')
                                 ->first();
 
+                            $verificationPhotos = $record->photoVerification()
+                                ->latest('submitted_at')
+                                ->latest('id')
+                                ->get()
+                                ->pluck('photos')
+                                ->flatten(1)
+                                ->values()
+                                ->all();
+
                             return view('filament.modals.provider-photo-verification', [
                                 'providerProfile' => $record,
                                 'verification' => $verification,
+                                'verificationPhotos' => $verificationPhotos,
                             ]);
                         })
                         ->form([
@@ -1584,7 +1576,7 @@ class UserResource extends Resource
                     ->collapsible(),
                 Group::make('online_status')
                     ->label('Online Status')
-                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->onlineUser?->isCurrentlyOnline() ? 'Online' : 'Offline')
+                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->isCurrentlyOnline() ? 'Online' : 'Offline')
                     ->collapsible(),
                 Group::make('is_featured')
                     ->label('Featured')

@@ -29,7 +29,7 @@
     }
 
     $hasFeaturedBadge = $featuredBadgeVariant !== null;
-    $hasTopBadgeRow = $profile['active'] || $hasFeaturedBadge;
+    $hasStatusBadges = $profile['active'] || $profile['verified'] || !empty($profile['available_now']);
 @endphp
 <article
     class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
@@ -53,38 +53,31 @@
             </div>
         @endif
 
-        @if($hasTopBadgeRow)
-            <div class="pointer-events-none absolute inset-x-0 top-3 z-20 px-2 sm:px-3">
-                <div class="flex items-center gap-1 sm:gap-1.5">
-                    @if($profile['active'])
-                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm sm:text-[11px] whitespace-nowrap">
-                            <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
-                        </span>
-                    @endif
-                    @if($hasFeaturedBadge)
-                        <x-featured-badge :variant="$featuredBadgeVariant" position="inline" :label="$featuredBadgeLabel" :icon="$featuredBadgeIcon" />
-                    @endif
-                </div>
+        @if($hasStatusBadges)
+            <div class="listing-card-badge-stack pointer-events-none absolute left-2.5 top-2.5 z-20 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
+                @if($profile['active'])
+                    <span class="listing-card-badge listing-card-badge--online inline-flex items-center gap-1 rounded-lg bg-emerald-500/95 px-2.5 py-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/20 sm:text-[11px]">
+                        <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
+                    </span>
+                @endif
+                @if($profile['verified'])
+                    <span class="listing-card-badge listing-card-badge--verified inline-flex items-center gap-1 rounded-lg bg-cyan-500/95 px-2.5 py-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/20 sm:text-[11px]">
+                        <i class="fa-solid fa-camera text-[9px]"></i> Verified Photo
+                    </span>
+                @endif
+                @if(!empty($profile['available_now']))
+                    <span class="listing-card-badge listing-card-badge--available inline-flex items-center gap-1 rounded-lg bg-fuchsia-500/95 px-2.5 py-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/20 sm:text-[11px]">
+                        <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
+                    </span>
+                @endif
             </div>
         @endif
 
-        {{-- Photo Verified / Available Now / Online badges --}}
-        <div @class([
-            'absolute left-0 z-10 flex flex-col gap-1',
-            'top-11 sm:top-12' => $hasTopBadgeRow,
-            'top-3' => ! $hasTopBadgeRow,
-        ])>
-            @if($profile['verified'])
-                <span class="inline-flex items-center gap-1 bg-cyan-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
-                    <i class="fa-solid fa-camera text-[9px]"></i> Photo Verified
-                </span>
-            @endif
-            @if(!empty($profile['available_now']))
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0; background-color: #e13a8b;">
-                    <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
-                </span>
-            @endif
-        </div>
+        @if($hasFeaturedBadge)
+            <div class="pointer-events-none absolute right-2.5 top-2.5 z-20 sm:right-3 sm:top-3">
+                <x-featured-badge :variant="$featuredBadgeVariant" position="inline" :label="$featuredBadgeLabel" :icon="$featuredBadgeIcon" />
+            </div>
+        @endif
     </div>
 
     {{-- Content --}}

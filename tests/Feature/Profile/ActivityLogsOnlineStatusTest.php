@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Profile;
 
-use App\Models\LoginLog;
 use App\Models\Category;
+use App\Models\LoginLog;
 use App\Models\ProfileImage;
 use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;

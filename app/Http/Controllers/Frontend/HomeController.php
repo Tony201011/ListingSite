@@ -36,6 +36,7 @@ class HomeController extends Controller
         }
 
         $viewData = $this->buildProfileFilterViewData->execute($validated);
+
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
         $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 
