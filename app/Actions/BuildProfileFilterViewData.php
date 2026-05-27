@@ -312,6 +312,7 @@ class BuildProfileFilterViewData
                 'user',
                 'user.onlineUser',
                 'city',
+                'state',
             ])
             ->orderByDesc("provider_profiles.{$expiryColumn}");
 
@@ -378,16 +379,7 @@ class BuildProfileFilterViewData
 
     private function applyActiveOnlineProfileConstraint(Builder $query): void
     {
-        $query->where(function (Builder $onlineConstraint): void {
-            $onlineConstraint
-                ->whereHas('onlineUser', function (Builder $onlineQuery): void {
-                    $onlineQuery->where('status', 'online');
-                })
-                ->orWhereHas('user.onlineUser', function (Builder $legacyOnline): void {
-                    $legacyOnline->whereNull('provider_profile_id')
-                        ->where('status', 'online');
-                });
-        });
+        $query->whereCurrentlyOnline();
     }
 
     private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
@@ -444,6 +436,7 @@ class BuildProfileFilterViewData
                 'user',
                 'user.onlineUser',
                 'city',
+                'state',
             ]);
 
         $this->applyActiveOnlineProfileConstraint($query);
@@ -946,6 +939,7 @@ class BuildProfileFilterViewData
                 'user',
                 'user.onlineUser',
                 'city',
+                'state',
             ])
             ->get();
 
@@ -982,11 +976,7 @@ class BuildProfileFilterViewData
             $categoryNames
         );
 
-        $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
-        if (! $isOnline) {
-            $isOnline = $profile->user?->onlineUser?->provider_profile_id === null
-                && ($profile->user?->onlineUser?->isCurrentlyOnline() ?? false);
-        }
+        $isOnline = $profile->isCurrentlyOnline();
         $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
 
         return [
@@ -1013,6 +1003,7 @@ class BuildProfileFilterViewData
             'home_banner' => $profile->home_banner_expires_at && $profile->home_banner_expires_at->isFuture(),
             'image' => $imageUrl ?? '',
             'slug' => $profile->slug,
+            'profile_url' => $profile->getEscortUrl(),
         ];
     }
 
