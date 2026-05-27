@@ -633,12 +633,12 @@
                                     <div class="flex items-center gap-2 text-gray-400 relative z-20">
                                         <button
                                             type="button"
-                                            @click.prevent="toggleFavourite('{{ $profile['slug'] }}')"
-                                            :class="isFavourite('{{ $profile['slug'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
+                                            @click.prevent="toggleFavourite('{{ $profile['id'] }}')"
+                                            :class="isFavourite('{{ $profile['id'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
                                             class="transition-colors"
                                             title="Favourite"
                                         >
-                                            <i :class="isFavourite('{{ $profile['slug'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
+                                            <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
                                         </button>
 
                                         {{-- @if($profile['age'])

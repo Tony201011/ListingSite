@@ -62,12 +62,12 @@ class HomeController extends Controller
 
     public function favourites(): View
     {
-        $favouriteSlugs = $this->favouriteBookmarkService->getFavourites();
-        $profiles = $this->buildProfileFilterViewData->getProfilesBySlugs($favouriteSlugs);
+        $favouriteProfileIds = $this->favouriteBookmarkService->getFavourites();
+        $profiles = $this->buildProfileFilterViewData->getProfilesBySlugs($favouriteProfileIds);
 
         return view('frontend.favourites', [
             'profiles' => $profiles,
-            'userFavourites' => $favouriteSlugs,
+            'userFavourites' => $favouriteProfileIds,
         ]);
     }
 
