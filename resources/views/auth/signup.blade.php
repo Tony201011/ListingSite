@@ -17,7 +17,7 @@
     <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
 
         <div class="flex items-center justify-between flex-wrap gap-4 mb-8">
-            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Create your free profile</h2>
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Create your account</h2>
         </div>
 
         <div class="bg-white rounded-2xl p-6 md:p-8 mb-8 shadow-md border border-gray-100">
@@ -46,10 +46,7 @@
         <form
             x-data="signupForm({
                 email: @js(old('email', '')),
-                nickname: @js(old('nickname', '')),
-                mobile: @js(old('mobile', '')),
-                suburb: @js(old('suburb', '')),
-                ageConfirm: @js((bool) old('age_confirm'))
+                mobile: @js(old('mobile', ''))
             })"
             @submit="submitForm"
             class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100"
@@ -92,29 +89,32 @@
 
                 <div class="min-w-0">
                     <label class="block font-semibold text-gray-800 mb-1">
-                        Nickname <span class="text-red-600">*</span>
+                        Mobile number <span class="text-red-600">*</span>
                     </label>
-                    <input
-                        type="text"
-                        name="nickname"
-                        x-ref="nickname"
-                        x-model="nickname"
-                        @blur="touched.nickname = true"
-                        @input="touched.nickname = true; validateNickname()"
-                        :aria-invalid="errors.nickname ? 'true' : 'false'"
-                        placeholder="e.g. SexyBabe"
-                        autocomplete="off"
-                        autocapitalize="none"
-                        autocorrect="off"
-                        spellcheck="false"
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
-                    >
-                    <div class="mt-1 min-h-5" data-error-container="nickname">
-                        @error('nickname')
-                            <div class="text-xs text-red-600" data-server-error="true" data-field="nickname">{{ $message }}</div>
+                    <div class="flex gap-2.5">
+                        <select class="w-24 px-3 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-800 font-semibold opacity-100 disabled:bg-gray-100 disabled:text-gray-800 disabled:font-semibold focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20" disabled>
+                            <option value="+61" selected>🇦🇺</option>
+                        </select>
+
+                        <input
+                            name="mobile"
+                            type="tel"
+                            x-ref="mobile"
+                            x-model="mobile"
+                            @blur="touched.mobile = true"
+                            @input="touched.mobile = true; validateMobile()"
+                            :aria-invalid="errors.mobile ? 'true' : 'false'"
+                            placeholder="Australian mobile (e.g. 04XXXXXXXX)"
+                            autocomplete="off"
+                            class="flex-1 min-w-0 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
+                        >
+                    </div>
+                    <div class="mt-1 min-h-5" data-error-container="mobile">
+                        @error('mobile')
+                            <div class="text-xs text-red-600" data-server-error="true" data-field="mobile">{{ $message }}</div>
                         @enderror
-                        <template x-if="touched.nickname && errors.nickname">
-                            <div class="text-xs text-red-600" x-text="errors.nickname"></div>
+                        <template x-if="touched.mobile && errors.mobile">
+                            <div class="text-xs text-red-600" x-text="errors.mobile"></div>
                         </template>
                     </div>
                 </div>
@@ -301,38 +301,6 @@
             </div>
 
             <div class="my-6">
-                <label class="block font-semibold text-gray-800 mb-1">
-                    Mobile number <span class="text-red-600">*</span>
-                </label>
-
-                <div class="flex gap-2.5">
-                    <select class="w-24 px-3 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-800 font-semibold opacity-100 disabled:bg-gray-100 disabled:text-gray-800 disabled:font-semibold focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20" disabled>
-                        <option value="+61" selected>🇦🇺</option>
-                    </select>
-
-                    <input
-                        name="mobile"
-                        type="tel"
-                        x-ref="mobile"
-                        x-model="mobile"
-                        @blur="touched.mobile = true"
-                        @input="touched.mobile = true; validateMobile()"
-                        :aria-invalid="errors.mobile ? 'true' : 'false'"
-                        placeholder="Australian mobile (e.g. 04XXXXXXXX)"
-                        autocomplete="off"
-                        class="flex-1 min-w-0 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
-                    >
-                </div>
-
-                <div class="mt-1 min-h-5" data-error-container="mobile">
-                    @error('mobile')
-                        <div class="text-xs text-red-600" data-server-error="true" data-field="mobile">{{ $message }}</div>
-                    @enderror
-                    <template x-if="touched.mobile && errors.mobile">
-                        <div class="text-xs text-red-600" x-text="errors.mobile"></div>
-                    </template>
-                </div>
-
                 <div class="bg-pink-50 rounded-2xl p-5 mt-4 flex gap-4 items-start">
                     <div class="w-8 h-8 bg-[#e04ecb] rounded-full flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,101 +313,6 @@
                             One of our moderators will call to confirm. We <span class="font-semibold text-[#c13ab0]">never</span> publish or share your number without permission.
                         </span>
                         <div class="mt-2 text-[#c13ab0] text-sm">📱 Australian mobile only</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-6 relative">
-                <label class="block font-semibold text-gray-800 mb-1">
-                    Primary suburb <span class="text-red-600">*</span>
-                </label>
-
-                <input
-                    type="text"
-                    name="suburb"
-                    x-ref="suburb"
-                    x-model="suburb"
-                    @input="touched.suburb = true; handleSuburbInput()"
-                    @blur="handleSuburbBlur()"
-                    @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
-                    :aria-invalid="errors.suburb ? 'true' : 'false'"
-                    placeholder="Start typing your suburb..."
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
-                    autocomplete="off"
-                >
-
-                <div
-                    x-show="showResults && searchResults.length > 0"
-                    x-cloak
-                    x-transition
-                    class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
-                >
-                    <template x-for="(item, index) in searchResults" :key="`${item.suburb}-${item.state}-${item.postcode}-${index}`">
-                        <div
-                            @mousedown.prevent="selectSuburb(item)"
-                            class="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-800"
-                        >
-                            <span x-text="`${item.suburb}, ${item.state} ${item.postcode}`"></span>
-                        </div>
-                    </template>
-                </div>
-
-                <div
-                    x-show="showResults && searching"
-                    x-cloak
-                    class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500"
-                >
-                    Searching...
-                </div>
-
-                <div class="text-xs text-gray-500 mt-1">We'll auto-complete from our list</div>
-
-                <div class="mt-1 min-h-5" data-error-container="suburb">
-                    @error('suburb')
-                        <div class="text-xs text-red-600" data-server-error="true" data-field="suburb">{{ $message }}</div>
-                    @enderror
-
-                    <template x-if="touched.suburb && errors.suburb">
-                        <div class="text-xs text-red-600" x-text="errors.suburb"></div>
-                    </template>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-start mb-6">
-                <div>
-                    <label class="block font-semibold text-gray-800 mb-1">Referral code (optional)</label>
-                    <input
-                        type="text"
-                        name="referral_code"
-                        value="{{ old('referral_code') }}"
-                        placeholder="Enter code if you have one"
-                        autocomplete="off"
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition"
-                    >
-                </div>
-
-                <div class="flex flex-col gap-0">
-                    <div class="flex items-center gap-2.5 bg-gray-50 px-5 py-3 rounded-full">
-                        <input
-                            name="age_confirm"
-                            type="checkbox"
-                            id="age_confirm"
-                            x-ref="ageConfirm"
-                            x-model="ageConfirm"
-                            @change="touched.ageConfirm = true; validateAgeConfirm()"
-                            :aria-invalid="errors.ageConfirm ? 'true' : 'false'"
-                            class="w-5 h-5 accent-[#e04ecb]"
-                            {{ old('age_confirm') ? 'checked' : '' }}
-                        >
-                        <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
-                    </div>
-                    <div class="mt-1 min-h-5" data-error-container="ageConfirm">
-                        @error('age_confirm')
-                            <div class="text-xs text-red-600 pl-12" data-server-error="true" data-field="ageConfirm">{{ $message }}</div>
-                        @enderror
-                        <template x-if="touched.ageConfirm && errors.ageConfirm">
-                            <div class="text-xs text-red-600 pl-12" x-text="errors.ageConfirm"></div>
-                        </template>
                     </div>
                 </div>
             </div>
@@ -461,7 +334,7 @@
                 type="submit"
                 class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200"
             >
-                Yes, sign me up — it's free
+                Create account
             </button>
 
             <p class="text-center mt-5 text-gray-500 text-sm">

@@ -33,13 +33,8 @@ class ProviderSignupRequest extends FormRequest
     {
         $rules = [
             'email' => ['required', 'email', 'unique:users,email'],
-            'nickname' => ['required', 'string', 'min:3', 'max:255'],
             'password' => ['required', 'min:8', 'confirmed'],
             'mobile' => ['required', 'regex:/^04\d{8}$/'],
-            'suburb' => ['required', 'string', 'max:255'],
-            'age_confirm' => ['accepted'],
-            'referral_code' => ['nullable', 'string', 'max:255'],
-            'account_user_referral_code' => ['nullable', 'string', 'max:255'],
         ];
 
         if ($this->shouldUseRecaptcha()) {
@@ -53,7 +48,6 @@ class ProviderSignupRequest extends FormRequest
     {
         return [
             'mobile.regex' => 'The mobile number must be a valid Australian mobile starting with 04.',
-            'age_confirm.accepted' => 'You must confirm your age.',
             'g-recaptcha-response.required' => 'Google reCAPTCHA verification failed. Please try again.',
         ];
     }

@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class SignupProvider
 {
@@ -31,16 +32,13 @@ class SignupProvider
         }
 
         Cache::put($pendingKey, [
-            'name' => $validated['nickname'],
+            'name' => $this->generateAccountName($validated['email']),
             'email' => $validated['email'],
             'mobile' => $normalizedMobile,
             'password' => Hash::make($validated['password']),
-            'suburb' => $validated['suburb'],
             'maskMobile' => $phone->toMasked(),
             'role' => User::ROLE_PROVIDER,
             'mobile_verified' => false,
-            'referral_code' => $validated['referral_code'] ?? null,
-            'account_user_referral_code' => $validated['account_user_referral_code'] ?? null,
         ], now()->addMinutes(10));
 
         Cache::put($pendingKey.'_otp', [
@@ -53,5 +51,17 @@ class SignupProvider
 
         return redirect('/otp-verification')
             ->with('success', 'OTP sent successfully. Please verify your mobile number.');
+    }
+
+    private function generateAccountName(string $email): string
+    {
+        $localPart = Str::before($email, '@');
+        $cleaned = trim((string) preg_replace('/[^a-zA-Z0-9]+/', ' ', $localPart));
+
+        if ($cleaned === '') {
+            return 'Provider';
+        }
+
+        return Str::title(Str::limit($cleaned, 255, ''));
     }
 }

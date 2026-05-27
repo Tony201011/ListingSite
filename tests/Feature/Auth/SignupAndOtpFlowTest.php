@@ -37,12 +37,9 @@ class SignupAndOtpFlowTest extends TestCase
     {
         return array_merge([
             'email' => 'newprovider@example.com',
-            'nickname' => 'providerNick',
             'password' => 'SecurePass123',
             'password_confirmation' => 'SecurePass123',
             'mobile' => self::DUMMY_MOBILE,
-            'suburb' => 'Sydney',
-            'age_confirm' => '1',
         ], $overrides);
     }
 
@@ -55,7 +52,7 @@ class SignupAndOtpFlowTest extends TestCase
         $response = $this->from('/signup')->post('/signup', []);
 
         $response->assertRedirect('/signup');
-        $response->assertSessionHasErrors(['email', 'nickname', 'password', 'mobile', 'suburb', 'age_confirm']);
+        $response->assertSessionHasErrors(['email', 'password', 'mobile']);
     }
 
     public function test_signup_rejects_invalid_mobile_format(): void
@@ -124,7 +121,7 @@ class SignupAndOtpFlowTest extends TestCase
         $pendingUser = Cache::get($pendingKey);
         $this->assertNotNull($pendingUser);
         $this->assertSame('newprovider@example.com', $pendingUser['email']);
-        $this->assertSame('providerNick', $pendingUser['name']);
+        $this->assertSame('Newprovider', $pendingUser['name']);
         $this->assertSame(self::DUMMY_MOBILE, $pendingUser['mobile']);
     }
 
@@ -163,11 +160,12 @@ class SignupAndOtpFlowTest extends TestCase
         // User was created
         $this->assertDatabaseHas('users', [
             'email' => 'newprovider@example.com',
-            'name' => 'providerNick',
+            'name' => 'Newprovider',
             'mobile' => self::DUMMY_MOBILE,
             'mobile_verified' => true,
             'role' => User::ROLE_PROVIDER,
         ]);
+        $this->assertDatabaseCount('provider_profiles', 0);
     }
 
     public function test_otp_verify_success_logs_in_the_unverified_user_and_redirects_to_email_notice(): void
