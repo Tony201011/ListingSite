@@ -35,13 +35,7 @@ class HomeController extends Controller
             return redirect()->to($canonicalUrl, 301);
         }
 
-        $viewData = $this->buildProfileFilterViewData->execute(
-            $validated,
-            max(1, ProviderProfile::query()->withoutTrashed()->whereCurrentlyOnline()->count())
-        );
-
-        echo ProviderProfile::query()->withoutTrashed()->whereCurrentlyOnline()->count();
-         die();
+        $viewData = $this->buildProfileFilterViewData->execute($validated);
 
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
         $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
