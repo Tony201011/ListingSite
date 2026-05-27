@@ -16,6 +16,7 @@ class GetProviderActivityLogs
         ?Carbon $dateFrom = null,
         ?Carbon $dateTo = null,
     ): array {
+        $displayTimezone = $this->displayTimezone();
         $empty = [
             'total_logins' => 0,
             'total_sessions' => 0,
@@ -52,7 +53,9 @@ class GetProviderActivityLogs
             return $empty;
         }
 
-        $grouped = $sessions->groupBy(fn (ProviderOnlineLog $log): string => Carbon::parse($log->went_online_at)->format('Y-m-d'));
+        $grouped = $sessions->groupBy(function (ProviderOnlineLog $log) use ($displayTimezone): string {
+            return Carbon::parse($log->went_online_at)->timezone($displayTimezone)->format('Y-m-d');
+        });
 
         $days = [];
         $currentSessionSeconds = 0;
@@ -62,13 +65,15 @@ class GetProviderActivityLogs
             $dayTotalSeconds = 0;
 
             foreach ($daySessions as $log) {
-                $loginAt = Carbon::parse($log->went_online_at);
-                $logoutAt = $log->went_offline_at ? Carbon::parse($log->went_offline_at) : null;
+                $loginAtUtc = Carbon::parse($log->went_online_at);
+                $logoutAtUtc = $log->went_offline_at ? Carbon::parse($log->went_offline_at) : null;
+                $loginAt = $loginAtUtc->copy()->timezone($displayTimezone);
+                $logoutAt = $logoutAtUtc?->copy()->timezone($displayTimezone);
                 $statusValue = strtoupper((string) ($log->status ?? ''));
-                $isOpen = $logoutAt === null && ($statusValue === '' || $statusValue === 'ONLINE');
+                $isOpen = $logoutAtUtc === null && ($statusValue === '' || $statusValue === 'ONLINE');
                 $sessionSeconds = $this->calculateSessionSeconds(
-                    $loginAt,
-                    $logoutAt,
+                    $loginAtUtc,
+                    $logoutAtUtc,
                     $log->duration_seconds,
                     $isOpen,
                     $now,
@@ -145,7 +150,10 @@ class GetProviderActivityLogs
             return null;
         }
 
-        $grouped = $sessions->groupBy(fn (LoginLog $log): string => Carbon::parse($log->created_at)->format('Y-m-d'));
+        $displayTimezone = $this->displayTimezone();
+        $grouped = $sessions->groupBy(function (LoginLog $log) use ($displayTimezone): string {
+            return Carbon::parse($log->created_at)->timezone($displayTimezone)->format('Y-m-d');
+        });
 
         $days = [];
         $currentSessionSeconds = 0;
@@ -155,13 +163,15 @@ class GetProviderActivityLogs
             $dayTotalSeconds = 0;
 
             foreach ($daySessions as $log) {
-                $loginAt = Carbon::parse($log->created_at);
-                $logoutAt = $log->logged_out_at ? Carbon::parse($log->logged_out_at) : null;
+                $loginAtUtc = Carbon::parse($log->created_at);
+                $logoutAtUtc = $log->logged_out_at ? Carbon::parse($log->logged_out_at) : null;
+                $loginAt = $loginAtUtc->copy()->timezone($displayTimezone);
+                $logoutAt = $logoutAtUtc?->copy()->timezone($displayTimezone);
                 $statusValue = strtoupper((string) ($log->status ?? ''));
-                $isOpen = $logoutAt === null && ($statusValue === '' || $statusValue === 'ONLINE');
+                $isOpen = $logoutAtUtc === null && ($statusValue === '' || $statusValue === 'ONLINE');
                 $sessionSeconds = $this->calculateSessionSeconds(
-                    $loginAt,
-                    $logoutAt,
+                    $loginAtUtc,
+                    $logoutAtUtc,
                     $log->duration_seconds,
                     $isOpen,
                     $now,
@@ -272,5 +282,10 @@ class GetProviderActivityLogs
             $now->copy()->subDays($lookbackDays)->startOfDay(),
             $now->copy()->endOfDay(),
         ];
+    }
+
+    private function displayTimezone(): string
+    {
+        return (string) config('app.timezone', 'UTC');
     }
 }

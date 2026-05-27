@@ -309,6 +309,44 @@ class ActivityLogsOnlineStatusTest extends TestCase
             ->assertSee('01h 00m 00s');
     }
 
+    public function test_activity_logs_groups_and_formats_session_times_using_app_timezone(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Selected Profile',
+            'slug' => 'selected-profile',
+        ]);
+
+        $originalTimezone = config('app.timezone');
+        config(['app.timezone' => 'Australia/Sydney']);
+
+        try {
+            Carbon::setTestNow('2026-05-23 12:00:00');
+
+            ProviderOnlineLog::query()->create([
+                'user_id' => $user->id,
+                'provider_profile_id' => $profile->id,
+                'went_online_at' => Carbon::parse('2026-05-22 23:30:00', 'UTC'),
+                'went_offline_at' => Carbon::parse('2026-05-23 00:30:00', 'UTC'),
+                'duration_seconds' => 3600,
+            ]);
+
+            $response = $this->actingAs($user)
+                ->withSession(['active_provider_profile_id' => $profile->id])
+                ->get(route('activity-logs'));
+
+            $response->assertOk()
+                ->assertSee('23 May 2026')
+                ->assertSee('09:30 AM')
+                ->assertSee('10:30 AM')
+                ->assertDontSee('22 May 2026');
+        } finally {
+            config(['app.timezone' => $originalTimezone]);
+        }
+    }
+
     private function createCompleteProfile(): array
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
