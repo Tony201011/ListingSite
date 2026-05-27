@@ -308,7 +308,7 @@ class HomeControllerTest extends TestCase
         $this->assertSame(4, $response->viewData('profiles')->total());
     }
 
-    public function test_online_count_matches_admin_online_card_total(): void
+    public function test_home_page_lists_every_online_profile_counted_by_admin_dashboard(): void
     {
         $approvedUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $approvedProfile = ProviderProfile::query()->create([
@@ -330,13 +330,36 @@ class HomeControllerTest extends TestCase
         ]);
         $this->createActiveOnlineUser($pendingUser, $pendingProfile->id);
 
+        $hiddenUser = $this->createApprovedProvider([
+            'name' => 'Hidden Online Profile',
+            'slug' => 'hidden-online-profile',
+        ]);
+        $hiddenProfile = ProviderProfile::query()->where('user_id', $hiddenUser->id)->firstOrFail();
+        HideShowProfile::query()->create([
+            'user_id' => $hiddenUser->id,
+            'provider_profile_id' => $hiddenProfile->id,
+            'status' => 'hide',
+        ]);
+
+        $this->createApprovedProvider([
+            'name' => 'Blocked Online Profile',
+            'slug' => 'blocked-online-profile',
+            'is_blocked' => true,
+        ]);
+
         $response = $this->get('/');
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
 
         $this->assertSame(
             ProviderProfile::query()->withoutTrashed()->whereCurrentlyOnline()->count(),
             $response->viewData('onlineCount')
         );
-        $this->assertSame(1, $response->viewData('profiles')->total());
+        $this->assertSame($response->viewData('onlineCount'), $profiles->total());
+        $this->assertTrue($names->contains('Approved Online Profile'));
+        $this->assertTrue($names->contains('Pending Online Profile'));
+        $this->assertTrue($names->contains('Hidden Online Profile'));
+        $this->assertTrue($names->contains('Blocked Online Profile'));
     }
 
     public function test_home_page_lists_each_online_profile_for_same_provider_account(): void
@@ -559,7 +582,7 @@ class HomeControllerTest extends TestCase
         $this->assertSame(0, $profiles->total());
     }
 
-    public function test_home_page_does_not_show_blocked_profiles(): void
+    public function test_home_page_shows_online_blocked_profiles_counted_in_admin(): void
     {
         $this->createApprovedProvider([
             'name' => 'Blocked Escort',
@@ -570,7 +593,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = $response->viewData('profiles');
-        $this->assertSame(0, $profiles->total());
+        $this->assertSame(1, $profiles->total());
     }
 
     public function test_home_page_does_not_show_soft_deleted_profiles(): void
@@ -590,7 +613,7 @@ class HomeControllerTest extends TestCase
         $this->assertSame(0, $profiles->total());
     }
 
-    public function test_home_page_does_not_show_hidden_profiles(): void
+    public function test_home_page_shows_online_hidden_profiles_counted_in_admin(): void
     {
         $user = $this->createApprovedProvider(['name' => 'Hidden Escort', 'slug' => 'hidden-escort']);
         $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
@@ -604,7 +627,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = $response->viewData('profiles');
-        $this->assertSame(0, $profiles->total());
+        $this->assertSame(1, $profiles->total());
     }
 
     public function test_home_page_shows_visible_profiles(): void
