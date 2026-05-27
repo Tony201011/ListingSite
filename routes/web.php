@@ -125,17 +125,17 @@ Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name(
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
 Route::get('/escorts/{state}/{suburb}/{slug}/{sequence_id}', [HomeController::class, 'showProfile'])
     ->where([
-        'state'       => '[a-z]{2,3}',
-        'suburb'      => '[a-z0-9-]+',
-        'slug'        => '[a-z0-9-]+',
+        'state' => '[a-z]{2,3}',
+        'suburb' => '[a-z0-9-]+',
+        'slug' => '[a-z0-9-]+',
         'sequence_id' => '[0-9]{3}',
     ])
     ->name('profile.show');
 Route::get('/escorts/{state}/{suburb}/{slug}', [HomeController::class, 'showProfile'])
     ->where([
-        'state'  => '[a-z]{2,3}',
+        'state' => '[a-z]{2,3}',
         'suburb' => '[a-z0-9-]+',
-        'slug'   => '[a-z0-9-]+',
+        'slug' => '[a-z0-9-]+',
     ])
     ->name('profile.show.no-sequence');
 
@@ -207,7 +207,7 @@ Route::middleware('provider.auth')->group(function () {
     Route::get('/my-profiles', [ProfileSwitchController::class, 'index'])->name('profiles.index');
     Route::post('/my-profiles', [ProfileSwitchController::class, 'store'])->name('profiles.store');
     Route::delete('/my-profiles/delete-selected', [ProfileSwitchController::class, 'destroySelected'])->name('profiles.destroy-selected');
-    Route::post('/my-profiles/{profile}/switch', [ProfileSwitchController::class, 'switchTo'])->name('profiles.switch');
+    Route::match(['get', 'post'], '/my-profiles/{profile}/switch', [ProfileSwitchController::class, 'switchTo'])->name('profiles.switch');
     Route::post('/my-profiles/{profile}/switch-edit', [ProfileSwitchController::class, 'switchToEdit'])->name('profiles.switch-edit');
     Route::post('/my-profiles/{profile}/online-status', [ProfileSwitchController::class, 'updateOnlineStatus'])->name('profiles.online-status');
     Route::delete('/my-profiles/{profile}', [ProfileSwitchController::class, 'destroy'])->name('profiles.destroy');

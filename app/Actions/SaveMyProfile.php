@@ -110,7 +110,7 @@ class SaveMyProfile
         return ActionResult::success(['profile_id' => $profile->id], 'Profile updated successfully.');
     }
 
-    private function getNextSequence(string $slug, int|null $excludeId = null): int
+    private function getNextSequence(string $slug, ?int $excludeId = null): int
     {
         $query = ProviderProfile::withTrashed()->where('slug', $slug);
 

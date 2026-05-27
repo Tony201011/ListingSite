@@ -7,7 +7,6 @@ use App\Models\OnlineUser;
 use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
 
-
 class UpdateOnlineNowStatus
 {
     public function execute(ProviderProfile $profile, ?string $status): ActionResult
@@ -128,7 +127,7 @@ class UpdateOnlineNowStatus
             ->each(function (ProviderOnlineLog $log) use ($closedAt): void {
                 $log->update([
                     'went_offline_at' => $closedAt,
-                    'duration_seconds' => max(0, (int) $closedAt->diffInSeconds($log->went_online_at)),
+                    'duration_seconds' => max(0, (int) $log->went_online_at->diffInSeconds($closedAt, true)),
                 ]);
             });
     }

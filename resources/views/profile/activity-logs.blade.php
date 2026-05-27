@@ -97,6 +97,7 @@
                                 <th>Sessions</th>
                                 <th>Login Time</th>
                                 <th>Logout Time</th>
+                                <th>Duration</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -104,42 +105,7 @@
                         <tbody>
                             @foreach ($activity['days'] as $day)
                                 @php
-                                    $dailyTotalSeconds = 0;
-
-                                    foreach (($day['sessions'] ?? []) as $sessionForTotal) {
-                                        try {
-                                            $sessionDate = $sessionForTotal['date'] ?? $day['date'] ?? null;
-                                            $loginTime = $sessionForTotal['login_at'] ?? null;
-                                            $logoutTime = $sessionForTotal['logout_at'] ?? null;
-
-                                            if (empty($sessionDate) || empty($loginTime) || empty($logoutTime)) {
-                                                continue;
-                                            }
-
-                                            $invalidLogoutValues = ['online', 'currently online', 'n/a', 'na', '-', '--', ''];
-
-                                            if (in_array(strtolower(trim($logoutTime)), $invalidLogoutValues, true)) {
-                                                continue;
-                                            }
-
-                                            $loginAt = \Carbon\Carbon::parse($sessionDate . ' ' . $loginTime);
-                                            $logoutAt = \Carbon\Carbon::parse($sessionDate . ' ' . $logoutTime);
-
-                                            if ($logoutAt->lessThan($loginAt)) {
-                                                $logoutAt->addDay();
-                                            }
-
-                                            $dailyTotalSeconds += $loginAt->diffInSeconds($logoutAt);
-                                        } catch (\Throwable $e) {
-                                            continue;
-                                        }
-                                    }
-
-                                    $hours = floor($dailyTotalSeconds / 3600);
-                                    $minutes = floor(($dailyTotalSeconds % 3600) / 60);
-                                    $seconds = $dailyTotalSeconds % 60;
-
-                                    $dailyTotal = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+                                    $dailyTotal = $day['total_duration'] ?? '00h 00m 00s';
                                 @endphp
 
                                 {{-- Day header --}}
@@ -151,7 +117,7 @@
                                         </span>
                                     </td>
 
-                                    <td colspan="2" class="al-day-total">
+                                    <td colspan="3" class="al-day-total">
                                         Daily total: <strong>{{ $dailyTotal }}</strong>
                                     </td>
 
@@ -165,6 +131,7 @@
                                         <td></td>
                                         <td>{{ $session['login_at'] }}</td>
                                         <td>{{ $session['logout_at'] }}</td>
+                                        <td>{{ $session['duration'] }}</td>
                                         <td>
                                             <span class="al-badge al-badge--{{ $session['is_current'] ? 'online' : 'offline' }}">
                                                 {{ $session['status'] }}

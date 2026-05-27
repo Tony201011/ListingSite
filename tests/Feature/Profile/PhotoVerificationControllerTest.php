@@ -116,8 +116,9 @@ class PhotoVerificationControllerTest extends TestCase
             ],
         ]);
 
-        $response->assertForbidden();
-        $response->assertJsonFragment(['message' => 'You already have an active verification submission. Please delete your existing verification photos before uploading new ones.']);
+        $response->assertStatus(422);
+        $response->assertJsonFragment(['message' => 'Validation failed.']);
+        $response->assertJsonValidationErrors(['photos']);
     }
 
     public function test_upload_allowed_after_existing_record_is_soft_deleted(): void
@@ -295,6 +296,43 @@ class PhotoVerificationControllerTest extends TestCase
         $this->assertSoftDeleted('photo_verifications', ['id' => $verification->id]);
         // 2 total rows: 1 soft-deleted (old) + 1 active (new)
         $this->assertDatabaseCount('photo_verifications', 2);
+    }
+
+    public function test_provider_can_replace_deleted_photo_with_single_new_upload(): void
+    {
+        $user = $this->createProvider();
+        $profile = $user->providerProfile;
+
+        $verification = PhotoVerification::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'photos' => [
+                ['path' => 'verification/test/photo1.jpg', 'url' => 'http://example.com/photo1.jpg', 'name' => 'photo1.jpg'],
+                ['path' => 'verification/test/photo2.jpg', 'url' => 'http://example.com/photo2.jpg', 'name' => 'photo2.jpg'],
+            ],
+            'status' => 'rejected',
+            'submitted_at' => now()->subDay(),
+        ]);
+
+        $this->actingAsProvider($user)->postJson(route('photo-verification.delete-photo'), [
+            'path' => 'verification/test/photo1.jpg',
+        ])->assertOk();
+
+        $response = $this->actingAsProvider($user)->postJson(route('photo-verification.upload'), [
+            'photos' => [
+                UploadedFile::fake()->image('replacement.jpg'),
+            ],
+        ]);
+
+        $response->assertOk();
+        $response->assertJson(['verification' => ['id' => $verification->id, 'status' => 'pending']]);
+
+        $verification->refresh();
+
+        $this->assertCount(2, $verification->photos);
+        $this->assertSame('verification/test/photo2.jpg', $verification->photos[0]['path']);
+        $this->assertSame('pending', $verification->status);
+        $this->assertNotNull($verification->submitted_at);
     }
 
     public function test_delete_photo_returns_404_for_unknown_path(): void

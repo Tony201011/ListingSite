@@ -65,8 +65,18 @@ class MyProfileController extends Controller
             'date_to' => [
                 'nullable',
                 'date',
-                'after_or_equal:date_from',
                 Rule::requiredIf(fn (): bool => $request->query('range') === 'custom'),
+                function (string $attribute, mixed $value, \Closure $fail) use ($request): void {
+                    $dateFrom = $request->input('date_from');
+
+                    if (! $dateFrom || ! $value) {
+                        return;
+                    }
+
+                    if (Carbon::parse((string) $value)->lt(Carbon::parse((string) $dateFrom))) {
+                        $fail('The date to field must be a date after or equal to date from.');
+                    }
+                },
             ],
         ]);
 

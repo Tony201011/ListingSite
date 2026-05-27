@@ -26,9 +26,10 @@ class GetProfileShowData
                 'availabilities',
                 'tours',
                 'userVideos',
-                'onlineUser',
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'profileMessage',
+                'photoVerification' => fn ($q) => $q->where('status', 'approved')->orderByDesc('submitted_at')->limit(1),
                 'user',
                 'city',
                 'state',
@@ -44,7 +45,7 @@ class GetProfileShowData
 
         if (
             $providerProfile->is_blocked
-            || (! $isFeatured && $providerProfile->onlineUser !== null && ! $this->isProfileOnline($providerProfile))
+            || (! $isFeatured && ! $this->isProfileOnline($providerProfile))
         ) {
             return [
                 'offline' => true,
@@ -277,7 +278,7 @@ class GetProfileShowData
             'your_length' => $categoryNames->get($providerProfile->your_length_id) ?? '',
             'age_group' => $categoryNames->get($providerProfile->age_group_id) ?? '',
             'profile_message' => $providerProfile->profileMessage?->message ?? '',
-            'active' => $providerProfile->onlineUser?->isCurrentlyOnline() ?? false,
+            'active' => $providerProfile->isCurrentlyOnline(),
             'available_now' => $providerProfile->availableNow?->isCurrentlyAvailable() ?? false,
             'available_expires_at' => $providerProfile->availableNow?->isCurrentlyAvailable()
                 ? $providerProfile->availableNow->available_expires_at
@@ -285,6 +286,7 @@ class GetProfileShowData
             'suburb' => $this->extractSuburbName($providerProfile->suburb ?? ''),
             'contact_method' => $providerProfile->contact_method ?? '',
             'phone_contact_preference' => $providerProfile->phone_contact_preference ?? '',
+            'photos_verified' => $providerProfile->photoVerification->isNotEmpty(),
         ];
     }
 
@@ -373,27 +375,13 @@ class GetProfileShowData
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
-            ->where(function (Builder $onlineConstraint): void {
-                $onlineConstraint
-                    ->whereHas('onlineUser', function (Builder $onlineQuery): void {
-                        $onlineQuery->where('status', 'online');
-                    })
-                    ->orWhere(function (Builder $legacyConstraint): void {
-                        $legacyConstraint
-                            ->whereDoesntHave('onlineUser')
-                            ->whereHas('user.onlineUser', function (Builder $legacyOnline): void {
-                                $legacyOnline->whereNull('provider_profile_id')
-                                    ->where('status', 'online');
-                            });
-                    });
-            })
+            ->whereCurrentlyOnline()
             ->with([
                 'primaryProfileImage',
                 'rates',
-                'onlineUser',
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'user',
-                'user.onlineUser',
                 'city',
                 'state',
             ])
@@ -423,12 +411,7 @@ class GetProfileShowData
 
                 $firstRate = $profile->rates?->first();
                 $rateDisplay = $this->formatRate($firstRate);
-                $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
-
-                if (! $isOnline) {
-                    $isOnline = $profile->user?->onlineUser?->provider_profile_id === null
-                        && ($profile->user?->onlineUser?->isCurrentlyOnline() ?? false);
-                }
+                $isOnline = $profile->isCurrentlyOnline();
 
                 return [
                     'slug' => $profile->slug ?? '',
@@ -456,13 +439,7 @@ class GetProfileShowData
 
     private function isProfileOnline(ProviderProfile $providerProfile): bool
     {
-        $onlineUser = $providerProfile->onlineUser;
-
-        if ($onlineUser === null) {
-            return false;
-        }
-
-        return $onlineUser->isCurrentlyOnline();
+        return $providerProfile->isCurrentlyOnline();
     }
 
     private function normalizeMediaUrl(?string $path): ?string

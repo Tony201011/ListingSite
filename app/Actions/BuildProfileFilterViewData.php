@@ -8,6 +8,7 @@ use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -54,7 +55,11 @@ class BuildProfileFilterViewData
         'time-waster-shield' => 'time_waster_shield',
     ];
 
-    public function execute(array $validated): array
+    public function execute(
+        array $validated,
+        ?int $profilesPerPage = null,
+        bool $includeOfflineProfiles = false
+    ): array
     {
         $filterSlugs = [
             'hair-color',
@@ -208,6 +213,9 @@ class BuildProfileFilterViewData
             $girlsMode,
             $escortNameQuery,
             $localFeaturedStateName,
+            $profilesPerPage,
+            $includeOfflineProfiles,
+            $locationFromRoute,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -230,6 +238,13 @@ class BuildProfileFilterViewData
         $localBannerProfiles = $escortNameQuery === '' && ($locationStateQuery !== '' || ($locationQuery !== '' && str_contains($locationQuery, ',')))
             ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery, $resolvedLocation)
             : collect();
+
+        $onlineCount = $includeOfflineProfiles
+            ? collect($profiles->items())->where('active', true)->count()
+            : ProviderProfile::query()
+                ->withoutTrashed()
+                ->whereCurrentlyOnline()
+                ->count();
 
         return compact(
             'filterGroups',
@@ -255,6 +270,7 @@ class BuildProfileFilterViewData
             'escortNameQuery',
             'homeBannerProfiles',
             'localBannerProfiles',
+            'onlineCount',
         );
     }
 
@@ -277,15 +293,13 @@ class BuildProfileFilterViewData
         );
     }
 
-    private function resolveProfilesPerPage(): int
+    private function resolveProfilesPerPage(?int $profilesPerPage = null): int
     {
-        $value = (int) cache()->remember(
-            'site_setting.home_page_records',
-            now()->addHour(),
-            fn () => SiteSetting::query()->value('home_page_records') ?? self::DEFAULT_PROFILES_PER_PAGE
-        );
+        if ($profilesPerPage !== null) {
+            return max(1, $profilesPerPage);
+        }
 
-        return $value >= 1 ? $value : self::DEFAULT_PROFILES_PER_PAGE;
+        return self::DEFAULT_PROFILES_PER_PAGE;
     }
 
     /**
@@ -309,10 +323,13 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUser',
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
-                'user.onlineUser',
                 'city',
                 'state',
             ])
@@ -381,20 +398,7 @@ class BuildProfileFilterViewData
 
     private function applyActiveOnlineProfileConstraint(Builder $query): void
     {
-        $query->where(function (Builder $onlineConstraint): void {
-            $onlineConstraint
-                ->whereHas('onlineUser', function (Builder $onlineQuery): void {
-                    $onlineQuery->where('status', 'online');
-                })
-                ->orWhere(function (Builder $legacyConstraint): void {
-                    $legacyConstraint
-                        ->whereDoesntHave('onlineUser')
-                        ->whereHas('user.onlineUser', function (Builder $legacyOnline): void {
-                            $legacyOnline->whereNull('provider_profile_id')
-                                ->where('status', 'online');
-                        });
-                });
-        });
+        $query->whereCurrentlyOnline();
     }
 
     private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
@@ -427,6 +431,9 @@ class BuildProfileFilterViewData
         string $girlsMode = 'all',
         string $escortNameQuery = '',
         ?string $localFeaturedStateName = null,
+        ?int $profilesPerPage = null,
+        bool $includeOfflineProfiles = false,
+        bool $locationFromRoute = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -446,15 +453,20 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUser',
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
-                'user.onlineUser',
                 'city',
                 'state',
             ]);
 
-        $this->applyActiveOnlineProfileConstraint($query);
+        if (! $includeOfflineProfiles) {
+            $this->applyActiveOnlineProfileConstraint($query);
+        }
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
@@ -625,9 +637,7 @@ class BuildProfileFilterViewData
                 break;
         }
 
-        $appendLocationFromRoute = isset($locationFromRoute)
-            ? (bool) $locationFromRoute
-            : (bool) ($validated['location_from_route'] ?? false);
+        $appendLocationFromRoute = $locationFromRoute;
 
         $appendParams = array_filter([
             'location' => $appendLocationFromRoute ? null : ($locationQuery ?: null),
@@ -647,7 +657,7 @@ class BuildProfileFilterViewData
         }
 
         $paginator = $query
-            ->paginate($this->resolveProfilesPerPage())
+            ->paginate($this->resolveProfilesPerPage($profilesPerPage))
             ->appends($appendParams);
 
         $serviceIds = $paginator->getCollection()
@@ -729,25 +739,29 @@ class BuildProfileFilterViewData
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
-            ->leftJoin('online_users', 'online_users.provider_profile_id', '=', 'provider_profiles.id')
             ->where(function ($q) {
                 $q->whereNull('hide_show_profiles.id')
                     ->orWhere('hide_show_profiles.status', 'show');
             })
-            ->where(function ($q) {
-                $q->where(function ($onlineQ) {
-                    $onlineQ->where('online_users.status', 'online');
-                })->orWhere(function ($legacyQ) {
-                    $legacyQ->whereNotExists(function ($noProfileRow): void {
-                        $noProfileRow->selectRaw('1')
-                            ->from('online_users as profile_online_users')
-                            ->whereColumn('profile_online_users.provider_profile_id', 'provider_profiles.id');
-                    })->whereExists(function ($exists): void {
-                        $exists->selectRaw('1')
-                            ->from('online_users as legacy_online_users')
-                            ->whereColumn('legacy_online_users.user_id', 'provider_profiles.user_id')
-                            ->whereNull('legacy_online_users.provider_profile_id')
-                            ->where('legacy_online_users.status', 'online');
+            ->where(function ($query) {
+                $query->whereExists(function ($onlineQuery) {
+                    $onlineQuery->selectRaw('1')
+                        ->from('online_users')
+                        ->whereColumn('online_users.provider_profile_id', 'provider_profiles.id')
+                        ->whereNotNull('online_users.provider_profile_id')
+                        ->where('online_users.status', 'online');
+                })->orWhere(function ($legacyQuery): void {
+                    $legacyQuery->whereNotExists(function ($profileLinkedQuery) {
+                        $profileLinkedQuery->selectRaw('1')
+                            ->from('online_users')
+                            ->whereColumn('online_users.provider_profile_id', 'provider_profiles.id')
+                            ->whereNotNull('online_users.provider_profile_id');
+                    })->whereExists(function ($legacyOnlineQuery) {
+                        $legacyOnlineQuery->selectRaw('1')
+                            ->from('online_users')
+                            ->whereColumn('online_users.user_id', 'provider_profiles.user_id')
+                            ->whereNull('online_users.provider_profile_id')
+                            ->where('online_users.status', 'online');
                     });
                 });
             })
@@ -987,10 +1001,13 @@ class BuildProfileFilterViewData
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
-                'onlineUser',
+                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
+                'photoVerification' => fn ($q) => $q
+                    ->where('status', 'approved')
+                    ->orderByDesc('submitted_at')
+                    ->orderByDesc('id'),
                 'user',
-                'user.onlineUser',
                 'city',
                 'state',
             ])
@@ -1029,11 +1046,7 @@ class BuildProfileFilterViewData
             $categoryNames
         );
 
-        $isOnline = $profile->onlineUser?->isCurrentlyOnline() ?? false;
-        if (! $isOnline && $profile->onlineUser === null) {
-            $isOnline = $profile->user?->onlineUser?->provider_profile_id === null
-                && ($profile->user?->onlineUser?->isCurrentlyOnline() ?? false);
-        }
+        $isOnline = $profile->isCurrentlyOnline();
         $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
 
         return [
@@ -1049,11 +1062,11 @@ class BuildProfileFilterViewData
             'height' => '',
             'service_1' => $services[0] ?? '',
             'service_2' => $services[1] ?? '',
-            'date' => $profile->created_at->format('d/m/Y'),
+            'date' => $this->formatRelativeDate($profile->created_at),
             'description' => $profile->description ?? '',
             'active' => $isOnline,
             'available_now' => $isAvailableNow,
-            'verified' => $profile->is_verified,
+            'verified' => $profile->photoVerification->isNotEmpty(),
             'featured' => (bool) $profile->is_featured,
             'home_featured' => $profile->home_featured_expires_at && $profile->home_featured_expires_at->isFuture(),
             'local_banner' => $profile->local_banner_expires_at && $profile->local_banner_expires_at->isFuture(),
@@ -1090,5 +1103,31 @@ class BuildProfileFilterViewData
         $digits = preg_replace('/[^\d]/', '', $value);
 
         return $digits !== '' ? (int) $digits : 0;
+    }
+
+    private function formatRelativeDate(Carbon $date): string
+    {
+        $today = now()->startOfDay();
+        $diffDays = (int) $date->startOfDay()->diffInDays($today, false);
+
+        if ($diffDays === 0) {
+            return 'Today';
+        }
+
+        if ($diffDays === 1) {
+            return 'Yesterday';
+        }
+
+        if ($diffDays <= 6) {
+            return "{$diffDays} days ago";
+        }
+
+        if ($diffDays <= 29) {
+            $weeks = (int) ceil($diffDays / 7);
+
+            return $weeks === 1 ? '1 week ago' : "{$weeks} weeks ago";
+        }
+
+        return $date->format('d/m/Y');
     }
 }

@@ -3,6 +3,7 @@ function verifyPage(config) {
         uploadUrl: config.uploadUrl || '',
         deleteUrl: config.deleteUrl || '',
         csrfToken: config.csrfToken || '',
+        existingPhotoCount: Number(config.existingPhotoCount || 0),
 
         isModalOpen: false,
         activeTab: 'files',
@@ -11,6 +12,150 @@ function verifyPage(config) {
         capturedImage: '',
         stream: null,
         isUploading: false,
+
+        // Per-slot drag-and-drop state
+        pendingPhoto1: null,
+        pendingPhoto2: null,
+        previewUrl1: '',
+        previewUrl2: '',
+        isDraggingSlot1: false,
+        isDraggingSlot2: false,
+        isUploadingSlots: false,
+
+        // --- Per-slot drag-and-drop ---
+
+        openSlotFilePicker(slot) {
+            const ref = slot === 1 ? this.$refs.slotFileInput1 : this.$refs.slotFileInput2;
+            if (ref) ref.click();
+        },
+
+        handleSlotDrop(event, slot) {
+            if (slot === 1) this.isDraggingSlot1 = false;
+            else this.isDraggingSlot2 = false;
+
+            const files = Array.from(event.dataTransfer.files || []);
+            if (files.length > 0) this.setSlotFile(slot, files[0]);
+        },
+
+        handleSlotFileSelect(event, slot) {
+            const files = Array.from(event.target.files || []);
+            if (files.length > 0) this.setSlotFile(slot, files[0]);
+            event.target.value = '';
+        },
+
+        setSlotFile(slot, file) {
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+            if (!allowedTypes.includes(file.type)) {
+                this.error('Only JPG, PNG, and WebP images are allowed.');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                this.error('Each photo must be 10 MB or smaller.');
+                return;
+            }
+
+            if (slot === 1) {
+                if (this.previewUrl1) URL.revokeObjectURL(this.previewUrl1);
+                this.pendingPhoto1 = file;
+                this.previewUrl1 = URL.createObjectURL(file);
+            } else {
+                if (this.previewUrl2) URL.revokeObjectURL(this.previewUrl2);
+                this.pendingPhoto2 = file;
+                this.previewUrl2 = URL.createObjectURL(file);
+            }
+        },
+
+        removeSlotFile(slot) {
+            if (slot === 1) {
+                if (this.previewUrl1) URL.revokeObjectURL(this.previewUrl1);
+                this.pendingPhoto1 = null;
+                this.previewUrl1 = '';
+            } else {
+                if (this.previewUrl2) URL.revokeObjectURL(this.previewUrl2);
+                this.pendingPhoto2 = null;
+                this.previewUrl2 = '';
+            }
+        },
+
+        getPendingSlotCount() {
+            return [this.pendingPhoto1, this.pendingPhoto2].filter(Boolean).length;
+        },
+
+        getRemainingPhotoSlots() {
+            return Math.max(0, 2 - this.existingPhotoCount);
+        },
+
+        getModalRequiredPhotoCount() {
+            return this.getRemainingPhotoSlots();
+        },
+
+        getPhotoCountLabel(count) {
+            return `${count} photo${count === 1 ? '' : 's'}`;
+        },
+
+        canUploadSlotPhotos() {
+            const totalPhotos = this.existingPhotoCount + this.getPendingSlotCount();
+
+            return this.getPendingSlotCount() > 0 && totalPhotos === 2;
+        },
+
+        async uploadSlotPhotos() {
+            if (!this.canUploadSlotPhotos()) {
+                this.error('Please fill the remaining verification photo slots before uploading.');
+                return;
+            }
+
+            this.isUploadingSlots = true;
+
+            const formData = new FormData();
+            [this.pendingPhoto1, this.pendingPhoto2]
+                .filter(Boolean)
+                .forEach((photo) => formData.append('photos[]', photo));
+
+            try {
+                const response = await fetch(this.uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error('Server returned an invalid response.');
+                }
+
+                if (!response.ok) {
+                    if (data.errors) {
+                        const firstGroup = Object.values(data.errors)[0];
+                        throw new Error(Array.isArray(firstGroup) ? firstGroup[0] : (data.message || 'Upload failed.'));
+                    }
+                    throw new Error(data.message || 'Upload failed.');
+                }
+
+                this.toast(data.message || 'Verification photos uploaded successfully.');
+                this.pendingPhoto1 = null;
+                this.pendingPhoto2 = null;
+                this.previewUrl1 = '';
+                this.previewUrl2 = '';
+                this.existingPhotoCount = 2;
+
+                setTimeout(() => window.location.reload(), 1200);
+            } catch (err) {
+                this.error(err.message || 'Something went wrong while uploading.');
+            } finally {
+                this.isUploadingSlots = false;
+            }
+        },
+
+        // --- Modal ---
 
         openModal() {
             this.activeTab = 'files';
@@ -61,9 +206,15 @@ function verifyPage(config) {
 
         addFiles(files) {
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const maxFiles = this.getModalRequiredPhotoCount();
             const existingKeys = new Set(
                 this.selectedFiles.map((file) => `${file.name}-${file.size}-${file.lastModified || 0}`)
             );
+
+            if (maxFiles <= 0) {
+                this.error('You have no remaining verification photo slots.');
+                return;
+            }
 
             for (const file of files) {
                 if (!allowedTypes.includes(file.type)) {
@@ -81,8 +232,8 @@ function verifyPage(config) {
                     continue;
                 }
 
-                if (this.selectedFiles.length >= 5) {
-                    this.error('You can upload a maximum of 5 photos.');
+                if (this.selectedFiles.length >= maxFiles) {
+                    this.error(`You can upload a maximum of ${this.getPhotoCountLabel(maxFiles)}.`);
                     break;
                 }
 
@@ -185,8 +336,15 @@ function verifyPage(config) {
                 return;
             }
 
-            if (this.selectedFiles.length >= 5) {
-                this.error('You can upload a maximum of 5 photos.');
+            const maxFiles = this.getModalRequiredPhotoCount();
+
+            if (maxFiles <= 0) {
+                this.error('You have no remaining verification photo slots.');
+                return;
+            }
+
+            if (this.selectedFiles.length >= maxFiles) {
+                this.error(`You can upload a maximum of ${this.getPhotoCountLabel(maxFiles)}.`);
                 return;
             }
 
@@ -207,8 +365,20 @@ function verifyPage(config) {
         },
 
         async uploadFiles() {
-            if (this.selectedFiles.length < 2) {
-                this.error('Please select at least two photos.');
+            const requiredPhotos = this.getModalRequiredPhotoCount();
+
+            if (requiredPhotos <= 0) {
+                this.error('You have no remaining verification photo slots.');
+                return;
+            }
+
+            if (this.selectedFiles.length < requiredPhotos) {
+                this.error(`Please select ${this.getPhotoCountLabel(requiredPhotos)}.`);
+                return;
+            }
+
+            if (this.selectedFiles.length > requiredPhotos) {
+                this.error(`You can upload a maximum of ${this.getPhotoCountLabel(requiredPhotos)}.`);
                 return;
             }
 
