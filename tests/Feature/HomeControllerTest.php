@@ -1125,7 +1125,7 @@ class HomeControllerTest extends TestCase
         $this->assertArrayNotHasKey('New Escort', $profiles->all());
     }
 
-    public function test_home_page_does_not_mark_profile_online_when_only_legacy_online_user_row_exists(): void
+    public function test_home_page_marks_profile_online_when_only_legacy_online_user_row_exists(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1151,7 +1151,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
-        $this->assertArrayNotHasKey('Legacy Linked Escort', $profiles->all());
+        $this->assertArrayHasKey('Legacy Linked Escort', $profiles->all());
     }
 
     public function test_home_page_keeps_profile_offline_when_profile_linked_row_is_offline_even_if_legacy_online_row_exists(): void
@@ -1193,7 +1193,7 @@ class HomeControllerTest extends TestCase
         $this->assertArrayNotHasKey('Legacy Online With Offline Profile Row Escort', $profiles->all());
     }
 
-    public function test_home_page_ignores_legacy_online_rows_when_syncing_profile_active_state(): void
+    public function test_home_page_includes_legacy_online_rows_when_profile_has_no_profile_linked_row(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1236,8 +1236,12 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
         $profiles = collect($response->viewData('profiles')->items());
         $legacyProfileData = $profiles->firstWhere('name', $legacyProfile->name);
+        $otherProfileData = $profiles->firstWhere('name', $otherProfile->name);
 
-        $this->assertNull($legacyProfileData);
+        // Legacy profile (no profile-linked row) is online via the user's legacy row
+        $this->assertNotNull($legacyProfileData);
+        // Other profile (explicit offline profile-linked row) stays offline
+        $this->assertNull($otherProfileData);
     }
 
     public function test_home_page_hides_featured_profile_when_offline(): void
