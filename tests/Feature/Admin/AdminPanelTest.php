@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Models\OnlineUser;
 use Filament\Panel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -148,5 +149,37 @@ class AdminPanelTest extends TestCase
         $response->assertOk();
         $response->assertSeeText('Featured Profile');
         $response->assertDontSeeText('Regular Profile');
+    }
+
+    public function test_provider_view_page_shows_online_status_for_each_profile_in_same_account(): void
+    {
+        $admin = $this->createAdmin();
+        $provider = $this->createProvider(['name' => 'Multi Account']);
+
+        $firstProfile = $provider->providerProfiles()->first();
+        $firstProfile->update([
+            'name' => 'Primary Profile',
+            'slug' => 'primary-profile',
+        ]);
+
+        $secondProfile = ProviderProfile::query()->create([
+            'user_id' => $provider->id,
+            'name' => 'Second Profile',
+            'slug' => 'second-profile',
+            'profile_sequence' => 2,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $provider->id,
+            'provider_profile_id' => $secondProfile->id,
+            'status' => 'online',
+        ]);
+
+        $response = $this->actingAs($admin, 'admin')->get("/admin/providers/{$firstProfile->id}/view");
+
+        $response->assertOk();
+        $response->assertSeeText('Primary Profile');
+        $response->assertSeeText('Second Profile');
+        $response->assertSeeTextInOrder(['Primary Profile', 'Offline', 'Second Profile', 'Online']);
     }
 }

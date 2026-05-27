@@ -115,6 +115,10 @@ class UserResource extends Resource
             ->with([
                 'user.providerProfiles' => fn (HasMany $query): HasMany => $query
                     ->withTrashed()
+                    ->with([
+                        'onlineUsers' => fn (Builder $onlineQuery): Builder => $onlineQuery
+                            ->whereNotNull('provider_profile_id'),
+                    ])
                     ->latest('id'),
                 'profileImages',
                 'userVideos',
@@ -830,6 +834,12 @@ class UserResource extends Resource
                                                     default => 'warning',
                                                 })
                                                 ->placeholder('-'),
+
+                                            TextEntry::make('online_status')
+                                                ->label('Online Status')
+                                                ->badge()
+                                                ->state(fn (ProviderProfile $record): string => $record->isCurrentlyOnline() ? 'Online' : 'Offline')
+                                                ->color(fn (string $state): string => $state === 'Online' ? 'success' : 'gray'),
 
                                             IconEntry::make('is_verified')
                                                 ->label('Verified')
