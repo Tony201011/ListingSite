@@ -18,6 +18,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class HomeControllerTest extends TestCase
@@ -1247,6 +1248,10 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_distance_filter_includes_legacy_online_profile_without_profile_linked_row(): void
     {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            $this->markTestSkipped('Distance filter uses MySQL-specific SQL (SUBSTRING_INDEX, haversine trig functions).');
+        }
+
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
         Postcode::query()->create([
@@ -1285,6 +1290,10 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_distance_filter_keeps_profile_offline_when_profile_linked_row_is_offline_even_with_legacy_online_row(): void
     {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            $this->markTestSkipped('Distance filter uses MySQL-specific SQL (SUBSTRING_INDEX, haversine trig functions).');
+        }
+
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
         Postcode::query()->create([
