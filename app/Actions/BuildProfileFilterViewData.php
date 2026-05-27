@@ -59,8 +59,7 @@ class BuildProfileFilterViewData
         array $validated,
         ?int $profilesPerPage = null,
         bool $includeOfflineProfiles = false
-    ): array
-    {
+    ): array {
         $filterSlugs = [
             'hair-color',
             'hair-length',
@@ -240,10 +239,7 @@ class BuildProfileFilterViewData
 
         $onlineCount = $includeOfflineProfiles
             ? collect($profiles->items())->where('active', true)->count()
-            : ProviderProfile::query()
-                ->withoutTrashed()
-                ->whereCurrentlyOnline()
-                ->count();
+            : $profiles->total();
 
         return compact(
             'filterGroups',
