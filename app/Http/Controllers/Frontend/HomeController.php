@@ -39,6 +39,12 @@ class HomeController extends Controller
             $validated,
             max(1, ProviderProfile::query()->withoutTrashed()->whereCurrentlyOnline()->count())
         );
+
+
+        echo '<pre>';
+            print_r($viewData);
+        echo '</pre>';
+        die();
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
         $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 
