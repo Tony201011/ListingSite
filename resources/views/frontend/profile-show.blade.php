@@ -221,6 +221,19 @@ $profileTags = array_values(array_unique(array_merge(
                         @endforeach
                     </div>
 
+                    @if(!empty($galleryImages))
+                        @if($profile['photos_verified'] ?? false)
+                            <div class="photo-verification-notice photo-verification-verified">
+                                <span>📌 Photos verified by editor.</span>
+                            </div>
+                        @else
+                            <div class="photo-verification-notice photo-verification-unverified">
+                                <span>📌 Photos are for illustration purposes only.</span>
+                                <span>📌 Photos NOT verified.</span>
+                            </div>
+                        @endif
+                    @endif
+
                     <!-- Videos Section -->
 
 @include('components.gallery-modal')

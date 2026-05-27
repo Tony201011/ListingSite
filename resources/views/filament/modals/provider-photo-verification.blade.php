@@ -1,8 +1,13 @@
 @php
     /** @var \App\Models\ProviderProfile $providerProfile */
     /** @var \App\Models\PhotoVerification|null $verification */
-    $galleryPreviewHeight = 120;
-    $galleryPreviewWidth = 120;
+
+    $verificationPhotos = is_array($verificationPhotos ?? null)
+        ? $verificationPhotos
+        : ($verification?->photos ?? []);
+
+    $galleryPreviewHeight = 150;
+    $galleryPreviewWidth = 150;
 @endphp
 
 <div class="pv-modal-content">
@@ -40,11 +45,13 @@
     </section>
 
     @if ($verification)
+
         <section class="pv-card">
             <div class="pv-card-header">Verification Submission</div>
 
             <table class="pv-table">
                 <tbody>
+
                     <tr>
                         <th>Verification Status</th>
                         <td>
@@ -56,7 +63,9 @@
 
                     <tr>
                         <th>Submitted At</th>
-                        <td>{{ $verification->submitted_at?->format('M d, Y h:i A') ?: '—' }}</td>
+                        <td>
+                            {{ $verification->submitted_at?->format('M d, Y h:i A') ?: '—' }}
+                        </td>
                     </tr>
 
                     <tr>
@@ -67,35 +76,46 @@
                             </div>
                         </td>
                     </tr>
+
                 </tbody>
             </table>
         </section>
 
         <section class="pv-card">
-            <div class="pv-card-header">Uploaded Verification Photo</div>
+            <div class="pv-card-header">
+                Uploaded Verification Photos
+            </div>
 
             <div class="pv-gallery-container">
+
                 <div class="photo-verification-gallery">
+
                     {!! \App\Support\PhotoVerificationGalleryRenderer::render(
-                        $verification->photos,
+                        $verificationPhotos,
                         $galleryPreviewHeight,
                         $galleryPreviewWidth,
                         null,
                         false,
-                        false
+                        true
                     ) !!}
+
                 </div>
+
             </div>
         </section>
+
     @else
+
         <div class="pv-empty">
             No photo verification submission is available for this provider profile yet.
         </div>
+
     @endif
 
 </div>
 
 <style>
+
     .pv-modal-content {
         max-height: calc(100vh - 180px);
         overflow-y: auto;
@@ -138,7 +158,7 @@
 
     .pv-table th {
         width: 275px;
-        padding: 20px;
+        padding: 14px;
         background: #f9fafb;
         border-right: 1px solid #e5e7eb;
         text-align: left;
@@ -151,7 +171,7 @@
     }
 
     .pv-table td {
-        padding: 20px;
+        padding: 13px;
         vertical-align: top;
         font-size: 17px;
         color: #111827;
@@ -185,20 +205,23 @@
     }
 
     .pv-gallery-container {
-        padding: 16px 20px 20px;
+        padding: 20px;
     }
 
-    .photo-verification-gallery,
-    .photo-verification-gallery > div {
+    /* =========================================
+       FIXED IMAGE GALLERY CSS
+    ========================================= */
+
+    .photo-verification-gallery {
         display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 14px !important;
+        flex-direction: column !important;
         align-items: flex-start !important;
-        max-width: 100% !important;
-        overflow: visible !important;
+        gap: 18px !important;
+        width: 100% !important;
     }
 
     .photo-verification-gallery a,
+    .photo-verification-gallery button,
     .photo-verification-gallery img,
     .photo-verification-gallery iframe,
     .photo-verification-gallery embed,
@@ -209,15 +232,32 @@
         max-width: 150px !important;
         min-height: 150px !important;
         max-height: 150px !important;
-        display: block !important;
+
         overflow: hidden !important;
         border-radius: 14px !important;
+        cursor: pointer !important;
     }
 
-    .photo-verification-gallery img {
+    .photo-verification-gallery img,
+    .photo-verification-gallery iframe,
+    .photo-verification-gallery embed,
+    .photo-verification-gallery object {
+        display: block !important;
+
+        width: 100% !important;
+        height: 100% !important;
+
+        min-width: 100% !important;
+        min-height: 100% !important;
+
+        max-width: 100% !important;
+        max-height: 100% !important;
+
         object-fit: cover !important;
-        border: 1px solid #e5e7eb !important;
-        background: #f9fafb !important;
+        object-position: center !important;
+
+        border-radius: 14px !important;
+        background: #f3f4f6 !important;
     }
 
     .pv-empty {
@@ -229,7 +269,12 @@
         font-size: 14px;
     }
 
+    /* =========================================
+       MOBILE RESPONSIVE
+    ========================================= */
+
     @media (max-width: 640px) {
+
         .pv-modal-content {
             max-height: calc(100vh - 140px);
             padding-right: 4px;
@@ -256,6 +301,7 @@
         }
 
         .photo-verification-gallery a,
+        .photo-verification-gallery button,
         .photo-verification-gallery img,
         .photo-verification-gallery iframe,
         .photo-verification-gallery embed,
@@ -268,4 +314,5 @@
             max-height: 120px !important;
         }
     }
+
 </style>

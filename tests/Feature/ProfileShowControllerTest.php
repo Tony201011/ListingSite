@@ -39,9 +39,9 @@ class ProfileShowControllerTest extends TestCase
     private function profileUrl(string $slug, int $sequence = 1, bool $includeSequence = false): string
     {
         $params = [
-            'state'       => 'au',
-            'suburb'      => 'australia',
-            'slug'        => $slug,
+            'state' => 'au',
+            'suburb' => 'australia',
+            'slug' => $slug,
         ];
 
         if ($includeSequence) {

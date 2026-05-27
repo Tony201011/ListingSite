@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -173,6 +174,11 @@ class ProviderProfile extends Model
         return $this->hasOne(OnlineUser::class, 'provider_profile_id');
     }
 
+    public function onlineUsers(): HasMany
+    {
+        return $this->hasMany(OnlineUser::class, 'provider_profile_id');
+    }
+
     public function providerOnlineLogs(): HasMany
     {
         return $this->hasMany(ProviderOnlineLog::class, 'provider_profile_id');
@@ -203,31 +209,137 @@ class ProviderProfile extends Model
         return $this->hasMany(UserReport::class);
     }
 
+    public function scopeWhereCurrentlyOnline(Builder $query): Builder
+    {
+        return $query->where(function (Builder $q): void {
+            // Profile-linked online row (standard mechanism)
+            $q->whereHas(
+                'onlineUsers',
+                fn (Builder $onlineQuery): Builder => $onlineQuery
+                    ->whereNotNull('provider_profile_id')
+                    ->where('status', 'online')
+            )
+            // OR: no profile-linked row at all AND user has a legacy online row
+                ->orWhere(function (Builder $q): void {
+                    $q->whereDoesntHave(
+                        'onlineUsers',
+                        fn (Builder $onlineQuery): Builder => $onlineQuery->whereNotNull('provider_profile_id')
+                    )->whereHas(
+                        'user',
+                        fn (Builder $userQuery): Builder => $userQuery->whereHas(
+                            'legacyOnlineUsers',
+                            fn (Builder $onlineQuery): Builder => $onlineQuery->where('status', 'online')
+                        )
+                    );
+                });
+        });
+    }
+
+    public function scopeWhereCurrentlyOffline(Builder $query): Builder
+    {
+        // Offline = no profile-linked online row AND NOT (no profile-linked row + legacy online row)
+        return $query->whereDoesntHave(
+            'onlineUsers',
+            fn (Builder $onlineQuery): Builder => $onlineQuery
+                ->whereNotNull('provider_profile_id')
+                ->where('status', 'online')
+        )->where(function (Builder $q): void {
+            // Either has a profile-linked row (but it's not online) …
+            $q->whereHas(
+                'onlineUsers',
+                fn (Builder $onlineQuery): Builder => $onlineQuery->whereNotNull('provider_profile_id')
+            )
+            // … or the user has no legacy online row
+                ->orWhereDoesntHave(
+                    'user',
+                    fn (Builder $userQuery): Builder => $userQuery->whereHas(
+                        'legacyOnlineUsers',
+                        fn (Builder $onlineQuery): Builder => $onlineQuery->where('status', 'online')
+                    )
+                );
+        });
+    }
+
+    public function isCurrentlyOnline(): bool
+    {
+        // Check profile-linked row first
+        if ($this->relationLoaded('onlineUsers')) {
+            if ($this->onlineUsers->contains(fn (OnlineUser $onlineUser): bool => $onlineUser->isCurrentlyOnline())) {
+                return true;
+            }
+            // Has a profile-linked row (not online) — don't fall through to legacy
+            if ($this->onlineUsers->isNotEmpty()) {
+                return false;
+            }
+        } else {
+            if ($this->onlineUsers()->whereNotNull('provider_profile_id')->where('status', 'online')->exists()) {
+                return true;
+            }
+            // Has any profile-linked row — don't fall through to legacy
+            if ($this->onlineUsers()->whereNotNull('provider_profile_id')->exists()) {
+                return false;
+            }
+        }
+
+        // No profile-linked row at all — check legacy user-level online row
+        return $this->user()->whereHas(
+            'legacyOnlineUsers',
+            fn (Builder $q): Builder => $q->where('status', 'online')
+        )->exists();
+    }
+
     // -----------------------------------------------------------------------
     // Escort URL helpers
     // -----------------------------------------------------------------------
 
     /**
      * Return the lowercase, 2-3 character state abbreviation for use in
-     * the escort URL (e.g. "vic", "nsw", "qld").  Falls back to "au" when the
-     * profile has no linked state.
+     * the escort URL (e.g. "vic", "nsw", "qld"). Falls back to parsing the
+     * state from suburb text (e.g. "Melbourne, VIC 3000"), then to "au".
      */
     public function getStateSlug(): string
     {
         static $map = [
-            'Australian Capital Territory' => 'act',
-            'New South Wales' => 'nsw',
-            'Victoria' => 'vic',
-            'Queensland' => 'qld',
-            'Western Australia' => 'wa',
-            'South Australia' => 'sa',
-            'Tasmania' => 'tas',
-            'Northern Territory' => 'nt',
+            'australian capital territory' => 'act',
+            'act' => 'act',
+            'new south wales' => 'nsw',
+            'nsw' => 'nsw',
+            'victoria' => 'vic',
+            'vic' => 'vic',
+            'queensland' => 'qld',
+            'qld' => 'qld',
+            'western australia' => 'wa',
+            'wa' => 'wa',
+            'south australia' => 'sa',
+            'sa' => 'sa',
+            'tasmania' => 'tas',
+            'tas' => 'tas',
+            'northern territory' => 'nt',
+            'nt' => 'nt',
         ];
 
-        $stateName = $this->state?->name ?? '';
+        $stateName = trim((string) ($this->state?->name ?? ''));
 
-        return $map[$stateName] ?? (Str::slug($stateName) ?: 'au');
+        if ($stateName === '') {
+            $suburb = trim((string) ($this->suburb ?? ''));
+
+            if (str_contains($suburb, ',')) {
+                $parts = array_values(array_filter(array_map('trim', explode(',', $suburb))));
+                $locationTail = strtolower((string) end($parts));
+
+                if ($locationTail !== '') {
+                    if (preg_match('/\b(act|nsw|vic|qld|wa|sa|tas|nt)\b/i', $locationTail, $matches) === 1) {
+                        return strtolower($matches[1]);
+                    }
+
+                    $stateName = trim((string) preg_replace('/\s+\d{4}\b/', '', (string) end($parts)));
+                }
+            }
+        }
+
+        $normalizedStateName = strtolower(trim(preg_replace('/\s+/', ' ', $stateName) ?? $stateName));
+
+        return $map[$normalizedStateName] ?? (Str::slug($stateName) ?: 'au');
     }
 
     /**
@@ -316,9 +428,9 @@ class ProviderProfile extends Model
         $this->loadMissing(['state', 'city']);
 
         $routeParams = [
-            'state'       => $this->getStateSlug(),
-            'suburb'      => $this->getSuburbSlug(),
-            'slug'        => $this->slug,
+            'state' => $this->getStateSlug(),
+            'suburb' => $this->getSuburbSlug(),
+            'slug' => $this->slug,
         ];
 
         if ($this->shouldIncludeSequenceInUrl()) {

@@ -76,4 +76,26 @@ class PhotoVerificationGalleryRendererTest extends TestCase
         $this->assertStringContainsString('https://example.com/photo-2.jpg', $html);
         $this->assertSame(2, substr_count($html, 'target="_blank"'));
     }
+
+    public function test_render_with_popup_enabled_and_structured_payloads_shows_all_images(): void
+    {
+        $html = PhotoVerificationGalleryRenderer::render(
+            [
+                ['path' => 'verification/user-1/photo-1.jpg', 'url' => 'https://example.com/photo-1.jpg', 'name' => 'front.jpg'],
+                ['path' => 'verification/user-1/photo-2.jpg', 'url' => 'https://example.com/photo-2.jpg', 'name' => 'back.jpg'],
+            ],
+            120,
+            120,
+            null,
+            false,
+            true,
+        )->toHtml();
+
+        $this->assertStringContainsString('x-teleport="body"', $html);
+        $this->assertStringContainsString('@click.stop="openGallery(0)"', $html);
+        $this->assertStringContainsString('@click.stop="openGallery(1)"', $html);
+        $this->assertStringContainsString('Verification photo 1', $html);
+        $this->assertStringContainsString('Verification photo 2', $html);
+        $this->assertStringNotContainsString('target="_blank"', $html);
+    }
 }

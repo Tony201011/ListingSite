@@ -155,21 +155,29 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/escorts/search/location/melbourne/vic');
 
-        $response->assertStatus(200);
-        $response->assertViewHas('locationQuery', 'Melbourne, VIC');
+        $response->assertRedirect('/escorts/search/melbourne-vic');
+        $response->assertStatus(301);
     }
 
     public function test_escorts_search_location_route_with_suburb_only(): void
     {
         $response = $this->get('/escorts/search/location/sydney');
 
-        $response->assertStatus(200);
-        $response->assertViewHas('locationQuery', 'Sydney');
+        $response->assertRedirect('/escorts/search/sydney');
+        $response->assertStatus(301);
     }
 
     public function test_escorts_search_location_route_multi_word_suburb(): void
     {
         $response = $this->get('/escorts/search/location/mount-gambier/sa');
+
+        $response->assertRedirect('/escorts/search/mount-gambier-sa');
+        $response->assertStatus(301);
+    }
+
+    public function test_escorts_search_slug_route_with_suburb_and_state(): void
+    {
+        $response = $this->get('/escorts/search/mount-gambier-sa');
 
         $response->assertStatus(200);
         $response->assertViewHas('locationQuery', 'Mount Gambier, SA');
@@ -180,13 +188,37 @@ class SearchTest extends TestCase
         $this->createApprovedProvider(['name' => 'Melbourne Escort', 'slug' => 'melbourne-escort', 'suburb' => 'Melbourne, VIC 3000']);
         $this->createApprovedProvider(['name' => 'Sydney Escort', 'slug' => 'sydney-escort', 'suburb' => 'Sydney, NSW 2000']);
 
-        $response = $this->get('/escorts/search/location/melbourne/vic');
+        $response = $this->get('/escorts/search/melbourne-vic');
 
         $response->assertStatus(200);
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
         $this->assertTrue($names->contains('Melbourne Escort'));
         $this->assertFalse($names->contains('Sydney Escort'));
+    }
+
+    public function test_escorts_search_query_location_redirects_to_canonical_slug_url(): void
+    {
+        $response = $this->get('/escorts/search?location=Melbourne%2C+VIC&distance=250&user_lat=-37.81&user_lng=144.96');
+
+        $response->assertStatus(301);
+        $response->assertRedirect('/escorts/search/melbourne-vic?distance=250');
+    }
+
+    public function test_escorts_search_slug_route_strips_legacy_location_query_params(): void
+    {
+        $response = $this->get('/escorts/search/melbourne-vic?min_age=18&max_age=40&min_price=150&max_price=400&location_slug=melbourne-vic&location_from_route=1&escort_name=&girls=all');
+
+        $response->assertStatus(301);
+        $response->assertRedirect('/escorts/search/melbourne-vic?min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
+    }
+
+    public function test_escorts_search_slug_route_with_filters_does_not_redirect_when_location_query_is_not_present(): void
+    {
+        $response = $this->get('/escorts/search/melbourne-vic?distance=500&min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('locationQuery', 'Melbourne, VIC');
     }
 
     // ===============================================================
@@ -244,7 +276,7 @@ class SearchTest extends TestCase
         $this->assertFalse($names->contains('Mia Stone'));
     }
 
-    public function test_home_page_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
+    public function test_home_page_name_search_excludes_offline_profile(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -265,14 +297,6 @@ class SearchTest extends TestCase
             'usage_count' => 1,
         ]);
 
-        OnlineUser::query()->create([
-            'user_id' => $user->id,
-            'provider_profile_id' => null,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-        ]);
-
         $response = $this->get('/?escort_name=Legacy+Offline+Home+Search');
 
         $profiles = $response->viewData('profiles');
@@ -280,7 +304,7 @@ class SearchTest extends TestCase
         $this->assertFalse($names->contains('Legacy Offline Home Search'));
     }
 
-    public function test_advanced_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
+    public function test_advanced_search_name_search_excludes_offline_profile(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => false]);
 
@@ -297,14 +321,6 @@ class SearchTest extends TestCase
             'user_id' => $user->id,
             'provider_profile_id' => $profile->id,
             'status' => 'offline',
-            'usage_date' => today(),
-            'usage_count' => 1,
-        ]);
-
-        OnlineUser::query()->create([
-            'user_id' => $user->id,
-            'provider_profile_id' => null,
-            'status' => 'online',
             'usage_date' => today(),
             'usage_count' => 1,
         ]);

@@ -128,4 +128,26 @@ class ProfileSwitchDeleteTest extends TestCase
         $response->assertSee(route('profiles.destroy', $profile), false);
         $response->assertDontSee('delete-selected-profiles-form', false);
     }
+
+    public function test_owner_can_switch_profile_using_get_route(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profileOne = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' One',
+            'slug' => 'provider-'.$user->id.'-one',
+        ]);
+        $profileTwo = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' Two',
+            'slug' => 'provider-'.$user->id.'-two',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profileOne->id])
+            ->get(route('profiles.switch', $profileTwo));
+
+        $response->assertRedirect(route('my-profile'));
+        $response->assertSessionHas('active_provider_profile_id', $profileTwo->id);
+    }
 }

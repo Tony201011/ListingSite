@@ -11,6 +11,7 @@ use App\Http\Requests\HomeIndexRequest;
 use App\Http\Requests\ShowProfileRequest;
 use App\Models\ProviderProfile;
 use App\Services\FavouriteBookmarkService;
+use App\Services\LocationSlugService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -22,11 +23,20 @@ class HomeController extends Controller
         private GetProfileShowData $getProfileShowData,
         private FavouriteBookmarkService $favouriteBookmarkService,
         private RecordProfileView $recordProfileView,
+        private LocationSlugService $locationSlugService,
     ) {}
 
-    public function index(HomeIndexRequest $request): View
+    public function index(HomeIndexRequest $request): View|RedirectResponse
     {
-        $viewData = $this->buildProfileFilterViewData->execute($request->validated());
+        $validated = $request->validated();
+
+        $canonicalUrl = $this->resolveCanonicalSearchUrl($request, $validated);
+        if ($canonicalUrl !== null) {
+            return redirect()->to($canonicalUrl, 301);
+        }
+
+        $viewData = $this->buildProfileFilterViewData->execute($validated);
+
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
         $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 
@@ -168,5 +178,51 @@ class HomeController extends Controller
         $canonicalPath = trim((string) parse_url($canonicalUrl, PHP_URL_PATH), '/');
 
         return $currentPath !== $canonicalPath;
+    }
+
+    private function resolveCanonicalSearchUrl(HomeIndexRequest $request, array $validated): ?string
+    {
+        $currentPath = trim($request->getPathInfo(), '/');
+
+        if (! str_starts_with($currentPath, 'escorts/search')) {
+            return null;
+        }
+
+        $rawQuery = [];
+        parse_str((string) $request->server('QUERY_STRING', ''), $rawQuery);
+
+        $location = trim((string) ($validated['location'] ?? ''));
+        $locationState = trim((string) ($validated['location_state'] ?? ''));
+        $locationData = $this->locationSlugService->fromLocationText($location, $locationState);
+
+        if ($locationData === null || empty($locationData['slug'])) {
+            return null;
+        }
+
+        $canonicalPath = route('escorts.search.slug', ['location_slug' => $locationData['slug']]);
+        $canonicalRoutePath = trim((string) parse_url($canonicalPath, PHP_URL_PATH), '/');
+
+        $query = $rawQuery;
+        unset(
+            $query['location'],
+            $query['location_state'],
+            $query['location_slug'],
+            $query['location_from_route'],
+            $query['user_lat'],
+            $query['user_lng']
+        );
+        $queryString = http_build_query($query);
+        $targetUrl = $queryString !== '' ? "{$canonicalPath}?{$queryString}" : $canonicalPath;
+
+        $hasLegacyLocationQuery = array_key_exists('location', $rawQuery)
+            || array_key_exists('location_state', $rawQuery)
+            || array_key_exists('location_slug', $rawQuery)
+            || array_key_exists('location_from_route', $rawQuery);
+
+        if ($currentPath !== $canonicalRoutePath) {
+            return $targetUrl;
+        }
+
+        return $hasLegacyLocationQuery ? $targetUrl : null;
     }
 }

@@ -24,21 +24,13 @@ class SearchController extends Controller
         try {
             $results = ProviderProfile::search($term)
                 ->where('profile_status', 'approved')
-                ->whereNotNull('slug')
-                ->where('slug', '!=', '')
-                ->whereNull('deleted_at')
-                ->where('is_blocked', false)
-                ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
-                ->where(function ($onlineQuery): void {
-                    $onlineQuery
-                        ->whereHas('onlineUser', fn ($q) => $q->where('status', 'online'))
-                        ->orWhere(fn ($legacy) => $legacy
-                            ->whereDoesntHave('onlineUser')
-                            ->whereHas('user.onlineUser', fn ($q) => $q
-                                ->whereNull('provider_profile_id')
-                                ->where('status', 'online')));
-                })
-                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+                ->query(fn ($query) => $query
+                    ->whereNotNull('slug')
+                    ->where('slug', '!=', '')
+                    ->whereNull('deleted_at')
+                    ->where('is_blocked', false)
+                    ->whereHas('user', fn ($userQuery) => $userQuery->where('role', User::ROLE_PROVIDER))
+                    ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide')))
                 ->take(self::MAX_SUGGESTIONS)
                 ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age'])
                 ->load('city');
@@ -53,15 +45,6 @@ class SearchController extends Controller
                 ->where('slug', '!=', '')
                 ->where('is_blocked', false)
                 ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
-                ->where(function ($onlineConstraint): void {
-                    $onlineConstraint
-                        ->whereHas('onlineUser', fn ($q) => $q->where('status', 'online'))
-                        ->orWhere(fn ($legacy) => $legacy
-                            ->whereDoesntHave('onlineUser')
-                            ->whereHas('user.onlineUser', fn ($q) => $q
-                                ->whereNull('provider_profile_id')
-                                ->where('status', 'online')));
-                })
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
                 ->with('city')

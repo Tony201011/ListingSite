@@ -40,8 +40,6 @@
                 <form method="GET" action="{{ route('escorts.search') }}" @submit="handleFormSubmit($event)">
                     <template x-if="distanceSearchEnabled">
                         <span>
-                            <input type="hidden" name="user_lat" :value="userLat">
-                            <input type="hidden" name="user_lng" :value="userLng">
                             <template x-if="searchMode === 'suburb' && (locationEnabled || term.trim() !== '')">
                                 <input type="hidden" name="distance" :value="distance">
                             </template>
@@ -130,7 +128,7 @@
                 $newGirlsQuery = array_merge($currentQuery, ['girls' => 'new']);
                 $allGirlsQuery = array_merge($currentQuery, ['girls' => 'all']);
                 $popularGirlsQuery = array_merge($currentQuery, ['girls' => 'popular']);
-                $girlsUrl = fn (array $query): string => url('/').'?'.http_build_query($query);
+                $girlsUrl = fn (array $query): string => url()->current().(! empty($query) ? '?'.http_build_query($query) : '');
             @endphp
             <div class="flex flex-wrap items-center gap-2">
                 <a
@@ -153,6 +151,14 @@
                     Popular
                 </a>
             </div>
+
+            {{-- Online users counter --}}
+            @if(($onlineCount ?? 0) > 0)
+                <span class="ml-auto inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-xs font-semibold text-green-700">
+                    <span class="inline-block h-2 w-2 rounded-full bg-green-500"></span>
+                    {{ $onlineCount }} online {{ $onlineCount === 1 ? 'user' : 'users' }}
+                </span>
+            @endif
         </div>
 
         {{-- Active filter pills --}}

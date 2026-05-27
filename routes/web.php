@@ -106,30 +106,36 @@ Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/escorts/search', [HomeController::class, 'index'])->name('escorts.search');
+Route::get('/escorts/search/name/{search_name}', [HomeController::class, 'index'])
+    ->name('escorts.search.name');
+Route::get('/escorts/search/{location_slug}', [HomeController::class, 'index'])
+    ->where(['location_slug' => '(?!name$|location$)[a-z0-9-]+'])
+    ->name('escorts.search.slug');
+Route::get('/escorts/search/location/{legacy_location_slug}', [HomeController::class, 'index'])
+    ->where(['legacy_location_slug' => '[a-z0-9-]+'])
+    ->name('escorts.search.location.legacy');
 Route::get('/escorts/search/location/{suburb}/{state}', [HomeController::class, 'index'])
     ->where(['suburb' => '[a-z0-9-]+', 'state' => '[a-z0-9-]+'])
     ->name('escorts.search.location');
 Route::get('/escorts/search/location/{suburb}', [HomeController::class, 'index'])
     ->where(['suburb' => '[a-z0-9-]+'])
     ->name('escorts.search.location.no-state');
-Route::get('/escorts/search/name/{search_name}', [HomeController::class, 'index'])
-    ->name('escorts.search.name');
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
 Route::get('/escorts/{state}/{suburb}/{slug}/{sequence_id}', [HomeController::class, 'showProfile'])
     ->where([
-        'state'       => '[a-z]{2,3}',
-        'suburb'      => '[a-z0-9-]+',
-        'slug'        => '[a-z0-9-]+',
+        'state' => '[a-z]{2,3}',
+        'suburb' => '[a-z0-9-]+',
+        'slug' => '[a-z0-9-]+',
         'sequence_id' => '[0-9]{3}',
     ])
     ->name('profile.show');
 Route::get('/escorts/{state}/{suburb}/{slug}', [HomeController::class, 'showProfile'])
     ->where([
-        'state'  => '[a-z]{2,3}',
+        'state' => '[a-z]{2,3}',
         'suburb' => '[a-z0-9-]+',
-        'slug'   => '[a-z0-9-]+',
+        'slug' => '[a-z0-9-]+',
     ])
     ->name('profile.show.no-sequence');
 
@@ -201,7 +207,7 @@ Route::middleware('provider.auth')->group(function () {
     Route::get('/my-profiles', [ProfileSwitchController::class, 'index'])->name('profiles.index');
     Route::post('/my-profiles', [ProfileSwitchController::class, 'store'])->name('profiles.store');
     Route::delete('/my-profiles/delete-selected', [ProfileSwitchController::class, 'destroySelected'])->name('profiles.destroy-selected');
-    Route::post('/my-profiles/{profile}/switch', [ProfileSwitchController::class, 'switchTo'])->name('profiles.switch');
+    Route::match(['get', 'post'], '/my-profiles/{profile}/switch', [ProfileSwitchController::class, 'switchTo'])->name('profiles.switch');
     Route::post('/my-profiles/{profile}/switch-edit', [ProfileSwitchController::class, 'switchToEdit'])->name('profiles.switch-edit');
     Route::post('/my-profiles/{profile}/online-status', [ProfileSwitchController::class, 'updateOnlineStatus'])->name('profiles.online-status');
     Route::delete('/my-profiles/{profile}', [ProfileSwitchController::class, 'destroy'])->name('profiles.destroy');
