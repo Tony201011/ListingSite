@@ -143,6 +143,19 @@ class SearchTest extends TestCase
         $response->assertViewHas('escortNameQuery', 'sara jane');
     }
 
+    public function test_home_page_name_search_matches_hyphenated_profile_names(): void
+    {
+        $this->createApprovedProvider(['name' => 'Sara-Jane', 'slug' => 'sara-jane']);
+
+        $queryResponse = $this->get('/?escort_name=Sara Jane');
+        $queryNames = collect($queryResponse->viewData('profiles')->items())->pluck('name');
+        $this->assertTrue($queryNames->contains('Sara-Jane'));
+
+        $seoResponse = $this->get('/escorts/search/name/sara-jane');
+        $seoNames = collect($seoResponse->viewData('profiles')->items())->pluck('name');
+        $this->assertTrue($seoNames->contains('Sara-Jane'));
+    }
+
     public function test_escorts_search_base_route_returns_home_view(): void
     {
         $response = $this->get('/escorts/search/');
