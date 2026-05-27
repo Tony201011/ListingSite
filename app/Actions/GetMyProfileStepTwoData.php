@@ -51,7 +51,7 @@ class GetMyProfileStepTwoData
             'user' => $user,
             'profile' => $profile,
             'profile_name' => $profile?->name ?? $user?->name ?? '',
-            'profile_phone' => $profile?->phone ?? $profile?->mobile ?? $user?->mobile ?? '',
+            'profile_phone' => $profile?->phone ?? $user?->mobile ?? '',
             'contactEmail' => $contactEmail,
             'selected' => $selected,
             'ageGroupOptions' => $this->getProfileCategoryOptions->execute('age-group'),

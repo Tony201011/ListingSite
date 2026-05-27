@@ -57,7 +57,6 @@ class ProviderProfile extends Model
         'latitude',
         'longitude',
         'phone',
-        'mobile',
         'whatsapp',
         'account_user_referral_code',
         'is_verified',
