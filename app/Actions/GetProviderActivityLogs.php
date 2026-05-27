@@ -43,18 +43,50 @@ class GetProviderActivityLogs
             ->orderByDesc('went_online_at')
             ->get();
 
-        if ($sessions->isEmpty()) {
-            $legacyActivity = $this->getLegacyUserActivity($profile, $rangeStart, $rangeEnd, $now);
+        $firstProfileSessionAt = $sessions->isNotEmpty()
+            ? Carbon::parse((string) $sessions->min('went_online_at'))
+            : null;
 
-            if ($legacyActivity !== null) {
-                return $legacyActivity;
-            }
+        $normalizedSessions = $sessions->map(function (ProviderOnlineLog $log) use ($now): array {
+            $loginAtUtc = Carbon::parse($log->went_online_at);
+            $logoutAtUtc = $log->went_offline_at ? Carbon::parse($log->went_offline_at) : null;
+            $statusValue = strtoupper((string) ($log->status ?? ''));
+            $isOpen = $logoutAtUtc === null && ($statusValue === '' || $statusValue === 'ONLINE');
+            $sessionSeconds = $this->calculateSessionSeconds(
+                $loginAtUtc,
+                $logoutAtUtc,
+                $log->duration_seconds,
+                $isOpen,
+                $now,
+            );
 
+            return [
+                'login_at_utc' => $loginAtUtc,
+                'logout_at_utc' => $logoutAtUtc,
+                'is_open' => $isOpen,
+                'duration_seconds' => $sessionSeconds,
+            ];
+        })->values();
+
+        $legacySessions = $this->getLegacyUserSessions(
+            $profile,
+            $rangeStart,
+            $rangeEnd,
+            $now,
+            $firstProfileSessionAt,
+        );
+
+        $normalizedSessions = $normalizedSessions
+            ->concat($legacySessions)
+            ->sortByDesc(fn (array $session): int => $session['login_at_utc']->getTimestamp())
+            ->values();
+
+        if ($normalizedSessions->isEmpty()) {
             return $empty;
         }
 
-        $grouped = $sessions->groupBy(function (ProviderOnlineLog $log) use ($displayTimezone): string {
-            return Carbon::parse($log->went_online_at)->timezone($displayTimezone)->format('Y-m-d');
+        $grouped = $normalizedSessions->groupBy(function (array $session) use ($displayTimezone): string {
+            return $session['login_at_utc']->copy()->timezone($displayTimezone)->format('Y-m-d');
         });
 
         $days = [];
@@ -64,20 +96,13 @@ class GetProviderActivityLogs
             $sessionRows = [];
             $dayTotalSeconds = 0;
 
-            foreach ($daySessions as $log) {
-                $loginAtUtc = Carbon::parse($log->went_online_at);
-                $logoutAtUtc = $log->went_offline_at ? Carbon::parse($log->went_offline_at) : null;
+            foreach ($daySessions as $session) {
+                $loginAtUtc = $session['login_at_utc'];
+                $logoutAtUtc = $session['logout_at_utc'];
                 $loginAt = $loginAtUtc->copy()->timezone($displayTimezone);
                 $logoutAt = $logoutAtUtc?->copy()->timezone($displayTimezone);
-                $statusValue = strtoupper((string) ($log->status ?? ''));
-                $isOpen = $logoutAtUtc === null && ($statusValue === '' || $statusValue === 'ONLINE');
-                $sessionSeconds = $this->calculateSessionSeconds(
-                    $loginAtUtc,
-                    $logoutAtUtc,
-                    $log->duration_seconds,
-                    $isOpen,
-                    $now,
-                );
+                $isOpen = (bool) $session['is_open'];
+                $sessionSeconds = (int) $session['duration_seconds'];
 
                 if ($isOpen) {
                     $logoutDisplay = '—';
@@ -117,8 +142,8 @@ class GetProviderActivityLogs
         $chartDays = array_slice(array_reverse($days), 0, 30);
 
         return [
-            'total_logins' => $sessions->count(),
-            'total_sessions' => $sessions->count(),
+            'total_logins' => $normalizedSessions->count(),
+            'total_sessions' => $normalizedSessions->count(),
             'total_online_seconds' => $totalOnlineSeconds,
             'total_online_duration' => $this->formatDuration($totalOnlineSeconds),
             'current_session_seconds' => $currentSessionSeconds,
@@ -130,43 +155,35 @@ class GetProviderActivityLogs
         ];
     }
 
-    private function getLegacyUserActivity(
+    private function getLegacyUserSessions(
         ProviderProfile $profile,
         Carbon $rangeStart,
         Carbon $rangeEnd,
         Carbon $now,
-    ): ?array {
+        ?Carbon $before = null,
+    ) {
         if (! Schema::hasColumns('login_logs', ['logged_out_at', 'duration_seconds'])) {
-            return null;
+            return collect();
         }
 
-        $sessions = LoginLog::query()
+        $query = LoginLog::query()
             ->where('user_id', $profile->user_id)
-            ->whereBetween('created_at', [$rangeStart, $rangeEnd])
-            ->orderByDesc('created_at')
-            ->get();
+            ->whereBetween('created_at', [$rangeStart, $rangeEnd]);
 
-        if ($sessions->isEmpty()) {
-            return null;
+        if ($before !== null) {
+            if ($before->lte($rangeStart)) {
+                return collect();
+            }
+
+            $query->where('created_at', '<', $before);
         }
 
-        $displayTimezone = $this->displayTimezone();
-        $grouped = $sessions->groupBy(function (LoginLog $log) use ($displayTimezone): string {
-            return Carbon::parse($log->created_at)->timezone($displayTimezone)->format('Y-m-d');
-        });
-
-        $days = [];
-        $currentSessionSeconds = 0;
-
-        foreach ($grouped as $dateKey => $daySessions) {
-            $sessionRows = [];
-            $dayTotalSeconds = 0;
-
-            foreach ($daySessions as $log) {
+        return $query
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function (LoginLog $log) use ($now): array {
                 $loginAtUtc = Carbon::parse($log->created_at);
                 $logoutAtUtc = $log->logged_out_at ? Carbon::parse($log->logged_out_at) : null;
-                $loginAt = $loginAtUtc->copy()->timezone($displayTimezone);
-                $logoutAt = $logoutAtUtc?->copy()->timezone($displayTimezone);
                 $statusValue = strtoupper((string) ($log->status ?? ''));
                 $isOpen = $logoutAtUtc === null && ($statusValue === '' || $statusValue === 'ONLINE');
                 $sessionSeconds = $this->calculateSessionSeconds(
@@ -177,55 +194,14 @@ class GetProviderActivityLogs
                     $now,
                 );
 
-                if ($isOpen) {
-                    $logoutDisplay = '—';
-                    $status = 'Online';
-                    $currentSessionSeconds = max($currentSessionSeconds, $sessionSeconds);
-                } else {
-                    $logoutDisplay = $logoutAt?->format('h:i A') ?? '—';
-                    $status = 'Offline';
-                }
-
-                $dayTotalSeconds += $sessionSeconds;
-
-                $sessionRows[] = [
-                    'date' => $loginAt->format('d M Y'),
-                    'login_at' => $loginAt->format('h:i A'),
-                    'logout_at' => $logoutDisplay,
-                    'duration' => $this->formatDuration($sessionSeconds),
+                return [
+                    'login_at_utc' => $loginAtUtc,
+                    'logout_at_utc' => $logoutAtUtc,
+                    'is_open' => $isOpen,
                     'duration_seconds' => $sessionSeconds,
-                    'status' => $status,
-                    'is_current' => $isOpen,
                 ];
-            }
-
-            $days[] = [
-                'date' => Carbon::parse($dateKey)->format('d M Y'),
-                'date_key' => $dateKey,
-                'session_count' => count($sessionRows),
-                'total_duration' => $this->formatDuration($dayTotalSeconds),
-                'total_seconds' => $dayTotalSeconds,
-                'sessions' => $sessionRows,
-            ];
-        }
-
-        usort($days, fn ($a, $b) => strcmp($b['date_key'], $a['date_key']));
-
-        $totalOnlineSeconds = array_sum(array_column($days, 'total_seconds'));
-        $chartDays = array_slice(array_reverse($days), 0, 30);
-
-        return [
-            'total_logins' => $sessions->count(),
-            'total_sessions' => $sessions->count(),
-            'total_online_seconds' => $totalOnlineSeconds,
-            'total_online_duration' => $this->formatDuration($totalOnlineSeconds),
-            'current_session_seconds' => $currentSessionSeconds,
-            'current_session_duration' => $this->formatDuration($currentSessionSeconds),
-            'days' => $days,
-            'chart_labels' => array_column($chartDays, 'date'),
-            'chart_logins' => array_column($chartDays, 'session_count'),
-            'chart_minutes' => array_map(fn ($day) => round($day['total_seconds'] / 60, 1), $chartDays),
-        ];
+            })
+            ->values();
     }
 
     private function calculateSessionSeconds(
