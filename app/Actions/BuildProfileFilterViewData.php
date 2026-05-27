@@ -479,7 +479,18 @@ class BuildProfileFilterViewData
         }
 
         if ($escortNameQuery !== '') {
-            $query->whereRaw('LOWER(provider_profiles.name) LIKE ?', ['%'.strtolower($escortNameQuery).'%']);
+            $normalizedEscortNameQuery = preg_replace('/[\s-]+/', '', mb_strtolower($escortNameQuery)) ?? '';
+
+            $query->where(function (Builder $nameQuery) use ($escortNameQuery, $normalizedEscortNameQuery): void {
+                $nameQuery->whereRaw('LOWER(provider_profiles.name) LIKE ?', ['%'.mb_strtolower($escortNameQuery).'%']);
+
+                if ($normalizedEscortNameQuery !== '') {
+                    $nameQuery->orWhereRaw(
+                        "LOWER(REPLACE(REPLACE(provider_profiles.name, '-', ''), ' ', '')) LIKE ?",
+                        ['%'.$normalizedEscortNameQuery.'%']
+                    );
+                }
+            });
         }
 
         if ($minPrice !== self::DEFAULT_MIN_PRICE || $maxPrice !== self::DEFAULT_MAX_PRICE) {
