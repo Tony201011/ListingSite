@@ -2,10 +2,7 @@
 
 namespace App\Actions\Auth;
 
-use App\Actions\GenerateUniqueProviderProfileSlug;
 use App\Actions\Support\ActionResult;
-use App\Models\ProviderProfile;
-use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -19,8 +16,7 @@ class VerifyProviderSignupOtp
     private const LOCKOUT_MINUTES = 15;
 
     public function __construct(
-        private SendProviderAccountEmails $sendProviderAccountEmails,
-        private GenerateUniqueProviderProfileSlug $generateUniqueProviderProfileSlug
+        private SendProviderAccountEmails $sendProviderAccountEmails
     ) {}
 
     public function execute(string $otp): ActionResult
@@ -79,19 +75,6 @@ class VerifyProviderSignupOtp
             'password' => $pendingUser['password'],
             'role' => $pendingUser['role'],
             'mobile_verified' => true,
-            'referral_code' => $pendingUser['referral_code'],
-        ]);
-
-        ProviderProfile::create([
-            'user_id' => $user->id,
-            'name' => $pendingUser['name'],
-            'slug' => $this->generateUniqueProviderProfileSlug->execute($pendingUser['name']),
-            'mobile' => $pendingUser['mobile'] ?? null,
-            'suburb' => $pendingUser['suburb'] ?? null,
-            'profile_status' => 'approved',
-            'free_listing_expires_at' => now()->addDays(
-                SiteSetting::getAdTierSettings()['free_listing_days']
-            ),
         ]);
 
         $this->sendProviderAccountEmails->execute($user);

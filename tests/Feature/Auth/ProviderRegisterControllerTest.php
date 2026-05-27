@@ -50,12 +50,9 @@ class ProviderRegisterControllerTest extends TestCase
     {
         $validated = [
             'email' => 'provider@example.com',
-            'nickname' => 'provider1',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
             'mobile' => '0412345678',
-            'suburb' => 'Sydney',
-            'age_confirm' => '1',
         ];
 
         $redirectResponse = redirect('/otp-verification')
@@ -66,9 +63,7 @@ class ProviderRegisterControllerTest extends TestCase
             ->once()
             ->with(Mockery::on(function (array $payload) {
                 return $payload['email'] === 'provider@example.com'
-                    && $payload['nickname'] === 'provider1'
-                    && $payload['mobile'] === '0412345678'
-                    && $payload['suburb'] === 'Sydney';
+                    && $payload['mobile'] === '0412345678';
             }))
             ->andReturn($redirectResponse);
 
