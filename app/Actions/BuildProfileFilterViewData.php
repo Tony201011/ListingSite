@@ -749,12 +749,27 @@ class BuildProfileFilterViewData
                 $q->whereNull('hide_show_profiles.id')
                     ->orWhere('hide_show_profiles.status', 'show');
             })
-            ->whereExists(function ($query) {
-                $query->selectRaw('1')
-                    ->from('online_users')
-                    ->whereColumn('online_users.provider_profile_id', 'provider_profiles.id')
-                    ->whereNotNull('online_users.provider_profile_id')
-                    ->where('online_users.status', 'online');
+            ->where(function ($query) {
+                $query->whereExists(function ($onlineQuery) {
+                    $onlineQuery->selectRaw('1')
+                        ->from('online_users')
+                        ->whereColumn('online_users.provider_profile_id', 'provider_profiles.id')
+                        ->whereNotNull('online_users.provider_profile_id')
+                        ->where('online_users.status', 'online');
+                })->orWhere(function ($legacyQuery): void {
+                    $legacyQuery->whereNotExists(function ($profileLinkedQuery) {
+                        $profileLinkedQuery->selectRaw('1')
+                            ->from('online_users')
+                            ->whereColumn('online_users.provider_profile_id', 'provider_profiles.id')
+                            ->whereNotNull('online_users.provider_profile_id');
+                    })->whereExists(function ($legacyOnlineQuery) {
+                        $legacyOnlineQuery->selectRaw('1')
+                            ->from('online_users')
+                            ->whereColumn('online_users.user_id', 'provider_profiles.user_id')
+                            ->whereNull('online_users.provider_profile_id')
+                            ->where('online_users.status', 'online');
+                    });
+                });
             })
             ->whereBetween('profile_postcodes.latitude', [$minLat, $maxLat])
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
