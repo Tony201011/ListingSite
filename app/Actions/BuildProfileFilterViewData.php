@@ -59,8 +59,7 @@ class BuildProfileFilterViewData
         array $validated,
         ?int $profilesPerPage = null,
         bool $includeOfflineProfiles = false
-    ): array
-    {
+    ): array {
         $filterSlugs = [
             'hair-color',
             'hair-length',
