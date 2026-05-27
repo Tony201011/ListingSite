@@ -53,7 +53,7 @@ class BuildProfileFilterViewData
         'time-waster-shield' => 'time_waster_shield',
     ];
 
-    public function execute(array $validated): array
+    public function execute(array $validated, bool $syncWithAdminOnlineListing = false): array
     {
         $filterSlugs = [
             'hair-color',
@@ -205,6 +205,7 @@ class BuildProfileFilterViewData
             $girlsMode,
             $escortNameQuery,
             $localFeaturedStateName,
+            $syncWithAdminOnlineListing,
         );
         $onlineCount = $profiles->total();
 
@@ -412,6 +413,7 @@ class BuildProfileFilterViewData
         string $girlsMode = 'all',
         string $escortNameQuery = '',
         ?string $localFeaturedStateName = null,
+        bool $syncWithAdminOnlineListing = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -423,11 +425,7 @@ class BuildProfileFilterViewData
         }
 
         $query = ProviderProfile::query()
-            ->whereNull('provider_profiles.deleted_at')
-            ->where('provider_profiles.profile_status', 'approved')
-            ->where('provider_profiles.is_blocked', false)
-            ->whereHas('user')
-            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->withoutTrashed()
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'rates',
@@ -438,6 +436,14 @@ class BuildProfileFilterViewData
                 'city',
                 'state',
             ]);
+
+        if (! $syncWithAdminOnlineListing) {
+            $query
+                ->where('provider_profiles.profile_status', 'approved')
+                ->where('provider_profiles.is_blocked', false)
+                ->whereHas('user')
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'));
+        }
 
         $this->applyActiveOnlineProfileConstraint($query);
 
