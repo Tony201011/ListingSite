@@ -665,6 +665,21 @@ class SearchTest extends TestCase
         $this->assertIsArray($response->json('suggestions'));
     }
 
+    public function test_search_suggestions_falls_back_to_database_when_scout_returns_no_hits(): void
+    {
+        config()->set('scout.driver', 'null');
+        $this->createApprovedProvider([
+            'name' => 'Fallback Suggestion Escort',
+            'slug' => 'fallback-suggestion-escort',
+        ]);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Fallback+Suggestion');
+
+        $response->assertOk();
+        $names = array_column($response->json('suggestions'), 'name');
+        $this->assertContains('Fallback Suggestion Escort', $names);
+    }
+
     public function test_search_suggestions_only_returns_approved_profiles(): void
     {
         // Create a pending profile with a unique search name
