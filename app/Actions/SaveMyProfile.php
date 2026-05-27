@@ -62,7 +62,6 @@ class SaveMyProfile
 
             $profile->fill([
                 'phone' => $validated['phone'] ?? null,
-                'mobile' => $validated['phone'] ?? $user->mobile ?? null,
                 'suburb' => $validated['suburb'] ?? null,
                 'introduction_line' => $validated['introduction_line'] ?? null,
                 'profile_text' => $validated['profile_text'] ?? null,
