@@ -315,9 +315,7 @@ class BuildProfileFilterViewData
             ])
             ->orderByDesc("provider_profiles.{$expiryColumn}");
 
-        if (SiteSetting::isOnlineFilterEnabled()) {
-            $this->applyActiveOnlineProfileConstraint($query);
-        }
+        $this->applyActiveOnlineProfileConstraint($query);
 
         // For local banner: restrict to the state being viewed
         if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
@@ -448,9 +446,7 @@ class BuildProfileFilterViewData
                 'city',
             ]);
 
-        if (SiteSetting::isOnlineFilterEnabled()) {
-            $this->applyActiveOnlineProfileConstraint($query);
-        }
+        $this->applyActiveOnlineProfileConstraint($query);
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
@@ -639,10 +635,8 @@ class BuildProfileFilterViewData
         }
 
         $profilesPerPage = $this->resolveProfilesPerPage();
-        if (SiteSetting::isOnlineFilterEnabled()) {
-            $totalOnlineProfiles = (clone $query)->count('provider_profiles.id');
-            $profilesPerPage = max($profilesPerPage, max(1, $totalOnlineProfiles));
-        }
+        $totalOnlineProfiles = (clone $query)->count('provider_profiles.id');
+        $profilesPerPage = max($profilesPerPage, max(1, $totalOnlineProfiles));
 
         $paginator = $query
             ->paginate($profilesPerPage)
