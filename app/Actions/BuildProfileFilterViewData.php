@@ -215,6 +215,7 @@ class BuildProfileFilterViewData
             $localFeaturedStateName,
             $profilesPerPage,
             $includeOfflineProfiles,
+            $locationFromRoute,
         );
 
         $allFilterCategoriesCollection = collect($allFilterCategories);
@@ -438,6 +439,7 @@ class BuildProfileFilterViewData
         ?string $localFeaturedStateName = null,
         ?int $profilesPerPage = null,
         bool $includeOfflineProfiles = false,
+        bool $locationFromRoute = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -641,9 +643,7 @@ class BuildProfileFilterViewData
                 break;
         }
 
-        $appendLocationFromRoute = isset($locationFromRoute)
-            ? (bool) $locationFromRoute
-            : (bool) ($validated['location_from_route'] ?? false);
+        $appendLocationFromRoute = $locationFromRoute;
 
         $appendParams = array_filter([
             'location' => $appendLocationFromRoute ? null : ($locationQuery ?: null),
