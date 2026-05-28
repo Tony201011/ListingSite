@@ -135,6 +135,21 @@ class SearchTest extends TestCase
         $response->assertViewHas('escortNameQuery', 'Sara');
     }
 
+    public function test_home_page_listing_suburb_hides_null_postcode_suffix(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Sydney Escort',
+            'slug' => 'sydney-escort',
+            'suburb' => 'Sydney, NSW null',
+        ]);
+
+        $response = $this->get('/');
+
+        $profiles = collect($response->viewData('profiles')->items());
+
+        $this->assertSame('Sydney', $profiles->firstWhere('slug', 'sydney-escort')['suburb']);
+    }
+
     public function test_home_page_supports_seo_name_search_route(): void
     {
         $response = $this->get('/escorts/search/name/sara-jane');
