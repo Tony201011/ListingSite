@@ -488,7 +488,7 @@ class HomeControllerTest extends TestCase
         $this->assertSame('case-favourite', $profiles[0]['slug']);
     }
 
-    public function test_favourites_page_resolves_legacy_slug_to_all_profiles_with_same_slug(): void
+    public function test_favourites_page_resolves_legacy_slug_to_first_profile_with_same_slug(): void
     {
         $firstProvider = $this->createApprovedProvider([
             'name' => 'Shared Favourite One',
@@ -507,13 +507,11 @@ class HomeControllerTest extends TestCase
         $response = $this->actingAs($viewer)->get('/favourites');
 
         $firstProfileId = (string) ProviderProfile::query()->where('user_id', $firstProvider->id)->value('id');
-        $secondProfileId = (string) ProviderProfile::query()->where('user_id', $secondProvider->id)->value('id');
-
         $response->assertStatus(200);
-        $response->assertViewHas('userFavourites', [$firstProfileId, $secondProfileId]);
+        $response->assertViewHas('userFavourites', [$firstProfileId]);
         $profiles = $response->viewData('profiles');
-        $this->assertCount(2, $profiles);
-        $this->assertSame([$firstProfileId, $secondProfileId], array_map(fn (array $profile): string => (string) $profile['id'], $profiles));
+        $this->assertCount(1, $profiles);
+        $this->assertSame([$firstProfileId], array_map(fn (array $profile): string => (string) $profile['id'], $profiles));
     }
 
     public function test_favourites_listing_shows_both_available_and_online_badges_when_both_statuses_are_active(): void
