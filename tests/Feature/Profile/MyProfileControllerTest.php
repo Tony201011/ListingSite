@@ -205,6 +205,43 @@ class MyProfileControllerTest extends TestCase
         $response->assertViewIs('profile.my-profile-2');
     }
 
+    public function test_edit_profile_view_does_not_render_bulk_error_summary_box(): void
+    {
+        $user = $this->createProvider();
+
+        $getMyProfileStepTwoData = Mockery::mock(GetMyProfileStepTwoData::class);
+        $getMyProfileStepTwoData->shouldReceive('execute')
+            ->once()
+            ->andReturn([
+                'user' => $user,
+                'profile' => $user->providerProfile,
+                'selected' => [],
+                'ageGroupOptions' => collect(),
+                'hairColorOptions' => collect(),
+                'hairLengthOptions' => collect(),
+                'ethnicityOptions' => collect(),
+                'bodyTypeOptions' => collect(),
+                'bustSizeOptions' => collect(),
+                'yourLengthOptions' => collect(),
+                'primaryTags' => collect(),
+                'attrTags' => collect(),
+                'styleTags' => collect(),
+                'services' => collect(),
+                'availabilityOptions' => collect(),
+                'contactMethodOptions' => collect(),
+                'phoneContactOptions' => collect(),
+                'timeWasterOptions' => collect(),
+                'contactEmail' => 'contact@example.com',
+            ]);
+
+        $this->app->instance(GetMyProfileStepTwoData::class, $getMyProfileStepTwoData);
+
+        $response = $this->actingAsProvider($user)->get(route('edit-profile'));
+
+        $response->assertOk();
+        $response->assertDontSee('Please fix the following errors before saving:');
+    }
+
     public function test_save_calls_action_and_returns_json_on_json_request(): void
     {
         $user = $this->createProvider();

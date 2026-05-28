@@ -64,23 +64,6 @@
         <form method="POST" @submit.prevent="submitForm" id="editProfileForm" autocomplete="off" class="space-y-8">
             @csrf
 
-            {{-- Error summary banner: visible whenever any client- or server-side field error is set --}}
-            <div
-                id="form-error-summary"
-                x-show="fieldErrors && Object.keys(fieldErrors || {}).length > 0"
-                x-cloak
-                style="display:none;"
-                class="bg-red-50 border border-red-400 rounded-2xl p-5"
-            >
-                <p class="text-red-700 font-semibold mb-2">Please fix the following errors before saving:</p>
-                <ul class="list-disc list-inside text-sm text-red-600 space-y-1">
-                    <template x-for="[field, message] in Object.entries(fieldErrors || {})" :key="field">
-                        <li x-text="Array.isArray(message) ? (message?.[0] || '') : message"></li>
-                    </template>
-                </ul>
-            </div>
-
-
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-6">Basic information</h2>
 
