@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class SearchSuburbs
 {
+    private const INVALID_TEXT_VALUES = [
+        'null',
+        'undefined',
+    ];
+
     private const STATE_ABBREVIATIONS = [
         'Australian Capital Territory' => 'ACT',
         'New South Wales' => 'NSW',
@@ -31,16 +36,18 @@ class SearchSuburbs
             ->orderBy('name')
             ->limit(10)
             ->get()
-            ->map(function (City $city): array {
+            ->map(function (City $city): ?array {
                 $stateName = $city->state?->name ?? '';
                 $stateAbbr = self::STATE_ABBREVIATIONS[$stateName] ?? $stateName;
 
-                return [
-                    'suburb' => $city->name,
-                    'state' => $stateAbbr,
-                    'postcode' => null,
-                ];
+                return $this->formatResult(
+                    suburb: $city->name,
+                    state: $stateAbbr,
+                    postcode: null
+                );
             })
+            ->filter()
+            ->values()
             ->all();
 
         $suburbResults = Postcode::query()
@@ -57,7 +64,14 @@ class SearchSuburbs
             ->orderBy('suburb')
             ->limit(20)
             ->get()
-            ->toArray();
+            ->map(fn (Postcode $postcode): ?array => $this->formatResult(
+                suburb: $postcode->suburb,
+                state: $postcode->state,
+                postcode: $postcode->postcode
+            ))
+            ->filter()
+            ->values()
+            ->all();
 
         // Merge city results first, then suburb results, deduplicating by suburb+state
         $seen = [];
@@ -72,5 +86,53 @@ class SearchSuburbs
         }
 
         return array_slice($results, 0, 20);
+    }
+
+    private function formatResult(mixed $suburb, mixed $state, mixed $postcode): ?array
+    {
+        $sanitizedSuburb = $this->sanitizeText($suburb);
+        $sanitizedState = $this->sanitizeText($state);
+
+        if ($sanitizedSuburb === null || $sanitizedState === null) {
+            return null;
+        }
+
+        return [
+            'suburb' => $sanitizedSuburb,
+            'state' => $sanitizedState,
+            'postcode' => $this->sanitizePostcode($postcode),
+        ];
+    }
+
+    private function sanitizeText(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $normalized = trim($value);
+
+        if ($normalized === '' || in_array(strtolower($normalized), self::INVALID_TEXT_VALUES, true)) {
+            return null;
+        }
+
+        return $normalized;
+    }
+
+    private function sanitizePostcode(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $normalized = trim($value);
+
+        if ($normalized === '' || in_array(strtolower($normalized), self::INVALID_TEXT_VALUES, true)) {
+            return null;
+        }
+
+        return preg_match('/^\d{4}$/', $normalized) === 1
+            ? $normalized
+            : null;
     }
 }

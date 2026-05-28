@@ -135,7 +135,7 @@
                                     @mousedown.prevent="selectSuburb(item)"
                                     class="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-800"
                                 >
-                                    <span x-text="`${item.suburb}, ${item.state} ${item.postcode}`"></span>
+                                    <span x-text="formatSuburbLabel(item)"></span>
                                 </div>
                             </template>
                         </div>
