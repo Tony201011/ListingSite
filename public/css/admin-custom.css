@@ -3,6 +3,11 @@
     min-height: 300px;
 }
 
+:root {
+    --admin-content-max-width: 1400px;
+    --admin-content-gutter: clamp(1rem, 1.8vw, 2.5rem);
+}
+
 /* Provider profile pages - prevent inner scroll containers on non-contained tabs */
 .fi-sc-tabs:not(.fi-contained) > .fi-sc-tabs-tab {
     overflow: visible !important;
@@ -19,6 +24,10 @@
 .fi-main-ctn {
     overflow: visible !important;
     height: auto !important;
+    width: 100%;
+    max-width: var(--admin-content-max-width);
+    margin-inline: auto;
+    padding-inline: var(--admin-content-gutter);
 }
 
 /* Improve admin dashboard chart sizing and layout */
@@ -37,16 +46,42 @@
 /* Provider listing table: prevent inner scrollbars and wrap cell content */
 .fi-resource-users .fi-ta-ctn,
 .fi-resource-users .fi-ta-content {
-    overflow: visible !important;
+    overflow-x: auto !important;
+    max-width: 100%;
 }
 
 .fi-resource-users .fi-ta-table {
     width: 100% !important;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 .fi-resource-users .fi-ta-table th,
 .fi-resource-users .fi-ta-table td {
     white-space: normal !important;
     word-break: break-word;
+}
+
+@media (min-width: 1920px) {
+    :root {
+        --admin-content-max-width: 1480px;
+    }
+}
+
+@media (min-width: 2560px) {
+    :root {
+        --admin-content-max-width: 1540px;
+    }
+}
+
+@media (min-width: 3440px) {
+    :root {
+        --admin-content-max-width: 1600px;
+        --admin-content-gutter: clamp(1.25rem, 2vw, 3rem);
+    }
+}
+
+@media (min-width: 3840px) {
+    :root {
+        --admin-content-max-width: 1640px;
+    }
 }
