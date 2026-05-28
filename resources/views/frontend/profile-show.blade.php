@@ -461,7 +461,7 @@ $profileTags = array_values(array_unique(array_merge(
                             >
                                 <i
                                     :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart text-pink-600' : 'fa-regular fa-heart text-pink-600'"
-                                    class="fa-regular fa-heart text-pink-600 text-lg sm:text-2xl"
+                                    class="text-pink-600 text-lg sm:text-2xl"
                                     aria-hidden="true"
                                 ></i>
                                 <span
