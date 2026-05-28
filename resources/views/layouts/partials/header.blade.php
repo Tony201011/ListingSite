@@ -155,10 +155,10 @@
                 ];
             })
             ->concat(collect([
-                ['label' => 'Touring escorts', 'url' => url('/advanced-search')],
+                ['label' => 'Touring escorts', 'url' => route('advanced-search')],
                 ['label' => 'Escorts directory', 'url' => url('/')],
                 ['label' => 'Search for escorts', 'url' => route('advanced-search')],
-                ['label' => 'Escorts near me', 'url' => url('/advanced-search')],
+                ['label' => 'Escorts near me', 'url' => route('advanced-search')],
                 ['label' => 'View all our escorts', 'url' => url('/')],
             ])->map(fn (array $item) => [
                 ...$item,
