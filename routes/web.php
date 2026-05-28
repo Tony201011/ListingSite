@@ -100,6 +100,7 @@ Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'
 
 Route::get('api/suburbs/search', [SuburbController::class, 'search'])->name('api.suburbs.search');
 Route::get('api/search/suggestions', [SearchController::class, 'suggestions'])->name('api.search.suggestions');
+Route::get('api/listings/online-count', [HomeController::class, 'listingsOnlineCount'])->name('api.listings.online-count');
 
 Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('contact-us');
 Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');

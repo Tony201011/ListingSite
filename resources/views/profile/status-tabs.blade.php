@@ -59,6 +59,7 @@
                 x-data="onlineNowToggle({
                     initialStatus: @js((bool) $onlineStatus),
                     initialExpiresAt: @js($onlineExpiresAt ?? null),
+                    profileId: @js($profileId ?? null),
                     updateUrl: @js(route('online.update-status')),
                     csrfToken: @js(csrf_token())
                 })"
@@ -247,6 +248,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('profile/js/profile-online-sync.js') }}?v={{ filemtime(public_path('profile/js/profile-online-sync.js')) }}"></script>
 <script src="{{ asset('profile/js/online-now-toggle.js') }}?v={{ filemtime(public_path('profile/js/online-now-toggle.js')) }}"></script>
 <script src="{{ asset('profile/js/hide-toggle.js') }}?v={{ filemtime(public_path('profile/js/hide-toggle.js')) }}"></script>
 <script src="{{ asset('profile/js/available-toggle.js') }}?v={{ filemtime(public_path('profile/js/available-toggle.js')) }}"></script>

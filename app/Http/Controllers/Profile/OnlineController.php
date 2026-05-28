@@ -24,6 +24,7 @@ class OnlineController extends Controller
     {
         $profile = $this->getActiveProviderProfile->execute(Auth::user());
         $data = $this->getOnlineNowState->execute($profile);
+        $data['profileId'] = $profile?->id;
 
         return view('profile.online-now', $data);
     }

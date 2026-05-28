@@ -30,6 +30,7 @@ class StatusTabsController extends Controller
         $statusSettings = SiteSetting::getStatusSettings();
 
         return view('profile.status-tabs', [
+            'profileId' => $profile?->id,
             'onlineStatus' => $onlineData['onlineStatus'],
             'onlineExpiresAt' => $onlineData['expiresAt'],
             'availableStatus' => $availableData['status'],

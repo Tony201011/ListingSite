@@ -529,7 +529,7 @@
                 </div>
             @endif
 
-            <div x-cloak>
+            <div id="listings-content" x-cloak>
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     @forelse($profiles as $profile)
                         @include('frontend.partials.profile-card', ['profile' => $profile])
@@ -609,4 +609,6 @@
 
 @push('scripts')
 <script src="{{ asset('frontend/js/home.js') }}"></script>
+<script src="{{ asset('profile/js/profile-online-sync.js') }}?v={{ filemtime(public_path('profile/js/profile-online-sync.js')) }}"></script>
+<script src="{{ asset('frontend/js/listings-refresh.js') }}?v={{ filemtime(public_path('frontend/js/listings-refresh.js')) }}"></script>
 @endpush
