@@ -60,7 +60,7 @@
             <span class="mr-1">&lt;</span> back
         </button>
 
-        <form method="POST" @submit.prevent="submitForm" id="editProfileForm" class="space-y-8">
+        <form method="POST" @submit.prevent="submitForm" id="editProfileForm" autocomplete="off" class="space-y-8">
             @csrf
 
             @if ($errors->any())
