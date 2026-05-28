@@ -62,10 +62,6 @@ class GetProviderActivityLogs
                 ? ($logoutAtUtc->lessThan($rangeEnd) ? $logoutAtUtc->copy() : $rangeEnd->copy())
                 : ($now->lessThan($rangeEnd) ? $now->copy() : $rangeEnd->copy());
 
-            if ($effectiveLogoutAtUtc->lessThanOrEqualTo($effectiveLoginAtUtc)) {
-                return null;
-            }
-
             $sessionSeconds = $this->calculateSessionSeconds(
                 $effectiveLoginAtUtc,
                 $effectiveLogoutAtUtc,
@@ -173,10 +169,6 @@ class GetProviderActivityLogs
                     ? ($logoutAtUtc->lessThan($rangeEnd) ? $logoutAtUtc->copy() : $rangeEnd->copy())
                     : ($now->lessThan($rangeEnd) ? $now->copy() : $rangeEnd->copy());
 
-                if ($effectiveLogoutAtUtc->lessThanOrEqualTo($effectiveLoginAtUtc)) {
-                    return null;
-                }
-
                 $sessionSeconds = $this->calculateSessionSeconds(
                     $effectiveLoginAtUtc,
                     $effectiveLogoutAtUtc,
@@ -220,11 +212,26 @@ class GetProviderActivityLogs
                 $currentSessionSeconds = max($currentSessionSeconds, $fullSessionSeconds);
             }
 
+            if ($effectiveEndUtc->lessThanOrEqualTo($effectiveStartUtc)) {
+                $this->appendSessionRow(
+                    $groupedDays,
+                    $effectiveStartUtc,
+                    $effectiveStartUtc,
+                    0,
+                    $displayTimezone,
+                    $isOpen,
+                    true,
+                );
+
+                continue;
+            }
+
             $segmentStartUtc = $effectiveStartUtc->copy();
 
             while ($segmentStartUtc->lt($effectiveEndUtc)) {
-                $segmentStartLocal = $segmentStartUtc->copy()->timezone($displayTimezone);
-                $nextDayStartUtc = $segmentStartLocal
+                $nextDayStartUtc = $segmentStartUtc
+                    ->copy()
+                    ->timezone($displayTimezone)
                     ->copy()
                     ->addDay()
                     ->startOfDay()
@@ -238,36 +245,58 @@ class GetProviderActivityLogs
                 }
 
                 $segmentSeconds = (int) $segmentStartUtc->diffInSeconds($segmentEndUtc);
-                $segmentEndLocal = $segmentEndUtc->copy()->timezone($displayTimezone);
-                $dateKey = $segmentStartLocal->format('Y-m-d');
                 $isLastSegment = $segmentEndUtc->equalTo($effectiveEndUtc);
                 $isCurrentSegment = $isOpen && $isLastSegment;
 
-                if (! $groupedDays->has($dateKey)) {
-                    $groupedDays->put($dateKey, [
-                        'total_seconds' => 0,
-                        'sessions' => [],
-                    ]);
-                }
-
-                $dayData = $groupedDays->get($dateKey);
-                $dayData['total_seconds'] += $segmentSeconds;
-                $dayData['sessions'][] = [
-                    'date' => $segmentStartLocal->format('d M Y'),
-                    'login_at' => $segmentStartLocal->format('h:i A'),
-                    'logout_at' => $isCurrentSegment
-                        ? '—'
-                        : ($segmentEndLocal->format('h:i A')),
-                    'duration' => $this->formatDuration($segmentSeconds),
-                    'duration_seconds' => $segmentSeconds,
-                    'status' => $isCurrentSegment ? 'Online' : 'Offline',
-                    'is_current' => $isCurrentSegment,
-                ];
-                $groupedDays->put($dateKey, $dayData);
+                $this->appendSessionRow(
+                    $groupedDays,
+                    $segmentStartUtc,
+                    $segmentEndUtc,
+                    $segmentSeconds,
+                    $displayTimezone,
+                    $isCurrentSegment,
+                    false,
+                );
 
                 $segmentStartUtc = $segmentEndUtc->copy();
             }
         }
+    }
+
+    private function appendSessionRow(
+        Collection &$groupedDays,
+        Carbon $segmentStartUtc,
+        Carbon $segmentEndUtc,
+        int $segmentSeconds,
+        string $displayTimezone,
+        bool $isCurrentSegment,
+        bool $forceLogoutTime,
+    ): void {
+        $segmentStartLocal = $segmentStartUtc->copy()->timezone($displayTimezone);
+        $segmentEndLocal = $segmentEndUtc->copy()->timezone($displayTimezone);
+        $dateKey = $segmentStartLocal->format('Y-m-d');
+
+        if (! $groupedDays->has($dateKey)) {
+            $groupedDays->put($dateKey, [
+                'total_seconds' => 0,
+                'sessions' => [],
+            ]);
+        }
+
+        $dayData = $groupedDays->get($dateKey);
+        $dayData['total_seconds'] += $segmentSeconds;
+        $dayData['sessions'][] = [
+            'date' => $segmentStartLocal->format('d M Y'),
+            'login_at' => $segmentStartLocal->format('h:i A'),
+            'logout_at' => $isCurrentSegment && ! $forceLogoutTime
+                ? '—'
+                : $segmentEndLocal->format('h:i A'),
+            'duration' => $this->formatDuration($segmentSeconds),
+            'duration_seconds' => $segmentSeconds,
+            'status' => $isCurrentSegment ? 'Online' : 'Offline',
+            'is_current' => $isCurrentSegment,
+        ];
+        $groupedDays->put($dateKey, $dayData);
     }
 
     private function formatDuration(int $totalSeconds): string
