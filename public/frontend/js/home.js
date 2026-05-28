@@ -340,7 +340,6 @@ function favouriteBookmark(config) {
     return {
         viewMode: config.viewMode || 'grid',
         favourites: Array.isArray(config.favourites) ? config.favourites.map(String) : [],
-        bookmarks: Array.isArray(config.bookmarks) ? config.bookmarks.map(String) : [],
 
         normalize(slug) {
             return String(slug || '').trim();
@@ -359,26 +358,26 @@ function favouriteBookmark(config) {
                 });
 
                 if (!response.ok) {
-                    console.warn('Favourite/bookmark toggle request failed with HTTP status:', response.status, response.statusText);
+                    console.warn('Favourite toggle request failed with HTTP status:', response.status, response.statusText);
                     return null;
                 }
 
                 const contentType = response.headers.get('content-type') || '';
                 if (!contentType.includes('application/json')) {
-                    console.warn('Favourite/bookmark toggle returned non-JSON content type:', contentType || '(empty)');
+                    console.warn('Favourite toggle returned non-JSON content type:', contentType || '(empty)');
                     return null;
                 }
 
                 const data = await response.json();
 
                 if (typeof data.active !== 'boolean') {
-                    console.warn('Unexpected favourite/bookmark toggle response payload:', data);
+                    console.warn('Unexpected favourite toggle response payload:', data);
                     return null;
                 }
 
                 return data.active;
             } catch (error) {
-                console.error('Favourite/bookmark toggle request failed:', error);
+                console.error('Favourite toggle request failed:', error);
                 return null;
             }
         },
@@ -386,11 +385,6 @@ function favouriteBookmark(config) {
         isFavourite(slug) {
             slug = this.normalize(slug);
             return this.favourites.includes(slug);
-        },
-
-        isBookmark(slug) {
-            slug = this.normalize(slug);
-            return this.bookmarks.includes(slug);
         },
 
         async toggleFavourite(slug) {
@@ -404,20 +398,6 @@ function favouriteBookmark(config) {
                 if (!this.favourites.includes(slug)) this.favourites.push(slug);
             } else {
                 this.favourites = this.favourites.filter(s => s !== slug);
-            }
-        },
-
-        async toggleBookmark(slug) {
-            slug = this.normalize(slug);
-            if (!slug) return;
-
-            const active = await this.requestToggle('/bookmark/' + encodeURIComponent(slug));
-            if (active === null) return;
-
-            if (active) {
-                if (!this.bookmarks.includes(slug)) this.bookmarks.push(slug);
-            } else {
-                this.bookmarks = this.bookmarks.filter(s => s !== slug);
             }
         },
     };

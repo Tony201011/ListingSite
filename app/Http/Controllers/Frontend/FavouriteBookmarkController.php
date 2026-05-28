@@ -22,14 +22,4 @@ class FavouriteBookmarkController extends Controller
         return response()->json(['active' => $active]);
     }
 
-    public function toggleBookmark(Request $request, string $slug): JsonResponse
-    {
-        if (! $this->service->slugExists($slug)) {
-            return response()->json(['error' => 'Profile not found.'], 404);
-        }
-
-        $active = $this->service->toggleBookmark($slug);
-
-        return response()->json(['active' => $active]);
-    }
 }
