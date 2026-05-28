@@ -28,8 +28,7 @@
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     @endif
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>[x-cloak] { display: none !important; }</style>
 
@@ -75,16 +74,36 @@
         $siteSetting = \App\Models\SiteSetting::first();
     @endphp
 
+    <script>
+        window.safeStorage = window.safeStorage || {
+            getLocal(key) {
+                try {
+                    return window.localStorage.getItem(key);
+                } catch (error) {
+                    return null;
+                }
+            },
+            setLocal(key, value) {
+                try {
+                    window.localStorage.setItem(key, value);
+                    return true;
+                } catch (error) {
+                    return false;
+                }
+            }
+        };
+    </script>
+
     @if($siteSetting && $siteSetting->enable_cookies)
         <div
             x-data="{
-                show: localStorage.getItem('cookieConsent') === null,
+                show: window.safeStorage.getLocal('cookieConsent') === null,
                 accept() {
-                    localStorage.setItem('cookieConsent', 'accepted');
+                    window.safeStorage.setLocal('cookieConsent', 'accepted');
                     this.show = false;
                 },
                 reject() {
-                    localStorage.setItem('cookieConsent', 'rejected');
+                    window.safeStorage.setLocal('cookieConsent', 'rejected');
                     this.show = false;
                 }
             }"
