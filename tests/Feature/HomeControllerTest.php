@@ -533,6 +533,27 @@ class HomeControllerTest extends TestCase
         $response->assertSeeText('Online Now');
     }
 
+    public function test_favourites_page_includes_bookmark_only_profiles(): void
+    {
+        $provider = $this->createApprovedProvider([
+            'name' => 'Bookmark Only Escort',
+            'slug' => 'bookmark-only-escort',
+        ]);
+        $profile = ProviderProfile::query()->where('user_id', $provider->id)->firstOrFail();
+        $viewer = User::factory()->create();
+
+        Cache::put("bookmarks_user_{$viewer->id}", [(string) $profile->id], 60);
+
+        $response = $this->actingAs($viewer)->get('/favourites');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('userFavourites', []);
+        $response->assertViewHas('userBookmarks', [(string) $profile->id]);
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(1, $profiles);
+        $this->assertSame((string) $profile->id, (string) $profiles[0]['id']);
+    }
+
     public function test_home_page_shows_default_filter_values(): void
     {
         $response = $this->get('/');
