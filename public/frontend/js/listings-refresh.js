@@ -5,7 +5,7 @@
     var LISTINGS_ID = 'listings-content';
     var COUNT_ENDPOINT = '/api/listings/online-count';
 
-    var lastKnownCount = null;
+    var lastKnownSignature = null;
     var pollTimer = null;
 
     function getListingsContainer() {
@@ -47,11 +47,12 @@
                 return res.json();
             })
             .then(function (data) {
-                var count = data.online_count;
-                if (lastKnownCount !== null && count !== lastKnownCount) {
+                var signature = data.refresh_signature || String(data.online_count || 0);
+
+                if (lastKnownSignature !== null && signature !== lastKnownSignature) {
                     refreshListings();
                 }
-                lastKnownCount = count;
+                lastKnownSignature = signature;
             })
             .catch(function () {
                 /* silently ignore network errors */

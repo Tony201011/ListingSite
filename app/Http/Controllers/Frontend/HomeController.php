@@ -227,8 +227,47 @@ class HomeController extends Controller
 
     public function listingsOnlineCount(): JsonResponse
     {
-        $count = ProviderProfile::query()->whereCurrentlyOnline()->count();
+        $onlineProfiles = ProviderProfile::query()
+            ->select([
+                'id',
+                'home_featured_expires_at',
+                'local_banner_expires_at',
+                'home_banner_expires_at',
+            ])
+            ->whereCurrentlyOnline()
+            ->get();
 
-        return response()->json(['online_count' => $count]);
+        $onlineIds = $onlineProfiles->pluck('id')->map(fn ($id) => (int) $id)->sort()->values();
+        $homeFeaturedIds = $onlineProfiles
+            ->filter(fn (ProviderProfile $profile): bool => $profile->home_featured_expires_at?->isFuture() ?? false)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->sort()
+            ->values();
+        $localBannerIds = $onlineProfiles
+            ->filter(fn (ProviderProfile $profile): bool => $profile->local_banner_expires_at?->isFuture() ?? false)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->sort()
+            ->values();
+        $homeBannerIds = $onlineProfiles
+            ->filter(fn (ProviderProfile $profile): bool => $profile->home_banner_expires_at?->isFuture() ?? false)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->sort()
+            ->values();
+
+        return response()->json([
+            'online_count' => $onlineIds->count(),
+            'home_featured_count' => $homeFeaturedIds->count(),
+            'local_banner_count' => $localBannerIds->count(),
+            'home_banner_count' => $homeBannerIds->count(),
+            'refresh_signature' => hash('sha256', implode('|', [
+                $onlineIds->implode(','),
+                $homeFeaturedIds->implode(','),
+                $localBannerIds->implode(','),
+                $homeBannerIds->implode(','),
+            ])),
+        ]);
     }
 }
