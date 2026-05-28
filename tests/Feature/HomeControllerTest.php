@@ -622,6 +622,20 @@ class HomeControllerTest extends TestCase
         $this->assertSame(1, $profiles->total());
     }
 
+    public function test_advanced_search_shows_online_blocked_profiles_counted_in_admin(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Blocked Escort',
+            'slug' => 'blocked-escort',
+            'is_blocked' => true,
+        ]);
+
+        $response = $this->get(route('advanced-search'));
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(1, $profiles->total());
+    }
+
     public function test_home_page_does_not_show_soft_deleted_profiles(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
@@ -651,6 +665,23 @@ class HomeControllerTest extends TestCase
         ]);
 
         $response = $this->get('/');
+
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(1, $profiles->total());
+    }
+
+    public function test_advanced_search_shows_online_hidden_profiles_counted_in_admin(): void
+    {
+        $user = $this->createApprovedProvider(['name' => 'Hidden Escort', 'slug' => 'hidden-escort']);
+        $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
+
+        HideShowProfile::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'hide',
+        ]);
+
+        $response = $this->get(route('advanced-search'));
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(1, $profiles->total());

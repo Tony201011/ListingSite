@@ -44,7 +44,7 @@ class HomeController extends Controller
 
     public function advancedSearch(AdvancedSearchRequest $request): View
     {
-        $viewData = $this->buildProfileFilterViewData->execute($request->validated());
+        $viewData = $this->buildProfileFilterViewData->execute($request->validated(), syncWithAdminOnlineListing: true);
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
 
         return view('frontend.advanced-search', $viewData);
