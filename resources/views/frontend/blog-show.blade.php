@@ -58,7 +58,12 @@
                 <span></span>
             @endif
 
-            <a href="{{ route('blog') }}" class="text-gray-500 hover:text-gray-700">Back to all blogs</a>
+            <a href="{{ route('blog') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors text-sm font-medium">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to all blogs
+            </a>
         </div>
     </div>
 </div>
