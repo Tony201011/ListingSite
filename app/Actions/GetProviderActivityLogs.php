@@ -247,6 +247,7 @@ class GetProviderActivityLogs
                 $segmentSeconds = (int) $segmentStartUtc->diffInSeconds($segmentEndUtc);
                 $isLastSegment = $segmentEndUtc->equalTo($effectiveEndUtc);
                 $isCurrentSegment = $isOpen && $isLastSegment;
+                $isMidnightSplit = ! $isLastSegment;
 
                 $this->appendSessionRow(
                     $groupedDays,
@@ -256,6 +257,7 @@ class GetProviderActivityLogs
                     $displayTimezone,
                     $isCurrentSegment,
                     false,
+                    $isMidnightSplit,
                 );
 
                 $segmentStartUtc = $segmentEndUtc->copy();
@@ -271,6 +273,7 @@ class GetProviderActivityLogs
         string $displayTimezone,
         bool $isCurrentSegment,
         bool $forceLogoutTime,
+        bool $isMidnightSplit = false,
     ): void {
         $segmentStartLocal = $segmentStartUtc->copy()->timezone($displayTimezone);
         $segmentEndLocal = $segmentEndUtc->copy()->timezone($displayTimezone);
@@ -283,6 +286,11 @@ class GetProviderActivityLogs
             ]);
         }
 
+        // For segments split at midnight, display end-of-day as 11:59:59 PM rather than 12:00 AM.
+        $logoutDisplay = $isMidnightSplit
+            ? $segmentEndLocal->copy()->subSecond()->format('h:i:s A')
+            : $segmentEndLocal->format('h:i A');
+
         $dayData = $groupedDays->get($dateKey);
         $dayData['total_seconds'] += $segmentSeconds;
         $dayData['sessions'][] = [
@@ -290,7 +298,7 @@ class GetProviderActivityLogs
             'login_at' => $segmentStartLocal->format('h:i A'),
             'logout_at' => $isCurrentSegment && ! $forceLogoutTime
                 ? '—'
-                : $segmentEndLocal->format('h:i A'),
+                : $logoutDisplay,
             'duration' => $this->formatDuration($segmentSeconds),
             'duration_seconds' => $segmentSeconds,
             'status' => $isCurrentSegment ? 'Online' : 'Offline',
