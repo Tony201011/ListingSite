@@ -302,6 +302,12 @@
                 @endif
             @endforeach
             <div class="ml-auto flex items-center gap-2">
+                <a href="{{ route('favourites') }}"
+                   class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition {{ request()->routeIs('favourites') ? 'bg-gray-800 text-pink-400' : 'text-gray-300 hover:bg-gray-800 hover:text-pink-400' }}"
+                   title="My Favourites">
+                    <i class="fa-solid fa-heart text-pink-500"></i>
+                    <span>Favourites</span>
+                </a>
                 @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
                     <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
                 @endif
@@ -357,6 +363,9 @@
                 @endforeach
                 @guest
                 @endguest
+                <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
+                    <i class="fa-solid fa-heart text-pink-500 mr-1.5 text-xs"></i> Favourites
+                </a>
                 @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
                     <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block rounded-lg px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
                 @endif

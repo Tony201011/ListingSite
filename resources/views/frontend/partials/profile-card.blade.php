@@ -82,9 +82,29 @@
 
     {{-- Content --}}
     <div class="p-3.5">
-        {{-- Date row --}}
-        <div class="mb-2">
+        {{-- Date + Actions row --}}
+        <div class="mb-2 flex items-center justify-between">
             <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
+            <div class="flex items-center gap-2 text-gray-400 relative z-20">
+                <button
+                    type="button"
+                    @click.prevent="toggleFavourite('{{ $profile['id'] }}')"
+                    :class="isFavourite('{{ $profile['id'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
+                    class="transition-colors"
+                    title="Favourite"
+                >
+                    <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
+                </button>
+                <button
+                    type="button"
+                    @click.prevent="toggleBookmark('{{ $profile['id'] }}')"
+                    :class="isBookmark('{{ $profile['id'] }}') ? 'text-sky-500' : 'hover:text-sky-500'"
+                    class="transition-colors"
+                    title="Bookmark"
+                >
+                    <i :class="isBookmark('{{ $profile['id'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
+                </button>
+            </div>
         </div>
 
         {{-- Name --}}

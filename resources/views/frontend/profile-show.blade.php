@@ -17,7 +17,7 @@ $profileTags = array_values(array_unique(array_merge(
 
 @section('content')
 <div class="min-h-screen bg-gray-50 text-gray-800 profile-page-content"
-    x-data="profileShowPage({ reportUrl: '{{ route('profile.report') }}', profileId: {{ $profile['id'] }} })"
+    x-data="profileShowPage({ favourites: {{ Js::from($userFavourites ?? []) }}, reportUrl: '{{ route('profile.report') }}', profileId: {{ $profile['id'] }} })"
 >
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
@@ -449,6 +449,27 @@ $profileTags = array_values(array_unique(array_merge(
                             </div>
                         </div>
                         @endif
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-3 sm:mt-4">
+                            <button
+                                type="button"
+                                @click.prevent="toggleFavourite('{{ $profile['id'] }}')"
+                                :class="isFavourite('{{ $profile['id'] }}') ? 'bg-pink-50 text-pink-700 border-pink-400' : 'bg-white text-pink-700 border-gray-300 hover:bg-pink-50'"
+                                class="flex items-center gap-2 border rounded-lg sm:rounded-xl px-4 sm:px-6 py-2 sm:py-3 transition font-semibold text-sm sm:text-lg w-full justify-center"
+                                style="border-width:2px;"
+                                title="Save favourite"
+                                aria-label="Save favourite"
+                            >
+                                <i
+                                    :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart text-pink-600' : 'fa-regular fa-heart text-pink-600'"
+                                    class="text-pink-600 text-lg sm:text-2xl"
+                                    aria-hidden="true"
+                                ></i>
+                                <span
+                                    class="font-semibold uppercase tracking-wide text-pink-700 text-xs sm:text-base"
+                                    x-text="isFavourite('{{ $profile['id'] }}') ? '✓ SAVED' : 'SAVE'"
+                                >SAVE</span>
+                            </button>
+                        </div>
                         <div class="mt-3 sm:mt-4">
                             <button
                                 type="button"
