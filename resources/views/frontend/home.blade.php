@@ -120,6 +120,7 @@
         })"
     >
 
+        <div id="listings-content" x-cloak>
         {{-- Toolbar: filters, sort, view toggle --}}
         <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
             @php
@@ -247,7 +248,6 @@
         @endif
 
         {{-- Profile Cards Grid --}}
-        <div id="listings-content" x-cloak>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             @forelse($profiles as $profile)
                 @if($loop->iteration === 11 && $loop->count > 10)

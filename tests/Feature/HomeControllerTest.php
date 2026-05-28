@@ -1714,4 +1714,54 @@ class HomeControllerTest extends TestCase
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
         $filteredResponse->assertDontSeeText('Featured');
     }
+
+    public function test_listings_online_count_endpoint_includes_banner_and_featured_counts(): void
+    {
+        $this->createApprovedProvider([
+            'home_featured_expires_at' => now()->addDay(),
+            'local_banner_expires_at' => now()->addDay(),
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $this->createApprovedProvider();
+
+        $response = $this->getJson('/api/listings/online-count');
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('online_count', 2)
+            ->assertJsonPath('home_featured_count', 1)
+            ->assertJsonPath('local_banner_count', 1)
+            ->assertJsonPath('home_banner_count', 1);
+
+        $this->assertNotSame('', (string) $response->json('refresh_signature'));
+    }
+
+    public function test_listings_online_count_endpoint_refresh_signature_changes_after_online_toggle(): void
+    {
+        $user = $this->createApprovedProvider([
+            'home_featured_expires_at' => now()->addDay(),
+            'local_banner_expires_at' => now()->addDay(),
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $first = $this->getJson('/api/listings/online-count')
+            ->assertOk();
+        $firstSignature = (string) $first->json('refresh_signature');
+
+        OnlineUser::query()
+            ->where('user_id', $user->id)
+            ->whereNotNull('provider_profile_id')
+            ->update(['status' => 'offline']);
+
+        $second = $this->getJson('/api/listings/online-count')
+            ->assertOk()
+            ->assertJsonPath('online_count', 0)
+            ->assertJsonPath('home_featured_count', 0)
+            ->assertJsonPath('local_banner_count', 0)
+            ->assertJsonPath('home_banner_count', 0);
+        $secondSignature = (string) $second->json('refresh_signature');
+
+        $this->assertNotSame($firstSignature, $secondSignature);
+    }
 }
