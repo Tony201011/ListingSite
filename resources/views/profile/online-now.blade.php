@@ -8,6 +8,7 @@
     initialExpiresAt: @js($expiresAt ?? null),
     initialOnlineStartedAt: @js($onlineStartedAt ?? null),
     initialBlockedBalance: @js((bool) $blockedBalance),
+    profileId: @js($profileId ?? null),
     updateUrl: @js(route('online.update-status')),
     csrfToken: @js(csrf_token())
     })"
@@ -105,6 +106,7 @@
 </div>
 
 @push('scripts')
+<script src="{{ asset('profile/js/profile-online-sync.js') }}?v={{ filemtime(public_path('profile/js/profile-online-sync.js')) }}"></script>
 <script src="{{ asset('profile/js/online-now-toggle.js') }}?v={{ filemtime(public_path('profile/js/online-now-toggle.js')) }}"></script>
 @endpush
 

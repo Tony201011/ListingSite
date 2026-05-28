@@ -4,6 +4,7 @@ document.addEventListener('alpine:init', () => {
         expiresAt: config.initialExpiresAt || null,
         onlineStartedAt: config.initialOnlineStartedAt || null,
         blockedBalance: Boolean(config.initialBlockedBalance),
+        profileId: config.profileId || null,
         updateUrl: config.updateUrl || '',
         csrfToken: config.csrfToken || '',
 
@@ -96,6 +97,13 @@ document.addEventListener('alpine:init', () => {
 
                 this.enabled = data.status === 'online';
                 this.onlineStartedAt = data.online_started_at ?? null;
+
+                if (this.profileId) {
+                    window.profileOnlineSync?.notify({
+                        profileId: this.profileId,
+                        status: data.status,
+                    });
+                }
 
                 if (this.enabled && this.onlineStartedAt) {
                     this.startTimer();

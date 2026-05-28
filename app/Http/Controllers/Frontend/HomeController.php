@@ -12,6 +12,7 @@ use App\Http\Requests\ShowProfileRequest;
 use App\Models\ProviderProfile;
 use App\Services\FavouriteBookmarkService;
 use App\Services\LocationSlugService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -222,5 +223,12 @@ class HomeController extends Controller
         }
 
         return $hasLegacyLocationQuery ? $targetUrl : null;
+    }
+
+    public function listingsOnlineCount(): JsonResponse
+    {
+        $count = ProviderProfile::query()->whereCurrentlyOnline()->count();
+
+        return response()->json(['online_count' => $count]);
     }
 }
