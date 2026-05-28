@@ -466,11 +466,6 @@
         </div>
 
                 <div class="mt-6 lg:mt-0 min-w-0 flex-1"
-            x-data="favouriteBookmark({
-                viewMode: 'grid',
-                favourites: {{ Js::from($userFavourites ?? []) }},
-                bookmarks: {{ Js::from($userBookmarks ?? []) }}
-            })"
         >
             <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
                 @php
@@ -628,32 +623,8 @@
                             </div>
 
                             <div class="p-3.5">
-                                <div class="mb-2 flex items-center justify-between">
+                                <div class="mb-2">
                                     <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
-                                    <div class="flex items-center gap-2 text-gray-400 relative z-20">
-                                        <button
-                                            type="button"
-                                            @click.prevent="toggleFavourite('{{ $profile['id'] }}')"
-                                            :class="isFavourite('{{ $profile['id'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
-                                            class="transition-colors"
-                                            title="Favourite"
-                                        >
-                                            <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            @click.prevent="toggleBookmark('{{ $profile['id'] }}')"
-                                            :class="isBookmark('{{ $profile['id'] }}') ? 'text-sky-500' : 'hover:text-sky-500'"
-                                            class="transition-colors"
-                                            title="Bookmark"
-                                        >
-                                            <i :class="isBookmark('{{ $profile['id'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
-                                        </button>
-
-                                        {{-- @if($profile['age'])
-                                            <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none">{{ $profile['age'] }}</span>
-                                        @endif --}}
-                                    </div>
                                 </div>
 
                                 <h3 class="text-sm font-medium text-gray-800 truncate">

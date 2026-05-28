@@ -20,19 +20,13 @@
 
     {{-- Main Content --}}
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8"
-        x-data="favouriteBookmark({
-            favourites: {{ Js::from($userFavourites ?? []) }},
-            bookmarks: {{ Js::from($userBookmarks ?? []) }}
-        })"
     >
 
         {{-- Profile Cards Grid --}}
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" x-show="favourites.length > 0 && {{ count($profiles) > 0 ? 'true' : 'false' }}">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" @if(!empty($profiles)) style="display:grid;" @else style="display:none;" @endif>
             @forelse($profiles as $profile)
                 <article
                     class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
-                    x-cloak
-                    x-show="isFavourite('{{ $profile['id'] }}')"
                 >
                     <a href="{{ $profile['profile_url'] ?? route('profile.show.no-sequence', ['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug']]) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
@@ -110,29 +104,9 @@
 
                     {{-- Content --}}
                     <div class="p-3.5">
-                        {{-- Date + Actions row --}}
-                        <div class="mb-2 flex items-center justify-between">
+                        {{-- Date row --}}
+                        <div class="mb-2">
                             <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
-                            <div class="flex items-center gap-2 text-gray-400 relative z-20">
-                                <button
-                                    type="button"
-                                    @click.prevent="toggleFavourite('{{ $profile['id'] }}')"
-                                    :class="isFavourite('{{ $profile['id'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
-                                    class="transition-colors"
-                                    title="Remove from favourites"
-                                >
-                                    <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
-                                </button>
-                                <button
-                                    type="button"
-                                    @click.prevent="toggleBookmark('{{ $profile['id'] }}')"
-                                    :class="isBookmark('{{ $profile['id'] }}') ? 'text-sky-500' : 'hover:text-sky-500'"
-                                    class="transition-colors"
-                                    title="Bookmark"
-                                >
-                                    <i :class="isBookmark('{{ $profile['id'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
-                                </button>
-                            </div>
                         </div>
 
                         {{-- Name --}}
@@ -193,13 +167,14 @@
             @endforelse
         </div>
 
-        {{-- Empty state (shown when no favourites, or all were removed) --}}
-        <div x-show="{{ empty($profiles) ? 'true' : 'favourites.length === 0' }}" class="rounded-2xl border border-dashed border-gray-300 bg-white p-16 text-center">
+        {{-- Empty state --}}
+        @if(empty($profiles))
+        <div class="rounded-2xl border border-dashed border-gray-300 bg-white p-16 text-center">
             <i class="fa-regular fa-heart mb-4 text-4xl text-gray-300"></i>
-            <p class="text-base font-medium text-gray-600">You haven't saved any favourites yet.</p>
-            <p class="mt-1 text-sm text-gray-500">Browse listings and click the <i class="fa-regular fa-heart text-pink-400"></i> icon to save them here.</p>
+            <p class="text-base font-medium text-gray-600">No listings found.</p>
             <a href="{{ url('/') }}" class="mt-5 inline-block rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white hover:bg-pink-700 transition">Browse Listings</a>
         </div>
+        @endif
 
     </div>
 </div>
