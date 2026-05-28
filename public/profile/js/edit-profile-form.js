@@ -1,6 +1,25 @@
 // Store Quill instances outside Alpine's reactive proxy to avoid conflicts
 const editorInstances = new Map();
 const IMAGE_LOAD_TIMEOUT_MS = 8000;
+const normalizeFieldErrors = (raw) => {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+        return {};
+    }
+
+    const normalized = {};
+
+    Object.entries(raw).forEach(([key, messages]) => {
+        const baseKey = key.split('.')[0];
+
+        if (normalized[baseKey]) {
+            return;
+        }
+
+        normalized[baseKey] = Array.isArray(messages) ? messages[0] : messages;
+    });
+
+    return normalized;
+};
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('editProfileForm', (config = {}) => ({
@@ -40,27 +59,60 @@ document.addEventListener('alpine:init', () => {
         suburbSelected: Boolean(config.initial?.suburbSelected),
 
         submitting: false,
-        fieldErrors: (function () {
-            const raw = config.initial?.serverErrors;
-            if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-                const out = {};
-                Object.entries(raw).forEach(([key, msgs]) => {
-                    out[key] = Array.isArray(msgs) ? msgs[0] : msgs;
-                });
-                return out;
-            }
-            return {};
-        })(),
+        fieldErrors: normalizeFieldErrors(config.initial?.serverErrors),
 
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
 
         init() {
             this.initEditors();
+            this.registerFieldWatchers();
         },
 
         getEditor(key) {
             return editorInstances.get(key);
+        },
+
+        registerFieldWatchers() {
+            const fieldMap = {
+                name: 'name',
+                phone: 'phone',
+                suburb: 'suburb',
+                age_group: 'age_group',
+                hair_color: 'hair_color',
+                hair_length: 'hair_length',
+                ethnicity: 'ethnicity',
+                body_type: 'body_type',
+                bust_size: 'bust_size',
+                your_length: 'your_length',
+                availability: 'availability',
+                contact_method: 'contact_method',
+                phone_contact: 'phone_contact',
+                time_waster: 'time_waster',
+                website: 'website',
+                twitter_handle: 'twitter_handle',
+                onlyfans_username: 'onlyfans_username',
+                primaryIdentity: 'primary_identity',
+                attributes: 'attributes',
+                servicesStyle: 'services_style',
+                services_provided: 'services_provided',
+            };
+
+            Object.entries(fieldMap).forEach(([stateKey, errorKey]) => {
+                this.$watch(stateKey, () => {
+                    this.clearFieldError(errorKey);
+                });
+            });
+        },
+
+        clearFieldError(field) {
+            if (!Object.prototype.hasOwnProperty.call(this.fieldErrors, field)) {
+                return;
+            }
+
+            const nextErrors = { ...this.fieldErrors };
+            delete nextErrors[field];
+            this.fieldErrors = nextErrors;
         },
 
         initEditors() {
@@ -215,6 +267,7 @@ document.addEventListener('alpine:init', () => {
 
             quill.on('text-change', () => {
                 this[modelKey] = quill.root.innerHTML;
+                this.clearFieldError(modelKey);
 
                 if (modelKey === 'introduction_line' && this.$refs.introductionLineInput) {
                     this.$refs.introductionLineInput.value = this[modelKey];
@@ -290,6 +343,7 @@ document.addEventListener('alpine:init', () => {
         toggleTag(group, tag, event) {
             if (group === 'primaryIdentity') {
                 this.primaryIdentity = [tag];
+                this.clearFieldError('primary_identity');
                 return;
             }
 
@@ -299,6 +353,7 @@ document.addEventListener('alpine:init', () => {
                 } else {
                     this.attributes.push(tag);
                 }
+                this.clearFieldError('attributes');
                 return;
             }
 
@@ -312,6 +367,8 @@ document.addEventListener('alpine:init', () => {
                     element.classList.add('shake');
                     setTimeout(() => element.classList.remove('shake'), 300);
                 }
+
+                this.clearFieldError('services_style');
             }
         },
 
@@ -321,10 +378,13 @@ document.addEventListener('alpine:init', () => {
             } else {
                 this.services_provided.push(service);
             }
+
+            this.clearFieldError('services_provided');
         },
 
         handleSuburbInput() {
             this.suburbSelected = false;
+            this.clearFieldError('suburb');
             this.searchSuburbs();
         },
 
@@ -373,6 +433,7 @@ document.addEventListener('alpine:init', () => {
             this.suburbSelected = true;
             this.showResults = false;
             this.searchResults = [];
+            this.clearFieldError('suburb');
         },
 
         stripHtml(html) {
@@ -461,7 +522,7 @@ document.addEventListener('alpine:init', () => {
         async submitForm() {
             this.syncHiddenEditorInputs();
 
-            this.fieldErrors = this.validate();
+            this.fieldErrors = { ...this.validate() };
 
             if (Object.keys(this.fieldErrors).length > 0) {
                 this.scrollToErrors();
@@ -524,15 +585,7 @@ document.addEventListener('alpine:init', () => {
                     this.fieldErrors = {};
                     this.toast(data.message || 'Profile updated successfully.');
                 } else if (response.status === 422) {
-                    const rawErrors = data.errors || {};
-                    const mapped = {};
-                    Object.entries(rawErrors).forEach(([key, msgs]) => {
-                        // Strip array notation, e.g. "primary_identity.0" → "primary_identity"
-                        const baseKey = key.split('.')[0];
-                        if (!mapped[baseKey]) {
-                            mapped[baseKey] = Array.isArray(msgs) ? msgs[0] : msgs;
-                        }
-                    });
+                    const mapped = normalizeFieldErrors(data.errors || {});
                     this.fieldErrors = Object.keys(mapped).length ? mapped : { form: 'Validation failed.' };
                     this.scrollToErrors();
                 } else {
