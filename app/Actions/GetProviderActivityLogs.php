@@ -35,8 +35,14 @@ class GetProviderActivityLogs
             return $empty;
         }
 
-        $now = now();
-        [$rangeStart, $rangeEnd] = $this->resolveDateRange($now, $lookbackDays, $dateFrom, $dateTo);
+        $now = now('UTC');
+        [$rangeStart, $rangeEnd] = $this->resolveDateRange(
+            $now,
+            $lookbackDays,
+            $dateFrom,
+            $dateTo,
+            $displayTimezone,
+        );
 
         $sessions = ProviderOnlineLog::query()
             ->where('provider_profile_id', $profile->id)
@@ -49,12 +55,12 @@ class GetProviderActivityLogs
             ->get();
 
         $firstProfileSessionAt = $sessions->isNotEmpty()
-            ? Carbon::parse((string) $sessions->min('went_online_at'))
+            ? $this->asUtc($sessions->min('went_online_at'))
             : null;
 
         $normalizedSessions = $sessions->map(function (ProviderOnlineLog $log) use ($now, $rangeStart, $rangeEnd): ?array {
-            $loginAtUtc = Carbon::parse($log->went_online_at);
-            $logoutAtUtc = $log->went_offline_at ? Carbon::parse($log->went_offline_at) : null;
+            $loginAtUtc = $this->asUtc($log->went_online_at);
+            $logoutAtUtc = $log->went_offline_at ? $this->asUtc($log->went_offline_at) : null;
             $statusValue = strtoupper((string) ($log->status ?? ''));
             $isOpen = $logoutAtUtc === null && ($statusValue === '' || $statusValue === 'ONLINE');
             $effectiveLoginAtUtc = $loginAtUtc->greaterThan($rangeStart) ? $loginAtUtc->copy() : $rangeStart->copy();
@@ -160,8 +166,8 @@ class GetProviderActivityLogs
             ->orderByDesc('created_at')
             ->get()
             ->map(function (LoginLog $log) use ($now, $rangeStart, $rangeEnd): ?array {
-                $loginAtUtc = Carbon::parse($log->created_at);
-                $logoutAtUtc = $log->logged_out_at ? Carbon::parse($log->logged_out_at) : null;
+                $loginAtUtc = $this->asUtc($log->created_at);
+                $logoutAtUtc = $log->logged_out_at ? $this->asUtc($log->logged_out_at) : null;
                 $statusValue = strtoupper((string) ($log->status ?? ''));
                 $isOpen = $logoutAtUtc === null && ($statusValue === '' || $statusValue === 'ONLINE');
                 $effectiveLoginAtUtc = $loginAtUtc->greaterThan($rangeStart) ? $loginAtUtc->copy() : $rangeStart->copy();
@@ -327,22 +333,38 @@ class GetProviderActivityLogs
         int $lookbackDays,
         ?Carbon $dateFrom,
         ?Carbon $dateTo,
+        string $displayTimezone,
     ): array {
         if ($dateFrom && $dateTo) {
+            $dateFromLocal = $dateFrom->copy()->timezone($displayTimezone)->startOfDay();
+            $dateToLocal = $dateTo->copy()->timezone($displayTimezone)->endOfDay();
+
             return [
-                $dateFrom->copy()->startOfDay(),
-                $dateTo->copy()->endOfDay(),
+                $dateFromLocal->copy()->utc(),
+                $dateToLocal->copy()->utc(),
             ];
         }
 
+        $rangeEndLocal = $now->copy()->timezone($displayTimezone)->endOfDay();
+        $rangeStartLocal = $rangeEndLocal->copy()->subDays($lookbackDays)->startOfDay();
+
         return [
-            $now->copy()->subDays($lookbackDays)->startOfDay(),
-            $now->copy()->endOfDay(),
+            $rangeStartLocal->copy()->utc(),
+            $rangeEndLocal->copy()->utc(),
         ];
     }
 
     private function displayTimezone(): string
     {
         return (string) config('app.timezone', 'UTC');
+    }
+
+    private function asUtc(mixed $value): Carbon
+    {
+        if ($value instanceof Carbon) {
+            return $value->copy()->utc();
+        }
+
+        return Carbon::parse((string) $value, 'UTC');
     }
 }
