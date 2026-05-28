@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Rules\CategoryOfType;
+use App\Rules\HtmlNotEmpty;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,8 +20,8 @@ class SaveMyProfileRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'suburb' => ['required', 'string', 'max:255'],
-            'introduction_line' => ['required', 'string', 'max:1000'],
-            'profile_text' => ['required', 'string', 'max:15000'],
+            'introduction_line' => ['required', 'string', 'max:1000', new HtmlNotEmpty()],
+            'profile_text' => ['required', 'string', 'max:15000', new HtmlNotEmpty()],
 
             'age_group' => ['required', 'integer', new CategoryOfType('age-group')],
             'hair_color' => ['required', 'integer', new CategoryOfType('hair-color')],
