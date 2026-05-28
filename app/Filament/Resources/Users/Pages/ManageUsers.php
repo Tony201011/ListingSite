@@ -199,7 +199,6 @@ class ManageUsers extends ManageRecords
                         'email' => $data['email'],
                         'password' => $data['password'],
                         'role' => User::ROLE_PROVIDER,
-                        'is_blocked' => false,
                     ];
                 })
                 ->after(function (?User $record, array $data): void {

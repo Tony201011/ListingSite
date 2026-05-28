@@ -28,7 +28,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'profile_image',
         'email',
         'role',
-        'is_blocked',
         'mobile',
         'referral_code',
         'mobile_verified',
@@ -48,7 +47,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return [
             'email_verified_at' => 'datetime',
-            'is_blocked' => 'boolean',
             'mobile_verified' => 'boolean',
             'must_change_password' => 'boolean',
             'password' => 'hashed',
@@ -62,7 +60,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         static::creating(function (self $user): void {
             $user->role ??= self::ROLE_PROVIDER;
-            $user->is_blocked ??= false;
         });
     }
 

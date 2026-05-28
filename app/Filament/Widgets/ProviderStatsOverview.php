@@ -32,7 +32,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
             $q->where('profile_status', 'approved');
         })->count();
         $onlineCount = (clone $profiles)->whereCurrentlyOnline()->count();
-        $blocked = (clone $users)->where('is_blocked', true)->count();
+        $blocked = (clone $profiles)->where('is_blocked', true)->count();
         $verified = (clone $users)->whereNotNull('email_verified_at')->count();
         $featured = (clone $profiles)->where('is_featured', true)->count();
 

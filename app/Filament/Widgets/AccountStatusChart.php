@@ -47,9 +47,9 @@ class AccountStatusChart extends ChartWidget
 
         $stats = $query
             ->selectRaw('
-                SUM(CASE WHEN users.is_blocked = 0 AND users.email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,
-                SUM(CASE WHEN users.is_blocked = 0 AND users.email_verified_at IS NULL THEN 1 ELSE 0 END) as active_unverified,
-                SUM(CASE WHEN users.is_blocked = 1 THEN 1 ELSE 0 END) as blocked
+                SUM(CASE WHEN provider_profiles.is_blocked = 0 AND users.email_verified_at IS NOT NULL THEN 1 ELSE 0 END) as active_verified,
+                SUM(CASE WHEN provider_profiles.is_blocked = 0 AND users.email_verified_at IS NULL THEN 1 ELSE 0 END) as active_unverified,
+                SUM(CASE WHEN provider_profiles.is_blocked = 1 THEN 1 ELSE 0 END) as blocked
             ')
             ->join('users', 'users.id', '=', 'provider_profiles.user_id')
             ->first();

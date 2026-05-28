@@ -59,7 +59,6 @@ class ProviderRegister extends Register
             'email' => $data['email'],
             'password' => $data['password'],
             'role' => User::ROLE_PROVIDER,
-            'is_blocked' => false,
         ]);
 
         ProviderProfile::query()->create([
