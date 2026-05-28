@@ -475,56 +475,6 @@ function signupForm(config = {}) {
             }, 200);
         },
 
-        sanitizeTextValue(value) {
-            if (typeof value !== 'string') return null;
-
-            const normalized = value.trim();
-            if (!normalized) return null;
-
-            const lower = normalized.toLowerCase();
-            if (lower === 'null' || lower === 'undefined') return null;
-
-            return normalized;
-        },
-
-        sanitizePostcodeValue(value) {
-            const normalized = this.sanitizeTextValue(value);
-            if (!normalized) return null;
-
-            return /^\d{4}$/.test(normalized) ? normalized : null;
-        },
-
-        sanitizeSuburbItem(item) {
-            if (!item || typeof item !== 'object') return null;
-
-            const suburb = this.sanitizeTextValue(item.suburb);
-            const state = this.sanitizeTextValue(item.state);
-            if (!suburb || !state) return null;
-
-            return {
-                suburb,
-                state,
-                postcode: this.sanitizePostcodeValue(item.postcode)
-            };
-        },
-
-        formatSuburbLabel(item) {
-            const sanitizedItem = this.sanitizeSuburbItem(item);
-            if (!sanitizedItem) return '';
-
-            return sanitizedItem.postcode
-                ? `${sanitizedItem.suburb}, ${sanitizedItem.state} ${sanitizedItem.postcode}`
-                : `${sanitizedItem.suburb}, ${sanitizedItem.state}`;
-        },
-
-        sanitizeSuburbResults(data) {
-            if (!Array.isArray(data)) return [];
-
-            return data
-                .map(item => this.sanitizeSuburbItem(item))
-                .filter(Boolean);
-        },
-
         searchSuburbs() {
             clearTimeout(this.debounceTimer);
 
@@ -555,7 +505,10 @@ function signupForm(config = {}) {
                         return res.json();
                     })
                     .then(data => {
-                        this.searchResults = this.sanitizeSuburbResults(data);
+                        this.searchResults =
+                            Array.isArray(data)
+                                ? data
+                                : [];
 
                         this.showResults =
                             this.searchResults.length > 0;
@@ -571,14 +524,7 @@ function signupForm(config = {}) {
         },
 
         selectSuburb(item) {
-            const label = this.formatSuburbLabel(item);
-            if (!label) {
-                this.showResults = false;
-                this.searchResults = [];
-                return;
-            }
-
-            this.suburb = label;
+            this.suburb = `${item.suburb}, ${item.state} ${item.postcode}`;
 
             this.suburbSelected = true;
             this.showResults = false;
