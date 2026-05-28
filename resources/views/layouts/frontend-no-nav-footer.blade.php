@@ -7,9 +7,10 @@
 
     @php
         $activeFavIcon = \App\Models\FavIcon::where('is_active', true)->latest()->first();
+        $activeFavIconUrl = $activeFavIcon?->getPublicUrl();
     @endphp
-    @if($activeFavIcon)
-        <link rel="icon" type="{{ $activeFavIcon->getMimeType() }}" href="{{ '/storage/' . $activeFavIcon->icon_path }}">
+    @if($activeFavIcon && $activeFavIconUrl !== asset('favicon.ico'))
+        <link rel="icon" type="{{ $activeFavIcon->getMimeType() }}" href="{{ $activeFavIconUrl }}">
     @else
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     @endif

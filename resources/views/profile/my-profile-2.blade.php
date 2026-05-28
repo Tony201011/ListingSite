@@ -67,7 +67,7 @@
             {{-- Error summary banner: visible whenever any client- or server-side field error is set --}}
             <div
                 id="form-error-summary"
-                x-show="Object.keys(fieldErrors || {}).length > 0"
+                x-show="fieldErrors && Object.keys(fieldErrors || {}).length > 0"
                 x-cloak
                 style="display:none;"
                 class="bg-red-50 border border-red-400 rounded-2xl p-5"
@@ -91,11 +91,11 @@
                             name="name"
                             type="text"
                             x-model="name"
-                            :class="fieldErrors?.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('name') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent transition"
                             placeholder="e.g. Jenny"
                         >
-                        <p x-show="fieldErrors?.name" x-text="Array.isArray(fieldErrors?.name) ? (fieldErrors?.name?.[0] || '') : (fieldErrors?.name || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('name')" x-text="getFieldError('name')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div>
@@ -120,7 +120,7 @@
                             @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
                             autocomplete="off"
                             placeholder="Start typing your suburb..."
-                            :class="fieldErrors?.suburb ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('suburb') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent transition"
                         >
 
@@ -150,8 +150,8 @@
                             Searching...
                         </div>
 
-                        <p x-show="fieldErrors?.suburb" x-text="Array.isArray(fieldErrors?.suburb) ? (fieldErrors?.suburb?.[0] || '') : (fieldErrors?.suburb || '')" class="mt-1 text-sm text-red-600"></p>
-                        <p x-show="!fieldErrors?.suburb" class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
+                        <p x-show="hasFieldError('suburb')" x-text="getFieldError('suburb')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="!hasFieldError('suburb')" class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
                     </div>
 
                     <div>
@@ -179,10 +179,10 @@
 
                     <div
                         id="introduction_line_editor"
-                        :class="fieldErrors?.introduction_line ? 'border border-red-500 rounded-lg' : ''"
+                        :class="hasFieldError('introduction_line') ? 'border border-red-500 rounded-lg' : ''"
                         class="w-full"
                     ></div>
-                    <p x-show="fieldErrors?.introduction_line" x-text="Array.isArray(fieldErrors?.introduction_line) ? (fieldErrors?.introduction_line?.[0] || '') : (fieldErrors?.introduction_line || '')" class="mt-1 text-sm text-red-600"></p>
+                    <p x-show="hasFieldError('introduction_line')" x-text="getFieldError('introduction_line')" class="mt-1 text-sm text-red-600"></p>
                 </div>
             </div>
 
@@ -214,10 +214,10 @@
                 <div
                     id="profile_text_editor"
                     data-field="profile_text"
-                    :class="fieldErrors?.profile_text ? 'border border-red-500 rounded-lg' : ''"
+                    :class="hasFieldError('profile_text') ? 'border border-red-500 rounded-lg' : ''"
                     class="w-full"
                 ></div>
-                <p x-show="fieldErrors?.profile_text" x-text="Array.isArray(fieldErrors?.profile_text) ? (fieldErrors?.profile_text?.[0] || '') : (fieldErrors?.profile_text || '')" class="mt-1 text-sm text-red-600"></p>
+                <p x-show="hasFieldError('profile_text')" x-text="getFieldError('profile_text')" class="mt-1 text-sm text-red-600"></p>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -227,92 +227,92 @@
                     <div data-field="age_group">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Age group</label>
                         <select name="age_group" x-model="age_group"
-                            :class="fieldErrors?.age_group ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('age_group') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select age -</option>
                             @foreach($ageGroupOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-show="fieldErrors?.age_group" x-text="Array.isArray(fieldErrors?.age_group) ? (fieldErrors?.age_group?.[0] || '') : (fieldErrors?.age_group || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('age_group')" x-text="getFieldError('age_group')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="hair_color">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Hair color</label>
                         <select name="hair_color" x-model="hair_color"
-                            :class="fieldErrors?.hair_color ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('hair_color') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($hairColorOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-show="fieldErrors?.hair_color" x-text="Array.isArray(fieldErrors?.hair_color) ? (fieldErrors?.hair_color?.[0] || '') : (fieldErrors?.hair_color || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('hair_color')" x-text="getFieldError('hair_color')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="hair_length">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Hair length</label>
                         <select name="hair_length" x-model="hair_length"
-                            :class="fieldErrors?.hair_length ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('hair_length') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($hairLengthOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-show="fieldErrors?.hair_length" x-text="Array.isArray(fieldErrors?.hair_length) ? (fieldErrors?.hair_length?.[0] || '') : (fieldErrors?.hair_length || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('hair_length')" x-text="getFieldError('hair_length')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="ethnicity">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Ethnicity</label>
                         <select name="ethnicity" x-model="ethnicity"
-                            :class="fieldErrors?.ethnicity ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('ethnicity') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($ethnicityOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-show="fieldErrors?.ethnicity" x-text="Array.isArray(fieldErrors?.ethnicity) ? (fieldErrors?.ethnicity?.[0] || '') : (fieldErrors?.ethnicity || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('ethnicity')" x-text="getFieldError('ethnicity')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="body_type">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Body type</label>
                         <select name="body_type" x-model="body_type"
-                            :class="fieldErrors?.body_type ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('body_type') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($bodyTypeOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-show="fieldErrors?.body_type" x-text="Array.isArray(fieldErrors?.body_type) ? (fieldErrors?.body_type?.[0] || '') : (fieldErrors?.body_type || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('body_type')" x-text="getFieldError('body_type')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="bust_size">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Bust size</label>
                         <select name="bust_size" x-model="bust_size"
-                            :class="fieldErrors?.bust_size ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('bust_size') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($bustSizeOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-show="fieldErrors?.bust_size" x-text="Array.isArray(fieldErrors?.bust_size) ? (fieldErrors?.bust_size?.[0] || '') : (fieldErrors?.bust_size || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('bust_size')" x-text="getFieldError('bust_size')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="your_length">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Your length</label>
                         <select name="your_length" x-model="your_length"
-                            :class="fieldErrors?.your_length ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('your_length') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($yourLengthOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p x-show="fieldErrors?.your_length" x-text="Array.isArray(fieldErrors?.your_length) ? (fieldErrors?.your_length?.[0] || '') : (fieldErrors?.your_length || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('your_length')" x-text="getFieldError('your_length')" class="mt-1 text-sm text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -335,7 +335,7 @@
                                 </span>
                             @endforeach
                         </div>
-                        <p x-show="fieldErrors?.primary_identity" x-text="Array.isArray(fieldErrors?.primary_identity) ? (fieldErrors?.primary_identity?.[0] || '') : (fieldErrors?.primary_identity || '')" class="mt-2 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('primary_identity')" x-text="getFieldError('primary_identity')" class="mt-2 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="attributes">
@@ -351,7 +351,7 @@
                                 </span>
                             @endforeach
                         </div>
-                        <p x-show="fieldErrors?.attributes" x-text="Array.isArray(fieldErrors?.attributes) ? (fieldErrors?.attributes?.[0] || '') : (fieldErrors?.attributes || '')" class="mt-2 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('attributes')" x-text="getFieldError('attributes')" class="mt-2 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="services_style">
@@ -367,7 +367,7 @@
                                 </span>
                             @endforeach
                         </div>
-                        <p x-show="fieldErrors?.services_style" x-text="Array.isArray(fieldErrors?.services_style) ? (fieldErrors?.services_style?.[0] || '') : (fieldErrors?.services_style || '')" class="mt-2 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('services_style')" x-text="getFieldError('services_style')" class="mt-2 text-sm text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -391,7 +391,7 @@
                         </label>
                     @endforeach
                 </div>
-                <p x-show="fieldErrors?.services_provided" x-text="Array.isArray(fieldErrors?.services_provided) ? (fieldErrors?.services_provided?.[0] || '') : (fieldErrors?.services_provided || '')" class="mt-2 text-sm text-red-600"></p>
+                <p x-show="hasFieldError('services_provided')" x-text="getFieldError('services_provided')" class="mt-2 text-sm text-red-600"></p>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
@@ -408,7 +408,7 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p x-show="fieldErrors?.availability" x-text="Array.isArray(fieldErrors?.availability) ? (fieldErrors?.availability?.[0] || '') : (fieldErrors?.availability || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('availability')" x-text="getFieldError('availability')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="contact_method">
@@ -422,7 +422,7 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p x-show="fieldErrors?.contact_method" x-text="Array.isArray(fieldErrors?.contact_method) ? (fieldErrors?.contact_method?.[0] || '') : (fieldErrors?.contact_method || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('contact_method')" x-text="getFieldError('contact_method')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="phone_contact">
@@ -435,7 +435,7 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p x-show="fieldErrors?.phone_contact" x-text="Array.isArray(fieldErrors?.phone_contact) ? (fieldErrors?.phone_contact?.[0] || '') : (fieldErrors?.phone_contact || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('phone_contact')" x-text="getFieldError('phone_contact')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div data-field="time_waster">
@@ -448,7 +448,7 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p x-show="fieldErrors?.time_waster" x-text="Array.isArray(fieldErrors?.time_waster) ? (fieldErrors?.time_waster?.[0] || '') : (fieldErrors?.time_waster || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('time_waster')" x-text="getFieldError('time_waster')" class="mt-1 text-sm text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -465,9 +465,9 @@
                     <div data-field="website">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Website</label>
                         <input name="website" type="text" x-model="website"
-                            :class="fieldErrors?.website ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            :class="hasFieldError('website') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
                             class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent">
-                        <p x-show="fieldErrors?.website" x-text="Array.isArray(fieldErrors?.website) ? (fieldErrors?.website?.[0] || '') : (fieldErrors?.website || '')" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="hasFieldError('website')" x-text="getFieldError('website')" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div>

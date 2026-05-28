@@ -115,6 +115,20 @@ document.addEventListener('alpine:init', () => {
             this.fieldErrors = nextErrors;
         },
 
+        hasFieldError(field) {
+            return Boolean(this.fieldErrors && this.fieldErrors[field]);
+        },
+
+        getFieldError(field) {
+            const message = this.fieldErrors && this.fieldErrors[field];
+
+            if (Array.isArray(message)) {
+                return message[0] || '';
+            }
+
+            return message || '';
+        },
+
         initEditors() {
             this.$nextTick(() => {
                 this.createEditor(
@@ -506,7 +520,7 @@ document.addEventListener('alpine:init', () => {
                     window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
                     return;
                 }
-                const firstKey = Object.keys(this.fieldErrors)[0];
+                const firstKey = Object.keys(this.fieldErrors || {})[0];
                 if (!firstKey) return;
                 const el = document.querySelector(`[data-field="${firstKey}"]`);
                 if (el) {
