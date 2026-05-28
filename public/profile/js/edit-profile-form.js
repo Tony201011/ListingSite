@@ -59,7 +59,7 @@ document.addEventListener('alpine:init', () => {
         suburbSelected: Boolean(config.initial?.suburbSelected),
 
         submitting: false,
-        fieldErrors: normalizeFieldErrors(config.initial?.serverErrors),
+        fieldErrors: normalizeFieldErrors(config.initial?.fieldErrors || config.initial?.serverErrors || {}),
 
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
@@ -522,9 +522,11 @@ document.addEventListener('alpine:init', () => {
         async submitForm() {
             this.syncHiddenEditorInputs();
 
-            this.fieldErrors = { ...this.validate() };
+            this.fieldErrors = {};
+            const clientErrors = this.validate();
+            this.fieldErrors = { ...clientErrors };
 
-            if (Object.keys(this.fieldErrors).length > 0) {
+            if (Object.keys(this.fieldErrors || {}).length > 0) {
                 this.scrollToErrors();
                 return;
             }
@@ -585,8 +587,7 @@ document.addEventListener('alpine:init', () => {
                     this.fieldErrors = {};
                     this.toast(data.message || 'Profile updated successfully.');
                 } else if (response.status === 422) {
-                    const mapped = normalizeFieldErrors(data.errors || {});
-                    this.fieldErrors = Object.keys(mapped).length ? mapped : { form: 'Validation failed.' };
+                    this.fieldErrors = normalizeFieldErrors(data.errors || {});
                     this.scrollToErrors();
                 } else {
                     this.fieldErrors = {};
