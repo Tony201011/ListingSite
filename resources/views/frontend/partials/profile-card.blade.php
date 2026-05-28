@@ -29,125 +29,140 @@
     }
 
     $hasFeaturedBadge = $featuredBadgeVariant !== null;
-    $hasStatusBadges = $profile['active'] || $profile['verified'] || !empty($profile['available_now']);
 @endphp
-<article
-    class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
->
+<article class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.07)] border border-gray-100 transition-all duration-300 hover:shadow-[0_10px_36px_rgba(0,0,0,0.13)] hover:-translate-y-1">
+    {{-- Invisible full-card link --}}
     <a href="{{ $profile['profile_url'] ?? route('profile.show.no-sequence', array_merge(['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
-    {{-- Image --}}
-    <div class="relative overflow-hidden rounded-t-2xl">
+    {{-- ── Image area ── --}}
+    <div class="relative aspect-[3/4] w-full overflow-hidden bg-gray-100">
         @if($profile['image'])
             <img
                 src="{{ $profile['image'] }}"
                 alt="{{ $profile['name'] }}"
-                class="w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105 h-52"
+                class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
                 decoding="async"
                 fetchpriority="low"
             >
         @else
-            <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
-                <i class="fa-solid fa-image text-4xl"></i>
+            <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                <i class="fa-solid fa-image text-5xl text-gray-300"></i>
             </div>
         @endif
 
-        @if($hasStatusBadges)
-            <div class="listing-card-badge-stack pointer-events-none absolute left-2.5 top-2.5 z-20 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
-                @if($profile['active'])
-                    <span class="listing-card-badge listing-card-badge--online inline-flex items-center gap-1 rounded-lg bg-emerald-500/95 px-2.5 py-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/20 sm:text-[11px]">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
-                    </span>
-                @endif
-                @if($profile['verified'])
-                    <span class="listing-card-badge listing-card-badge--verified inline-flex items-center gap-1 rounded-lg bg-cyan-500/95 px-2.5 py-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/20 sm:text-[11px]">
-                        <i class="fa-solid fa-camera text-[9px]"></i> Verified Photo
-                    </span>
-                @endif
-                @if(!empty($profile['available_now']))
-                    <span class="listing-card-badge listing-card-badge--available inline-flex items-center gap-1 rounded-lg bg-fuchsia-500/95 px-2.5 py-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/20 sm:text-[11px]">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
-                    </span>
-                @endif
-            </div>
-        @endif
+        {{-- Bottom gradient overlay for text readability --}}
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
 
+        {{-- Top-left: Online / Available status pills --}}
+        <div class="pointer-events-none absolute left-2.5 top-2.5 z-20 flex flex-col items-start gap-1.5">
+            @if($profile['active'])
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold leading-none text-white backdrop-blur-sm ring-1 ring-white/15">
+                    <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]"></span>
+                    Online
+                </span>
+            @endif
+            @if(!empty($profile['available_now']))
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold leading-none text-white backdrop-blur-sm ring-1 ring-white/15">
+                    <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-fuchsia-400 shadow-[0_0_4px_rgba(232,121,249,0.8)]"></span>
+                    Available
+                </span>
+            @endif
+        </div>
+
+        {{-- Top-right: Featured badge --}}
         @if($hasFeaturedBadge)
-            <div class="pointer-events-none absolute right-2.5 top-2.5 z-20 sm:right-3 sm:top-3">
+            <div class="pointer-events-none absolute right-2.5 top-2.5 z-20">
                 <x-featured-badge :variant="$featuredBadgeVariant" position="inline" :label="$featuredBadgeLabel" :icon="$featuredBadgeIcon" />
             </div>
         @endif
+
+        {{-- Bottom-right: Photo Verified badge --}}
+        @if($profile['verified'])
+            <div class="pointer-events-none absolute bottom-2.5 right-2.5 z-20">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold leading-none text-white backdrop-blur-sm ring-1 ring-cyan-400/40">
+                    <i class="fa-solid fa-circle-check text-[10px] text-cyan-400"></i>
+                    Photo Verified
+                </span>
+            </div>
+        @endif
+
+        {{-- Bottom-left: Name & Age overlay --}}
+        <div class="pointer-events-none absolute bottom-0 left-0 z-20 w-full px-3 pb-3">
+            <h3 class="truncate text-[15px] font-bold leading-tight text-white drop-shadow-sm">{{ $profile['name'] }}</h3>
+            @if(!empty($profile['age']))
+                <p class="mt-0.5 text-[11px] font-medium text-white/75">Age {{ $profile['age'] }}</p>
+            @endif
+        </div>
     </div>
 
-    {{-- Content --}}
-    <div class="p-3.5">
-        {{-- Date + Actions row --}}
-        <div class="mb-2 flex items-center justify-between">
-            <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
-            <div class="flex items-center gap-2 text-gray-400 relative z-20">
-                <button
-                    type="button"
-                    @click.stop.prevent="toggleFavourite('{{ $profile['id'] }}')"
-                    :class="isFavourite('{{ $profile['id'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
-                    class="relative z-30 transition-colors"
-                    title="Favourite"
-                >
-                    <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
-                </button>
-            </div>
+    {{-- ── Card body ── --}}
+    <div class="flex flex-1 flex-col p-3.5">
+
+        {{-- Rate + Favourite --}}
+        <div class="flex items-center justify-between gap-2">
+            <p class="text-xl font-bold text-gray-900 leading-none">{{ $profile['rate'] }}</p>
+            <button
+                type="button"
+                @click.stop.prevent="toggleFavourite('{{ $profile['id'] }}')"
+                :class="isFavourite('{{ $profile['id'] }}') ? 'text-pink-500' : 'text-gray-300 hover:text-pink-400'"
+                class="relative z-30 transition-colors"
+                title="Favourite"
+            >
+                <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-base"></i>
+            </button>
         </div>
 
-        {{-- Name --}}
-        <h3 class="text-sm font-medium text-gray-800 truncate">
-            {{ $profile['name'] }}@if($profile['suburb']) <span class="text-gray-400 font-normal">({{ $profile['suburb'] }})</span>@endif
-        </h3>
+        {{-- Location --}}
+        @if($profile['city'] || $profile['suburb'])
+            <p class="mt-1.5 flex items-center gap-1 text-[11px] text-gray-500">
+                <i class="fa-solid fa-location-dot text-pink-400 text-[10px]" aria-hidden="true"></i>
+                {{ $profile['suburb'] ?: $profile['city'] }}
+            </p>
+        @endif
 
-        {{-- Rate --}}
-        <p class="mt-0.5 text-2xl font-bold text-gray-900">
-            {{ $profile['rate'] }}
-        </p>
-
-        {{-- In Call / Out Call --}}
+        {{-- In-call / Out-call --}}
         @if(!empty($profile['in_call']) || !empty($profile['out_call']))
-            <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+            <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500">
                 @if(!empty($profile['in_call']))
-                    <span class="inline-flex items-center gap-1 text-gray-600">
-                        <i class="fa-solid fa-house text-emerald-500 text-[10px]" aria-hidden="true"></i>
-                        <span class="font-medium">In:</span> {{ $profile['in_call'] }}
+                    <span class="inline-flex items-center gap-1">
+                        <i class="fa-solid fa-house text-emerald-500 text-[9px]" aria-hidden="true"></i>
+                        <span class="font-medium text-gray-600">In:</span> {{ $profile['in_call'] }}
                     </span>
                 @endif
                 @if(!empty($profile['out_call']))
-                    <span class="inline-flex items-center gap-1 text-gray-600">
-                        <i class="fa-solid fa-car text-blue-500 text-[10px]" aria-hidden="true"></i>
-                        <span class="font-medium">Out:</span> {{ $profile['out_call'] }}
+                    <span class="inline-flex items-center gap-1">
+                        <i class="fa-solid fa-car text-blue-400 text-[9px]" aria-hidden="true"></i>
+                        <span class="font-medium text-gray-600">Out:</span> {{ $profile['out_call'] }}
                     </span>
                 @endif
             </div>
         @endif
 
-        {{-- Location + Service --}}
-        <div class="mt-3 flex flex-wrap items-start gap-x-4 gap-y-1.5 text-[12px] text-gray-600">
-            @if($profile['city'] || $profile['suburb'])
-                <span class="inline-flex items-center gap-1">
-                    <i class="fa-solid fa-location-dot text-pink-500 text-[11px]"></i>
-                    {{ $profile['suburb'] ?: $profile['city'] }}
-                </span>
-            @endif
-            @if(!empty($profile['service_1']))
-                <span class="inline-flex items-center gap-1">
-                    <i class="fa-solid fa-briefcase text-gray-400 text-[11px]"></i>
-                    {{ $profile['service_1'] }}
-                </span>
-            @endif
-        </div>
-
-        {{-- Categories --}}
-        @if(!empty($profile['service_2']) || !empty($profile['description']))
-            <div class="mt-2 text-[12px] text-gray-600 line-clamp-2">
-                <i class="fa-solid fa-gem text-blue-500 text-[10px] mr-1"></i>
-                {{ !empty($profile['service_2']) ? $profile['service_2'] : $profile['description'] }}
+        {{-- Service tag pills --}}
+        @if(!empty($profile['service_1']) || !empty($profile['service_2']))
+            <div class="mt-2.5 flex flex-wrap gap-1.5">
+                @if(!empty($profile['service_1']))
+                    <span class="rounded-full bg-pink-50 px-2.5 py-0.5 text-[10px] font-medium text-pink-600 ring-1 ring-pink-100">
+                        {{ $profile['service_1'] }}
+                    </span>
+                @endif
+                @if(!empty($profile['service_2']))
+                    <span class="rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-medium text-purple-600 ring-1 ring-purple-100">
+                        {{ $profile['service_2'] }}
+                    </span>
+                @endif
             </div>
         @endif
+
+        {{-- Push footer to bottom --}}
+        <div class="flex-1"></div>
+
+        {{-- Footer: View Profile CTA --}}
+        <div class="mt-3 border-t border-gray-100 pt-3">
+            <span class="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 px-4 py-2 text-[11px] font-semibold tracking-wide text-white shadow-sm transition-all duration-200 group-hover:from-pink-600 group-hover:to-purple-600 group-hover:shadow-md">
+                View Profile
+            </span>
+        </div>
     </div>
 </article>
