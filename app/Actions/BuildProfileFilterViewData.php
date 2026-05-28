@@ -945,8 +945,6 @@ class BuildProfileFilterViewData
             ->whereNull('provider_profiles.deleted_at')
             ->where('provider_profiles.profile_status', 'approved')
             ->where('provider_profiles.is_blocked', false)
-            ->whereHas('user')
-            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->whereIn('provider_profiles.id', $profileIds)
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
