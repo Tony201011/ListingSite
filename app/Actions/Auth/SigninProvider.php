@@ -19,12 +19,6 @@ class SigninProvider
             ])->withInput();
         }
 
-        if ($user->is_blocked) {
-            return back()->withErrors([
-                'email' => 'Your account has been blocked.',
-            ])->withInput();
-        }
-
         $guard = $user->role === User::ROLE_ADMIN ? 'admin' : 'web';
 
         if (Auth::guard($guard)->attempt([

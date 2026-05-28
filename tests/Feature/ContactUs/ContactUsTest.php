@@ -31,7 +31,6 @@ class ContactUsTest extends TestCase
         return User::factory()->create(array_merge([
             'role' => User::ROLE_ADMIN,
             'email_verified_at' => now(),
-            'is_blocked' => false,
             'password' => Hash::make('AdminPass123!'),
         ], $overrides));
     }
