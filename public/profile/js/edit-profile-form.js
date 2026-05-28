@@ -438,6 +438,13 @@ document.addEventListener('alpine:init', () => {
 
         scrollToErrors() {
             this.$nextTick(() => {
+                const summary = document.getElementById('form-error-summary');
+                if (summary) {
+                    const offset = 80;
+                    const top = summary.getBoundingClientRect().top + window.scrollY - offset;
+                    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+                    return;
+                }
                 const firstKey = Object.keys(this.fieldErrors)[0];
                 if (!firstKey) return;
                 const el = document.querySelector(`[data-field="${firstKey}"]`);
