@@ -99,6 +99,7 @@ class ProfileSwitchController extends Controller
             'phone' => $validated['phone'] ?? null,
             'slug' => $slug,
             'profile_sequence' => $sequence,
+            'profile_status' => 'approved',
         ]);
 
         session(['active_provider_profile_id' => $profile->id]);

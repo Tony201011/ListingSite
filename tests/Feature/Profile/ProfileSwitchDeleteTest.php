@@ -150,4 +150,24 @@ class ProfileSwitchDeleteTest extends TestCase
         $response->assertRedirect(route('my-profile'));
         $response->assertSessionHas('active_provider_profile_id', $profileTwo->id);
     }
+
+    public function test_store_creates_approved_profile(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $response = $this->actingAs($user)->post(route('profiles.store'), [
+            'name' => 'S8www811w',
+            'phone' => '0400000000',
+        ]);
+
+        $response->assertRedirect(route('edit-profile'));
+        $response->assertSessionHas('success', 'New profile created. Please fill in your profile details.');
+
+        $this->assertDatabaseHas('provider_profiles', [
+            'user_id' => $user->id,
+            'name' => 'S8www811w',
+            'slug' => 's8www811w',
+            'profile_status' => 'approved',
+        ]);
+    }
 }
