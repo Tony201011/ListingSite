@@ -41,7 +41,7 @@
             onlyfans_username: @js(old('onlyfans_username', $profile->onlyfans_username ?? '')),
 
             suburbSelected: @js((bool) old('suburb', $profile->suburb ?? '')),
-            serverErrors: @js($errors->all()),
+            serverErrors: @js($errors->messages()),
         },
         submitUrl: @js(url()->current()),
         csrfToken: @js(csrf_token())
@@ -63,41 +63,22 @@
         <form method="POST" @submit.prevent="submitForm" id="editProfileForm" autocomplete="off" class="space-y-8">
             @csrf
 
-            @if ($errors->any())
-                <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
-                    <p class="font-semibold">Please fix the following errors:</p>
-                    <ul class="mt-2 list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <template x-if="errors.length > 0">
-                <div class="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
-                    <p class="font-semibold">Please fix the following errors:</p>
-                    <ul class="mt-2 list-disc list-inside text-sm">
-                        <template x-for="(error, index) in errors" :key="index">
-                            <li x-text="error"></li>
-                        </template>
-                    </ul>
-                </div>
-            </template>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-6">Basic information</h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
+                    <div data-field="name">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Profile name</label>
                         <input
                             name="name"
                             type="text"
                             x-model="name"
-                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                            :class="fieldErrors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent transition"
                             placeholder="e.g. Jenny"
                         >
+                        <p x-show="fieldErrors.name" x-text="fieldErrors.name" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div>
@@ -111,7 +92,7 @@
                         >
                     </div>
 
-                    <div class="relative">
+                    <div class="relative" data-field="suburb">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Your suburb</label>
                         <input
                             name="suburb"
@@ -122,7 +103,8 @@
                             @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
                             autocomplete="off"
                             placeholder="Start typing your suburb..."
-                            class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent transition"
+                            :class="fieldErrors.suburb ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent transition"
                         >
 
                         <div
@@ -151,7 +133,8 @@
                             Searching...
                         </div>
 
-                        <p class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
+                        <p x-show="fieldErrors.suburb" x-text="fieldErrors.suburb" class="mt-1 text-sm text-red-600"></p>
+                        <p x-show="!fieldErrors.suburb" class="text-sm text-gray-600 mt-1">Primary work suburb (select from list while typing)</p>
                     </div>
 
                     <div>
@@ -166,7 +149,7 @@
                     </div>
                 </div>
 
-                <div class="mt-6">
+                <div class="mt-6" data-field="introduction_line">
                     <label class="block font-semibold text-[#e04ecb] mb-1">Introduction line</label>
 
                     <input
@@ -179,8 +162,10 @@
 
                     <div
                         id="introduction_line_editor"
+                        :class="fieldErrors.introduction_line ? 'border border-red-500 rounded-lg' : ''"
                         class="w-full"
                     ></div>
+                    <p x-show="fieldErrors.introduction_line" x-text="fieldErrors.introduction_line" class="mt-1 text-sm text-red-600"></p>
                 </div>
             </div>
 
@@ -211,82 +196,106 @@
 
                 <div
                     id="profile_text_editor"
+                    data-field="profile_text"
+                    :class="fieldErrors.profile_text ? 'border border-red-500 rounded-lg' : ''"
                     class="w-full"
                 ></div>
+                <p x-show="fieldErrors.profile_text" x-text="fieldErrors.profile_text" class="mt-1 text-sm text-red-600"></p>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-6">Your stats</h2>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
+                    <div data-field="age_group">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Age group</label>
-                        <select name="age_group" x-model="age_group" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                        <select name="age_group" x-model="age_group"
+                            :class="fieldErrors.age_group ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select age -</option>
                             @foreach($ageGroupOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                        <p x-show="fieldErrors.age_group" x-text="fieldErrors.age_group" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="hair_color">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Hair color</label>
-                        <select name="hair_color" x-model="hair_color" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                        <select name="hair_color" x-model="hair_color"
+                            :class="fieldErrors.hair_color ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($hairColorOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                        <p x-show="fieldErrors.hair_color" x-text="fieldErrors.hair_color" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="hair_length">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Hair length</label>
-                        <select name="hair_length" x-model="hair_length" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                        <select name="hair_length" x-model="hair_length"
+                            :class="fieldErrors.hair_length ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($hairLengthOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                        <p x-show="fieldErrors.hair_length" x-text="fieldErrors.hair_length" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="ethnicity">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Ethnicity</label>
-                        <select name="ethnicity" x-model="ethnicity" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                        <select name="ethnicity" x-model="ethnicity"
+                            :class="fieldErrors.ethnicity ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($ethnicityOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                        <p x-show="fieldErrors.ethnicity" x-text="fieldErrors.ethnicity" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="body_type">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Body type</label>
-                        <select name="body_type" x-model="body_type" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                        <select name="body_type" x-model="body_type"
+                            :class="fieldErrors.body_type ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($bodyTypeOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                        <p x-show="fieldErrors.body_type" x-text="fieldErrors.body_type" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="bust_size">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Bust size</label>
-                        <select name="bust_size" x-model="bust_size" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                        <select name="bust_size" x-model="bust_size"
+                            :class="fieldErrors.bust_size ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($bustSizeOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                        <p x-show="fieldErrors.bust_size" x-text="fieldErrors.bust_size" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="your_length">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Your length</label>
-                        <select name="your_length" x-model="your_length" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent bg-white">
+                        <select name="your_length" x-model="your_length"
+                            :class="fieldErrors.your_length ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent bg-white">
                             <option value="">- Select -</option>
                             @foreach($yourLengthOptions ?? [] as $id => $label)
                                 <option value="{{ $id }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                        <p x-show="fieldErrors.your_length" x-text="fieldErrors.your_length" class="mt-1 text-sm text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -296,7 +305,7 @@
                 <p class="text-gray-600 text-sm mb-6">These tags help clients find you. Click to select.</p>
 
                 <div class="space-y-6">
-                    <div>
+                    <div data-field="primary_identity">
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Primary identity <span class="text-[#e04ecb] text-sm">(select one)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach($primaryTags as $tag)
@@ -309,9 +318,10 @@
                                 </span>
                             @endforeach
                         </div>
+                        <p x-show="fieldErrors.primary_identity" x-text="fieldErrors.primary_identity" class="mt-2 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="attributes">
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Attributes <span class="text-[#e04ecb] text-sm">(multiple allowed)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach($attrTags as $tag)
@@ -324,9 +334,10 @@
                                 </span>
                             @endforeach
                         </div>
+                        <p x-show="fieldErrors.attributes" x-text="fieldErrors.attributes" class="mt-2 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="services_style">
                         <h3 class="font-semibold text-[#e04ecb] mb-3">Services & style <span class="text-[#e04ecb] text-sm">(up to 12)</span></h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach($styleTags as $tag)
@@ -339,6 +350,7 @@
                                 </span>
                             @endforeach
                         </div>
+                        <p x-show="fieldErrors.services_style" x-text="fieldErrors.services_style" class="mt-2 text-sm text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -347,7 +359,7 @@
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Services you provide</h2>
                 <p class="text-gray-600 text-sm mb-4">Check all that apply</p>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div data-field="services_provided" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     @foreach($services as $service)
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input
@@ -362,13 +374,14 @@
                         </label>
                     @endforeach
                 </div>
+                <p x-show="fieldErrors.services_provided" x-text="fieldErrors.services_provided" class="mt-2 text-sm text-red-600"></p>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Availability & contact</h2>
 
                 <div class="space-y-4">
-                    <div>
+                    <div data-field="availability">
                         <label class="block font-semibold text-[#e04ecb] mb-2">Are you available for:</label>
                         <div class="flex flex-wrap gap-4">
                             @foreach($availabilityOptions ?? [] as $option)
@@ -378,9 +391,10 @@
                                 </label>
                             @endforeach
                         </div>
+                        <p x-show="fieldErrors.availability" x-text="fieldErrors.availability" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="contact_method">
                         <label class="block font-semibold text-[#e04ecb] mb-2">How can people contact you?</label>
                         <p class="text-sm text-gray-600 mb-2">Email enquiries will be sent to: {{ $contactEmail ?? 'Not configured' }}</p>
                         <div class="flex flex-wrap gap-4">
@@ -391,9 +405,10 @@
                                 </label>
                             @endforeach
                         </div>
+                        <p x-show="fieldErrors.contact_method" x-text="fieldErrors.contact_method" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="phone_contact">
                         <label class="block font-semibold text-[#e04ecb] mb-2">Phone contact preferences</label>
                         <div class="flex flex-wrap gap-4">
                             @foreach($phoneContactOptions ?? [] as $option)
@@ -403,9 +418,10 @@
                                 </label>
                             @endforeach
                         </div>
+                        <p x-show="fieldErrors.phone_contact" x-text="fieldErrors.phone_contact" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
-                    <div>
+                    <div data-field="time_waster">
                         <label class="block font-semibold text-[#e04ecb] mb-2">Use time waster shield for SMS?</label>
                         <div class="flex gap-4">
                             @foreach($timeWasterOptions ?? [] as $option)
@@ -415,6 +431,7 @@
                                 </label>
                             @endforeach
                         </div>
+                        <p x-show="fieldErrors.time_waster" x-text="fieldErrors.time_waster" class="mt-1 text-sm text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -428,9 +445,12 @@
                         <input name="twitter_handle" type="text" x-model="twitter_handle" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
                     </div>
 
-                    <div>
+                    <div data-field="website">
                         <label class="block font-semibold text-[#e04ecb] mb-1">Website</label>
-                        <input name="website" type="text" x-model="website" class="w-full px-4 py-3 border border-gray-400 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent">
+                        <input name="website" type="text" x-model="website"
+                            :class="fieldErrors.website ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]'"
+                            class="w-full px-4 py-3 border rounded-lg text-gray-900 font-medium focus:ring-2 focus:border-transparent">
+                        <p x-show="fieldErrors.website" x-text="fieldErrors.website" class="mt-1 text-sm text-red-600"></p>
                     </div>
 
                     <div>

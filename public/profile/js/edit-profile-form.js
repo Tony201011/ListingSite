@@ -40,7 +40,17 @@ document.addEventListener('alpine:init', () => {
         suburbSelected: Boolean(config.initial?.suburbSelected),
 
         submitting: false,
-        errors: Array.isArray(config.initial?.serverErrors) ? config.initial.serverErrors : [],
+        fieldErrors: (function () {
+            const raw = config.initial?.serverErrors;
+            if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+                const out = {};
+                Object.entries(raw).forEach(([key, msgs]) => {
+                    out[key] = Array.isArray(msgs) ? msgs[0] : msgs;
+                });
+                return out;
+            }
+            return {};
+        })(),
 
         submitUrl: config.submitUrl || '',
         csrfToken: config.csrfToken || '',
@@ -372,37 +382,37 @@ document.addEventListener('alpine:init', () => {
         },
 
         validate() {
-            const errors = [];
+            const errors = {};
 
-            if (!this.name.trim()) errors.push('Profile name is required.');
+            if (!this.name.trim()) errors.name = 'Profile name is required.';
 
             if (!this.suburb.trim()) {
-                errors.push('Suburb is required.');
+                errors.suburb = 'Suburb is required.';
             } else if (!this.suburbSelected) {
-                errors.push('Please choose a location from the dropdown list, which appears while typing.');
+                errors.suburb = 'Please choose a location from the dropdown list, which appears while typing.';
             }
 
             const plainIntroductionLine = this.stripHtml(this.introduction_line);
-            if (!plainIntroductionLine) errors.push('Introduction line is required.');
+            if (!plainIntroductionLine) errors.introduction_line = 'Introduction line is required.';
 
             const plainProfileText = this.stripHtml(this.profile_text);
-            if (!plainProfileText) errors.push('Profile text is required.');
+            if (!plainProfileText) errors.profile_text = 'Profile text is required.';
 
-            if (!this.age_group) errors.push('Age group is required.');
-            if (!this.hair_color) errors.push('Hair color is required.');
-            if (!this.hair_length) errors.push('Hair length is required.');
-            if (!this.ethnicity) errors.push('Ethnicity is required.');
-            if (!this.body_type) errors.push('Body type is required.');
-            if (!this.bust_size) errors.push('Bust size is required.');
-            if (!this.your_length) errors.push('Your length is required.');
-            if (this.primaryIdentity.length === 0) errors.push('Primary identity is required.');
-            if (this.attributes.length === 0) errors.push('Attributes are required.');
-            if (this.servicesStyle.length === 0) errors.push('Services & style are required.');
-            if (this.services_provided.length === 0) errors.push('Services provided are required.');
-            if (!this.availability) errors.push('Availability is required.');
-            if (!this.contact_method) errors.push('Contact method is required.');
-            if (!this.phone_contact) errors.push('Phone contact preference is required.');
-            if (!this.time_waster) errors.push('Time waster shield preference is required.');
+            if (!this.age_group) errors.age_group = 'Age group is required.';
+            if (!this.hair_color) errors.hair_color = 'Hair color is required.';
+            if (!this.hair_length) errors.hair_length = 'Hair length is required.';
+            if (!this.ethnicity) errors.ethnicity = 'Ethnicity is required.';
+            if (!this.body_type) errors.body_type = 'Body type is required.';
+            if (!this.bust_size) errors.bust_size = 'Bust size is required.';
+            if (!this.your_length) errors.your_length = 'Your length is required.';
+            if (this.primaryIdentity.length === 0) errors.primary_identity = 'Primary identity is required.';
+            if (this.attributes.length === 0) errors.attributes = 'Attributes are required.';
+            if (this.servicesStyle.length === 0) errors.services_style = 'Services & style are required.';
+            if (this.services_provided.length === 0) errors.services_provided = 'Services provided are required.';
+            if (!this.availability) errors.availability = 'Availability is required.';
+            if (!this.contact_method) errors.contact_method = 'Contact method is required.';
+            if (!this.phone_contact) errors.phone_contact = 'Phone contact preference is required.';
+            if (!this.time_waster) errors.time_waster = 'Time waster shield preference is required.';
 
             return errors;
         },
@@ -427,15 +437,26 @@ document.addEventListener('alpine:init', () => {
         },
 
         scrollToErrors() {
-            this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            this.$nextTick(() => {
+                const firstKey = Object.keys(this.fieldErrors)[0];
+                if (!firstKey) return;
+                const el = document.querySelector(`[data-field="${firstKey}"]`);
+                if (el) {
+                    const offset = 80;
+                    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+                    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
         },
 
         async submitForm() {
             this.syncHiddenEditorInputs();
 
-            this.errors = this.validate();
+            this.fieldErrors = this.validate();
 
-            if (this.errors.length > 0) {
+            if (Object.keys(this.fieldErrors).length > 0) {
                 this.scrollToErrors();
                 return;
             }
@@ -493,19 +514,27 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 if (response.ok) {
-                    this.errors = [];
+                    this.fieldErrors = {};
                     this.toast(data.message || 'Profile updated successfully.');
                 } else if (response.status === 422) {
-                    const messages = Object.values(data.errors || {}).flat();
-                    this.errors = messages.length ? messages : ['Validation failed.'];
+                    const rawErrors = data.errors || {};
+                    const mapped = {};
+                    Object.entries(rawErrors).forEach(([key, msgs]) => {
+                        // Strip array notation, e.g. "primary_identity.0" → "primary_identity"
+                        const baseKey = key.split('.')[0];
+                        if (!mapped[baseKey]) {
+                            mapped[baseKey] = Array.isArray(msgs) ? msgs[0] : msgs;
+                        }
+                    });
+                    this.fieldErrors = Object.keys(mapped).length ? mapped : { form: 'Validation failed.' };
                     this.scrollToErrors();
                 } else {
-                    this.errors = [];
+                    this.fieldErrors = {};
                     this.error(data.message || 'Unable to save profile. Please try again later.');
                 }
             } catch (error) {
                 console.error('Profile submit error:', error);
-                this.errors = [];
+                this.fieldErrors = {};
                 this.error('Unable to save profile. Please check your connection and try again.');
             } finally {
                 this.submitting = false;
