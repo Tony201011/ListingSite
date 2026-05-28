@@ -40,7 +40,6 @@ if (! function_exists('resolve_meta_page_candidates')) {
             'contact-us' => 'contact',
             'help' => 'help-center',
             'advanced-search' => 'search',
-            'escorts-advanced-search-slug' => 'search',
             'profile-show' => 'profile',
         ];
 

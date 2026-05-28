@@ -42,13 +42,8 @@ class HomeController extends Controller
         return view('frontend.home', $viewData);
     }
 
-    public function advancedSearch(AdvancedSearchRequest $request): View|RedirectResponse
+    public function advancedSearch(AdvancedSearchRequest $request): View
     {
-        $canonicalUrl = $this->resolveCanonicalAdvancedSearchUrl($request);
-        if ($canonicalUrl !== null) {
-            return redirect()->to($canonicalUrl, 301);
-        }
-
         $viewData = $this->buildProfileFilterViewData->execute($request->validated(), syncWithAdminOnlineListing: true);
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
 
@@ -227,44 +222,5 @@ class HomeController extends Controller
         }
 
         return $hasLegacyLocationQuery ? $targetUrl : null;
-    }
-
-    private function resolveCanonicalAdvancedSearchUrl(AdvancedSearchRequest $request): ?string
-    {
-        // Already on slug-based URL — no redirect needed
-        if (trim((string) $request->route('location_slug', '')) !== '') {
-            return null;
-        }
-
-        $rawQuery = [];
-        parse_str((string) $request->server('QUERY_STRING', ''), $rawQuery);
-
-        $location = trim((string) ($rawQuery['location'] ?? ''));
-        $locationState = trim((string) ($rawQuery['location_state'] ?? ''));
-
-        if ($location === '') {
-            return null;
-        }
-
-        $locationData = $this->locationSlugService->fromLocationText($location, $locationState);
-
-        if ($locationData === null || empty($locationData['slug'])) {
-            return null;
-        }
-
-        $canonicalPath = route('escorts.advanced-search.slug', ['location_slug' => $locationData['slug']]);
-
-        $query = $rawQuery;
-        unset(
-            $query['location'],
-            $query['location_state'],
-            $query['location_slug'],
-            $query['location_from_route'],
-            $query['user_lat'],
-            $query['user_lng']
-        );
-        $queryString = http_build_query($query);
-
-        return $queryString !== '' ? "{$canonicalPath}?{$queryString}" : $canonicalPath;
     }
 }
