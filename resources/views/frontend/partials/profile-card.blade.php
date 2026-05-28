@@ -88,9 +88,9 @@
             <div class="flex items-center gap-2 text-gray-400 relative z-20">
                 <button
                     type="button"
-                    @click.prevent="toggleFavourite('{{ $profile['id'] }}')"
+                    @click.stop.prevent="toggleFavourite('{{ $profile['id'] }}')"
                     :class="isFavourite('{{ $profile['id'] }}') ? 'text-pink-500' : 'hover:text-pink-500'"
-                    class="transition-colors"
+                    class="relative z-30 transition-colors"
                     title="Favourite"
                 >
                     <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
