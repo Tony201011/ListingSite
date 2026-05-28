@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\ProviderProfile;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -116,7 +115,7 @@ class FavouriteBookmarkService
         }
 
         $canonicalSlugIds = empty($textSlugs)
-            ? collect()
+            ? []
             : ProviderProfile::query()
                 ->whereNull('deleted_at')
                 ->where('profile_status', 'approved')
@@ -125,14 +124,15 @@ class FavouriteBookmarkService
                 ->orderBy('profile_sequence')
                 ->orderBy('id')
                 ->get(['id', 'slug'])
-                ->groupBy(fn (ProviderProfile $profile) => mb_strtolower((string) $profile->slug))
-                ->map(
-                    fn (Collection $profiles): array => $profiles
-                        ->pluck('id')
-                        ->map(fn ($id) => (string) $id)
-                        ->values()
-                        ->all()
-                );
+                ->reduce(function (array $carry, ProviderProfile $profile): array {
+                    $slug = mb_strtolower((string) $profile->slug);
+
+                    if (! array_key_exists($slug, $carry)) {
+                        $carry[$slug] = (string) $profile->id;
+                    }
+
+                    return $carry;
+                }, []);
 
         $seen = [];
         $normalizedIds = [];
@@ -156,16 +156,12 @@ class FavouriteBookmarkService
                     $normalizedIds[] = (string) $normalized;
                 }
             } else {
-                $resolvedIds = $canonicalSlugIds->get(mb_strtolower($normalized), []);
-                if ($resolvedIds === []) {
+                $resolvedId = $canonicalSlugIds[mb_strtolower($normalized)] ?? null;
+                if ($resolvedId === null) {
                     continue;
                 }
 
-                foreach ($resolvedIds as $resolvedId) {
-                    if (isset($seen[$resolvedId])) {
-                        continue;
-                    }
-
+                if (! isset($seen[$resolvedId])) {
                     $seen[$resolvedId] = true;
                     $normalizedIds[] = $resolvedId;
                 }
