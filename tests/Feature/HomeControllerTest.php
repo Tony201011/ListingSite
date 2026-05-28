@@ -533,6 +533,41 @@ class HomeControllerTest extends TestCase
         $response->assertSeeText('Online Now');
     }
 
+    public function test_bookmark_toggle_accepts_numeric_profile_id_identifier(): void
+    {
+        $providerUser = $this->createApprovedProvider(['name' => 'Bookmark Target', 'slug' => 'bookmark-target']);
+        $profile = ProviderProfile::query()->where('user_id', $providerUser->id)->firstOrFail();
+        $viewer = User::factory()->create();
+
+        $response = $this->actingAs($viewer)->post('/bookmark/'.$profile->id);
+
+        $response->assertOk()->assertJson(['active' => true]);
+        $this->assertSame([(string) $profile->id], Cache::get("bookmarks_user_{$viewer->id}"));
+    }
+
+    public function test_bookmark_toggle_can_target_specific_profile_when_slug_is_shared(): void
+    {
+        $provider = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $firstProfile = $this->createApprovedProfile($provider, [
+            'name' => 'Shared Name',
+            'slug' => 'shared-bookmark',
+            'profile_sequence' => 1,
+        ]);
+        $secondProfile = $this->createApprovedProfile($provider, [
+            'name' => 'Shared Name',
+            'slug' => 'shared-bookmark',
+            'profile_sequence' => 2,
+        ]);
+        $this->createActiveOnlineUser($provider, $firstProfile->id);
+        $this->createActiveOnlineUser($provider, $secondProfile->id);
+        $viewer = User::factory()->create();
+
+        $response = $this->actingAs($viewer)->post('/bookmark/'.$secondProfile->id);
+
+        $response->assertOk()->assertJson(['active' => true]);
+        $this->assertSame([(string) $secondProfile->id], Cache::get("bookmarks_user_{$viewer->id}"));
+    }
+
     public function test_home_page_shows_default_filter_values(): void
     {
         $response = $this->get('/');

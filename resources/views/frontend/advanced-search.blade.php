@@ -640,6 +640,15 @@
                                         >
                                             <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
                                         </button>
+                                        <button
+                                            type="button"
+                                            @click.prevent="toggleBookmark('{{ $profile['id'] }}')"
+                                            :class="isBookmark('{{ $profile['id'] }}') ? 'text-sky-500' : 'hover:text-sky-500'"
+                                            class="transition-colors"
+                                            title="Bookmark"
+                                        >
+                                            <i :class="isBookmark('{{ $profile['id'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
+                                        </button>
 
                                         {{-- @if($profile['age'])
                                             <span class="inline-flex items-center justify-center h-4 w-4 rounded bg-blue-600 text-white text-[9px] font-bold leading-none">{{ $profile['age'] }}</span>

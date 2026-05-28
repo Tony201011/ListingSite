@@ -56,6 +56,7 @@ class HomeController extends Controller
     {
         $data = $this->buildProfileFilterViewData->getFeaturedListingsData();
         $data['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
+        $data['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 
         return view('frontend.featured', $data);
     }
@@ -68,6 +69,7 @@ class HomeController extends Controller
         return view('frontend.favourites', [
             'profiles' => $profiles,
             'userFavourites' => $favouriteProfileIds,
+            'userBookmarks' => $this->favouriteBookmarkService->getBookmarks(),
         ]);
     }
 
