@@ -30,9 +30,9 @@
 @if($variant === 'ribbon')
     <div {{ $attributes->class(['pointer-events-none select-none z-30', $positionClass]) }}>
         <span @class([
-            'inline-flex items-center justify-center gap-1 bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-950 shadow-lg ring-1 ring-amber-200/70 sm:text-[11px] dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-gray-900 dark:ring-amber-300/30 whitespace-nowrap',
-            'rounded-full max-w-full px-2.5 sm:px-3' => $isInline,
-            'w-32 px-2 sm:w-36' => ! $isInline,
+            'inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-950 shadow-[0_4px_14px_rgba(245,158,11,0.45)] ring-1 ring-amber-200/80 sm:text-[11px] dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-gray-900 dark:ring-amber-300/30 whitespace-nowrap',
+            'rounded-full px-3 sm:px-3.5' => $isInline,
+            'w-32 rounded-md px-2 sm:w-36' => ! $isInline,
         ])>
             <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="{{ $iconPath }}" />
@@ -42,8 +42,8 @@
     </div>
 @elseif($variant === 'glow')
     <div {{ $attributes->class(['pointer-events-none select-none z-30', $positionClass]) }}>
-        <span class="relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-950 shadow-[0_8px_20px_rgba(245,158,11,0.35)] ring-1 ring-amber-100/80 transition-all duration-300 group-hover:scale-[1.03] group-hover:shadow-[0_12px_24px_rgba(245,158,11,0.45)] sm:px-3 sm:text-[11px] dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-gray-900 dark:ring-amber-300/30 dark:shadow-[0_8px_24px_rgba(251,191,36,0.28)] whitespace-nowrap">
-            <span class="absolute inset-0 rounded-full bg-amber-300/35 blur-md"></span>
+        <span class="relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-950 shadow-[0_6px_20px_rgba(245,158,11,0.5)] ring-1 ring-amber-200/80 transition-all duration-300 group-hover:scale-[1.04] group-hover:shadow-[0_10px_28px_rgba(245,158,11,0.6)] sm:px-3.5 sm:text-[11px] dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-gray-900 dark:ring-amber-300/30 whitespace-nowrap">
+            <span class="absolute inset-0 rounded-full bg-amber-300/40 blur-[6px]"></span>
             <span class="relative inline-flex items-center gap-1.5">
                 <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="{{ $iconPath }}" />
@@ -54,7 +54,7 @@
     </div>
 @else
     <div {{ $attributes->class(['pointer-events-none select-none z-30', $positionClass]) }}>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-950 shadow-md ring-1 ring-amber-100/80 transition-all duration-300 group-hover:shadow-lg sm:px-3 sm:text-[11px] dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-gray-900 dark:ring-amber-300/30 whitespace-nowrap">
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-950 shadow-[0_4px_14px_rgba(245,158,11,0.4)] ring-1 ring-amber-200/80 transition-all duration-300 group-hover:shadow-[0_8px_20px_rgba(245,158,11,0.5)] sm:px-3.5 sm:text-[11px] dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-gray-900 dark:ring-amber-300/30 whitespace-nowrap">
             <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="{{ $iconPath }}" />
             </svg>
