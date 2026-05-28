@@ -38,7 +38,7 @@ class SearchSuburbs
                 return [
                     'suburb' => $city->name,
                     'state' => $stateAbbr,
-                    'postcode' => 1111111111,
+                    'postcode' =>''
                 ];
             })
             ->all();
