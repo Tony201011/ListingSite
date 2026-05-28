@@ -497,7 +497,7 @@ class SearchTest extends TestCase
 
     public function test_advanced_search_view_data_includes_location_query(): void
     {
-        $response = $this->get(route('advanced-search').'?location=Brisbane');
+        $response = $this->followingRedirects()->get(route('advanced-search').'?location=Brisbane');
 
         $response->assertViewHas('locationQuery', 'Brisbane');
     }

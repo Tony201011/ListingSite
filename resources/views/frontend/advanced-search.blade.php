@@ -474,7 +474,12 @@
             <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
                 @php
                     $currentQuery = request()->query();
-                    $girlsUrl = fn (string $mode): string => route('advanced-search', array_merge($currentQuery, ['girls' => $mode]));
+                    $locationSlug = request()->route('location_slug');
+                    $girlsUrlBase = $locationSlug
+                        ? route('escorts.advanced-search.slug', ['location_slug' => $locationSlug])
+                        : route('advanced-search');
+                    $girlsQuery = array_diff_key($currentQuery, array_flip(['location', 'location_state', 'location_slug', 'location_from_route']));
+                    $girlsUrl = fn (string $mode): string => $girlsUrlBase.'?'.http_build_query(array_merge($girlsQuery, ['girls' => $mode]));
                 @endphp
                 <div class="flex items-center gap-2">
                     <a

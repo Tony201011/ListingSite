@@ -121,7 +121,12 @@ Route::get('/escorts/search/location/{suburb}', [HomeController::class, 'index']
     ->where(['suburb' => '[a-z0-9-]+'])
     ->name('escorts.search.location.no-state');
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
-Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
+Route::get('/escorts/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
+Route::get('/escorts/advanced-search/{location_slug}', [HomeController::class, 'advancedSearch'])
+    ->where(['location_slug' => '(?!name$|location$)[a-z0-9-]+'])
+    ->name('escorts.advanced-search.slug');
+// Legacy redirect: old /advanced-search path → new SEO URL (301)
+Route::get('/advanced-search', fn () => redirect(route('advanced-search'), 301));
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
 Route::get('/escorts/{state}/{suburb}/{slug}/{sequence_id}', [HomeController::class, 'showProfile'])
     ->where([
