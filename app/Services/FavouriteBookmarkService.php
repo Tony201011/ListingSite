@@ -15,19 +15,9 @@ class FavouriteBookmarkService
         return $this->toggle('favourites', $slug);
     }
 
-    public function toggleBookmark(string $slug): bool
-    {
-        return $this->toggle('bookmarks', $slug);
-    }
-
     public function getFavourites(): array
     {
         return $this->getNormalizedProfileIds('favourites');
-    }
-
-    public function getBookmarks(): array
-    {
-        return $this->getNormalizedProfileIds('bookmarks');
     }
 
     public function slugExists(string $slug): bool

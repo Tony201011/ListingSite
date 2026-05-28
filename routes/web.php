@@ -143,7 +143,6 @@ Route::get('/escorts/{state}/{suburb}/{slug}', [HomeController::class, 'showProf
 Route::get('/profile/{slug}', [HomeController::class, 'redirectOldProfile'])->name('profile.show.legacy');
 
 Route::post('/favourite/{slug}', [FavouriteBookmarkController::class, 'toggleFavourite'])->name('favourite.toggle');
-Route::post('/bookmark/{slug}', [FavouriteBookmarkController::class, 'toggleBookmark'])->name('bookmark.toggle');
 
 Route::post('/report-profile', [ReportUserController::class, 'store'])
     ->middleware('throttle:'.config('security.throttles.booking_enquiry', '5,1'))

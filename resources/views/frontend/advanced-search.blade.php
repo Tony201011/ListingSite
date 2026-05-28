@@ -466,12 +466,11 @@
         </div>
 
                 <div class="mt-6 lg:mt-0 min-w-0 flex-1"
-            x-data="favouriteBookmark({
-                viewMode: 'grid',
-                favourites: {{ Js::from($userFavourites ?? []) }},
-                bookmarks: {{ Js::from($userBookmarks ?? []) }}
-            })"
-        >
+                    x-data="favouriteBookmark({
+                        viewMode: 'grid',
+                        favourites: {{ Js::from($userFavourites ?? []) }}
+                    })"
+                >
             <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
                 @php
                     $currentQuery = request()->query();
@@ -639,15 +638,6 @@
                                             title="Favourite"
                                         >
                                             <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            @click.prevent="toggleBookmark('{{ $profile['id'] }}')"
-                                            :class="isBookmark('{{ $profile['id'] }}') ? 'text-sky-500' : 'hover:text-sky-500'"
-                                            class="transition-colors"
-                                            title="Bookmark"
-                                        >
-                                            <i :class="isBookmark('{{ $profile['id'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
                                         </button>
 
                                         {{-- @if($profile['age'])

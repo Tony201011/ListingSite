@@ -38,7 +38,6 @@ class HomeController extends Controller
         $viewData = $this->buildProfileFilterViewData->execute($validated, syncWithAdminOnlineListing: true);
 
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
-        $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 
         return view('frontend.home', $viewData);
     }
@@ -47,7 +46,6 @@ class HomeController extends Controller
     {
         $viewData = $this->buildProfileFilterViewData->execute($request->validated());
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
-        $viewData['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 
         return view('frontend.advanced-search', $viewData);
     }
@@ -56,7 +54,6 @@ class HomeController extends Controller
     {
         $data = $this->buildProfileFilterViewData->getFeaturedListingsData();
         $data['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
-        $data['userBookmarks'] = $this->favouriteBookmarkService->getBookmarks();
 
         return view('frontend.featured', $data);
     }
@@ -69,7 +66,6 @@ class HomeController extends Controller
         return view('frontend.favourites', [
             'profiles' => $profiles,
             'userFavourites' => $favouriteProfileIds,
-            'userBookmarks' => $this->favouriteBookmarkService->getBookmarks(),
         ]);
     }
 

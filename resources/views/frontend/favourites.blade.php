@@ -21,8 +21,7 @@
     {{-- Main Content --}}
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8"
         x-data="favouriteBookmark({
-            favourites: {{ Js::from($userFavourites ?? []) }},
-            bookmarks: {{ Js::from($userBookmarks ?? []) }}
+            favourites: {{ Js::from($userFavourites ?? []) }}
         })"
     >
 
@@ -122,15 +121,6 @@
                                     title="Remove from favourites"
                                 >
                                     <i :class="isFavourite('{{ $profile['id'] }}') ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" class="text-xs"></i>
-                                </button>
-                                <button
-                                    type="button"
-                                    @click.prevent="toggleBookmark('{{ $profile['id'] }}')"
-                                    :class="isBookmark('{{ $profile['id'] }}') ? 'text-sky-500' : 'hover:text-sky-500'"
-                                    class="transition-colors"
-                                    title="Bookmark"
-                                >
-                                    <i :class="isBookmark('{{ $profile['id'] }}') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-xs"></i>
                                 </button>
                             </div>
                         </div>
