@@ -447,7 +447,9 @@ class BuildProfileFilterViewData
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'));
         }
 
-        $this->applyActiveOnlineProfileConstraint($query);
+        if ($escortNameQuery === '') {
+            $this->applyActiveOnlineProfileConstraint($query);
+        }
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {

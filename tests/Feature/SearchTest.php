@@ -304,7 +304,7 @@ class SearchTest extends TestCase
         $this->assertFalse($names->contains('Mia Stone'));
     }
 
-    public function test_home_page_name_search_excludes_offline_profile(): void
+    public function test_home_page_name_search_includes_offline_profile(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -329,10 +329,10 @@ class SearchTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Legacy Offline Home Search'));
+        $this->assertTrue($names->contains('Legacy Offline Home Search'));
     }
 
-    public function test_advanced_search_name_search_excludes_offline_profile(): void
+    public function test_advanced_search_name_search_includes_offline_profile(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => false]);
 
@@ -357,7 +357,7 @@ class SearchTest extends TestCase
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
-        $this->assertFalse($names->contains('Legacy Offline Advanced Search'));
+        $this->assertTrue($names->contains('Legacy Offline Advanced Search'));
     }
 
     public function test_location_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
