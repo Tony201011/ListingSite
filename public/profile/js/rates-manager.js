@@ -163,12 +163,10 @@ document.addEventListener('alpine:init', () => {
                     }
                     this.toast('Updated successfully');
                     this.cancelForm();
-                    this.scrollTo(`#rate-row-${mapped.id}, #rate-card-${mapped.id}`);
                 } else {
                     this.rates.push(mapped);
                     this.toast('Added successfully');
                     this.cancelForm();
-                    this.scrollTo(`#rate-row-${mapped.id}, #rate-card-${mapped.id}`);
                 }
 
             } catch (e) {
