@@ -22,7 +22,6 @@ class EditAccount extends EditRecord
             'name' => $data['name'],
             'email' => $data['email'],
             'mobile' => $data['mobile'] ?? null,
-            'password' => filled($data['password'] ?? null) ? $data['password'] : $record->password,
             'account_status' => $data['account_status'] ?? $record->account_status,
             'is_blocked' => (bool) ($data['is_blocked'] ?? false),
             'mobile_verified' => (bool) ($data['mobile_verified'] ?? false),

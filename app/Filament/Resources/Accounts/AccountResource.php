@@ -67,6 +67,7 @@ class AccountResource extends Resource
                     TextInput::make('password')
                         ->password()
                         ->revealable()
+                        ->visible(fn (string $operation): bool => $operation === 'create')
                         ->required(fn (string $operation): bool => $operation === 'create')
                         ->dehydrated(fn ($state): bool => filled($state))
                         ->minLength(8)
@@ -74,6 +75,7 @@ class AccountResource extends Resource
                     TextInput::make('password_confirmation')
                         ->password()
                         ->revealable()
+                        ->visible(fn (string $operation): bool => $operation === 'create')
                         ->required(fn (string $operation): bool => $operation === 'create')
                         ->dehydrated(false)
                         ->same('password'),
