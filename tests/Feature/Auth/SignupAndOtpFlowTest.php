@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\TwilioSetting;
 use App\Models\User;
+use App\Models\ProviderProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -41,7 +42,6 @@ class SignupAndOtpFlowTest extends TestCase
             'password' => 'SecurePass123',
             'password_confirmation' => 'SecurePass123',
             'mobile' => self::DUMMY_MOBILE,
-            'suburb' => 'Sydney',
             'age_confirm' => '1',
         ], $overrides);
     }
@@ -55,7 +55,7 @@ class SignupAndOtpFlowTest extends TestCase
         $response = $this->from('/signup')->post('/signup', []);
 
         $response->assertRedirect('/signup');
-        $response->assertSessionHasErrors(['email', 'nickname', 'password', 'mobile', 'suburb', 'age_confirm']);
+        $response->assertSessionHasErrors(['email', 'nickname', 'password', 'mobile', 'age_confirm']);
     }
 
     public function test_signup_rejects_invalid_mobile_format(): void
@@ -168,6 +168,7 @@ class SignupAndOtpFlowTest extends TestCase
             'mobile_verified' => true,
             'role' => User::ROLE_PROVIDER,
         ]);
+        $this->assertDatabaseCount((new ProviderProfile)->getTable(), 0);
     }
 
     public function test_otp_verify_success_logs_in_the_unverified_user_and_redirects_to_email_notice(): void

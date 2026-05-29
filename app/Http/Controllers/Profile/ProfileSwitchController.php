@@ -61,7 +61,8 @@ class ProfileSwitchController extends Controller
 
         // No profiles yet — send straight to dashboard to set up the first one
         if ($profiles->isEmpty()) {
-            return redirect()->route('my-profile');
+            return redirect()->route('profiles.index')
+                ->with('success', 'Create your first profile to get started.');
         }
 
         // Exactly one profile — auto-select and proceed
