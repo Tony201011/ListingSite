@@ -319,20 +319,18 @@ class BuildProfileFilterViewData
 
         $this->applyActiveOnlineProfileConstraint($query);
 
-        // For local banner: restrict to the state being viewed
+        // For local banner: restrict to the state being viewed.
+        // Keep this state-wide (not suburb-exact) so multiple profiles in one
+        // account/state can all appear in the local featured strip.
         if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
-            if ($exactLocation !== null) {
-                $this->applyExactLocationFilter($query, $exactLocation);
-            }
-
-            $state = $locationStateQuery ?: '';
+            $state = $locationStateQuery ?: (string) ($exactLocation['state'] ?? '');
 
             if ($state === '' && $locationQuery !== null && str_contains($locationQuery, ',')) {
                 $parts = explode(',', $locationQuery, 2);
                 $state = trim($parts[1] ?? '');
             }
 
-            if ($state !== '' && $exactLocation === null) {
+            if ($state !== '') {
                 $normalizedState = $this->normalizeStateAbbreviation($state) ?? strtoupper($state);
                 $fullStateName = $this->resolveStateName($normalizedState);
 

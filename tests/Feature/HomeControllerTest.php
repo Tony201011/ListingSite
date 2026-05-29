@@ -874,7 +874,7 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($localFeaturedNames->contains('VIC Local Escort'));
     }
 
-    public function test_local_featured_filters_by_exact_location_when_location_contains_suburb_and_state(): void
+    public function test_local_featured_filters_by_state_when_location_contains_suburb_and_state(): void
     {
         $macknadeUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $macknadeProfile = ProviderProfile::query()->create([
@@ -910,7 +910,52 @@ class HomeControllerTest extends TestCase
         $response->assertSeeText('Local Featured');
         $localFeaturedNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
         $this->assertTrue($localFeaturedNames->contains('Macknade Local Featured'));
-        $this->assertFalse($localFeaturedNames->contains('Townsville Local Featured'));
+        $this->assertTrue($localFeaturedNames->contains('Townsville Local Featured'));
+    }
+
+    public function test_home_and_local_banners_include_multiple_profiles_from_same_account(): void
+    {
+        $country = Country::query()->create(['name' => 'Australia', 'code' => 'AU']);
+        $state = State::query()->create(['country_id' => $country->id, 'name' => 'Queensland']);
+
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $firstProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Shared Account Banner One',
+            'slug' => 'shared-account-banner-one',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'state_id' => $state->id,
+            'suburb' => 'MACKNADE, QLD 4850',
+            'home_banner_expires_at' => now()->addDay(),
+            'local_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $secondProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Shared Account Banner Two',
+            'slug' => 'shared-account-banner-two',
+            'profile_status' => 'approved',
+            'age' => 26,
+            'state_id' => $state->id,
+            'suburb' => 'TOWNSVILLE, QLD 4810',
+            'home_banner_expires_at' => now()->addDay(),
+            'local_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $this->createActiveOnlineUser($user, $firstProfile->id);
+        $this->createActiveOnlineUser($user, $secondProfile->id);
+
+        $homeResponse = $this->get('/');
+        $homeBannerNames = collect($homeResponse->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($homeBannerNames->contains('Shared Account Banner One'));
+        $this->assertTrue($homeBannerNames->contains('Shared Account Banner Two'));
+
+        $localResponse = $this->get('/?location=MACKNADE%2C+QLD');
+        $localBannerNames = collect($localResponse->viewData('localBannerProfiles'))->pluck('name');
+        $this->assertTrue($localBannerNames->contains('Shared Account Banner One'));
+        $this->assertTrue($localBannerNames->contains('Shared Account Banner Two'));
     }
 
     // ---------------------------------------------------------------
