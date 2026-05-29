@@ -14,6 +14,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -46,151 +48,225 @@ class SiteSettingResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('meta_key')->label('Meta Key'),
-            Textarea::make('meta_description')->label('Meta Description'),
-            Toggle::make('enable_cookies')->label('Enable Cookie Consent Banner'),
-            Toggle::make('captcha_enabled')
-                ->label('Enable reCAPTCHA')
-                ->default(true)
-                ->helperText('When enabled, reCAPTCHA is shown on sign up and sign in pages.'),
-            Textarea::make('cookies_text')->label('Cookie Consent Text')->rows(4),
-            Toggle::make('site_password_enabled')->label('Enable Site Password')->helperText('When enabled, visitors must enter the site password to access the site.'),
+            Tabs::make('SiteSettingsTabs')
+                ->tabs([
+                    Tab::make('General')
+                        ->icon('heroicon-o-home')
+                        ->schema([
+                            Section::make('Display & Listing')
+                                ->compact()
+                                ->columns(2)
+                                ->schema([
+                                    TextInput::make('home_page_records')
+                                        ->label('Home Page Records Per Page')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->maxValue(100)
+                                        ->default(12)
+                                        ->helperText('Profiles shown per page on the home page. Default: 12.'),
+                                    Toggle::make('online_filter_enabled')
+                                        ->label('Require Online Status')
+                                        ->default(false)
+                                        ->helperText('Only show profiles with an active online session.'),
+                                    Toggle::make('short_url')
+                                        ->label('Enable Short URLs')
+                                        ->helperText('Use short URLs for all links on the site.'),
+                                ]),
+                            Section::make('Cookie Consent')
+                                ->compact()
+                                ->schema([
+                                    Toggle::make('enable_cookies')
+                                        ->label('Enable Cookie Consent Banner'),
+                                    Textarea::make('cookies_text')
+                                        ->label('Cookie Consent Text')
+                                        ->rows(3),
+                                ]),
+                        ]),
 
-            Toggle::make('short_url')->label('Enable Short URLs')->helperText('When enabled, the site will use short URLs for all links.'),
+                    Tab::make('SEO & Meta')
+                        ->icon('heroicon-o-magnifying-glass')
+                        ->schema([
+                            Section::make('Meta Tags')
+                                ->compact()
+                                ->schema([
+                                    TextInput::make('meta_key')
+                                        ->label('Meta Keywords'),
+                                    Textarea::make('meta_description')
+                                        ->label('Meta Description')
+                                        ->rows(3),
+                                ]),
+                            Section::make('Contact')
+                                ->compact()
+                                ->schema([
+                                    TextInput::make('contact_email')
+                                        ->label('Contact Email')
+                                        ->email()
+                                        ->maxLength(255)
+                                        ->helperText('Shown on profile contact section for email enquiries.'),
+                                ]),
+                        ]),
 
-            TextInput::make('site_password')
-                ->label('Site Password')
-                ->password()
-                ->revealable()
-                ->dehydrated(fn ($state) => filled($state))
-                ->helperText('Set the site password used to grant visitor access. If empty, `SITE_PASSWORD` env will be used.'),
-            TextInput::make('contact_email')
-                ->label('Contact Email')
-                ->email()
-                ->maxLength(255)
-                ->helperText('Shown on profile contact section for email enquiries.'),
-            TextInput::make('max_search_distance')
-                ->label('Max Search Distance (km)')
-                ->numeric()
-                ->minValue(1)
-                ->maxValue(20000)
-                ->default(500)
-                ->helperText('Maximum distance in kilometres users can filter profiles by. Default is 500 km.'),
-            Toggle::make('distance_search_enabled')
-                ->label('Enable Distance Search')
-                ->default(true)
-                ->helperText('When enabled, users can filter profiles by distance using their location.'),
-            TextInput::make('home_page_records')
-                ->label('Home Page Records Per Page')
-                ->numeric()
-                ->minValue(1)
-                ->maxValue(100)
-                ->default(12)
-                ->helperText('Number of profiles displayed per page on the home page. Default is 12.'),
-            Toggle::make('online_filter_enabled')
-                ->label('Require Online Status to Show Profiles')
-                ->default(false)
-                ->helperText('When enabled, only profiles with an active online session are shown on the home page and search results. Disable this to show all approved profiles regardless of their online status.'),
-            Toggle::make('fatal_error_page_enabled')
-                ->label('Enable Fatal Error Maintenance Page')
-                ->default(false)
-                ->helperText('When enabled, unhandled server errors show a maintenance-style page with your configured message.'),
-            Textarea::make('fatal_error_default_message')
-                ->label('Fatal Error Default Message')
-                ->rows(3)
-                ->maxLength(1000)
-                ->helperText('Default message shown on the fatal error page.'),
-            TextInput::make('fatal_error_query_param')
-                ->label('Fatal Error Query Parameter')
-                ->maxLength(100)
-                ->helperText('Optional query key used to override the message on error pages (example: fatal_message).'),
-            Toggle::make('logging_enabled')
-                ->label('Enable Logs')
-                ->default(true)
-                ->helperText('When enabled, the Logs section is visible in the admin navigation. When disabled, all log pages are hidden.'),
-            TextInput::make('max_video_upload_mb')
-                ->label('Max Video Upload Size (MB)')
-                ->numeric()
-                ->minValue(1)
-                ->maxValue(10240)
-                ->default(100)
-                ->required()
-                ->helperText('Maximum video file size users can upload in megabytes. Default is 100 MB.'),
+                    Tab::make('Security')
+                        ->icon('heroicon-o-lock-closed')
+                        ->schema([
+                            Section::make('Site Password')
+                                ->compact()
+                                ->schema([
+                                    Toggle::make('site_password_enabled')
+                                        ->label('Enable Site Password')
+                                        ->helperText('Visitors must enter the site password to access the site.'),
+                                    TextInput::make('site_password')
+                                        ->label('Site Password')
+                                        ->password()
+                                        ->revealable()
+                                        ->dehydrated(fn ($state) => filled($state))
+                                        ->helperText('If empty, the SITE_PASSWORD environment variable is used.'),
+                                ]),
+                            Section::make('Anti-Spam')
+                                ->compact()
+                                ->schema([
+                                    Toggle::make('captcha_enabled')
+                                        ->label('Enable reCAPTCHA')
+                                        ->default(true)
+                                        ->helperText('Show reCAPTCHA on sign-up and sign-in pages.'),
+                                ]),
+                        ]),
 
-            Section::make('Featured & Ad Tier Pricing')
-                ->description('Credit costs and durations for featured listings and sponsored ad placements.')
-                ->schema([
-                    TextInput::make('free_listing_days')
-                        ->label('Free Listing Days (new profiles)')
-                        ->numeric()
-                        ->minValue(0)
-                        ->maxValue(365)
-                        ->default(21)
-                        ->helperText('Number of free days before the daily listing fee kicks in for new profiles. Default is 21.'),
-                    TextInput::make('featured_duration_days')
-                        ->label('Ad Purchase Duration (days)')
-                        ->numeric()
-                        ->minValue(1)
-                        ->default(1)
-                        ->helperText('Ad tiers are charged daily. Keep this at 1 day.'),
-                    TextInput::make('featured_credit_cost')
-                        ->label('Normal Featured – Credits per Purchase')
-                        ->numeric()
-                        ->minValue(1)
-                        ->default(1)
-                        ->helperText('Credits charged when a provider activates the Normal Featured badge ($1/day equivalent).'),
-                    TextInput::make('home_featured_credit_cost')
-                        ->label('Home Page Featured – Credits per Purchase')
-                        ->numeric()
-                        ->minValue(1)
-                        ->default(3)
-                        ->helperText('Credits charged for Home Page Featured placement ($3/day equivalent).'),
-                    TextInput::make('local_banner_credit_cost')
-                        ->label('Local Banner – Credits per Purchase')
-                        ->numeric()
-                        ->minValue(1)
-                        ->default(2)
-                        ->helperText('Credits charged for the Local (state) Banner ad placement ($2/day equivalent).'),
-                    TextInput::make('home_banner_credit_cost')
-                        ->label('Home Banner – Credits per Purchase')
-                        ->numeric()
-                        ->minValue(1)
-                        ->default(5)
-                        ->helperText('Credits charged for the national Home Page Banner ad placement ($5/day equivalent).'),
-                ]),
+                    Tab::make('System')
+                        ->icon('heroicon-o-wrench-screwdriver')
+                        ->schema([
+                            Section::make('Search & Discovery')
+                                ->compact()
+                                ->columns(2)
+                                ->schema([
+                                    Toggle::make('distance_search_enabled')
+                                        ->label('Enable Distance Search')
+                                        ->default(true)
+                                        ->helperText('Allow users to filter profiles by location distance.'),
+                                    TextInput::make('max_search_distance')
+                                        ->label('Max Search Distance (km)')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->maxValue(20000)
+                                        ->default(500)
+                                        ->helperText('Maximum filterable distance in km. Default: 500.'),
+                                ]),
+                            Section::make('Uploads & Media')
+                                ->compact()
+                                ->schema([
+                                    TextInput::make('max_video_upload_mb')
+                                        ->label('Max Video Upload Size (MB)')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->maxValue(10240)
+                                        ->default(100)
+                                        ->required()
+                                        ->helperText('Maximum video file size in megabytes. Default: 100 MB.'),
+                                ]),
+                            Section::make('Logs & Maintenance')
+                                ->compact()
+                                ->schema([
+                                    Toggle::make('logging_enabled')
+                                        ->label('Enable Admin Logs')
+                                        ->default(true)
+                                        ->helperText('Show the Logs section in the admin navigation.'),
+                                    Toggle::make('fatal_error_page_enabled')
+                                        ->label('Enable Fatal Error Page')
+                                        ->default(false)
+                                        ->helperText('Show a maintenance page for unhandled server errors.'),
+                                    Textarea::make('fatal_error_default_message')
+                                        ->label('Fatal Error Message')
+                                        ->rows(2)
+                                        ->maxLength(1000)
+                                        ->helperText('Default message shown on the error page.'),
+                                    TextInput::make('fatal_error_query_param')
+                                        ->label('Fatal Error Query Parameter')
+                                        ->maxLength(100)
+                                        ->helperText('Optional query key to override the error message (e.g. fatal_message).'),
+                                ]),
+                        ]),
 
-            Section::make('Payment Settings')
-                ->schema([
-                    Select::make('stripe_mode')
-                        ->label('Stripe Mode')
-                        ->options([
-                            'sandbox' => 'Sandbox (Testing)',
-                            'live' => 'Live (Production)',
-                        ])
-                        ->default('sandbox')
-                        ->required()
-                        ->helperText('Choose Sandbox for testing or Live for production transactions.'),
-                    TextInput::make('stripe_publishable_key')
-                        ->label('Stripe Publishable Key')
-                        ->placeholder('pk_test_... or pk_live_...')
-                        ->helperText('Your Stripe publishable key for client-side operations.'),
-                    TextInput::make('stripe_secret_key')
-                        ->label('Stripe Secret Key')
-                        ->password()
-                        ->revealable()
-                        ->placeholder('sk_test_... or sk_live_...')
-                        ->helperText('Your Stripe secret key for server-side operations. Keep this secure.'),
-                    TextInput::make('stripe_webhook_secret')
-                        ->label('Stripe Webhook Secret')
-                        ->password()
-                        ->revealable()
-                        ->placeholder('whsec_...')
-                        ->helperText('Secret for verifying Stripe webhook signatures.'),
-                    Toggle::make('stripe_enabled')
-                        ->label('Enable Stripe Payments')
-                        ->default(false)
-                        ->helperText('When enabled, users can make payments using Stripe.'),
-                ]),
+                    Tab::make('Payments & Pricing')
+                        ->icon('heroicon-o-credit-card')
+                        ->schema([
+                            Section::make('Stripe')
+                                ->compact()
+                                ->columns(2)
+                                ->schema([
+                                    Toggle::make('stripe_enabled')
+                                        ->label('Enable Stripe Payments')
+                                        ->default(false)
+                                        ->helperText('Allow users to pay via Stripe.')
+                                        ->columnSpanFull(),
+                                    Select::make('stripe_mode')
+                                        ->label('Stripe Mode')
+                                        ->options([
+                                            'sandbox' => 'Sandbox (Testing)',
+                                            'live' => 'Live (Production)',
+                                        ])
+                                        ->default('sandbox')
+                                        ->required()
+                                        ->native(false)
+                                        ->helperText('Use Sandbox for testing, Live for production.'),
+                                    TextInput::make('stripe_publishable_key')
+                                        ->label('Publishable Key')
+                                        ->placeholder('pk_test_... or pk_live_...')
+                                        ->helperText('Client-side Stripe key.'),
+                                    TextInput::make('stripe_secret_key')
+                                        ->label('Secret Key')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('sk_test_... or sk_live_...')
+                                        ->helperText('Server-side Stripe key. Keep this secure.'),
+                                    TextInput::make('stripe_webhook_secret')
+                                        ->label('Webhook Secret')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('whsec_...')
+                                        ->helperText('Used to verify Stripe webhook signatures.'),
+                                ]),
+                            Section::make('Ad Tier Pricing')
+                                ->description('Daily credit costs for featured listings and sponsored placements.')
+                                ->compact()
+                                ->columns(2)
+                                ->schema([
+                                    TextInput::make('free_listing_days')
+                                        ->label('Free Listing Days')
+                                        ->numeric()
+                                        ->minValue(0)
+                                        ->maxValue(365)
+                                        ->default(21)
+                                        ->helperText('Free days before the daily fee applies. Default: 21.'),
+                                    TextInput::make('featured_duration_days')
+                                        ->label('Ad Duration (days)')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default(1)
+                                        ->helperText('Ad tiers are charged daily. Keep at 1.'),
+                                    TextInput::make('featured_credit_cost')
+                                        ->label('Normal Featured (credits/day)')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default(1),
+                                    TextInput::make('home_featured_credit_cost')
+                                        ->label('Home Featured (credits/day)')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default(3),
+                                    TextInput::make('local_banner_credit_cost')
+                                        ->label('Local Banner (credits/day)')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default(2),
+                                    TextInput::make('home_banner_credit_cost')
+                                        ->label('Home Banner (credits/day)')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default(5),
+                                ]),
+                        ]),
+                ])
+                ->columnSpanFull(),
         ]);
     }
 
@@ -198,27 +274,41 @@ class SiteSettingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('meta_key')->label('Meta Key'),
-                IconColumn::make('enable_cookies')->label('Cookies Enabled')->boolean(),
-                IconColumn::make('captcha_enabled')->label('Captcha')->boolean(),
-                IconColumn::make('site_password_enabled')->label('Site Password')->boolean(),
-                IconColumn::make('short_url')->label('Short URL')->boolean(),
-                TextColumn::make('contact_email')->label('Contact Email'),
-                TextColumn::make('max_search_distance')->label('Max Distance (km)'),
-                IconColumn::make('distance_search_enabled')->label('Distance Search')->boolean(),
-                TextColumn::make('home_page_records')->label('Home Page Records'),
-                IconColumn::make('online_filter_enabled')->label('Online Filter')->boolean(),
-                IconColumn::make('fatal_error_page_enabled')->label('Fatal Error Page')->boolean(),
-                TextColumn::make('fatal_error_query_param')->label('Fatal Query Param'),
-                IconColumn::make('logging_enabled')->label('Logs Enabled')->boolean(),
-                TextColumn::make('max_video_upload_mb')->label('Max Video Upload (MB)'),
-                TextColumn::make('cookies_text')->label('Cookie Consent Text')->limit(40),
-                IconColumn::make('stripe_enabled')->label('Stripe Enabled')->boolean(),
-                TextColumn::make('stripe_publishable_key')->label('Stripe Key')->limit(20),
+                TextColumn::make('meta_key')
+                    ->label('Meta Key')
+                    ->limit(30)
+                    ->placeholder('—'),
+                TextColumn::make('contact_email')
+                    ->label('Contact Email')
+                    ->placeholder('—'),
+                IconColumn::make('enable_cookies')
+                    ->label('Cookies')
+                    ->boolean(),
+                IconColumn::make('captcha_enabled')
+                    ->label('reCAPTCHA')
+                    ->boolean(),
+                IconColumn::make('site_password_enabled')
+                    ->label('Site Password')
+                    ->boolean(),
+                IconColumn::make('stripe_enabled')
+                    ->label('Stripe')
+                    ->boolean(),
+                IconColumn::make('logging_enabled')
+                    ->label('Logs')
+                    ->boolean(),
+                TextColumn::make('home_page_records')
+                    ->label('Records/Page'),
+                TextColumn::make('updated_at')
+                    ->label('Last Updated')
+                    ->since()
+                    ->sortable(),
             ])
             ->recordActions([
-                EditAction::make(),
-            ]);
+                EditAction::make()->slideOver(),
+            ])
+            ->striped()
+            ->emptyStateHeading('No site settings configured')
+            ->emptyStateDescription('Click "Add Site Setting" to create the initial configuration.');
     }
 
     public static function getPages(): array
