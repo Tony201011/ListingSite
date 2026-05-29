@@ -9,7 +9,7 @@ use UnitEnum;
 
 class Dashboard extends BaseDashboard
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2X2;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
     protected static ?string $navigationLabel = 'Dashboard';
 
