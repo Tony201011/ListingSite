@@ -51,6 +51,7 @@
 }
 
 .fi-sidebar-group {
+    display: grid;
     gap: 0.25rem;
 }
 
@@ -127,7 +128,7 @@
 
 .fi-sidebar .fi-sidebar-header,
 .fi-sidebar .fi-sidebar-nav {
-    background: color-mix(in srgb, var(--admin-sidebar-surface) 92%, transparent);
+    background: rgba(255, 255, 255, 0.92);
 }
 
 /* Improve admin dashboard chart sizing and layout */
