@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\Frontend\AvailableController;
-use App\Http\Controllers\Frontend\BabeRankController;
-use App\Http\Controllers\Frontend\FeaturedController;
-use App\Http\Controllers\Frontend\ForgetController;
-use App\Http\Controllers\Frontend\MyRateController;
-use App\Http\Controllers\Frontend\MyToursController;
-use App\Http\Controllers\Frontend\MyVideosController;
-use App\Http\Controllers\Frontend\OnlineController;
-use App\Http\Controllers\Frontend\PhotoController;
-use App\Http\Controllers\Frontend\PhotoVerificationController;
-use App\Http\Controllers\Frontend\ProfileMessageController;
-use App\Http\Controllers\Frontend\ReferralsController;
-use App\Http\Controllers\Frontend\ShowHideProfileController;
-use App\Http\Controllers\Frontend\StatusTabsController;
-use App\Http\Controllers\Frontend\UrlController;
+use App\Http\Controllers\Profile\AvailableController;
+use App\Http\Controllers\Profile\BabeRankController;
+use App\Http\Controllers\Profile\FeaturedController;
+use App\Http\Controllers\Profile\ForgetController;
+use App\Http\Controllers\Profile\MyRateController;
+use App\Http\Controllers\Profile\MyToursController;
+use App\Http\Controllers\Profile\MyVideosController;
+use App\Http\Controllers\Profile\OnlineController;
+use App\Http\Controllers\Profile\PhotoController;
+use App\Http\Controllers\Profile\PhotoVerificationController;
+use App\Http\Controllers\Profile\ProfileMessageController;
+use App\Http\Controllers\Profile\ReferralsController;
+use App\Http\Controllers\Profile\ShowHideProfileController;
+use App\Http\Controllers\Profile\StatusTabsController;
+use App\Http\Controllers\Profile\UrlController;
 use App\Http\Controllers\Profile\AvailabilityController;
 use App\Http\Controllers\Profile\MyProfileController;
 use App\Http\Controllers\Profile\ProfileSettingController;
