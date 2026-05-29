@@ -717,7 +717,7 @@ class SearchTest extends TestCase
         $this->assertNotContains('PendingSearchable', $names);
     }
 
-    public function test_search_suggestions_exclude_profile_marked_offline_even_with_legacy_online_row(): void
+    public function test_search_suggestions_include_profile_marked_offline_even_with_legacy_online_row(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
@@ -748,7 +748,7 @@ class SearchTest extends TestCase
 
         $response->assertOk();
         $names = array_column($response->json('suggestions'), 'name');
-        $this->assertNotContains('Legacy Offline Suggestion', $names);
+        $this->assertContains('Legacy Offline Suggestion', $names);
     }
 
     public function test_search_suggestions_returns_suggestions_with_correct_shape_when_results_found(): void

@@ -21,17 +21,26 @@ class SearchController extends Controller
             return response()->json(['suggestions' => []]);
         }
 
+        $results = collect();
+
         try {
             $results = $this->queryScoutSuggestions($term);
         } catch (\Throwable $e) {
             Log::warning('Scout search unavailable, falling back to database search.', [
                 'error' => $e->getMessage(),
             ]);
-            $results = collect();
         }
 
-        if ($results->isEmpty()) {
-            $results = $this->queryDatabaseSuggestions($term);
+        $remainingSlots = self::MAX_SUGGESTIONS - $results->count();
+
+        if ($remainingSlots > 0) {
+            $results = $results->concat(
+                $this->queryDatabaseSuggestions(
+                    $term,
+                    $results->pluck('id')->all(),
+                    $remainingSlots
+                )
+            );
         }
 
         $suggestions = $results->map(fn (ProviderProfile $profile) => [
@@ -79,9 +88,9 @@ class SearchController extends Controller
             ->load('city');
     }
 
-    private function queryDatabaseSuggestions(string $term)
+    private function queryDatabaseSuggestions(string $term, array $excludedProfileIds = [], int $limit = self::MAX_SUGGESTIONS)
     {
-        return ProviderProfile::query()
+        $query = ProviderProfile::query()
             ->where('profile_status', 'approved')
             ->whereNull('deleted_at')
             ->whereNotNull('slug')
@@ -92,7 +101,13 @@ class SearchController extends Controller
             ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
             ->with('city')
             ->orderBy('name')
-            ->take(self::MAX_SUGGESTIONS)
+            ->take($limit)
+            ->when(
+                ! empty($excludedProfileIds),
+                fn ($query) => $query->whereNotIn('id', $excludedProfileIds)
+            )
             ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age']);
+
+        return $query;
     }
 }
