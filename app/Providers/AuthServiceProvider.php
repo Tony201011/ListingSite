@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\PhotoVerification;
-use App\Models\Profile;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
 use App\Models\Rate;
@@ -12,7 +11,6 @@ use App\Models\ShortUrl;
 use App\Models\Tour;
 use App\Models\UserVideo;
 use App\Policies\PhotoVerificationPolicy;
-use App\Policies\ProfilePolicy;
 use App\Policies\ProfileImagePolicy;
 use App\Policies\ProviderProfilePolicy;
 use App\Policies\RateGroupPolicy;
@@ -28,7 +26,6 @@ class AuthServiceProvider extends ServiceProvider
         Rate::class => RatePolicy::class,
         RateGroup::class => RateGroupPolicy::class,
         ProfileImage::class => ProfileImagePolicy::class,
-        Profile::class => ProfilePolicy::class,
         UserVideo::class => UserVideoPolicy::class,
         ProviderProfile::class => ProviderProfilePolicy::class,
         Tour::class => TourPolicy::class,

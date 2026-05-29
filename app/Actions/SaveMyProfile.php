@@ -92,17 +92,6 @@ class SaveMyProfile
 
             $profile->save();
 
-            // Sync mobile number to user account if provided. When the number
-            // actually changes, reset mobile_verified to false because the new
-            // number has not been verified via OTP yet.
-            if (filled($validated['phone'] ?? null)) {
-                $updates = ['mobile' => $validated['phone']];
-                if ($user->mobile !== $validated['phone']) {
-                    $updates['mobile_verified'] = false;
-                }
-                $user->update($updates);
-            }
-
             return $profile;
         });
 
