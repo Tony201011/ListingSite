@@ -5,6 +5,7 @@ namespace App\Filament\Clusters;
 use BackedEnum;
 use Filament\Clusters\Cluster;
 use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class Pages extends Cluster
 {
@@ -12,5 +13,7 @@ class Pages extends Cluster
 
     protected static ?string $navigationLabel = 'Pages';
 
-    protected static ?int $navigationSort = 3;
+    protected static string|UnitEnum|null $navigationGroup = 'Content Management';
+
+    protected static ?int $navigationSort = 2;
 }

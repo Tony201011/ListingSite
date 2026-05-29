@@ -24,6 +24,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use UnitEnum;
 
 class PurchaseComplaintResource extends Resource
 {
@@ -39,7 +40,9 @@ class PurchaseComplaintResource extends Resource
 
     protected static ?string $slug = 'purchase-complaints';
 
-    protected static ?int $navigationSort = 5;
+    protected static string|UnitEnum|null $navigationGroup = 'Support';
+
+    protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool
     {

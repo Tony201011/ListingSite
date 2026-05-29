@@ -22,6 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 class PurchaseTransactionResource extends Resource
 {
@@ -39,7 +40,9 @@ class PurchaseTransactionResource extends Resource
 
     protected static ?string $slug = 'purchase-transactions';
 
-    protected static ?int $navigationSort = 4;
+    protected static string|UnitEnum|null $navigationGroup = 'Financial';
+
+    protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool
     {

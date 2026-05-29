@@ -7,6 +7,7 @@ use BackedEnum;
 use Filament\Clusters\Cluster;
 use Filament\Facades\Filament;
 use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class Logs extends Cluster
 {
@@ -14,7 +15,9 @@ class Logs extends Cluster
 
     protected static ?string $navigationLabel = 'Logs';
 
-    protected static ?int $navigationSort = 5;
+    protected static string|UnitEnum|null $navigationGroup = 'System';
+
+    protected static ?int $navigationSort = 2;
 
     public static function shouldRegisterNavigation(): bool
     {
