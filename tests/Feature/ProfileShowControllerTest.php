@@ -193,6 +193,33 @@ class ProfileShowControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_offline_profile_shows_full_profile_page(): void
+    {
+        $user = $this->createApprovedProvider(['slug' => 'offline-profile']);
+        $profile = ProviderProfile::query()->where('user_id', $user->id)->first();
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+        ]);
+
+        $response = $this->get($this->profileUrl('offline-profile'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('frontend.profile-show');
+    }
+
+    public function test_blocked_profile_shows_offline_page(): void
+    {
+        $this->createApprovedProvider(['slug' => 'blocked-profile', 'is_blocked' => true]);
+
+        $response = $this->get($this->profileUrl('blocked-profile'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('frontend.profile-offline');
+    }
+
     // ---------------------------------------------------------------
     // Profile data integrity
     // ---------------------------------------------------------------
