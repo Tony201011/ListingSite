@@ -13,6 +13,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -20,7 +21,9 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
@@ -123,6 +126,11 @@ class AccountResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                TernaryFilter::make('email_verified_at')
+                    ->label('Email Verified')
+                    ->nullable()
+                    ->trueLabel('Verified')
+                    ->falseLabel('Unverified'),
                 SelectFilter::make('account_status')
                     ->options([
                         'active' => 'Active',
@@ -136,6 +144,42 @@ class AccountResource extends Resource
                         '1' => 'Yes',
                         '0' => 'No',
                     ]),
+                Filter::make('created_at')
+                    ->label('Created Date')
+                    ->schema([
+                        DatePicker::make('created_from')->label('From'),
+                        DatePicker::make('created_until')->label('Until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                filled($data['created_from'] ?? null),
+                                fn (Builder $query): Builder => $query->whereDate('created_at', '>=', $data['created_from']),
+                            )
+                            ->when(
+                                filled($data['created_until'] ?? null),
+                                fn (Builder $query): Builder => $query->whereDate('created_at', '<=', $data['created_until']),
+                            );
+                    }),
+                SelectFilter::make('profile_status')
+                    ->label('Profile Status')
+                    ->options([
+                        'approved' => 'Approved',
+                        'pending' => 'Pending',
+                        'rejected' => 'Rejected',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            filled($data['value'] ?? null),
+                            fn (Builder $query): Builder => $query->whereHas(
+                                'providerProfiles',
+                                fn (Builder $profileQuery): Builder => $profileQuery
+                                    ->withTrashed()
+                                    ->where('profile_status', $data['value'])
+                            )
+                        );
+                    })
+                    ->placeholder('All Statuses'),
             ])
             ->recordActions([
                 ActionGroup::make([
