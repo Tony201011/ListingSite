@@ -68,6 +68,10 @@ class VerifyProviderSignupOtp
             return ActionResult::domainError('Email already exists.');
         }
 
+        if (User::query()->where('name', $pendingUser['name'])->exists()) {
+            return ActionResult::domainError('Account name already exists.');
+        }
+
         $user = User::create([
             'name' => $pendingUser['name'],
             'email' => $pendingUser['email'],

@@ -80,6 +80,16 @@ class SignupAndOtpFlowTest extends TestCase
         $response->assertSessionHasErrors(['email']);
     }
 
+    public function test_signup_rejects_duplicate_account_name(): void
+    {
+        User::factory()->create(['name' => 'providerNick']);
+
+        $response = $this->from('/signup')->post('/signup', $this->validSignupPayload());
+
+        $response->assertRedirect('/signup');
+        $response->assertSessionHasErrors(['nickname']);
+    }
+
     public function test_signup_rejects_password_shorter_than_8_chars(): void
     {
         $response = $this->from('/signup')->post('/signup', $this->validSignupPayload([
@@ -212,6 +222,26 @@ class SignupAndOtpFlowTest extends TestCase
         $response->assertJsonFragment(['message' => 'Invalid OTP. 4 attempt(s) remaining.']);
 
         $this->assertDatabaseMissing('users', ['email' => 'newprovider@example.com']);
+    }
+
+    public function test_otp_verify_with_existing_account_name_returns_error(): void
+    {
+        $this->from('/signup')->post('/signup', $this->validSignupPayload([
+            'nickname' => 'anotherNick',
+        ]));
+
+        User::factory()->create(['name' => 'providerNick']);
+
+        $pendingKey = session('pending_signup_key');
+        Cache::put($pendingKey, array_merge(
+            Cache::get($pendingKey),
+            ['name' => 'providerNick'],
+        ), now()->addMinutes(10));
+
+        $response = $this->postJson('/verify-otp', ['otp' => self::DUMMY_OTP]);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment(['message' => 'Account name already exists.']);
     }
 
     public function test_otp_verify_decrements_remaining_attempts(): void

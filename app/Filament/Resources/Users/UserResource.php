@@ -158,7 +158,12 @@ class UserResource extends Resource
                                         ->label('User Name')
                                         ->placeholder('Enter full name')
                                         ->required()
-                                        ->maxLength(255),
+                                        ->maxLength(255)
+                                        ->unique(
+                                            table: 'users',
+                                            column: 'name',
+                                            ignoreRecord: true,
+                                        ),
 
                                     TextInput::make('email')
                                         ->email()
