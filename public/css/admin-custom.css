@@ -4,8 +4,7 @@
 }
 
 :root {
-    --admin-content-max-width: 1400px;
-    --admin-content-gutter: clamp(1rem, 1.8vw, 2.5rem);
+    --admin-content-gutter: clamp(1rem, 1.8vw, 2rem);
     --admin-sidebar-surface: #ffffff;
     --admin-sidebar-border: rgba(148, 163, 184, 0.18);
     --admin-sidebar-hover: rgba(15, 23, 42, 0.045);
@@ -32,8 +31,8 @@
     overflow: visible !important;
     height: auto !important;
     width: 100%;
-    max-width: var(--admin-content-max-width);
-    margin-inline: auto;
+    max-width: 100% !important;
+    margin-inline: 0;
     padding-inline: var(--admin-content-gutter);
 }
 
@@ -131,6 +130,10 @@
     background: rgba(255, 255, 255, 0.92);
 }
 
+.fi-topbar {
+    width: 100%;
+}
+
 /* Improve admin dashboard chart sizing and layout */
 .fi-wi-chart .fi-wi-chart-canvas-ctn {
     min-height: 360px;
@@ -162,34 +165,13 @@
     word-break: break-word;
 }
 
-@media (min-width: 1920px) {
-    :root {
-        --admin-content-max-width: 1480px;
-    }
-}
-
 @media (max-width: 1024px) {
     .fi-sidebar-nav {
         max-height: calc(100vh - 4rem);
         padding: 0.625rem;
     }
-}
 
-@media (min-width: 2560px) {
     :root {
-        --admin-content-max-width: 1540px;
-    }
-}
-
-@media (min-width: 3440px) {
-    :root {
-        --admin-content-max-width: 1600px;
-        --admin-content-gutter: clamp(1.25rem, 2vw, 3rem);
-    }
-}
-
-@media (min-width: 3840px) {
-    :root {
-        --admin-content-max-width: 1640px;
+        --admin-content-gutter: 1rem;
     }
 }
