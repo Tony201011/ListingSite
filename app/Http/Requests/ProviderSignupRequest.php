@@ -33,7 +33,7 @@ class ProviderSignupRequest extends FormRequest
     {
         $rules = [
             'email' => ['required', 'email', 'unique:users,email'],
-            'nickname' => ['required', 'string', 'min:3', 'max:255'],
+            'nickname' => ['required', 'string', 'min:3', 'max:255', 'unique:users,name'],
             'password' => ['required', 'min:8', 'confirmed'],
             'mobile' => ['required', 'regex:/^04\d{8}$/'],
             'age_confirm' => ['accepted'],

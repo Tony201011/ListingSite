@@ -41,7 +41,8 @@ class ManageUsers extends ManageRecords
                 ->schema([
                     TextInput::make('name')
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(255)
+                        ->unique(User::class, 'name'),
                     TextInput::make('email')
                         ->email()
                         ->required()
