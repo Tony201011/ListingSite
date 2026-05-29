@@ -52,7 +52,7 @@
             class="space-y-8"
         >
             <!-- Rates List -->
-            <div class="bg-white rounded-2xl p-5 sm:p-6 md:p-8 shadow-md border border-gray-100">
+            <div id="rates-container" class="bg-white rounded-2xl p-5 sm:p-6 md:p-8 shadow-md border border-gray-100">
                 <div class="flex items-baseline flex-wrap gap-2 mb-2">
                     <h2 class="text-2xl font-semibold text-gray-800">Your rates</h2>
                     <span class="text-gray-500 text-sm">(not in a group)</span>
@@ -74,7 +74,7 @@
                         </thead>
                         <tbody id="ratesList" class="divide-y divide-gray-200">
                             <template x-for="(rate, index) in rates" :key="rate.id">
-                                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                <tr :id="'rate-row-' + rate.id" class="border-b border-gray-200 hover:bg-gray-50">
                                     <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.desc || '—'"></td>
                                     <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.incall ? '$' + rate.incall : '—'"></td>
                                     <td class="p-3 text-gray-800 font-medium border border-gray-300" x-text="rate.outcall ? '$' + rate.outcall : '—'"></td>
@@ -98,7 +98,7 @@
                 <!-- Rates cards (mobile) -->
                 <div class="md:hidden space-y-3 mb-6">
                     <template x-for="(rate, index) in rates" :key="'mobile-' + rate.id">
-                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                        <div :id="'rate-card-' + rate.id" class="rounded-xl border border-gray-200 bg-gray-50 p-4">
                             <p class="text-xs text-gray-500 mb-1">Description</p>
                             <p class="text-gray-800 font-semibold mb-3" x-text="rate.desc || '—'"></p>
 
@@ -135,7 +135,7 @@
                 </button>
 
                 <!-- Rate Form -->
-                <div x-show="showForm" x-transition class="mt-8">
+                <div id="rate-form" x-show="showForm" x-transition class="mt-8">
                     <div class="bg-pink-50 border border-[#e04ecb] rounded-xl p-6">
                         <div class="border-b border-[#e04ecb]/30 pb-4 mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center items-start gap-2">
                             <span class="text-xl font-semibold text-gray-800" x-text="editingId ? 'Edit rate' : 'Add new rate'"></span>

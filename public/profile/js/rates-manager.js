@@ -19,9 +19,20 @@ document.addEventListener('alpine:init', () => {
 
         validationErrors: {},
 
+        scrollTo(selector, offset = 80) {
+            this.$nextTick(() => {
+                const candidates = selector.split(',').map(s => document.querySelector(s.trim())).filter(Boolean);
+                const el = candidates.find(e => e.offsetParent !== null) || candidates[0];
+                if (!el) return;
+                const y = el.getBoundingClientRect().top + window.scrollY - offset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            });
+        },
+
         openFormForAdd() {
             this.resetForm();
             this.showForm = true;
+            this.scrollTo('#rate-form');
         },
 
         editRate(rate) {
@@ -29,6 +40,7 @@ document.addEventListener('alpine:init', () => {
             this.editingId = rate.id;
             this.showForm = true;
             this.validationErrors = {};
+            this.scrollTo('#rate-form');
         },
 
         cancelForm() {
@@ -150,12 +162,14 @@ document.addEventListener('alpine:init', () => {
                         this.rates.splice(index, 1, mapped);
                     }
                     this.toast('Updated successfully');
+                    this.cancelForm();
+                    this.scrollTo(`#rate-row-${mapped.id}, #rate-card-${mapped.id}`);
                 } else {
                     this.rates.push(mapped);
                     this.toast('Added successfully');
+                    this.cancelForm();
+                    this.scrollTo(`#rate-row-${mapped.id}, #rate-card-${mapped.id}`);
                 }
-
-                this.cancelForm();
 
             } catch (e) {
                 this.error(e.message || 'Something went wrong');
@@ -196,6 +210,7 @@ document.addEventListener('alpine:init', () => {
 
                 this.rates.splice(index, 1);
                 this.toast('Deleted successfully');
+                this.scrollTo('#rates-container');
 
             } catch {
                 this.error('Delete failed');
