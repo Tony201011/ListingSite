@@ -48,7 +48,6 @@
                 email: @js(old('email', '')),
                 nickname: @js(old('nickname', '')),
                 mobile: @js(old('mobile', '')),
-                suburb: @js(old('suburb', '')),
                 ageConfirm: @js((bool) old('age_confirm'))
             })"
             @submit="submitForm"
@@ -346,62 +345,6 @@
                         </span>
                         <div class="mt-2 text-[#c13ab0] text-sm">📱 Australian mobile only</div>
                     </div>
-                </div>
-            </div>
-
-            <div class="mb-6 relative">
-                <label class="block font-semibold text-gray-800 mb-1">
-                    Primary suburb <span class="text-red-600">*</span>
-                </label>
-
-                <input
-                    type="text"
-                    name="suburb"
-                    x-ref="suburb"
-                    x-model="suburb"
-                    @input="touched.suburb = true; handleSuburbInput()"
-                    @blur="handleSuburbBlur()"
-                    @focus="if (suburb.length >= 2 && searchResults.length > 0) showResults = true"
-                    :aria-invalid="errors.suburb ? 'true' : 'false'"
-                    placeholder="Start typing your suburb..."
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
-                    autocomplete="off"
-                >
-
-                <div
-                    x-show="showResults && searchResults.length > 0"
-                    x-cloak
-                    x-transition
-                    class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
-                >
-                    <template x-for="(item, index) in searchResults" :key="`${item.suburb}-${item.state}-${item.postcode}-${index}`">
-                        <div
-                            @mousedown.prevent="selectSuburb(item)"
-                            class="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-800"
-                        >
-                            <span x-text="`${item.suburb}, ${item.state} ${item.postcode}`"></span>
-                        </div>
-                    </template>
-                </div>
-
-                <div
-                    x-show="showResults && searching"
-                    x-cloak
-                    class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500"
-                >
-                    Searching...
-                </div>
-
-                <div class="text-xs text-gray-500 mt-1">We'll auto-complete from our list</div>
-
-                <div class="mt-1 min-h-5" data-error-container="suburb">
-                    @error('suburb')
-                        <div class="text-xs text-red-600" data-server-error="true" data-field="suburb">{{ $message }}</div>
-                    @enderror
-
-                    <template x-if="touched.suburb && errors.suburb">
-                        <div class="text-xs text-red-600" x-text="errors.suburb"></div>
-                    </template>
                 </div>
             </div>
 

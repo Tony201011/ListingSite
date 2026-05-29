@@ -6,7 +6,6 @@ function signupForm(config = {}) {
             'password',
             'confirmPassword',
             'mobile',
-            'suburb',
             'ageConfirm'
         ],
 
@@ -15,7 +14,6 @@ function signupForm(config = {}) {
         password: '',
         confirmPassword: '',
         mobile: config.mobile || '',
-        suburb: config.suburb || '',
         ageConfirm: !!config.ageConfirm,
 
         showPassword: false,
@@ -28,13 +26,6 @@ function signupForm(config = {}) {
             '(prefers-reduced-motion: reduce)'
         ).matches,
 
-        searchResults: [],
-        showResults: false,
-        searching: false,
-        debounceTimer: null,
-        suburbSelected: !!config.suburb,
-        initialSuburb: config.suburb || '',
-
         errors: {},
 
         touched: {
@@ -43,7 +34,6 @@ function signupForm(config = {}) {
             password: false,
             confirmPassword: false,
             mobile: false,
-            suburb: false,
             ageConfirm: false
         },
 
@@ -67,7 +57,6 @@ function signupForm(config = {}) {
                 password: 'password',
                 confirmPassword: 'confirmPassword',
                 mobile: 'mobile',
-                suburb: 'suburb',
                 ageConfirm: 'ageConfirm',
                 captcha: 'captcha'
             };
@@ -323,21 +312,6 @@ function signupForm(config = {}) {
             }
         },
 
-        validateSuburb() {
-            if (
-                !this.suburb ||
-                this.suburb.trim() === ''
-            ) {
-                this.errors.suburb =
-                    'Suburb is required.';
-            } else if (!this.suburbSelected) {
-                this.errors.suburb =
-                    'Please choose a location from the dropdown list.';
-            } else {
-                delete this.errors.suburb;
-            }
-        },
-
         validateAgeConfirm() {
             if (!this.ageConfirm) {
                 this.errors.ageConfirm =
@@ -353,7 +327,6 @@ function signupForm(config = {}) {
             this.validatePassword();
             this.validateConfirmPassword();
             this.validateMobile();
-            this.validateSuburb();
             this.validateAgeConfirm();
 
             return (
@@ -443,96 +416,6 @@ function signupForm(config = {}) {
             return window.PasswordTools.getPasswordStrength(
                 this.password
             );
-        },
-
-        /*
-        |--------------------------------------------------------------------------
-        | SUBURB SEARCH
-        |--------------------------------------------------------------------------
-        */
-
-        handleSuburbInput() {
-            if (
-                this.initialSuburb &&
-                this.suburb === this.initialSuburb
-            ) {
-                return;
-            }
-
-            this.suburbSelected = false;
-            this.initialSuburb = '';
-
-            this.searchSuburbs();
-        },
-
-        handleSuburbBlur() {
-            setTimeout(() => {
-                this.showResults = false;
-
-                this.touched.suburb = true;
-
-                this.validateSuburb();
-            }, 200);
-        },
-
-        searchSuburbs() {
-            clearTimeout(this.debounceTimer);
-
-            if (
-                !this.suburb ||
-                this.suburb.trim().length < 2
-            ) {
-                this.searchResults = [];
-                this.showResults = false;
-                return;
-            }
-
-            this.debounceTimer = setTimeout(() => {
-                this.searching = true;
-
-                fetch(
-                    `/api/suburbs/search?q=${encodeURIComponent(
-                        this.suburb.trim()
-                    )}`
-                )
-                    .then(res => {
-                        if (!res.ok) {
-                            throw new Error(
-                                'Failed to fetch suburbs'
-                            );
-                        }
-
-                        return res.json();
-                    })
-                    .then(data => {
-                        this.searchResults =
-                            Array.isArray(data)
-                                ? data
-                                : [];
-
-                        this.showResults =
-                            this.searchResults.length > 0;
-                    })
-                    .catch(() => {
-                        this.searchResults = [];
-                        this.showResults = false;
-                    })
-                    .finally(() => {
-                        this.searching = false;
-                    });
-            }, 300);
-        },
-
-        selectSuburb(item) {
-            this.suburb = `${item.suburb}, ${item.state} ${item.postcode}`;
-
-            this.suburbSelected = true;
-            this.showResults = false;
-            this.searchResults = [];
-
-            this.touched.suburb = true;
-
-            this.validateSuburb();
         }
     };
 }

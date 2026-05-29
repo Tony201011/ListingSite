@@ -109,6 +109,16 @@ class ProfileSwitchOnlineStatusTest extends TestCase
         $response->assertViewHas('activeProfileId');
     }
 
+    public function test_select_profile_redirects_to_profiles_index_when_user_has_no_profiles(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $response = $this->actingAs($user)->get(route('select-profile'));
+
+        $response->assertRedirect(route('profiles.index'));
+        $response->assertSessionHas('success', 'Create your first profile to get started.');
+    }
+
     public function test_owner_can_set_profile_online(): void
     {
         [$user, $profiles] = $this->createProviderWithProfiles(2);

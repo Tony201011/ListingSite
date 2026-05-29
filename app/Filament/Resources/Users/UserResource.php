@@ -88,6 +88,10 @@ class UserResource extends Resource
     {
         return parent::getEloquentQuery()
             ->withTrashed()
+            ->when(
+                filled(request()->query('account_id')),
+                fn (Builder $query): Builder => $query->where('user_id', (int) request()->query('account_id'))
+            )
             ->with([
                 'profileImages',
                 'userVideos',
