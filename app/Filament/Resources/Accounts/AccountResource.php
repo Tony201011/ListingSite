@@ -9,6 +9,7 @@ use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -137,20 +138,23 @@ class AccountResource extends Resource
                     ]),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-                Action::make('manageProfiles')
-                    ->label('Manage Profiles')
-                    ->icon('heroicon-o-identification')
-                    ->url(fn (User $record): string => UserResource::getUrl('index', ['account_id' => $record->id])),
-                Action::make('toggleActive')
-                    ->label(fn (User $record): string => $record->is_blocked ? 'Activate' : 'Deactivate')
-                    ->icon(fn (User $record): string => $record->is_blocked ? 'heroicon-o-check-circle' : 'heroicon-o-no-symbol')
-                    ->color(fn (User $record): string => $record->is_blocked ? 'success' : 'danger')
-                    ->requiresConfirmation()
-                    ->action(function (User $record): void {
-                        $record->update(['is_blocked' => ! $record->is_blocked]);
-                    }),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                    Action::make('manageProfiles')
+                        ->label('Manage Profiles')
+                        ->icon('heroicon-o-identification')
+                        ->url(fn (User $record): string => UserResource::getUrl('index', ['account_id' => $record->id])),
+                    Action::make('toggleActive')
+                        ->label(fn (User $record): string => $record->is_blocked ? 'Activate' : 'Deactivate')
+                        ->icon(fn (User $record): string => $record->is_blocked ? 'heroicon-o-check-circle' : 'heroicon-o-no-symbol')
+                        ->color(fn (User $record): string => $record->is_blocked ? 'success' : 'danger')
+                        ->requiresConfirmation()
+                        ->action(function (User $record): void {
+                            $record->update(['is_blocked' => ! $record->is_blocked]);
+                        }),
+                ])
+                    ->label('Action'),
             ]);
     }
 
