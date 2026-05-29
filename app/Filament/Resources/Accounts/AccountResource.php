@@ -22,6 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class AccountResource extends Resource
 {
@@ -31,7 +32,7 @@ class AccountResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'Account Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Account Management';
 
     protected static ?string $modelLabel = 'Account';
 
