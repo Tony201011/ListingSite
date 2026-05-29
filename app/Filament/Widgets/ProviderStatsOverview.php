@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
@@ -24,46 +23,44 @@ class ProviderStatsOverview extends StatsOverviewWidget
      */
     protected function getStats(): array
     {
-        $profiles = ProviderProfile::query()->withoutTrashed();
         $users = User::query()->where('role', User::ROLE_PROVIDER)->withoutTrashed();
 
-        $total = $profiles->count();
-        $active = (clone $users)->whereHas('providerProfiles', function ($q) {
-            $q->where('profile_status', 'approved');
-        })->count();
-        $onlineCount = (clone $profiles)->whereCurrentlyOnline()->count();
+        $total = (clone $users)->count();
+        $active = (clone $users)->where('account_status', 'active')->count();
+        $inactive = (clone $users)->where('account_status', 'inactive')->count();
+        $softDeleted = (clone $users)->where('account_status', 'soft_deleted')->count();
+        $anonymized = (clone $users)->where('account_status', 'anonymized')->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
-        $verified = (clone $users)->whereNotNull('email_verified_at')->count();
-        $featured = (clone $profiles)->where('is_featured', true)->count();
+
+        $accountsUrl = fn (array $filters): string => route('filament.admin.resources.account-management/accounts.index', [
+            'filters' => $filters,
+        ]);
 
         return [
-            Stat::make('Total Providers', (string) $total)
+            Stat::make('Total Accounts', (string) $total)
                 ->color('primary')
-                ->icon('heroicon-o-users'),
-            Stat::make('Active Accounts', (string) $active)
+                ->icon('heroicon-o-users')
+                ->url($accountsUrl([])),
+            Stat::make('Active', (string) $active)
                 ->color('success')
-                ->icon('heroicon-o-check-circle'),
-            Stat::make('Online Users', (string) $onlineCount)
-                ->color('info')
-                ->icon('heroicon-o-signal')
-                ->url(fn (): string => route('filament.admin.resources.providers.index', [
-                    'filters' => ['online_status' => ['value' => 'online']],
-                ])),
-            Stat::make('Blocked Accounts', (string) $blocked)
+                ->icon('heroicon-o-check-circle')
+                ->url($accountsUrl(['account_status' => ['value' => 'active']])),
+            Stat::make('Inactive', (string) $inactive)
+                ->color('warning')
+                ->icon('heroicon-o-pause-circle')
+                ->url($accountsUrl(['account_status' => ['value' => 'inactive']])),
+            Stat::make('Soft Deleted', (string) $softDeleted)
+                ->color('gray')
+                ->icon('heroicon-o-trash')
+                ->url($accountsUrl(['account_status' => ['value' => 'soft_deleted']])),
+            Stat::make('Anonymized', (string) $anonymized)
+                ->color('gray')
+                ->icon('heroicon-o-eye-slash')
+                ->url($accountsUrl(['account_status' => ['value' => 'anonymized']])),
+            Stat::make('Blocked', (string) $blocked)
                 ->color('danger')
                 ->icon('heroicon-o-no-symbol')
-                ->url(fn (): string => route('filament.admin.resources.providers.index', [
-                    'filters' => ['is_blocked' => ['value' => '1']],
-                ])),
-            Stat::make('Verified Emails', (string) $verified)
-                ->color('warning')
-                ->icon('heroicon-o-shield-check'),
-            Stat::make('Featured Profiles', (string) $featured)
-                ->color('info')
-                ->icon('heroicon-o-star')
-                ->url(fn (): string => route('filament.admin.resources.providers.index', [
-                    'filters' => ['is_featured' => ['value' => '1']],
-                ])),
+                ->url($accountsUrl(['is_blocked' => ['value' => '1']])),
         ];
     }
 
