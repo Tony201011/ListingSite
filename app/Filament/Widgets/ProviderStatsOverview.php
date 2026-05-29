@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\Accounts\AccountResource;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
@@ -32,7 +33,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
         $anonymized = (clone $users)->where('account_status', 'anonymized')->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
 
-        $accountsUrl = fn (array $filters): string => route('filament.admin.resources.account-management/accounts.index', [
+        $accountsUrl = fn (array $filters): string => AccountResource::getUrl('index', [
             'filters' => $filters,
         ]);
 
