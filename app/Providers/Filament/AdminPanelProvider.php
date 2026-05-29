@@ -2,13 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\Pages\Dashboard;
 use App\Filament\Pages\Auth\EditProfile;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Assets\Css;
@@ -39,10 +40,24 @@ class AdminPanelProvider extends PanelProvider
             ->navigationItems([
                 NavigationItem::make('Profile')
                     ->url(fn (): string => EditProfile::getUrl())
+                    ->group('Account Management')
                     ->icon(Heroicon::OutlinedUserCircle)
-                    ->sort(-1)
+                    ->sort(2)
                     ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.auth.profile')),
             ])
+            ->navigationGroups([
+                NavigationGroup::make('Dashboard')->collapsed(),
+                NavigationGroup::make('Content Management')->collapsed(),
+                NavigationGroup::make('Provider Management')->collapsed(),
+                NavigationGroup::make('Account Management')->collapsed(),
+                NavigationGroup::make('Financial')->collapsed(),
+                NavigationGroup::make('Support')->collapsed(),
+                NavigationGroup::make('System')->collapsed(),
+            ])
+            ->sidebarCollapsibleOnDesktop()
+            ->collapsibleNavigationGroups()
+            ->sidebarWidth('17rem')
+            ->collapsedSidebarWidth('4.75rem')
             ->assets([
                 Css::make('admin-custom', asset('css/admin-custom.css')),
             ])

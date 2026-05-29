@@ -55,6 +55,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 class UserResource extends Resource
 {
@@ -72,7 +73,9 @@ class UserResource extends Resource
 
     protected static ?string $slug = 'providers';
 
-    protected static ?int $navigationSort = 2;
+    protected static string|UnitEnum|null $navigationGroup = 'Provider Management';
+
+    protected static ?int $navigationSort = 1;
 
     protected static function isCreatePage(): bool
     {
