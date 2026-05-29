@@ -50,14 +50,19 @@ class PurgeDeletedAccounts extends Command
             'name' => 'Deleted User',
             'email' => "deleted+{$random}@example.invalid",
             'password' => '',
-            'mobile' => null,
-            'profile_image' => null,
             'referral_code' => null,
             'email_verified_at' => null,
-            'mobile_verified' => false,
             'remember_token' => null,
             'account_status' => 'anonymized',
         ])->save();
+
+        // Anonymize PII in the user's profile records.
+        $user->profiles()->update([
+            'name' => 'Deleted User',
+            'phone' => null,
+            'phone_verified' => false,
+            'profile_image' => null,
+        ]);
 
         $user->providerProfiles()->update(['anonymized_at' => now()]);
 

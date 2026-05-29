@@ -95,8 +95,8 @@ class PurchaseTransactionResource extends Resource
                             ->label('Provider Name'),
                         TextEntry::make('user.email')
                             ->label('Provider Email'),
-                        TextEntry::make('user.mobile')
-                            ->label('Provider Mobile')
+                        TextEntry::make('user.profile.phone')
+                            ->label('Provider Phone')
                             ->placeholder('-'),
                         TextEntry::make('user.providerProfile.name')
                             ->label('Profile Name')
@@ -138,8 +138,8 @@ class PurchaseTransactionResource extends Resource
                     ->label('Provider Email')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('user.mobile')
-                    ->label('Provider Mobile')
+                TextColumn::make('user.profile.phone')
+                    ->label('Provider Phone')
                     ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('credits')

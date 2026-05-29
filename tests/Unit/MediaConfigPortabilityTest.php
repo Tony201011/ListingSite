@@ -53,9 +53,11 @@ class MediaConfigPortabilityTest extends TestCase
         ]);
         Config::set('media.avatar_disk', 'avatar_test');
 
-        $user = new User([
+        $user = new User;
+        $profile = new \App\Models\Profile([
             'profile_image' => 'avatars/user-avatar.jpg',
         ]);
+        $user->setRelation('profile', $profile);
 
         $this->assertSame('https://avatars.example.test/avatars/user-avatar.jpg', $user->getFilamentAvatarUrl());
     }

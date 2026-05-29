@@ -25,13 +25,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     protected $fillable = [
         'name',
-        'profile_image',
         'email',
         'role',
         'is_blocked',
-        'mobile',
         'referral_code',
-        'mobile_verified',
         'password',
         'must_change_password',
         'account_status',
@@ -49,7 +46,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return [
             'email_verified_at' => 'datetime',
             'is_blocked' => 'boolean',
-            'mobile_verified' => 'boolean',
             'must_change_password' => 'boolean',
             'password' => 'hashed',
             'deleted_at' => 'datetime',
@@ -76,15 +72,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function getFilamentAvatarUrl(): ?string
     {
-        if (blank($this->profile_image)) {
+        $image = $this->profile?->profile_image;
+
+        if (blank($image)) {
             return null;
         }
 
-        if (str_starts_with($this->profile_image, 'http')) {
-            return $this->profile_image;
+        if (str_starts_with($image, 'http')) {
+            return $image;
         }
 
-        return Storage::disk(config('media.avatar_disk'))->url($this->profile_image);
+        return Storage::disk(config('media.avatar_disk'))->url($image);
     }
 
     public function providerListings(): HasMany
@@ -110,6 +108,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     public function profiles(): HasMany
     {
         return $this->hasMany(Profile::class);
+    }
+
+    public function profile(): HasOne
+    {
+        return $this->hasOne(Profile::class)->oldestOfMany();
     }
 
     public function sendPasswordResetNotification($token): void

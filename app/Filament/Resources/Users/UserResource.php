@@ -160,11 +160,6 @@ class UserResource extends Resource
                                         ->maxLength(255)
                                         ->unique(ignoreRecord: true),
 
-                                    TextInput::make('mobile')
-                                        ->label('Mobile')
-                                        ->placeholder('+61...')
-                                        ->maxLength(20),
-
                                     TextInput::make('password')
                                         ->label('Password')
                                         ->password()
@@ -767,8 +762,8 @@ class UserResource extends Resource
                                         ->label('Email')
                                         ->copyable(),
 
-                                    TextEntry::make('user.mobile')
-                                        ->label('Mobile')
+                                    TextEntry::make('user.profile.phone')
+                                        ->label('Phone')
                                         ->placeholder('-'),
 
                                     TextEntry::make('user.referral_code')
@@ -786,8 +781,8 @@ class UserResource extends Resource
                                         ->dateTime()
                                         ->placeholder('-'),
 
-                                    IconEntry::make('user.mobile_verified')
-                                        ->label('Mobile Verified')
+                                    IconEntry::make('user.profile.phone_verified')
+                                        ->label('Phone Verified')
                                         ->boolean(),
 
                                     IconEntry::make('is_blocked')
@@ -1088,8 +1083,8 @@ class UserResource extends Resource
                     ->wrap()
                     ->toggleable(),
 
-                TextColumn::make('user.mobile')
-                    ->label('Mobile')
+                TextColumn::make('user.profile.phone')
+                    ->label('Phone')
                     ->searchable()
                     ->wrap()
                     ->toggleable(),

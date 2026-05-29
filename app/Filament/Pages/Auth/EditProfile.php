@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Models\Profile;
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
@@ -10,6 +11,7 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -55,6 +57,27 @@ class EditProfile extends BaseEditProfile
                     ->columns(2)
                     ->collapsible(),
             ]);
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['profile_image'] = $this->getRecord()->profile?->profile_image;
+
+        return $data;
+    }
+
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        if (array_key_exists('profile_image', $data)) {
+            $record->profiles()->firstOrCreate(
+                ['user_id' => $record->id],
+                ['name' => $record->name, 'is_active' => true]
+            )->update(['profile_image' => $data['profile_image']]);
+
+            unset($data['profile_image']);
+        }
+
+        return parent::handleRecordUpdate($record, $data);
     }
 
     protected function getPasswordFormComponent(): Component

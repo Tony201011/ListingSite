@@ -163,7 +163,6 @@ class EditUser extends EditRecord
         $userUpdates = array_filter([
             'name' => $userData['name'] ?? null,
             'email' => $userData['email'] ?? null,
-            'mobile' => $userData['mobile'] ?? null,
             'password' => filled($userData['password'] ?? null) ? $userData['password'] : null,
         ], fn ($value): bool => $value !== null);
 

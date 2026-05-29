@@ -4,6 +4,7 @@ namespace App\Actions\Auth;
 
 use App\Actions\GenerateUniqueProviderProfileSlug;
 use App\Actions\Support\ActionResult;
+use App\Models\Profile;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -75,18 +76,23 @@ class VerifyProviderSignupOtp
         $user = User::create([
             'name' => $pendingUser['name'],
             'email' => $pendingUser['email'],
-            'mobile' => $pendingUser['mobile'],
             'password' => $pendingUser['password'],
             'role' => $pendingUser['role'],
-            'mobile_verified' => true,
             'referral_code' => $pendingUser['referral_code'],
+        ]);
+
+        Profile::create([
+            'user_id' => $user->id,
+            'name' => $pendingUser['name'],
+            'phone' => $pendingUser['mobile'] ?? null,
+            'phone_verified' => true,
+            'is_active' => true,
         ]);
 
         ProviderProfile::create([
             'user_id' => $user->id,
             'name' => $pendingUser['name'],
             'slug' => $this->generateUniqueProviderProfileSlug->execute($pendingUser['name']),
-            'mobile' => $pendingUser['mobile'] ?? null,
             'suburb' => $pendingUser['suburb'] ?? null,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->addDays(

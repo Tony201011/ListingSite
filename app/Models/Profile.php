@@ -16,7 +16,9 @@ class Profile extends Model
         'headline',
         'bio',
         'phone',
+        'phone_verified',
         'location',
+        'profile_image',
         'is_active',
     ];
 
@@ -24,6 +26,7 @@ class Profile extends Model
     {
         return [
             'is_active' => 'boolean',
+            'phone_verified' => 'boolean',
         ];
     }
 

@@ -29,7 +29,6 @@ class CreateUser extends CreateRecord
         $user = User::query()->create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'mobile' => $data['mobile'] ?? null,
             'password' => $data['password'],
             'role' => User::ROLE_PROVIDER,
             'is_blocked' => false,

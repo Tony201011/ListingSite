@@ -164,9 +164,15 @@ class SignupAndOtpFlowTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'newprovider@example.com',
             'name' => 'providerNick',
-            'mobile' => self::DUMMY_MOBILE,
-            'mobile_verified' => true,
             'role' => User::ROLE_PROVIDER,
+        ]);
+
+        // Phone number is stored in the profiles table
+        $user = User::where('email', 'newprovider@example.com')->first();
+        $this->assertDatabaseHas('profiles', [
+            'user_id' => $user->id,
+            'phone' => self::DUMMY_MOBILE,
+            'phone_verified' => true,
         ]);
     }
 

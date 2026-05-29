@@ -431,8 +431,13 @@ class MyProfileControllerTest extends TestCase
     {
         $user = User::factory()->create([
             'role' => User::ROLE_PROVIDER,
-            'mobile' => '0400000000',
-            'mobile_verified' => true,
+        ]);
+
+        \App\Models\Profile::factory()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'phone' => '0400000000',
+            'phone_verified' => true,
         ]);
 
         ProviderProfile::query()->create([
@@ -448,16 +453,21 @@ class MyProfileControllerTest extends TestCase
         $response->assertOk();
 
         $user->refresh();
-        $this->assertSame('0499999999', $user->mobile);
-        $this->assertFalse($user->mobile_verified);
+        $this->assertSame('0499999999', $user->profile->phone);
+        $this->assertFalse($user->profile->phone_verified);
     }
 
     public function test_save_resets_mobile_verified_when_mobile_changes(): void
     {
         $user = User::factory()->create([
             'role' => User::ROLE_PROVIDER,
-            'mobile' => '0400000000',
-            'mobile_verified' => true,
+        ]);
+
+        \App\Models\Profile::factory()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'phone' => '0400000000',
+            'phone_verified' => true,
         ]);
 
         ProviderProfile::query()->create([
@@ -471,15 +481,20 @@ class MyProfileControllerTest extends TestCase
         $this->actingAsProvider($user)->postJson(route('edit-profile.save'), $payload);
 
         $user->refresh();
-        $this->assertFalse($user->mobile_verified, 'mobile_verified should be reset when mobile changes');
+        $this->assertFalse($user->profile->phone_verified, 'phone_verified should be reset when phone changes');
     }
 
     public function test_save_preserves_mobile_verified_when_mobile_unchanged(): void
     {
         $user = User::factory()->create([
             'role' => User::ROLE_PROVIDER,
-            'mobile' => '0400000000',
-            'mobile_verified' => true,
+        ]);
+
+        \App\Models\Profile::factory()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'phone' => '0400000000',
+            'phone_verified' => true,
         ]);
 
         ProviderProfile::query()->create([
@@ -488,21 +503,26 @@ class MyProfileControllerTest extends TestCase
             'slug' => 'provider-'.$user->id,
         ]);
 
-        // Submit with the same phone number as the existing mobile
+        // Submit with the same phone number as the existing profile phone
         $payload = $this->buildValidProfilePayload(['phone' => '0400000000']);
 
         $this->actingAsProvider($user)->postJson(route('edit-profile.save'), $payload);
 
         $user->refresh();
-        $this->assertTrue($user->mobile_verified, 'mobile_verified should stay true when mobile is unchanged');
+        $this->assertTrue($user->profile->phone_verified, 'phone_verified should stay true when phone is unchanged');
     }
 
     public function test_save_does_not_update_mobile_when_phone_not_provided(): void
     {
         $user = User::factory()->create([
             'role' => User::ROLE_PROVIDER,
-            'mobile' => '0400000000',
-            'mobile_verified' => true,
+        ]);
+
+        \App\Models\Profile::factory()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'phone' => '0400000000',
+            'phone_verified' => true,
         ]);
 
         ProviderProfile::query()->create([
@@ -518,7 +538,7 @@ class MyProfileControllerTest extends TestCase
         $this->actingAsProvider($user)->postJson(route('edit-profile.save'), $payload);
 
         $user->refresh();
-        $this->assertSame('0400000000', $user->mobile);
-        $this->assertTrue($user->mobile_verified);
+        $this->assertSame('0400000000', $user->profile->phone);
+        $this->assertTrue($user->profile->phone_verified);
     }
 }
