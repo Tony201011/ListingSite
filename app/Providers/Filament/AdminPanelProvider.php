@@ -42,7 +42,7 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn (): string => EditProfile::getUrl())
                     ->group('Account Management')
                     ->icon(Heroicon::OutlinedUserCircle)
-                    ->sort(2)
+                    ->sort(3)
                     ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.auth.profile')),
             ])
             ->navigationGroups([
