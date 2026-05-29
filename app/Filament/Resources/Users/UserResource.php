@@ -73,9 +73,9 @@ class UserResource extends Resource
 
     protected static ?string $slug = 'providers';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Provider Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Account Management';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static function isCreatePage(): bool
     {
