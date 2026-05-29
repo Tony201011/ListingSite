@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -50,12 +51,6 @@ class VerificationExampleImageResource extends Resource
                     ->label('Label')
                     ->placeholder('e.g. Example 1')
                     ->maxLength(255),
-                TextInput::make('image_url')
-                    ->label('Image URL')
-                    ->required()
-                    ->url()
-                    ->placeholder('https://cdn.hotescort.com.au/...')
-                    ->maxLength(500),
                 TextInput::make('caption')
                     ->label('Caption')
                     ->placeholder('e.g. clear note + visible face')
@@ -67,6 +62,24 @@ class VerificationExampleImageResource extends Resource
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
+                FileUpload::make('image_path')
+                    ->label('Upload Image')
+                    ->disk('public')
+                    ->directory('verification-examples')
+                    ->image()
+                    ->imageEditor()
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->maxSize(4096)
+                    ->helperText('Upload an image directly. If provided, this takes precedence over the external URL below.')
+                    ->columnSpanFull(),
+                TextInput::make('image_url')
+                    ->label('External Image URL')
+                    ->url()
+                    ->placeholder('https://cdn.example.com/verification-example.jpg')
+                    ->maxLength(500)
+                    ->helperText('Optional. Enter a full URL if not uploading an image above.')
+                    ->columnSpanFull(),
             ])
             ->columns(2);
     }
@@ -78,9 +91,12 @@ class VerificationExampleImageResource extends Resource
                 TextColumn::make('label')
                     ->label('Label')
                     ->searchable(),
-                ImageColumn::make('image_url')
+                ImageColumn::make('image_path')
                     ->label('Image')
-                    ->height(60),
+                    ->disk('public')
+                    ->height(60)
+                    ->defaultImageUrl(fn (VerificationExampleImage $record): ?string => $record->getRawOriginal('image_url'))
+                    ->extraImgAttributes(['loading' => 'lazy']),
                 TextColumn::make('caption')
                     ->label('Caption')
                     ->limit(50),
