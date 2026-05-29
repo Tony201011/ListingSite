@@ -24,6 +24,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
@@ -180,6 +181,30 @@ class AccountResource extends Resource
                         );
                     })
                     ->placeholder('All Statuses'),
+            ])
+            ->groups([
+                Group::make('name')
+                    ->label('Account Name')
+                    ->collapsible(),
+                Group::make('email')
+                    ->label('Email')
+                    ->collapsible(),
+                Group::make('account_status')
+                    ->label('Account Status')
+                    ->getTitleFromRecordUsing(fn (User $record): string => ucfirst((string) $record->account_status))
+                    ->collapsible(),
+                Group::make('is_blocked')
+                    ->label('Deactivated Status')
+                    ->getTitleFromRecordUsing(fn (User $record): string => $record->is_blocked ? 'Deactivated' : 'Active')
+                    ->collapsible(),
+                Group::make('provider_profiles_count')
+                    ->label('Profile Count')
+                    ->getTitleFromRecordUsing(fn (User $record): string => (string) $record->provider_profiles_count)
+                    ->collapsible(),
+                Group::make('created_at')
+                    ->label('Created Date')
+                    ->date()
+                    ->collapsible(),
             ])
             ->recordActions([
                 ActionGroup::make([
