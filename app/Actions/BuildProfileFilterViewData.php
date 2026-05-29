@@ -307,6 +307,7 @@ class BuildProfileFilterViewData
             ->where("provider_profiles.{$expiryColumn}", '>', now())
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
+                'photoVerification' => fn ($q) => $q->where('status', 'approved')->orderByDesc('submitted_at'),
                 'rates',
                 'onlineUser',
                 'availableNow',
@@ -428,6 +429,7 @@ class BuildProfileFilterViewData
             ->withoutTrashed()
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
+                'photoVerification' => fn ($q) => $q->where('status', 'approved')->orderByDesc('submitted_at'),
                 'rates',
                 'onlineUser',
                 'availableNow',
@@ -948,6 +950,7 @@ class BuildProfileFilterViewData
             ->whereIn('provider_profiles.id', $profileIds)
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
+                'photoVerification' => fn ($q) => $q->where('status', 'approved')->orderByDesc('submitted_at'),
                 'rates',
                 'onlineUser',
                 'availableNow',
@@ -993,6 +996,9 @@ class BuildProfileFilterViewData
 
         $isOnline = $profile->isCurrentlyOnline();
         $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
+        $isPhotoVerified = $profile->relationLoaded('photoVerification')
+            ? $profile->photoVerification->isNotEmpty()
+            : $profile->photoVerification()->where('status', 'approved')->exists();
 
         return [
             'id' => $profile->id,
@@ -1012,7 +1018,7 @@ class BuildProfileFilterViewData
             'description' => $profile->description ?? '',
             'active' => $isOnline,
             'available_now' => $isAvailableNow,
-            'verified' => $profile->is_verified,
+            'verified' => $isPhotoVerified,
             'featured' => (bool) $profile->is_featured,
             'home_featured' => $profile->home_featured_expires_at && $profile->home_featured_expires_at->isFuture(),
             'local_banner' => $profile->local_banner_expires_at && $profile->local_banner_expires_at->isFuture(),
