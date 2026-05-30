@@ -152,6 +152,36 @@ class PurgeDeletedAccountsTest extends TestCase
         $this->assertNotNull(User::withTrashed()->find($user->id));
     }
 
+    public function test_skips_users_when_soft_deleted_profile_has_hold_reason(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'account_status' => 'soft_deleted',
+            'scheduled_purge_at' => now()->subDay(),
+        ]);
+
+        ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'test-active-'.$user->id,
+        ]);
+
+        $heldProfile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $user->name.' Held',
+            'slug' => 'test-held-'.$user->id,
+            'hold_reason' => 'legal_investigation',
+        ]);
+
+        $heldProfile->delete();
+        $user->delete();
+
+        $this->artisan('accounts:purge-deleted')
+            ->assertSuccessful();
+
+        $this->assertNotNull(User::withTrashed()->find($user->id));
+    }
+
     // ===============================================================
     // Anonymization before hard delete
     // ===============================================================
