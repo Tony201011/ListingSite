@@ -27,3 +27,8 @@ Schedule::command('featured:expire')
     ->hourly()
     ->withoutOverlapping()
     ->onOneServer();
+
+Schedule::command('online-sessions:rollover')
+    ->dailyAt('00:00')
+    ->withoutOverlapping()
+    ->onOneServer();
