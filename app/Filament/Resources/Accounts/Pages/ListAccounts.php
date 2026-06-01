@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\Accounts\Pages;
 
 use App\Filament\Resources\Accounts\AccountResource;
-use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 use App\Filament\Widgets\ProviderStatsOverview;
 use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
 
-class ListAccounts extends ListRecordsWithPageJump
+class ListAccounts extends ListRecords
 {
     protected static string $resource = AccountResource::class;
 
@@ -28,5 +28,10 @@ class ListAccounts extends ListRecordsWithPageJump
     public function getHeaderWidgetsColumns(): int|array
     {
         return 1;
+    }
+
+    public function updatedTableFilters(): void
+    {
+        $this->resetPage($this->getTablePaginationPageName());
     }
 }
