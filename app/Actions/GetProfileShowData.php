@@ -429,7 +429,7 @@ class GetProfileShowData
                     'age' => $profile->age,
                     'verified' => $profile->is_verified,
                     'active' => $isOnline,
-                    'available_now' => $profile->availableNow?->isCurrentlyAvailable() ?? false,
+                    'available_now' => $isOnline || ($profile->availableNow?->isCurrentlyAvailable() ?? false),
                     'date' => $profile->created_at->format('d/m/Y'),
                 ];
             })
