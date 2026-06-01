@@ -2,6 +2,7 @@
 
 namespace App\Actions\Subscription;
 
+use App\Actions\Referral\ReverseReferralRewardForRefund;
 use App\Models\CreditLog;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
@@ -11,6 +12,10 @@ use Stripe\StripeClient;
 
 class ProcessStripeRefund
 {
+    public function __construct(
+        private ReverseReferralRewardForRefund $reverseReferralRewardForRefund,
+    ) {}
+
     public function execute(PurchaseTransaction $transaction): void
     {
         if ($transaction->status !== 'paid') {
@@ -97,6 +102,8 @@ class ProcessStripeRefund
             }
 
             $locked->update(['status' => 'refunded']);
+
+            $this->reverseReferralRewardForRefund->execute($locked);
 
             Log::info('Transaction refunded and credits deducted', [
                 'transaction_id' => $locked->id,

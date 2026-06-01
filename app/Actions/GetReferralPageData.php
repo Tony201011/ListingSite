@@ -3,7 +3,7 @@
 namespace App\Actions;
 
 use App\Models\ProviderProfile;
-use App\Models\User;
+use App\Models\Referral;
 
 class GetReferralPageData
 {
@@ -11,11 +11,13 @@ class GetReferralPageData
     {
         abort_if(! $profile, 403);
 
-        $referralLink = $profile->account_user_referral_code;
+        $referralCode = $profile->account_user_referral_code;
+        $referralLink = $referralCode ? url('/signup?ref='.$referralCode) : null;
 
-        $referralCount = $referralLink
-            ? User::query()
-                ->where('referral_code', $referralLink)
+        $referralCount = $profile->user_id
+            ? Referral::query()
+                ->where('referrer_id', $profile->user_id)
+                ->whereIn('status', ['pending', 'qualified', 'rewarded'])
                 ->count()
             : 0;
 

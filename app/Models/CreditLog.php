@@ -12,6 +12,8 @@ class CreditLog extends Model
         'user_id',
         'amount',
         'type',
+        'transaction_type',
+        'status',
         'description',
         'reference_type',
         'reference_id',

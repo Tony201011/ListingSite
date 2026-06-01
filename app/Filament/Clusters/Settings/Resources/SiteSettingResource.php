@@ -264,6 +264,70 @@ class SiteSettingResource extends Resource
                                         ->minValue(1)
                                         ->default(5),
                                 ]),
+                            Section::make('Referral Program')
+                                ->compact()
+                                ->columns(2)
+                                ->schema([
+                                    Select::make('reward_receiver')
+                                        ->label('Reward Receiver')
+                                        ->options([
+                                            'referrer' => 'Referrer',
+                                            'referred' => 'Referred User',
+                                            'both' => 'Both',
+                                        ])
+                                        ->default('referrer')
+                                        ->required()
+                                        ->native(false),
+                                    Select::make('reward_trigger')
+                                        ->label('Reward Trigger')
+                                        ->options([
+                                            'signup' => 'Signup',
+                                            'successful_payment' => 'Successful Payment',
+                                            'service_completion' => 'Service Completion',
+                                        ])
+                                        ->default('successful_payment')
+                                        ->required()
+                                        ->native(false),
+                                    Select::make('reward_type')
+                                        ->label('Reward Type')
+                                        ->options([
+                                            'fixed' => 'Fixed',
+                                            'percentage' => 'Percentage',
+                                        ])
+                                        ->default('fixed')
+                                        ->required()
+                                        ->native(false),
+                                    TextInput::make('reward_value')
+                                        ->label('Reward Value')
+                                        ->numeric()
+                                        ->default(0)
+                                        ->minValue(0)
+                                        ->required(),
+                                    Toggle::make('referred_user_bonus_enabled')
+                                        ->label('Enable Referred User Bonus')
+                                        ->default(false),
+                                    Select::make('referred_user_bonus_type')
+                                        ->label('Referred User Bonus Type')
+                                        ->options([
+                                            'fixed' => 'Fixed',
+                                            'percentage' => 'Percentage',
+                                        ])
+                                        ->default('fixed')
+                                        ->native(false),
+                                    TextInput::make('referred_user_bonus_value')
+                                        ->label('Referred User Bonus Value')
+                                        ->numeric()
+                                        ->default(0)
+                                        ->minValue(0),
+                                    Select::make('credit_destination')
+                                        ->label('Credit Destination')
+                                        ->options([
+                                            'wallet' => 'Wallet',
+                                        ])
+                                        ->default('wallet')
+                                        ->required()
+                                        ->native(false),
+                                ]),
                         ]),
                 ])
                 ->columnSpanFull(),

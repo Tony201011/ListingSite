@@ -45,6 +45,14 @@ class SiteSetting extends Model
         'stripe_secret_key',
         'stripe_webhook_secret',
         'stripe_enabled',
+        'reward_receiver',
+        'reward_trigger',
+        'reward_type',
+        'reward_value',
+        'referred_user_bonus_enabled',
+        'referred_user_bonus_type',
+        'referred_user_bonus_value',
+        'credit_destination',
     ];
 
     protected $casts = [
@@ -71,6 +79,9 @@ class SiteSetting extends Model
         'max_video_upload_mb' => 'integer',
         'stripe_mode' => 'string',
         'stripe_enabled' => 'boolean',
+        'reward_value' => 'decimal:2',
+        'referred_user_bonus_enabled' => 'boolean',
+        'referred_user_bonus_value' => 'decimal:2',
     ];
 
     protected function sitePassword(): Attribute

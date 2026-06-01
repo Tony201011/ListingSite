@@ -2,6 +2,7 @@
 
 namespace App\Actions\Subscription;
 
+use App\Actions\Referral\ProcessReferralRewardForFirstPayment;
 use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
@@ -14,6 +15,7 @@ class HandleCheckoutSuccess
 {
     public function __construct(
         private SendCreditPurchaseEmail $sendCreditPurchaseEmail,
+        private ProcessReferralRewardForFirstPayment $processReferralRewardForFirstPayment,
     ) {}
 
     /**
@@ -74,6 +76,8 @@ class HandleCheckoutSuccess
                                 'reference_id' => $profile->id,
                             ]);
                         }
+
+                        $this->processReferralRewardForFirstPayment->execute($locked);
                     }
                 });
 

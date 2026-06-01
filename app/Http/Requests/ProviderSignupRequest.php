@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\GoogleRecaptchaSetting;
+use App\Models\ProviderProfile;
 use App\Models\RecaptchaLog;
 use App\Models\SiteSetting;
 use App\ValueObjects\AustralianMobile;
@@ -60,6 +61,17 @@ class ProviderSignupRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            $referralCode = trim((string) $this->input('referral_code', ''));
+            if ($referralCode !== '') {
+                $referrerExists = ProviderProfile::query()
+                    ->where('account_user_referral_code', $referralCode)
+                    ->exists();
+
+                if (! $referrerExists) {
+                    $validator->errors()->add('referral_code', 'The referral code is invalid.');
+                }
+            }
+
             if (! $this->shouldUseRecaptcha()) {
                 return;
             }

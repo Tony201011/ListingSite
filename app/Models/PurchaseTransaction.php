@@ -116,4 +116,9 @@ class PurchaseTransaction extends Model
     {
         return $this->hasMany(PurchaseComplaint::class);
     }
+
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(Referral::class, 'payment_id');
+    }
 }
