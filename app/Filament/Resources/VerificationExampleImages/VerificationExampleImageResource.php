@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -18,6 +19,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class VerificationExampleImageResource extends Resource
 {
@@ -54,8 +56,26 @@ class VerificationExampleImageResource extends Resource
                     ->label('Image URL')
                     ->required()
                     ->url()
+                    ->live(onBlur: true)
                     ->placeholder('https://cdn.hotescort.com.au/...')
                     ->maxLength(500),
+                Placeholder::make('image_preview')
+                    ->label('Image Preview')
+                    ->content(function (callable $get): HtmlString {
+                        $imageUrl = trim((string) $get('image_url'));
+
+                        if ($imageUrl === '') {
+                            return new HtmlString('<span class="text-sm text-gray-500 italic">Enter an image URL to preview it here.</span>');
+                        }
+
+                        return new HtmlString(
+                            '<div style="display:flex;flex-direction:column;gap:12px;">'
+                            .'<img src="'.e($imageUrl).'" alt="Verification example preview" style="max-height:320px;width:100%;object-fit:contain;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;" loading="lazy" decoding="async" />'
+                            .'<span style="font-size:12px;color:#6b7280;word-break:break-all;">'.e($imageUrl).'</span>'
+                            .'</div>'
+                        );
+                    })
+                    ->columnSpanFull(),
                 TextInput::make('caption')
                     ->label('Caption')
                     ->placeholder('e.g. clear note + visible face')
