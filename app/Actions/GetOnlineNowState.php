@@ -59,8 +59,6 @@ class GetOnlineNowState
             return false;
         }
 
-        $profile->loadMissing('user');
-
-        return $profile->user !== null && $profile->user->credits < 0;
+        return (int) $profile->credits < 0;
     }
 }

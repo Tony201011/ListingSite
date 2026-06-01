@@ -264,7 +264,7 @@
                 <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">CREDITS</h3>
                     <p class="mb-3 text-3xl font-bold text-gray-900">
-                        {{ $user?->credits ?? 0 }} <span class="text-base font-normal text-gray-500">credits available</span>
+                        {{ $profile?->credits ?? 0 }} <span class="text-base font-normal text-gray-500">credits available</span>
                     </p>
                     <div class="space-y-2">
                         <a href="{{ url('/purchase-credit') }}" class="block w-full rounded-lg bg-pink-600 px-4 py-2 text-center text-white transition hover:bg-pink-700">Add balance</a>

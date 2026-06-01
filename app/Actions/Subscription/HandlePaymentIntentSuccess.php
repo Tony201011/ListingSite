@@ -3,6 +3,7 @@
 namespace App\Actions\Subscription;
 
 use App\Models\CreditLog;
+use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Auth;
@@ -50,7 +51,7 @@ class HandlePaymentIntentSuccess
 
             $receiptUrl = $paymentIntent->latest_charge?->receipt_url ?? null;
 
-            DB::transaction(function () use ($transaction, $paymentIntentId, $receiptUrl) {
+            DB::transaction(function () use ($transaction, $paymentIntent, $paymentIntentId, $receiptUrl) {
                 $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
                 if ($locked && $locked->status !== 'paid') {
                     $locked->update([
@@ -58,17 +59,18 @@ class HandlePaymentIntentSuccess
                         'stripe_payment_intent_id' => $paymentIntentId,
                         'receipt_url' => $receiptUrl,
                         'paid_at' => now(),
+                        'provider_profile_id' => $locked->provider_profile_id ?: (int) ($paymentIntent->metadata->provider_profile_id ?? 0) ?: null,
                     ]);
-                    $user = $locked->user;
-                    if ($user) {
-                        $user->increment('credits', $locked->credits);
+                    $profile = $locked->providerProfile;
+                    if ($profile) {
+                        $profile->increment('credits', $locked->credits);
                         CreditLog::create([
-                            'user_id' => $user->id,
+                            'user_id' => $locked->user_id,
                             'amount' => $locked->credits,
                             'type' => 'purchase_credit',
                             'description' => "Purchased {$locked->credits} credits",
-                            'reference_type' => PurchaseTransaction::class,
-                            'reference_id' => $locked->id,
+                            'reference_type' => ProviderProfile::class,
+                            'reference_id' => $profile->id,
                         ]);
                     }
                 }

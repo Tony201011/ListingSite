@@ -57,6 +57,7 @@
         <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
             <h1 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">Boost Your Profile</h1>
             <p class="text-gray-600">Choose one or more ad placements to increase your visibility. Each placement is charged per day.</p>
+            <p class="mt-2 text-sm font-semibold text-gray-800">Purchasing for profile: {{ $profile?->name ?? 'Not selected' }}</p>
 
             <div class="mt-4 flex flex-col items-start gap-2 rounded-xl bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
                 <span class="text-sm text-gray-500">Your credit balance:</span>

@@ -168,13 +168,14 @@ class AvailableControllerTest extends TestCase
 
     public function test_update_status_to_online_is_blocked_when_free_listing_expired_and_balance_negative(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_PROVIDER, 'credits' => -1]);
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
         ProviderProfile::query()->create([
             'user_id' => $user->id,
             'name' => $user->name,
             'slug' => 'provider-'.$user->id,
             'free_listing_expires_at' => now()->subDay(),
+            'credits' => -1,
         ]);
 
         $response = $this->actingAs($user)->postJson(route('available.update-status'), [
@@ -184,19 +185,20 @@ class AvailableControllerTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonPath('success', false);
         $response->assertJsonFragment([
-            'message' => 'Your 21-day period has expired and your account balance is negative. Please clear your balance to go online or become available now.',
+            'message' => 'Your 21-day period has expired and this profile balance is negative. Please top up this profile to go online or become available now.',
         ]);
     }
 
     public function test_update_status_to_online_is_allowed_when_free_listing_expired_but_balance_non_negative(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_PROVIDER, 'credits' => 0]);
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
         ProviderProfile::query()->create([
             'user_id' => $user->id,
             'name' => $user->name,
             'slug' => 'provider-'.$user->id,
             'free_listing_expires_at' => now()->subDay(),
+            'credits' => 0,
         ]);
 
         $response = $this->actingAs($user)->postJson(route('available.update-status'), [
@@ -210,13 +212,14 @@ class AvailableControllerTest extends TestCase
 
     public function test_update_status_to_online_is_allowed_when_free_listing_active_and_balance_negative(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_PROVIDER, 'credits' => -5]);
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
         ProviderProfile::query()->create([
             'user_id' => $user->id,
             'name' => $user->name,
             'slug' => 'provider-'.$user->id,
             'free_listing_expires_at' => now()->addDays(10),
+            'credits' => -5,
         ]);
 
         $response = $this->actingAs($user)->postJson(route('available.update-status'), [
@@ -230,13 +233,14 @@ class AvailableControllerTest extends TestCase
 
     public function test_update_status_to_offline_is_always_allowed_even_when_free_listing_expired_and_balance_negative(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_PROVIDER, 'credits' => -1]);
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
         ProviderProfile::query()->create([
             'user_id' => $user->id,
             'name' => $user->name,
             'slug' => 'provider-'.$user->id,
             'free_listing_expires_at' => now()->subDay(),
+            'credits' => -1,
         ]);
 
         $response = $this->actingAs($user)->postJson(route('available.update-status'), [

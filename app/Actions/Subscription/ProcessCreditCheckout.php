@@ -37,6 +37,7 @@ class ProcessCreditCheckout
         // Create transaction record
         $transaction = PurchaseTransaction::create([
             'user_id' => Auth::id(),
+            'provider_profile_id' => (int) $validated['provider_profile_id'],
             'credits' => $selectedCredits,
             'amount' => $selectedPrice,
             'currency' => 'AUD',
@@ -67,6 +68,7 @@ class ProcessCreditCheckout
                 'user_id' => Auth::id(),
                 'credits' => $selectedCredits,
                 'package_id' => $package->id,
+                'provider_profile_id' => (int) $validated['provider_profile_id'],
                 'transaction_id' => $transaction->id,
                 'invoice_name' => $validated['invoice_name'],
             ],

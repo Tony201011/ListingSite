@@ -3,6 +3,7 @@
 namespace App\Actions\Subscription;
 
 use App\Models\CreditLog;
+use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Auth;
@@ -59,16 +60,18 @@ class HandleCheckoutSuccess
                                 : $session->payment_intent?->id,
                             'receipt_url' => $receiptUrl,
                             'paid_at' => now(),
+                            'provider_profile_id' => $locked->provider_profile_id ?: (int) ($session->metadata->provider_profile_id ?? 0) ?: null,
                         ]);
-                        $locked->user?->increment('credits', $locked->credits);
-                        if ($locked->user) {
+                        $profile = $locked->providerProfile;
+                        if ($profile) {
+                            $profile->increment('credits', $locked->credits);
                             CreditLog::create([
-                                'user_id' => $locked->user->id,
+                                'user_id' => $locked->user_id,
                                 'amount' => $locked->credits,
                                 'type' => 'purchase_credit',
                                 'description' => "Purchased {$locked->credits} credits",
-                                'reference_type' => PurchaseTransaction::class,
-                                'reference_id' => $locked->id,
+                                'reference_type' => ProviderProfile::class,
+                                'reference_id' => $profile->id,
                             ]);
                         }
                     }

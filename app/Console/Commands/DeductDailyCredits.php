@@ -5,9 +5,7 @@ namespace App\Console\Commands;
 use App\Models\CreditLog;
 use App\Models\HideShowProfile;
 use App\Models\ProviderProfile;
-use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -22,7 +20,7 @@ class DeductDailyCredits extends Command
         // Find approved profiles that are currently visible.
         // A profile is visible when hide_show_profiles.status = 'show' OR no hide_show_profiles row exists
         // (which defaults to visible).
-        $eligibleProfilesByUser = ProviderProfile::query()
+        $eligibleProfiles = ProviderProfile::query()
             ->where('profile_status', 'approved')
             ->where('is_blocked', false)
             ->whereNull('deleted_at')
@@ -43,12 +41,10 @@ class DeductDailyCredits extends Command
                 $query->whereNull('free_listing_expires_at')
                     ->orWhere('free_listing_expires_at', '<=', now());
             })
-            ->orderBy('user_id')
             ->orderBy('id')
-            ->get(['id', 'user_id'])
-            ->groupBy('user_id');
+            ->get(['id', 'user_id']);
 
-        if ($eligibleProfilesByUser->isEmpty()) {
+        if ($eligibleProfiles->isEmpty()) {
             $this->info('No eligible visible profiles found. No credits deducted.');
 
             return self::SUCCESS;
@@ -57,54 +53,41 @@ class DeductDailyCredits extends Command
         $deducted = 0;
         $hiddenUnpaid = 0;
 
-        User::whereIn('id', $eligibleProfilesByUser->keys())
-            ->each(function (User $user) use (&$deducted, &$hiddenUnpaid, $eligibleProfilesByUser): void {
-                /** @var Collection<int, ProviderProfile> $profiles */
-                $profiles = $eligibleProfilesByUser->get($user->id, collect())->values();
-                if ($profiles->isEmpty()) {
-                    return;
+        $eligibleProfiles->each(function (ProviderProfile $profile) use (&$deducted, &$hiddenUnpaid): void {
+            [$deductedForProfile, $hiddenForProfile] = DB::transaction(function () use ($profile): array {
+                $locked = ProviderProfile::lockForUpdate()->find($profile->id);
+
+                if (! $locked) {
+                    return [0, 0];
                 }
 
-                [$deductedForUser, $hiddenForUser] = DB::transaction(function () use ($user, $profiles): array {
-                    $locked = User::lockForUpdate()->find($user->id);
+                if ((int) $locked->credits <= 0) {
+                    HideShowProfile::updateOrCreate(
+                        ['user_id' => $locked->user_id, 'provider_profile_id' => $locked->id],
+                        ['user_id' => $locked->user_id, 'status' => 'hide']
+                    );
 
-                    if (! $locked) {
-                        return [0, 0];
-                    }
+                    return [0, 1];
+                }
 
-                    $eligibleCount = $profiles->count();
-                    $payableCount = max(0, min($locked->credits, $eligibleCount));
-                    $profileIdsToHide = $profiles->skip($payableCount)->pluck('id');
+                $currentBalance = (int) $locked->credits;
+                $locked->decrement('credits', 1);
 
-                    for ($i = 0; $i < $payableCount; $i++) {
-                        $profile = $profiles[$i];
-                        $currentBalance = $locked->credits;
-                        $locked->decrement('credits', 1);
-                        $locked->refresh();
+                CreditLog::create([
+                    'user_id' => $locked->user_id,
+                    'amount' => -1,
+                    'type' => 'daily_deduction',
+                    'description' => "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
+                    'reference_type' => ProviderProfile::class,
+                    'reference_id' => $locked->id,
+                ]);
 
-                        CreditLog::create([
-                            'user_id' => $locked->id,
-                            'amount' => -1,
-                            'type' => 'daily_deduction',
-                            'description' => "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
-                            'reference_type' => ProviderProfile::class,
-                            'reference_id' => $profile->id,
-                        ]);
-                    }
-
-                    foreach ($profileIdsToHide as $profileId) {
-                        HideShowProfile::updateOrCreate(
-                            ['user_id' => $locked->id, 'provider_profile_id' => $profileId],
-                            ['user_id' => $locked->id, 'status' => 'hide']
-                        );
-                    }
-
-                    return [$payableCount, $profileIdsToHide->count()];
-                });
-
-                $deducted += $deductedForUser;
-                $hiddenUnpaid += $hiddenForUser;
+                return [1, 0];
             });
+
+            $deducted += $deductedForProfile;
+            $hiddenUnpaid += $hiddenForProfile;
+        });
 
         Log::info('Daily credit deduction completed', [
             'deducted_profiles' => $deducted,

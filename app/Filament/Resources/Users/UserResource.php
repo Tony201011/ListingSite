@@ -1788,10 +1788,12 @@ class UserResource extends Resource
 
         $usedBalance = (int) abs(CreditLog::query()
             ->where('user_id', $record->user_id)
+            ->where('reference_type', ProviderProfile::class)
+            ->where('reference_id', $record->id)
             ->where('amount', '<', 0)
             ->sum('amount'));
 
-        $remainingBalance = (int) ($record->user?->credits ?? 0);
+        $remainingBalance = (int) ($record->credits ?? 0);
 
         return [
             'total_balance' => $usedBalance + $remainingBalance,
@@ -1816,7 +1818,8 @@ class UserResource extends Resource
                 'reference_id',
             ])
             ->where('user_id', $record->user_id)
-            ->where('amount', '<', 0)
+            ->where('reference_type', ProviderProfile::class)
+            ->where('reference_id', $record->id)
             ->latest('created_at')
             ->limit(10)
             ->get()

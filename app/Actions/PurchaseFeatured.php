@@ -42,11 +42,11 @@ class PurchaseFeatured
 
         [$creditCost, $expiryColumn, $tierLabel] = $this->resolveTier($tier, $settings);
 
-        if ($user->credits < $creditCost) {
+        if ((int) $profile->credits < $creditCost) {
             return new ActionResult(
                 false,
                 422,
-                "You need {$creditCost} credits to activate this ad. You currently have {$user->credits} credits.",
+                "You need {$creditCost} credits to activate this ad. You currently have {$profile->credits} credits on this profile.",
                 $this->buildPayload($profile, $tier, $creditCost, $durationDays, $expiryColumn),
                 'domain'
             );
@@ -72,7 +72,7 @@ class PurchaseFeatured
 
             $profile->save();
 
-            $user->decrement('credits', $creditCost);
+            $profile->decrement('credits', $creditCost);
 
             CreditLog::create([
                 'user_id' => $user->id,

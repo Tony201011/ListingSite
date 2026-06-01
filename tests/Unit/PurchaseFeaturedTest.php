@@ -27,13 +27,13 @@ class PurchaseFeaturedTest extends TestCase
     {
         $user = User::factory()->create([
             'role' => User::ROLE_PROVIDER,
-            'credits' => $credits,
         ]);
 
         $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
             'name' => 'Provider',
             'slug' => 'provider-'.$user->id,
+            'credits' => $credits,
         ]);
 
         return [$user, $profile];
@@ -53,8 +53,8 @@ class PurchaseFeaturedTest extends TestCase
         $this->assertNotNull($profile->featured_expires_at);
         $this->assertTrue($profile->featured_expires_at->isFuture());
 
-        $user->refresh();
-        $this->assertSame(5, $user->credits);
+        $profile->refresh();
+        $this->assertSame(5, $profile->credits);
     }
 
     public function test_purchase_creates_credit_log_entry(): void
@@ -83,8 +83,8 @@ class PurchaseFeaturedTest extends TestCase
         $profile->refresh();
         $this->assertFalse((bool) $profile->is_featured);
 
-        $user->refresh();
-        $this->assertSame(2, $user->credits);
+        $profile->refresh();
+        $this->assertSame(2, $profile->credits);
     }
 
     public function test_purchase_extends_existing_featured_expiry(): void

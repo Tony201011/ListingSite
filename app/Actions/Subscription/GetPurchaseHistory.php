@@ -2,16 +2,27 @@
 
 namespace App\Actions\Subscription;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Models\CreditLog;
+use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class GetPurchaseHistory
 {
+    public function __construct(
+        private GetActiveProviderProfile $getActiveProviderProfile,
+    ) {}
+
     public function execute(): array
     {
+        $user = Auth::user();
+        $profile = $this->getActiveProviderProfile->execute($user);
+        $profileId = $profile?->id ?? 0;
+
         $query = PurchaseTransaction::where('user_id', Auth::id())
+            ->where('provider_profile_id', $profileId)
             ->orderBy('created_at', 'desc');
 
         $status = request('status', 'all');
@@ -37,6 +48,7 @@ class GetPurchaseHistory
 
         // Get available months for filter — use SUBSTR for cross-DB compatibility (MySQL + SQLite)
         $availableMonths = PurchaseTransaction::where('user_id', Auth::id())
+            ->where('provider_profile_id', $profileId)
             ->selectRaw('DISTINCT SUBSTR(created_at, 1, 7) as month_key')
             ->orderByRaw('month_key DESC')
             ->get()
@@ -47,6 +59,7 @@ class GetPurchaseHistory
 
         // Build daily chart data for the line graph
         $chartQuery = PurchaseTransaction::where('user_id', Auth::id())
+            ->where('provider_profile_id', $profileId)
             ->where('status', 'paid');
 
         if ($month !== 'all') {
@@ -88,13 +101,15 @@ class GetPurchaseHistory
         ];
 
         // Wallet summary
-        $user = Auth::user();
-        $currentBalance = $user->credits ?? 0;
+        $currentBalance = $profile?->credits ?? 0;
         $totalPurchased = PurchaseTransaction::where('user_id', $user->id)
+            ->where('provider_profile_id', $profileId)
             ->where('status', 'paid')
             ->sum('credits');
         $totalSpent = abs(
             CreditLog::where('user_id', $user->id)
+                ->where('reference_type', ProviderProfile::class)
+                ->where('reference_id', $profileId)
                 ->where('amount', '<', 0)
                 ->sum('amount')
         );
@@ -105,6 +120,6 @@ class GetPurchaseHistory
             'total_spent' => (int) $totalSpent,
         ];
 
-        return compact('purchases', 'availableMonths', 'chartData', 'walletSummary');
+        return compact('purchases', 'availableMonths', 'chartData', 'walletSummary', 'profile');
     }
 }

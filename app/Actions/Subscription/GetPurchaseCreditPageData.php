@@ -2,6 +2,7 @@
 
 namespace App\Actions\Subscription;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Models\CreditPackage;
 use App\Models\PricingPage;
 use App\Models\SiteSetting;
@@ -9,9 +10,14 @@ use Illuminate\Support\Facades\Auth;
 
 class GetPurchaseCreditPageData
 {
+    public function __construct(
+        private GetActiveProviderProfile $getActiveProviderProfile,
+    ) {}
+
     public function execute(): array
     {
         $user = Auth::user();
+        $profile = $this->getActiveProviderProfile->execute($user);
         $pricingPage = PricingPage::query()
             ->where('is_active', true)
             ->latest('updated_at')
@@ -37,8 +43,9 @@ class GetPurchaseCreditPageData
         $siteSetting = SiteSetting::first();
 
         return [
-            'currentBalance' => $user->credits ?? 0,
+            'currentBalance' => $profile?->credits ?? 0,
             'userName' => $user->name ?? 'User',
+            'activeProfile' => $profile,
             'pricingPage' => $pricingPage,
             'packages' => $packages,
             'selectedPackageId' => $selectedPackageId,
