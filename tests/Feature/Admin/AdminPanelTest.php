@@ -2,13 +2,17 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Filament\Admin\Pages\Dashboard;
+use App\Filament\Widgets\ProviderStatsOverview;
 use App\Models\AvailableNow;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Panel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class AdminPanelTest extends TestCase
@@ -83,7 +87,7 @@ class AdminPanelTest extends TestCase
 
     public function test_admin_dashboard_shows_available_now_card(): void
     {
-        $admin = $this->createAdmin();
+        $this->createAdmin();
         $provider = $this->createProvider();
         $profile = $provider->providerProfiles()->firstOrFail();
 
@@ -97,11 +101,14 @@ class AdminPanelTest extends TestCase
             'available_expires_at' => now()->addMinutes(55),
         ]);
 
-        $response = $this->actingAs($admin, 'admin')->get('/admin');
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
 
-        $response->assertOk();
-        $response->assertSeeText('Available Now');
-        $response->assertSee('/admin/providers?tableFilters%5Bavailable_now_status%5D%5Bvalue%5D=online', false);
+        $this->assertContains(ProviderStatsOverview::class, app(Dashboard::class)->getWidgets());
+
+        $html = Livewire::test(ProviderStatsOverview::class)->html();
+
+        $this->assertStringContainsString('Available Now', $html);
+        $this->assertStringContainsString('/admin/providers?tableFilters%5Bavailable_now_status%5D%5Bvalue%5D=online', $html);
     }
 
     public function test_provider_user_cannot_access_admin_panel(): void

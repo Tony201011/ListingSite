@@ -18,14 +18,14 @@ class Dashboard extends BaseDashboard
 
     protected static ?int $navigationSort = 1;
 
-    protected function getHeaderWidgets(): array
+    public function getWidgets(): array
     {
         return [
             ProviderStatsOverview::class,
         ];
     }
 
-    public function getHeaderWidgetsColumns(): int|array
+    public function getColumns(): int|array
     {
         return 1;
     }
