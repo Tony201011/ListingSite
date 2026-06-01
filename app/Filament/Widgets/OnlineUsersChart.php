@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 
 class OnlineUsersChart extends ChartWidget
 {
-    protected ?string $heading = 'Online Users';
+    protected ?string $heading = 'Available Now';
 
     protected static ?int $sort = 10;
 
@@ -69,7 +69,7 @@ class OnlineUsersChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Online Users',
+                    'label' => 'Available Now',
                     'data' => $counts,
                     'backgroundColor' => 'rgba(16, 185, 129, 0.2)',
                     'borderColor' => 'rgba(5, 150, 105, 1)',
