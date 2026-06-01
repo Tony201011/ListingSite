@@ -153,18 +153,10 @@ class PurchaseTransactionResource extends Resource
                 TextColumn::make('credits')
                     ->label('Credits Purchased')
                     ->sortable(),
-                TextColumn::make('provider_profile_id')
-                    ->label('Profile ID')
-                    ->sortable(),
                 TextColumn::make('providerProfile.name')
                     ->label('Profile Name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('providerProfile.slug')
-                    ->label('Profile Slug')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('-'),
                 TextColumn::make('providerProfile.profile_status')
                     ->label('Profile Status')
                     ->badge()
@@ -182,10 +174,6 @@ class PurchaseTransactionResource extends Resource
                     ->badge()
                     ->getStateUsing(fn (PurchaseTransaction $record): string => self::resolveAvailableNowStatus($record))
                     ->color(fn (string $state): string => $state === 'Available Now' ? 'success' : 'gray'),
-                TextColumn::make('featured_boost_status')
-                    ->label('Featured / Boost')
-                    ->badge()
-                    ->getStateUsing(fn (PurchaseTransaction $record): string => self::resolveFeaturedBoostStatus($record)),
                 TextColumn::make('currency')
                     ->label('Currency')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -216,12 +204,6 @@ class PurchaseTransactionResource extends Resource
                     ->placeholder('-')
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('paid_at')
-                    ->label('Paid Date')
-                    ->dateTime()
-                    ->since()
-                    ->sortable()
-                    ->placeholder('-'),
                 TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
@@ -470,26 +452,4 @@ class PurchaseTransactionResource extends Resource
             : 'Unavailable';
     }
 
-    private static function resolveFeaturedBoostStatus(PurchaseTransaction $record): string
-    {
-        $profile = $record->providerProfile;
-
-        if (! $profile) {
-            return 'Unknown';
-        }
-
-        $hasBoost = $profile->home_featured_expires_at?->isFuture()
-            || $profile->local_banner_expires_at?->isFuture()
-            || $profile->home_banner_expires_at?->isFuture();
-
-        if ($profile->is_featured && $hasBoost) {
-            return 'Featured + Boosted';
-        }
-
-        if ($profile->is_featured) {
-            return 'Featured';
-        }
-
-        return $hasBoost ? 'Boosted' : 'Standard';
-    }
 }
