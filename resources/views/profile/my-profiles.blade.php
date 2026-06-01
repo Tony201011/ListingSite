@@ -99,60 +99,66 @@
                                             </label>
                                         @endif
 
-                                        {{-- Profile avatar --}}
-                                        <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-gray-200">
-                                            @if($profile->primaryProfileImage?->thumbnail_url)
-                                                <img
-                                                    src="{{ $profile->primaryProfileImage->thumbnail_url }}"
-                                                    alt="{{ $profile->name }}"
-                                                    class="h-full w-full object-cover"
-                                                >
-                                            @else
-                                                <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#e04ecb] to-[#c13ab0]">
-                                                    <span class="text-lg font-bold text-white select-none">{{ strtoupper(substr($profile->name, 0, 1)) }}</span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="flex items-center gap-2">
-                                                <p class="truncate font-semibold text-gray-900">{{ $profile->name }}</p>
-                                                {{-- Online indicator dot (only meaningful when profile is approved) --}}
-                                                @if($profile->profile_status === 'approved')
-                                                    <span
-                                                        class="h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm"
-                                                        :class="online ? 'bg-green-400' : 'bg-gray-300'"
-                                                        :title="online ? 'Online Now' : 'Offline'"
-                                                        :aria-label="online ? 'Status: Online Now' : 'Status: Offline'"
-                                                        role="img"
-                                                    ></span>
+                                        <a
+                                            href="{{ route('profiles.switch', $profile) }}"
+                                            class="flex min-w-0 items-center gap-3 rounded-lg transition hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400"
+                                            title="Open {{ $profile->name }} in My Profile"
+                                        >
+                                            {{-- Profile avatar --}}
+                                            <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-gray-200">
+                                                @if($profile->primaryProfileImage?->thumbnail_url)
+                                                    <img
+                                                        src="{{ $profile->primaryProfileImage->thumbnail_url }}"
+                                                        alt="{{ $profile->name }}"
+                                                        class="h-full w-full object-cover"
+                                                    >
+                                                @else
+                                                    <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#e04ecb] to-[#c13ab0]">
+                                                        <span class="text-lg font-bold text-white select-none">{{ strtoupper(substr($profile->name, 0, 1)) }}</span>
+                                                    </div>
                                                 @endif
                                             </div>
-                                            <p class="truncate text-xs text-gray-500">/{{ $profile->slug }}</p>
-                                            <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                                                <span
-                                                    class="inline-block rounded-full px-2 py-0.5 text-xs font-medium
-                                                        @if($profile->profile_status === 'approved') bg-green-100 text-green-700
-                                                        @elseif($profile->profile_status === 'rejected') bg-red-100 text-red-700
-                                                        @else bg-yellow-100 text-yellow-700
-                                                        @endif
-                                                    "
-                                                    title="@if($profile->profile_status === 'approved')Your listing is live and visible in search results.@elseif($profile->profile_status === 'rejected')Your listing has been rejected. Please contact support.@else Your listing is awaiting admin approval before it becomes visible in search results.@endif"
-                                                >
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-2">
+                                                    <p class="truncate font-semibold text-gray-900">{{ $profile->name }}</p>
+                                                    {{-- Online indicator dot (only meaningful when profile is approved) --}}
                                                     @if($profile->profile_status === 'approved')
-                                                        ✓ Approved – Live
-                                                    @elseif($profile->profile_status === 'rejected')
-                                                        ✗ Rejected
-                                                    @else
-                                                        ⏳ Pending Approval
+                                                        <span
+                                                            class="h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm"
+                                                            :class="online ? 'bg-green-400' : 'bg-gray-300'"
+                                                            :title="online ? 'Online Now' : 'Offline'"
+                                                            :aria-label="online ? 'Status: Online Now' : 'Status: Offline'"
+                                                            role="img"
+                                                        ></span>
                                                     @endif
-                                                </span>
-                                                @if((int)$activeProfileId === $profile->id)
-                                                    <span class="inline-block rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-semibold text-pink-700" title="This is the profile you are currently managing.">
-                                                        Selected
+                                                </div>
+                                                <p class="truncate text-xs text-gray-500">/{{ $profile->slug }}</p>
+                                                <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                                                    <span
+                                                        class="inline-block rounded-full px-2 py-0.5 text-xs font-medium
+                                                            @if($profile->profile_status === 'approved') bg-green-100 text-green-700
+                                                            @elseif($profile->profile_status === 'rejected') bg-red-100 text-red-700
+                                                            @else bg-yellow-100 text-yellow-700
+                                                            @endif
+                                                        "
+                                                        title="@if($profile->profile_status === 'approved')Your listing is live and visible in search results.@elseif($profile->profile_status === 'rejected')Your listing has been rejected. Please contact support.@else Your listing is awaiting admin approval before it becomes visible in search results.@endif"
+                                                    >
+                                                        @if($profile->profile_status === 'approved')
+                                                            ✓ Approved – Live
+                                                        @elseif($profile->profile_status === 'rejected')
+                                                            ✗ Rejected
+                                                        @else
+                                                            ⏳ Pending Approval
+                                                        @endif
                                                     </span>
-                                                @endif
+                                                    @if((int)$activeProfileId === $profile->id)
+                                                        <span class="inline-block rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-semibold text-pink-700" title="This is the profile you are currently managing.">
+                                                            Selected
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                        </div>
+                                        </a>
                                     </div>
 
                                     <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
