@@ -2,8 +2,8 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\Accounts\AccountResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
