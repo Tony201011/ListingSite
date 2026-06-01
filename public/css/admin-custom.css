@@ -134,6 +134,57 @@
     width: 100%;
 }
 
+.admin-top-subnav {
+    display: none;
+    margin: 0 var(--admin-content-gutter);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.admin-top-subnav.is-visible {
+    display: block;
+}
+
+.admin-top-subnav__tabs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.6rem 0;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-top-subnav__tab {
+    flex: 0 0 auto;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    color: var(--admin-sidebar-muted);
+    font-size: 0.84rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 150ms ease;
+}
+
+.admin-top-subnav__tab:hover {
+    border-color: rgba(148, 163, 184, 0.45);
+    background: var(--admin-sidebar-hover);
+    color: #0f172a;
+}
+
+.admin-top-subnav__tab.is-active {
+    border-color: var(--admin-sidebar-active-border);
+    background: var(--admin-sidebar-active-bg);
+    color: var(--admin-sidebar-active-text);
+}
+
+.admin-top-subnav-enabled .fi-sidebar-sub-group-items {
+    display: none !important;
+}
+
 /* Improve admin dashboard chart sizing and layout */
 .fi-wi-chart .fi-wi-chart-canvas-ctn {
     min-height: 360px;
