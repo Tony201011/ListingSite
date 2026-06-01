@@ -1071,14 +1071,16 @@ class UserResource extends Resource
                         CASE
                             WHEN EXISTS (
                                 SELECT 1
-                                FROM online_users
-                                WHERE online_users.provider_profile_id = provider_profiles.id
-                                AND online_users.status = ?
+                                FROM available_nows
+                                WHERE available_nows.provider_profile_id = provider_profiles.id
+                                AND available_nows.status = ?
+                                AND available_nows.available_expires_at IS NOT NULL
+                                AND available_nows.available_expires_at > ?
                             ) THEN ?
                             ELSE ?
-                        END AS online_status
+                        END AS available_now_status
                         SQL,
-                        ['online', 'online', 'offline']
+                        ['online', now(), 'online', 'offline']
                     );
             })
             ->columns([
@@ -1165,11 +1167,12 @@ class UserResource extends Resource
                     ->state(fn (ProviderProfile $record): string => $record->is_featured ? 'Yes' : 'No')
                     ->color(fn (string $state): string => $state === 'Yes' ? 'success' : 'gray'),
 
-                TextColumn::make('online_status')
-                    ->label('Online')
+                TextColumn::make('available_now_status')
+                    ->label('Available Now')
                     ->badge()
-                    ->getStateUsing(fn (ProviderProfile $record): string => $record->online_status === 'online' ? 'Online' : 'Offline')
-                    ->color(fn (string $state): string => $state === 'Online' ? 'success' : 'gray'),
+                    ->getStateUsing(fn (ProviderProfile $record): string => $record->available_now_status === 'online' ? 'Available Now' : 'Unavailable')
+                    ->color(fn (string $state): string => $state === 'Available Now' ? 'success' : 'gray')
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('available_now_status', $direction)),
 
                 TextColumn::make('created_at')
                     ->label('Created')
@@ -1269,16 +1272,16 @@ class UserResource extends Resource
                     })
                     ->placeholder('All Profiles'),
 
-                SelectFilter::make('online_status')
-                    ->label('Online Status')
+                SelectFilter::make('available_now_status')
+                    ->label('Available Now Status')
                     ->options([
-                        'online' => 'Online',
-                        'offline' => 'Offline',
+                        'online' => 'Available Now',
+                        'offline' => 'Unavailable',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
-                            'online' => $query->whereCurrentlyOnline(),
-                            'offline' => $query->whereCurrentlyOffline(),
+                            'online' => $query->whereCurrentlyAvailableNow(),
+                            'offline' => $query->whereCurrentlyUnavailableNow(),
                             default => $query,
                         };
                     })
@@ -1586,9 +1589,9 @@ class UserResource extends Resource
                     ->label('Profile Status')
                     ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => ucfirst($record->profile_status ?? 'pending'))
                     ->collapsible(),
-                Group::make('online_status')
-                    ->label('Online Status')
-                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->isCurrentlyOnline() ? 'Online' : 'Offline')
+                Group::make('available_now_status')
+                    ->label('Available Now Status')
+                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->isCurrentlyAvailableNow() ? 'Available Now' : 'Unavailable')
                     ->collapsible(),
                 Group::make('is_featured')
                     ->label('Featured')

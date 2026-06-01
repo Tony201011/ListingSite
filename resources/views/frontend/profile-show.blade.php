@@ -57,7 +57,6 @@ $profileTags = array_values(array_unique(array_merge(
             $servicesProvided = !empty($profile['services_provided']) ? $profile['services_provided'] : [];
 
             $availableNow = $profile['available_now'] ?? false;
-            $isOnline = $profile['active'] ?? false;
             $availableExpiresAt = $profile['available_expires_at'] ?? null;
             $availableTillText = $availableNow && $availableExpiresAt
                 ? ' - AVAILABLE TILL ' . \Carbon\Carbon::parse($availableExpiresAt)->format('g:ia')
@@ -94,10 +93,6 @@ $profileTags = array_values(array_unique(array_merge(
                     @if($availableNow)
                     <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-6 py-2 rounded bg-[#e13a8b] text-white font-extrabold text-sm sm:text-base tracking-wide" style="letter-spacing:0.5px;">
                         AVAILABLE NOW{{ $availableTillText }}
-                    </div>
-                    @elseif($isOnline)
-                    <div class="inline-block mb-3 sm:mb-4 px-4 sm:px-6 py-2 rounded bg-green-500 text-white font-extrabold text-sm sm:text-base tracking-wide" style="letter-spacing:0.5px;">
-                        ONLINE NOW
                     </div>
                     @endif
                     <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-pink-600 mb-2 sm:mb-3 px-2" style="color:#e13a8b;">
@@ -794,11 +789,6 @@ $profileTags = array_values(array_unique(array_merge(
                                         @endif
                                         @if(!empty($nearby['available_now']))
                                             <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0; background-color: #e13a8b;">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
-                                            </span>
-                                        @endif
-                                        @if(!empty($nearby['active']))
-                                            <span class="inline-flex items-center gap-1 bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm" style="border-radius: 0 4px 4px 0;">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
                                             </span>
                                         @endif

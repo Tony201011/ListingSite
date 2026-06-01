@@ -6,6 +6,7 @@ use App\Concerns\ResolvesProfileCategoryIds;
 use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\Category;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -15,7 +16,8 @@ class GetProfileSettingPageData
     use ResolvesProfileCategoryValues;
 
     public function __construct(
-        private GetProfileMessage $getProfileMessage
+        private GetProfileMessage $getProfileMessage,
+        private GetAvailableNowState $getAvailableNowState
     ) {}
 
     public function execute(?User $user, ?ProviderProfile $activeProfile = null): array
@@ -80,12 +82,21 @@ class GetProfileSettingPageData
                 ->exists()
             : false;
 
+        $availableData = $this->getAvailableNowState->execute($profile);
+        $statusSettings = SiteSetting::getStatusSettings();
+
         return [
             'profileImages' => $profileImages,
             'videos' => $videos,
             'photoVerification' => $photoVerification,
             'userInfo' => $userInfo,
             'profileMessage' => $this->getProfileMessage->execute($profile),
+            'availableStatus' => $availableData['status'],
+            'availableRemainingUses' => $availableData['remainingUses'],
+            'availableExpiresAt' => $availableData['expiresAt'],
+            'availableBlockedBalance' => $availableData['blockedBalance'],
+            'availableMaxUses' => $statusSettings['available_now_max_uses'],
+            'availableDurationMinutes' => $statusSettings['available_now_duration_minutes'],
         ];
     }
 

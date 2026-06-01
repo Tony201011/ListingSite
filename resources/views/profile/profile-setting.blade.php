@@ -84,6 +84,61 @@
             </div>
         </div>
 
+        <div
+            class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6"
+            x-data="availableToggle({
+                initialStatus: @js((bool) ($availableStatus ?? false)),
+                initialRemainingUses: @js((int) ($availableRemainingUses ?? 0)),
+                initialExpiresAt: @js($availableExpiresAt ?? null),
+                initialBlockedBalance: @js((bool) ($availableBlockedBalance ?? false)),
+                updateUrl: @js(route('available.update-status'))
+            })"
+        >
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900">Available Now</h2>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Control your public Available Now status from profile settings.
+                    </p>
+                    <p class="mt-2 text-xs font-medium text-pink-600">
+                        {{ $availableMaxUses }} daily uses · {{ $availableDurationMinutes }} minutes each
+                    </p>
+                </div>
+                <div class="text-sm font-semibold text-gray-700">
+                    Remaining today: <span class="text-pink-600" x-text="remainingUses"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+                <span
+                    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
+                    :class="enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                >
+                    <span class="h-2.5 w-2.5 rounded-full" :class="enabled ? 'bg-green-500' : 'bg-gray-400'"></span>
+                    <span x-text="enabled ? 'Available Now' : 'Unavailable'"></span>
+                </span>
+
+                <button
+                    type="button"
+                    @click="toggleStatus()"
+                    :disabled="loading || (!enabled && remainingUses <= 0)"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition"
+                    :class="enabled
+                        ? 'bg-pink-600 text-white hover:bg-pink-700'
+                        : 'bg-gray-900 text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50'"
+                >
+                    <span x-show="!loading" x-cloak x-text="enabled ? 'Disable Available Now' : 'Enable Available Now'"></span>
+                    <span x-show="loading" x-cloak>Updating...</span>
+                </button>
+
+                <div x-show="enabled" x-cloak class="text-sm font-semibold text-green-700">
+                    Time left: <span x-text="countdown"></span>
+                </div>
+            </div>
+
+            <div class="mt-3 text-sm" x-show="message" x-cloak :class="messageType === 'success' ? 'text-green-600' : 'text-red-600'" x-text="message"></div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
@@ -685,4 +740,5 @@
 
 @push('scripts')
 <script src="{{ asset('profile/js/profile-setting.js') }}"></script>
+<script src="{{ asset('profile/js/available-toggle.js') }}?v={{ filemtime(public_path('profile/js/available-toggle.js')) }}"></script>
 @endpush
