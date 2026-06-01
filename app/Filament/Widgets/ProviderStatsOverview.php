@@ -27,7 +27,9 @@ class ProviderStatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         $users = User::query()->where('role', User::ROLE_PROVIDER)->withoutTrashed();
-        $profiles = ProviderProfile::query()->whereCurrentlyAvailableNow();
+        $profiles = ProviderProfile::query()->where(function ($query) {
+            $query->whereCurrentlyOnline()->orWhereCurrentlyAvailableNow();
+        });
 
         $total = (clone $users)->count();
         $active = (clone $users)->where('account_status', 'active')->count();
