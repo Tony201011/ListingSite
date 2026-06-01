@@ -12,7 +12,18 @@ use App\Models\Postcode;
 use App\Models\S3BucketSetting;
 use App\Models\SmtpSetting;
 use App\Notifications\BrandedAgentResetPasswordNotification;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Auth\Notifications\ResetPassword as FilamentResetPasswordNotification;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -44,6 +55,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureAdminSlideOverActions();
+
         FilamentView::registerRenderHook(
             'panels::head.end',
             fn (): string => '<style>.fi-sidebar{min-height:0!important;}.fi-body-has-topbar .fi-sidebar{max-height:calc(100dvh - 4rem)!important;}.fi-sidebar-nav{min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;scrollbar-gutter:stable;}</style>',
@@ -86,6 +99,28 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Logout::class, RecordUserLogout::class);
         Event::listen(NotificationSent::class, LogPasswordResetNotificationEmail::class);
         Event::listen(NotificationFailed::class, LogPasswordResetNotificationEmail::class);
+    }
+
+    private function configureAdminSlideOverActions(): void
+    {
+        $configure = function (Action $action): void {
+            if (Filament::getCurrentPanel()?->getId() !== 'admin') {
+                return;
+            }
+
+            $action->slideOver();
+        };
+
+        Action::configureUsing($configure);
+        CreateAction::configureUsing($configure);
+        DeleteAction::configureUsing($configure);
+        DeleteBulkAction::configureUsing($configure);
+        EditAction::configureUsing($configure);
+        ForceDeleteAction::configureUsing($configure);
+        ForceDeleteBulkAction::configureUsing($configure);
+        RestoreAction::configureUsing($configure);
+        RestoreBulkAction::configureUsing($configure);
+        ViewAction::configureUsing($configure);
     }
 
     private function shareFooterText(): void
