@@ -16,7 +16,7 @@ abstract class ListRecordsWithPageJump extends ListRecords
 
     protected function syncLegacyPageQueryParameter(): void
     {
-        $pageName = $this->getTablePaginationPageName();
+        $pageName = $this->getLegacyPaginationPageName();
 
         if ($pageName === 'page' || request()->has($pageName)) {
             return;
@@ -29,6 +29,19 @@ abstract class ListRecordsWithPageJump extends ListRecords
         }
 
         $this->gotoPage(max(1, (int) $legacyPage), $pageName);
+    }
+
+    protected function getLegacyPaginationPageName(): string
+    {
+        $identifier = method_exists($this, 'getTableQueryStringIdentifier')
+            ? $this->getTableQueryStringIdentifier()
+            : null;
+
+        if (filled($identifier)) {
+            return "{$identifier}Page";
+        }
+
+        return 'tablePage';
     }
 
     protected function resetTableToFirstPage(): void
