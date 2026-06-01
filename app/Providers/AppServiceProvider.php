@@ -55,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
                 $authSessionSync = session('auth_session_sync');
 
                 return implode('', array_filter([
+                    view('filament.partials.admin-top-subnav')->render(),
                     sprintf(
                         '<script>document.body.dataset.authProtected="1";document.body.dataset.authenticated="%s";document.body.dataset.signinUrl=%s;document.body.dataset.logoutUrl=%s;</script>',
                         auth('admin')->check() ? '1' : '0',
