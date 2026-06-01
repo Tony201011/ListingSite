@@ -2,7 +2,9 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\Accounts\AccountResource;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
@@ -25,6 +27,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         $users = User::query()->where('role', User::ROLE_PROVIDER)->withoutTrashed();
+        $profiles = ProviderProfile::query()->whereCurrentlyAvailableNow();
 
         $total = (clone $users)->count();
         $active = (clone $users)->where('account_status', 'active')->count();
@@ -32,9 +35,13 @@ class ProviderStatsOverview extends StatsOverviewWidget
         $softDeleted = (clone $users)->where('account_status', 'soft_deleted')->count();
         $anonymized = (clone $users)->where('account_status', 'anonymized')->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
+        $availableNow = (clone $profiles)->count();
 
         $accountsUrl = fn (array $filters): string => AccountResource::getUrl('index', [
             'filters' => $filters,
+        ]);
+        $profilesUrl = fn (array $tableFilters): string => UserResource::getUrl('index', [
+            'tableFilters' => $tableFilters,
         ]);
 
         return [
@@ -42,6 +49,10 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ->color('primary')
                 ->icon('heroicon-o-users')
                 ->url($accountsUrl([])),
+            Stat::make('Available Now', (string) $availableNow)
+                ->color('success')
+                ->icon('heroicon-o-bolt')
+                ->url($profilesUrl(['available_now_status' => ['value' => 'online']])),
             Stat::make('Active', (string) $active)
                 ->color('success')
                 ->icon('heroicon-o-check-circle')

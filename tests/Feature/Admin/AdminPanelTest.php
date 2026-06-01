@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\AvailableNow;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -78,6 +79,29 @@ class AdminPanelTest extends TestCase
         $response = $this->actingAs($admin, 'admin')->get('/admin');
 
         $response->assertOk();
+    }
+
+    public function test_admin_dashboard_shows_available_now_card(): void
+    {
+        $admin = $this->createAdmin();
+        $provider = $this->createProvider();
+        $profile = $provider->providerProfiles()->firstOrFail();
+
+        AvailableNow::query()->create([
+            'user_id' => $provider->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'available_started_at' => now()->subMinutes(5),
+            'available_expires_at' => now()->addMinutes(55),
+        ]);
+
+        $response = $this->actingAs($admin, 'admin')->get('/admin');
+
+        $response->assertOk();
+        $response->assertSeeText('Available Now');
+        $response->assertSee('/admin/providers?tableFilters%5Bavailable_now_status%5D%5Bvalue%5D=online', false);
     }
 
     public function test_provider_user_cannot_access_admin_panel(): void
