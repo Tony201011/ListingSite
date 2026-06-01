@@ -14,8 +14,7 @@
     $userLng = $userLng ?? null;
     $girlsMode = (string) ($girlsMode ?? 'all');
     $selectedCategoryItems = $selectedCategoryItems ?? collect();
-    $availableNowFilter = (bool) ($availableNowFilter ?? false);
-    $hasActiveFilters = $locationQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter || $availableNowFilter;
+    $hasActiveFilters = $locationQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
 @endphp
 
 @section('content')
@@ -476,9 +475,6 @@
                 @php
                     $currentQuery = request()->query();
                     $girlsUrl = fn (string $mode): string => route('advanced-search', array_merge($currentQuery, ['girls' => $mode]));
-                    $availableNowQuery = $availableNowFilter
-                        ? array_diff_key($currentQuery, ['available_now' => null])
-                        : array_merge($currentQuery, ['available_now' => 1]);
                 @endphp
                 <div class="flex items-center gap-2">
                     <a
@@ -499,14 +495,6 @@
                     >
                         <i class="fa-solid fa-fire text-[10px]"></i>
                         Popular
-                    </a>
-                    {{-- Available Now filter --}}
-                    <a
-                        href="{{ route('advanced-search', $availableNowQuery) }}"
-                        class="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $availableNowFilter ? 'border-green-600 bg-green-600/10 text-green-700' : 'border-gray-300 bg-white text-gray-600 hover:border-green-400 hover:text-green-700' }}"
-                    >
-                        <span class="inline-block h-1.5 w-1.5 rounded-full {{ $availableNowFilter ? 'bg-green-600' : 'bg-gray-400' }}"></span>
-                        Available Now
                     </a>
                 </div>
             </div>
@@ -536,11 +524,6 @@
                     @if($hasDistanceFilter)
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
                             <i class="fa-solid fa-location-crosshairs text-pink-500 text-[10px]"></i> Within {{ $distanceFilter }} km
-                        </span>
-                    @endif
-                    @if($availableNowFilter)
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-xs font-semibold text-green-700">
-                            <span class="inline-block h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span> Available Now
                         </span>
                     @endif
                 </div>

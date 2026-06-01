@@ -136,7 +136,6 @@ class BuildProfileFilterViewData
         $girlsMode = (string) ($validated['girls'] ?? 'all');
         $locationStateQuery = trim((string) ($validated['location_state'] ?? ''));
         $escortNameQuery = trim((string) ($validated['escort_name'] ?? ''));
-        $availableNowFilter = (bool) ($validated['available_now'] ?? false);
 
         $setting = SiteSetting::query()->first(['max_search_distance', 'distance_search_enabled']);
         $distanceSearchEnabled = (bool) ($setting?->distance_search_enabled ?? true);
@@ -207,7 +206,6 @@ class BuildProfileFilterViewData
             $escortNameQuery,
             $localFeaturedStateName,
             $syncWithAdminOnlineListing,
-            $availableNowFilter,
         );
         $onlineCount = $profiles->total();
 
@@ -256,7 +254,6 @@ class BuildProfileFilterViewData
             'onlineCount',
             'homeBannerProfiles',
             'localBannerProfiles',
-            'availableNowFilter',
         );
     }
 
@@ -418,7 +415,6 @@ class BuildProfileFilterViewData
         string $escortNameQuery = '',
         ?string $localFeaturedStateName = null,
         bool $syncWithAdminOnlineListing = false,
-        bool $availableNowFilter = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -452,10 +448,6 @@ class BuildProfileFilterViewData
         }
 
         $this->applyActiveOnlineProfileConstraint($query);
-
-        if ($availableNowFilter) {
-            $query->whereCurrentlyAvailableNow();
-        }
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
@@ -646,7 +638,6 @@ class BuildProfileFilterViewData
             'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
             'max_price' => $maxPrice !== self::DEFAULT_MAX_PRICE ? $maxPrice : null,
             'distance' => $distanceFilter,
-            'available_now' => $availableNowFilter ? 1 : null,
         ]);
 
         $appendParams['girls'] = $girlsMode;
