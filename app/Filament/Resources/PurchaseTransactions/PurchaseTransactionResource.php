@@ -10,6 +10,7 @@ use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Infolists\Components\TextEntry;
@@ -201,63 +202,65 @@ class PurchaseTransactionResource extends Resource
                     ]),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->label('View')
-                    ->icon('heroicon-o-eye')
-                    ->modalHeading('Transaction Details'),
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('View')
+                        ->icon('heroicon-o-eye')
+                        ->modalHeading('Transaction Details'),
 
-                Action::make('wallet_spend_history')
-                    ->label('Wallet Summary')
-                    ->icon('heroicon-o-eye')
-                    ->color('info')
-                    ->modalHeading(fn (PurchaseTransaction $record): string => 'Wallet Spend History · '.($record->user?->name ?? 'User'))
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close')
-                    ->modalWidth('4xl')
-                    ->modalContent(fn (PurchaseTransaction $record) => view('filament.modals.wallet-spend-history', [
-                        'summary' => self::getWalletSpendSummary($record),
-                        'history' => self::getWalletSpendHistory($record),
-                    ])),
+                    Action::make('wallet_spend_history')
+                        ->label('Wallet Summary')
+                        ->icon('heroicon-o-eye')
+                        ->color('info')
+                        ->modalHeading(fn (PurchaseTransaction $record): string => 'Wallet Spend History · '.($record->user?->name ?? 'User'))
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close')
+                        ->modalWidth('4xl')
+                        ->modalContent(fn (PurchaseTransaction $record) => view('filament.modals.wallet-spend-history', [
+                            'summary' => self::getWalletSpendSummary($record),
+                            'history' => self::getWalletSpendHistory($record),
+                        ])),
 
-                Action::make('view_receipt')
-                    ->label('View Receipt')
-                    ->icon('heroicon-o-document-text')
-                    ->color('info')
-                    ->url(fn (PurchaseTransaction $record): ?string => $record->normalized_receipt_url)
-                    ->openUrlInNewTab()
-                    ->visible(fn (PurchaseTransaction $record): bool => ! empty($record->normalized_receipt_url)),
+                    Action::make('view_receipt')
+                        ->label('View Receipt')
+                        ->icon('heroicon-o-document-text')
+                        ->color('info')
+                        ->url(fn (PurchaseTransaction $record): ?string => $record->normalized_receipt_url)
+                        ->openUrlInNewTab()
+                        ->visible(fn (PurchaseTransaction $record): bool => ! empty($record->normalized_receipt_url)),
 
-                Action::make('refund')
-                    ->label('Refund')
-                    ->icon('heroicon-o-arrow-uturn-left')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Refund Transaction')
-                    ->modalDescription(fn (PurchaseTransaction $record): string => "Refund transaction for {$record->user?->name}? The Stripe refund amount and wallet deduction will be calculated from the user's unused balance.")
-                    ->modalSubmitActionLabel('Yes, Refund')
-                    ->visible(fn (PurchaseTransaction $record): bool => $record->status === 'paid')
-                    ->action(function (PurchaseTransaction $record, ProcessStripeRefund $processStripeRefund): void {
-                        try {
-                            $processStripeRefund->execute($record);
+                    Action::make('refund')
+                        ->label('Refund')
+                        ->icon('heroicon-o-arrow-uturn-left')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Refund Transaction')
+                        ->modalDescription(fn (PurchaseTransaction $record): string => "Refund transaction for {$record->user?->name}? The Stripe refund amount and wallet deduction will be calculated from the user's unused balance.")
+                        ->modalSubmitActionLabel('Yes, Refund')
+                        ->visible(fn (PurchaseTransaction $record): bool => $record->status === 'paid')
+                        ->action(function (PurchaseTransaction $record, ProcessStripeRefund $processStripeRefund): void {
+                            try {
+                                $processStripeRefund->execute($record);
 
-                            Notification::make()
-                                ->title('Refund processed successfully')
-                                ->success()
-                                ->send();
-                        } catch (\RuntimeException $e) {
-                            Notification::make()
-                                ->title('Refund failed')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title('Refund failed')
-                                ->body('An unexpected error occurred. Please try again or check Stripe directly.')
-                                ->danger()
-                                ->send();
-                        }
-                    }),
+                                Notification::make()
+                                    ->title('Refund processed successfully')
+                                    ->success()
+                                    ->send();
+                            } catch (\RuntimeException $e) {
+                                Notification::make()
+                                    ->title('Refund failed')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            } catch (\Exception $e) {
+                                Notification::make()
+                                    ->title('Refund failed')
+                                    ->body('An unexpected error occurred. Please try again or check Stripe directly.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                ]),
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()
