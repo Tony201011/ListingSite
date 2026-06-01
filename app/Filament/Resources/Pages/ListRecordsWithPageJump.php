@@ -7,30 +7,6 @@ use Illuminate\Contracts\View\View;
 
 abstract class ListRecordsWithPageJump extends ListRecords
 {
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->syncLegacyPageQueryParameter();
-    }
-
-    protected function syncLegacyPageQueryParameter(): void
-    {
-        $pageName = $this->getTablePaginationPageName();
-
-        if ($pageName === 'page' || request()->has($pageName)) {
-            return;
-        }
-
-        $legacyPage = request()->query('page');
-
-        if (! is_numeric($legacyPage)) {
-            return;
-        }
-
-        $this->gotoPage(max(1, (int) $legacyPage), $pageName);
-    }
-
     protected function resetTableToFirstPage(): void
     {
         $this->resetPage($this->getTablePaginationPageName());
