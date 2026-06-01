@@ -49,7 +49,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ->color('primary')
                 ->icon('heroicon-o-users')
                 ->url($accountsUrl([])),
-            Stat::make('Available Now', (string) $availableNow)
+            Stat::make('Available Now', (string) $onlineNow)
                 ->color('success')
                 ->icon('heroicon-o-bolt')
                 ->url($profilesUrl([])),
