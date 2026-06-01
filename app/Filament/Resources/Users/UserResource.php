@@ -1307,7 +1307,8 @@ class UserResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
                             'online' => $query->where(function (Builder $query): Builder {
-                                return $query->whereCurrentlyOnline()->orWhereCurrentlyAvailableNow();
+                                return $query->whereCurrentlyOnline()
+                                    ->orWhere(fn (Builder $orQuery): Builder => $orQuery->whereCurrentlyAvailableNow());
                             }),
                             'offline' => $query->whereCurrentlyOffline()->whereCurrentlyUnavailableNow(),
                             default => $query,
