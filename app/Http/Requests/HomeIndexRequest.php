@@ -66,7 +66,6 @@ class HomeIndexRequest extends FormRequest
             'user_lng' => $this->input('user_lng'),
             'distance' => $this->input('distance'),
             'girls' => $this->input('girls', 'all'),
-            'available_now' => $this->boolean('available_now'),
         ]);
     }
 
@@ -91,7 +90,6 @@ class HomeIndexRequest extends FormRequest
             'user_lng' => ['nullable', 'numeric', 'between:-180,180'],
             'distance' => ['nullable', 'integer', 'min:0', 'max:20000'],
             'girls' => ['nullable', Rule::in(['all', 'new', 'popular'])],
-            'available_now' => ['nullable', 'boolean'],
         ];
     }
 
