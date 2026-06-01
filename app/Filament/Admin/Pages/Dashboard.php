@@ -22,6 +22,8 @@ use UnitEnum;
 
 class Dashboard extends BaseDashboard
 {
+    protected static ?string $slug = 'dashboard';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
     protected static ?string $navigationLabel = 'Dashboard';
