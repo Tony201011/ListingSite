@@ -27,7 +27,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         $users = User::query()->where('role', User::ROLE_PROVIDER)->withoutTrashed();
-        $profiles = ProviderProfile::query()->whereCurrentlyAvailableNow();
+        $profiles = ProviderProfile::query()->whereCurrentlyOnline();
 
         $total = (clone $users)->count();
         $active = (clone $users)->where('account_status', 'active')->count();
@@ -35,7 +35,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
         $softDeleted = (clone $users)->where('account_status', 'soft_deleted')->count();
         $anonymized = (clone $users)->where('account_status', 'anonymized')->count();
         $blocked = (clone $users)->where('is_blocked', true)->count();
-        $availableNow = (clone $profiles)->count();
+        $onlineNow = (clone $profiles)->count();
 
         $accountsUrl = fn (array $filters): string => AccountResource::getUrl('index', [
             'filters' => $filters,
@@ -49,7 +49,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ->color('primary')
                 ->icon('heroicon-o-users')
                 ->url($accountsUrl([])),
-            Stat::make('Available Now', (string) $availableNow)
+            Stat::make('Online Now', (string) $onlineNow)
                 ->color('success')
                 ->icon('heroicon-o-bolt')
                 ->url($profilesUrl([])),
