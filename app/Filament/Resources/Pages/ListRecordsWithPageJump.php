@@ -22,7 +22,7 @@ abstract class ListRecordsWithPageJump extends ListRecords
         $this->resetTableToFirstPage();
     }
 
-    public function updatedTableColumnSearches(): void
+    public function updatedTableColumnSearches($value = null, ?string $key = null): void
     {
         $this->resetTableToFirstPage();
     }
