@@ -43,7 +43,7 @@ class AccountResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Accounts';
 
-    protected static ?string $slug = 'account-management/accounts';
+    protected static ?string $slug = 'account-management/account';
 
     protected static ?int $navigationSort = 1;
 
