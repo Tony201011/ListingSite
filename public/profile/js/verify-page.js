@@ -108,6 +108,7 @@ function verifyPage(config) {
             }
 
             this.isUploadingSlots = true;
+            window.dispatchEvent(new CustomEvent('upload:start'));
 
             const formData = new FormData();
             [this.pendingPhoto1, this.pendingPhoto2]
@@ -152,10 +153,9 @@ function verifyPage(config) {
                 this.error(err.message || 'Something went wrong while uploading.');
             } finally {
                 this.isUploadingSlots = false;
+                window.dispatchEvent(new CustomEvent('upload:end'));
             }
         },
-
-        // --- Modal ---
 
         openModal() {
             this.activeTab = 'files';
@@ -383,6 +383,7 @@ function verifyPage(config) {
             }
 
             this.isUploading = true;
+            window.dispatchEvent(new CustomEvent('upload:start'));
 
             const formData = new FormData();
             this.selectedFiles.forEach((file) => {
@@ -429,6 +430,7 @@ function verifyPage(config) {
                 this.error(err.message || 'Something went wrong while uploading.');
             } finally {
                 this.isUploading = false;
+                window.dispatchEvent(new CustomEvent('upload:end'));
             }
         },
 

@@ -87,8 +87,7 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.uploading = true;
-
-            const formData = new FormData();
+            window.dispatchEvent(new CustomEvent('upload:start'));
 
             this.selectedFiles.forEach((f, i) => {
                 formData.append(`photos[${i}]`, f);
@@ -114,6 +113,7 @@ document.addEventListener('alpine:init', () => {
                 this.error(e.message);
             } finally {
                 this.uploading = false;
+                window.dispatchEvent(new CustomEvent('upload:end'));
             }
         },
 

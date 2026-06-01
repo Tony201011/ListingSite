@@ -166,8 +166,44 @@
         </script>
     @endif
 
+    {{-- Global upload progress overlay --}}
+    <div
+        id="upload-progress-overlay"
+        style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;"
+        aria-live="assertive"
+        aria-label="Upload in progress"
+    >
+        <div style="background:#1f2937;border:1px solid #374151;border-radius:1rem;padding:2rem 2.5rem;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            {{-- Spinner --}}
+            <div style="display:flex;justify-content:center;margin-bottom:1.25rem;">
+                <svg style="width:3rem;height:3rem;animation:upload-spin 1s linear infinite;color:#e04ecb;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle style="opacity:0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path style="opacity:0.75;" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+            </div>
+            {{-- Warning message --}}
+            <p style="color:#f9fafb;font-size:1rem;font-weight:700;line-height:1.6;margin:0 0 1rem;">
+                ⚠️ WAIT! Do not leave or close this page.<br>
+                Your photos/videos are currently being uploaded.<br>
+                Please wait until this message disappears.
+            </p>
+            {{-- Progress bar (shown when upload:progress events are dispatched) --}}
+            <div style="background:#374151;border-radius:9999px;overflow:hidden;height:0.5rem;margin-top:0.5rem;">
+                <div id="upload-progress-bar" style="height:100%;width:0%;background:linear-gradient(to right,#e04ecb,#db2777);transition:width 0.3s ease;border-radius:9999px;"></div>
+            </div>
+            <p id="upload-progress-pct" style="color:#9ca3af;font-size:0.75rem;margin-top:0.5rem;min-height:1rem;"></p>
+        </div>
+    </div>
+    <style>
+        @keyframes upload-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+    </style>
+
     @stack('scripts')
 
     <script src="{{ asset('js/password-toggle.js') }}"></script>
+    <script src="{{ asset('js/upload-overlay.js') }}"></script>
 </body>
 </html>
