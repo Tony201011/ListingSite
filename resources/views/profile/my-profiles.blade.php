@@ -74,12 +74,12 @@
                 @else
                     <div class="mb-6 space-y-3">
                         @foreach($profiles as $profile)
-                            @php $state = $onlineStates[$profile->id] ?? ['status' => false, 'expiresAt' => null]; @endphp
+                            @php $state = $onlineStates[$profile->id] ?? ['onlineStatus' => false, 'expiresAt' => null]; @endphp
                             <div
                                 class="rounded-xl border border-gray-100 bg-gray-50 px-4 py-4 transition hover:bg-gray-100"
                                 x-data="profileOnlineToggle({
                                     profileId: @js($profile->id),
-                                    initialStatus: @js((bool) ($state['status'] ?? false)),
+                                    initialStatus: @js((bool) $state['onlineStatus']),
                                     updateUrl: @js(route('profiles.online-status', $profile)),
                                     csrfToken: @js(csrf_token())
                                 })"
@@ -121,8 +121,8 @@
                                                     <span
                                                         class="h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm"
                                                         :class="online ? 'bg-green-400' : 'bg-gray-300'"
-                                                        :title="online ? 'Available Now' : 'Unavailable'"
-                                                        :aria-label="online ? 'Status: Available Now' : 'Status: Unavailable'"
+                                                        :title="online ? 'Online Now' : 'Offline'"
+                                                        :aria-label="online ? 'Status: Online Now' : 'Status: Offline'"
                                                         role="img"
                                                     ></span>
                                                 @endif
@@ -156,7 +156,7 @@
                                     </div>
 
                                     <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
-                                        {{-- Available Now toggle (only available for approved profiles) --}}
+                                        {{-- Online Now toggle (only available for approved profiles) --}}
                                         @if($profile->profile_status === 'approved')
                                             <div class="flex flex-col items-start gap-1 sm:items-end">
                                                 <button
@@ -174,7 +174,7 @@
                                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                                         </svg>
                                                     </span>
-                                                    <span x-show="!loading" x-text="online ? 'Disable Available Now' : 'Enable Available Now'"></span>
+                                                    <span x-show="!loading" x-text="online ? 'Go Offline' : 'Go Online'"></span>
                                                 </button>
                                             </div>
                                         @endif

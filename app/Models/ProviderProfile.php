@@ -265,6 +265,8 @@ class ProviderProfile extends Model
             'availableNow',
             fn (Builder $availableQuery): Builder => $availableQuery
                 ->where('status', 'online')
+                ->whereNotNull('available_expires_at')
+                ->where('available_expires_at', '>', now())
         );
     }
 
@@ -274,6 +276,8 @@ class ProviderProfile extends Model
             'availableNow',
             fn (Builder $availableQuery): Builder => $availableQuery
                 ->where('status', 'online')
+                ->whereNotNull('available_expires_at')
+                ->where('available_expires_at', '>', now())
         );
     }
 
@@ -313,6 +317,8 @@ class ProviderProfile extends Model
 
         return $this->availableNow()
             ->where('status', 'online')
+            ->whereNotNull('available_expires_at')
+            ->where('available_expires_at', '>', now())
             ->exists();
     }
 

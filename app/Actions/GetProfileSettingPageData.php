@@ -6,6 +6,7 @@ use App\Concerns\ResolvesProfileCategoryIds;
 use App\Concerns\ResolvesProfileCategoryValues;
 use App\Models\Category;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -82,6 +83,7 @@ class GetProfileSettingPageData
             : false;
 
         $availableData = $this->getAvailableNowState->execute($profile);
+        $statusSettings = SiteSetting::getStatusSettings();
 
         return [
             'profileImages' => $profileImages,
@@ -90,9 +92,11 @@ class GetProfileSettingPageData
             'userInfo' => $userInfo,
             'profileMessage' => $this->getProfileMessage->execute($profile),
             'availableStatus' => $availableData['status'],
+            'availableRemainingUses' => $availableData['remainingUses'],
             'availableExpiresAt' => $availableData['expiresAt'],
-            'availableStartedAt' => $availableData['startedAt'],
             'availableBlockedBalance' => $availableData['blockedBalance'],
+            'availableMaxUses' => $statusSettings['available_now_max_uses'],
+            'availableDurationMinutes' => $statusSettings['available_now_duration_minutes'],
         ];
     }
 
