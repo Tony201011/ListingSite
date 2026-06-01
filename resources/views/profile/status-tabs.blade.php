@@ -71,7 +71,7 @@
                         :class="enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
                     >
                         <span class="h-2.5 w-2.5 rounded-full" :class="enabled ? 'bg-green-500' : 'bg-gray-400'"></span>
-                        <span x-text="enabled ? 'Currently Online' : 'Currently Offline'"></span>
+                        <span x-text="enabled ? 'Available Now' : 'Not Available'"></span>
                     </div>
                 </div>
 

@@ -52,7 +52,7 @@
                         <span
                             class="absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-white shadow-sm"
                             :class="online ? 'bg-green-400' : 'bg-gray-300'"
-                            :title="online ? 'Online' : 'Offline'"
+                            :title="online ? 'Available Now' : 'Not Available'"
                             role="img"
                         ></span>
                     </div>

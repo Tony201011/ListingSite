@@ -34,7 +34,7 @@
                             class="h-2.5 w-2.5 rounded-full"
                             :class="enabled ? 'bg-green-500' : 'bg-white/70'"
                         ></span>
-                        <span x-text="enabled ? 'Currently Online' : 'Currently Offline'"></span>
+                        <span x-text="enabled ? 'Available Now' : 'Not Available'"></span>
                     </div>
                 </div>
             </div>

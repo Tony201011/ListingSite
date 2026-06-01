@@ -126,8 +126,8 @@
                                                         <span
                                                             class="h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm"
                                                             :class="online ? 'bg-green-400' : 'bg-gray-300'"
-                                                            :title="online ? 'Online Now' : 'Offline'"
-                                                            :aria-label="online ? 'Status: Online Now' : 'Status: Offline'"
+                                                            :title="online ? 'Available Now' : 'Not Available'"
+                                                            :aria-label="online ? 'Status: Available Now' : 'Status: Not Available'"
                                                             role="img"
                                                         ></span>
                                                     @endif
@@ -180,7 +180,7 @@
                                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                                         </svg>
                                                     </span>
-                                                    <span x-show="!loading" x-text="online ? 'Go Offline' : 'Go Online'"></span>
+                                                    <span x-show="!loading" x-text="online ? 'Go Not Available' : 'Go Available Now'"></span>
                                                 </button>
                                             </div>
                                         @endif
