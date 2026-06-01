@@ -102,8 +102,11 @@ class PurchaseTransactionResource extends Resource
                         TextEntry::make('user.mobile')
                             ->label('Provider Mobile')
                             ->placeholder('-'),
-                        TextEntry::make('user.providerProfile.name')
+                        TextEntry::make('providerProfile.name')
                             ->label('Profile Name')
+                            ->placeholder('-'),
+                        TextEntry::make('providerProfile.id')
+                            ->label('Profile ID')
                             ->placeholder('-'),
                     ]),
                 Section::make('Stripe Information')
@@ -148,6 +151,10 @@ class PurchaseTransactionResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('credits')
                     ->label('Credits')
+                    ->sortable(),
+                TextColumn::make('providerProfile.name')
+                    ->label('Profile')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('currency')
                     ->label('Currency')
@@ -235,7 +242,7 @@ class PurchaseTransactionResource extends Resource
                         ->color('danger')
                         ->requiresConfirmation()
                         ->modalHeading('Refund Transaction')
-                        ->modalDescription(fn (PurchaseTransaction $record): string => "Refund transaction for {$record->user?->name}? The Stripe refund amount and wallet deduction will be calculated from the user's unused balance.")
+                        ->modalDescription(fn (PurchaseTransaction $record): string => "Refund transaction for {$record->providerProfile?->name}? The Stripe refund amount and wallet deduction will be calculated from this profile's unused balance.")
                         ->modalSubmitActionLabel('Yes, Refund')
                         ->visible(fn (PurchaseTransaction $record): bool => $record->status === 'paid')
                         ->action(function (PurchaseTransaction $record, ProcessStripeRefund $processStripeRefund): void {
@@ -277,7 +284,7 @@ class PurchaseTransactionResource extends Resource
 
     private static function getWalletSpendHistory(PurchaseTransaction $record): array
     {
-        if (! $record->user_id) {
+        if (! $record->user_id || ! $record->provider_profile_id) {
             return [];
         }
 
@@ -291,6 +298,8 @@ class PurchaseTransactionResource extends Resource
                 'reference_id',
             ])
             ->where('user_id', $record->user_id)
+            ->where('reference_type', ProviderProfile::class)
+            ->where('reference_id', $record->provider_profile_id)
             ->where('amount', '!=', 0)
             ->latest('created_at')
             ->limit(self::WALLET_SPEND_HISTORY_LIMIT)
@@ -313,7 +322,7 @@ class PurchaseTransactionResource extends Resource
      */
     private static function getWalletSpendSummary(PurchaseTransaction $record): array
     {
-        if (! $record->user_id) {
+        if (! $record->user_id || ! $record->provider_profile_id) {
             return [
                 'total_balance' => 0,
                 'used_balance' => 0,
@@ -322,7 +331,7 @@ class PurchaseTransactionResource extends Resource
         }
 
         $request = request();
-        $cacheKey = (int) $record->user_id;
+        $cacheKey = (int) $record->provider_profile_id;
         $summaryCache = is_object($request)
             ? (array) $request->attributes->get('wallet_spend_summary_cache', [])
             : [];
@@ -333,10 +342,12 @@ class PurchaseTransactionResource extends Resource
 
         $usedBalance = abs((int) CreditLog::query()
             ->where('user_id', $record->user_id)
+            ->where('reference_type', ProviderProfile::class)
+            ->where('reference_id', $record->provider_profile_id)
             ->where('amount', '<', 0)
             ->sum('amount'));
 
-        $remainingBalance = (int) ($record->user?->credits ?? 0);
+        $remainingBalance = (int) ($record->providerProfile?->credits ?? 0);
 
         $summary = [
             'total_balance' => $usedBalance + $remainingBalance,

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\CreditPackage;
+use App\Models\ProviderProfile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,6 +16,15 @@ class CheckoutPurchaseCreditRequest extends FormRequest
         if ($lockedPackageId) {
             $this->merge([
                 'package_id' => $lockedPackageId,
+            ]);
+        }
+
+        if (! $this->has('provider_profile_id')) {
+            $fallbackProfileId = session('active_provider_profile_id')
+                ?: $this->user()?->providerProfiles()->orderBy('id')->value('id');
+
+            $this->merge([
+                'provider_profile_id' => $fallbackProfileId,
             ]);
         }
     }
@@ -33,6 +43,13 @@ class CheckoutPurchaseCreditRequest extends FormRequest
                 Rule::exists(CreditPackage::class, 'id')->where('status', 'active'),
             ],
             'invoice_name' => ['required', 'string', 'max:120'],
+            'provider_profile_id' => [
+                'required',
+                'integer',
+                Rule::exists(ProviderProfile::class, 'id')->where(
+                    fn ($query) => $query->where('user_id', $this->user()?->id)
+                ),
+            ],
         ];
     }
 
@@ -45,6 +62,8 @@ class CheckoutPurchaseCreditRequest extends FormRequest
             'invoice_name.required' => 'Invoice name is required.',
             'invoice_name.string' => 'Invoice name must be a valid string.',
             'invoice_name.max' => 'Invoice name may not be greater than 120 characters.',
+            'provider_profile_id.required' => 'Please select a provider profile for this purchase.',
+            'provider_profile_id.exists' => 'The selected provider profile is invalid.',
         ];
     }
 }

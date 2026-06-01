@@ -35,6 +35,7 @@
         </div>
 
         <div class="mb-5 rounded-2xl border border-pink-100 bg-pink-50 p-4 text-xs sm:text-sm text-gray-700 shadow-sm">
+            <div class="font-semibold text-gray-900">Selected profile: {{ $activeProfile?->name ?? 'Not selected' }}</div>
             Your current credits balance is <span class="font-semibold text-gray-900">{{ $currentBalance }}</span>.
             You are charged <span class="font-semibold text-gray-900">1 credit per day</span> while your profile is visible.
         </div>
@@ -64,6 +65,7 @@
             <div x-show="step === 'select'" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
                 <form id="package-form" action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
                     @csrf
+                    <input type="hidden" name="provider_profile_id" value="{{ $activeProfile?->id }}">
                     @if($lockedPackageId && $selectedPackage)
                         <input type="hidden" name="package_id" value="{{ $lockedPackageId }}">
                         <div class="rounded-xl border border-pink-100 bg-pink-50 p-4">
@@ -273,6 +275,7 @@
                 body: JSON.stringify({
                     package_id: data.selectedPackageId,
                     invoice_name: invoiceName,
+                    provider_profile_id: {{ (int) ($activeProfile?->id ?? 0) }},
                 }),
             });
 

@@ -30,7 +30,8 @@ class FeaturedController extends Controller
         $graphData = $this->buildGraphData($data);
 
         return view('profile.featured', array_merge($data, $graphData, [
-            'userCredits' => $user->credits ?? 0,
+            'userCredits' => $profile?->credits ?? 0,
+            'profile' => $profile,
         ]));
     }
 

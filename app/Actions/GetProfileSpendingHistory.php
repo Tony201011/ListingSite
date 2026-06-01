@@ -55,7 +55,7 @@ class GetProfileSpendingHistory
 
         return [
             'profile' => $profile,
-            'currentBalance' => (int) ($profile->user?->credits ?? 0),
+            'currentBalance' => (int) ($profile->credits ?? 0),
             'totalSpent' => $totalSpent,
             'dailyFeesSpent' => $dailyFeesSpent,
             'boostsSpent' => $boostsSpent,

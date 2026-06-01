@@ -74,8 +74,9 @@ class ProcessStripeRefund
             }
 
             $user = $locked->user;
-            if ($user) {
-                $availableCredits = max((int) $user->credits, 0);
+            $profile = $locked->providerProfile;
+            if ($profile) {
+                $availableCredits = max((int) $profile->credits, 0);
                 $creditsToDeduct = min($availableCredits, $refundableCredits);
 
                 if ($creditsToDeduct <= 0) {
@@ -85,20 +86,22 @@ class ProcessStripeRefund
                 if ($creditsToDeduct < $refundableCredits) {
                     Log::warning('Refund credit deduction exceeds available credits', [
                         'transaction_id' => $locked->id,
-                        'user_id' => $user->id,
+                        'user_id' => $locked->user_id,
+                        'provider_profile_id' => $profile->id,
                         'credits_to_deduct' => $refundableCredits,
                         'credits_available' => $availableCredits,
                     ]);
                 }
 
-                $user->decrement('credits', $creditsToDeduct);
+                $profile->decrement('credits', $creditsToDeduct);
             }
 
             $locked->update(['status' => 'refunded']);
 
             Log::info('Transaction refunded and credits deducted', [
                 'transaction_id' => $locked->id,
-                'user_id' => $user?->id,
+                'user_id' => $locked->user_id,
+                'provider_profile_id' => $locked->provider_profile_id,
                 'credits_deducted' => $creditsToDeduct,
             ]);
         });
@@ -111,8 +114,9 @@ class ProcessStripeRefund
     {
         $transactionCredits = max((int) $transaction->credits, 0);
         $userId = $transaction->user_id;
+        $profileId = $transaction->provider_profile_id;
 
-        if (! $userId || $transactionCredits <= 0) {
+        if (! $userId || ! $profileId || $transactionCredits <= 0) {
             return [
                 'transaction_credits' => $transactionCredits,
                 'used_credits' => 0,
@@ -123,6 +127,8 @@ class ProcessStripeRefund
 
         $totalUsedCredits = (int) abs(CreditLog::query()
             ->where('user_id', $userId)
+            ->where('reference_type', \App\Models\ProviderProfile::class)
+            ->where('reference_id', $profileId)
             ->where('amount', '<', 0)
             ->sum('amount'));
 
@@ -130,6 +136,7 @@ class ProcessStripeRefund
 
         $paidTransactions = PurchaseTransaction::query()
             ->where('user_id', $userId)
+            ->where('provider_profile_id', $profileId)
             ->where('status', 'paid')
             ->where(function ($query) use ($transactionSortDate, $transaction): void {
                 $query->whereRaw('COALESCE(paid_at, created_at) < ?', [$transactionSortDate])
@@ -159,9 +166,8 @@ class ProcessStripeRefund
         }
 
         $unusedCredits = max($transactionCredits - $usedCreditsFromTransaction, 0);
-        $transaction->loadMissing('user:id,credits');
-
-        $availableCredits = max((int) ($transaction->user?->credits ?? 0), 0);
+        $transaction->loadMissing('providerProfile:id,credits');
+        $availableCredits = max((int) ($transaction->providerProfile?->credits ?? 0), 0);
 
         return [
             'transaction_credits' => $transactionCredits,

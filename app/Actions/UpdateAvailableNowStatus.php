@@ -63,7 +63,7 @@ class UpdateAvailableNowStatus
             return new ActionResult(
                 false,
                 422,
-                'Your 21-day period has expired and your account balance is negative. Please clear your balance to go online or become available now.',
+                'Your 21-day period has expired and this profile balance is negative. Please top up this profile to go online or become available now.',
                 [
                     'status' => 'offline',
                     'remaining_uses' => max(0, $maxUses - $available->usage_count),
@@ -131,8 +131,6 @@ class UpdateAvailableNowStatus
             return false;
         }
 
-        $profile->loadMissing('user');
-
-        return $profile->user !== null && $profile->user->credits < 0;
+        return (int) $profile->credits < 0;
     }
 }

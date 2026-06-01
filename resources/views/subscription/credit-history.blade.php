@@ -6,7 +6,8 @@
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Credit History</h1>
-                <p class="mt-3 text-gray-600">Track every credit movement for your account.</p>
+                <p class="mt-3 text-gray-600">Track every credit movement for your selected profile.</p>
+                <p class="mt-1 text-sm font-semibold text-gray-800">Showing profile: {{ $profile?->name ?? 'Selected profile' }}</p>
             </div>
             <a href="{{ route('my-profile') }}" class="text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
         </div>

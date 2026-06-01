@@ -13,6 +13,7 @@
             <div>
                 <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Purchase History</h1>
                 <p class="mt-3 text-gray-600">View all your credit purchase transactions.</p>
+                <p class="mt-1 text-sm font-semibold text-gray-800">Showing profile: {{ $profile?->name ?? 'Selected profile' }}</p>
             </div>
             <a href="{{ route('purchase-credit') }}" class="inline-flex items-center rounded-lg bg-[#e04ecb] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

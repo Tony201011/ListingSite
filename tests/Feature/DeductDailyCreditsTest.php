@@ -25,6 +25,7 @@ class DeductDailyCreditsTest extends TestCase
             'name' => 'Visible User',
             'slug' => 'visible-user-'.$user->id,
             'profile_status' => 'approved',
+            'credits' => 243,
         ]);
 
         HideShowProfile::create([
@@ -36,8 +37,8 @@ class DeductDailyCreditsTest extends TestCase
         $this->artisan('credits:deduct-daily')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+        $this->assertDatabaseHas('provider_profiles', [
+            'id' => $profile->id,
             'credits' => 242,
         ]);
 
@@ -63,6 +64,7 @@ class DeductDailyCreditsTest extends TestCase
             'name' => 'Hidden User',
             'slug' => 'hidden-user-'.$user->id,
             'profile_status' => 'approved',
+            'credits' => 243,
         ]);
 
         HideShowProfile::create([
@@ -74,8 +76,8 @@ class DeductDailyCreditsTest extends TestCase
         $this->artisan('credits:deduct-daily')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+        $this->assertDatabaseHas('provider_profiles', [
+            'id' => $profile->id,
             'credits' => 243,
         ]);
 
@@ -97,6 +99,7 @@ class DeductDailyCreditsTest extends TestCase
             'name' => 'No Credits User',
             'slug' => 'no-credits-user-'.$user->id,
             'profile_status' => 'approved',
+            'credits' => 0,
         ]);
 
         HideShowProfile::create([
@@ -108,8 +111,8 @@ class DeductDailyCreditsTest extends TestCase
         $this->artisan('credits:deduct-daily')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+        $this->assertDatabaseHas('provider_profiles', [
+            'id' => $profile->id,
             'credits' => 0,
         ]);
 
@@ -133,6 +136,7 @@ class DeductDailyCreditsTest extends TestCase
             'slug' => 'free-trial-user-'.$user->id,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->addDays(10),
+            'credits' => 100,
         ]);
 
         HideShowProfile::create([
@@ -144,8 +148,8 @@ class DeductDailyCreditsTest extends TestCase
         $this->artisan('credits:deduct-daily')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+        $this->assertDatabaseHas('provider_profiles', [
+            'id' => $profile->id,
             'credits' => 100,
         ]);
 
@@ -168,6 +172,7 @@ class DeductDailyCreditsTest extends TestCase
             'slug' => 'post-trial-user-'.$user->id,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->subDay(),
+            'credits' => 100,
         ]);
 
         HideShowProfile::create([
@@ -179,8 +184,8 @@ class DeductDailyCreditsTest extends TestCase
         $this->artisan('credits:deduct-daily')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+        $this->assertDatabaseHas('provider_profiles', [
+            'id' => $profile->id,
             'credits' => 99,
         ]);
     }
@@ -198,6 +203,7 @@ class DeductDailyCreditsTest extends TestCase
             'slug' => 'profile-one-'.$user->id,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->subDay(),
+            'credits' => 5,
         ]);
 
         $secondProfile = ProviderProfile::create([
@@ -206,15 +212,14 @@ class DeductDailyCreditsTest extends TestCase
             'slug' => 'profile-two-'.$user->id,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->subDay(),
+            'credits' => 5,
         ]);
 
         $this->artisan('credits:deduct-daily')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'credits' => 3,
-        ]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $firstProfile->id, 'credits' => 4]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $secondProfile->id, 'credits' => 4]);
 
         $this->assertSame(2, CreditLog::query()
             ->where('user_id', $user->id)
@@ -248,6 +253,7 @@ class DeductDailyCreditsTest extends TestCase
             'slug' => 'paid-profile-'.$user->id,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->subDay(),
+            'credits' => 1,
         ]);
 
         $secondProfile = ProviderProfile::create([
@@ -256,15 +262,14 @@ class DeductDailyCreditsTest extends TestCase
             'slug' => 'unpaid-profile-'.$user->id,
             'profile_status' => 'approved',
             'free_listing_expires_at' => now()->subDay(),
+            'credits' => 0,
         ]);
 
         $this->artisan('credits:deduct-daily')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'credits' => 0,
-        ]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $firstProfile->id, 'credits' => 0]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $secondProfile->id, 'credits' => 0]);
 
         $this->assertSame(1, CreditLog::query()
             ->where('user_id', $user->id)

@@ -13,6 +13,7 @@ class PurchaseTransaction extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'stripe_session_id',
         'stripe_payment_intent_id',
         'receipt_url',
@@ -34,6 +35,11 @@ class PurchaseTransaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function providerProfile(): BelongsTo
+    {
+        return $this->belongsTo(ProviderProfile::class);
     }
 
     public function scopePaid($query)

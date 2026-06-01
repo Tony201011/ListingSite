@@ -119,7 +119,7 @@ class PurchaseCreditFlowTest extends TestCase
     public function test_purchase_credit_page_shows_user_current_balance(): void
     {
         $user = $this->createProvider();
-        $user->update(['credits' => 42]);
+        $user->providerProfile->update(['credits' => 42]);
 
         $response = $this->actingAsProvider($user)->get('/purchase-credit');
 
@@ -270,7 +270,7 @@ class PurchaseCreditFlowTest extends TestCase
             'checkout_success',
             "Checkout started for {$lockedPackage->credits} credits (AUD $".
             number_format((float) $lockedPackage->price, 2).
-            ") under invoice name 'Locked Invoice'."
+            ") for {$user->name} under invoice name 'Locked Invoice'."
         );
     }
 
@@ -306,7 +306,7 @@ class PurchaseCreditFlowTest extends TestCase
             'checkout_success',
             "Checkout started for {$otherPackage->credits} credits (AUD $".
             number_format((float) $otherPackage->price, 2).
-            ") under invoice name 'Unlocked Invoice'."
+            ") for {$user->name} under invoice name 'Unlocked Invoice'."
         );
     }
 
@@ -317,10 +317,12 @@ class PurchaseCreditFlowTest extends TestCase
     public function test_checkout_success_redirects_to_history_when_transaction_is_paid(): void
     {
         $user = $this->createProvider();
-        $user->update(['credits' => 0]);
+        $profile = $user->providerProfile;
+        $profile->update(['credits' => 0]);
 
         PurchaseTransaction::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'stripe_session_id' => 'cs_test_already_paid',
             'credits' => 30,
             'amount' => '9.99',
@@ -340,10 +342,12 @@ class PurchaseCreditFlowTest extends TestCase
     public function test_checkout_success_does_not_re_add_credits_for_already_paid_transaction(): void
     {
         $user = $this->createProvider();
-        $user->update(['credits' => 30]);
+        $profile = $user->providerProfile;
+        $profile->update(['credits' => 30]);
 
         PurchaseTransaction::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'stripe_session_id' => 'cs_test_no_double',
             'credits' => 30,
             'amount' => '9.99',
@@ -356,7 +360,7 @@ class PurchaseCreditFlowTest extends TestCase
         $this->actingAsProvider($user)
             ->get('/purchase-credit/success?session_id=cs_test_no_double');
 
-        $this->assertDatabaseHas('users', ['id' => $user->id, 'credits' => 30]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $profile->id, 'credits' => 30]);
     }
 
     public function test_checkout_success_returns_error_for_missing_session_id(): void
@@ -376,6 +380,7 @@ class PurchaseCreditFlowTest extends TestCase
 
         PurchaseTransaction::create([
             'user_id' => $otherUser->id,
+            'provider_profile_id' => $otherUser->providerProfile->id,
             'stripe_session_id' => 'cs_test_other_user',
             'credits' => 30,
             'amount' => '9.99',
@@ -416,10 +421,12 @@ class PurchaseCreditFlowTest extends TestCase
     public function test_webhook_adds_credits_and_marks_transaction_paid(): void
     {
         $user = $this->createProvider();
-        $user->update(['credits' => 0]);
+        $profile = $user->providerProfile;
+        $profile->update(['credits' => 0]);
 
         $transaction = PurchaseTransaction::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'stripe_session_id' => 'cs_test_webhook',
             'credits' => 50,
             'amount' => '19.99',
@@ -435,19 +442,50 @@ class PurchaseCreditFlowTest extends TestCase
             'status' => 'paid',
         ]);
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+        $this->assertDatabaseHas('provider_profiles', [
+            'id' => $profile->id,
             'credits' => 50,
         ]);
+    }
+
+    public function test_webhook_credits_only_target_profile_under_same_account(): void
+    {
+        $user = $this->createProvider();
+        $primaryProfile = $user->providerProfile;
+        $secondaryProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Second Profile',
+            'slug' => 'second-profile-'.$user->id,
+            'credits' => 0,
+        ]);
+        $primaryProfile->update(['credits' => 0]);
+
+        $transaction = PurchaseTransaction::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $primaryProfile->id,
+            'stripe_session_id' => 'cs_test_profile_scope',
+            'credits' => 30,
+            'amount' => '9.99',
+            'currency' => 'AUD',
+            'status' => 'pending',
+            'invoice_name' => 'Scoped Profile',
+        ]);
+
+        $this->invokeWebhookHandler($transaction, 'cs_test_profile_scope');
+
+        $this->assertDatabaseHas('provider_profiles', ['id' => $primaryProfile->id, 'credits' => 30]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $secondaryProfile->id, 'credits' => 0]);
     }
 
     public function test_webhook_sends_purchase_email_on_successful_payment(): void
     {
         $user = $this->createProvider();
-        $user->update(['credits' => 0]);
+        $profile = $user->providerProfile;
+        $profile->update(['credits' => 0]);
 
         $transaction = PurchaseTransaction::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'stripe_session_id' => 'cs_test_email',
             'credits' => 30,
             'amount' => '9.99',
@@ -471,6 +509,7 @@ class PurchaseCreditFlowTest extends TestCase
             'metadata' => (object) [
                 'transaction_id' => (string) $transaction->id,
                 'user_id' => (string) $transaction->user_id,
+                'provider_profile_id' => (string) $transaction->provider_profile_id,
                 'credits' => (string) $transaction->credits,
             ],
             'id' => 'cs_test_email',
@@ -482,10 +521,12 @@ class PurchaseCreditFlowTest extends TestCase
     public function test_webhook_is_idempotent_on_duplicate_delivery(): void
     {
         $user = $this->createProvider();
-        $user->update(['credits' => 0]);
+        $profile = $user->providerProfile;
+        $profile->update(['credits' => 0]);
 
         $transaction = PurchaseTransaction::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'stripe_session_id' => 'cs_test_idempotent',
             'credits' => 20,
             'amount' => '7.99',
@@ -497,17 +538,19 @@ class PurchaseCreditFlowTest extends TestCase
         $this->invokeWebhookHandler($transaction, 'cs_test_idempotent');
         $this->invokeWebhookHandler($transaction, 'cs_test_idempotent');
 
-        $user->refresh();
-        $this->assertEquals(20, $user->credits);
+        $profile->refresh();
+        $this->assertEquals(20, $profile->credits);
     }
 
     public function test_webhook_does_not_add_credits_when_payment_not_paid(): void
     {
         $user = $this->createProvider();
-        $user->update(['credits' => 0]);
+        $profile = $user->providerProfile;
+        $profile->update(['credits' => 0]);
 
         $transaction = PurchaseTransaction::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
             'stripe_session_id' => 'cs_test_unpaid',
             'credits' => 30,
             'amount' => '9.99',
@@ -522,7 +565,7 @@ class PurchaseCreditFlowTest extends TestCase
             'id' => $transaction->id,
             'status' => 'pending',
         ]);
-        $this->assertDatabaseHas('users', ['id' => $user->id, 'credits' => 0]);
+        $this->assertDatabaseHas('provider_profiles', ['id' => $profile->id, 'credits' => 0]);
     }
 
     public function test_webhook_logs_warning_when_no_transaction_id_in_metadata(): void
@@ -555,6 +598,7 @@ class PurchaseCreditFlowTest extends TestCase
 
         PurchaseTransaction::create([
             'user_id' => $user->id,
+            'provider_profile_id' => $user->providerProfile->id,
             'credits' => 30,
             'amount' => '9.99',
             'currency' => 'AUD',
@@ -577,6 +621,7 @@ class PurchaseCreditFlowTest extends TestCase
 
         PurchaseTransaction::create([
             'user_id' => $otherUser->id,
+            'provider_profile_id' => $otherUser->providerProfile->id,
             'credits' => 30,
             'amount' => '9.99',
             'currency' => 'AUD',
@@ -649,6 +694,7 @@ class PurchaseCreditFlowTest extends TestCase
             'metadata' => (object) [
                 'transaction_id' => (string) $transaction->id,
                 'user_id' => (string) $transaction->user_id,
+                'provider_profile_id' => (string) $transaction->provider_profile_id,
                 'credits' => (string) $transaction->credits,
             ],
             'id' => $sessionId,

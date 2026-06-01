@@ -3,6 +3,7 @@
 namespace App\Actions\Subscription;
 
 use App\Models\CreditLog;
+use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\DB;
@@ -67,21 +68,23 @@ class HandleStripeWebhook
                 'stripe_payment_intent_id' => $session->payment_intent,
                 'receipt_url' => $receiptUrl,
                 'paid_at' => now(),
+                'provider_profile_id' => $locked->provider_profile_id ?: (int) ($session->metadata->provider_profile_id ?? 0) ?: null,
             ]);
 
-            $user = $locked->user;
-            if ($user) {
-                $user->increment('credits', $locked->credits);
+            $profile = $locked->providerProfile;
+            if ($profile) {
+                $profile->increment('credits', $locked->credits);
                 CreditLog::create([
-                    'user_id' => $user->id,
+                    'user_id' => $locked->user_id,
                     'amount' => $locked->credits,
                     'type' => 'purchase_credit',
                     'description' => "Purchased {$locked->credits} credits",
-                    'reference_type' => PurchaseTransaction::class,
-                    'reference_id' => $locked->id,
+                    'reference_type' => ProviderProfile::class,
+                    'reference_id' => $profile->id,
                 ]);
                 Log::info('Credits added to user via webhook', [
-                    'user_id' => $user->id,
+                    'user_id' => $locked->user_id,
+                    'provider_profile_id' => $profile->id,
                     'credits_added' => $locked->credits,
                     'transaction_id' => $locked->id,
                     'session_id' => $session->id,
@@ -120,21 +123,23 @@ class HandleStripeWebhook
                 'stripe_payment_intent_id' => $paymentIntent->id,
                 'receipt_url' => $receiptUrl,
                 'paid_at' => now(),
+                'provider_profile_id' => $locked->provider_profile_id ?: (int) ($paymentIntent->metadata->provider_profile_id ?? 0) ?: null,
             ]);
 
-            $user = $locked->user;
-            if ($user) {
-                $user->increment('credits', $locked->credits);
+            $profile = $locked->providerProfile;
+            if ($profile) {
+                $profile->increment('credits', $locked->credits);
                 CreditLog::create([
-                    'user_id' => $user->id,
+                    'user_id' => $locked->user_id,
                     'amount' => $locked->credits,
                     'type' => 'purchase_credit',
                     'description' => "Purchased {$locked->credits} credits",
-                    'reference_type' => PurchaseTransaction::class,
-                    'reference_id' => $locked->id,
+                    'reference_type' => ProviderProfile::class,
+                    'reference_id' => $profile->id,
                 ]);
                 Log::info('Credits added to user via payment_intent webhook', [
-                    'user_id' => $user->id,
+                    'user_id' => $locked->user_id,
+                    'provider_profile_id' => $profile->id,
                     'credits_added' => $locked->credits,
                     'transaction_id' => $locked->id,
                     'payment_intent_id' => $paymentIntent->id,

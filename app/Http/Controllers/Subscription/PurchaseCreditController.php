@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Subscription;
 
+use App\Actions\GetActiveProviderProfile;
 use App\Actions\Subscription\CreatePaymentIntent;
 use App\Actions\Subscription\CreatePurchaseComplaint;
 use App\Actions\Subscription\GetCreditHistory;
@@ -29,6 +30,7 @@ class PurchaseCreditController extends Controller
         private CreatePurchaseComplaint $createPurchaseComplaint,
         private GetCreditHistory $getCreditHistory,
         private CreatePaymentIntent $createPaymentIntent,
+        private GetActiveProviderProfile $getActiveProviderProfile,
     ) {}
 
     public function purchaseCredit(): View
@@ -46,7 +48,10 @@ class PurchaseCreditController extends Controller
 
     public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse
     {
-        $result = $this->processCreditCheckout->execute($request->validated());
+        $validated = $request->validated();
+        $result = $this->processCreditCheckout->execute($validated);
+        $activeProfile = $this->getActiveProviderProfile->execute($request->user());
+        $profileName = $activeProfile?->name ?? 'selected profile';
 
         if (isset($result['checkout_url'])) {
             return redirect($result['checkout_url']);
@@ -56,7 +61,7 @@ class PurchaseCreditController extends Controller
             'checkout_success',
             "Checkout started for {$result['credits']} credits (AUD $".
             number_format($result['price'], 2).
-            ") under invoice name '{$result['invoice_name']}'."
+            ") for {$profileName} under invoice name '{$result['invoice_name']}'."
         );
     }
 
@@ -66,11 +71,13 @@ class PurchaseCreditController extends Controller
         if ($request->get('payment_intent')) {
             $paymentIntentId = $request->get('payment_intent');
             $result = $this->handlePaymentIntentSuccess->execute($paymentIntentId);
+            $profile = $this->getActiveProviderProfile->execute($request->user());
+            $profileName = $profile?->name ?? 'selected profile';
 
             return match ($result['status']) {
                 'paid' => redirect('/purchase-history')->with(
                     'checkout_success',
-                    "Payment successful! {$result['credits']} credits have been added to your account."
+                    "Payment successful! {$result['credits']} credits have been added to {$profileName}."
                 ),
                 'not_found' => redirect('/purchase-credit')->withErrors('Transaction not found.'),
                 'not_configured' => redirect('/purchase-credit')->withErrors('Payment system is not configured.'),
@@ -88,11 +95,13 @@ class PurchaseCreditController extends Controller
         }
 
         $result = $this->handleCheckoutSuccess->execute($sessionId);
+        $profile = $this->getActiveProviderProfile->execute($request->user());
+        $profileName = $profile?->name ?? 'selected profile';
 
         return match ($result['status']) {
             'paid' => redirect('/purchase-history')->with(
                 'checkout_success',
-                "Payment successful! {$result['credits']} credits have been added to your account."
+                "Payment successful! {$result['credits']} credits have been added to {$profileName}."
             ),
             'not_found' => redirect('/purchase-credit')->withErrors('Transaction not found.'),
             'not_configured' => redirect('/purchase-credit')->withErrors('Payment system is not configured.'),
@@ -138,6 +147,11 @@ class PurchaseCreditController extends Controller
         ]);
 
         if ($purchaseTransaction->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $activeProfile = $this->getActiveProviderProfile->execute($request->user());
+        if (! $activeProfile || $purchaseTransaction->provider_profile_id !== $activeProfile->id) {
             abort(403);
         }
 
