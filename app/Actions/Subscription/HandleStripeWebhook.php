@@ -2,6 +2,7 @@
 
 namespace App\Actions\Subscription;
 
+use App\Actions\Referral\ProcessReferralRewardForFirstPayment;
 use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
@@ -14,6 +15,7 @@ class HandleStripeWebhook
 {
     public function __construct(
         private SendCreditPurchaseEmail $sendCreditPurchaseEmail,
+        private ProcessReferralRewardForFirstPayment $processReferralRewardForFirstPayment,
     ) {}
 
     public function execute(object $event): void
@@ -90,6 +92,8 @@ class HandleStripeWebhook
                     'session_id' => $session->id,
                 ]);
             }
+
+            $this->processReferralRewardForFirstPayment->execute($locked);
         });
 
         $transaction->refresh();
@@ -145,6 +149,8 @@ class HandleStripeWebhook
                     'payment_intent_id' => $paymentIntent->id,
                 ]);
             }
+
+            $this->processReferralRewardForFirstPayment->execute($locked);
         });
 
         $transaction->refresh();

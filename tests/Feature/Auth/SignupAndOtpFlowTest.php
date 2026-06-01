@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\TwilioSetting;
 use App\Models\User;
 use App\Models\ProviderProfile;
+use App\Models\Referral;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -99,6 +100,16 @@ class SignupAndOtpFlowTest extends TestCase
 
         $response->assertRedirect('/signup');
         $response->assertSessionHasErrors(['password']);
+    }
+
+    public function test_signup_rejects_invalid_referral_code(): void
+    {
+        $response = $this->from('/signup')->post('/signup', $this->validSignupPayload([
+            'referral_code' => 'INVALIDCODE',
+        ]));
+
+        $response->assertRedirect('/signup');
+        $response->assertSessionHasErrors(['referral_code']);
     }
 
     public function test_signup_rejects_mismatched_password_confirmation(): void
@@ -205,6 +216,35 @@ class SignupAndOtpFlowTest extends TestCase
         $this->assertNull(Cache::get($pendingKey.'_otp'));
         $this->assertFalse(session()->has('otp_required'));
         $this->assertFalse(session()->has('pending_signup_key'));
+    }
+
+    public function test_otp_verify_with_valid_referral_creates_pending_referral_record(): void
+    {
+        $referrer = User::factory()->create();
+        ProviderProfile::query()->create([
+            'user_id' => $referrer->id,
+            'name' => 'Referrer Profile',
+            'slug' => 'referrer-profile-'.$referrer->id,
+            'account_user_referral_code' => 'REF12345',
+        ]);
+
+        $this->from('/signup')->post('/signup', $this->validSignupPayload([
+            'referral_code' => 'REF12345',
+        ]));
+
+        $response = $this->postJson('/verify-otp', ['otp' => self::DUMMY_OTP]);
+
+        $response->assertOk();
+
+        $referredUser = User::query()->where('email', 'newprovider@example.com')->firstOrFail();
+
+        $this->assertDatabaseHas((new Referral)->getTable(), [
+            'referrer_id' => $referrer->id,
+            'referred_user_id' => $referredUser->id,
+            'referral_code' => 'REF12345',
+            'status' => 'pending',
+            'payment_id' => null,
+        ]);
     }
 
     // ---------------------------------------------------------------

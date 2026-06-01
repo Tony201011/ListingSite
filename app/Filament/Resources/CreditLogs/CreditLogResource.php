@@ -73,14 +73,25 @@ class CreditLogResource extends Resource
                         'daily_deduction' => 'Daily Listing Fee',
                         'used' => 'Featured/Ad Spend',
                         'purchase_credit' => 'Credit Purchase',
+                        'referral_reward' => 'Referral Reward',
                         default => str($state)->headline()->toString(),
                     })
                     ->color(fn (string $state): string => match ($state) {
                         'daily_deduction' => 'warning',
                         'used' => 'danger',
                         'purchase_credit' => 'success',
+                        'referral_reward' => 'info',
                         default => 'gray',
                     }),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'reversed' => 'danger',
+                        default => 'success',
+                    })
+                    ->placeholder('-'),
                 TextColumn::make('description')
                     ->label('Description')
                     ->searchable()
@@ -115,6 +126,7 @@ class CreditLogResource extends Resource
                         'daily_deduction' => 'Daily Listing Fee',
                         'used' => 'Featured/Ad Spend',
                         'purchase_credit' => 'Credit Purchase',
+                        'referral_reward' => 'Referral Reward',
                     ]),
             ])
             ->defaultSort('created_at', 'desc')

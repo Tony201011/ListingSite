@@ -3,6 +3,7 @@
 namespace App\Actions\Auth;
 
 use App\Actions\Support\ActionResult;
+use App\Actions\Referral\CreatePendingReferralOnSignup;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -17,6 +18,7 @@ class VerifyProviderSignupOtp
 
     public function __construct(
         private SendProviderAccountEmails $sendProviderAccountEmails,
+        private CreatePendingReferralOnSignup $createPendingReferralOnSignup,
     ) {}
 
     public function execute(string $otp): ActionResult
@@ -81,6 +83,8 @@ class VerifyProviderSignupOtp
             'mobile_verified' => true,
             'referral_code' => $pendingUser['referral_code'],
         ]);
+
+        $this->createPendingReferralOnSignup->execute($user, $pendingUser['referral_code'] ?? null);
 
         $this->sendProviderAccountEmails->execute($user);
 
