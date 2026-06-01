@@ -885,8 +885,12 @@ class UserResource extends Resource
                                     TextEntry::make('availableNow.status')
                                         ->label('Available Now')
                                         ->badge()
-                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Offline')
-                                        ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray'),
+                                        ->getStateUsing(
+                                            fn (ProviderProfile $record): string => $record->isCurrentlyOnline() || $record->isCurrentlyAvailableNow()
+                                                ? 'Available Now'
+                                                : 'Unavailable'
+                                        )
+                                        ->color(fn (string $state): string => $state === 'Available Now' ? 'success' : 'gray'),
                                 ])
                                 ->columns(3),
                         ]),
@@ -1069,18 +1073,40 @@ class UserResource extends Resource
                     ->selectRaw(
                         <<<'SQL'
                         CASE
-                            WHEN EXISTS (
-                                SELECT 1
-                                FROM available_nows
-                                WHERE available_nows.provider_profile_id = provider_profiles.id
-                                AND available_nows.status = ?
-                                AND available_nows.available_expires_at IS NOT NULL
-                                AND available_nows.available_expires_at > ?
+                            WHEN (
+                                EXISTS (
+                                    SELECT 1
+                                    FROM available_nows
+                                    WHERE available_nows.provider_profile_id = provider_profiles.id
+                                    AND available_nows.status = ?
+                                    AND available_nows.available_expires_at IS NOT NULL
+                                    AND available_nows.available_expires_at > ?
+                                )
+                                OR EXISTS (
+                                    SELECT 1
+                                    FROM online_users
+                                    WHERE online_users.provider_profile_id = provider_profiles.id
+                                    AND online_users.status = ?
+                                )
+                                OR (
+                                    NOT EXISTS (
+                                        SELECT 1
+                                        FROM online_users
+                                        WHERE online_users.provider_profile_id = provider_profiles.id
+                                    )
+                                    AND EXISTS (
+                                        SELECT 1
+                                        FROM online_users AS legacy_online_users
+                                        WHERE legacy_online_users.user_id = provider_profiles.user_id
+                                        AND legacy_online_users.provider_profile_id IS NULL
+                                        AND legacy_online_users.status = ?
+                                    )
+                                )
                             ) THEN ?
                             ELSE ?
                         END AS available_now_status
                         SQL,
-                        ['online', now(), 'online', 'offline']
+                        ['online', now(), 'online', 'online', 'online', 'offline']
                     );
             })
             ->columns([
@@ -1280,8 +1306,10 @@ class UserResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
-                            'online' => $query->whereCurrentlyAvailableNow(),
-                            'offline' => $query->whereCurrentlyUnavailableNow(),
+                            'online' => $query->where(function (Builder $query): Builder {
+                                return $query->whereCurrentlyOnline()->orWhereCurrentlyAvailableNow();
+                            }),
+                            'offline' => $query->whereCurrentlyOffline()->whereCurrentlyUnavailableNow(),
                             default => $query,
                         };
                     })
@@ -1591,7 +1619,11 @@ class UserResource extends Resource
                     ->collapsible(),
                 Group::make('available_now_status')
                     ->label('Available Now Status')
-                    ->getTitleFromRecordUsing(fn (ProviderProfile $record): string => $record->isCurrentlyAvailableNow() ? 'Available Now' : 'Unavailable')
+                    ->getTitleFromRecordUsing(
+                        fn (ProviderProfile $record): string => $record->isCurrentlyOnline() || $record->isCurrentlyAvailableNow()
+                            ? 'Available Now'
+                            : 'Unavailable'
+                    )
                     ->collapsible(),
                 Group::make('is_featured')
                     ->label('Featured')
