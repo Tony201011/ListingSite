@@ -259,6 +259,28 @@ class ProviderProfile extends Model
         });
     }
 
+    public function scopeWhereCurrentlyAvailableNow(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'availableNow',
+            fn (Builder $availableQuery): Builder => $availableQuery
+                ->where('status', 'online')
+                ->whereNotNull('available_expires_at')
+                ->where('available_expires_at', '>', now())
+        );
+    }
+
+    public function scopeWhereCurrentlyUnavailableNow(Builder $query): Builder
+    {
+        return $query->whereDoesntHave(
+            'availableNow',
+            fn (Builder $availableQuery): Builder => $availableQuery
+                ->where('status', 'online')
+                ->whereNotNull('available_expires_at')
+                ->where('available_expires_at', '>', now())
+        );
+    }
+
     public function isCurrentlyOnline(): bool
     {
         // Check profile-linked row first
@@ -285,6 +307,19 @@ class ProviderProfile extends Model
             'legacyOnlineUsers',
             fn (Builder $q): Builder => $q->where('status', 'online')
         )->exists();
+    }
+
+    public function isCurrentlyAvailableNow(): bool
+    {
+        if ($this->relationLoaded('availableNow')) {
+            return $this->availableNow?->isCurrentlyAvailable() ?? false;
+        }
+
+        return $this->availableNow()
+            ->where('status', 'online')
+            ->whereNotNull('available_expires_at')
+            ->where('available_expires_at', '>', now())
+            ->exists();
     }
 
     // -----------------------------------------------------------------------
