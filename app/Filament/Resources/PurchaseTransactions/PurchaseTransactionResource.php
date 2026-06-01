@@ -21,6 +21,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use UnitEnum;
@@ -150,17 +151,46 @@ class PurchaseTransactionResource extends Resource
                     ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('credits')
-                    ->label('Credits')
+                    ->label('Credits Purchased')
+                    ->sortable(),
+                TextColumn::make('provider_profile_id')
+                    ->label('Profile ID')
                     ->sortable(),
                 TextColumn::make('providerProfile.name')
-                    ->label('Profile')
+                    ->label('Profile Name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('providerProfile.slug')
+                    ->label('Profile Slug')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('-'),
+                TextColumn::make('providerProfile.profile_status')
+                    ->label('Profile Status')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => ucfirst((string) ($state ?: 'unknown')))
+                    ->color(fn (?string $state): string => match ($state) {
+                        'approved' => 'success',
+                        'pending' => 'warning',
+                        'rejected' => 'danger',
+                        'hold' => 'gray',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+                TextColumn::make('available_now_status')
+                    ->label('Available Now')
+                    ->badge()
+                    ->getStateUsing(fn (PurchaseTransaction $record): string => self::resolveAvailableNowStatus($record))
+                    ->color(fn (string $state): string => $state === 'Available Now' ? 'success' : 'gray'),
+                TextColumn::make('featured_boost_status')
+                    ->label('Featured / Boost')
+                    ->badge()
+                    ->getStateUsing(fn (PurchaseTransaction $record): string => self::resolveFeaturedBoostStatus($record)),
                 TextColumn::make('currency')
                     ->label('Currency')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label('Payment Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'paid' => 'success',
@@ -187,7 +217,7 @@ class PurchaseTransactionResource extends Resource
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('paid_at')
-                    ->label('Paid At')
+                    ->label('Paid Date')
                     ->dateTime()
                     ->since()
                     ->sortable()
@@ -269,6 +299,20 @@ class PurchaseTransactionResource extends Resource
                         }),
                 ]),
             ])
+            ->groups([
+                Group::make('user_id')
+                    ->label('Account')
+                    ->getTitleFromRecordUsing(fn (PurchaseTransaction $record): string => self::resolveAccountGroupTitle($record))
+                    ->collapsible(),
+                Group::make('providerProfile.name')
+                    ->label('Profile Name')
+                    ->collapsible(),
+                Group::make('status')
+                    ->label('Payment Status')
+                    ->getTitleFromRecordUsing(fn (PurchaseTransaction $record): string => ucfirst($record->status ?? 'Unknown'))
+                    ->collapsible(),
+            ])
+            ->defaultGroup('user_id')
             ->defaultSort('created_at', 'desc')
             ->striped()
             ->emptyStateHeading('No transactions yet')
@@ -374,5 +418,78 @@ class PurchaseTransactionResource extends Resource
             PurchaseTransaction::class => static::getUrl('index', ['tableSearch' => $log->reference_id]),
             default => null,
         };
+    }
+
+    private static function resolveAccountGroupTitle(PurchaseTransaction $record): string
+    {
+        $name = $record->user?->name ?: 'Unknown Account';
+        $email = $record->user?->email ?: 'No email';
+        $totalCredits = self::getAccountPurchasedCredits($record);
+
+        return "{$name} · {$email} · Total Credits Purchased: {$totalCredits}";
+    }
+
+    private static function getAccountPurchasedCredits(PurchaseTransaction $record): int
+    {
+        if (! $record->user_id) {
+            return 0;
+        }
+
+        $request = request();
+        $cache = is_object($request)
+            ? (array) $request->attributes->get('account_purchased_credits_cache', [])
+            : [];
+
+        if (array_key_exists($record->user_id, $cache)) {
+            return (int) $cache[$record->user_id];
+        }
+
+        $totalCredits = (int) PurchaseTransaction::query()
+            ->where('user_id', $record->user_id)
+            ->where('status', 'paid')
+            ->sum('credits');
+
+        if (is_object($request)) {
+            $cache[$record->user_id] = $totalCredits;
+            $request->attributes->set('account_purchased_credits_cache', $cache);
+        }
+
+        return $totalCredits;
+    }
+
+    private static function resolveAvailableNowStatus(PurchaseTransaction $record): string
+    {
+        $profile = $record->providerProfile;
+
+        if (! $profile) {
+            return 'Unknown';
+        }
+
+        return $profile->isCurrentlyOnline() || $profile->isCurrentlyAvailableNow()
+            ? 'Available Now'
+            : 'Unavailable';
+    }
+
+    private static function resolveFeaturedBoostStatus(PurchaseTransaction $record): string
+    {
+        $profile = $record->providerProfile;
+
+        if (! $profile) {
+            return 'Unknown';
+        }
+
+        $hasBoost = $profile->home_featured_expires_at?->isFuture()
+            || $profile->local_banner_expires_at?->isFuture()
+            || $profile->home_banner_expires_at?->isFuture();
+
+        if ($profile->is_featured && $hasBoost) {
+            return 'Featured + Boosted';
+        }
+
+        if ($profile->is_featured) {
+            return 'Featured';
+        }
+
+        return $hasBoost ? 'Boosted' : 'Standard';
     }
 }
