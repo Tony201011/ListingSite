@@ -1017,7 +1017,7 @@ class BuildProfileFilterViewData
             'date' => $profile->created_at->format('d/m/Y'),
             'description' => $profile->description ?? '',
             'active' => $isOnline,
-            'available_now' => $isAvailableNow,
+            'available_now' => $isOnline || $isAvailableNow,
             'verified' => $isPhotoVerified,
             'featured' => (bool) $profile->is_featured,
             'home_featured' => $profile->home_featured_expires_at && $profile->home_featured_expires_at->isFuture(),
