@@ -30,8 +30,4 @@ class ListAccounts extends ListRecordsWithPageJump
         return 1;
     }
 
-    public function updatedTableFilters(): void
-    {
-        $this->resetPage($this->getTablePaginationPageName());
-    }
 }
