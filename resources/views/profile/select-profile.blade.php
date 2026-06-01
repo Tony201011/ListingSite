@@ -11,8 +11,8 @@
     <div class="flex flex-wrap justify-center gap-6">
         @foreach($profiles as $profile)
             @php
-                $state = $onlineStates[$profile->id] ?? ['status' => false, 'expiresAt' => null];
-                $isOnline = (bool) ($state['status'] ?? false);
+                $state = $onlineStates[$profile->id] ?? ['onlineStatus' => false, 'remainingUses' => 0, 'expiresAt' => null];
+                $isOnline = (bool) $state['onlineStatus'];
                 $isActive = (int) $activeProfileId === $profile->id;
             @endphp
             <form
@@ -52,7 +52,7 @@
                         <span
                             class="absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-white shadow-sm"
                             :class="online ? 'bg-green-400' : 'bg-gray-300'"
-                            :title="online ? 'Available Now' : 'Unavailable'"
+                            :title="online ? 'Online' : 'Offline'"
                             role="img"
                         ></span>
                     </div>

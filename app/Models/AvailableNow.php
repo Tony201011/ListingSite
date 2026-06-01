@@ -35,11 +35,19 @@ class AvailableNow extends Model
 
     public function isCurrentlyAvailable(): bool
     {
-        return $this->status === 'online';
+        return $this->status === 'online'
+            && $this->available_expires_at
+            && now()->lt($this->available_expires_at);
     }
 
     public function resetDailyUsageIfNeeded(): void
     {
-        // Available Now is now a persistent manual status.
+        if (! $this->usage_date || ! $this->usage_date->isToday()) {
+            $this->usage_date = today();
+            $this->usage_count = 0;
+            $this->status = 'offline';
+            $this->available_started_at = null;
+            $this->available_expires_at = null;
+        }
     }
 }

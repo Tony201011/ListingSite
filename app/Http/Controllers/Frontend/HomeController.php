@@ -234,7 +234,7 @@ class HomeController extends Controller
                 'local_banner_expires_at',
                 'home_banner_expires_at',
             ])
-            ->whereCurrentlyAvailableNow()
+            ->whereCurrentlyOnline()
             ->get();
 
         $onlineIds = $onlineProfiles->pluck('id')->map(fn ($id) => (int) $id)->sort()->values();
