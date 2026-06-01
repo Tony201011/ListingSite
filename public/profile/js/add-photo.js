@@ -228,6 +228,7 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.uploading = true;
+            window.dispatchEvent(new CustomEvent('upload:start'));
 
             const formData = new FormData();
 
@@ -265,6 +266,7 @@ document.addEventListener('alpine:init', () => {
                 this.errorMessage = error.message || 'Something went wrong.';
             } finally {
                 this.uploading = false;
+                window.dispatchEvent(new CustomEvent('upload:end'));
             }
         },
 
