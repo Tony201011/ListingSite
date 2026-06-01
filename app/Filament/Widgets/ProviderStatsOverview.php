@@ -55,7 +55,7 @@ class ProviderStatsOverview extends StatsOverviewWidget
             Stat::make('Available Now', (string) $availableNow)
                 ->color('success')
                 ->icon('heroicon-o-bolt')
-                ->url($profilesUrl([])),
+                ->url($profilesUrl(['available_now_status' => ['value' => 'online']])),
             Stat::make('Active', (string) $active)
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
