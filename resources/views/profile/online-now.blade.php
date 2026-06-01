@@ -20,9 +20,9 @@
             <div class="border-b border-pink-100 bg-gradient-to-r from-pink-600 to-fuchsia-500 px-6 py-6 text-white sm:px-8">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold sm:text-3xl">Online Now</h1>
+                        <h1 class="text-2xl font-bold sm:text-3xl">Available Now</h1>
                         <p class="mt-2 text-sm text-pink-50 sm:text-base">
-                            Mark yourself available for online enquiries and improve visibility.
+                            Manually control your Available Now visibility.
                         </p>
                     </div>
 
@@ -34,7 +34,7 @@
                             class="h-2.5 w-2.5 rounded-full"
                             :class="enabled ? 'bg-green-500' : 'bg-white/70'"
                         ></span>
-                        <span x-text="enabled ? 'Currently Online' : 'Currently Offline'"></span>
+                        <span x-text="enabled ? 'Available Now enabled' : 'Available Now disabled'"></span>
                     </div>
                 </div>
             </div>
@@ -47,10 +47,10 @@
                     x-show="enabled"
                     x-transition
                 >
-                    <p class="text-sm font-medium text-green-700">Online session timer</p>
+                    <p class="text-sm font-medium text-green-700">Status enabled since</p>
                     <div class="mt-2 flex items-center gap-3">
                         <div class="rounded-xl bg-white px-4 py-3 shadow-sm border border-green-100">
-                            <p class="text-xs uppercase tracking-wide text-gray-500">Time Online</p>
+                            <p class="text-xs uppercase tracking-wide text-gray-500">Duration</p>
                             <p class="mt-1 text-2xl font-bold text-green-600 tabular-nums" x-text="elapsed"></p>
                         </div>
                     </div>
@@ -77,7 +77,7 @@
                         </template>
 
                         <template x-if="!loading">
-                            <span x-text="enabled ? 'Disable Online Now' : 'Enable Online Now'"></span>
+                            <span x-text="enabled ? 'Disable Available Now' : 'Enable Available Now'"></span>
                         </template>
                     </button>
                 </div>

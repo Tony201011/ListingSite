@@ -21,18 +21,18 @@
             <div class="border-b border-gray-100 bg-gradient-to-r from-pink-600 to-fuchsia-500 px-6 py-6 text-white sm:px-8">
                 <h1 class="text-2xl font-bold sm:text-3xl">Set &amp; Forget</h1>
                 <p class="mt-2 text-sm text-pink-50 sm:text-base">
-                    Automate your Online Now and Available Now statuses at your preferred times.
+                    Automate your Available Now status at your preferred times.
                 </p>
             </div>
 
             <div class="p-6 sm:p-8 space-y-8">
 
-                {{-- Online Now Automation --}}
+                {{-- Available Now Automation --}}
                 <div class="rounded-2xl border border-gray-200 p-5 sm:p-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900">Online Now</h2>
-                            <p class="text-sm text-gray-500 mt-1">Automatically activate Online Now on selected days at a set time.</p>
+                            <h2 class="text-lg font-semibold text-gray-900">Available Now</h2>
+                            <p class="text-sm text-gray-500 mt-1">Automatically activate Available Now on selected days at a set time.</p>
                         </div>
                         <button
                             type="button"
@@ -169,7 +169,7 @@
                 </div>
 
                 <div class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
-                    <strong>How it works:</strong> When automation is enabled, the system will automatically activate Online Now or Available Now at your chosen time on the selected days. Daily usage limits still apply.
+                    <strong>How it works:</strong> When automation is enabled, the system will automatically activate Available Now at your chosen time on the selected days.
                 </div>
 
             </div>
@@ -182,4 +182,3 @@
 @endpush
 
 @endsection
-

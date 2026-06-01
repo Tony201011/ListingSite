@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Actions\GenerateUniqueProviderProfileSlug;
-use App\Actions\GetOnlineNowState;
-use App\Actions\UpdateOnlineNowStatus;
+use App\Actions\GetAvailableNowState;
+use App\Actions\UpdateAvailableNowStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOnlineStatusRequest;
 use App\Models\ProviderProfile;
@@ -18,8 +18,8 @@ class ProfileSwitchController extends Controller
 {
     public function __construct(
         private GenerateUniqueProviderProfileSlug $generateSlug,
-        private GetOnlineNowState $getOnlineNowState,
-        private UpdateOnlineNowStatus $updateOnlineNowStatus,
+        private GetAvailableNowState $getAvailableNowState,
+        private UpdateAvailableNowStatus $updateAvailableNowStatus,
     ) {}
 
     public function index(): View
@@ -29,7 +29,7 @@ class ProfileSwitchController extends Controller
         $activeProfileId = session('active_provider_profile_id') ?? $profiles->first()?->id;
 
         $onlineStates = $profiles->mapWithKeys(function (ProviderProfile $profile): array {
-            return [$profile->id => $this->getOnlineNowState->execute($profile)];
+            return [$profile->id => $this->getAvailableNowState->execute($profile)];
         });
 
         return view('profile.my-profiles', compact('profiles', 'activeProfileId', 'onlineStates'));
@@ -39,17 +39,7 @@ class ProfileSwitchController extends Controller
     {
         $this->authorizeProfileOwnership($profile);
 
-        if (
-            $request->validated('status') === 'online' &&
-            ! $this->isProfileReadyForOnline($profile)
-        ) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please complete your profile in Edit Profile and upload at least one photo before going online.',
-            ], 403);
-        }
-
-        $result = $this->updateOnlineNowStatus->execute($profile, $request->validated('status'));
+        $result = $this->updateAvailableNowStatus->execute($profile, $request->validated('status'));
 
         return response()->json($result->toPayload(), $result->status());
     }
@@ -75,7 +65,7 @@ class ProfileSwitchController extends Controller
         $activeProfileId = session('active_provider_profile_id') ?? $profiles->first()?->id;
 
         $onlineStates = $profiles->mapWithKeys(function (ProviderProfile $profile): array {
-            return [$profile->id => $this->getOnlineNowState->execute($profile)];
+            return [$profile->id => $this->getAvailableNowState->execute($profile)];
         });
 
         return view('profile.select-profile', compact('profiles', 'activeProfileId', 'onlineStates'));
@@ -211,36 +201,4 @@ class ProfileSwitchController extends Controller
         }
     }
 
-    private function isProfileReadyForOnline(ProviderProfile $profile): bool
-    {
-        return $this->isProfileStepOneCompleted($profile) && $this->hasProfilePhoto($profile);
-    }
-
-    private function isProfileStepOneCompleted(ProviderProfile $profile): bool
-    {
-        return ! empty($profile->introduction_line) &&
-            ! empty($profile->profile_text) &&
-            ! empty($profile->age_group_id) &&
-            ! empty($profile->hair_color_id) &&
-            ! empty($profile->hair_length_id) &&
-            ! empty($profile->ethnicity_id) &&
-            ! empty($profile->body_type_id) &&
-            ! empty($profile->bust_size_id) &&
-            ! empty($profile->your_length_id) &&
-            ! empty($profile->availability) &&
-            ! empty($profile->contact_method) &&
-            ! empty($profile->phone_contact_preference) &&
-            ! empty($profile->time_waster_shield) &&
-            ! empty($profile->primary_identity) &&
-            ! empty($profile->attributes) &&
-            ! empty($profile->services_style) &&
-            ! empty($profile->services_provided);
-    }
-
-    private function hasProfilePhoto(ProviderProfile $profile): bool
-    {
-        return $profile->profileImages()
-            ->whereNull('deleted_at')
-            ->exists();
-    }
 }

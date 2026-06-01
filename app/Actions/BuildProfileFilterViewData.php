@@ -381,7 +381,7 @@ class BuildProfileFilterViewData
 
     private function applyActiveOnlineProfileConstraint(Builder $query): void
     {
-        $query->whereCurrentlyOnline();
+        $query->whereCurrentlyAvailableNow();
     }
 
     private function buildCategoryToParentSlugMap(Collection $parents, Collection $childrenByParent): array
@@ -994,7 +994,6 @@ class BuildProfileFilterViewData
             $categoryNames
         );
 
-        $isOnline = $profile->isCurrentlyOnline();
         $isAvailableNow = $profile->availableNow?->isCurrentlyAvailable() ?? false;
         $isPhotoVerified = $profile->relationLoaded('photoVerification')
             ? $profile->photoVerification->isNotEmpty()
@@ -1016,7 +1015,7 @@ class BuildProfileFilterViewData
             'service_2' => $services[1] ?? '',
             'date' => $profile->created_at->format('d/m/Y'),
             'description' => $profile->description ?? '',
-            'active' => $isOnline,
+            'active' => $isAvailableNow,
             'available_now' => $isAvailableNow,
             'verified' => $isPhotoVerified,
             'featured' => (bool) $profile->is_featured,

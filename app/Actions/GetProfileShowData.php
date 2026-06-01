@@ -26,7 +26,6 @@ class GetProfileShowData
                 'availabilities',
                 'tours',
                 'userVideos',
-                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'profileMessage',
                 'photoVerification' => fn ($q) => $q->where('status', 'approved')->orderByDesc('submitted_at')->limit(1),
@@ -45,7 +44,7 @@ class GetProfileShowData
 
         if (
             $providerProfile->is_blocked
-            || (! $isFeatured && ! $this->isProfileOnline($providerProfile))
+            || (! $isFeatured && ! $this->isProfileAvailableNow($providerProfile))
         ) {
             return [
                 'offline' => true,
@@ -278,7 +277,7 @@ class GetProfileShowData
             'your_length' => $categoryNames->get($providerProfile->your_length_id) ?? '',
             'age_group' => $categoryNames->get($providerProfile->age_group_id) ?? '',
             'profile_message' => $providerProfile->profileMessage?->message ?? '',
-            'active' => $providerProfile->isCurrentlyOnline(),
+            'active' => $providerProfile->isCurrentlyAvailableNow(),
             'available_now' => $providerProfile->availableNow?->isCurrentlyAvailable() ?? false,
             'available_expires_at' => $providerProfile->availableNow?->isCurrentlyAvailable()
                 ? $providerProfile->availableNow->available_expires_at
@@ -375,11 +374,10 @@ class GetProfileShowData
             ->when($cityId, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
-            ->whereCurrentlyOnline()
+            ->whereCurrentlyAvailableNow()
             ->with([
                 'primaryProfileImage',
                 'rates',
-                'onlineUsers' => fn ($q) => $q->where('status', 'online'),
                 'availableNow',
                 'user',
                 'city',
@@ -411,7 +409,7 @@ class GetProfileShowData
 
                 $firstRate = $profile->rates?->first();
                 $rateDisplay = $this->formatRate($firstRate);
-                $isOnline = $profile->isCurrentlyOnline();
+                $isAvailableNow = $profile->isCurrentlyAvailableNow();
 
                 return [
                     'slug' => $profile->slug ?? '',
@@ -428,7 +426,7 @@ class GetProfileShowData
                     'out_call' => trim((string) ($firstRate?->outcall ?? '')),
                     'age' => $profile->age,
                     'verified' => $profile->is_verified,
-                    'active' => $isOnline,
+                    'active' => $isAvailableNow,
                     'available_now' => $profile->availableNow?->isCurrentlyAvailable() ?? false,
                     'date' => $profile->created_at->format('d/m/Y'),
                 ];
@@ -437,9 +435,9 @@ class GetProfileShowData
             ->all();
     }
 
-    private function isProfileOnline(ProviderProfile $providerProfile): bool
+    private function isProfileAvailableNow(ProviderProfile $providerProfile): bool
     {
-        return $providerProfile->isCurrentlyOnline();
+        return $providerProfile->isCurrentlyAvailableNow();
     }
 
     private function normalizeMediaUrl(?string $path): ?string

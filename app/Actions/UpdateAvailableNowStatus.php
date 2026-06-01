@@ -5,25 +5,18 @@ namespace App\Actions;
 use App\Actions\Support\ActionResult;
 use App\Models\AvailableNow;
 use App\Models\ProviderProfile;
-use App\Models\SiteSetting;
 
 class UpdateAvailableNowStatus
 {
     public function execute(ProviderProfile $profile, string $status): ActionResult
     {
-        $settings = SiteSetting::getStatusSettings();
-        $maxUses = $settings['available_now_max_uses'];
-        $durationMinutes = $settings['available_now_duration_minutes'];
-
         $available = $this->getOrCreateAvailableNow($profile);
 
-        $this->syncExpiredStatus($available);
-
         if ($status === 'online') {
-            return $this->goOnline($available, $maxUses, $durationMinutes, $profile);
+            return $this->goOnline($available, $profile);
         }
 
-        return $this->goOffline($available, $maxUses);
+        return $this->goOffline($available);
     }
 
     protected function getOrCreateAvailableNow(ProviderProfile $profile): AvailableNow
@@ -43,21 +36,7 @@ class UpdateAvailableNowStatus
         return $available;
     }
 
-    protected function syncExpiredStatus(AvailableNow $available): void
-    {
-        if (
-            $available->status === 'online' &&
-            $available->available_expires_at &&
-            now()->greaterThanOrEqualTo($available->available_expires_at)
-        ) {
-            $available->status = 'offline';
-            $available->available_started_at = null;
-            $available->available_expires_at = null;
-            $available->save();
-        }
-    }
-
-    protected function goOnline(AvailableNow $available, int $maxUses, int $durationMinutes, ProviderProfile $profile): ActionResult
+    protected function goOnline(AvailableNow $available, ProviderProfile $profile): ActionResult
     {
         if ($this->isFreeListingExpiredWithNegativeBalance($profile)) {
             return new ActionResult(
@@ -66,7 +45,6 @@ class UpdateAvailableNowStatus
                 'Your 21-day period has expired and your account balance is negative. Please clear your balance to go online or become available now.',
                 [
                     'status' => 'offline',
-                    'remaining_uses' => max(0, $maxUses - $available->usage_count),
                     'expires_at' => null,
                 ],
                 'domain'
@@ -76,40 +54,24 @@ class UpdateAvailableNowStatus
         if ($available->isCurrentlyAvailable()) {
             return ActionResult::success([
                 'status' => 'online',
-                'remaining_uses' => max(0, $maxUses - $available->usage_count),
                 'expires_at' => optional($available->available_expires_at)?->toIso8601String(),
-            ], 'You are already available now.');
-        }
-
-        if ($available->usage_count >= $maxUses) {
-            return new ActionResult(
-                false,
-                422,
-                "You have already used Available Now {$maxUses} times today.",
-                [
-                    'status' => 'offline',
-                    'remaining_uses' => 0,
-                    'expires_at' => null,
-                ],
-                'domain'
-            );
+                'online_started_at' => optional($available->available_started_at)?->toIso8601String(),
+            ], 'Available Now is already enabled.');
         }
 
         $available->status = 'online';
-        $available->usage_date = today();
-        $available->usage_count += 1;
-        $available->available_started_at = now();
-        $available->available_expires_at = now()->addMinutes($durationMinutes);
+        $available->available_started_at = $available->available_started_at ?? now();
+        $available->available_expires_at = null;
         $available->save();
 
         return ActionResult::success([
             'status' => 'online',
-            'remaining_uses' => max(0, $maxUses - $available->usage_count),
             'expires_at' => optional($available->available_expires_at)?->toIso8601String(),
-        ], "You are now available for enquiries for {$durationMinutes} minutes.");
+            'online_started_at' => optional($available->available_started_at)?->toIso8601String(),
+        ], 'Available Now enabled.');
     }
 
-    protected function goOffline(AvailableNow $available, int $maxUses): ActionResult
+    protected function goOffline(AvailableNow $available): ActionResult
     {
         $available->status = 'offline';
         $available->available_started_at = null;
@@ -118,9 +80,9 @@ class UpdateAvailableNowStatus
 
         return ActionResult::success([
             'status' => 'offline',
-            'remaining_uses' => max(0, $maxUses - $available->usage_count),
             'expires_at' => null,
-        ], 'You are now unavailable.');
+            'online_started_at' => null,
+        ], 'Available Now disabled.');
     }
 
     protected function isFreeListingExpiredWithNegativeBalance(ProviderProfile $profile): bool

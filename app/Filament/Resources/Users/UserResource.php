@@ -870,10 +870,10 @@ class UserResource extends Resource
                                 ->description('Current visibility and live profile state.')
                                 ->icon('heroicon-o-bolt')
                                 ->schema([
-                                    TextEntry::make('onlineUser.status')
-                                        ->label('Online Status')
+                                    TextEntry::make('availableNow.status')
+                                        ->label('Available Now Status')
                                         ->badge()
-                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Offline')
+                                        ->formatStateUsing(fn ($state): string => $state === 'online' ? 'Available Now' : 'Unavailable')
                                         ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray'),
 
                                     TextEntry::make('hideShowProfile.status')
@@ -882,13 +882,8 @@ class UserResource extends Resource
                                         ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Show')
                                         ->color(fn ($state): string => $state === 'show' ? 'success' : 'warning'),
 
-                                    TextEntry::make('availableNow.status')
-                                        ->label('Available Now')
-                                        ->badge()
-                                        ->formatStateUsing(fn ($state): string => filled($state) ? ucfirst($state) : 'Offline')
-                                        ->color(fn ($state): string => $state === 'online' ? 'success' : 'gray'),
                                 ])
-                                ->columns(3),
+                                ->columns(2),
                         ]),
 
                     Tab::make('Attributes')
@@ -1074,13 +1069,11 @@ class UserResource extends Resource
                                 FROM available_nows
                                 WHERE available_nows.provider_profile_id = provider_profiles.id
                                 AND available_nows.status = ?
-                                AND available_nows.available_expires_at IS NOT NULL
-                                AND available_nows.available_expires_at > ?
                             ) THEN ?
                             ELSE ?
                         END AS available_now_status
                         SQL,
-                        ['online', now(), 'online', 'offline']
+                        ['online', 'online', 'offline']
                     );
             })
             ->columns([

@@ -352,7 +352,7 @@
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ONLINE NOW</h3>
 
                     <p class="mb-4 text-sm text-gray-600">
-                        Mark yourself available for online enquiries and improve visibility.
+                        Manually control your Available Now visibility.
                     </p>
 
                     <button
