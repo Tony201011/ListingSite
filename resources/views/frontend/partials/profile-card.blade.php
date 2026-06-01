@@ -57,7 +57,7 @@
             <div class="listing-card-badge-stack pointer-events-none absolute left-2.5 top-2.5 z-20 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
                 @if($profile['active'])
                     <span class="listing-card-badge listing-card-badge--online inline-flex items-center gap-1 rounded-lg bg-emerald-500/95 px-2.5 py-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/20 sm:text-[11px]">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Online Now
+                        <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span> Available Now
                     </span>
                 @endif
                 @if($profile['verified'])

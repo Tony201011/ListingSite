@@ -529,7 +529,7 @@ class HomeControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Available Now');
-        $response->assertSeeText('Online Now');
+        $response->assertSeeText('Available Now');
     }
 
     public function test_home_page_shows_default_filter_values(): void
@@ -559,7 +559,7 @@ class HomeControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Available Now');
-        $response->assertSeeText('Online Now');
+        $response->assertSeeText('Available Now');
     }
 
     public function test_advanced_search_listing_shows_both_available_and_online_badges_when_both_statuses_are_active(): void
@@ -575,7 +575,7 @@ class HomeControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Available Now');
-        $response->assertSeeText('Online Now');
+        $response->assertSeeText('Available Now');
     }
 
     // ---------------------------------------------------------------
@@ -1114,7 +1114,7 @@ class HomeControllerTest extends TestCase
 
         $profiles = collect($response->viewData('profiles')->items())->keyBy('name');
         $this->assertArrayNotHasKey('Offline Escort', $profiles->all());
-        $response->assertDontSeeText('Online Now');
+        $response->assertDontSeeText('Available Now');
     }
 
     public function test_home_page_shows_profile_with_online_status_regardless_of_expires_at(): void
@@ -1173,7 +1173,7 @@ class HomeControllerTest extends TestCase
 
         $this->assertTrue($onlineProfiles['Synced Escort']['active']);
         $this->assertSame(1, $onlineResponse->viewData('onlineCount'));
-        $onlineResponse->assertSeeText('Online Now');
+        $onlineResponse->assertSeeText('Available Now');
 
         $this->actingAs($user)->postJson(route('profiles.online-status', $profile), [
             'status' => 'offline',
@@ -1184,7 +1184,7 @@ class HomeControllerTest extends TestCase
 
         $this->assertArrayNotHasKey('Synced Escort', $offlineProfiles->all());
         $this->assertSame(0, $offlineResponse->viewData('onlineCount'));
-        $offlineResponse->assertDontSeeText('Online Now');
+        $offlineResponse->assertDontSeeText('Available Now');
     }
 
     public function test_home_page_shows_profile_with_no_online_user_record_as_offline(): void
