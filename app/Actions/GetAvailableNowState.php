@@ -4,67 +4,48 @@ namespace App\Actions;
 
 use App\Models\AvailableNow;
 use App\Models\ProviderProfile;
-use App\Models\SiteSetting;
 
 class GetAvailableNowState
 {
     public function execute(?ProviderProfile $profile): array
     {
-        $settings = SiteSetting::getStatusSettings();
-        $maxUses = $settings['available_now_max_uses'];
-
         $status = false;
-        $remainingUses = $maxUses;
         $expiresAt = null;
         $blockedBalance = false;
+        $startedAt = null;
 
         if (! $profile) {
-            return compact('status', 'remainingUses', 'expiresAt', 'blockedBalance');
+            return compact('status', 'expiresAt', 'startedAt', 'blockedBalance');
         }
 
-        $available = $this->getOrCreateAvailableNow($profile->id);
-
-        $this->syncExpiredStatus($available);
-
-        if ($available->isDirty()) {
-            $available->save();
-        }
+        $available = $this->getOrCreateAvailableNow($profile);
 
         $status = $available->isCurrentlyAvailable();
-        $remainingUses = max(0, $maxUses - $available->usage_count);
         $expiresAt = optional($available->available_expires_at)?->toIso8601String();
+        $startedAt = optional($available->available_started_at)?->toIso8601String();
         $blockedBalance = $this->isFreeListingExpiredWithNegativeBalance($profile);
 
-        return compact('status', 'remainingUses', 'expiresAt', 'blockedBalance');
+        return compact('status', 'expiresAt', 'startedAt', 'blockedBalance');
     }
 
-    protected function getOrCreateAvailableNow(int $profileId): AvailableNow
+    protected function getOrCreateAvailableNow(ProviderProfile $profile): AvailableNow
     {
         $available = AvailableNow::firstOrCreate(
-            ['provider_profile_id' => $profileId],
+            ['provider_profile_id' => $profile->id],
             [
+                'user_id' => $profile->user_id,
                 'status' => 'offline',
                 'usage_date' => today(),
                 'usage_count' => 0,
             ]
         );
 
-        $available->resetDailyUsageIfNeeded();
+        if ($available->user_id !== $profile->user_id) {
+            $available->user_id = $profile->user_id;
+            $available->save();
+        }
 
         return $available;
-    }
-
-    protected function syncExpiredStatus(AvailableNow $available): void
-    {
-        if (
-            $available->status === 'online' &&
-            $available->available_expires_at &&
-            now()->greaterThanOrEqualTo($available->available_expires_at)
-        ) {
-            $available->status = 'offline';
-            $available->available_started_at = null;
-            $available->available_expires_at = null;
-        }
     }
 
     protected function isFreeListingExpiredWithNegativeBalance(ProviderProfile $profile): bool

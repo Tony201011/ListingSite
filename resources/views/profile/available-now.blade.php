@@ -5,8 +5,7 @@
     class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8"
     x-data="availableToggle({
         initialStatus: @js((bool) $status),
-        initialRemainingUses: @js((int) $remainingUses),
-        initialExpiresAt: @js($expiresAt ?? null),
+        initialStartedAt: @js($startedAt ?? null),
         initialBlockedBalance: @js((bool) $blockedBalance),
         updateUrl: @js(route('available.update-status'))
     })"
@@ -23,31 +22,20 @@
                 Mark yourself available for immediate enquiries and improve visibility.
             </p>
 
-            <p class="mb-6 text-sm font-medium text-pink-600">
-                Promote your availability twice a day for two hours.
-            </p>
-
-            <div class="mb-6 grid gap-4 sm:grid-cols-2">
-                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                    <p class="text-sm font-medium text-gray-500">Remaining uses today</p>
-                    <p class="mt-2 text-2xl font-bold text-pink-600" x-text="remainingUses"></p>
-                </div>
-
-                <div
-                    x-show="enabled"
-                    x-cloak
-                    x-transition
-                    class="rounded-2xl border border-green-100 bg-green-50 p-4"
+            <div class="mb-6">
+                <span
+                    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
+                    :class="enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
                 >
-                    <p class="text-sm font-medium text-green-700">Time left</p>
-                    <p class="mt-2 text-2xl font-bold tabular-nums text-green-600" x-text="countdown"></p>
-                </div>
+                    <span class="h-2.5 w-2.5 rounded-full" :class="enabled ? 'bg-green-500' : 'bg-gray-400'"></span>
+                    <span x-text="enabled ? 'Available Now is enabled' : 'Available Now is disabled'"></span>
+                </span>
             </div>
 
             <button
                 type="button"
                 @click="toggleStatus()"
-                :disabled="loading || (!enabled && remainingUses <= 0) || (!enabled && blockedBalance)"
+                :disabled="loading || (!enabled && blockedBalance)"
                 class="flex w-full items-center justify-center gap-2 rounded-lg px-5 py-2.5 font-semibold transition sm:w-auto"
                 :class="enabled
                     ? 'bg-pink-600 text-white hover:bg-pink-700'
@@ -92,15 +80,6 @@
                     x-text="message"
                 ></div>
             </template>
-
-            <div
-                x-show="!enabled && remainingUses <= 0"
-                x-cloak
-                x-transition
-                class="mt-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800"
-            >
-                You have reached your daily limit for Available Now. Please try again tomorrow.
-            </div>
 
             <div
                 x-show="!enabled && blockedBalance"

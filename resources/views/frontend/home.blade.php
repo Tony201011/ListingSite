@@ -152,11 +152,11 @@
                 </a>
             </div>
 
-            {{-- Online users counter --}}
+            {{-- Available-now users counter --}}
             @if(($onlineCount ?? 0) > 0)
                 <span class="ml-auto inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-xs font-semibold text-green-700">
                     <span class="inline-block h-2 w-2 rounded-full bg-green-500"></span>
-                    {{ $onlineCount }} online {{ $onlineCount === 1 ? 'user' : 'users' }}
+                    {{ $onlineCount }} available now {{ $onlineCount === 1 ? 'user' : 'users' }}
                 </span>
             @endif
         </div>
