@@ -83,7 +83,7 @@
                                     Upgrade to Premium
                                 </button>
                             </form>
-                            <a href="{{ route('photos') }}" class="inline-flex items-center justify-center rounded-2xl border border-sky-800 bg-sky-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-800">
+                            <a href="{{ route('photos') }}" class="inline-flex items-center justify-center rounded-2xl border border-amber-700 bg-amber-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-amber-700">
                                 <i class="fa-solid fa-images mr-1"></i>
                                 Manage Gallery
                             </a>
