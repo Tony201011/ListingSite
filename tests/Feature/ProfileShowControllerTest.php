@@ -458,7 +458,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_nearby_profiles_exclude_offline_profiles(): void
     {
-        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
+        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10', 'is_featured' => true]);
 
         $onlineUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
         $offlineUser = $this->createApprovedProvider(['name' => 'Mia', 'slug' => 'mia-001']);
@@ -484,7 +484,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_nearby_profiles_include_legacy_user_online_records(): void
     {
-        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
+        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10', 'is_featured' => true]);
         $legacyOnlineUser = $this->createApprovedProvider(['name' => 'Luna', 'slug' => 'luna-001']);
 
         OnlineUser::query()->create([
@@ -510,7 +510,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_selected_category_names_is_empty_when_no_categories_passed(): void
     {
-        $this->createApprovedProvider();
+        $this->createApprovedProvider(['is_featured' => true]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -519,7 +519,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_selected_category_names_populated_when_valid_category_ids_passed(): void
     {
-        $this->createApprovedProvider();
+        $this->createApprovedProvider(['is_featured' => true]);
 
         $category = Category::query()->create([
             'name' => 'Brunette',
