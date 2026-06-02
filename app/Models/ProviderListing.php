@@ -12,6 +12,7 @@ class ProviderListing extends Model
 
     protected $fillable = [
         'user_id',
+        'provider_profile_id',
         'title',
         'age',
         'category_id',
@@ -37,6 +38,11 @@ class ProviderListing extends Model
     public function provider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function providerProfile(): BelongsTo
+    {
+        return $this->belongsTo(ProviderProfile::class, 'provider_profile_id');
     }
 
     public function categoryItem(): BelongsTo

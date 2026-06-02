@@ -9,6 +9,7 @@ use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class MyListingsController extends Controller
@@ -19,12 +20,20 @@ class MyListingsController extends Controller
     {
         $user = User::findOrFail(Auth::id());
 
-        $listings = $user->providerListings()->latest()->get();
+        $activeProfile = $this->getActiveProviderProfile->execute($user);
+
+        if ($activeProfile && Schema::hasColumn('provider_listings', 'provider_profile_id')) {
+            $listings = ProviderListing::where('user_id', $user->id)
+                ->where('provider_profile_id', $activeProfile->id)
+                ->latest()
+                ->get();
+        } else {
+            $listings = $user->providerListings()->latest()->get();
+        }
 
         // Also provide provider profiles so the UI can fall back to showing
         // profiles (the select-profile view) when no provider_listings exist.
         $profiles = $user->providerProfiles()->orderBy('id')->with('primaryProfileImage')->get();
-        $activeProfile = $this->getActiveProviderProfile->execute($user);
 
         return view('profile.my-listings', [
             'listings' => $listings,
