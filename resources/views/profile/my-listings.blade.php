@@ -10,7 +10,7 @@
         <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <div class="flex items-start gap-3">
                 <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pink-50">
-                    <i class="fa-solid fa-lips text-xl text-[#e04ecb]"></i>
+                    <i class="fa-solid fa-rectangle-list text-xl text-[#e04ecb]"></i>
                 </div>
 
                 <div>
@@ -51,7 +51,7 @@
                 <input type="hidden" name="status" value="{{ $status }}">
 
                 <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+                    <i class="fa-solid fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
                     <input
                         name="q"
                         value="{{ $searchQuery ?? '' }}"
