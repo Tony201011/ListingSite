@@ -234,6 +234,14 @@
                     ],
                 ],
             ]) : collect();
+        $authDropdownItems = $isAuthenticated ? collect([
+            ['label' => 'My Account', 'url' => route('my-profile')],
+            ['label' => 'My Profiles', 'url' => route('profiles.index')],
+            ['label' => 'My Listings', 'url' => route('my-listings'), 'is_active' => request()->routeIs('my-listings')],
+            ['label' => 'Billing & Payments', 'url' => route('payment-subscription')],
+            ['label' => 'Privacy Settings', 'url' => route('privacy-policy')],
+            ['label' => 'Help & Support', 'url' => route('help'), 'divider_before' => true],
+        ]) : collect();
         @endphp
 
     @if($showTopBar)
@@ -368,26 +376,17 @@
                             {{ $authDisplayName }}
                             <i class="fa-solid fa-chevron-down text-xs"></i>
                         </button>
-                        <div x-show="open" x-transition class="absolute right-0 z-50 mt-2 min-w-[280px] overflow-hidden rounded-3xl border border-gray-700 bg-gray-950 shadow-2xl" @click.away="open = false" style="display:none;">
-                            @foreach($authMenuGroups as $group)
-                                <div class="px-4 py-3">
-                                    @if(filled($group['title']))
-                                        <p class="text-xs uppercase tracking-[0.2em] text-gray-500">{{ $group['title'] }}</p>
-                                    @endif
-                                    <div class="mt-2 space-y-1">
-                                        @foreach($group['items'] as $item)
-                                            <a href="{{ $item['url'] }}" class="block rounded-2xl px-4 py-3 text-sm text-gray-200 transition hover:bg-gray-800">{{ $item['label'] }}</a>
-                                        @endforeach
-                                    </div>
-                                </div>
-                                @if(!$loop->last)
-                                    <div class="border-t border-gray-800"></div>
+                        <div x-show="open" x-transition class="absolute right-0 top-full z-50 mt-[-4px] w-[250px] overflow-hidden rounded-[12px] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)] ring-1 ring-black/5" @click.away="open = false" style="display:none;">
+                            @foreach($authDropdownItems as $item)
+                                @if($item['divider_before'] ?? false)
+                                    <div class="border-t border-gray-200"></div>
                                 @endif
+                                <a href="{{ $item['url'] }}" @click="open = false" class="block px-6 py-[18px] text-left text-[18px] leading-tight text-slate-900 transition hover:bg-gray-100 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-medium' }}">{{ $item['label'] }}</a>
                             @endforeach
-                            <div class="border-t border-gray-800"></div>
+                            <div class="border-t border-gray-200"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="button" class="w-full px-4 py-3 text-left text-sm font-semibold text-pink-200 transition hover:bg-gray-800" @click="confirmSignOut($el.closest('form'))">Sign Out</button>
+                                <button type="button" class="w-full px-6 py-[18px] text-left text-[18px] font-medium leading-tight text-red-600 transition hover:bg-gray-100" @click="confirmSignOut($el.closest('form'))">Sign Out</button>
                             </form>
                         </div>
                     </div>
