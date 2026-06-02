@@ -35,6 +35,7 @@ Route::post('/my-profiles/{profile}/online-status', [ProfileSwitchController::cl
 Route::delete('/my-profiles/{profile}', [ProfileSwitchController::class, 'destroy'])->name('profiles.destroy');
 
 Route::get('/my-listings', [MyListingsController::class, 'index'])->name('my-listings');
+Route::get('/my-listings/profile/{profile}', [MyListingsController::class, 'showProfile'])->name('my-listings.profile.show');
 Route::get('/my-listings/{listing}', [MyListingsController::class, 'show'])->name('my-listings.show');
 Route::post('/my-listings/{listing}/feature', [MyListingsController::class, 'feature'])->name('my-listings.feature');
 

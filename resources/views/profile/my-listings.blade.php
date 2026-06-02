@@ -61,6 +61,22 @@
                     >
                 </div>
 
+                <button
+                    type="submit"
+                    class="inline-flex h-10 items-center justify-center rounded-full bg-[#e04ecb] px-4 text-sm font-semibold text-white transition hover:bg-[#c13ab0]"
+                >
+                    Search
+                </button>
+
+                @if(filled($searchQuery ?? ''))
+                    <a
+                        href="{{ route('my-listings', ['status' => $status, 'sort' => $sort]) }}"
+                        class="inline-flex h-10 items-center justify-center rounded-full border border-gray-300 px-4 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:text-gray-900"
+                    >
+                        Clear
+                    </a>
+                @endif
+
                 <select
                     id="sort"
                     name="sort"
@@ -329,7 +345,7 @@
                             </div>
 
                             <div class="mt-4 flex justify-end">
-                                <a href="{{ route('profiles.switch', $profile) }}"
+                                <a href="{{ route('my-listings.profile.show', $profile) }}"
                                    class="inline-flex h-9 items-center gap-2 rounded-full bg-[#e04ecb] px-5 text-sm font-semibold text-white hover:bg-[#c13ab0]">
                                     Details
                                     <i class="fa-solid fa-caret-right"></i>

@@ -3,6 +3,14 @@
 @section('title', 'Listing Details')
 
 @section('content')
+@php
+    $profile = $listing->providerProfile;
+    $location = collect([$profile?->suburb, $profile?->city?->name, $profile?->state?->name])
+        ->filter()
+        ->unique()
+        ->implode(', ');
+    $profileSummary = $profile?->introduction_line ?: $profile?->description ?: $profile?->profile_text;
+@endphp
 <div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-5xl">
         <div class="mb-6 flex flex-col gap-4 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -56,14 +64,63 @@
                             </div>
                             <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Website type</p>
-                                <p class="mt-2 text-base font-semibold text-gray-900">{{ ucfirst($listing->website_type) }}</p>
+                                <p class="mt-2 text-base font-semibold text-gray-900">{{ filled($listing->website_type) ? ucfirst($listing->website_type) : 'Not set' }}</p>
                             </div>
                             <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Created</p>
                                 <p class="mt-2 text-base font-semibold text-gray-900">{{ $listing->created_at->format('d M Y') }}</p>
                             </div>
+                            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Profile</p>
+                                <p class="mt-2 text-base font-semibold text-gray-900">{{ $profile?->name ?: 'Not linked' }}</p>
+                            </div>
+                            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Location</p>
+                                <p class="mt-2 text-base font-semibold text-gray-900">{{ $location ?: 'Not set' }}</p>
+                            </div>
                         </div>
                     </section>
+
+                    @if($profile)
+                        <section class="rounded-3xl border border-gray-200 bg-white p-6">
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-900">Profile details</h2>
+                                    <p class="mt-2 text-sm text-gray-500">Review the linked profile information shown with this listing.</p>
+                                </div>
+
+                                <a
+                                    href="{{ $profile->getEscortUrl() }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex items-center justify-center rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:text-gray-900"
+                                >
+                                    View Public Profile
+                                </a>
+                            </div>
+
+                            <div class="mt-4 grid gap-4 sm:grid-cols-[120px_minmax(0,1fr)]">
+                                <div class="overflow-hidden rounded-2xl bg-gray-100">
+                                    @if($profile->primaryProfileImage)
+                                        <img src="{{ $profile->primaryProfileImage->thumbnail_url }}" alt="{{ $profile->name }}" class="h-32 w-full object-cover">
+                                    @else
+                                        <div class="flex h-32 items-center justify-center text-gray-500">No photo</div>
+                                    @endif
+                                </div>
+
+                                <div class="space-y-3">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900">{{ $profile->name }}</p>
+                                        <p class="text-sm text-gray-500">{{ $location ?: 'Location not set' }}</p>
+                                    </div>
+
+                                    <p class="text-sm leading-6 text-gray-700">
+                                        {{ $profileSummary ?: 'Add profile details to help this listing stand out in search results.' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                    @endif
 
                     <section class="rounded-3xl border border-gray-200 bg-white p-6">
                         <h2 class="text-xl font-semibold text-gray-900">Manage listing</h2>
