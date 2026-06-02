@@ -51,7 +51,8 @@
             </div>
 
             <div class="space-y-5 p-5 sm:p-6">
-                @forelse($listings as $listing)
+                @if($listings->isNotEmpty())
+                    @forelse($listings as $listing)
                     <article class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
                         <div class="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
                             <div class="relative overflow-hidden bg-gray-100">
@@ -118,12 +119,81 @@
                             </div>
                         </div>
                     </article>
-                @empty
-                    <div class="rounded-[28px] border border-dashed border-gray-200 bg-white p-10 text-center">
-                        <h2 class="text-xl font-semibold text-gray-900">No listings yet</h2>
-                        <p class="mt-2 text-sm text-gray-500">You don’t have any provider listings yet. Create your first listing from the dashboard to get started.</p>
-                    </div>
-                @endforelse
+                    @empty
+                        <div class="rounded-[28px] border border-dashed border-gray-200 bg-white p-10 text-center">
+                            <h2 class="text-xl font-semibold text-gray-900">No listings yet</h2>
+                            <p class="mt-2 text-sm text-gray-500">You don’t have any provider listings yet. Create your first listing from the dashboard to get started.</p>
+                        </div>
+                    @endforelse
+                @else
+                    @if(isset($profiles) && $profiles->isNotEmpty())
+                        @foreach($profiles as $profile)
+                            <article class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
+                                <div class="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+                                    <div class="relative overflow-hidden bg-gray-100">
+                                        @if($profile->primaryProfileImage)
+                                            <img src="{{ $profile->primaryProfileImage->thumbnail_url }}" alt="{{ $profile->name }}" class="h-full min-h-[240px] w-full object-cover">
+                                        @else
+                                            <div class="flex h-full min-h-[240px] items-center justify-center bg-gray-200 text-sm text-gray-500">
+                                                No photo available
+                                            </div>
+                                        @endif
+
+                                        <span class="absolute left-4 top-4 inline-flex rounded-full {{ $profile->isCurrentlyOnline() ? 'bg-green-600 text-white' : 'bg-gray-700 text-white' }} px-3 py-1 text-xs font-semibold">
+                                            {{ $profile->isCurrentlyOnline() ? 'Online' : 'Offline' }}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex flex-col justify-between p-5">
+                                        <div class="space-y-4">
+                                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                                <div class="min-w-0">
+                                                    <h2 class="truncate text-2xl font-semibold text-gray-900">{{ $profile->name }}</h2>
+                                                    <p class="mt-2 text-sm text-gray-500">
+                                                        {{ $profile->age ? $profile->age.' years' : 'Age not set' }} · {{ $profile->suburb ?? 'Location not set' }}
+                                                    </p>
+                                                </div>
+                                                <span class="inline-flex rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-700">
+                                                    {{ $profile->is_featured ? 'VIP' : 'Standard' }}
+                                                </span>
+                                            </div>
+
+                                            <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                                                <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                                                    <i class="fa-regular fa-heart text-pink-500"></i>
+                                                    {{ number_format($profile->user->providerListings()->count(), 0) }} listings
+                                                </span>
+                                                <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                                                    {{ $profile->isCurrentlyAvailableNow() ? 'Available Now' : 'Not available' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <div class="rounded-3xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                                                Manage your profile and listings from the dashboard.
+                                            </div>
+
+                                            <div class="grid gap-3 lg:grid-cols-[1fr_140px]">
+                                                <div class="grid gap-3 sm:grid-cols-3">
+                                                    <a href="{{ route('profiles.switch', $profile) }}" class="w-full rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-800 transition hover:bg-yellow-100">Top</a>
+                                                    <a href="{{ route('photos') }}" class="inline-flex h-full items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-800 transition hover:bg-teal-100">Gallery</a>
+                                                    <a href="{{ route('featured') }}" class="w-full rounded-2xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-800 transition hover:bg-violet-100">Premium</a>
+                                                </div>
+                                                <a href="{{ route('profiles.switch', $profile) }}" class="inline-flex h-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">Details</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        @endforeach
+                    @else
+                        <div class="rounded-[28px] border border-dashed border-gray-200 bg-white p-10 text-center">
+                            <h2 class="text-xl font-semibold text-gray-900">No profiles yet</h2>
+                            <p class="mt-2 text-sm text-gray-500">You don’t have any provider profiles yet. Create your first profile from the dashboard to get started.</p>
+                        </div>
+                    @endif
+                @endif
             </div>
         </div>
     </div>
