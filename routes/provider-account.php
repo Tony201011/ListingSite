@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Frontend\PaymentSubscriptionController;
+use App\Http\Controllers\Subscription\PaymentSubscriptionController;
 use App\Http\Controllers\Auth\ProviderRegisterController;
 use App\Http\Controllers\Subscription\PurchaseCreditController;
 use App\Http\Controllers\Profile\AccountController;
