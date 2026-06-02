@@ -52,8 +52,19 @@
     $isAdminAuthenticated = $isAuthenticated && (($currentUser->role ?? null) === \App\Models\User::ROLE_ADMIN);
     $primaryAuthUrl = $isAdminAuthenticated ? filament()->getUrl() : url('/my-profile');
     $primaryAuthLabel = $isAdminAuthenticated ? 'Dashboard' : 'My Profile';
+    $isAddAdvertisementLink = function ($item): bool {
+        return strtolower(trim((string) ($item['label'] ?? ''))) === 'add advertisement';
+    };
 
     if ($isAuthenticated) {
+        $actionLinks = $actionLinks->map(function ($item) use ($isAddAdvertisementLink, $primaryAuthUrl) {
+            if ($isAddAdvertisementLink($item)) {
+                $item['url'] = $primaryAuthUrl;
+            }
+
+            return $item;
+        });
+
         $actionLinks = $actionLinks->reject(function ($item): bool {
             $label = strtolower(trim((string) ($item['label'] ?? '')));
             $rawUrl = strtolower(trim((string) ($item['url'] ?? '')));
@@ -65,6 +76,8 @@
                 || str_contains($label, 'join')
                 || in_array($path, ['/login', '/signin', '/signup', '/register'], true);
         });
+    } else {
+        $actionLinks = $actionLinks->reject($isAddAdvertisementLink);
     }
 
     $actionLinks = $actionLinks->values();
