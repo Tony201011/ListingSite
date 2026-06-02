@@ -406,7 +406,7 @@
                     <button
                         @click="open = !open"
                         type="button"
-                        class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-yellow-300"
+                        class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-300"
                     >
                         {{ $authDisplayName }}
                         <i class="fa-solid fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
@@ -433,7 +433,7 @@
                             <a
                                 href="{{ $item['url'] }}"
                                 @click="open = false"
-                                class="block px-5 py-3 text-[18px] leading-tight text-slate-900 transition hover:bg-gray-50 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
+                                class="block px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
                             >
                                 {{ $item['label'] }}
                             </a>
