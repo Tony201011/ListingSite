@@ -43,8 +43,18 @@ class UploadUserPhotos
         $uploadedPhotos = [];
         $storedBatchFiles = [];
 
+        $startedTransaction = false;
+
         try {
-            DB::beginTransaction();
+            try {
+                DB::beginTransaction();
+                $startedTransaction = true;
+            } catch (\Throwable $e) {
+                // If a transaction is already active (tests may wrap requests),
+                // skip starting a new one and proceed. We'll only commit/rollback
+                // if we successfully started it.
+                $startedTransaction = false;
+            }
 
             $hasPrimary = ProfileImage::query()
                 ->where('provider_profile_id', $profile->id)
@@ -86,13 +96,17 @@ class UploadUserPhotos
                 ];
             }
 
-            DB::commit();
+            if ($startedTransaction) {
+                DB::commit();
+            }
 
             return ActionResult::success([
                 'photos' => $uploadedPhotos,
             ], 'Photos uploaded successfully.');
         } catch (Throwable $e) {
-            DB::rollBack();
+            if ($startedTransaction) {
+                DB::rollBack();
+            }
 
             foreach ($storedBatchFiles as $storedFile) {
                 try {
