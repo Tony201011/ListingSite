@@ -388,7 +388,7 @@ class ProfileShowControllerTest extends TestCase
     public function test_prev_and_next_navigation_return_correct_adjacent_profiles(): void
     {
         $this->createApprovedProvider(['name' => 'Alice', 'slug' => 'alice-001']);
-        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
+        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10', 'is_featured' => true]);
         $this->createApprovedProvider(['name' => 'Bella', 'slug' => 'bella-001']);
 
         $response = $this->get($this->profileUrl('jade010-10'));
@@ -406,7 +406,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_nearby_profiles_is_an_array(): void
     {
-        $this->createApprovedProvider();
+        $this->createApprovedProvider(['is_featured' => true]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -415,8 +415,13 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_nearby_profiles_excludes_current_profile(): void
     {
-        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
-        $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
+        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10', 'is_featured' => true]);
+        $rubyUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
+        OnlineUser::query()->create([
+            'user_id' => $rubyUser->id,
+            'provider_profile_id' => $rubyUser->providerProfile->id,
+            'status' => 'online',
+        ]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -427,10 +432,15 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_nearby_profiles_limited_to_four_results(): void
     {
-        $this->createApprovedProvider(['slug' => 'jade010-10']);
+        $this->createApprovedProvider(['slug' => 'jade010-10', 'is_featured' => true]);
 
         for ($i = 1; $i <= 6; $i++) {
-            $this->createApprovedProvider(['name' => "Escort {$i}", 'slug' => "escort-{$i}"]);
+            $escortUser = $this->createApprovedProvider(['name' => "Escort {$i}", 'slug' => "escort-{$i}"]);
+            OnlineUser::query()->create([
+                'user_id' => $escortUser->id,
+                'provider_profile_id' => $escortUser->providerProfile->id,
+                'status' => 'online',
+            ]);
         }
 
         $response = $this->get($this->profileUrl('jade010-10'));
@@ -440,8 +450,13 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_each_nearby_profile_has_expected_keys(): void
     {
-        $this->createApprovedProvider(['slug' => 'jade010-10']);
-        $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
+        $this->createApprovedProvider(['slug' => 'jade010-10', 'is_featured' => true]);
+        $rubyUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
+        OnlineUser::query()->create([
+            'user_id' => $rubyUser->id,
+            'provider_profile_id' => $rubyUser->providerProfile->id,
+            'status' => 'online',
+        ]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
