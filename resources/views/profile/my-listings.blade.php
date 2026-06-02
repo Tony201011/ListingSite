@@ -211,7 +211,7 @@
                                 </form>
 
                                 <a href="{{ route('photos') }}"
-                                  class="flex h-10 items-center justify-center rounded-full border border-sky-400 bg-white text-sm font-semibold text-sky-700 hover:bg-sky-50">
+                                  class="flex h-10 items-center justify-center rounded-full border border-amber-400 bg-white text-sm font-semibold text-amber-700 hover:bg-amber-50">
                                     <i class="fa-solid fa-images mr-1"></i>
                                     Gallery
                                 </a>
@@ -316,7 +316,7 @@
                                 </a>
 
                                 <a href="{{ route('photos') }}"
-                                  class="flex h-10 items-center justify-center rounded-full border border-sky-400 bg-white text-sm font-semibold text-sky-700 hover:bg-sky-50">
+                                  class="flex h-10 items-center justify-center rounded-full border border-amber-400 bg-white text-sm font-semibold text-amber-700 hover:bg-amber-50">
                                     <i class="fa-solid fa-images mr-1"></i>
                                     Gallery
                                 </a>
