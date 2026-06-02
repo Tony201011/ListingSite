@@ -233,6 +233,9 @@
                         ['label' => 'Help & support', 'url' => route('help')],
                     ],
                 ],
+            ]) : collect();
+        @endphp
+
     @if($showTopBar)
         <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
             <div class="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
