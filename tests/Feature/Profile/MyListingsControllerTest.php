@@ -87,23 +87,14 @@ class MyListingsControllerTest extends TestCase
         $response->assertDontSee(route('my-listings.profile.show', $secondProfile), false);
     }
 
-    public function test_owner_can_view_profile_details_from_my_listings(): void
+    public function test_owner_is_redirected_to_profile_setting_from_my_listings_details(): void
     {
         $user = $this->createProvider();
         $profile = $user->providerProfile;
 
-        $profile->update([
-            'name' => 'Detail Profile',
-            'suburb' => 'Brisbane',
-            'description' => 'Detailed profile description',
-            'phone' => '0400000000',
-        ]);
-
         $response = $this->actingAsProvider($user, $profile)->get(route('my-listings.profile.show', $profile));
 
-        $response->assertOk();
-        $response->assertSee('Detail Profile');
-        $response->assertSee('Detailed profile description');
-        $response->assertSee('Brisbane');
+        $response->assertRedirect(route('profile-setting'));
+        $response->assertSessionHas('active_provider_profile_id', $profile->id);
     }
 }
