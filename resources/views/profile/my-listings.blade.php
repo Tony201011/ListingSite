@@ -215,7 +215,7 @@
                                 </form>
 
                                 <a href="{{ route('photos') }}"
-                                   class="flex h-10 items-center justify-center rounded-full border border-sky-800 bg-sky-700 text-sm font-semibold text-white hover:bg-sky-800">
+                                  class="flex h-10 items-center justify-center rounded-full border border-sky-400 bg-white text-sm font-semibold text-sky-700 hover:bg-sky-50">
                                     <i class="fa-solid fa-images mr-1"></i>
                                     Gallery
                                 </a>
@@ -224,7 +224,7 @@
                                     @csrf
                                     <input type="hidden" name="feature" value="premium">
                                     <button type="submit"
-                                            class="h-10 w-full rounded-full border border-amber-700 bg-amber-600 text-sm font-semibold text-white hover:bg-amber-700">
+                                            class="h-10 w-full rounded-full border border-amber-400 bg-white text-sm font-semibold text-amber-700 hover:bg-amber-50">
                                         <i class="fa-solid fa-crown mr-1"></i>
                                         Premium
                                     </button>
@@ -324,13 +324,13 @@
                                 </a>
 
                                 <a href="{{ route('photos') }}"
-                                   class="flex h-10 items-center justify-center rounded-full border border-sky-800 bg-sky-700 text-sm font-semibold text-white hover:bg-sky-800">
+                                  class="flex h-10 items-center justify-center rounded-full border border-sky-400 bg-white text-sm font-semibold text-sky-700 hover:bg-sky-50">
                                     <i class="fa-solid fa-images mr-1"></i>
                                     Gallery
                                 </a>
 
                                 <a href="{{ route('featured') }}"
-                                   class="flex h-10 items-center justify-center rounded-full border border-amber-700 bg-amber-600 text-sm font-semibold text-white hover:bg-amber-700">
+                                   class="flex h-10 items-center justify-center rounded-full border border-amber-400 bg-white text-sm font-semibold text-amber-700 hover:bg-amber-50">
                                     <i class="fa-solid fa-crown mr-1"></i>
                                     Premium
                                 </a>
