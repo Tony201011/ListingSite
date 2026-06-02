@@ -454,6 +454,10 @@ class AuthorizationTest extends TestCase
 
     public function test_user_without_profile_cannot_upload_verification_photo(): void
     {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('GD extension is not installed');
+        }
+
         $user = $this->userWithoutProfile();
 
         $this->withoutMiddleware(CheckProfileSteps::class)

@@ -112,7 +112,7 @@ class HeaderWidgetResource extends Resource
                     ->minValue(320)
                     ->maxValue(3840)
                     ->suffix('px'),
-                Toggle::make('enable_top_bar')->label('Enable top bar')->default(true)->columnSpanFull(),
+                Toggle::make('enable_top_bar')->label('Enable top bar')->default(false)->columnSpanFull(),
                 Repeater::make('top_left_items')
                     ->label('Top bar left items')
                     ->schema([

@@ -23,7 +23,7 @@ class HeaderWidgetSeeder extends Seeder
             'header_width' => null,
             'brand_primary' => 'HOT',
             'brand_accent' => 'ESCORTS',
-            'enable_top_bar' => true,
+            'enable_top_bar' => false,
             'top_left_items' => [
                 ['label' => 'Verified advertisers', 'icon' => 'fa-solid fa-shield-heart'],
                 ['label' => 'Australia-wide directory', 'icon' => 'fa-solid fa-location-dot'],

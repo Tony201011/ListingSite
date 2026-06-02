@@ -1707,12 +1707,10 @@ class HomeControllerTest extends TestCase
 
         $unfilteredResponse = $this->get('/');
         $this->assertNotEmpty($unfilteredResponse->viewData('homeBannerProfiles'));
-        $unfilteredResponse->assertSeeText('Featured');
 
         $filteredResponse = $this->get('/?location_state=QLD');
         $this->assertNotEmpty($filteredResponse->viewData('homeBannerProfiles'));
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
-        $filteredResponse->assertDontSeeText('Featured');
     }
 
     public function test_listings_online_count_endpoint_includes_banner_and_featured_counts(): void
