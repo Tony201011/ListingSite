@@ -14,6 +14,15 @@ class RolloverOnlineSessionsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        OnlineUser::resolveRelationUsing('providerProfile', function (OnlineUser $onlineUser) {
+            return $onlineUser->belongsTo(ProviderProfile::class, 'provider_profile_id');
+        });
+    }
+
     protected function tearDown(): void
     {
         Carbon::setTestNow();
@@ -151,7 +160,7 @@ class RolloverOnlineSessionsTest extends TestCase
             'slug' => 'profile-b',
         ]);
 
-        foreach ([$user1 => $profile1, $user2 => $profile2] as $user => $profile) {
+        foreach ([[$user1, $profile1], [$user2, $profile2]] as [$user, $profile]) {
             OnlineUser::query()->create([
                 'user_id' => $user->id,
                 'provider_profile_id' => $profile->id,
