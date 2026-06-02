@@ -43,7 +43,7 @@
 @endphp
 
 <body
-    class="bg-gray-900 text-gray-100 font-sans @yield('bodyClass')"
+    class="flex min-h-screen flex-col bg-gray-900 text-gray-100 font-sans @yield('bodyClass')"
     data-authenticated="{{ auth('web')->check() ? '1' : '0' }}"
     data-auth-protected="{{ $authProtectedRoute ? '1' : '0' }}"
     data-signin-url="{{ route('signin') }}"
@@ -63,13 +63,15 @@
 
     @include('layouts.partials.header')
 
-    @include('layouts.partials.global-banner')
+    <main class="flex-1">
+        @include('layouts.partials.global-banner')
 
-    @include('layouts.partials.ads', ['position' => 'all_pages_top'])
+        @include('layouts.partials.ads', ['position' => 'all_pages_top'])
 
-    @yield('content')
+        @yield('content')
 
-    @include('layouts.partials.ads', ['position' => 'all_pages_bottom'])
+        @include('layouts.partials.ads', ['position' => 'all_pages_bottom'])
+    </main>
 
     @php
         $siteSetting = \App\Models\SiteSetting::first();
