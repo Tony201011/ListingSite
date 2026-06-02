@@ -78,9 +78,15 @@
                             <form action="{{ route('my-listings.feature', $listing) }}" method="POST" class="inline-flex w-full">
                                 @csrf
                                 <input type="hidden" name="feature" value="premium">
-                                <button type="submit" class="w-full rounded-2xl border border-violet-700 bg-violet-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-violet-700">Upgrade to Premium</button>
+                                <button type="submit" class="w-full rounded-2xl border border-amber-700 bg-amber-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-amber-700">
+                                    <i class="fa-solid fa-crown mr-1"></i>
+                                    Upgrade to Premium
+                                </button>
                             </form>
-                            <a href="{{ route('photos') }}" class="inline-flex items-center justify-center rounded-2xl border border-teal-700 bg-teal-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-700">Manage Gallery</a>
+                            <a href="{{ route('photos') }}" class="inline-flex items-center justify-center rounded-2xl border border-sky-800 bg-sky-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-800">
+                                <i class="fa-solid fa-images mr-1"></i>
+                                Manage Gallery
+                            </a>
                         </div>
                     </section>
                 </div>
