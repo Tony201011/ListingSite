@@ -318,8 +318,6 @@ class BuildProfileFilterViewData
             ])
             ->orderByDesc("provider_profiles.{$expiryColumn}");
 
-        $this->applyActiveOnlineProfileConstraint($query);
-
         // For local banner: restrict to the state being viewed
         if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
             if ($exactLocation !== null) {
