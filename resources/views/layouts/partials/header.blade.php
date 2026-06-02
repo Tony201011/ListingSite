@@ -198,19 +198,41 @@
         }
         $authDisplayName = filled($authDisplayName) ? $authDisplayName : 'Account';
 
-        $authMenuItems = $isAuthenticated ? collect([
-            ['label' => 'My Account', 'url' => route('my-profile')],
-            ['label' => 'My Profiles', 'url' => route('profiles.index')],
-            ['label' => 'My Listings', 'url' => route('my-listings')],
-            ['label' => 'Billing & Payments', 'url' => route('payment-subscription')],
-            ['label' => 'Privacy Settings', 'url' => route('privacy-policy')],
-            ['label' => 'Help & Support', 'url' => route('help')],
-        ]) : collect();
-@endphp
-
-<header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md" style="{{ $headerStyle }}">
-
-    <!-- Top bar (with Follow Alice) -->
+            $authMenuGroups = $isAuthenticated ? collect([
+                [
+                    'title' => 'My Account',
+                    'items' => [
+                        ['label' => 'Account settings', 'url' => route('my-profile')],
+                        ['label' => 'Registered email', 'url' => route('change-email')],
+                        ['label' => 'Change password', 'url' => route('change-password')],
+                        ['label' => 'Delete account', 'url' => route('account.delete-page')],
+                    ],
+                ],
+                [
+                    'title' => 'Profile',
+                    'items' => [
+                        ['label' => 'Profile verification', 'url' => route('verify.photos')],
+                        ['label' => 'Edit profile', 'url' => route('edit-profile')],
+                        ['label' => 'Photos & gallery', 'url' => route('photos')],
+                        ['label' => 'Videos', 'url' => route('my-videos')],
+                        ['label' => 'Availability settings', 'url' => route('availability.edit')],
+                    ],
+                ],
+                [
+                    'title' => 'My Listings',
+                    'items' => [
+                        ['label' => 'All listings', 'url' => route('my-listings')],
+                        ['label' => 'Promotions', 'url' => route('featured')],
+                        ['label' => 'Payment history', 'url' => route('payment-subscription')],
+                    ],
+                ],
+                [
+                    'title' => null,
+                    'items' => [
+                        ['label' => 'Privacy settings', 'url' => route('privacy-policy')],
+                        ['label' => 'Help & support', 'url' => route('help')],
+                    ],
+                ],
     @if($showTopBar)
         <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
             <div class="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
@@ -343,14 +365,26 @@
                             {{ $authDisplayName }}
                             <i class="fa-solid fa-chevron-down text-xs"></i>
                         </button>
-                        <div x-show="open" x-transition class="absolute right-0 z-50 mt-2 min-w-[220px] overflow-hidden rounded-xl border border-gray-700 bg-gray-900 shadow-2xl" @click.away="open = false" style="display:none;">
-                            @foreach($authMenuItems as $item)
-                                <a href="{{ $item['url'] }}" class="block px-4 py-3 text-sm text-gray-200 transition hover:bg-gray-800">{{ $item['label'] }}</a>
+                        <div x-show="open" x-transition class="absolute right-0 z-50 mt-2 min-w-[280px] overflow-hidden rounded-3xl border border-gray-700 bg-gray-950 shadow-2xl" @click.away="open = false" style="display:none;">
+                            @foreach($authMenuGroups as $group)
+                                <div class="px-4 py-3">
+                                    @if(filled($group['title']))
+                                        <p class="text-xs uppercase tracking-[0.2em] text-gray-500">{{ $group['title'] }}</p>
+                                    @endif
+                                    <div class="mt-2 space-y-1">
+                                        @foreach($group['items'] as $item)
+                                            <a href="{{ $item['url'] }}" class="block rounded-2xl px-4 py-3 text-sm text-gray-200 transition hover:bg-gray-800">{{ $item['label'] }}</a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @if(!$loop->last)
+                                    <div class="border-t border-gray-800"></div>
+                                @endif
                             @endforeach
-                            <div class="border-t border-gray-700"></div>
+                            <div class="border-t border-gray-800"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="button" class="w-full px-4 py-3 text-left text-sm font-medium text-gray-200 transition hover:bg-gray-800" @click="confirmSignOut($el.closest('form'))">Sign Out</button>
+                                <button type="button" class="w-full px-4 py-3 text-left text-sm font-semibold text-pink-200 transition hover:bg-gray-800" @click="confirmSignOut($el.closest('form'))">Sign Out</button>
                             </form>
                         </div>
                     </div>
@@ -420,6 +454,23 @@
                 @endforeach
                 @guest
                 @endguest
+                @auth
+                    <div class="border-t border-gray-800 px-3 pt-4">
+                        <p class="text-xs uppercase tracking-[0.24em] text-gray-500">Account</p>
+                        @foreach($authMenuGroups as $group)
+                            @if(filled($group['title']))
+                                <p class="mt-3 px-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{{ $group['title'] }}</p>
+                            @endif
+                            @foreach($group['items'] as $item)
+                                <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
+                            @endforeach
+                        @endforeach
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="button" @click="mobileMenu = false; confirmSignOut($el.closest('form'))" class="mt-3 block w-full rounded-lg px-3 py-2 text-left text-gray-200 hover:bg-gray-800">Sign Out</button>
+                        </form>
+                    </div>
+                @endauth
                 <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
                     <i class="fa-solid fa-heart text-pink-500 mr-1.5 text-xs"></i> Favourites
                 </a>

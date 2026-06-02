@@ -19,17 +19,33 @@ class MyListingsController extends Controller
     public function index(Request $request): View
     {
         $user = User::findOrFail(Auth::id());
-
         $activeProfile = $this->getActiveProviderProfile->execute($user);
+        $status = $request->query('status', 'all');
+        $search = trim((string) $request->query('q', ''));
+        $sort = $request->query('sort', 'oldest');
+
+        $baseQuery = ProviderListing::where('user_id', $user->id);
 
         if ($activeProfile && Schema::hasColumn('provider_listings', 'provider_profile_id')) {
-            $listings = ProviderListing::where('user_id', $user->id)
-                ->where('provider_profile_id', $activeProfile->id)
-                ->latest()
-                ->get();
-        } else {
-            $listings = $user->providerListings()->latest()->get();
+            $baseQuery->where('provider_profile_id', $activeProfile->id);
         }
+
+        $statusCounts = [
+            'all' => (clone $baseQuery)->count(),
+            'online' => (clone $baseQuery)->where('is_live', true)->where('is_active', true)->count(),
+            'expiring' => (clone $baseQuery)->where('is_active', true)->where('is_live', false)->where('created_at', '<=', now()->subDays(7))->count(),
+            'expired' => (clone $baseQuery)->where('is_active', false)->count(),
+            'offline' => (clone $baseQuery)->where('is_active', true)->where('is_live', false)->where('created_at', '>', now()->subDays(7))->count(),
+        ];
+
+        $listings = (clone $baseQuery)
+            ->when($status === 'online', fn ($query) => $query->where('is_live', true)->where('is_active', true))
+            ->when($status === 'expiring', fn ($query) => $query->where('is_active', true)->where('is_live', false)->where('created_at', '<=', now()->subDays(7)))
+            ->when($status === 'expired', fn ($query) => $query->where('is_active', false))
+            ->when($status === 'offline', fn ($query) => $query->where('is_active', true)->where('is_live', false)->where('created_at', '>', now()->subDays(7)))
+            ->when($search !== '', fn ($query) => $query->where('title', 'like', "%{$search}%"))
+            ->when($sort === 'newest', fn ($query) => $query->orderByDesc('created_at'), fn ($query) => $query->orderBy('created_at'))
+            ->get();
 
         // Also provide provider profiles so the UI can fall back to showing
         // profiles (the select-profile view) when no provider_listings exist.
@@ -39,6 +55,10 @@ class MyListingsController extends Controller
             'listings' => $listings,
             'profiles' => $profiles,
             'activeProfileId' => $activeProfile?->id ?? null,
+            'status' => $status,
+            'statusCounts' => $statusCounts,
+            'searchQuery' => $search,
+            'sort' => $sort,
         ]);
     }
 

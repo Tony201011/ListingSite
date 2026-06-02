@@ -31,21 +31,56 @@
         <div class="mb-6 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
             <div class="border-b border-gray-200 px-5 py-5 sm:px-6">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                        <span class="font-semibold text-gray-900">All Listings</span>
-                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">Online</span>
-                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">Expiring</span>
-                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">Expired</span>
-                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">Offline</span>
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-[0.24em] text-pink-600">Listings manager</p>
+                        <h2 class="mt-2 text-2xl font-semibold text-gray-900">All Listings</h2>
+                        <p class="mt-1 text-sm text-gray-500">Manage all of your listings, activate or promote them, and track performance at a glance.</p>
                     </div>
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <div class="relative w-full sm:w-64">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" class="w-full rounded-full border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-700 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100" placeholder="Search listings" disabled>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-900">
+                            {{ $statusCounts['all'] ?? $listings->count() }} Total Listings
                         </div>
-                        <button type="button" class="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-pink-300 hover:text-pink-700">
-                            Sort by: Upload (oldest first)
-                        </button>
+                        <a href="{{ route('my-profile') }}" class="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">View Dashboard</a>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4">
+                    @foreach(['all' => 'All Listings', 'online' => 'Online', 'expiring' => 'Expiring', 'expired' => 'Expired', 'offline' => 'Offline'] as $key => $label)
+                        <a href="{{ request()->fullUrlWithQuery(['status' => $key]) }}"
+                           class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition {{ $status === $key ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                            {{ $label }}
+                            <span class="ml-2 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-gray-700">{{ $statusCounts[$key] ?? 0 }}</span>
+                        </a>
+                    @endforeach
+                </div>
+
+                <form method="GET" action="{{ route('my-listings') }}" class="mt-6 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+                    <input type="hidden" name="status" value="{{ $status }}">
+                    <div class="relative w-full">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input name="q" value="{{ $searchQuery ?? '' }}" type="search" placeholder="Search by title" class="w-full rounded-full border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 justify-end">
+                        <label class="sr-only" for="sort">Sort</label>
+                        <select id="sort" name="sort" class="rounded-full border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            <option value="oldest" {{ ($sort ?? 'oldest') === 'oldest' ? 'selected' : '' }}>Upload (oldest first)</option>
+                            <option value="newest" {{ ($sort ?? '') === 'newest' ? 'selected' : '' }}>Upload (newest first)</option>
+                        </select>
+                        <button type="submit" class="inline-flex items-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">Apply</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="border-b border-gray-200 bg-blue-50 px-5 py-4 sm:px-6">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-blue-800">Promotion & Advertisements</p>
+                        <p class="mt-1 text-sm text-blue-700">Promote listings, feature them on the homepage, or add premium exposure for better visibility.</p>
+                    </div>
+                    <div class="grid w-full gap-3 sm:w-auto sm:grid-cols-3">
+                        <a href="{{ route('featured') }}" class="inline-flex items-center justify-center rounded-full border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-100">Homepage Feature</a>
+                        <a href="{{ route('featured') }}" class="inline-flex items-center justify-center rounded-full border border-teal-200 bg-white px-4 py-3 text-sm font-semibold text-teal-700 transition hover:bg-teal-100">Premium Listing</a>
+                        <a href="{{ route('featured') }}" class="inline-flex items-center justify-center rounded-full border border-violet-200 bg-white px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-100">Gallery Boost</a>
                     </div>
                 </div>
             </div>
@@ -71,24 +106,39 @@
 
                             <div class="flex flex-col justify-between p-5">
                                 <div class="space-y-4">
-                                    <div class="flex flex-wrap items-center justify-between gap-3">
+                                    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                                         <div class="min-w-0">
-                                            <h2 class="truncate text-2xl font-semibold text-gray-900">{{ $listing->title }}</h2>
+                                            <h2 class="truncate text-2xl font-semibold text-blue-700 hover:text-blue-800">{{ $listing->title }}</h2>
                                             <p class="mt-2 text-sm text-gray-500">
-                                                {{ $listing->category ?: 'Uncategorized' }} · {{ $listing->age ? $listing->age.' years' : 'Age not set' }} · {{ ucfirst($listing->website_type) }}
+                                                {{ $listing->category ?: 'Uncategorized' }} · {{ $listing->age ? $listing->age.' years' : 'Age not set' }}
                                             </p>
                                         </div>
-                                        <span class="inline-flex rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-700">
-                                            {{ $listing->is_vip ? 'VIP' : 'Standard' }}
+                                        <span class="inline-flex items-center rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-700">
+                                            {{ $listing->is_vip ? 'Premium' : 'Standard' }}
                                         </span>
+                                    </div>
+
+                                    <div class="space-y-3 text-sm text-gray-600">
+                                        <p class="leading-6 text-gray-500">Manage your listing details and promotions from this page. View listing activity, update visibility, and push premium placement with the buttons below.</p>
+                                        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                                            <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                                                <i class="fa-solid fa-tag text-gray-500"></i>
+                                                {{ $listing->category ?: 'Uncategorized' }}
+                                            </span>
+                                            <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                                                <i class="fa-solid fa-globe text-gray-500"></i>
+                                                {{ ucfirst($listing->website_type) }}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
                                         <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
-                                            <i class="fa-regular fa-heart text-pink-500"></i>
+                                            <i class="fa-solid fa-star text-amber-500"></i>
                                             {{ number_format($listing->audience_score, 2) }} score
                                         </span>
                                         <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                                            <i class="fa-solid fa-circle {{ $listing->is_active ? 'text-green-500' : 'text-gray-400' }} text-[10px]"></i>
                                             {{ $listing->is_active ? 'Active' : 'Inactive' }}
                                         </span>
                                     </div>
