@@ -7,15 +7,15 @@
     <div class="mx-auto max-w-7xl">
 
         {{-- Header --}}
-        <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <div class="flex items-start gap-3">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100">
-                    <i class="fa-solid fa-lips text-xl text-red-500"></i>
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pink-50">
+                    <i class="fa-solid fa-lips text-xl text-[#e04ecb]"></i>
                 </div>
 
                 <div>
-                    <h1 class="text-2xl font-bold text-blue-700">My Listings</h1>
-                    <p class="mt-1 text-sm text-gray-600">
+                    <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">My Listings</h1>
+                    <p class="mt-2 text-sm text-gray-500">
                         Manage all of your Listings in one place or add Premium Features.
                     </p>
                 </div>
@@ -27,8 +27,8 @@
                     <a href="{{ request()->fullUrlWithQuery(['status' => $key]) }}"
                        class="-mb-px pb-3 transition
                            {{ $status === $key
-                               ? 'border-b-2 border-blue-600 text-blue-600'
-                               : 'border-b-2 border-transparent text-gray-700 hover:text-blue-600' }}">
+                               ? 'border-b-2 border-[#e04ecb] text-[#e04ecb]'
+                               : 'border-b-2 border-transparent text-gray-600 hover:text-[#e04ecb]' }}">
                         {{ $label }}
                     </a>
                 @endforeach
@@ -57,7 +57,7 @@
                         value="{{ $searchQuery ?? '' }}"
                         type="search"
                         placeholder="Search"
-                        class="h-10 w-56 rounded-md border border-gray-300 bg-white pl-9 pr-3 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        class="h-10 w-56 rounded-full border border-gray-300 bg-white pl-9 pr-3 text-sm text-gray-700 focus:border-[#e04ecb] focus:outline-none focus:ring-1 focus:ring-[#e04ecb]"
                     >
                 </div>
 
@@ -65,7 +65,7 @@
                     id="sort"
                     name="sort"
                     onchange="this.form.submit()"
-                    class="h-10 rounded-md border border-blue-600 bg-blue-600 px-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    class="h-10 rounded-full border border-[#e04ecb] bg-[#e04ecb] px-4 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-pink-200"
                 >
                     <option value="oldest" {{ ($sort ?? 'oldest') === 'oldest' ? 'selected' : '' }}>
                         Sort by: Upload (oldest first)
@@ -118,7 +118,7 @@
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <h2 class="text-lg font-bold text-blue-700">
+                                            <h2 class="text-xl font-semibold text-gray-900">
                                                 {{ $listing->title }}
                                             </h2>
 
@@ -195,8 +195,8 @@
                         </div>
 
                         {{-- Promotion Bar --}}
-                        <div class="border-t border-blue-100 bg-blue-50 px-4 py-3">
-                            <p class="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-700">
+                        <div class="border-t border-pink-100 bg-pink-50 px-4 py-3">
+                            <p class="mb-2 flex items-center gap-2 text-sm font-semibold text-pink-700">
                                 <i class="fa-regular fa-circle-question"></i>
                                 Get more views
                             </p>
@@ -210,14 +210,14 @@
                                     @csrf
                                     <input type="hidden" name="feature" value="top">
                                     <button type="submit"
-                                            class="h-10 w-full rounded border border-yellow-500 bg-white text-sm font-semibold text-yellow-600 hover:bg-yellow-50">
+                                            class="h-10 w-full rounded-full border border-yellow-400 bg-white text-sm font-semibold text-yellow-700 hover:bg-yellow-50">
                                         <i class="fa-solid fa-star mr-1"></i>
                                         Top
                                     </button>
                                 </form>
 
                                 <a href="{{ route('photos') }}"
-                                   class="flex h-10 items-center justify-center rounded border border-teal-500 bg-white text-sm font-semibold text-teal-600 hover:bg-teal-50">
+                                   class="flex h-10 items-center justify-center rounded-full border border-teal-400 bg-white text-sm font-semibold text-teal-700 hover:bg-teal-50">
                                     <i class="fa-regular fa-image mr-1"></i>
                                     Gallery
                                 </a>
@@ -226,7 +226,7 @@
                                     @csrf
                                     <input type="hidden" name="feature" value="premium">
                                     <button type="submit"
-                                            class="h-10 w-full rounded border border-purple-500 bg-white text-sm font-semibold text-purple-600 hover:bg-purple-50">
+                                            class="h-10 w-full rounded-full border border-purple-400 bg-white text-sm font-semibold text-purple-700 hover:bg-purple-50">
                                         <i class="fa-solid fa-award mr-1"></i>
                                         Premium
                                     </button>
@@ -235,7 +235,7 @@
 
                             <div class="mt-4 flex justify-end">
                                 <a href="{{ route('my-listings.show', $listing) }}"
-                                   class="inline-flex h-9 items-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700">
+                                   class="inline-flex h-9 items-center gap-2 rounded-full bg-[#e04ecb] px-5 text-sm font-semibold text-white hover:bg-[#c13ab0]">
                                     Details
                                     <i class="fa-solid fa-caret-right"></i>
                                 </a>
@@ -270,7 +270,7 @@
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <h2 class="text-lg font-bold text-blue-700">
+                                            <h2 class="text-xl font-semibold text-gray-900">
                                                 {{ $profile->name }}
                                             </h2>
 
@@ -310,8 +310,8 @@
                             </div>
                         </div>
 
-                        <div class="border-t border-blue-100 bg-blue-50 px-4 py-3">
-                            <p class="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-700">
+                        <div class="border-t border-pink-100 bg-pink-50 px-4 py-3">
+                            <p class="mb-2 flex items-center gap-2 text-sm font-semibold text-pink-700">
                                 <i class="fa-regular fa-circle-question"></i>
                                 Get more views
                             </p>
@@ -322,19 +322,19 @@
 
                             <div class="grid gap-3 md:grid-cols-3">
                                 <a href="{{ route('profiles.switch', $profile) }}"
-                                   class="flex h-10 items-center justify-center rounded border border-yellow-500 bg-white text-sm font-semibold text-yellow-600 hover:bg-yellow-50">
+                                   class="flex h-10 items-center justify-center rounded-full border border-yellow-400 bg-white text-sm font-semibold text-yellow-700 hover:bg-yellow-50">
                                     <i class="fa-solid fa-star mr-1"></i>
                                     Top
                                 </a>
 
                                 <a href="{{ route('photos') }}"
-                                   class="flex h-10 items-center justify-center rounded border border-teal-500 bg-white text-sm font-semibold text-teal-600 hover:bg-teal-50">
+                                   class="flex h-10 items-center justify-center rounded-full border border-teal-400 bg-white text-sm font-semibold text-teal-700 hover:bg-teal-50">
                                     <i class="fa-regular fa-image mr-1"></i>
                                     Gallery
                                 </a>
 
                                 <a href="{{ route('featured') }}"
-                                   class="flex h-10 items-center justify-center rounded border border-purple-500 bg-white text-sm font-semibold text-purple-600 hover:bg-purple-50">
+                                   class="flex h-10 items-center justify-center rounded-full border border-purple-400 bg-white text-sm font-semibold text-purple-700 hover:bg-purple-50">
                                     <i class="fa-solid fa-award mr-1"></i>
                                     Premium
                                 </a>
@@ -342,7 +342,7 @@
 
                             <div class="mt-4 flex justify-end">
                                 <a href="{{ route('profiles.switch', $profile) }}"
-                                   class="inline-flex h-9 items-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700">
+                                   class="inline-flex h-9 items-center gap-2 rounded-full bg-[#e04ecb] px-5 text-sm font-semibold text-white hover:bg-[#c13ab0]">
                                     Details
                                     <i class="fa-solid fa-caret-right"></i>
                                 </a>
@@ -364,7 +364,7 @@
                 </p>
 
                 <a href="{{ route('my-profile') }}"
-                   class="mt-6 inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
+                   class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#e04ecb] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#c13ab0]">
                     <i class="fa-solid fa-plus"></i>
                     Go to Dashboard
                 </a>
