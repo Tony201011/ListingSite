@@ -240,7 +240,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_view_data_defaults_rate_to_contact_for_rate_when_no_rates(): void
     {
-        $this->createApprovedProvider();
+        $this->createApprovedProvider(['is_featured' => true]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -250,7 +250,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_view_data_shows_incall_rate_when_set(): void
     {
-        $user = $this->createApprovedProvider();
+        $user = $this->createApprovedProvider(['is_featured' => true]);
         $profileId = $user->providerProfile->id;
 
         Rate::query()->create([
@@ -269,7 +269,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_view_data_falls_back_to_outcall_when_incall_is_empty(): void
     {
-        $user = $this->createApprovedProvider();
+        $user = $this->createApprovedProvider(['is_featured' => true]);
         $profileId = $user->providerProfile->id;
 
         Rate::query()->create([
@@ -288,7 +288,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_view_data_price_list_contains_all_rates(): void
     {
-        $user = $this->createApprovedProvider();
+        $user = $this->createApprovedProvider(['is_featured' => true]);
         $profileId = $user->providerProfile->id;
 
         Rate::query()->create(['user_id' => $user->id, 'provider_profile_id' => $profileId, 'description' => '30 min', 'incall' => '$150', 'outcall' => '$180']);
@@ -302,7 +302,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_stats_array_contains_expected_labels(): void
     {
-        $this->createApprovedProvider();
+        $this->createApprovedProvider(['is_featured' => true]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -320,7 +320,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_stats_show_dash_when_category_not_set(): void
     {
-        $this->createApprovedProvider(['age_group_id' => null]);
+        $this->createApprovedProvider(['age_group_id' => null, 'is_featured' => true]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -332,7 +332,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_is_verified_flag_is_present_in_view_data(): void
     {
-        $this->createApprovedProvider(['is_verified' => true]);
+        $this->createApprovedProvider(['is_verified' => true, 'is_featured' => true]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -356,7 +356,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_prev_and_next_profile_are_arrays_with_slug_and_name_keys(): void
     {
-        $this->createApprovedProvider();
+        $this->createApprovedProvider(['is_featured' => true]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -373,7 +373,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_prev_and_next_profile_wrap_around_to_same_profile_when_only_one_exists(): void
     {
-        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10']);
+        $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10', 'is_featured' => true]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
