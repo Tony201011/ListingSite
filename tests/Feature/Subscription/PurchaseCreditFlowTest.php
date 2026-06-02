@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Subscription;
 
+use App\Actions\Referral\ProcessReferralRewardForFirstPayment;
 use App\Actions\Subscription\HandleStripeWebhook;
 use App\Actions\Subscription\SendCreditPurchaseEmail;
 use App\Http\Middleware\CheckProfileSteps;
@@ -499,7 +500,7 @@ class PurchaseCreditFlowTest extends TestCase
             ->method('execute')
             ->with($this->callback(fn ($t) => $t->id === $transaction->id));
 
-        $controller = new HandleStripeWebhook($emailAction);
+        $controller = new HandleStripeWebhook($emailAction, $this->createMock(ProcessReferralRewardForFirstPayment::class));
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
@@ -572,7 +573,10 @@ class PurchaseCreditFlowTest extends TestCase
     {
         Log::spy();
 
-        $controller = new HandleStripeWebhook(new SendCreditPurchaseEmail);
+        $controller = new HandleStripeWebhook(
+            new SendCreditPurchaseEmail,
+            $this->createMock(ProcessReferralRewardForFirstPayment::class)
+        );
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
@@ -684,7 +688,10 @@ class PurchaseCreditFlowTest extends TestCase
     ): void {
         Mail::fake();
 
-        $controller = new HandleStripeWebhook(new SendCreditPurchaseEmail);
+        $controller = new HandleStripeWebhook(
+            new SendCreditPurchaseEmail,
+            $this->createMock(ProcessReferralRewardForFirstPayment::class)
+        );
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
