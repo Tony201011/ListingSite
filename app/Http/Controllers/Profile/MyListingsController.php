@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class MyListingsController extends Controller
@@ -101,14 +102,12 @@ class MyListingsController extends Controller
         ]);
     }
 
-    public function showProfile(ProviderProfile $profile): View
+    public function showProfile(ProviderProfile $profile): RedirectResponse
     {
         $this->authorizeProfileOwnership($profile);
         session(['active_provider_profile_id' => $profile->id]);
 
-        return view('profile.my-listings-profile-show', [
-            'profile' => $profile->loadMissing('state', 'city', 'primaryProfileImage'),
-        ]);
+        return redirect()->route('profile-setting');
     }
 
     public function feature(Request $request, ProviderListing $listing)
