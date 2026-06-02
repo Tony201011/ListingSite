@@ -41,6 +41,7 @@ class MyListingsController extends Controller
             ->when($status === 'offline', fn ($query) => $query->where(fn ($q) => $q->where('is_live', false)->orWhere('is_active', false)))
             ->when($search !== '', fn ($query) => $query->where('title', 'like', "%{$search}%"))
             ->when($sort === 'newest', fn ($query) => $query->orderByDesc('created_at'), fn ($query) => $query->orderBy('created_at'))
+            ->with('providerProfile')
             ->get();
 
         // Also provide provider profiles so the UI can fall back to showing

@@ -123,7 +123,7 @@
                                             </h2>
 
                                             <p class="mt-1 line-clamp-2 text-sm leading-6 text-gray-700">
-                                                {{ $listing->description ?? 'No description available.' }}
+                                                {{ $listing->providerProfile?->description ?? 'No description available.' }}
                                             </p>
                                         </div>
 
