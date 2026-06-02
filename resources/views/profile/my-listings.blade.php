@@ -169,8 +169,6 @@
                                     </div>
 
                                     <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
-                                        <span>Category: {{ $listing->category ?: 'Uncategorized' }}</span>
-
                                         @if($location)
                                             <span class="inline-flex items-center gap-1">
                                                 <i class="fa-solid fa-location-dot text-gray-500"></i>
@@ -285,8 +283,6 @@
                                     </div>
 
                                     <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
-                                        <span>Category: {{ $profile->category ?? 'Uncategorized' }}</span>
-
                                         @if($profile->suburb)
                                             <span class="inline-flex items-center gap-1">
                                                 <i class="fa-solid fa-location-dot text-gray-500"></i>
