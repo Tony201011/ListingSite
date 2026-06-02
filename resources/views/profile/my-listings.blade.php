@@ -4,248 +4,368 @@
 
 @section('content')
 <div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-6xl">
-        <div class="mb-8 flex flex-col gap-4 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm sm:flex-row sm:items-end sm:justify-between">
+    <div class="mx-auto max-w-7xl">
+
+        {{-- Page Header --}}
+        <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">My Listings</h1>
-                <p class="mt-2 max-w-2xl text-sm text-gray-500">
-                    Manage your current provider listings in one place and see which ones are live.
+                <p class="mt-2 max-w-xl text-sm text-gray-500">
+                    Manage all of your listings in one place, renew expiring listings, and purchase premium features.
                 </p>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-900">
-                    {{ $listings->count() }} Total Listings
-                </div>
-                <a href="{{ route('my-profile') }}" class="inline-flex items-center justify-center rounded-full bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
-                    View Dashboard
+            <div class="flex flex-shrink-0 flex-wrap items-center gap-3">
+                <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-gray-400"></i>
+                    View Listings
+                </a>
+                <a href="{{ route('my-profile') }}" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                    <i class="fa-solid fa-plus"></i>
+                    Post New Advertisement
                 </a>
             </div>
         </div>
 
         @if(session('success'))
-            <div class="mb-6 rounded-3xl border border-green-200 bg-green-50 px-6 py-4 text-sm font-medium text-green-800 shadow-sm">
+            <div class="mb-6 rounded-2xl border border-green-200 bg-green-50 px-6 py-4 text-sm font-medium text-green-800 shadow-sm">
                 {{ session('success') }}
             </div>
         @endif
 
-        <div class="mb-6 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-            <div class="border-b border-gray-200 px-5 py-5 sm:px-6">
-                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <p class="text-sm font-semibold uppercase tracking-[0.24em] text-pink-600">Listings manager</p>
-                        <h2 class="mt-2 text-2xl font-semibold text-gray-900">All Listings</h2>
-                        <p class="mt-1 text-sm text-gray-500">Manage all of your listings, activate or promote them, and track performance at a glance.</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <div class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-900">
-                            {{ $statusCounts['all'] ?? $listings->count() }} Total Listings
-                        </div>
-                        <a href="{{ route('my-profile') }}" class="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">View Dashboard</a>
-                    </div>
-                </div>
+        {{-- Filter + Search Bar --}}
+        <div class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div class="flex flex-col gap-4 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
 
-                <div class="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4">
+                {{-- Status filter tabs --}}
+                <div class="flex flex-wrap items-center gap-2">
                     @foreach(['all' => 'All Listings', 'online' => 'Online', 'expiring' => 'Expiring', 'expired' => 'Expired', 'offline' => 'Offline'] as $key => $label)
                         <a href="{{ request()->fullUrlWithQuery(['status' => $key]) }}"
-                           class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition {{ $status === $key ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                           class="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition
+                               {{ $status === $key
+                                   ? 'bg-blue-600 text-white shadow-sm'
+                                   : 'text-gray-600 hover:bg-gray-100' }}">
                             {{ $label }}
-                            <span class="ml-2 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-gray-700">{{ $statusCounts[$key] ?? 0 }}</span>
+                            <span class="rounded-md px-1.5 py-0.5 text-[11px] font-semibold
+                                {{ $status === $key ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600' }}">
+                                {{ $statusCounts[$key] ?? 0 }}
+                            </span>
                         </a>
                     @endforeach
                 </div>
 
-                <form method="GET" action="{{ route('my-listings') }}" class="mt-6 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+                {{-- Search & Sort --}}
+                <form method="GET" action="{{ route('my-listings') }}" class="flex flex-wrap items-center gap-3">
                     <input type="hidden" name="status" value="{{ $status }}">
-                    <div class="relative w-full">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input name="q" value="{{ $searchQuery ?? '' }}" type="search" placeholder="Search by title" class="w-full rounded-full border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input name="q" value="{{ $searchQuery ?? '' }}" type="search" placeholder="Search listings…"
+                               class="w-56 rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-4 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
                     </div>
-                    <div class="flex flex-wrap items-center gap-3 justify-end">
+                    <div class="flex items-center gap-2">
                         <label class="sr-only" for="sort">Sort</label>
-                        <select id="sort" name="sort" class="rounded-full border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
-                            <option value="oldest" {{ ($sort ?? 'oldest') === 'oldest' ? 'selected' : '' }}>Upload (oldest first)</option>
-                            <option value="newest" {{ ($sort ?? '') === 'newest' ? 'selected' : '' }}>Upload (newest first)</option>
+                        <select id="sort" name="sort"
+                                class="rounded-xl border border-gray-200 bg-white py-2.5 pl-3 pr-8 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            <option value="oldest" {{ ($sort ?? 'oldest') === 'oldest' ? 'selected' : '' }}>Upload Date · Oldest First</option>
+                            <option value="newest" {{ ($sort ?? '') === 'newest' ? 'selected' : '' }}>Upload Date · Newest First</option>
                         </select>
-                        <button type="submit" class="inline-flex items-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">Apply</button>
+                        <button type="submit"
+                                class="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+                            Apply
+                        </button>
                     </div>
                 </form>
             </div>
+        </div>
 
-            <div class="border-b border-gray-200 bg-blue-50 px-5 py-4 sm:px-6">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-blue-800">Promotion & Advertisements</p>
-                        <p class="mt-1 text-sm text-blue-700">Promote listings, feature them on the homepage, or add premium exposure for better visibility.</p>
-                    </div>
-                    <div class="grid w-full gap-3 sm:w-auto sm:grid-cols-3">
-                        <a href="{{ route('featured') }}" class="inline-flex items-center justify-center rounded-full border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-100">Homepage Feature</a>
-                        <a href="{{ route('featured') }}" class="inline-flex items-center justify-center rounded-full border border-teal-200 bg-white px-4 py-3 text-sm font-semibold text-teal-700 transition hover:bg-teal-100">Premium Listing</a>
-                        <a href="{{ route('featured') }}" class="inline-flex items-center justify-center rounded-full border border-violet-200 bg-white px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-100">Gallery Boost</a>
-                    </div>
-                </div>
-            </div>
+        {{-- Listing Cards Grid --}}
+        @if($listings->isNotEmpty())
+            <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach($listings as $listing)
+                @php
+                    $isOnline  = $listing->is_live && $listing->is_active;
+                    $isExpired = !$listing->is_active;
+                    $isExpiring = $listing->is_active && !$listing->is_live && $listing->created_at->lte(now()->subDays(7));
 
-            <div class="space-y-5 p-5 sm:p-6">
-                @if($listings->isNotEmpty())
-                    @forelse($listings as $listing)
-                    <article class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
-                        <div class="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-                            <div class="relative overflow-hidden bg-gray-100">
-                                @if($listing->thumbnail)
-                                    <img src="{{ url($listing->thumbnail) }}" alt="{{ $listing->title }}" class="h-full min-h-[240px] w-full object-cover">
-                                @else
-                                    <div class="flex h-full min-h-[240px] items-center justify-center bg-gray-200 text-sm text-gray-500">
-                                        No photo available
-                                    </div>
+                    if ($isOnline) {
+                        $badgeClass = 'bg-green-500 text-white';
+                        $badgeLabel = 'Online';
+                    } elseif ($isExpired) {
+                        $badgeClass = 'bg-red-500 text-white';
+                        $badgeLabel = 'Expired';
+                    } elseif ($isExpiring) {
+                        $badgeClass = 'bg-amber-500 text-white';
+                        $badgeLabel = 'Expiring';
+                    } else {
+                        $badgeClass = 'bg-gray-600 text-white';
+                        $badgeLabel = 'Offline';
+                    }
+
+                    $location = $listing->providerProfile?->suburb ?? null;
+                @endphp
+                <article class="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
+
+                    {{-- Card image with overlays --}}
+                    <div class="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                        @if($listing->thumbnail)
+                            <img src="{{ url($listing->thumbnail) }}"
+                                 alt="{{ $listing->title }}"
+                                 class="h-full w-full object-cover">
+                        @else
+                            <div class="flex h-full items-center justify-center bg-gray-200">
+                                <i class="fa-regular fa-image text-4xl text-gray-400"></i>
+                            </div>
+                        @endif
+
+                        {{-- Status badge top-left --}}
+                        <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow {{ $badgeClass }}">
+                            <span class="h-1.5 w-1.5 rounded-full bg-white/70"></span>
+                            {{ $badgeLabel }}
+                        </span>
+
+                        {{-- Three-dot action menu top-right --}}
+                        <div class="absolute right-3 top-3" x-data="{ open: false }">
+                            <button @click="open = !open" @click.outside="open = false"
+                                    class="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow transition hover:bg-white">
+                                <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                            </button>
+                            <div x-show="open" x-transition
+                                 class="absolute right-0 top-10 z-10 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+                                <a href="{{ route('my-listings.show', $listing) }}"
+                                   class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+                                    <i class="fa-regular fa-eye w-4 text-gray-400"></i> View Details
+                                </a>
+                                <form action="{{ route('my-listings.feature', $listing) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="feature" value="top">
+                                    <button type="submit"
+                                            class="flex w-full items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+                                        <i class="fa-solid fa-arrow-up w-4 text-gray-400"></i> Mark Online
+                                    </button>
+                                </form>
+                                <form action="{{ route('my-listings.feature', $listing) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="feature" value="premium">
+                                    <button type="submit"
+                                            class="flex w-full items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+                                        <i class="fa-solid fa-crown w-4 text-gray-400"></i> Upgrade Premium
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Card body --}}
+                    <div class="flex flex-1 flex-col p-5">
+
+                        {{-- Listing info --}}
+                        <div class="mb-4">
+                            <div class="flex items-start justify-between gap-2">
+                                <h2 class="line-clamp-1 text-base font-semibold text-gray-900">{{ $listing->title }}</h2>
+                                @if($listing->is_vip)
+                                    <span class="inline-flex shrink-0 items-center rounded-md bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-700">Premium</span>
                                 @endif
-
-                                <span class="absolute left-4 top-4 inline-flex rounded-full {{ $listing->is_live ? 'bg-green-600 text-white' : 'bg-gray-700 text-white' }} px-3 py-1 text-xs font-semibold">
-                                    {{ $listing->is_live ? 'Online' : 'Offline' }}
+                            </div>
+                            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                                @if($location)
+                                    <span class="inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-location-dot text-gray-400"></i>
+                                        {{ $location }}
+                                    </span>
+                                    <span class="text-gray-300">·</span>
+                                @endif
+                                <span class="inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-tag text-gray-400"></i>
+                                    {{ $listing->category ?: 'Uncategorized' }}
+                                </span>
+                                <span class="text-gray-300">·</span>
+                                <span class="inline-flex items-center gap-1">
+                                    <i class="fa-regular fa-clock text-gray-400"></i>
+                                    Updated {{ $listing->updated_at->diffForHumans() }}
                                 </span>
                             </div>
+                        </div>
 
-                            <div class="flex flex-col justify-between p-5">
-                                <div class="space-y-4">
-                                    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                                        <div class="min-w-0">
-                                            <h2 class="truncate text-2xl font-semibold text-blue-700 hover:text-blue-800">{{ $listing->title }}</h2>
-                                            <p class="mt-2 text-sm text-gray-500">
-                                                {{ $listing->category ?: 'Uncategorized' }} · {{ $listing->age ? $listing->age.' years' : 'Age not set' }}
-                                            </p>
-                                        </div>
-                                        <span class="inline-flex items-center rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-700">
-                                            {{ $listing->is_vip ? 'Premium' : 'Standard' }}
-                                        </span>
-                                    </div>
-
-                                    <div class="space-y-3 text-sm text-gray-600">
-                                        <p class="leading-6 text-gray-500">Manage your listing details and promotions from this page. View listing activity, update visibility, and push premium placement with the buttons below.</p>
-                                        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                                            <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
-                                                <i class="fa-solid fa-tag text-gray-500"></i>
-                                                {{ $listing->category ?: 'Uncategorized' }}
-                                            </span>
-                                            <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
-                                                <i class="fa-solid fa-globe text-gray-500"></i>
-                                                {{ ucfirst($listing->website_type) }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                                        <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
-                                            <i class="fa-solid fa-star text-amber-500"></i>
-                                            {{ number_format($listing->audience_score, 2) }} score
-                                        </span>
-                                        <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
-                                            <i class="fa-solid fa-circle {{ $listing->is_active ? 'text-green-500' : 'text-gray-400' }} text-[10px]"></i>
-                                            {{ $listing->is_active ? 'Active' : 'Inactive' }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-4">
-                                    <div class="rounded-3xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                                        Get more views. Add a Premium Feature to stand out in the search results!
-                                    </div>
-
-                                    <div class="grid gap-3 lg:grid-cols-[1fr_140px]">
-                                        <div class="grid gap-3 sm:grid-cols-3">
-                                            <form action="{{ route('my-listings.feature', $listing) }}" method="POST">
-                                                @csrf
-                                                <input type="hidden" name="feature" value="top">
-                                                <button type="submit" class="w-full rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-800 transition hover:bg-yellow-100">Top</button>
-                                            </form>
-                                            <a href="{{ route('photos') }}" class="inline-flex h-full items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-800 transition hover:bg-teal-100">Gallery</a>
-                                            <form action="{{ route('my-listings.feature', $listing) }}" method="POST">
-                                                @csrf
-                                                <input type="hidden" name="feature" value="premium">
-                                                <button type="submit" class="w-full rounded-2xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-800 transition hover:bg-violet-100">Premium</button>
-                                            </form>
-                                        </div>
-                                        <a href="{{ route('my-listings.show', $listing) }}" class="inline-flex h-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">Details</a>
-                                    </div>
-                                </div>
+                        {{-- Stats row --}}
+                        <div class="mb-4 grid grid-cols-4 divide-x divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 text-center">
+                            <div class="px-2 py-2.5">
+                                <p class="text-base font-bold text-gray-800">0</p>
+                                <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Views</p>
+                            </div>
+                            <div class="px-2 py-2.5">
+                                <p class="text-base font-bold text-gray-800">0</p>
+                                <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Likes</p>
+                            </div>
+                            <div class="px-2 py-2.5">
+                                <p class="text-base font-bold text-gray-800">0</p>
+                                <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Contacts</p>
+                            </div>
+                            <div class="px-2 py-2.5">
+                                <p class="text-base font-bold text-gray-800">0</p>
+                                <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Leads</p>
                             </div>
                         </div>
-                    </article>
-                    @empty
-                        <div class="rounded-[28px] border border-dashed border-gray-200 bg-white p-10 text-center">
-                            <h2 class="text-xl font-semibold text-gray-900">No listings yet</h2>
-                            <p class="mt-2 text-sm text-gray-500">You don’t have any provider listings yet. Create your first listing from the dashboard to get started.</p>
+
+                        {{-- Promotion section --}}
+                        <div class="mb-4 rounded-xl border border-gray-100 bg-gray-50 p-4">
+                            <p class="text-sm font-semibold text-gray-800">Get More Views</p>
+                            <p class="mt-0.5 text-xs text-gray-500">Promote your listing and improve visibility.</p>
+                            <div class="mt-3 grid grid-cols-3 gap-2">
+                                <form action="{{ route('my-listings.feature', $listing) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="feature" value="top">
+                                    <button type="submit"
+                                            class="w-full rounded-lg border border-yellow-300 bg-white px-2 py-2 text-xs font-semibold text-yellow-700 transition hover:bg-yellow-50">
+                                        <i class="fa-solid fa-arrow-up mb-0.5 block text-yellow-500"></i>
+                                        Top
+                                    </button>
+                                </form>
+                                <a href="{{ route('photos') }}"
+                                   class="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50">
+                                    <i class="fa-regular fa-images mb-0.5 text-gray-400"></i>
+                                    Gallery
+                                </a>
+                                <form action="{{ route('my-listings.feature', $listing) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="feature" value="premium">
+                                    <button type="submit"
+                                            class="w-full rounded-lg border border-violet-300 bg-white px-2 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-50">
+                                        <i class="fa-solid fa-crown mb-0.5 block text-violet-500"></i>
+                                        Premium
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                    @endforelse
-                @else
-                    @if(isset($profiles) && $profiles->isNotEmpty())
-                        @foreach($profiles as $profile)
-                            <article class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
-                                <div class="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-                                    <div class="relative overflow-hidden bg-gray-100">
-                                        @if($profile->primaryProfileImage)
-                                            <img src="{{ $profile->primaryProfileImage->thumbnail_url }}" alt="{{ $profile->name }}" class="h-full min-h-[240px] w-full object-cover">
-                                        @else
-                                            <div class="flex h-full min-h-[240px] items-center justify-center bg-gray-200 text-sm text-gray-500">
-                                                No photo available
-                                            </div>
-                                        @endif
 
-                                        <span class="absolute left-4 top-4 inline-flex rounded-full {{ $profile->isCurrentlyOnline() ? 'bg-green-600 text-white' : 'bg-gray-700 text-white' }} px-3 py-1 text-xs font-semibold">
-                                            {{ $profile->isCurrentlyOnline() ? 'Online' : 'Offline' }}
-                                        </span>
-                                    </div>
-
-                                    <div class="flex flex-col justify-between p-5">
-                                        <div class="space-y-4">
-                                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                                <div class="min-w-0">
-                                                    <h2 class="truncate text-2xl font-semibold text-gray-900">{{ $profile->name }}</h2>
-                                                    <p class="mt-2 text-sm text-gray-500">
-                                                        {{ $profile->age ? $profile->age.' years' : 'Age not set' }} · {{ $profile->suburb ?? 'Location not set' }}
-                                                    </p>
-                                                </div>
-                                                <span class="inline-flex rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-700">
-                                                    {{ $profile->is_featured ? 'VIP' : 'Standard' }}
-                                                </span>
-                                            </div>
-
-                                            <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                                                <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
-                                                    <i class="fa-regular fa-heart text-pink-500"></i>
-                                                    {{ number_format($profile->user->providerListings()->count(), 0) }} listings
-                                                </span>
-                                                <span class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
-                                                    {{ $profile->isCurrentlyAvailableNow() ? 'Available Now' : 'Not available' }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div class="space-y-4">
-                                            <div class="rounded-3xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                                                Manage your profile and listings from the dashboard.
-                                            </div>
-
-                                            <div class="grid gap-3 lg:grid-cols-[1fr_140px]">
-                                                <div class="grid gap-3 sm:grid-cols-3">
-                                                    <a href="{{ route('profiles.switch', $profile) }}" class="w-full rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-800 transition hover:bg-yellow-100">Top</a>
-                                                    <a href="{{ route('photos') }}" class="inline-flex h-full items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-800 transition hover:bg-teal-100">Gallery</a>
-                                                    <a href="{{ route('featured') }}" class="w-full rounded-2xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-800 transition hover:bg-violet-100">Premium</a>
-                                                </div>
-                                                <a href="{{ route('profiles.switch', $profile) }}" class="inline-flex h-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">Details</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </article>
-                        @endforeach
-                    @else
-                        <div class="rounded-[28px] border border-dashed border-gray-200 bg-white p-10 text-center">
-                            <h2 class="text-xl font-semibold text-gray-900">No profiles yet</h2>
-                            <p class="mt-2 text-sm text-gray-500">You don’t have any provider profiles yet. Create your first profile from the dashboard to get started.</p>
+                        {{-- Details button --}}
+                        <div class="mt-auto flex justify-end">
+                            <a href="{{ route('my-listings.show', $listing) }}"
+                               class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+                                Details
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
                         </div>
-                    @endif
-                @endif
+                    </div>
+                </article>
+                @endforeach
             </div>
-        </div>
+
+        {{-- Fallback: show provider profiles when no ProviderListings exist --}}
+        @elseif(isset($profiles) && $profiles->isNotEmpty())
+            <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach($profiles as $profile)
+                <article class="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
+
+                    {{-- Card image --}}
+                    <div class="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                        @if($profile->primaryProfileImage)
+                            <img src="{{ $profile->primaryProfileImage->thumbnail_url }}"
+                                 alt="{{ $profile->name }}"
+                                 class="h-full w-full object-cover">
+                        @else
+                            <div class="flex h-full items-center justify-center bg-gray-200">
+                                <i class="fa-regular fa-image text-4xl text-gray-400"></i>
+                            </div>
+                        @endif
+
+                        <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow
+                            {{ $profile->isCurrentlyOnline() ? 'bg-green-500 text-white' : 'bg-gray-600 text-white' }}">
+                            <span class="h-1.5 w-1.5 rounded-full bg-white/70"></span>
+                            {{ $profile->isCurrentlyOnline() ? 'Online' : 'Offline' }}
+                        </span>
+                    </div>
+
+                    {{-- Card body --}}
+                    <div class="flex flex-1 flex-col p-5">
+                        <div class="mb-4">
+                            <div class="flex items-start justify-between gap-2">
+                                <h2 class="line-clamp-1 text-base font-semibold text-gray-900">{{ $profile->name }}</h2>
+                                @if($profile->is_featured)
+                                    <span class="inline-flex shrink-0 items-center rounded-md bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-700">VIP</span>
+                                @endif
+                            </div>
+                            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                                @if($profile->suburb)
+                                    <span class="inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-location-dot text-gray-400"></i>
+                                        {{ $profile->suburb }}
+                                    </span>
+                                    <span class="text-gray-300">·</span>
+                                @endif
+                                <span>{{ $profile->age ? $profile->age.' yrs' : 'Age not set' }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Stats row --}}
+                        <div class="mb-4 grid grid-cols-4 divide-x divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 text-center">
+                            <div class="px-2 py-2.5">
+                                <p class="text-base font-bold text-gray-800">0</p>
+                                <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Views</p>
+                            </div>
+                            <div class="px-2 py-2.5">
+                                <p class="text-base font-bold text-gray-800">0</p>
+                                <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Likes</p>
+                            </div>
+                            <div class="px-2 py-2.5">
+                                <p class="text-base font-bold text-gray-800">0</p>
+                                <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Contacts</p>
+                            </div>
+                            <div class="px-2 py-2.5">
+                                <p class="text-base font-bold text-gray-800">0</p>
+                                <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Leads</p>
+                            </div>
+                        </div>
+
+                        {{-- Promotion section --}}
+                        <div class="mb-4 rounded-xl border border-gray-100 bg-gray-50 p-4">
+                            <p class="text-sm font-semibold text-gray-800">Get More Views</p>
+                            <p class="mt-0.5 text-xs text-gray-500">Promote your listing and improve visibility.</p>
+                            <div class="mt-3 grid grid-cols-3 gap-2">
+                                <a href="{{ route('profiles.switch', $profile) }}"
+                                   class="flex flex-col items-center justify-center rounded-lg border border-yellow-300 bg-white px-2 py-2 text-xs font-semibold text-yellow-700 transition hover:bg-yellow-50">
+                                    <i class="fa-solid fa-arrow-up mb-0.5 text-yellow-500"></i>
+                                    Top
+                                </a>
+                                <a href="{{ route('photos') }}"
+                                   class="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50">
+                                    <i class="fa-regular fa-images mb-0.5 text-gray-400"></i>
+                                    Gallery
+                                </a>
+                                <a href="{{ route('featured') }}"
+                                   class="flex flex-col items-center justify-center rounded-lg border border-violet-300 bg-white px-2 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-50">
+                                    <i class="fa-solid fa-crown mb-0.5 text-violet-500"></i>
+                                    Premium
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- Details button --}}
+                        <div class="mt-auto flex justify-end">
+                            <a href="{{ route('profiles.switch', $profile) }}"
+                               class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+                                Details
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+                @endforeach
+            </div>
+
+        @else
+            {{-- Empty state --}}
+            <div class="rounded-2xl border border-dashed border-gray-200 bg-white p-16 text-center">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
+                    <i class="fa-regular fa-rectangle-list text-2xl text-gray-400"></i>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-900">No listings yet</h2>
+                <p class="mt-2 text-sm text-gray-500">You don't have any listings yet. Head to the dashboard to create your first one.</p>
+                <a href="{{ route('my-profile') }}" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+                    <i class="fa-solid fa-plus"></i>
+                    Go to Dashboard
+                </a>
+            </div>
+        @endif
+
     </div>
 </div>
 @endsection
