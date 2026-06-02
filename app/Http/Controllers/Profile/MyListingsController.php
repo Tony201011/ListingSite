@@ -33,16 +33,12 @@ class MyListingsController extends Controller
         $statusCounts = [
             'all' => (clone $baseQuery)->count(),
             'online' => (clone $baseQuery)->where('is_live', true)->where('is_active', true)->count(),
-            'expiring' => (clone $baseQuery)->where('is_active', true)->where('is_live', false)->where('created_at', '<=', now()->subDays(7))->count(),
-            'expired' => (clone $baseQuery)->where('is_active', false)->count(),
-            'offline' => (clone $baseQuery)->where('is_active', true)->where('is_live', false)->where('created_at', '>', now()->subDays(7))->count(),
+            'offline' => (clone $baseQuery)->where(fn ($q) => $q->where('is_live', false)->orWhere('is_active', false))->count(),
         ];
 
         $listings = (clone $baseQuery)
             ->when($status === 'online', fn ($query) => $query->where('is_live', true)->where('is_active', true))
-            ->when($status === 'expiring', fn ($query) => $query->where('is_active', true)->where('is_live', false)->where('created_at', '<=', now()->subDays(7)))
-            ->when($status === 'expired', fn ($query) => $query->where('is_active', false))
-            ->when($status === 'offline', fn ($query) => $query->where('is_active', true)->where('is_live', false)->where('created_at', '>', now()->subDays(7)))
+            ->when($status === 'offline', fn ($query) => $query->where(fn ($q) => $q->where('is_live', false)->orWhere('is_active', false)))
             ->when($search !== '', fn ($query) => $query->where('title', 'like', "%{$search}%"))
             ->when($sort === 'newest', fn ($query) => $query->orderByDesc('created_at'), fn ($query) => $query->orderBy('created_at'))
             ->get();
