@@ -39,14 +39,42 @@ class MyListingsController extends Controller
         $listings = (clone $baseQuery)
             ->when($status === 'online', fn ($query) => $query->where('is_live', true)->where('is_active', true))
             ->when($status === 'offline', fn ($query) => $query->where(fn ($q) => $q->where('is_live', false)->orWhere('is_active', false)))
-            ->when($search !== '', fn ($query) => $query->where('title', 'like', "%{$search}%"))
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery
+                        ->where('title', 'like', "%{$search}%")
+                        ->orWhere('category', 'like', "%{$search}%")
+                        ->orWhere('website_type', 'like', "%{$search}%")
+                        ->orWhereHas('providerProfile', function ($profileQuery) use ($search) {
+                            $profileQuery
+                                ->where('name', 'like', "%{$search}%")
+                                ->orWhere('suburb', 'like', "%{$search}%")
+                                ->orWhere('description', 'like', "%{$search}%")
+                                ->orWhere('introduction_line', 'like', "%{$search}%")
+                                ->orWhere('profile_text', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->when($sort === 'newest', fn ($query) => $query->orderByDesc('created_at'), fn ($query) => $query->orderBy('created_at'))
             ->with('providerProfile')
             ->get();
 
         // Also provide provider profiles so the UI can fall back to showing
         // profiles (the select-profile view) when no provider_listings exist.
-        $profiles = $user->providerProfiles()->orderBy('id')->with('primaryProfileImage')->get();
+        $profiles = $user->providerProfiles()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('suburb', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('introduction_line', 'like', "%{$search}%")
+                        ->orWhere('profile_text', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('id')
+            ->with('primaryProfileImage')
+            ->get();
 
         return view('profile.my-listings', [
             'listings' => $listings,
@@ -64,7 +92,16 @@ class MyListingsController extends Controller
         $this->authorizeOwnership($listing);
 
         return view('profile.my-listings-show', [
-            'listing' => $listing,
+            'listing' => $listing->loadMissing('providerProfile.state', 'providerProfile.city', 'providerProfile.primaryProfileImage'),
+        ]);
+    }
+
+    public function showProfile(ProviderProfile $profile): View
+    {
+        $this->authorizeProfileOwnership($profile);
+
+        return view('profile.my-listings-profile-show', [
+            'profile' => $profile->loadMissing('state', 'city', 'primaryProfileImage'),
         ]);
     }
 
@@ -92,6 +129,13 @@ class MyListingsController extends Controller
     private function authorizeOwnership(ProviderListing $listing): void
     {
         if ($listing->user_id !== Auth::id()) {
+            abort(403);
+        }
+    }
+
+    private function authorizeProfileOwnership(ProviderProfile $profile): void
+    {
+        if ($profile->user_id !== Auth::id()) {
             abort(403);
         }
     }
