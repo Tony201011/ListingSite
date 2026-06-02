@@ -121,10 +121,6 @@
                                             <h2 class="text-xl font-semibold text-gray-900">
                                                 {{ $listing->title }}
                                             </h2>
-
-                                            <p class="mt-1 line-clamp-2 text-sm leading-6 text-gray-700">
-                                                {{ $listing->providerProfile?->description ?? 'No description available.' }}
-                                            </p>
                                         </div>
 
                                         <div x-data="{ open: false }" class="relative shrink-0">
@@ -271,10 +267,6 @@
                                             <h2 class="text-xl font-semibold text-gray-900">
                                                 {{ $profile->name }}
                                             </h2>
-
-                                            <p class="mt-1 line-clamp-2 text-sm leading-6 text-gray-700">
-                                                {{ $profile->description ?? 'No description available.' }}
-                                            </p>
                                         </div>
 
                                         <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100">
