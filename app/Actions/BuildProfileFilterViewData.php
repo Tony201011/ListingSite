@@ -161,7 +161,7 @@ class BuildProfileFilterViewData
         // the featured exclusion filter either (otherwise local-banner profiles would be absent
         // from both the hidden featured strip AND the main results).
         $localFeaturedStateName = $escortNameQuery === ''
-            ? $this->resolveLocalFeaturedStateName($locationQuery, $locationStateQuery)
+            ? $this->resolveLocalFeaturedStateName($locationQuery, $locationStateQuery, $resolvedLocation)
             : null;
 
         $geocodedLat = null;
@@ -226,7 +226,11 @@ class BuildProfileFilterViewData
             : collect();
 
         // Load local-banner profiles — shown when a state filter is active
-        $localBannerProfiles = $escortNameQuery === '' && ($locationStateQuery !== '' || ($locationQuery !== '' && str_contains($locationQuery, ',')))
+        $hasLocalBannerLocation = $locationStateQuery !== ''
+            || ($locationQuery !== '' && str_contains($locationQuery, ','))
+            || $resolvedLocation !== null;
+
+        $localBannerProfiles = $escortNameQuery === '' && $hasLocalBannerLocation
             ? $this->queryBannerProfiles('local_banner_expires_at', $locationStateQuery ?: null, $locationQuery, $resolvedLocation)
             : collect();
 
@@ -854,13 +858,17 @@ class BuildProfileFilterViewData
         ];
     }
 
-    private function resolveLocalFeaturedStateName(string $locationQuery, string $locationStateQuery): ?string
+    private function resolveLocalFeaturedStateName(string $locationQuery, string $locationStateQuery, ?array $resolvedLocation = null): ?string
     {
         $state = trim($locationStateQuery);
 
         if ($state === '' && $locationQuery !== '' && str_contains($locationQuery, ',')) {
             $parts = explode(',', $locationQuery, 2);
             $state = trim($parts[1] ?? '');
+        }
+
+        if ($state === '' && $resolvedLocation !== null) {
+            $state = trim((string) ($resolvedLocation['state'] ?? ''));
         }
 
         if ($state === '') {
