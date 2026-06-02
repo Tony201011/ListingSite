@@ -16,14 +16,14 @@
                 <div>
                     <h1 class="text-2xl font-bold text-blue-700">My Listings</h1>
                     <p class="mt-1 text-sm text-gray-600">
-                        Manage all of your Listings in one place, renew expiring or expired Listings or add Premium Features.
+                        Manage all of your Listings in one place or add Premium Features.
                     </p>
                 </div>
             </div>
 
             {{-- Tabs --}}
             <div class="mt-5 flex flex-wrap items-center gap-6 border-b border-gray-200 text-sm font-medium">
-                @foreach(['all' => 'All Listings', 'online' => 'Online', 'expiring' => 'Expiring', 'expired' => 'Expired', 'offline' => 'Offline'] as $key => $label)
+                @foreach(['all' => 'All Listings', 'online' => 'Online', 'offline' => 'Offline'] as $key => $label)
                     <a href="{{ request()->fullUrlWithQuery(['status' => $key]) }}"
                        class="-mb-px pb-3 transition
                            {{ $status === $key
@@ -82,18 +82,10 @@
                 @foreach($listings as $listing)
                     @php
                         $isOnline = $listing->is_live && $listing->is_active;
-                        $isExpired = ! $listing->is_active;
-                        $isExpiring = $listing->is_active && ! $listing->is_live && $listing->created_at->lte(now()->subDays(7));
 
                         if ($isOnline) {
                             $badgeClass = 'bg-green-500 text-white';
                             $badgeLabel = 'Online';
-                        } elseif ($isExpired) {
-                            $badgeClass = 'bg-red-500 text-white';
-                            $badgeLabel = 'Expired';
-                        } elseif ($isExpiring) {
-                            $badgeClass = 'bg-amber-500 text-white';
-                            $badgeLabel = 'Expiring';
                         } else {
                             $badgeClass = 'bg-gray-600 text-white';
                             $badgeLabel = 'Offline';
@@ -117,7 +109,7 @@
                                         </div>
                                     @endif
 
-                                    <span class="absolute left-2 top-2 rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">
+                                    <span class="absolute left-2 top-2 rounded px-2 py-1 text-xs font-semibold {{ $badgeClass }}">
                                         {{ $badgeLabel }}
                                     </span>
                                 </div>
