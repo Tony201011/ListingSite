@@ -122,7 +122,7 @@
             ['label' => 'Contact', 'url' => route('contact-us')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
-        $showTopBar = $headerWidget?->enable_top_bar ?? true;
+        $showTopBar = $headerWidget?->enable_top_bar ?? false;
         $showSearch = $headerWidget?->enable_search ?? true;
         $isGirlProfilePage = request()->routeIs('profile.show');
         $showFreeTrialCta = (bool) ($headerWidget?->show_free_trial_cta ?? true);
@@ -181,6 +181,31 @@
 
             return $itemPath === $currentPath;
         };
+
+        $desktopNavLinks = $mainNavLinks->reject(function ($item): bool {
+            $label = strtolower(trim((string) ($item['label'] ?? '')));
+
+            return in_array($label, ['sign up', 'sign in', 'my profile', 'dashboard', 'logout'], true);
+        })->values();
+
+        $primaryActionLink = $actionLinks->first(function ($item): bool {
+            return strtolower(trim((string) ($item['label'] ?? ''))) === 'add advertisement';
+        });
+
+        $authDisplayName = $isAuthenticated ? trim((string) ($currentUser->name ?? '')) : null;
+        if ($isAuthenticated && $authDisplayName === '') {
+            $authDisplayName = trim((string) ($currentUser->email ?? ''));
+        }
+        $authDisplayName = filled($authDisplayName) ? $authDisplayName : 'Account';
+
+        $authMenuItems = $isAuthenticated ? collect([
+            ['label' => 'My Account', 'url' => route('my-profile')],
+            ['label' => 'My Profiles', 'url' => route('profiles.index')],
+            ['label' => 'My Listings', 'url' => route('my-profile')],
+            ['label' => 'Billing & Payments', 'url' => route('payment-subscription')],
+            ['label' => 'Privacy Settings', 'url' => route('privacy-policy')],
+            ['label' => 'Help & Support', 'url' => route('help')],
+        ]) : collect();
 @endphp
 
 <header class="sticky top-0 z-50 border-b border-gray-800 bg-gray-900/95 backdrop-blur-md" style="{{ $headerStyle }}">
@@ -253,63 +278,89 @@
             </button>
         </div>
 
-        <!-- Second row: main navigation (from first & second images) -->
-        <div class="hidden items-center gap-1 border-t border-gray-800 py-3 {{ $isGirlProfilePage ? 'md:flex' : 'lg:flex' }}">
-            <a href="{{ url('/') }}" class="mr-4 shrink-0">
+        <!-- Second row: main navigation -->
+        <div class="hidden items-center justify-between gap-4 border-t border-gray-800 py-3 {{ $isGirlProfilePage ? 'md:flex' : 'lg:flex' }}">
+            <a href="{{ url('/') }}" class="shrink-0">
                 @if($logoType === 'image' && filled($logoUrl))
                     <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
                 @else
                     <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
                 @endif
             </a>
-            @foreach($mainNavLinks as $item)
-                @if(!empty($item['is_logout']))
-                    <form method="POST" action="{{ route('logout') }}" class="inline-flex">
-                        @csrf
-                        <button type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white" @click="confirmSignOut($el.closest('form'))">Sign Out</button>
-                    </form>
-                @elseif(strtolower($item['label']) === 'escorts')
-                    <div
-                        class="relative"
-                        x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
-                        @click.away="open = false; search = ''"
-                    >
-                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                            {{ $item['label'] }}
-                            <i class="fa-solid fa-chevron-down text-xs ml-1" :class="{ 'rotate-180': open }"></i>
-                        </button>
-                        <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-72 rounded-lg bg-gray-800 py-2 shadow-lg z-50 max-h-80 overflow-y-auto" style="display:none;">
-                            <div class="px-3 pb-2">
-                                <label for="escort-menu-search" class="sr-only">Search escorts menu</label>
-                                <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2">
-                                    <i class="fa-solid fa-magnifying-glass text-xs text-gray-500"></i>
-                                    <input id="escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search escorts menu" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+
+            <nav class="flex flex-wrap items-center gap-1">
+                @foreach($desktopNavLinks as $item)
+                    @if(strtolower($item['label']) === 'escorts')
+                        <div
+                            class="relative"
+                            x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
+                            @click.away="open = false; search = ''"
+                        >
+                            <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                                {{ $item['label'] }}
+                                <i class="fa-solid fa-chevron-down text-xs ml-1" :class="{ 'rotate-180': open }"></i>
+                            </button>
+                            <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-72 rounded-lg bg-gray-800 py-2 shadow-lg z-50 max-h-80 overflow-y-auto" style="display:none;">
+                                <div class="px-3 pb-2">
+                                    <label for="escort-menu-search" class="sr-only">Search escorts menu</label>
+                                    <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2">
+                                        <i class="fa-solid fa-magnifying-glass text-xs text-gray-500"></i>
+                                        <input id="escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search escorts menu" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-700 pt-2">
+                                    <template x-for="link in filteredLinks" :key="`${link.label}-${link.url}`">
+                                        <a @click="open = false; search = ''" :href="link.url" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">
+                                            <span x-text="link.label"></span>
+                                        </a>
+                                    </template>
+                                    <p x-show="filteredLinks.length === 0" class="px-5 py-2 text-sm text-gray-400">No matching escorts found.</p>
                                 </div>
                             </div>
-                            <div class="border-t border-gray-700 pt-2">
-                                <template x-for="link in filteredLinks" :key="`${link.label}-${link.url}`">
-                                    <a @click="open = false; search = ''" :href="link.url" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">
-                                        <span x-text="link.label"></span>
-                                    </a>
-                                </template>
-                                <p x-show="filteredLinks.length === 0" class="px-5 py-2 text-sm text-gray-400">No matching escorts found.</p>
-                            </div>
+                        </div>
+                    @else
+                        @php $isActive = $isNavItemActive((string) $item['url']); @endphp
+                        <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">{{ $item['label'] }}</a>
+                    @endif
+                @endforeach
+            </nav>
+
+            <div class="flex flex-wrap items-center gap-2">
+                @if($primaryActionLink)
+                    <a href="{{ $primaryActionLink['url'] }}" class="inline-flex items-center rounded-full bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
+                        {{ $primaryActionLink['label'] }}
+                    </a>
+                @endif
+
+                <a href="{{ route('favourites') }}" class="inline-flex items-center gap-2 rounded-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-pink-400" title="My Favourites">
+                    <i class="fa-solid fa-heart text-pink-500"></i>
+                    <span class="hidden sm:inline">Favourites</span>
+                </a>
+
+                @auth
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" type="button" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-yellow-300">
+                            {{ $authDisplayName }}
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                        <div x-show="open" x-transition class="absolute right-0 z-50 mt-2 min-w-[220px] overflow-hidden rounded-xl border border-gray-700 bg-gray-900 shadow-2xl" @click.away="open = false" style="display:none;">
+                            @foreach($authMenuItems as $item)
+                                <a href="{{ $item['url'] }}" class="block px-4 py-3 text-sm text-gray-200 transition hover:bg-gray-800">{{ $item['label'] }}</a>
+                            @endforeach
+                            <div class="border-t border-gray-700"></div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="button" class="w-full px-4 py-3 text-left text-sm font-medium text-gray-200 transition hover:bg-gray-800" @click="confirmSignOut($el.closest('form'))">Sign Out</button>
+                            </form>
                         </div>
                     </div>
                 @else
-                    @php $isActive = $isNavItemActive((string) $item['url']); @endphp
-                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">{{ $item['label'] }}</a>
-                @endif
-            @endforeach
-            <div class="ml-auto flex items-center gap-2">
-                <a href="{{ route('favourites') }}"
-                   class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition {{ request()->routeIs('favourites') ? 'bg-gray-800 text-pink-400' : 'text-gray-300 hover:bg-gray-800 hover:text-pink-400' }}"
-                   title="My Favourites">
-                    <i class="fa-solid fa-heart text-pink-500"></i>
-                    <span>Favourites</span>
-                </a>
+                    <a href="{{ route('signin') }}" class="text-sm font-medium text-gray-300 transition hover:text-white">Sign In</a>
+                    <a href="{{ url('/signup') }}" class="inline-flex items-center rounded-full bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">Sign Up</a>
+                @endauth
+
                 @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
-                    <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
+                    <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-full border border-pink-500 px-4 py-2 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">{{ $freeTrialCtaText }}</a>
                 @endif
             </div>
         </div>
@@ -327,6 +378,12 @@
             </form>
             @endif
             <div class="space-y-1 text-sm">
+                <!-- Action links -->
+                @foreach($actionLinks as $item)
+                    <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">{{ $item['label'] }}</a>
+                @endforeach
+                <div class="border-t border-gray-800"></div>
+
                 <!-- Main nav links -->
                 @foreach($mainNavLinks as $item)
                     @if(!empty($item['is_logout']))
