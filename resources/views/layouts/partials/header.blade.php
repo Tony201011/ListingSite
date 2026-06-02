@@ -410,11 +410,6 @@
                 </a>
             @endif
 
-            <a href="{{ route('favourites') }}" class="inline-flex items-center gap-2 rounded-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-pink-400" title="My Favourites">
-                <i class="fa-solid fa-heart text-pink-500"></i>
-                <span class="hidden sm:inline">Favourites</span>
-            </a>
-
             @auth
                 <div x-data="{ open: false }" class="relative" @keydown.escape.window="open = false">
                     <button
@@ -482,6 +477,11 @@
                     {{ $freeTrialCtaText }}
                 </a>
             @endif
+
+            <a href="{{ route('favourites') }}" class="inline-flex items-center gap-2 rounded-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-pink-400" title="My Favourites">
+                <i class="fa-solid fa-heart text-pink-500"></i>
+                <span class="hidden sm:inline">Favourites</span>
+            </a>
         </div>
     </div>
 
@@ -580,16 +580,16 @@
                 </div>
             @endauth
 
-            <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
-                <i class="fa-solid fa-heart mr-1.5 text-xs text-pink-500"></i>
-                Favourites
-            </a>
-
             @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
                 <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block rounded-lg px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">
                     {{ $freeTrialCtaText }}
                 </a>
             @endif
+
+            <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
+                <i class="fa-solid fa-heart mr-1.5 text-xs text-pink-500"></i>
+                Favourites
+            </a>
 
             @foreach($mobileExtraLinks as $item)
                 <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">
