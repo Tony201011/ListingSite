@@ -201,7 +201,7 @@
         $authMenuItems = $isAuthenticated ? collect([
             ['label' => 'My Account', 'url' => route('my-profile')],
             ['label' => 'My Profiles', 'url' => route('profiles.index')],
-            ['label' => 'My Listings', 'url' => route('my-profile')],
+            ['label' => 'My Listings', 'url' => route('my-listings')],
             ['label' => 'Billing & Payments', 'url' => route('payment-subscription')],
             ['label' => 'Privacy Settings', 'url' => route('privacy-policy')],
             ['label' => 'Help & Support', 'url' => route('help')],

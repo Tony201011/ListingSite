@@ -16,6 +16,7 @@ use App\Http\Controllers\Profile\ShowHideProfileController;
 use App\Http\Controllers\Profile\StatusTabsController;
 use App\Http\Controllers\Profile\UrlController;
 use App\Http\Controllers\Profile\AvailabilityController;
+use App\Http\Controllers\Profile\MyListingsController;
 use App\Http\Controllers\Profile\MyProfileController;
 use App\Http\Controllers\Profile\ProfileSettingController;
 use App\Http\Controllers\Profile\ProfileSwitchController;
@@ -32,6 +33,10 @@ Route::match(['get', 'post'], '/my-profiles/{profile}/switch', [ProfileSwitchCon
 Route::post('/my-profiles/{profile}/switch-edit', [ProfileSwitchController::class, 'switchToEdit'])->name('profiles.switch-edit');
 Route::post('/my-profiles/{profile}/online-status', [ProfileSwitchController::class, 'updateOnlineStatus'])->name('profiles.online-status');
 Route::delete('/my-profiles/{profile}', [ProfileSwitchController::class, 'destroy'])->name('profiles.destroy');
+
+Route::get('/my-listings', [MyListingsController::class, 'index'])->name('my-listings');
+Route::get('/my-listings/{listing}', [MyListingsController::class, 'show'])->name('my-listings.show');
+Route::post('/my-listings/{listing}/feature', [MyListingsController::class, 'feature'])->name('my-listings.feature');
 
 // All routes below require an active profile to be selected in session
 Route::middleware('profile.selected')->group(function () {
