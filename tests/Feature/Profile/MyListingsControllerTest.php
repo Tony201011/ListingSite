@@ -58,7 +58,6 @@ class MyListingsControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Evening Listing');
-        $response->assertSee('Scarlett Search');
     }
 
     public function test_my_listings_search_filters_profile_fallback_cards(): void

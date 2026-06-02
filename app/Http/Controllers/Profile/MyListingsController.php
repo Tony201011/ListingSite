@@ -90,15 +90,21 @@ class MyListingsController extends Controller
     public function show(ProviderListing $listing): View
     {
         $this->authorizeOwnership($listing);
+        $listing->loadMissing('providerProfile.state', 'providerProfile.city', 'providerProfile.primaryProfileImage');
+
+        if ($listing->provider_profile_id) {
+            session(['active_provider_profile_id' => $listing->provider_profile_id]);
+        }
 
         return view('profile.my-listings-show', [
-            'listing' => $listing->loadMissing('providerProfile.state', 'providerProfile.city', 'providerProfile.primaryProfileImage'),
+            'listing' => $listing,
         ]);
     }
 
     public function showProfile(ProviderProfile $profile): View
     {
         $this->authorizeProfileOwnership($profile);
+        session(['active_provider_profile_id' => $profile->id]);
 
         return view('profile.my-listings-profile-show', [
             'profile' => $profile->loadMissing('state', 'city', 'primaryProfileImage'),
