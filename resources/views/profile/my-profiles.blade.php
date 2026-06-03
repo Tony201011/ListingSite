@@ -1,64 +1,81 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="bg-white min-h-screen py-10 px-4">
-    <div
-        class="max-w-7xl mx-auto px-6 py-8"
-        x-data="{
-            showCreateModal: false,
-            createName: '',
-            createPhone: '',
-            createErrors: []
-        }"
-    >
-        <button
-            type="button"
-            onclick="window.history.back()"
-            class="inline-flex items-center text-pink-500 hover:text-pink-600 transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
+<div class="min-h-screen bg-gray-50">
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div
+            class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8"
+            x-data="{
+                showCreateModal: false,
+                createName: '',
+                createPhone: '',
+                createErrors: []
+            }"
         >
-            <span class="mr-1">&lt;</span> back
-        </button>
+            <button
+                type="button"
+                onclick="window.history.back()"
+                class="mb-6 inline-flex cursor-pointer items-center border-0 bg-transparent text-sm font-medium text-pink-500 transition-colors hover:text-pink-600"
+            >
+                <span class="mr-1">&lt;</span> back
+            </button>
 
-        <h1 class="text-3xl font-bold mb-8 text-gray-900">
-            My Profiles
-        </h1>
+            <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <h1 class="text-3xl font-bold text-gray-900">My Profiles</h1>
 
-        @if(session('success'))
-            <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-                {{ session('success') }}
+                <button
+                    type="button"
+                    @click="showCreateModal = true; createName = ''; createPhone = ''; createErrors = []"
+                    class="inline-flex items-center justify-center rounded bg-pink-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-pink-600"
+                >
+                    + Create New Profile
+                </button>
             </div>
-        @endif
 
-        @if(session('error'))
-            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                {{ session('error') }}
-            </div>
-        @endif
+            @if(session('success'))
+                <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-        @if($errors->any())
-            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                <ul class="list-disc space-y-1 pl-5">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+            @if(session('error'))
+                <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                    {{ session('error') }}
+                </div>
+            @endif
 
-        <div class="bg-white min-h-[600px]">
+            @if($errors->any())
+                <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                    <ul class="list-disc space-y-1 pl-5">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @if($profiles->isEmpty())
-                <div class="mb-8 rounded-xl border border-gray-100 bg-gray-50 px-5 py-6 text-gray-600">
+                <div class="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-8 text-center text-gray-600">
                     You have no profiles yet. Create your first profile to get started.
                 </div>
             @else
-                <div class="mb-8 space-y-4">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     @foreach($profiles as $profile)
                         @php
                             $state = $onlineStates[$profile->id] ?? ['onlineStatus' => false, 'expiresAt' => null];
+                            $profileImage = $profile->primaryProfileImage?->thumbnail_url;
+                            $location = $profile->suburb ?? $profile->city ?? $profile->state ?? 'Australia';
+                            $price = $profile->price ?? $profile->hourly_rate ?? $profile->rate ?? null;
+                            $phone = $profile->phone ?? $profile->mobile ?? null;
+                            $statusLabel = match ($profile->profile_status) {
+                                'approved' => 'VERIFIED PROFILE',
+                                'rejected' => 'REJECTED PROFILE',
+                                default => 'PENDING PROFILE',
+                            };
                         @endphp
 
                         <div
-                            class="rounded-lg border border-gray-300 bg-white p-6"
+                            class="overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl"
                             x-data="profileOnlineToggle({
                                 profileId: @js($profile->id),
                                 initialStatus: @js((bool) $state['onlineStatus']),
@@ -66,118 +83,142 @@
                                 csrfToken: @js(csrf_token())
                             })"
                         >
-                            <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                                <a
-                                    href="{{ route('profiles.switch', $profile) }}"
-                                    class="flex min-w-0 items-center gap-4 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400"
-                                    title="Open {{ $profile->name }} in My Profile"
-                                >
-                                    <div class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border border-gray-200 bg-white">
-                                        @if($profile->primaryProfileImage?->thumbnail_url)
-                                            <img
-                                                src="{{ $profile->primaryProfileImage->thumbnail_url }}"
-                                                alt="{{ $profile->name }}"
-                                                class="h-full w-full object-cover"
-                                            >
+                            <div class="bg-gray-100 py-2 text-center text-xs font-semibold tracking-wider text-gray-600">
+                                {{ $statusLabel }}
+                            </div>
+
+                            <div class="relative">
+                                @if($profileImage)
+                                    <img
+                                        src="{{ $profileImage }}"
+                                        alt="{{ $profile->name }}"
+                                        class="h-80 w-full object-cover"
+                                    >
+                                @else
+                                    <div class="flex h-80 w-full items-center justify-center bg-gradient-to-br from-pink-500 to-pink-700">
+                                        <span class="select-none text-7xl font-bold text-white">
+                                            {{ strtoupper(substr($profile->name, 0, 1)) }}
+                                        </span>
+                                    </div>
+                                @endif
+
+                                <div class="absolute left-3 top-3">
+                                    <span class="rounded-full px-3 py-1 text-xs font-semibold text-white
+                                        @if($profile->profile_status === 'approved') bg-blue-600
+                                        @elseif($profile->profile_status === 'rejected') bg-red-600
+                                        @else bg-yellow-400 text-slate-900
+                                        @endif"
+                                    >
+                                        @if($profile->profile_status === 'approved')
+                                            PREMIUM
+                                        @elseif($profile->profile_status === 'rejected')
+                                            REJECTED
                                         @else
-                                            <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#e04ecb] to-[#c13ab0]">
-                                                <span class="select-none text-xl font-bold text-white">
-                                                    {{ strtoupper(substr($profile->name, 0, 1)) }}
-                                                </span>
-                                            </div>
+                                            PENDING
                                         @endif
-                                    </div>
+                                    </span>
+                                </div>
 
-                                    <div class="min-w-0">
-                                        <div class="flex items-center gap-2">
-                                            <p class="truncate text-xl font-bold text-gray-900">
-                                                {{ $profile->name }}
-                                            </p>
+                                <div class="absolute right-3 top-3 flex gap-2">
+                                    <a
+                                        href="{{ route('profiles.switch', $profile) }}"
+                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70"
+                                        aria-label="View profile {{ $profile->name }}"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                    </a>
 
-                                            @if($profile->profile_status === 'approved')
-                                                <span
-                                                    class="h-2.5 w-2.5 rounded-full border-2 border-white shadow-sm"
-                                                    :class="online ? 'bg-green-400' : 'bg-gray-300'"
-                                                    :title="online ? 'Available Now' : 'Not Available'"
-                                                    :aria-label="online ? 'Status: Available Now' : 'Status: Not Available'"
-                                                    role="img"
-                                                ></span>
-                                            @endif
-                                        </div>
-
-                                        <p class="truncate text-sm text-gray-500">
-                                            /{{ $profile->slug }}
-                                        </p>
-
-                                        <div class="mt-2 flex flex-wrap items-center gap-2">
-                                            <span
-                                                class="inline-flex rounded-full px-3 py-1 text-sm font-semibold
-                                                    @if($profile->profile_status === 'approved') bg-green-100 text-green-700
-                                                    @elseif($profile->profile_status === 'rejected') bg-red-100 text-red-700
-                                                    @else bg-yellow-100 text-yellow-700
-                                                    @endif"
-                                            >
-                                                @if($profile->profile_status === 'approved')
-                                                    ✓ Approved – Live
-                                                @elseif($profile->profile_status === 'rejected')
-                                                    ✗ Rejected
-                                                @else
-                                                    ⏳ Pending Approval
-                                                @endif
-                                            </span>
-
-                                            @if((int)$activeProfileId === $profile->id)
-                                                <span class="inline-flex rounded-full bg-pink-100 px-3 py-1 text-sm font-semibold text-pink-700">
-                                                    Selected
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </a>
-
-                                <div class="flex flex-wrap items-center gap-3 lg:justify-end">
                                     @if($profile->profile_status === 'approved')
                                         <button
                                             type="button"
                                             @click="toggleOnline"
                                             :disabled="loading"
-                                            class="rounded-lg px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50"
-                                            :class="online
-                                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+                                            class="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+                                            :aria-label="online ? 'Go Not Available' : 'Go Available Now'"
                                         >
-                                            <span x-show="loading" class="inline-flex items-center gap-1">
-                                                <svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                                </svg>
-                                                Updating
-                                            </span>
-                                            <span x-show="!loading" x-text="online ? 'Go Not Available' : 'Go Available Now'"></span>
+                                            <svg x-show="!loading" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="online ? 'fill-pink-500 text-pink-500' : 'text-white'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7 7-7z" />
+                                            </svg>
+                                            <svg x-show="loading" class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
                                         </button>
                                     @endif
+                                </div>
 
-                                    <form method="POST" action="{{ route('profiles.switch-edit', $profile) }}">
+                                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                                    @if($profile->profile_status === 'approved')
+                                        <div class="mb-2">
+                                            <span
+                                                class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold text-white"
+                                                :class="online ? 'bg-green-600' : 'bg-gray-600'"
+                                            >
+                                                <span class="h-2 w-2 rounded-full bg-white"></span>
+                                                <span x-text="online ? 'Available now' : 'Not available'"></span>
+                                            </span>
+                                        </div>
+                                    @endif
+
+                                    <h3 class="flex items-center gap-2 text-lg font-bold text-white">
+                                        {{ $profile->name }} - {{ $location }}
+                                        @if($profile->profile_status === 'approved')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M20 6L9 17l-5-5" />
+                                            </svg>
+                                        @endif
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <div class="p-4">
+                                <div class="mb-2 flex items-center justify-between gap-4">
+                                    <div class="flex min-w-0 items-center gap-1 text-sm text-gray-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z" />
+                                            <circle cx="12" cy="10" r="3" />
+                                        </svg>
+                                        <span class="truncate">{{ $location }}</span>
+                                    </div>
+
+                                    @if($price)
+                                        <span class="text-lg font-bold text-gray-800">${{ $price }}</span>
+                                    @endif
+                                </div>
+
+                                <p class="mb-3 line-clamp-2 text-sm text-gray-600">
+                                    @if($profile->profile_status === 'approved')
+                                        Your profile is approved and visible in search results.
+                                    @elseif($profile->profile_status === 'rejected')
+                                        This profile has been rejected and is not visible in search results.
+                                    @else
+                                        This profile is awaiting admin approval and will not appear in search results yet.
+                                    @endif
+                                </p>
+
+                                <div class="mb-4 flex items-center gap-2 text-sm text-gray-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0111.19 19 19.5 19.5 0 015 13a19.79 19.79 0 01-2.92-8.63A2 2 0 014.06 2h3a2 2 0 012 1.72c.12.9.33 1.77.63 2.61a2 2 0 01-.45 2.11L8 9.91a16 16 0 006 6l1.47-1.24a2 2 0 012.11-.45c.84.3 1.71.51 2.61.63A2 2 0 0122 16.92z" />
+                                    </svg>
+                                    <span>{{ $phone ?: 'No phone added' }}</span>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <form class="flex-1" method="POST" action="{{ route('profiles.switch', $profile) }}">
                                         @csrf
-                                        <button
-                                            type="submit"
-                                            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 transition hover:border-pink-300 hover:bg-pink-50 hover:text-pink-700"
-                                        >
-                                            Edit
+                                        <button type="submit" class="w-full rounded bg-blue-600 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+                                            View
                                         </button>
                                     </form>
 
-                                    @if((int)$activeProfileId !== $profile->id)
-                                        <form method="POST" action="{{ route('profiles.switch', $profile) }}">
-                                            @csrf
-                                            <button
-                                                type="submit"
-                                                class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700"
-                                            >
-                                                Switch
-                                            </button>
-                                        </form>
-                                    @endif
+                                    <form class="flex-1" method="POST" action="{{ route('profiles.switch-edit', $profile) }}">
+                                        @csrf
+                                        <button type="submit" class="w-full rounded bg-gray-200 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300">
+                                            Edit
+                                        </button>
+                                    </form>
 
                                     <form
                                         method="POST"
@@ -187,166 +228,140 @@
                                     >
                                         @csrf
                                         @method('DELETE')
-                                        <button
-                                            type="submit"
-                                            class="rounded-lg bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
-                                            aria-label="Delete profile {{ $profile->name }}"
-                                        >
+                                        <button type="submit" class="rounded border border-red-300 px-4 py-2 text-sm text-red-600 transition hover:bg-red-50">
                                             Delete
                                         </button>
                                     </form>
                                 </div>
-                            </div>
 
-                            @if($profile->profile_status !== 'approved')
-                                <div
-                                    class="mt-4 rounded-lg border px-4 py-3 text-sm font-medium
-                                    @if($profile->profile_status === 'rejected') border-red-200 bg-red-50 text-red-700
-                                    @else border-yellow-200 bg-yellow-50 text-yellow-700
-                                    @endif"
-                                    role="alert"
-                                    aria-live="polite"
-                                >
-                                    @if($profile->profile_status === 'rejected')
-                                        ✗ This profile has been rejected and is not visible in search results. Please contact support for assistance.
-                                    @else
-                                        ⏳ This profile is awaiting admin approval. It will <strong>not appear in search results</strong> until it has been approved.
-                                    @endif
+                                @if((int)$activeProfileId === $profile->id)
+                                    <div class="mt-3 rounded bg-pink-50 px-3 py-2 text-center text-xs font-semibold text-pink-700">
+                                        Selected profile
+                                    </div>
+                                @endif
+
+                                <div class="mt-3" x-show="message" x-transition>
+                                    <div
+                                        class="rounded-lg border px-4 py-3 text-sm font-medium"
+                                        :class="messageType === 'success'
+                                            ? 'border-green-200 bg-green-50 text-green-700'
+                                            : 'border-red-200 bg-red-50 text-red-700'"
+                                        x-text="message"
+                                    ></div>
                                 </div>
-                            @endif
-
-                            <div class="mt-3" x-show="message" x-transition>
-                                <div
-                                    class="rounded-lg border px-4 py-3 text-sm font-medium"
-                                    :class="messageType === 'success'
-                                        ? 'border-green-200 bg-green-50 text-green-700'
-                                        : 'border-red-200 bg-red-50 text-red-700'"
-                                    x-text="message"
-                                ></div>
                             </div>
                         </div>
                     @endforeach
                 </div>
             @endif
 
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <button
-                    type="button"
-                    @click="showCreateModal = true; createName = ''; createPhone = ''; createErrors = []"
-                    class="inline-flex items-center justify-center bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded transition"
-                >
-                    + Create New Profile
-                </button>
-
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <a
                     href="{{ route('account.delete-page') }}"
-                    class="inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded transition"
+                    class="inline-flex items-center justify-center rounded border border-red-300 bg-white px-5 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                     data-delete-account-trigger
                     onclick="event.preventDefault()"
                 >
                     Delete account altogether
                 </a>
             </div>
-        </div>
 
-        {{-- Create New Profile Modal --}}
-        <div
-            x-show="showCreateModal"
-            x-cloak
-            x-transition.opacity
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-            @keydown.escape.window="showCreateModal = false"
-        >
+            {{-- Create New Profile Modal --}}
             <div
-                class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
-                @click.stop
+                x-show="showCreateModal"
+                x-cloak
+                x-transition.opacity
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+                @keydown.escape.window="showCreateModal = false"
             >
-                <div class="mb-5 flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-gray-900">Create New Profile</h2>
-                    <button
-                        type="button"
-                        @click="showCreateModal = false"
-                        class="text-2xl leading-none text-gray-400 hover:text-gray-600"
-                        aria-label="Close modal"
-                    >
-                        &times;
-                    </button>
-                </div>
-
-                <p class="mb-4 text-sm text-gray-600">
-                    Each profile can have its own name and phone number, so you can manage multiple listings from one account.
-                </p>
-
-                <template x-if="createErrors.length > 0">
-                    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        <template x-for="err in createErrors" :key="err">
-                            <p x-text="err"></p>
-                        </template>
-                    </div>
-                </template>
-
-                <form
-                    method="POST"
-                    action="{{ route('profiles.store') }}"
-                    @submit.prevent="
-                        createErrors = [];
-                        if (!createName.trim()) {
-                            createErrors.push('Profile name is required.');
-                            return;
-                        }
-                        $el.submit();
-                    "
-                    class="space-y-4"
-                >
-                    @csrf
-
-                    <div>
-                        <label class="mb-1 block text-sm font-semibold text-[#e04ecb]">
-                            Profile name <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            name="name"
-                            type="text"
-                            x-model="createName"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-[#e04ecb] focus:outline-none focus:ring-2 focus:ring-[#e04ecb]/30"
-                            placeholder="e.g. Jenny"
-                            required
-                            autofocus
-                        >
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-sm font-semibold text-[#e04ecb]">
-                            Mobile number <span class="font-normal text-gray-400">(optional)</span>
-                        </label>
-                        <input
-                            name="phone"
-                            type="text"
-                            x-model="createPhone"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-[#e04ecb] focus:outline-none focus:ring-2 focus:ring-[#e04ecb]/30"
-                            placeholder="e.g. 0400 000 000"
-                        >
-                    </div>
-
-                    <div class="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
+                <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" @click.stop>
+                    <div class="mb-5 flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-gray-900">Create New Profile</h2>
                         <button
                             type="button"
                             @click="showCreateModal = false"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:w-auto"
+                            class="text-2xl leading-none text-gray-400 hover:text-gray-600"
+                            aria-label="Close modal"
                         >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            class="w-full rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto"
-                        >
-                            Create Profile
+                            &times;
                         </button>
                     </div>
-                </form>
+
+                    <p class="mb-4 text-sm text-gray-600">
+                        Each profile can have its own name and phone number, so you can manage multiple listings from one account.
+                    </p>
+
+                    <template x-if="createErrors.length > 0">
+                        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <template x-for="err in createErrors" :key="err">
+                                <p x-text="err"></p>
+                            </template>
+                        </div>
+                    </template>
+
+                    <form
+                        method="POST"
+                        action="{{ route('profiles.store') }}"
+                        @submit.prevent="
+                            createErrors = [];
+                            if (!createName.trim()) {
+                                createErrors.push('Profile name is required.');
+                                return;
+                            }
+                            $el.submit();
+                        "
+                        class="space-y-4"
+                    >
+                        @csrf
+
+                        <div>
+                            <label class="mb-1 block text-sm font-semibold text-pink-500">
+                                Profile name <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                name="name"
+                                type="text"
+                                x-model="createName"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/30"
+                                placeholder="e.g. Jenny"
+                                required
+                                autofocus
+                            >
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-semibold text-pink-500">
+                                Mobile number <span class="font-normal text-gray-400">(optional)</span>
+                            </label>
+                            <input
+                                name="phone"
+                                type="text"
+                                x-model="createPhone"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/30"
+                                placeholder="e.g. 0400 000 000"
+                            >
+                        </div>
+
+                        <div class="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
+                            <button
+                                type="button"
+                                @click="showCreateModal = false"
+                                class="w-full rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:w-auto"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                class="w-full rounded-lg bg-pink-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-pink-600 sm:w-auto"
+                            >
+                                Create Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
 
 <form id="my-profiles-delete-account-form" action="{{ route('account.destroy') }}" method="POST" class="hidden">
@@ -469,5 +484,3 @@
     </script>
 @endpush
 @endsection
-
-
