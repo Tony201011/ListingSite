@@ -38,12 +38,15 @@
 
             <div class="mb-6 flex flex-wrap gap-6 border-b border-gray-300">
                 @foreach($tabs as $key => $label)
-                    <a href="{{ request()->fullUrlWithQuery(['status' => $key]) }}"
+                    <a href="{{ route('my-listings', ['status' => $key, 'sort' => $sort, 'q' => $searchQuery]) }}"
                        class="pb-2 text-sm transition
                             {{ $status === $key
                                 ? 'border-b-2 border-blue-600 font-medium text-blue-600'
                                 : 'text-gray-600 hover:text-blue-600' }}">
                         {{ $label }}
+                        @if(isset($statusCounts[$key]))
+                            ({{ $statusCounts[$key] }})
+                        @endif
                     </a>
                 @endforeach
             </div>
@@ -67,7 +70,7 @@
 
                             <input
                                 name="q"
-                                value=""
+                                value="{{ $searchQuery }}"
                                 type="search"
                                 placeholder="Search"
                                 class="h-12 w-64 rounded-md border border-gray-300 bg-white pl-12 pr-4 text-base text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"

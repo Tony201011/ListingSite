@@ -97,4 +97,101 @@ class MyListingsControllerTest extends TestCase
         $response->assertRedirect(route('profile-setting'));
         $response->assertSessionHas('active_provider_profile_id', $profile->id);
     }
+
+    public function test_my_listings_expiring_filter_shows_only_profiles_expiring_within_seven_days(): void
+    {
+        $user = $this->createProvider();
+        $profile = $user->providerProfile;
+        $profile->update(['free_listing_expires_at' => now()->addDays(3)]);
+
+        $expiredProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Expired Profile',
+            'slug' => 'expired-profile',
+            'free_listing_expires_at' => now()->subDay(),
+        ]);
+
+        $futureProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Future Profile',
+            'slug' => 'future-profile',
+            'free_listing_expires_at' => now()->addDays(12),
+        ]);
+
+        ProviderListing::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'title' => 'Expiring Soon Listing',
+            'website_type' => 'adult',
+            'is_active' => true,
+            'is_live' => true,
+        ]);
+
+        ProviderListing::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $expiredProfile->id,
+            'title' => 'Already Expired Listing',
+            'website_type' => 'adult',
+            'is_active' => true,
+            'is_live' => true,
+        ]);
+
+        ProviderListing::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $futureProfile->id,
+            'title' => 'Far Future Listing',
+            'website_type' => 'adult',
+            'is_active' => true,
+            'is_live' => true,
+        ]);
+
+        $response = $this->actingAsProvider($user, $profile)->get(route('my-listings', [
+            'status' => 'expiring',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Expiring Soon Listing');
+        $response->assertDontSee('Already Expired Listing');
+        $response->assertDontSee('Far Future Listing');
+    }
+
+    public function test_my_listings_expired_filter_shows_only_expired_profiles(): void
+    {
+        $user = $this->createProvider();
+        $profile = $user->providerProfile;
+        $profile->update(['free_listing_expires_at' => now()->subDay()]);
+
+        $activeProfile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Active Profile',
+            'slug' => 'active-profile',
+            'free_listing_expires_at' => now()->addDays(5),
+        ]);
+
+        ProviderListing::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'title' => 'Expired Listing',
+            'website_type' => 'adult',
+            'is_active' => true,
+            'is_live' => false,
+        ]);
+
+        ProviderListing::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $activeProfile->id,
+            'title' => 'Active Listing',
+            'website_type' => 'adult',
+            'is_active' => true,
+            'is_live' => true,
+        ]);
+
+        $response = $this->actingAsProvider($user, $profile)->get(route('my-listings', [
+            'status' => 'expired',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Expired Listing');
+        $response->assertDontSee('Active Listing');
+    }
 }

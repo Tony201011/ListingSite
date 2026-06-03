@@ -15,6 +15,8 @@ use Illuminate\View\View;
 
 class MyListingsController extends Controller
 {
+    private const EXPIRING_WINDOW_DAYS = 7;
+
     public function __construct(private GetActiveProviderProfile $getActiveProviderProfile) {}
 
     public function index(Request $request): View
@@ -22,6 +24,9 @@ class MyListingsController extends Controller
         $user = User::findOrFail(Auth::id());
         $activeProfile = $this->getActiveProviderProfile->execute($user);
         $status = $request->query('status', 'all');
+        if (! in_array($status, ['all', 'online', 'offline', 'expiring', 'expired'], true)) {
+            $status = 'all';
+        }
         $search = trim((string) $request->query('q', ''));
         $sort = $request->query('sort', 'oldest');
 
@@ -31,15 +36,40 @@ class MyListingsController extends Controller
             $baseQuery->where('provider_profile_id', $activeProfile->id);
         }
 
+        $now = now();
+        $expiringThreshold = $now->copy()->addDays(self::EXPIRING_WINDOW_DAYS);
+
         $statusCounts = [
             'all' => (clone $baseQuery)->count(),
             'online' => (clone $baseQuery)->where('is_live', true)->where('is_active', true)->count(),
             'offline' => (clone $baseQuery)->where(fn ($q) => $q->where('is_live', false)->orWhere('is_active', false))->count(),
+            'expiring' => (clone $baseQuery)->whereHas('providerProfile', function ($query) use ($expiringThreshold, $now) {
+                $query->whereNotNull('free_listing_expires_at')
+                    ->where('free_listing_expires_at', '>', $now)
+                    ->where('free_listing_expires_at', '<=', $expiringThreshold);
+            })->count(),
+            'expired' => (clone $baseQuery)->whereHas('providerProfile', function ($query) use ($now) {
+                $query->whereNotNull('free_listing_expires_at')
+                    ->where('free_listing_expires_at', '<=', $now);
+            })->count(),
         ];
 
         $listings = (clone $baseQuery)
             ->when($status === 'online', fn ($query) => $query->where('is_live', true)->where('is_active', true))
             ->when($status === 'offline', fn ($query) => $query->where(fn ($q) => $q->where('is_live', false)->orWhere('is_active', false)))
+            ->when($status === 'expiring', function ($query) use ($expiringThreshold, $now) {
+                $query->whereHas('providerProfile', function ($profileQuery) use ($expiringThreshold, $now) {
+                    $profileQuery->whereNotNull('free_listing_expires_at')
+                        ->where('free_listing_expires_at', '>', $now)
+                        ->where('free_listing_expires_at', '<=', $expiringThreshold);
+                });
+            })
+            ->when($status === 'expired', function ($query) use ($now) {
+                $query->whereHas('providerProfile', function ($profileQuery) use ($now) {
+                    $profileQuery->whereNotNull('free_listing_expires_at')
+                        ->where('free_listing_expires_at', '<=', $now);
+                });
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($searchQuery) use ($search) {
                     $searchQuery
