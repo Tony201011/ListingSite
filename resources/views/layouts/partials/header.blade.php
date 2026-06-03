@@ -405,8 +405,8 @@
                 @endif
             @endforeach
 
-                        @if($primaryActionLink)
-                <a href="{{ $primaryActionLink['url'] }}" class="inline-flex items-center whitespace-nowrap bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
+            @if($primaryActionLink)
+                <a href="{{ $primaryActionLink['url'] }}" class="mx-4 inline-flex items-center whitespace-nowrap bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
                     {{ $primaryActionLink['label'] }}
                 </a>
             @endif
