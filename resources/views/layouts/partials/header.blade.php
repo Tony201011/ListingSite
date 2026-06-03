@@ -322,7 +322,7 @@
         <div class="hidden items-center space-x-4 md:flex {{ $isGirlProfilePage ? '' : 'lg:hidden' }}">
             @foreach($actionLinks as $item)
                 <a href="{{ $item['url'] }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">
-                    {{ $item['label'] }}
+                    {{ $item['label'] }}   vbcbvcbvc
                 </a>
             @endforeach
 
