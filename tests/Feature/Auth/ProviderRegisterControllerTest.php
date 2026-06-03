@@ -248,13 +248,4 @@ class ProviderRegisterControllerTest extends TestCase
         ]);
     }
 
-    public function test_delete_account_returns_view(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get(route('account.delete-page'));
-
-        $response->assertOk();
-        $response->assertViewIs('auth.delete-account');
-    }
 }

@@ -2,28 +2,16 @@
 
 namespace Tests\Feature\Profile;
 
-use App\Actions\DeleteUserAccount;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\URL;
-use Mockery;
 use Tests\TestCase;
 
 class AccountControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function tearDown(): void
-    {
-        Mockery::close();
-
-        parent::tearDown();
-    }
-
-    public function test_delete_account_page_is_returned_for_authenticated_user(): void
+    public function test_my_account_page_is_returned_for_authenticated_user(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::create([
@@ -34,10 +22,10 @@ class AccountControllerTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['active_provider_profile_id' => $profile->id])
-            ->get(route('account.delete-page'));
+            ->get(route('my-account'));
 
         $response->assertOk();
-        $response->assertViewIs('auth.delete-account');
+        $response->assertViewIs('my-account');
     }
 
     public function test_update_notification_preferences_updates_user_settings(): void
@@ -75,255 +63,5 @@ class AccountControllerTest extends TestCase
             'marketing_emails' => 0,
             'weekly_summary' => 1,
         ]);
-    }
-
-    public function test_destroy_sends_confirmation_email_and_redirects_back(): void
-    {
-        Mail::fake();
-
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('secret123'),
-        ]);
-        $profile = ProviderProfile::create([
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'slug' => 'user-'.$user->id,
-        ]);
-
-        $deleteUserAccount = Mockery::mock(DeleteUserAccount::class);
-        $deleteUserAccount->shouldReceive('execute')
-            ->never()
-            ->with(Mockery::on(fn ($arg) => $arg->is($user)));
-
-        $this->app->instance(DeleteUserAccount::class, $deleteUserAccount);
-
-        $response = $this->actingAs($user)
-            ->withSession(['active_provider_profile_id' => $profile->id])
-            ->from('/delete-account')
-            ->delete(route('account.destroy'), [
-                'password' => 'secret123',
-                'confirmation_text' => 'DELETE',
-            ]);
-
-        $response->assertRedirect('/delete-account');
-        $response->assertSessionHas('success');
-
-        $this->assertDatabaseHas('email_logs', [
-            'recipient' => $user->email,
-            'subject' => 'Confirm Account Deletion',
-            'type' => 'delete_account_confirmation',
-            'status' => 'sent',
-        ]);
-    }
-
-    public function test_confirm_destroy_deletes_account_and_redirects_to_signin(): void
-    {
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('secret123'),
-        ]);
-        $profile = ProviderProfile::create([
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'slug' => 'user-'.$user->id,
-        ]);
-
-        $deleteUserAccount = Mockery::mock(DeleteUserAccount::class);
-        $deleteUserAccount->shouldReceive('execute')
-            ->once()
-            ->with(Mockery::on(fn ($arg) => $arg->is($user)));
-
-        $this->app->instance(DeleteUserAccount::class, $deleteUserAccount);
-
-        $url = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            Carbon::now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
-
-        $response = $this->actingAs($user)
-            ->withSession(['active_provider_profile_id' => $profile->id])
-            ->get($url);
-
-        $response->assertRedirect('/signin');
-        $response->assertSessionHas('success');
-    }
-
-    public function test_confirm_destroy_redirects_back_with_error_when_action_throws_exception(): void
-    {
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('secret123'),
-        ]);
-
-        $deleteUserAccount = Mockery::mock(DeleteUserAccount::class);
-        $deleteUserAccount->shouldReceive('execute')
-            ->once()
-            ->andThrow(new \RuntimeException('Deletion failed'));
-
-        $this->app->instance(DeleteUserAccount::class, $deleteUserAccount);
-
-        $url = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            Carbon::now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
-
-        $response = $this->actingAs($user)->get($url);
-
-        $response->assertRedirect('/delete-account');
-        $response->assertSessionHas('error');
-    }
-
-    public function test_confirm_destroy_shows_debug_error_when_app_debug_is_true(): void
-    {
-        config(['app.debug' => true]);
-
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('secret123'),
-        ]);
-
-        $deleteUserAccount = Mockery::mock(DeleteUserAccount::class);
-        $deleteUserAccount->shouldReceive('execute')
-            ->once()
-            ->andThrow(new \RuntimeException('Detailed error message'));
-
-        $this->app->instance(DeleteUserAccount::class, $deleteUserAccount);
-
-        $url = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            Carbon::now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
-
-        $response = $this->actingAs($user)->get($url);
-
-        $response->assertSessionHas('error', 'Detailed error message');
-    }
-
-    public function test_confirm_destroy_shows_generic_error_when_app_debug_is_false(): void
-    {
-        config(['app.debug' => false]);
-
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('secret123'),
-        ]);
-
-        $deleteUserAccount = Mockery::mock(DeleteUserAccount::class);
-        $deleteUserAccount->shouldReceive('execute')
-            ->once()
-            ->andThrow(new \RuntimeException('Detailed error message'));
-
-        $this->app->instance(DeleteUserAccount::class, $deleteUserAccount);
-
-        $url = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            Carbon::now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
-
-        $response = $this->actingAs($user)->get($url);
-
-        $response->assertSessionHas('error', 'Something went wrong while deleting your account.');
-    }
-
-    public function test_destroy_returns_validation_error_when_password_is_wrong(): void
-    {
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('correct-password'),
-        ]);
-
-        $response = $this->actingAs($user)->from('/delete-account')->delete(route('account.destroy'), [
-            'password' => 'wrong-password',
-            'confirmation_text' => 'DELETE',
-        ]);
-
-        $response->assertRedirect('/delete-account');
-        $response->assertSessionHasErrors(['password']);
-    }
-
-    public function test_destroy_returns_validation_error_when_confirmation_text_is_wrong(): void
-    {
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('secret123'),
-        ]);
-
-        $response = $this->actingAs($user)->from('/delete-account')->delete(route('account.destroy'), [
-            'password' => 'secret123',
-            'confirmation_text' => 'delete',
-        ]);
-
-        $response->assertRedirect('/delete-account');
-        $response->assertSessionHasErrors(['confirmation_text']);
-    }
-
-    public function test_destroy_returns_validation_error_when_confirmation_text_is_missing(): void
-    {
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('secret123'),
-        ]);
-
-        $response = $this->actingAs($user)->from('/delete-account')->delete(route('account.destroy'), [
-            'password' => 'secret123',
-        ]);
-
-        $response->assertRedirect('/delete-account');
-        $response->assertSessionHasErrors(['confirmation_text']);
-    }
-
-    public function test_guest_cannot_access_delete_account_page(): void
-    {
-        $response = $this->get(route('account.delete-page'));
-
-        $response->assertRedirect();
-    }
-
-    public function test_guest_cannot_delete_account(): void
-    {
-        $response = $this->delete(route('account.destroy'), [
-            'password' => 'secret123',
-            'confirmation_text' => 'DELETE',
-        ]);
-
-        $response->assertRedirect();
-    }
-
-    public function test_confirm_destroy_with_invalid_hash_returns_403(): void
-    {
-        $user = User::factory()->create([
-            'role' => User::ROLE_PROVIDER,
-            'password' => bcrypt('secret123'),
-        ]);
-
-        $url = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            Carbon::now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => 'bad-hash',
-            ]
-        );
-
-        $response = $this->get($url);
-
-        $response->assertForbidden();
     }
 }

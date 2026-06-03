@@ -239,11 +239,6 @@ class AuthorizationTest extends TestCase
         $this->postJson(route('edit-profile.save'), [])->assertUnauthorized();
     }
 
-    public function test_guest_cannot_delete_account(): void
-    {
-        $this->deleteJson(route('account.destroy'), [])->assertUnauthorized();
-    }
-
     // --- Photo Verification ---
 
     public function test_guest_cannot_upload_verification_photo(): void
@@ -1057,11 +1052,6 @@ class AuthorizationTest extends TestCase
     public function test_guest_cannot_view_edit_profile_page(): void
     {
         $this->get(route('edit-profile'))->assertRedirect();
-    }
-
-    public function test_guest_cannot_view_delete_account_page(): void
-    {
-        $this->get(route('account.delete-page'))->assertRedirect();
     }
 
     // ===============================================================

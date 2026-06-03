@@ -305,25 +305,6 @@
                     </div>
                 </div>
 
-                {{-- Danger Zone --}}
-                <div class="border border-red-300 rounded-lg p-6 bg-red-50">
-                    <h2 class="text-xl font-bold mb-4 text-red-700">Danger Zone</h2>
-
-                    <div class="flex items-start justify-between flex-wrap gap-4">
-                        <div>
-                            <h3 class="font-medium text-red-700">Delete Account</h3>
-                            <p class="text-sm text-red-600">Permanently delete your account and all associated data.</p>
-                        </div>
-
-                        <a
-                            href="{{ route('account.delete-page') }}"
-                            class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded transition"
-                        >
-                            Delete Account
-                        </a>
-                    </div>
-                </div>
-
             </div>
         </div>
     </main>

@@ -18,7 +18,6 @@ use App\Http\Controllers\MediaController;
 /*******auth Controllers end */
 
 /***profile Controllers start*/
-use App\Http\Controllers\Profile\AccountController;
 use App\Http\Controllers\Profile\AvailabilityController;
 use App\Http\Controllers\Profile\AvailableController;
 use App\Http\Controllers\Profile\BabeRankController;
@@ -79,10 +78,6 @@ Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware(['signed'])
     ->name('verification.verify');
-
-Route::get('/delete-account/confirm/{id}/{hash}', [AccountController::class, 'confirmDestroy'])
-    ->middleware(['signed'])
-    ->name('account.confirm-destroy');
 
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
     ->middleware(['auth:web', 'throttle:'.config('security.throttles.verification_send', '6,1')])

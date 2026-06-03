@@ -116,8 +116,4 @@ class ProviderRegisterController extends Controller
         );
     }
 
-    public function deleteAccount(): View
-    {
-        return view('auth.delete-account');
-    }
 }

@@ -255,17 +255,6 @@
                 </div>
             @endif
 
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <a
-                    href="{{ route('account.delete-page') }}"
-                    class="inline-flex items-center justify-center rounded border border-red-300 bg-white px-5 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-                    data-delete-account-trigger
-                    onclick="event.preventDefault()"
-                >
-                    Delete account altogether
-                </a>
-            </div>
-
             {{-- Create New Profile Modal --}}
             <div
                 x-show="showCreateModal"
@@ -364,72 +353,12 @@
     </main>
 </div>
 
-<form id="my-profiles-delete-account-form" action="{{ route('account.destroy') }}" method="POST" class="hidden">
-    @csrf
-    @method('DELETE')
-    <input type="hidden" name="password" id="my-profiles-delete-password">
-    <input type="hidden" name="confirmation_text" id="my-profiles-delete-confirmation">
-    <input type="hidden" name="delete_account_origin" value="my-profiles">
-</form>
-
 @push('scripts')
     <script src="{{ asset('profile/js/profile-online-sync.js') }}?v={{ filemtime(public_path('profile/js/profile-online-sync.js')) }}"></script>
     <script src="{{ asset('profile/js/my-profiles-online.js') }}?v={{ filemtime(public_path('profile/js/my-profiles-online.js')) }}"></script>
 
     <script>
         (function () {
-            const deleteAccountForm = document.getElementById('my-profiles-delete-account-form');
-            const deleteAccountPassword = document.getElementById('my-profiles-delete-password');
-            const deleteAccountConfirmation = document.getElementById('my-profiles-delete-confirmation');
-
-            if (deleteAccountForm && window.Swal) {
-                document.querySelectorAll('[data-delete-account-trigger]').forEach(function (trigger) {
-                    trigger.addEventListener('click', async function (e) {
-                        e.preventDefault();
-
-                        const result = await Swal.fire({
-                            title: 'Delete account?',
-                            html: `
-                                <p style="margin-bottom:12px;font-size:14px;color:#4b5563;">
-                                    We will send a secure confirmation link to your email.
-                                    Your account will be deleted only after clicking that email link.
-                                </p>
-                                <input id="swal-delete-password" type="password" class="swal2-input" placeholder="Enter your password">
-                                <input id="swal-delete-confirm" type="text" class="swal2-input" placeholder="Type DELETE">
-                            `,
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Send email',
-                            cancelButtonText: 'Cancel',
-                            confirmButtonColor: '#dc2626',
-                            focusConfirm: false,
-                            preConfirm: () => {
-                                const password = document.getElementById('swal-delete-password')?.value ?? '';
-                                const confirmationText = document.getElementById('swal-delete-confirm')?.value ?? '';
-
-                                if (!password) {
-                                    Swal.showValidationMessage('Password is required.');
-                                    return false;
-                                }
-
-                                if (confirmationText !== 'DELETE') {
-                                    Swal.showValidationMessage('Please type DELETE exactly.');
-                                    return false;
-                                }
-
-                                return { password, confirmationText };
-                            }
-                        });
-
-                        if (result.isConfirmed && result.value) {
-                            deleteAccountPassword.value = result.value.password;
-                            deleteAccountConfirmation.value = result.value.confirmationText;
-                            deleteAccountForm.submit();
-                        }
-                    });
-                });
-            }
-
             if (window.Swal) {
                 document.querySelectorAll('[data-profile-delete-form]').forEach(function (form) {
                     form.addEventListener('submit', async function (e) {
@@ -452,33 +381,6 @@
                         }
                     });
                 });
-
-                @if (session('delete_account_email_sent'))
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Email sent',
-                        text: @json(session('success')),
-                        confirmButtonColor: '#db2777',
-                    });
-                @endif
-
-                @if (session('delete_account_email_error'))
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Could not send email',
-                        text: @json(session('error')),
-                        confirmButtonColor: '#db2777',
-                    });
-                @endif
-
-                @if (old('delete_account_origin') === 'my-profiles' && $errors->any())
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Could not send email',
-                        html: @json(collect($errors->all())->map(fn ($message) => '• '.$message)->implode('<br>')),
-                        confirmButtonColor: '#db2777',
-                    });
-                @endif
             }
         })();
     </script>

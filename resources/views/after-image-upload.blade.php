@@ -120,7 +120,6 @@
                 <p class="text-sm text-gray-600 mb-4">Manage your password and account access settings.</p>
                 <div class="space-y-2">
                     <a href="{{ url('/change-password') }}" class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-center">Change password</a>
-                    <a href="{{ url('/delete-account') }}" class="block w-full px-4 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition text-center">Delete account</a>
                 </div>
             </div>
         </div>

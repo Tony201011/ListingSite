@@ -225,7 +225,6 @@
                 ['label' => 'Account settings', 'url' => route('my-account')],
                 ['label' => 'Registered email', 'url' => route('change-email')],
                 ['label' => 'Change password', 'url' => route('change-password')],
-                ['label' => 'Delete account', 'url' => route('account.delete-page')],
             ],
         ],
         [

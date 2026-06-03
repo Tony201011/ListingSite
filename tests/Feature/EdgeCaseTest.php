@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class EdgeCaseTest extends TestCase
@@ -503,65 +502,4 @@ class EdgeCaseTest extends TestCase
             ->assertStatus(422);
     }
 
-    // ===============================================================
-    // 7. Account deletion edge cases
-    // ===============================================================
-
-    public function test_deleting_account_removes_user_from_database(): void
-    {
-        $user = $this->providerWithProfile();
-
-        $confirmUrl = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
-
-        $this->actingAs($user)
-            ->get($confirmUrl)
-            ->assertRedirect('/signin');
-
-        $this->assertSoftDeleted('users', ['id' => $user->id]);
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'account_status' => 'soft_deleted',
-        ]);
-    }
-
-    public function test_deleting_account_cascades_to_owned_resources(): void
-    {
-        $user = $this->providerWithProfile();
-
-        ProfileImage::create([
-            'user_id' => $user->id,
-            'provider_profile_id' => $user->providerProfile->id,
-            'image_path' => 'images/test.jpg',
-            'thumbnail_path' => 'thumbnails/test.jpg',
-            'is_primary' => true,
-        ]);
-
-        ShortUrl::create(['user_id' => $user->id, 'short_url' => 'slug-'.$user->id]);
-
-        $confirmUrl = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
-
-        $this->actingAs($user)
-            ->get($confirmUrl)
-            ->assertRedirect('/signin');
-
-        // Account uses soft-delete with scheduled purge — resources still exist
-        $this->assertSoftDeleted('users', ['id' => $user->id]);
-        $this->assertNotNull($user->fresh()?->scheduled_purge_at);
-        $this->assertEquals(1, ProfileImage::where('user_id', $user->id)->count());
-        $this->assertEquals(1, ShortUrl::where('user_id', $user->id)->count());
-    }
 }
