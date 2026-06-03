@@ -510,16 +510,18 @@
                 </a>
             @endforeach
 
+            a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
+                <i class="fa-solid fa-heart mr-1.5 text-xs text-pink-500"></i>
+                Favourites
+            </a>
+
             @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
-                <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block rounded-lg px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">
+                <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block  px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">
                     {{ $freeTrialCtaText }}
                 </a>
             @endif
 
-            <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
-                <i class="fa-solid fa-heart mr-1.5 text-xs text-pink-500"></i>
-                Favourites
-            </a>
+
 
             <div class="border-t border-gray-800"></div>
 
