@@ -40,6 +40,43 @@ class AccountControllerTest extends TestCase
         $response->assertViewIs('auth.delete-account');
     }
 
+    public function test_update_notification_preferences_updates_user_settings(): void
+    {
+        $user = User::factory()->create([
+            'role' => User::ROLE_PROVIDER,
+            'email_notifications' => true,
+            'message_alerts' => true,
+            'marketing_emails' => true,
+            'weekly_summary' => true,
+        ]);
+        $profile = ProviderProfile::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'slug' => 'user-'.$user->id,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->put(route('my-account.update'), [
+                'form_section' => 'notification_preferences',
+                'email_notifications' => '0',
+                'message_alerts' => '1',
+                'marketing_emails' => '0',
+                'weekly_summary' => '1',
+            ]);
+
+        $response->assertRedirect(route('my-account'));
+        $response->assertSessionHas('success', 'Notification preferences updated successfully.');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'email_notifications' => 0,
+            'message_alerts' => 1,
+            'marketing_emails' => 0,
+            'weekly_summary' => 1,
+        ]);
+    }
+
     public function test_destroy_sends_confirmation_email_and_redirects_back(): void
     {
         Mail::fake();
