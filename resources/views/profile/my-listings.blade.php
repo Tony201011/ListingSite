@@ -247,11 +247,11 @@
                                         </button>
                                     </form>
 
-                                    <a href="{{ route('photos') }}"
-                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-teal-500 bg-white px-4 text-base font-semibold text-teal-700 hover:bg-teal-50">
-                                        <i class="fa-regular fa-image text-lg"></i>
-                                        Gallery
-                                    </a>
+                                   <a href="{{ route('photos') }}"
+                                        class="flex h-12 w-full items-center justify-center gap-3 rounded-md border-2 border-teal-500 bg-white px-4 font-semibold text-teal-600 transition hover:bg-teal-50">
+                                            <i class="fa-regular fa-image text-base"></i>
+                                            <span>Gallery</span>
+                                        </a>
 
                                     <form action="{{ route('my-listings.feature', $listing) }}" method="POST" class="flex-1">
                                         @csrf
