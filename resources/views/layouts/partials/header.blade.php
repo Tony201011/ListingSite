@@ -404,15 +404,12 @@
                     </a>
                 @endif
             @endforeach
-        </nav>
-
-        <div class="flex items-center gap-2 whitespace-nowrap">
             @if($primaryActionLink)
                 <a href="{{ $primaryActionLink['url'] }}" class="inline-flex items-center whitespace-nowrap bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
                     {{ $primaryActionLink['label'] }}
                 </a>
             @endif
-
+            
             @auth
                 <div x-data="{ open: false }" class="relative" @keydown.escape.window="open = false">
                     <button
@@ -474,6 +471,11 @@
                     Sign Up
                 </a>
             @endauth
+        </nav>
+
+        <div class="flex items-center gap-2 whitespace-nowrap">
+
+
 
             @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
                 <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-full border border-pink-500 px-4 py-2 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">
