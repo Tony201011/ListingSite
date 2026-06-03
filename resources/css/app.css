@@ -11,3 +11,12 @@
 	max-height: calc(100vh - 5rem);
 	overflow-y: auto;
 }
+
+@layer base {
+	button:not([class*="rounded"]),
+	input[type="button"]:not([class*="rounded"]),
+	input[type="submit"]:not([class*="rounded"]),
+	input[type="reset"]:not([class*="rounded"]) {
+		border-radius: 0.5rem;
+	}
+}
