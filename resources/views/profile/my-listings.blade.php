@@ -55,7 +55,7 @@
             @endif
 
             <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <span class="text-sm font-medium">
+                <span class="text-sm font-medium text-black">
                     {{ $totalListings }} Total Listings
                 </span>
 
@@ -63,15 +63,16 @@
                     <input type="hidden" name="status" value="{{ $status }}">
 
                     <div class="relative">
-                        <i class="fa-solid fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-400"></i>
-                        <input
-                            name="q"
-                            value="{{ $searchQuery }}"
-                            type="search"
-                            placeholder="Search"
-                            class="h-12 w-64 rounded-md border border-gray-300 bg-white pl-4 pr-4 text-base text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
-                        >
-                    </div>
+                            <i class="fa-solid fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-400"></i>
+
+                            <input
+                                name="q"
+                                value=""
+                                type="search"
+                                placeholder="Search"
+                                class="h-12 w-64 rounded-md border border-gray-300 bg-white pl-12 pr-4 text-base text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                            >
+                        </div>
 
                     @if(filled($searchQuery))
                         <a href="{{ route('my-listings', ['status' => $status, 'sort' => $sort]) }}"
