@@ -27,6 +27,20 @@ class AccountController extends Controller
         return view('my-account');
     }
 
+    public function updateAccount(Request $request)
+    {
+        $validated = $request->validate([
+            'name'   => ['required', 'string', 'max:255'],
+            'mobile' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        $user->update($validated);
+
+        return redirect()->route('my-account')->with('success', 'Account information updated successfully.');
+    }
+
     public function deleteAccountPage()
     {
         return view('auth.delete-account');
