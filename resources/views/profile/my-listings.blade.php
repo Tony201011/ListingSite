@@ -1,6 +1,4 @@
-Fixed Blade based on your uploaded HTML mockup and current Blade file.
 
-```blade
 @extends('layouts.frontend')
 
 @section('title', 'My Listings')
