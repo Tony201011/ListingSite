@@ -22,6 +22,11 @@ class AccountController extends Controller
         private MailgunConfigService $mailgunConfigService
     ) {}
 
+    public function myAccount()
+    {
+        return view('my-account');
+    }
+
     public function deleteAccountPage()
     {
         return view('auth.delete-account');
