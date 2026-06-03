@@ -87,7 +87,7 @@
                                     name="username"
                                     type="text"
                                     value="{{ $username }}"
-                                    class="w-full px-3 py-2 border {{ $errors->has('username') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
+                                    class="w-full px-3 py-2 border {{ $errors->has('username') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2 text-gray-900"
                                 >
                                 @error('username')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -101,7 +101,7 @@
                                     name="name"
                                     type="text"
                                     value="{{ $displayName }}"
-                                    class="w-full px-3 py-2 border {{ $errors->has('name') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
+                                    class="w-full px-3 py-2 border {{ $errors->has('name') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2 text-gray-900"
                                 >
                                 @error('name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -127,7 +127,7 @@
                                 name="mobile"
                                 type="tel"
                                 value="{{ $mobile }}"
-                                class="w-full px-3 py-2 border {{ $errors->has('mobile') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
+                                class="w-full px-3 py-2 border {{ $errors->has('mobile') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2 text-gray-900"
                             >
                             @error('mobile')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -158,7 +158,7 @@
                                 name="current_password"
                                 type="password"
                                 placeholder="Enter current password"
-                                class="w-full px-3 py-2 border {{ $errors->has('current_password') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
+                                class="w-full px-3 py-2 border {{ $errors->has('current_password') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2 text-gray-900"
                             >
                             @error('current_password')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -173,7 +173,7 @@
                                     name="password"
                                     type="password"
                                     placeholder="Enter new password"
-                                    class="w-full px-3 py-2 border {{ $errors->has('password') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
+                                    class="w-full px-3 py-2 border {{ $errors->has('password') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2 text-gray-900"
                                 >
                                 @error('password')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -187,7 +187,7 @@
                                     name="password_confirmation"
                                     type="password"
                                     placeholder="Confirm new password"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900"
                                 >
                             </div>
                         </div>
