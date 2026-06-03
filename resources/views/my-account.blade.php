@@ -11,6 +11,7 @@
 
     $emailNotifications = old('email_notifications', $user->email_notifications ?? true);
     $messageAlerts = old('message_alerts', $user->message_alerts ?? true);
+    $marketingEmails = old('marketing_emails', $user->marketing_emails ?? true);
     $weeklySummary = old('weekly_summary', $user->weekly_summary ?? true);
 
     $currentPlan = $user->plan_name ?? 'Premium';
@@ -232,6 +233,20 @@
                             value="1"
                             class="w-5 h-5 text-pink-500"
                             @checked($messageAlerts)
+                        >
+                    </div>
+
+                      <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-medium text-gray-900">Marketing Emails</h3>
+                            <p class="text-sm text-gray-600">Get notified when someone sends you a message</p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            name="message_alerts"
+                            value="1"
+                            class="w-5 h-5 text-pink-500"
+                            @checked($marketingEmails)
                         >
                     </div>
 
