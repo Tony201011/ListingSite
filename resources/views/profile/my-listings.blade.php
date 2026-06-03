@@ -248,14 +248,14 @@
     </a>
 
     <a href="{{ route('photos') }}"
-       class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-teal-500 bg-white px-4 py-3 text-[15px] font-semibold text-teal-600 transition">
-        <i class="fa-regular fa-image text-teal-600"></i>
+       class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-teal-700 bg-teal-600 px-4 py-3 text-[15px] font-semibold text-white transition hover:bg-teal-700">
+        <i class="fa-regular fa-image text-white"></i>
         <span>Gallery</span>
     </a>
 
     <a href="{{ route('featured') }}"
-       class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-purple-500 bg-white px-4 py-3 text-[15px] font-semibold text-purple-600 transition">
-        <i class="fa-solid fa-award text-purple-600"></i>
+       class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-purple-700 bg-purple-600 px-4 py-3 text-[15px] font-semibold text-white transition hover:bg-purple-700">
+        <i class="fa-solid fa-award text-white"></i>
         <span>Premium</span>
     </a>
 
@@ -375,14 +375,14 @@
                                     </a>
 
                                     <a href="{{ route('photos') }}"
-                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-teal-500 bg-white px-4 text-base font-semibold text-teal-700 hover:bg-teal-50">
-                                        <i class="fa-regular fa-image text-lg"></i>
+                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-teal-700 bg-teal-600 px-4 text-base font-semibold text-white hover:bg-teal-700">
+                                        <i class="fa-regular fa-image text-lg text-white"></i>
                                         Gallery
                                     </a>
 
                                     <a href="{{ route('featured') }}"
-                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-purple-500 bg-white px-4 text-base font-semibold text-purple-700 hover:bg-purple-50">
-                                        <i class="fa-solid fa-award text-lg"></i>
+                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-purple-700 bg-purple-600 px-4 text-base font-semibold text-white hover:bg-purple-700">
+                                        <i class="fa-solid fa-award text-lg text-white"></i>
                                         Premium
                                     </a>
                                 </div>
