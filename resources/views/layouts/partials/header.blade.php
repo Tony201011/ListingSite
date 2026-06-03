@@ -350,7 +350,7 @@
         <div class="flex shrink-0 items-center gap-2 whitespace-nowrap">
         </div>
 
-        <nav class="flex min-w-0 flex-1 flex-nowrap items-center gap-1">
+        <nav class="flex min-w-0 flex-1 flex-nowrap items-center gap-2">
             @foreach($desktopNavLinks as $item)
                 @if(strtolower($item['label']) === 'escorts')
                     <div
@@ -358,7 +358,7 @@
                         x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
                         @click.outside="open = false; search = ''"
                     >
-                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex h-9 items-center gap-1 rounded-full px-3.5 text-sm font-medium text-gray-300 transition-colors duration-200 hover:bg-white/5 hover:text-white">
                             {{ $item['label'] }}
                             <i class="fa-solid fa-chevron-down ml-1 text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
                         </button>
@@ -399,13 +399,13 @@
                 @else
                     @php $isActive = $isNavItemActive((string) $item['url']); @endphp
 
-                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+                    <a href="{{ $item['url'] }}" class="inline-flex h-9 items-center gap-1 rounded-full px-3.5 text-sm font-medium transition-colors duration-200 {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-white/5 hover:text-white' }}">
                         {{ $item['label'] }}
                     </a>
                 @endif
             @endforeach
             @if($primaryActionLink)
-                <a href="{{ $primaryActionLink['url'] }}" class="inline-flex items-center whitespace-nowrap mx-4 bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
+                <a href="{{ $primaryActionLink['url'] }}" class="inline-flex h-9 items-center whitespace-nowrap rounded-full bg-pink-600 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-pink-500 hover:shadow-md hover:shadow-pink-900/40">
                     {{ $primaryActionLink['label'] }}
                 </a>
             @endif
@@ -463,11 +463,11 @@
                     </div>
                 </div>
             @else
-                <a href="{{ route('signin') }}" class="text-sm font-medium text-gray-300 transition hover:text-white">
+                <a href="{{ route('signin') }}" class="inline-flex h-9 items-center rounded-full px-3.5 text-sm font-medium text-gray-300 transition-colors duration-200 hover:text-white">
                     Sign In
                 </a>
 
-                <a href="{{ url('/signup') }}" class="inline-flex items-center rounded-full bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
+                <a href="{{ url('/signup') }}" class="inline-flex h-9 items-center rounded-full bg-pink-600 px-4 text-sm font-semibold text-white shadow-sm shadow-pink-900/30 transition-all duration-200 hover:bg-pink-500 hover:shadow-md hover:shadow-pink-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-400">
                     Sign Up
                 </a>
             @endauth
