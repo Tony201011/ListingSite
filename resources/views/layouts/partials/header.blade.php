@@ -268,7 +268,7 @@
 <header id="main-header" class="border-b border-gray-800 bg-gray-950" style="{{ $headerStyle }}">
 @if($showTopBar)
     <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
-        <div class="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
+        <div class="flex h-10 max-w-7xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
             <div class="flex items-center gap-4">
                 @foreach($topLeftItems as $item)
                     <span class="inline-flex items-center gap-2">
@@ -291,7 +291,7 @@
     </div>
 @endif
 
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex min-h-[70px] items-center justify-between gap-4 py-3 {{ $isGirlProfilePage ? 'md:hidden' : 'lg:hidden' }}">
         <a href="{{ url('/') }}" class="shrink-0">
             @if($logoType === 'image' && filled($logoUrl))
@@ -302,7 +302,7 @@
         </a>
 
         <form action="{{ url('/provider/content-listings') }}" method="GET" class="{{ $showSearch ? 'hidden flex-1 xl:block' : 'hidden' }}">
-            <div class="mx-auto flex max-w-2xl items-center rounded-xl border border-gray-700 bg-gray-800/80 p-1.5">
+            <div class="flex max-w-2xl items-center rounded-xl border border-gray-700 bg-gray-800/80 p-1.5">
                 <div class="flex min-w-0 flex-1 items-center gap-2 px-2">
                     <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
                     <input type="text" name="q" placeholder="Search by name or keyword" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
