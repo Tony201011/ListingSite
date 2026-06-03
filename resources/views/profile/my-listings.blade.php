@@ -237,32 +237,26 @@
                                 </p>
 
                                 <div class="flex flex-col gap-4 md:flex-row">
-                                    <form action="{{ route('my-listings.feature', $listing) }}" method="POST" class="flex-1">
-                                        @csrf
-                                        <input type="hidden" name="feature" value="top">
-                                        <button type="submit"
-                                                class="flex h-12 w-full items-center justify-center gap-3 rounded-md border-2 border-yellow-500 bg-white px-4 text-base font-semibold text-yellow-700 hover:bg-yellow-50">
-                                            <i class="fa-solid fa-star text-lg text-yellow-500"></i>
-                                            Top
-                                        </button>
-                                    </form>
 
-                                   <a href="{{ route('photos') }}"
-                                        class="flex h-12 w-full items-center justify-center gap-3 rounded-md border-2 border-teal-500 bg-white px-4 font-semibold text-teal-600 transition hover:bg-teal-50">
-                                            <i class="fa-regular fa-image text-base"></i>
-                                            <span>Gallery</span>
-                                        </a>
+    <a href="{{ route('profiles.switch', $profile) }}"
+       class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-yellow-500 bg-white px-4 py-3 text-[15px] font-semibold text-yellow-600 transition">
+        <i class="fa-solid fa-star text-yellow-500"></i>
+        <span>Top</span>
+    </a>
 
-                                    <form action="{{ route('my-listings.feature', $listing) }}" method="POST" class="flex-1">
-                                        @csrf
-                                        <input type="hidden" name="feature" value="premium">
-                                        <button type="submit"
-                                                class="flex h-12 w-full items-center justify-center gap-3 rounded-md border-2 border-purple-500 bg-white px-4 text-base font-semibold text-purple-700 hover:bg-purple-50">
-                                            <i class="fa-solid fa-award text-lg"></i>
-                                            Premium
-                                        </button>
-                                    </form>
-                                </div>
+    <a href="{{ route('photos') }}"
+       class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-teal-500 bg-white px-4 py-3 text-[15px] font-semibold text-teal-600 transition">
+        <i class="fa-regular fa-image text-teal-600"></i>
+        <span>Gallery</span>
+    </a>
+
+    <a href="{{ route('featured') }}"
+       class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-purple-500 bg-white px-4 py-3 text-[15px] font-semibold text-purple-600 transition">
+        <i class="fa-solid fa-award text-purple-600"></i>
+        <span>Premium</span>
+    </a>
+
+</div>
                             </div>
 
                             <div class="flex justify-end border-t border-gray-200 bg-white px-4 py-2">
