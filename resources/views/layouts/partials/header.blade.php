@@ -431,7 +431,7 @@
                         x-transition:leave="transition ease-in duration-100"
                         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                         x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-                        class="absolute right-0 top-full z-50 mt-2 w-[250px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
+                        class="absolute right-0 top-full z-50 mt-2 w-[320px] max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5 sm:w-[340px]"
                         style="display:none;"
                     >
                         @foreach($authDropdownItems as $item)
@@ -442,7 +442,7 @@
                             <a
                                 href="{{ $item['url'] }}"
                                 @click="open = false"
-                                class="block px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
+                                class="flex items-center whitespace-nowrap px-6 py-3 text-[18px] leading-tight text-black transition-colors duration-200 ease-out hover:bg-gray-100 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
                             >
                                 {{ $item['label'] }}
                             </a>
@@ -454,7 +454,7 @@
                             @csrf
                             <button
                                 type="button"
-                                class="block w-full px-5 py-3 text-left text-[18px] font-normal leading-tight text-red-600 transition hover:bg-gray-50"
+                                class="flex w-full items-center whitespace-nowrap px-6 py-3 text-left text-[18px] font-normal leading-tight text-red-600 transition-colors duration-200 ease-out hover:bg-gray-100"
                                 @click="open = false; confirmSignOut($el.closest('form'))"
                             >
                                 Sign Out
