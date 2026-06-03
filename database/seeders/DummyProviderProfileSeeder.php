@@ -82,6 +82,10 @@ class DummyProviderProfileSeeder extends Seeder
         $countries = Country::query()->pluck('id')->values()->all();
         $states = State::query()->pluck('id')->values()->all();
         $cities = $cityRows->pluck('id')->values()->all();
+        $melbourneVicCity = $cityRows->first(
+            fn (City $city): bool => strcasecmp($city->name, 'Melbourne') === 0
+                && strcasecmp((string) $city->state?->name, 'Victoria') === 0
+        );
 
         $ageGroupIds = Category::query()->where('slug', 'age-group')
             ->first()?->children()->pluck('id')->values()->all() ?? [];
@@ -246,6 +250,11 @@ class DummyProviderProfileSeeder extends Seeder
         for ($i = 1; $i <= self::TOTAL; $i++) {
             $email = "provider{$i}@yopmail.com";
             $name = $this->pickName($i);
+            $isJerryProfile = $i === 90 && $melbourneVicCity !== null;
+
+            if ($isJerryProfile) {
+                $name = 'Jerry09090';
+            }
 
             // 1. User
             $user = User::updateOrCreate(
@@ -263,8 +272,12 @@ class DummyProviderProfileSeeder extends Seeder
             );
 
             // 2. ProviderProfile
-            $cityId = count($cities) > 0 ? $cities[$i % count($cities)] : null;
-            $cityModel = $cityId ? $cityRows->firstWhere('id', $cityId) : null;
+            $cityId = $isJerryProfile
+                ? $melbourneVicCity->id
+                : (count($cities) > 0 ? $cities[$i % count($cities)] : null);
+            $cityModel = $isJerryProfile
+                ? $melbourneVicCity
+                : ($cityId ? $cityRows->firstWhere('id', $cityId) : null);
             $stateId = $cityModel ? $cityModel->state_id : (count($states) > 0 ? $states[$i % count($states)] : null);
             $countryId = $cityModel ? ($cityModel->state?->country_id ?? null) : (count($countries) > 0 ? $countries[$i % count($countries)] : null);
 
@@ -277,7 +290,9 @@ class DummyProviderProfileSeeder extends Seeder
                     'name' => $name,
                     'slug' => $slug,
                     'profile_sequence' => $profileSequence,
-                    'suburb' => $this->pickFrom($suburbs, $i),
+                    'suburb' => $isJerryProfile
+                        ? 'Melbourne, VIC 3000'
+                        : $this->pickFrom($suburbs, $i),
                     'age' => rand(21, 45),
                     'description' => "Hi, I'm {$name}. I am a professional and discreet companion offering premium companionship services. I love to meet new people and create unforgettable experiences.",
                     'introduction_line' => "Welcome to my profile! I'm {$name}, your perfect companion.",
