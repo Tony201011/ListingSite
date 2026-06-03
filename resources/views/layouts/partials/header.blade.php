@@ -406,7 +406,7 @@
             @endforeach
 
             @if($primaryActionLink)
-                <a href="{{ $primaryActionLink['url'] }}" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-1 rounded">
+                <a href="{{ $primaryActionLink['url'] }}" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-1 rounded mx-4">
                     {{ $primaryActionLink['label'] }}
                 </a>
             @endif
@@ -417,6 +417,7 @@
         @click="open = !open"
         type="button"
         class="bg-yellow-400 text-slate-900 px-3 py-1 rounded hover:bg-yellow-500 flex items-center gap-1"
+    >
         {{ $authDisplayName }}
         <i class="fa-solid fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
     </button>
