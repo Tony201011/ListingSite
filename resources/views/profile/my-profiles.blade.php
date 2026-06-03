@@ -1,9 +1,9 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
+<div class="bg-white min-h-screen py-10 px-4">
     <div
-        class="mx-auto max-w-5xl"
+        class="max-w-7xl mx-auto px-6 py-8"
         x-data="{
             showCreateModal: false,
             createName: '',
@@ -14,12 +14,12 @@
         <button
             type="button"
             onclick="window.history.back()"
-            class="mb-6 inline-flex cursor-pointer items-center border-0 bg-transparent text-base font-medium text-[#e04ecb] transition-colors hover:text-[#c13ab0]"
+            class="inline-flex items-center text-pink-500 hover:text-pink-600 transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
         >
             <span class="mr-1">&lt;</span> back
         </button>
 
-        <h1 class="mb-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+        <h1 class="text-3xl font-bold mb-8 text-gray-900">
             My Profiles
         </h1>
 
@@ -45,7 +45,7 @@
             </div>
         @endif
 
-        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-md sm:p-10">
+        <div class="bg-white min-h-[600px]">
             @if($profiles->isEmpty())
                 <div class="mb-8 rounded-xl border border-gray-100 bg-gray-50 px-5 py-6 text-gray-600">
                     You have no profiles yet. Create your first profile to get started.
@@ -58,7 +58,7 @@
                         @endphp
 
                         <div
-                            class="rounded-xl border border-gray-200 bg-gray-50 px-5 py-6"
+                            class="rounded-lg border border-gray-300 bg-white p-6"
                             x-data="profileOnlineToggle({
                                 profileId: @js($profile->id),
                                 initialStatus: @js((bool) $state['onlineStatus']),
@@ -233,14 +233,14 @@
                 <button
                     type="button"
                     @click="showCreateModal = true; createName = ''; createPhone = ''; createErrors = []"
-                    class="inline-flex items-center justify-center rounded-full bg-pink-600 px-8 py-3 text-base font-bold text-white shadow-md transition hover:bg-pink-700"
+                    class="inline-flex items-center justify-center bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded transition"
                 >
                     + Create New Profile
                 </button>
 
                 <a
                     href="{{ route('account.delete-page') }}"
-                    class="inline-flex items-center justify-center rounded-full border border-rose-500 bg-white px-8 py-3 text-base font-semibold text-rose-600 transition hover:bg-rose-50"
+                    class="inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded transition"
                     data-delete-account-trigger
                     onclick="event.preventDefault()"
                 >
@@ -469,6 +469,5 @@
     </script>
 @endpush
 @endsection
-
 
 
