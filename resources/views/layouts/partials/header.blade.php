@@ -322,7 +322,7 @@
         <div class="hidden items-center space-x-4 md:flex {{ $isGirlProfilePage ? '' : 'lg:hidden' }}">
             @foreach($actionLinks as $item)
                 <a href="{{ $item['url'] }}" class="text-sm font-medium text-gray-300 transition hover:text-pink-400">
-                    {{ $item['label'] }}   vbcbvcbvc
+                    {{ $item['label'] }}
                 </a>
             @endforeach
 
@@ -358,7 +358,7 @@
                         x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
                         @click.outside="open = false; search = ''"
                     >
-                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium hover:text-white">
                             {{ $item['label'] }}
                             <i class="fa-solid fa-chevron-down ml-1 text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
                         </button>
@@ -399,7 +399,7 @@
                 @else
                     @php $isActive = $isNavItemActive((string) $item['url']); @endphp
 
-                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+                    <a href="{{ $item['url'] }}" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition {{ $isActive ? 'text-white' : ' hover:text-white' }}">
                         {{ $item['label'] }}
                     </a>
                 @endif
