@@ -78,6 +78,7 @@
                     <form action="{{ route('my-account.update') }}" method="POST" class="space-y-4" autocomplete="off">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="form_section" value="account_information">
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -207,12 +208,14 @@
                     <form action="{{ route('my-account.update') }}" method="POST" class="space-y-3">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="form_section" value="notification_preferences">
 
                         <div class="flex items-center justify-between gap-4">
                             <div>
                                 <h3 class="font-medium text-gray-900">Email Notifications</h3>
                                 <p class="text-sm text-gray-600">Receive updates about your listings via email</p>
                             </div>
+                            <input type="hidden" name="email_notifications" value="0">
                             <input
                                 type="checkbox"
                                 name="email_notifications"
@@ -227,6 +230,7 @@
                                 <h3 class="font-medium text-gray-900">Message Alerts</h3>
                                 <p class="text-sm text-gray-600">Get notified when someone sends you a message</p>
                             </div>
+                            <input type="hidden" name="message_alerts" value="0">
                             <input
                                 type="checkbox"
                                 name="message_alerts"
@@ -239,11 +243,12 @@
                         <div class="flex items-center justify-between gap-4">
                             <div>
                                 <h3 class="font-medium text-gray-900">Marketing Emails</h3>
-                                <p class="text-sm text-gray-600">Get notified when someone sends you a message</p>
+                                <p class="text-sm text-gray-600">Receive promotions, feature updates, and special offers</p>
                             </div>
+                            <input type="hidden" name="marketing_emails" value="0">
                             <input
                                 type="checkbox"
-                                name="message_alerts"
+                                name="marketing_emails"
                                 value="1"
                                 class="w-5 h-5 text-pink-500"
                                 @checked($marketingEmails)
@@ -255,6 +260,7 @@
                                 <h3 class="font-medium text-gray-900">Weekly Summary</h3>
                                 <p class="text-sm text-gray-600">Get a weekly report of your listing performance</p>
                             </div>
+                            <input type="hidden" name="weekly_summary" value="0">
                             <input
                                 type="checkbox"
                                 name="weekly_summary"
