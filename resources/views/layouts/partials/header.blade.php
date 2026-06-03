@@ -432,7 +432,7 @@
         x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-        class="absolute right-0 top-full z-50 mt-2 w-[250px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
+        class="absolute right-0 top-full z-50 mt-2 w-[340px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
         style="display:none;"
     >
         @foreach($authDropdownItems as $item)
