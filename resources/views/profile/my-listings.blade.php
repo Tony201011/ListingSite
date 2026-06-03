@@ -225,8 +225,9 @@
 
                             <div class="border-t border-blue-200 bg-blue-50 p-4">
                                 <div class="mb-3 flex items-center gap-2">
-                                    <i class="fa-solid fa-circle-info text-sm text-blue-700"></i>
-                                    <span class="text-sm font-medium !text-blue-900">
+                                    <i class="fa-solid fa-circle-info text-sm" style="color:#1d4ed8;"></i>
+
+                                    <span class="text-sm font-semibold" style="color:#1e3a8a;">
                                         Get more views
                                     </span>
                                 </div>
