@@ -205,14 +205,6 @@
 
         return in_array($label, ['sign up', 'sign in', 'my profile', 'dashboard', 'logout'], true);
     })->values();
-    $orderedDesktopNavLinks = collect(['Home', 'About us', 'Pricing', 'Escorts', 'Naughty corner', 'Blog'])
-        ->map(function (string $label) use ($desktopNavLinks) {
-            return $desktopNavLinks->first(function ($item) use ($label): bool {
-                return strtolower(trim((string) ($item['label'] ?? ''))) === strtolower($label);
-            });
-        })
-        ->filter()
-        ->values();
 
     $primaryActionLink = $actionLinks->first(function ($item): bool {
         return strtolower(trim((string) ($item['label'] ?? ''))) === 'add advertisement';
@@ -346,28 +338,27 @@
         </button>
     </div>
 
-    <div class="hidden min-h-[70px] items-center justify-between gap-6 border-t border-gray-800 py-3 {{ $isGirlProfilePage ? 'md:flex' : 'lg:flex' }}">
-        <div class="flex shrink-0 items-center">
-            <a href="{{ url('/') }}" class="shrink-0">
-                @if($logoType === 'image' && filled($logoUrl))
-                    <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
-                @else
-                    <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
-                @endif
-            </a>
+    <div class="hidden items-center gap-4 border-t border-gray-800 py-3 {{ $isGirlProfilePage ? 'md:flex' : 'lg:flex' }}">
+        <a href="{{ url('/') }}" class="shrink-0">
+            @if($logoType === 'image' && filled($logoUrl))
+                <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
+            @else
+                <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
+            @endif
+        </a>
+
+        <div class="flex shrink-0 items-center gap-2 whitespace-nowrap">
         </div>
 
-        <div class="flex min-w-0 flex-1 items-center justify-center px-2 xl:px-6">
-            <div class="flex min-w-0 max-w-full items-center overflow-x-auto">
-                <nav class="flex min-w-max items-center gap-2 whitespace-nowrap xl:gap-3">
-            @foreach($orderedDesktopNavLinks as $item)
+        <nav class="flex min-w-0 flex-1 flex-nowrap items-center gap-2">
+            @foreach($desktopNavLinks as $item)
                 @if(strtolower($item['label']) === 'escorts')
                     <div
-                        class="relative shrink-0"
+                        class="relative"
                         x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
                         @click.outside="open = false; search = ''"
                     >
-                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3.5 text-sm font-medium text-gray-300 transition-colors duration-200 hover:bg-white/5 hover:text-white">
+                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex h-9 items-center gap-1 rounded-full px-3.5 text-sm font-medium text-gray-300 transition-colors duration-200 hover:bg-white/5 hover:text-white">
                             {{ $item['label'] }}
                             <i class="fa-solid fa-chevron-down ml-1 text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
                         </button>
@@ -408,23 +399,23 @@
                 @else
                     @php $isActive = $isNavItemActive((string) $item['url']); @endphp
 
-                    <a href="{{ $item['url'] }}" class="inline-flex h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3.5 text-sm font-medium transition-colors duration-200 {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-white/5 hover:text-white' }}">
+                    <a href="{{ $item['url'] }}" class="inline-flex h-9 items-center gap-1 rounded-full px-3.5 text-sm font-medium transition-colors duration-200 {{ $isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-white/5 hover:text-white' }}">
                         {{ $item['label'] }}
                     </a>
                 @endif
             @endforeach
             @if($primaryActionLink)
-                <a href="{{ $primaryActionLink['url'] }}" class="inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-full bg-pink-600 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-pink-500 hover:shadow-md hover:shadow-pink-900/40">
+                <a href="{{ $primaryActionLink['url'] }}" class="inline-flex h-9 items-center whitespace-nowrap rounded-full bg-pink-600 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-pink-500 hover:shadow-md hover:shadow-pink-900/40">
                     {{ $primaryActionLink['label'] }}
                 </a>
             @endif
             
             @auth
-                <div x-data="{ open: false }" class="relative shrink-0" @keydown.escape.window="open = false">
+                <div x-data="{ open: false }" class="relative" @keydown.escape.window="open = false">
                     <button
                         @click="open = !open"
                         type="button"
-                        class="inline-flex h-10 min-w-[12rem] items-center justify-between gap-3 whitespace-nowrap rounded-full bg-yellow-400 px-4 text-sm font-semibold text-black transition hover:bg-yellow-300"
+                        class="inline-flex items-center gap-2 bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-300"
                     >
                         {{ $authDisplayName }}
                         <i class="fa-solid fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
@@ -440,7 +431,7 @@
                         x-transition:leave="transition ease-in duration-100"
                         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                         x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-                        class="absolute right-0 top-full z-50 mt-2 w-[360px] max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5 sm:w-[400px]"
+                        class="absolute right-0 top-full z-50 mt-2 w-[320px] max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5 sm:w-[340px]"
                         style="display:none;"
                     >
                         @foreach($authDropdownItems as $item)
@@ -472,21 +463,19 @@
                     </div>
                 </div>
             @else
-                <a href="{{ route('signin') }}" class="inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-full px-3.5 text-sm font-medium text-gray-300 transition-colors duration-200 hover:text-white">
+                <a href="{{ route('signin') }}" class="inline-flex h-9 items-center rounded-full px-3.5 text-sm font-medium text-gray-300 transition-colors duration-200 hover:text-white">
                     Sign In
                 </a>
 
-                <a href="{{ url('/signup') }}" class="inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-full bg-pink-600 px-4 text-sm font-semibold text-white shadow-sm shadow-pink-900/30 transition-all duration-200 hover:bg-pink-500 hover:shadow-md hover:shadow-pink-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-400">
+                <a href="{{ url('/signup') }}" class="inline-flex h-9 items-center rounded-full bg-pink-600 px-4 text-sm font-semibold text-white shadow-sm shadow-pink-900/30 transition-all duration-200 hover:bg-pink-500 hover:shadow-md hover:shadow-pink-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-400">
                     Sign Up
                 </a>
             @endauth
-                </nav>
-            </div>
-        </div>
+        </nav>
 
-        <div class="ml-4 flex shrink-0 items-center gap-2 whitespace-nowrap xl:gap-3">
+        <div class="flex items-center gap-2 whitespace-nowrap">
 
-            <a href="{{ route('favourites') }}" class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-gray-900 px-3 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-pink-400" title="My Favourites">
+            <a href="{{ route('favourites') }}" class="inline-flex items-center gap-2 rounded-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-pink-400" title="My Favourites">
                 <i class="fa-solid fa-heart text-pink-500"></i>
                 <span class="hidden sm:inline">Favourites</span>
             </a>
@@ -494,7 +483,7 @@
 
 
             @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
-                <a href="{{ $freeTrialCtaUrl }}" class="inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-pink-500/10 hover:text-white">
+                <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-full border border-pink-500 px-4 py-2 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">
                     {{ $freeTrialCtaText }}
                 </a>
             @endif
@@ -523,7 +512,7 @@
                 </a>
             @endforeach
 
-            <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
+            a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
                 <i class="fa-solid fa-heart mr-1.5 text-xs text-pink-500"></i>
                 Favourites
             </a>
