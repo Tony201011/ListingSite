@@ -413,57 +413,57 @@
 
             @auth
                 <div x-data="{ open: false }" class="relative" @keydown.escape.window="open = false">
+    <button
+        @click="open = !open"
+        type="button"
+        class="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-300"
+    >
+        {{ $authDisplayName }}
+        <i class="fa-solid fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
+    </button>
+
+    <div
+        x-cloak
+        x-show="open"
+        @click.outside="open = false"
+        x-transition:enter="transition ease-out duration-150"
+        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+        class="absolute right-0 top-full z-50 mt-2 w-[250px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
+        style="display:none;"
+    >
+        @foreach($authDropdownItems as $item)
+            @if($item['divider_before'] ?? false)
+                <div class="my-3 border-t border-gray-200"></div>
+            @endif
+
+            <a
+                href="{{ $item['url'] }}"
+                @click="open = false"
+                class="block px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
+            >
+                {{ $item['label'] }}
+            </a>
+        @endforeach
+
+        <div class="my-3 border-t border-gray-200"></div>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
                     <button
-                        @click="open = !open"
                         type="button"
-                        class="inline-flex items-center gap-2 bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-300"
+                        class="block w-full px-5 py-3 text-left text-[18px] font-normal leading-tight text-red-600 transition hover:bg-gray-50"
+                        @click="open = false; confirmSignOut($el.closest('form'))"
                     >
-                        {{ $authDisplayName }}
-                        <i class="fa-solid fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
+                        Sign Out
                     </button>
-
-                    <div
-                        x-cloak
-                        x-show="open"
-                        @click.outside="open = false"
-                        x-transition:enter="transition ease-out duration-150"
-                        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
-                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                        x-transition:leave="transition ease-in duration-100"
-                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-                        class="absolute right-0 top-full z-50 mt-2 w-[250px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
-                        style="display:none;"
-                    >
-                        @foreach($authDropdownItems as $item)
-                            @if($item['divider_before'] ?? false)
-                                <div class="my-3 border-t border-gray-200"></div>
-                            @endif
-
-                            <a
-                                href="{{ $item['url'] }}"
-                                @click="open = false"
-                                class="block px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
-                            >
-                                {{ $item['label'] }}
-                            </a>
-                        @endforeach
-
-                        <div class="my-3 border-t border-gray-200"></div>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button
-                                type="button"
-                                class="block w-full px-5 py-3 text-left text-[18px] font-normal leading-tight text-red-600 transition hover:bg-gray-50"
-                                @click="open = false; confirmSignOut($el.closest('form'))"
-                            >
-                                Sign Out
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @else
+                </form>
+            </div>
+        </div>
+                    @else
                 <a href="{{ route('signin') }}" class="text-sm font-medium text-gray-300 mx-4 transition hover:text-white">
                     Sign In
                 </a>
