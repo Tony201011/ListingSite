@@ -347,7 +347,10 @@
             @endif
         </a>
 
-        <nav class="flex min-w-0 flex-nowrap items-center gap-1">
+        <div class="flex shrink-0 items-center gap-2 whitespace-nowrap">
+        </div>
+
+        <nav class="flex min-w-0 flex-1 flex-nowrap items-center gap-1">
             @foreach($desktopNavLinks as $item)
                 @if(strtolower($item['label']) === 'escorts')
                     <div
@@ -505,6 +508,17 @@
                 </a>
             @endforeach
 
+            @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
+                <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block rounded-lg px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">
+                    {{ $freeTrialCtaText }}
+                </a>
+            @endif
+
+            <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
+                <i class="fa-solid fa-heart mr-1.5 text-xs text-pink-500"></i>
+                Favourites
+            </a>
+
             <div class="border-t border-gray-800"></div>
 
             @foreach($mainNavLinks as $item)
@@ -579,17 +593,6 @@
                     </form>
                 </div>
             @endauth
-
-            @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
-                <a @click="mobileMenu = false" href="{{ $freeTrialCtaUrl }}" class="block rounded-lg px-3 py-2 text-pink-200 hover:bg-pink-500/10 hover:text-white">
-                    {{ $freeTrialCtaText }}
-                </a>
-            @endif
-
-            <a @click="mobileMenu = false" href="{{ route('favourites') }}" class="block rounded-lg px-3 py-2 {{ request()->routeIs('favourites') ? 'bg-gray-800 font-medium text-pink-400' : 'text-gray-200 hover:bg-gray-800' }}">
-                <i class="fa-solid fa-heart mr-1.5 text-xs text-pink-500"></i>
-                Favourites
-            </a>
 
             @foreach($mobileExtraLinks as $item)
                 <a @click="mobileMenu = false" href="{{ $item['url'] }}" class="block rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">
