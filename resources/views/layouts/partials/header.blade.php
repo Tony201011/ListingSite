@@ -338,7 +338,7 @@
         </button>
     </div>
 
-    <div class="hidden items-center justify-between gap-4 border-t border-gray-800 py-3 {{ $isGirlProfilePage ? 'md:flex' : 'lg:flex' }}">
+    <div class="hidden items-center gap-4 border-t border-gray-800 py-3 {{ $isGirlProfilePage ? 'md:flex' : 'lg:flex' }}">
         <a href="{{ url('/') }}" class="shrink-0">
             @if($logoType === 'image' && filled($logoUrl))
                 <img src="{{ $logoUrl }}" alt="Site Logo" class="h-auto w-auto" style="{{ $logoStyle }}" loading="lazy" decoding="async">
