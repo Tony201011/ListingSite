@@ -25,7 +25,10 @@ class ProfileSwitchController extends Controller
     public function index(): View
     {
         $user = Auth::user();
-        $profiles = $user->providerProfiles()->orderBy('id')->with('primaryProfileImage')->get();
+        $profiles = $user->providerProfiles()->orderBy('id')->with([
+            'primaryProfileImage',
+            'photoVerification' => fn ($q) => $q->where('status', 'approved'),
+        ])->get();
         $activeProfileId = session('active_provider_profile_id') ?? $profiles->first()?->id;
 
         $onlineStates = $profiles->mapWithKeys(function (ProviderProfile $profile): array {

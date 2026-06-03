@@ -67,6 +67,7 @@
                             $location = $profile->suburb ?? $profile->city ?? $profile->state ?? 'Australia';
                             $price = $profile->price ?? $profile->hourly_rate ?? $profile->rate ?? null;
                             $phone = $profile->phone ?? $profile->mobile ?? null;
+                            $isPhotoVerified = $profile->photoVerification->isNotEmpty();
                             $statusLabel = match ($profile->profile_status) {
                                 'approved' => 'VERIFIED PROFILE',
                                 'rejected' => 'REJECTED PROFILE',
@@ -102,7 +103,7 @@
                                     </div>
                                 @endif
 
-                                <div class="absolute left-3 top-3">
+                                <div class="absolute left-3 top-3 flex flex-col items-start gap-1.5">
                                     <span class="rounded-full px-3 py-1 text-xs font-semibold text-white
                                         @if($profile->profile_status === 'approved') bg-blue-600
                                         @elseif($profile->profile_status === 'rejected') bg-red-600
@@ -117,6 +118,11 @@
                                             PENDING
                                         @endif
                                     </span>
+                                    @if($isPhotoVerified)
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-cyan-500/95 px-2.5 py-1 text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/20 sm:text-[11px]">
+                                            <i class="fa-solid fa-camera text-[9px]"></i> Verified Photo
+                                        </span>
+                                    @endif
                                 </div>
 
                                 <div class="absolute right-3 top-3 flex gap-2">
