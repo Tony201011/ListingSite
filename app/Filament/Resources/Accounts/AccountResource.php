@@ -111,6 +111,10 @@ class AccountResource extends Resource
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('email')->searchable()->sortable(),
                 TextColumn::make('mobile')->searchable()->toggleable(),
+                TextColumn::make('credits')
+                    ->label('Rewards')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('account_status')
                     ->badge()
                     ->sortable(),
