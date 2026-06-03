@@ -1,4 +1,3 @@
-
 @extends('layouts.frontend')
 
 @section('title', 'My Listings')
@@ -25,22 +24,18 @@
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div class="min-h-[600px] bg-white p-4 sm:p-6">
 
-            {{-- Header --}}
             <div class="mb-2 flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
                     <i class="fa-solid fa-rectangle-list text-xl text-blue-700"></i>
                 </div>
 
-                <h1 class="text-xl font-bold text-blue-800">
-                    My Listings
-                </h1>
+                <h1 class="text-xl font-bold text-blue-800">My Listings</h1>
             </div>
 
             <p class="mb-6 text-sm text-gray-600">
                 Manage all of your Listings in one place, renew expiring or expired Listings or add Premium Features.
             </p>
 
-            {{-- Tabs --}}
             <div class="mb-6 flex flex-wrap gap-6 border-b border-gray-300">
                 @foreach($tabs as $key => $label)
                     <a href="{{ request()->fullUrlWithQuery(['status' => $key]) }}"
@@ -59,36 +54,35 @@
                 </div>
             @endif
 
-            {{-- Count/Search/Sort --}}
             <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <span class="text-sm font-medium">
                     {{ $totalListings }} Total Listings
                 </span>
 
-                <form method="GET" action="{{ route('my-listings') }}" class="flex flex-wrap items-center gap-3">
+                <form method="GET" action="{{ route('my-listings') }}" class="flex flex-wrap items-center gap-4">
                     <input type="hidden" name="status" value="{{ $status }}">
 
                     <div class="relative">
-                        <i class="fa-solid fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
+                        <i class="fa-solid fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-400"></i>
                         <input
                             name="q"
                             value="{{ $searchQuery }}"
                             type="search"
                             placeholder="Search"
-                            class="h-10 w-56 rounded border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                            class="h-12 w-64 rounded-md border border-gray-300 bg-white pl-4 pr-4 text-base text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
                         >
                     </div>
 
                     <button
                         type="submit"
-                        class="h-10 rounded bg-blue-600 px-4 text-sm font-medium text-white transition hover:bg-blue-700"
+                        class="h-12 rounded-md bg-blue-600 px-7 text-base font-semibold text-white transition hover:bg-blue-700"
                     >
                         Search
                     </button>
 
                     @if(filled($searchQuery))
                         <a href="{{ route('my-listings', ['status' => $status, 'sort' => $sort]) }}"
-                           class="flex h-10 items-center rounded border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                           class="flex h-12 items-center rounded-md border border-gray-300 px-5 text-base font-semibold text-gray-700 hover:bg-gray-50">
                             Clear
                         </a>
                     @endif
@@ -97,7 +91,7 @@
                         id="sort"
                         name="sort"
                         onchange="this.form.submit()"
-                        class="h-10 rounded border border-blue-600 bg-blue-600 px-4 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        class="h-12 rounded-md border border-blue-600 bg-blue-600 px-6 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-200"
                     >
                         <option value="oldest" {{ $sort === 'oldest' ? 'selected' : '' }}>
                             Sort by: Upload
@@ -129,7 +123,6 @@
                         <article class="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
                             <div class="p-4">
                                 <div class="flex gap-4">
-                                    {{-- Image --}}
                                     <div class="relative shrink-0">
                                         <div class="h-32 w-32 overflow-hidden rounded bg-gray-200">
                                             @if($listing->thumbnail)
@@ -148,7 +141,6 @@
                                         </span>
                                     </div>
 
-                                    {{-- Content --}}
                                     <div class="min-w-0 flex-1">
                                         <div class="mb-2 flex items-start justify-between gap-3">
                                             <div>
@@ -237,7 +229,6 @@
                                 </div>
                             </div>
 
-                            {{-- Promotion Bar --}}
                             <div class="border-t border-blue-200 bg-blue-50 p-4">
                                 <div class="mb-3 flex items-center gap-2">
                                     <i class="fa-solid fa-circle-info text-sm text-blue-700"></i>
@@ -250,20 +241,20 @@
                                     Add a Premium Feature to stand out in the search results!
                                 </p>
 
-                                <div class="flex flex-col gap-3 md:flex-row">
+                                <div class="flex flex-col gap-4 md:flex-row">
                                     <form action="{{ route('my-listings.feature', $listing) }}" method="POST" class="flex-1">
                                         @csrf
                                         <input type="hidden" name="feature" value="top">
                                         <button type="submit"
-                                                class="flex w-full items-center justify-center gap-2 rounded border-2 border-yellow-500 bg-white px-4 py-2 text-sm font-medium text-yellow-700 hover:bg-yellow-50">
-                                            <i class="fa-solid fa-star text-yellow-500"></i>
+                                                class="flex h-12 w-full items-center justify-center gap-3 rounded-md border-2 border-yellow-500 bg-white px-4 text-base font-semibold text-yellow-700 hover:bg-yellow-50">
+                                            <i class="fa-solid fa-star text-lg text-yellow-500"></i>
                                             Top
                                         </button>
                                     </form>
 
                                     <a href="{{ route('photos') }}"
-                                       class="flex flex-1 items-center justify-center gap-2 rounded border-2 border-teal-500 bg-white px-4 py-2 text-sm font-medium text-teal-700 hover:bg-teal-50">
-                                        <i class="fa-solid fa-image"></i>
+                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-teal-500 bg-white px-4 text-base font-semibold text-teal-700 hover:bg-teal-50">
+                                        <i class="fa-regular fa-image text-lg"></i>
                                         Gallery
                                     </a>
 
@@ -271,8 +262,8 @@
                                         @csrf
                                         <input type="hidden" name="feature" value="premium">
                                         <button type="submit"
-                                                class="flex w-full items-center justify-center gap-2 rounded border-2 border-purple-500 bg-white px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50">
-                                            <i class="fa-solid fa-award"></i>
+                                                class="flex h-12 w-full items-center justify-center gap-3 rounded-md border-2 border-purple-500 bg-white px-4 text-base font-semibold text-purple-700 hover:bg-purple-50">
+                                            <i class="fa-solid fa-award text-lg"></i>
                                             Premium
                                         </button>
                                     </form>
@@ -383,22 +374,22 @@
                                     Add a Premium Feature to stand out in the search results!
                                 </p>
 
-                                <div class="flex flex-col gap-3 md:flex-row">
+                                <div class="flex flex-col gap-4 md:flex-row">
                                     <a href="{{ route('profiles.switch', $profile) }}"
-                                       class="flex flex-1 items-center justify-center gap-2 rounded border-2 border-yellow-500 bg-white px-4 py-2 text-sm font-medium text-yellow-700 hover:bg-yellow-50">
-                                        <i class="fa-solid fa-star text-yellow-500"></i>
+                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-yellow-500 bg-white px-4 text-base font-semibold text-yellow-700 hover:bg-yellow-50">
+                                        <i class="fa-solid fa-star text-lg text-yellow-500"></i>
                                         Top
                                     </a>
 
                                     <a href="{{ route('photos') }}"
-                                       class="flex flex-1 items-center justify-center gap-2 rounded border-2 border-teal-500 bg-white px-4 py-2 text-sm font-medium text-teal-700 hover:bg-teal-50">
-                                        <i class="fa-solid fa-image"></i>
+                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-teal-500 bg-white px-4 text-base font-semibold text-teal-700 hover:bg-teal-50">
+                                        <i class="fa-regular fa-image text-lg"></i>
                                         Gallery
                                     </a>
 
                                     <a href="{{ route('featured') }}"
-                                       class="flex flex-1 items-center justify-center gap-2 rounded border-2 border-purple-500 bg-white px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50">
-                                        <i class="fa-solid fa-award"></i>
+                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-purple-500 bg-white px-4 text-base font-semibold text-purple-700 hover:bg-purple-50">
+                                        <i class="fa-solid fa-award text-lg"></i>
                                         Premium
                                     </a>
                                 </div>
@@ -439,4 +430,3 @@
     </main>
 </div>
 @endsection
-```
