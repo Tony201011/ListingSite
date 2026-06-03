@@ -464,7 +464,7 @@
                     </div>
                 </div>
             @else
-                <a href="{{ route('signin') }}" class="text-sm font-medium text-gray-300 transition hover:text-white">
+                <a href="{{ route('signin') }}" class="text-sm font-medium text-gray-300 mx-4 transition hover:text-white">
                     Sign In
                 </a>
 
@@ -475,18 +475,15 @@
         </nav>
 
         <div class="flex items-center gap-2 whitespace-nowrap">
-
-
-            @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
-                <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-full border border-pink-500 px-4 py-2 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">
-                    {{ $freeTrialCtaText }}
-                </a>
-            @endif
-
-            <a href="{{ route('favourites') }}" class="inline-flex items-center gap-2 rounded-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 hover:text-pink-400" title="My Favourites">
+            <a href="{{ route('favourites') }}" class="inline-flex items-center gap-2 rounded-full bg-gray-900 px-3 py-2 text-sm font-medium  transition hover:bg-gray-800 hover:text-pink-400" title="My Favourites">
                 <i class="fa-solid fa-heart text-pink-500"></i>
                 <span class="hidden sm:inline">Favourites</span>
             </a>
+            @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
+                <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold  transition hover:bg-pink-500/10 hover:text-white">
+                    {{ $freeTrialCtaText }}
+                </a>
+            @endif
         </div>
     </div>
 
