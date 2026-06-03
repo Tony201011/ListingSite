@@ -255,7 +255,7 @@
                 </div>
             @endif
 
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {{-- <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <a
                     href="{{ route('account.delete-page') }}"
                     class="inline-flex items-center justify-center rounded border border-red-300 bg-white px-5 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
@@ -264,7 +264,7 @@
                 >
                     Delete account altogether
                 </a>
-            </div>
+            </div> --}}
 
             {{-- Create New Profile Modal --}}
             <div
