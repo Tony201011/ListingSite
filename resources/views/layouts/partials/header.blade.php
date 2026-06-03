@@ -268,7 +268,7 @@
 <header id="main-header" class="border-b border-gray-800 bg-gray-950" style="{{ $headerStyle }}">
 @if($showTopBar)
     <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
-        <div class="flex h-10 max-w-12xl items-center justify-between px-4 text-xs text-gray-400 sm:px-6 lg:px-8">
+        <div class="bg-slate-900 text-white text-sm py-2 px-6 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 @foreach($topLeftItems as $item)
                     <span class="inline-flex items-center gap-2">
@@ -280,7 +280,7 @@
                 @endforeach
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-6">
                 @foreach($topRightLinks as $item)
                     <a href="{{ $item['url'] }}" class="transition hover:text-pink-400">
                         {{ $item['label'] }}
