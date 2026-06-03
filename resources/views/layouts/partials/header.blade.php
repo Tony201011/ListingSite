@@ -222,7 +222,7 @@
         [
             'title' => 'My Account',
             'items' => [
-                ['label' => 'Account settings', 'url' => route('my-profile')],
+                ['label' => 'Account settings', 'url' => route('my-account')],
                 ['label' => 'Registered email', 'url' => route('change-email')],
                 ['label' => 'Change password', 'url' => route('change-password')],
                 ['label' => 'Delete account', 'url' => route('account.delete-page')],
@@ -256,7 +256,7 @@
     ]) : collect();
 
     $authDropdownItems = $isAuthenticated ? collect([
-        ['label' => 'My Account', 'url' => route('my-profile')],
+        ['label' => 'My Account', 'url' => route('my-account')],
         ['label' => 'My Profiles', 'url' => route('profiles.index')],
         ['label' => 'My Listings', 'url' => route('my-listings'), 'is_active' => request()->routeIs('my-listings')],
         ['label' => 'Billing & Payments', 'url' => route('payment-subscription')],

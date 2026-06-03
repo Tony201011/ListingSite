@@ -7,6 +7,7 @@ use App\Http\Controllers\Profile\AccountController;
 use Illuminate\Support\Facades\Route;
 
 // Account management — no active-profile session required
+Route::get('/my-account', [AccountController::class, 'myAccount'])->name('my-account');
 Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
 Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
 Route::middleware(['profile.steps'])->group(function () {
