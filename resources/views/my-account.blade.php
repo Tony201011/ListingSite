@@ -3,9 +3,18 @@
 @section('content')
 @php
     $user = auth()->user();
+
+    $username = old('username', $user->username ?? $user->name ?? '');
     $displayName = old('name', $user->name ?? '');
     $email = $user->email ?? '';
     $mobile = old('mobile', $user->mobile ?? '');
+
+    $emailNotifications = old('email_notifications', $user->email_notifications ?? true);
+    $messageAlerts = old('message_alerts', $user->message_alerts ?? true);
+    $weeklySummary = old('weekly_summary', $user->weekly_summary ?? true);
+
+    $currentPlan = $user->plan_name ?? 'Premium';
+    $renewalDate = optional($user->plan_expires_at ?? null)->format('M d, Y') ?? 'Auto renewal active';
 @endphp
 
 <div class="bg-white min-h-screen py-10 px-4" x-data="{}">
@@ -14,12 +23,12 @@
         <button
             type="button"
             onclick="window.history.back()"
-            class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
+            class="inline-flex items-center text-pink-500 hover:text-pink-600 transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
         >
             <span class="mr-1">&lt;</span> back
         </button>
 
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-l-[6px] border-[#e04ecb] pl-4">
+        <h1 class="text-3xl font-bold mb-8 text-gray-900">
             My Account
         </h1>
 
@@ -29,7 +38,7 @@
                 <div
                     x-show="show"
                     x-transition
-                    class="mb-6 flex items-start justify-between gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700"
+                    class="mb-6 flex items-start justify-between gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700"
                 >
                     <span>{{ session('success') }}</span>
                     <button type="button" @click="show = false" class="text-lg leading-none text-green-500 hover:text-green-700">&times;</button>
@@ -43,7 +52,7 @@
                 <div
                     x-show="show"
                     x-transition
-                    class="mb-6 flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    class="mb-6 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
                 >
                     <div>
                         <p class="font-semibold mb-1">Please fix the following errors:</p>
@@ -61,134 +70,234 @@
         <div class="space-y-6">
 
             {{-- Account Information --}}
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-6">Account Information</h2>
+            <div class="border border-gray-300 rounded-lg p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-900">Account Information</h2>
 
-                <form action="{{ route('my-account.update') }}" method="POST" class="space-y-6" autocomplete="off">
+                <form action="{{ route('my-account.update') }}" method="POST" class="space-y-4" autocomplete="off">
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="name" class="block font-semibold text-[#e04ecb] mb-1">Display Name</label>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                             <input
-                                id="name"
-                                name="name"
+                                id="username"
+                                name="username"
                                 type="text"
-                                value="{{ $displayName }}"
-                                placeholder="Your display name"
-                                class="w-full px-4 py-3 border {{ $errors->has('name') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]' }} rounded-lg text-gray-900 font-medium focus:outline-none focus:ring-2 focus:border-transparent transition"
+                                value="{{ $username }}"
+                                class="w-full px-3 py-2 border {{ $errors->has('username') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
                             >
-                            @error('name')
+                            @error('username')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="email" class="block font-semibold text-[#e04ecb] mb-1">Email Address</label>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
                             <input
-                                id="email"
-                                type="email"
-                                value="{{ $email }}"
-                                readonly
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-500 font-medium bg-gray-100 cursor-not-allowed"
+                                id="name"
+                                name="name"
+                                type="text"
+                                value="{{ $displayName }}"
+                                class="w-full px-3 py-2 border {{ $errors->has('name') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
                             >
-                            <p class="mt-1 text-xs text-gray-500">
-                                To change your email, use
-                                <a href="{{ url('/change-email') }}" class="text-[#e04ecb] hover:underline">Change Email</a>.
-                            </p>
+                            @error('name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
-                    <div class="md:max-w-sm">
-                        <label for="mobile" class="block font-semibold text-[#e04ecb] mb-1">Phone Number</label>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input
+                            id="email"
+                            type="email"
+                            value="{{ $email }}"
+                            readonly
+                            class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-500 cursor-not-allowed focus:outline-none"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="mobile" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                         <input
                             id="mobile"
                             name="mobile"
                             type="tel"
                             value="{{ $mobile }}"
-                            placeholder="e.g. +61 400 000 000"
-                            class="w-full px-4 py-3 border {{ $errors->has('mobile') ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#e04ecb]' }} rounded-lg text-gray-900 font-medium focus:outline-none focus:ring-2 focus:border-transparent transition"
+                            class="w-full px-3 py-2 border {{ $errors->has('mobile') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
                         >
                         @error('mobile')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div>
-                        <button
-                            type="submit"
-                            class="px-8 py-3 bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-semibold rounded-xl shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition focus:outline-none focus:ring-2 focus:ring-[#e04ecb] focus:ring-offset-2"
-                        >
-                            Save Changes
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        class="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded transition"
+                    >
+                        Save Changes
+                    </button>
                 </form>
             </div>
 
             {{-- Password & Security --}}
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Password &amp; Security</h2>
-                <p class="text-sm text-gray-500 mb-6">Manage your password and email access settings.</p>
+            <div class="border border-gray-300 rounded-lg p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-900">Password &amp; Security</h2>
 
-                <div class="flex flex-wrap gap-3">
-                    <a
-                        href="{{ url('/change-password') }}"
-                        class="inline-flex items-center gap-2 px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-xl transition"
+                <form action="{{ route('password.update') }}" method="POST" class="space-y-4" autocomplete="off">
+                    @csrf
+                    @method('PUT')
+
+                    <div>
+                        <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                        <input
+                            id="current_password"
+                            name="current_password"
+                            type="password"
+                            placeholder="Enter current password"
+                            class="w-full px-3 py-2 border {{ $errors->has('current_password') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
+                        >
+                        @error('current_password')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                placeholder="Enter new password"
+                                class="w-full px-3 py-2 border {{ $errors->has('password') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }} rounded focus:outline-none focus:ring-2"
+                            >
+                            @error('password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                            <input
+                                id="password_confirmation"
+                                name="password_confirmation"
+                                type="password"
+                                placeholder="Confirm new password"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                            >
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded transition"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#e04ecb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
-                        Change Password
-                    </a>
+                        Update Password
+                    </button>
+                </form>
+            </div>
+
+            {{-- Notification Preferences --}}
+            <div class="border border-gray-300 rounded-lg p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-900">Notification Preferences</h2>
+
+                <form action="{{ route('my-account.update') }}" method="POST" class="space-y-3">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-medium text-gray-900">Email Notifications</h3>
+                            <p class="text-sm text-gray-600">Receive updates about your listings via email</p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            name="email_notifications"
+                            value="1"
+                            class="w-5 h-5 text-pink-500"
+                            @checked($emailNotifications)
+                        >
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-medium text-gray-900">Message Alerts</h3>
+                            <p class="text-sm text-gray-600">Get notified when someone sends you a message</p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            name="message_alerts"
+                            value="1"
+                            class="w-5 h-5 text-pink-500"
+                            @checked($messageAlerts)
+                        >
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-medium text-gray-900">Weekly Summary</h3>
+                            <p class="text-sm text-gray-600">Get a weekly report of your listing performance</p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            name="weekly_summary"
+                            value="1"
+                            class="w-5 h-5 text-pink-500"
+                            @checked($weeklySummary)
+                        >
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded transition"
+                    >
+                        Save Preferences
+                    </button>
+                </form>
+            </div>
+
+            {{-- Billing Information --}}
+            <div class="border border-gray-300 rounded-lg p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-900">Billing Information</h2>
+
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-gray-900">Current Plan</span>
+                            <span class="text-pink-600 font-bold">{{ $currentPlan }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Renewal</span>
+                            <span class="text-sm text-gray-700">{{ $renewalDate }}</span>
+                        </div>
+                    </div>
 
                     <a
-                        href="{{ url('/change-email') }}"
-                        class="inline-flex items-center gap-2 px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-xl transition"
+                        href="{{ url('/pricing') }}"
+                        class="inline-block bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded transition"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#e04ecb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                        Change Email
+                        Manage Plan
                     </a>
-
-                    @auth
-                        @if (!auth()->user()->hasVerifiedEmail())
-                            <form method="POST" action="{{ route('verification.send') }}">
-                                @csrf
-                                <button
-                                    type="submit"
-                                    class="inline-flex items-center gap-2 px-5 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-xl transition"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    Verify Email
-                                </button>
-                            </form>
-                        @endif
-                    @endauth
                 </div>
             </div>
 
             {{-- Danger Zone --}}
-            <div class="bg-red-50 border border-red-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h2 class="text-xl font-semibold text-red-700 mb-2">Danger Zone</h2>
-                <p class="text-sm text-red-600 mb-6">Permanently delete your account and all associated data. This action cannot be undone.</p>
+            <div class="border border-red-300 rounded-lg p-6 bg-red-50">
+                <h2 class="text-xl font-bold mb-4 text-red-700">Danger Zone</h2>
 
                 <div class="flex items-start justify-between flex-wrap gap-4">
                     <div>
-                        <h3 class="font-semibold text-red-700">Delete Account</h3>
-                        <p class="text-sm text-red-500 mt-0.5">You will receive a confirmation email before deletion occurs.</p>
+                        <h3 class="font-medium text-red-700">Delete Account</h3>
+                        <p class="text-sm text-red-600">Permanently delete your account and all associated data.</p>
                     </div>
 
                     <a
                         href="{{ route('account.delete-page') }}"
-                        class="inline-flex items-center gap-2 px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition shadow-sm"
+                        class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded transition"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
                         Delete Account
                     </a>
                 </div>
