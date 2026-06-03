@@ -443,7 +443,7 @@
             <a
                 href="{{ $item['url'] }}"
                 @click="open = false"
-                class="block px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
+                class="block whitespace-nowrap px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
             >
                 {{ $item['label'] }}
             </a>
