@@ -405,7 +405,7 @@
 
         <div class="flex items-center gap-2 whitespace-nowrap">
             @if($primaryActionLink)
-                <a href="{{ $primaryActionLink['url'] }}" class="inline-flex items-center whitespace-nowrap rounded-full bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
+                <a href="{{ $primaryActionLink['url'] }}" class="inline-flex items-center whitespace-nowrap bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
                     {{ $primaryActionLink['label'] }}
                 </a>
             @endif
@@ -415,7 +415,7 @@
                     <button
                         @click="open = !open"
                         type="button"
-                        class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-300"
+                        class="inline-flex items-center gap-2 bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-300"
                     >
                         {{ $authDisplayName }}
                         <i class="fa-solid fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
