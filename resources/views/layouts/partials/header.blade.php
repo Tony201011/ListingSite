@@ -216,7 +216,7 @@
 <header id="main-header" class="w-full border-b border-slate-800 bg-slate-900" style="{{ $headerStyle }}">
     @if($showTopBar)
         <div class="hidden h-[30px] bg-[#070e22] lg:block">
-            <div class="flex h-full max-w-[1600px] items-center justify-between px-6 text-[12px] font-medium text-white">
+            <div class="mx-auto flex h-full max-w-[1600px] items-center justify-between px-6 text-[12px] font-medium text-white">
                 <div class="flex items-center gap-5">
                     @foreach($topLeftItems as $item)
                         <span class="inline-flex items-center gap-2">
@@ -228,7 +228,7 @@
                     @endforeach
                 </div>
 
-                <div class="flex gap-5">
+                <div class="flex items-center gap-5">
                     @foreach($topRightLinks as $item)
                         <a href="{{ $item['url'] }}" class="text-white transition hover:text-pink-400">
                             {{ $item['label'] }}
@@ -240,7 +240,7 @@
     @endif
 
     <div class="bg-[#172236]">
-        <div class="max-w-[1600px] px-6">
+        <div class="mx-auto max-w-[1600px] px-6">
             <div class="flex min-h-[54px] items-center justify-between gap-4 {{ $isGirlProfilePage ? 'md:hidden' : 'lg:hidden' }}">
                 <a href="{{ url('/') }}" class="shrink-0">
                     @if($logoType === 'image' && filled($logoUrl))
