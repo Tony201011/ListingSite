@@ -468,7 +468,7 @@
                     Sign In
                 </a>
 
-                <a href="{{ url('/signup') }}" class="inline-flex items-center rounded-full bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
+                <a href="{{ url('/signup') }}" class="inline-flex items-center rounded-full bg-pink-600 mx-4 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
                     Sign Up
                 </a>
             @endauth
