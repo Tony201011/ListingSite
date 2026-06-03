@@ -483,7 +483,7 @@
 
 
             @if($showFreeTrialCta && filled($freeTrialCtaText) && filled($freeTrialCtaUrl))
-                <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold text-pink-200 transition hover:bg-pink-500/10 hover:text-white">
+                <a href="{{ $freeTrialCtaUrl }}" class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-pink-500/10 hover:text-white">
                     {{ $freeTrialCtaText }}
                 </a>
             @endif
