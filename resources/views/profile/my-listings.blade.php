@@ -73,13 +73,6 @@
                         >
                     </div>
 
-                    <button
-                        type="submit"
-                        class="h-12 rounded-md bg-blue-600 px-7 text-base font-semibold text-white transition hover:bg-blue-700"
-                    >
-                        Search
-                    </button>
-
                     @if(filled($searchQuery))
                         <a href="{{ route('my-listings', ['status' => $status, 'sort' => $sort]) }}"
                            class="flex h-12 items-center rounded-md border border-gray-300 px-5 text-base font-semibold text-gray-700 hover:bg-gray-50">
