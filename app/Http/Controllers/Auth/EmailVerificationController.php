@@ -15,7 +15,7 @@ class EmailVerificationController extends Controller
     public function notice()
     {
         if (request()->user()?->hasVerifiedEmail()) {
-            return redirect('/select-profile');
+            return redirect('/my-profiles');
         }
 
         return view('auth.verify-email');
@@ -46,7 +46,7 @@ class EmailVerificationController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect('/select-profile')
+        return redirect('/my-profiles')
             ->with('success', 'Your account has been successfully verified.');
     }
 
@@ -55,7 +55,7 @@ class EmailVerificationController extends Controller
         $user = $request->user();
 
         if (! $user || $user->hasVerifiedEmail()) {
-            return redirect('/select-profile');
+            return redirect('/my-profiles');
         }
 
         $result = $this->resendEmailVerification($user);

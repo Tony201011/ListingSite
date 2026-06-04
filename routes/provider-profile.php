@@ -22,8 +22,8 @@ use App\Http\Controllers\Profile\ProfileSettingController;
 use App\Http\Controllers\Profile\ProfileSwitchController;
 use Illuminate\Support\Facades\Route;
 
-// Profile picker — no active-profile session required
-Route::get('/select-profile', [ProfileSwitchController::class, 'selectProfile'])->name('select-profile');
+// Legacy profile picker URL now redirects to My Profiles
+Route::get('/select-profile', fn () => redirect()->route('profiles.index'))->name('select-profile');
 
 // Profile management — no active-profile session required
 Route::get('/my-profiles', [ProfileSwitchController::class, 'index'])->name('profiles.index');

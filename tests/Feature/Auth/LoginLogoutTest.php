@@ -45,7 +45,7 @@ class LoginLogoutTest extends TestCase
             'password' => 'CorrectPass123',
         ]);
 
-        $response->assertRedirect('/select-profile');
+        $response->assertRedirect('/my-profiles');
         $response->assertSessionHas('auth_session_sync', fn (array $payload): bool => ($payload['type'] ?? null) === 'login' && filled($payload['id'] ?? null));
         $this->assertAuthenticatedAs($user);
     }
@@ -67,7 +67,7 @@ class LoginLogoutTest extends TestCase
             'password' => 'CorrectPass123',
         ]);
 
-        $response->assertRedirect('/select-profile');
+        $response->assertRedirect('/my-profiles');
         $this->assertAuthenticatedAs($user);
     }
 
@@ -315,7 +315,7 @@ class LoginLogoutTest extends TestCase
             'slug' => 'profile-b-'.$user->id,
         ]);
 
-        $response = $this->actingAs($user)->get('/select-profile');
+        $response = $this->actingAs($user)->get('/my-profiles');
 
         $response->assertOk()
             ->assertSee('data-authenticated="1"', false)
@@ -339,7 +339,7 @@ class LoginLogoutTest extends TestCase
     {
         $user = $this->createVerifiedUser(['is_blocked' => true]);
 
-        $response = $this->actingAs($user)->get('/select-profile');
+        $response = $this->actingAs($user)->get('/my-profiles');
 
         $response->assertRedirect('/signin');
         $this->assertGuest();
