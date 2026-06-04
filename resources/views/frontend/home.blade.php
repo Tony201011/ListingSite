@@ -247,14 +247,8 @@
         @endif
 
         {{-- Profile Cards Grid --}}
-        <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @forelse($profiles as $profile)
-                @if($loop->iteration === 11 && $loop->count > 10)
-                    {{-- Ad: Between listings (shown as a full-width row after the 10th card) --}}
-                    <div class="col-span-full">
-                        @include('layouts.partials.ads', ['position' => 'home_between', 'pageKey' => 'home'])
-                    </div>
-                @endif
                 @include('frontend.partials.profile-card', ['profile' => $profile])
             @empty
                 <div class="col-span-full rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
