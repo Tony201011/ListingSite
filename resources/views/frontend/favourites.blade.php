@@ -26,7 +26,7 @@
     >
 
         {{-- Profile Cards Grid --}}
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" x-show="favourites.length > 0 && {{ count($profiles) > 0 ? 'true' : 'false' }}">
+        <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" x-show="favourites.length > 0 && {{ count($profiles) > 0 ? 'true' : 'false' }}">
             @forelse($profiles as $profile)
                 <div x-cloak x-show="isFavourite('{{ $profile['id'] }}')">
                     @include('frontend.partials.profile-card', ['profile' => $profile])
