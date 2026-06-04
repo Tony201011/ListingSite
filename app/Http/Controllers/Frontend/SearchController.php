@@ -136,10 +136,6 @@ class SearchController extends Controller
                         'legacyOnlineUsers',
                         fn ($legacyOnlineQuery) => $legacyOnlineQuery
                             ->where('status', 'online')
-                            ->where(function ($onlineExpiryQuery): void {
-                                $onlineExpiryQuery->whereNull('online_expires_at')
-                                    ->orWhere('online_expires_at', '>', now());
-                            })
                     ));
                 })
                 ->orWhere(fn ($orQuery) => $orQuery->whereCurrentlyAvailableNow());
