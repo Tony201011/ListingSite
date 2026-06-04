@@ -247,11 +247,16 @@
         <span>Top</span>
     </a>
 
-    <a href="{{ route('photos') }}"
+    @php
+        $listingGalleryImages = $listing->providerProfile?->profileImages->pluck('image_url')->filter()->values()->toArray() ?? [];
+    @endphp
+    <button type="button"
+       data-gallery="{{ htmlspecialchars(json_encode($listingGalleryImages), ENT_QUOTES) }}"
+       onclick="(function(btn){var imgs=JSON.parse(btn.getAttribute('data-gallery')||'[]');if(imgs.length){window.dispatchEvent(new CustomEvent('open-gallery',{detail:{images:imgs,startIdx:0}}));}else{window.location='{{ route('photos') }}'}})(this)"
        class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-teal-700 bg-teal-600 px-4 py-3 text-[15px] font-semibold text-white transition hover:bg-teal-700">
         <i class="fa-regular fa-image text-white"></i>
         <span>Gallery</span>
-    </a>
+    </button>
 
     <a href="{{ route('featured') }}"
        class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-purple-700 bg-purple-600 px-4 py-3 text-[15px] font-semibold text-white transition hover:bg-purple-700">
@@ -374,11 +379,16 @@
                                         Top
                                     </a>
 
-                                    <a href="{{ route('photos') }}"
+                                    @php
+                                        $profileGalleryImages = $profile->profileImages->pluck('image_url')->filter()->values()->toArray();
+                                    @endphp
+                                    <button type="button"
+                                       data-gallery="{{ htmlspecialchars(json_encode($profileGalleryImages), ENT_QUOTES) }}"
+                                       onclick="(function(btn){var imgs=JSON.parse(btn.getAttribute('data-gallery')||'[]');if(imgs.length){window.dispatchEvent(new CustomEvent('open-gallery',{detail:{images:imgs,startIdx:0}}));}else{window.location='{{ route('photos') }}'}})(this)"
                                        class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-teal-700 bg-teal-600 px-4 text-base font-semibold text-white hover:bg-teal-700">
                                         <i class="fa-regular fa-image text-lg text-white"></i>
                                         Gallery
-                                    </a>
+                                    </button>
 
                                     <a href="{{ route('featured') }}"
                                        class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-purple-700 bg-purple-600 px-4 text-base font-semibold text-white hover:bg-purple-700">
@@ -422,4 +432,6 @@
         </div>
     </main>
 </div>
+
+@include('components.gallery-modal')
 @endsection
