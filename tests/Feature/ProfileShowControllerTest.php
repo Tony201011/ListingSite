@@ -100,6 +100,34 @@ class ProfileShowControllerTest extends TestCase
         $response->assertStatus(301);
     }
 
+    public function test_profile_show_falls_back_when_legacy_embedded_sequence_does_not_match(): void
+    {
+        $this->createApprovedProvider([
+            'slug' => 'jade',
+            'profile_sequence' => 1,
+            'suburb' => 'Fremantle',
+        ]);
+        $this->createApprovedProvider([
+            'slug' => 'jade',
+            'profile_sequence' => 2,
+            'suburb' => 'Fremantle',
+        ]);
+
+        $response = $this->get(route('profile.show.no-sequence', [
+            'state' => 'wa',
+            'suburb' => 'fremantle',
+            'slug' => 'jade010',
+        ]));
+
+        $response->assertRedirect(route('profile.show', [
+            'state' => 'wa',
+            'suburb' => 'fremantle',
+            'slug' => 'jade',
+            'sequence_id' => '001',
+        ]));
+        $response->assertStatus(301);
+    }
+
     public function test_profile_show_renders_correct_view(): void
     {
         $this->createApprovedProvider();
