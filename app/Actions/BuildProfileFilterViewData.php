@@ -444,6 +444,12 @@ class BuildProfileFilterViewData
                 ->where('provider_profiles.is_blocked', false)
                 ->whereHas('user')
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'));
+        } elseif ($escortNameQuery !== '') {
+            $query
+                ->where('provider_profiles.profile_status', 'approved')
+                ->where('provider_profiles.is_blocked', false)
+                ->whereHas('user')
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'));
         }
 
         if ($escortNameQuery === '') {
