@@ -71,6 +71,14 @@ Route::middleware('profile.selected')->group(function () {
     Route::delete('/groups/{group}', [MyRateController::class, 'destroyGroup'])->name('my-rate.groups.destroy');
     /************* rate and group route end here */
 
+    /**** featured listing route start here */
+    // Route name kept as 'featured' for backward compatibility with existing blade/test references.
+    // These payment routes are intentionally outside profile.steps so they work
+    // regardless of whether the provider has uploaded photos.
+    Route::get('/featured-listing', [FeaturedController::class, 'featured'])->name('featured');
+    Route::post('/featured-listing/purchase', [FeaturedController::class, 'purchase'])->name('featured.purchase');
+    /**** featured listing route end here */
+
     Route::middleware(['profile.steps'])->group(function () {
         /**** video route start here */
         Route::get('/upload-video', [MyVideosController::class, 'index'])->name('upload-video');
@@ -117,12 +125,6 @@ Route::middleware('profile.selected')->group(function () {
         Route::get('/set-and-forget', [ForgetController::class, 'setForget'])->name('set-and-forget');
         Route::post('/set-and-forget', [ForgetController::class, 'save'])->name('set-and-forget.save');
         /*** forget end here */
-
-        /**** featured listing route start here */
-        // Route name kept as 'featured' for backward compatibility with existing blade/test references.
-        Route::get('/featured-listing', [FeaturedController::class, 'featured'])->name('featured');
-        Route::post('/featured-listing/purchase', [FeaturedController::class, 'purchase'])->name('featured.purchase');
-        /**** featured listing route end here */
 
         /**** babe rank start here */
         Route::get('/my-babe-rank', [BabeRankController::class, 'myBabeRank'])->name('my-babe-rank');

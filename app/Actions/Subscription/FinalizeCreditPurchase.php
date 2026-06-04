@@ -24,7 +24,6 @@ class FinalizeCreditPurchase
     {
         DB::transaction(function () use ($payment, $attributes): void {
             $locked = PurchaseTransaction::query()
-                ->with('providerProfile')
                 ->lockForUpdate()
                 ->findOrFail($payment->id);
 
@@ -45,7 +44,9 @@ class FinalizeCreditPurchase
                 'paid_at' => $attributes['paid_at'] ?? now(),
             ]);
 
-            $profile = $locked->providerProfile;
+            // Use withTrashed so credits are applied even if the profile was
+            // soft-deleted after the payment was initiated.
+            $profile = ProviderProfile::withTrashed()->find($locked->provider_profile_id);
 
             if (! $profile instanceof ProviderProfile) {
                 return;

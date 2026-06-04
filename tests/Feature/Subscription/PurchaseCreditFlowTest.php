@@ -588,6 +588,48 @@ class PurchaseCreditFlowTest extends TestCase
         $this->assertEquals(20, $profile->credits);
     }
 
+    public function test_webhook_adds_credits_even_when_profile_is_soft_deleted(): void
+    {
+        $user = $this->createProvider();
+        $profile = $user->providerProfile;
+        $profile->update(['credits' => 0]);
+
+        $transaction = PurchaseTransaction::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'stripe_session_id' => 'cs_test_soft_deleted',
+            'credits' => 40,
+            'amount' => '14.99',
+            'currency' => 'AUD',
+            'status' => 'pending',
+            'invoice_name' => 'Soft Delete Test',
+        ]);
+
+        // Soft-delete the profile after the transaction was created (simulates
+        // an admin or user action that occurs before the webhook fires).
+        $profile->delete();
+
+        $this->invokeWebhookHandler($transaction, 'cs_test_soft_deleted');
+
+        // Transaction must be marked paid.
+        $this->assertDatabaseHas('purchase_transactions', [
+            'id' => $transaction->id,
+            'status' => 'paid',
+        ]);
+
+        // Credits must be applied to the (soft-deleted) profile.
+        $this->assertDatabaseHas('provider_profiles', [
+            'id' => $profile->id,
+            'credits' => 40,
+        ]);
+        $this->assertDatabaseHas('credit_logs', [
+            'user_id' => $user->id,
+            'amount' => 40,
+            'type' => 'purchase_credit',
+            'related_payment_id' => $transaction->id,
+        ]);
+    }
+
     public function test_webhook_does_not_add_credits_when_payment_not_paid(): void
     {
         $user = $this->createProvider();
