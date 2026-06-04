@@ -5,11 +5,11 @@
     $statusSettings = \App\Models\SiteSetting::getStatusSettings();
 @endphp
 <div
-    class="bg-white min-h-screen py-10 px-4"
+    class="min-h-screen bg-gray-50"
     x-data="{ availableNow: false, onlineNow: false }"
 >
-    <main class="max-w-7xl mx-auto px-6 py-8">
-        <div class="bg-white min-h-[600px]">
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8">
         <button
             type="button"
             onclick="window.history.back()"
