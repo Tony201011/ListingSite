@@ -230,7 +230,7 @@ class SearchTest extends TestCase
         $response = $this->get('/escorts/search?location=Melbourne%2C+VIC&distance=250&user_lat=-37.81&user_lng=144.96');
 
         $response->assertStatus(301);
-        $response->assertRedirect('/escorts/location/Melbourne%2C%20VIC?distance=250');
+        $response->assertRedirect('/search/melbourne-vic?distance=250');
     }
 
     public function test_escorts_search_slug_route_strips_legacy_location_query_params(): void
@@ -238,12 +238,12 @@ class SearchTest extends TestCase
         $response = $this->get('/escorts/location/Melbourne%2C%20VIC?min_age=18&max_age=40&min_price=150&max_price=400&location_slug=melbourne-vic&location_from_route=1&escort_name=&girls=all');
 
         $response->assertStatus(301);
-        $response->assertRedirect('/escorts/location/Melbourne%2C%20VIC?min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
+        $response->assertRedirect('/search/melbourne-vic');
     }
 
-    public function test_escorts_search_slug_route_with_filters_does_not_redirect_when_location_query_is_not_present(): void
+    public function test_search_location_route_with_filters_uses_canonical_location_path(): void
     {
-        $response = $this->get('/escorts/location/Melbourne%2C%20VIC?distance=500&min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
+        $response = $this->get('/search/melbourne-vic?distance=500&min_age=18&max_age=40&min_price=150&max_price=400');
 
         $response->assertStatus(200);
         $response->assertViewHas('locationQuery', 'Melbourne, VIC');
@@ -261,13 +261,46 @@ class SearchTest extends TestCase
         $this->assertInstanceOf(LengthAwarePaginator::class, $profiles);
     }
 
-    public function test_home_page_pagination_works_with_page_param(): void
+    public function test_home_page_query_string_pagination_redirects_to_seo_friendly_girls_url(): void
     {
-        $response = $this->get('/?page=1');
+        $response = $this->get('/?girls=all&page=2');
 
-        $response->assertStatus(200);
+        $response->assertRedirect('/girls/all/page/2');
+    }
+
+    public function test_advanced_search_query_string_pagination_redirects_to_seo_friendly_search_url(): void
+    {
+        $response = $this->get('/advanced-search?page=2');
+
+        $response->assertRedirect('/search/page/2');
+    }
+
+    public function test_girls_route_uses_route_page_segment_for_pagination(): void
+    {
+        foreach (range(1, 13) as $index) {
+            $this->createApprovedProvider([
+                'name' => "Seo Escort {$index}",
+                'slug' => "seo-escort-{$index}",
+            ]);
+        }
+
+        $response = $this->get('/girls/all/page/2');
+
+        $response->assertOk();
         $profiles = $response->viewData('profiles');
-        $this->assertInstanceOf(LengthAwarePaginator::class, $profiles);
+        $this->assertSame(2, $profiles->currentPage());
+        $this->assertSame(url('/girls/all'), $profiles->previousPageUrl());
+        $response->assertSee('<link rel="canonical" href="'.url('/girls/all/page/2').'">', false);
+        $response->assertSee('<link rel="prev" href="'.url('/girls/all').'">', false);
+    }
+
+    public function test_search_location_paginator_generates_seo_friendly_page_urls(): void
+    {
+        $response = $this->get('/search/melbourne-vic');
+
+        $response->assertOk();
+        $profiles = $response->viewData('profiles');
+        $this->assertSame(url('/search/melbourne-vic/page/2'), $profiles->url(2));
     }
 
     // ===============================================================

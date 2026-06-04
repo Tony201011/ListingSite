@@ -105,7 +105,25 @@ Route::get('api/listings/online-count', [HomeController::class, 'listingsOnlineC
 Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('contact-us');
 Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/girls/{type}/page/{page}', [HomeController::class, 'index'])
+    ->whereIn('type', ['all', 'new', 'popular'])
+    ->whereNumber('page')
+    ->name('girls.page');
+Route::get('/girls/{type}', [HomeController::class, 'index'])
+    ->whereIn('type', ['all', 'new', 'popular'])
+    ->name('girls.index');
+Route::get('/search/page/{page}', [HomeController::class, 'advancedSearch'])
+    ->whereNumber('page')
+    ->name('advanced-search.page');
+Route::get('/search/{location_slug}/page/{page}', [HomeController::class, 'advancedSearch'])
+    ->where('location_slug', '(?!page$)[a-z0-9-]+')
+    ->whereNumber('page')
+    ->name('search.location.page');
+Route::get('/search/{location_slug}', [HomeController::class, 'advancedSearch'])
+    ->where('location_slug', '(?!page$)[a-z0-9-]+')
+    ->name('search.location');
+Route::get('/search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/escorts/search', [HomeController::class, 'index'])->name('escorts.search');
 Route::get('/escorts/search/name/{search_name}', [HomeController::class, 'index'])
     ->name('escorts.search.name');
@@ -124,7 +142,7 @@ Route::get('/escorts/search/location/{suburb}', [HomeController::class, 'index']
 Route::get('/escorts/location/{location}', [HomeController::class, 'index'])
     ->name('escorts.location');
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
-Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
+Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search.legacy');
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');
 Route::get('/escorts/{state}/{suburb}/{slug}/{sequence_id}', [HomeController::class, 'showProfile'])
     ->where([

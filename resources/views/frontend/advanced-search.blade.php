@@ -1,6 +1,16 @@
 @extends('layouts.frontend')
 
 @section('title', 'Advanced Search / Filter')
+@section('canonical', $profiles->url($profiles->currentPage()))
+
+@push('head')
+    @if (! $profiles->onFirstPage())
+        <link rel="prev" href="{{ $profiles->previousPageUrl() }}">
+    @endif
+    @if ($profiles->hasMorePages())
+        <link rel="next" href="{{ $profiles->nextPageUrl() }}">
+    @endif
+@endpush
 
 @php
     $locationQuery = (string) ($locationQuery ?? '');

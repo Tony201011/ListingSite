@@ -8,6 +8,8 @@ use App\Models\Postcode;
 use App\Models\ProfileView;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
+use App\Services\ListingPaginationUrlService;
+use App\Support\SeoFriendlyLengthAwarePaginator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -17,6 +19,10 @@ use Laravel\Scout\Builder as ScoutBuilder;
 class BuildProfileFilterViewData
 {
     use ResolvesProfileCategoryIds;
+
+    public function __construct(
+        private readonly ListingPaginationUrlService $listingPaginationUrlService,
+    ) {}
 
     private const DEFAULT_PROFILES_PER_PAGE = 12;
 
@@ -53,7 +59,7 @@ class BuildProfileFilterViewData
         'time-waster-shield' => 'time_waster_shield',
     ];
 
-    public function execute(array $validated, bool $syncWithAdminOnlineListing = false): array
+    public function execute(array $validated, bool $syncWithAdminOnlineListing = false, bool $advancedSearch = false): array
     {
         $filterSlugs = [
             'hair-color',
@@ -206,6 +212,8 @@ class BuildProfileFilterViewData
             $escortNameQuery,
             $localFeaturedStateName,
             $syncWithAdminOnlineListing,
+            $validated,
+            $advancedSearch,
         );
         $onlineCount = $profiles->total();
 
@@ -414,6 +422,8 @@ class BuildProfileFilterViewData
         string $escortNameQuery = '',
         ?string $localFeaturedStateName = null,
         bool $syncWithAdminOnlineListing = false,
+        array $validated = [],
+        bool $advancedSearch = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -628,28 +638,15 @@ class BuildProfileFilterViewData
                 break;
         }
 
-        $appendParams = array_filter([
-            'location' => $locationQuery ?: null,
-            'location_state' => $locationStateQuery ?: null,
-            'escort_name' => $escortNameQuery ?: null,
-            'min_age' => $minAge !== self::DEFAULT_MIN_AGE ? $minAge : null,
-            'max_age' => $maxAge !== self::DEFAULT_MAX_AGE ? $maxAge : null,
-            'min_price' => $minPrice !== self::DEFAULT_MIN_PRICE ? $minPrice : null,
-            'max_price' => $maxPrice !== self::DEFAULT_MAX_PRICE ? $maxPrice : null,
-            'distance' => $distanceFilter,
-        ]);
-
-        $appendParams['girls'] = $girlsMode;
-
-        foreach ($selectedCategoryIds as $categoryId) {
-            $appendParams['categories'][] = $categoryId;
-        }
-
         $profilesPerPage = $this->resolveProfilesPerPage();
+        $currentPage = max(1, (int) request()->route('page', request()->integer('page', 1)));
+        $paginationContext = $this->listingPaginationUrlService->buildContext($validated, $advancedSearch);
 
         $paginator = $query
-            ->paginate($profilesPerPage)
-            ->appends($appendParams);
+            ->paginate($profilesPerPage, ['*'], 'page', $currentPage);
+
+        $paginator = SeoFriendlyLengthAwarePaginator::fromPaginator($paginator, $paginationContext['base_url'])
+            ->appends($paginationContext['query']);
 
         $serviceIds = $paginator->getCollection()
             ->flatMap(fn (ProviderProfile $p) => array_filter((array) ($p->services_provided ?? []), 'is_numeric'))
