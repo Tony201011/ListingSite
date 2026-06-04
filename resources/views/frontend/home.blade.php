@@ -247,7 +247,7 @@
         @endif
 
         {{-- Profile Cards Grid --}}
-        <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div class="cards-grid">
             @forelse($profiles as $profile)
                 @if($loop->iteration === 11 && $loop->count > 10)
                     {{-- Ad: Between listings (shown as a full-width row after the 10th card) --}}
