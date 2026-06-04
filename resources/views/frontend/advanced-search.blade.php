@@ -536,7 +536,7 @@
                     @empty
                         <div class="col-span-full rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
                             <i class="fa-solid fa-magnifying-glass mb-4 text-3xl text-gray-400"></i>
-                            <p class="text-sm font-medium text-gray-600">No profiles found matching your criteria.</p>
+                            <p class="text-sm font-medium text-gray-600">{{ $escortNameQuery !== '' ? 'No available escorts found.' : 'No profiles found matching your criteria.' }}</p>
                             @if($hasActiveFilters)
                                 <a href="{{ route('advanced-search') }}" class="mt-4 inline-block rounded-lg bg-pink-600 px-5 py-2 text-sm font-semibold text-white hover:bg-pink-700 transition">Clear filters</a>
                             @endif
