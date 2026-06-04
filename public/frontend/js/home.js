@@ -116,7 +116,6 @@ function escortSearch(config) {
         suggestions: [],
         showSuggestions: false,
         highlightedIndex: -1,
-        noResultsMessage: '',
         abortController: null,
         userLat: config.userLat || '',
         userLng: config.userLng || '',
@@ -210,7 +209,6 @@ function escortSearch(config) {
                         label: item.postcode || '',
                         value: [item.suburb, item.state].filter(Boolean).join(', '),
                     }));
-                    this.noResultsMessage = '';
                 } else {
                     this.suggestions = (data.suggestions || []).map(item => ({
                         type: 'profile',
@@ -219,15 +217,9 @@ function escortSearch(config) {
                         slug: item.slug || '',
                         label: item.location || '',
                         age: item.age,
-                        url: item.url || '',
-                        image: item.image || '',
                     }));
-
-                    this.noResultsMessage = this.suggestions.length === 0
-                        ? 'No available escorts found'
-                        : '';
                 }
-                this.showSuggestions = this.suggestions.length > 0 || (!isSuburbMode && this.noResultsMessage !== '');
+                this.showSuggestions = this.suggestions.length > 0;
                 this.highlightedIndex = -1;
             })
             .catch(err => {
@@ -238,37 +230,29 @@ function escortSearch(config) {
         },
 
         selectSuggestion(item, event, autoSubmit = true) {
-            if (item.type === 'profile' && item.url) {
-                this.closeSuggestions();
-                window.location.assign(item.url);
-                return true;
-            }
-
             this.term = item.value || item.name || this.term;
             this.searchMode = item.type === 'suburb' ? 'suburb' : 'username';
             this.closeSuggestions();
 
             if (!autoSubmit) {
-                return false;
+                return;
             }
 
             const form = (event && (event.currentTarget || event.target)
                 ? (event.currentTarget || event.target).closest('form')
                 : null) || document.querySelector('form');
             if (!form) {
-                return false;
+                return;
             }
 
             // Wait for Alpine.js to apply the updated :name binding before submitting,
             // so the correct field name (location or escort_name) is sent.
             this.$nextTick(() => this.submitForm(form));
-            return false;
         },
 
         closeSuggestions() {
             this.showSuggestions = false;
             this.highlightedIndex = -1;
-            this.noResultsMessage = '';
         },
 
         highlightNext() {
@@ -285,10 +269,7 @@ function escortSearch(config) {
             if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
                 // Pass false so selectSuggestion doesn't also call form.submit();
                 // we submit explicitly below so the caller controls timing.
-                const wasRedirected = this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
-                if (wasRedirected) {
-                    return;
-                }
+                this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
                 // Wait for Alpine.js to apply the updated :name binding before submitting.
                 this.$nextTick(() => this.submitForm(event.target.closest('form')));
                 return;
@@ -302,10 +283,7 @@ function escortSearch(config) {
                 event.preventDefault();
                 // Pass false so selectSuggestion doesn't also call form.submit();
                 // we submit explicitly below so the caller controls timing.
-                const wasRedirected = this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
-                if (wasRedirected) {
-                    return;
-                }
+                this.selectSuggestion(this.suggestions[this.highlightedIndex], event, false);
                 // Wait for Alpine.js to apply the updated :name binding before submitting.
                 this.$nextTick(() => this.submitForm(event.target.closest('form')));
                 return;
