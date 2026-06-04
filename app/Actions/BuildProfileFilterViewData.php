@@ -446,7 +446,7 @@ class BuildProfileFilterViewData
 
         $query->where(fn (Builder $availabilityQuery) => $availabilityQuery
             ->whereCurrentlyOnline()
-            ->orWhereCurrentlyAvailableNow());
+            ->orWhere(fn (Builder $orQuery): Builder => $orQuery->whereCurrentlyAvailableNow()));
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {
