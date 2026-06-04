@@ -372,25 +372,25 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute left-0 z-50 mt-2 max-h-80 w-72 overflow-y-auto rounded-lg bg-gray-800 py-2 shadow-lg"
+                            class="absolute left-0 z-50 mt-2 max-h-80 w-72 overflow-y-auto rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
                             style="display:none;"
                         >
-                            <div class="px-3 pb-2">
+                            <div class="px-3 pb-3">
                                 <label for="escort-menu-search" class="sr-only">Search escorts menu</label>
-                                <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2">
-                                    <i class="fa-solid fa-magnifying-glass text-xs text-gray-500"></i>
-                                    <input id="escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search escorts menu" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                                <div class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
+                                    <i class="fa-solid fa-magnifying-glass text-xs text-gray-400"></i>
+                                    <input id="escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search escorts menu" class="w-full border-0 bg-transparent text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-0">
                                 </div>
                             </div>
 
-                            <div class="border-t border-gray-700 pt-2">
+                            <div class="border-t border-gray-200 pt-2">
                                 <template x-for="link in filteredLinks" :key="`${link.label}-${link.url}`">
-                                    <a @click="open = false; search = ''" :href="link.url" class="block px-5 py-2 text-gray-200 hover:bg-gray-700">
+                                    <a @click="open = false; search = ''" :href="link.url" class="block px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50">
                                         <span x-text="link.label"></span>
                                     </a>
                                 </template>
 
-                                <p x-show="filteredLinks.length === 0" class="px-5 py-2 text-sm text-gray-400">
+                                <p x-show="filteredLinks.length === 0" class="px-5 py-3 text-sm text-gray-500">
                                     No matching escorts found.
                                 </p>
                             </div>
