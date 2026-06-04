@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AvailableNow;
 use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
@@ -39,6 +40,31 @@ class SearchTest extends TestCase
             'usage_count' => 1,
             'online_started_at' => now()->subMinutes(5),
             'online_expires_at' => null,
+        ]);
+
+        return $user;
+    }
+
+    private function createAvailableNowProvider(array $profileOverrides = [], array $userOverrides = []): User
+    {
+        $user = User::factory()->create(array_merge(['role' => User::ROLE_PROVIDER], $userOverrides));
+
+        $profile = ProviderProfile::query()->create(array_merge([
+            'user_id' => $user->id,
+            'name' => 'Available Now Escort',
+            'slug' => 'available-now-escort-'.$user->id,
+            'profile_status' => 'approved',
+            'age' => 25,
+        ], $profileOverrides));
+
+        AvailableNow::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'available_started_at' => now()->subMinutes(5),
+            'available_expires_at' => now()->addHour(),
         ]);
 
         return $user;
@@ -358,6 +384,34 @@ class SearchTest extends TestCase
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
         $this->assertFalse($names->contains('Legacy Offline Advanced Search'));
+    }
+
+    public function test_home_page_name_search_includes_available_now_profile_without_online_row(): void
+    {
+        $this->createAvailableNowProvider([
+            'name' => 'Available Now Home Search',
+            'slug' => 'available-now-home-search',
+        ]);
+
+        $response = $this->get('/?escort_name=Available+Now+Home+Search');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Available Now Home Search'));
+    }
+
+    public function test_advanced_search_name_search_includes_available_now_profile_without_online_row(): void
+    {
+        $this->createAvailableNowProvider([
+            'name' => 'Available Now Advanced Search',
+            'slug' => 'available-now-advanced-search',
+        ]);
+
+        $response = $this->get(route('advanced-search').'?escort_name=Available+Now+Advanced+Search');
+
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Available Now Advanced Search'));
     }
 
     public function test_location_search_excludes_profile_marked_offline_even_with_legacy_online_row(): void
@@ -717,7 +771,7 @@ class SearchTest extends TestCase
         $this->assertNotContains('PendingSearchable', $names);
     }
 
-    public function test_search_suggestions_include_profile_marked_offline_even_with_legacy_online_row(): void
+    public function test_search_suggestions_exclude_profile_marked_offline_even_with_legacy_online_row(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
@@ -748,7 +802,21 @@ class SearchTest extends TestCase
 
         $response->assertOk();
         $names = array_column($response->json('suggestions'), 'name');
-        $this->assertContains('Legacy Offline Suggestion', $names);
+        $this->assertNotContains('Legacy Offline Suggestion', $names);
+    }
+
+    public function test_search_suggestions_include_available_now_profile_without_online_row(): void
+    {
+        $this->createAvailableNowProvider([
+            'name' => 'Available Now Suggestion',
+            'slug' => 'available-now-suggestion',
+        ]);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Available+Now+Suggestion');
+
+        $response->assertOk();
+        $names = array_column($response->json('suggestions'), 'name');
+        $this->assertContains('Available Now Suggestion', $names);
     }
 
     public function test_search_suggestions_returns_suggestions_with_correct_shape_when_results_found(): void

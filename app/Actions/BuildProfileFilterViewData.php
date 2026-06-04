@@ -438,15 +438,15 @@ class BuildProfileFilterViewData
                 'state',
             ]);
 
-        if (! $syncWithAdminOnlineListing) {
-            $query
-                ->where('provider_profiles.profile_status', 'approved')
-                ->where('provider_profiles.is_blocked', false)
-                ->whereHas('user')
-                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'));
-        }
+        $query
+            ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'));
 
-        $this->applyActiveOnlineProfileConstraint($query);
+        $query->where(fn (Builder $availabilityQuery) => $availabilityQuery
+            ->whereCurrentlyOnline()
+            ->orWhereCurrentlyAvailableNow());
 
         if (! $distanceSearchActive) {
             if ($exactLocation !== null) {

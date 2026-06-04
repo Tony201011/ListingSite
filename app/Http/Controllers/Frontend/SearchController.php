@@ -82,7 +82,10 @@ class SearchController extends Controller
                 ->whereNull('deleted_at')
                 ->where('is_blocked', false)
                 ->whereHas('user', fn ($userQuery) => $userQuery->where('role', User::ROLE_PROVIDER))
-                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide')))
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+                ->where(fn ($availabilityQuery) => $availabilityQuery
+                    ->whereCurrentlyOnline()
+                    ->orWhereCurrentlyAvailableNow()))
             ->take(self::MAX_SUGGESTIONS)
             ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age'])
             ->load('city');
@@ -98,6 +101,9 @@ class SearchController extends Controller
             ->where('is_blocked', false)
             ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->where(fn ($availabilityQuery) => $availabilityQuery
+                ->whereCurrentlyOnline()
+                ->orWhereCurrentlyAvailableNow())
             ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
             ->with('city')
             ->orderBy('name')
