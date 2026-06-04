@@ -134,27 +134,26 @@
         {{-- Toolbar: filters, sort, view toggle --}}
         <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
             @php
-                $currentQuery = request()->query();
-                $newGirlsQuery = array_merge($currentQuery, ['girls' => 'new']);
-                $allGirlsQuery = array_merge($currentQuery, ['girls' => 'all']);
-                $popularGirlsQuery = array_merge($currentQuery, ['girls' => 'popular']);
-                $girlsUrl = fn (array $query): string => url()->current().(! empty($query) ? '?'.http_build_query($query) : '');
+                $girlsModeUrls = $girlsModeUrls ?? [];
+                $newGirlsUrl = $girlsModeUrls['new'] ?? route('girls.index', ['type' => 'new']);
+                $allGirlsUrl = $girlsModeUrls['all'] ?? route('girls.index', ['type' => 'all']);
+                $popularGirlsUrl = $girlsModeUrls['popular'] ?? route('girls.index', ['type' => 'popular']);
             @endphp
             <div class="flex flex-wrap items-center gap-2">
                 <a
-                    href="{{ $girlsUrl($newGirlsQuery) }}"
+                    href="{{ $newGirlsUrl }}"
                     class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'new' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                 >
                     New girls
                 </a>
                 <a
-                    href="{{ $girlsUrl($allGirlsQuery) }}"
+                    href="{{ $allGirlsUrl }}"
                     class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'all' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                 >
                     All girls
                 </a>
                 <a
-                    href="{{ $girlsUrl($popularGirlsQuery) }}"
+                    href="{{ $popularGirlsUrl }}"
                     class="inline-flex items-center gap-1 rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'popular' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                 >
                     <i class="fa-solid fa-fire text-[10px]"></i>
