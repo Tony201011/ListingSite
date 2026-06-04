@@ -81,8 +81,13 @@ class SearchController extends Controller
                 ->where('slug', '!=', '')
                 ->whereNull('deleted_at')
                 ->where('is_blocked', false)
-                ->whereHas('user', fn ($userQuery) => $userQuery->where('role', User::ROLE_PROVIDER))
-                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide')))
+                ->whereHas('user', fn ($userQuery) => $userQuery
+                    ->where('role', User::ROLE_PROVIDER)
+                    ->where('account_status', 'active')
+                    ->where('is_blocked', false)
+                    ->whereNull('deleted_at'))
+                ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+                ->where(fn ($availabilityQuery) => $this->applyActiveAvailabilityConstraint($availabilityQuery)))
             ->take(self::MAX_SUGGESTIONS)
             ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age'])
             ->load('city');
@@ -96,8 +101,15 @@ class SearchController extends Controller
             ->whereNotNull('slug')
             ->where('slug', '!=', '')
             ->where('is_blocked', false)
-            ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
+            ->whereHas('user', fn ($query) => $query
+                ->where('role', User::ROLE_PROVIDER)
+                ->where('account_status', 'active')
+                ->where('is_blocked', false)
+                ->whereNull('deleted_at'))
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
+            ->where(function ($query): void {
+                $this->applyActiveAvailabilityConstraint($query);
+            })
             ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
             ->with('city')
             ->orderBy('name')
@@ -109,5 +121,36 @@ class SearchController extends Controller
             ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age']);
 
         return $query;
+    }
+
+    private function applyActiveAvailabilityConstraint($query): void
+    {
+        $query->where(function ($availabilityQuery): void {
+            $availabilityQuery
+                ->where(function ($onlineQuery): void {
+                    $onlineQuery->whereHas('onlineUsers', fn ($profileOnlineQuery) => $profileOnlineQuery
+                        ->whereNotNull('provider_profile_id')
+                        ->where('status', 'online')
+                        ->where(function ($onlineExpiryQuery): void {
+                            $onlineExpiryQuery->whereNull('online_expires_at')
+                                ->orWhere('online_expires_at', '>', now());
+                        }));
+                })
+                ->orWhere(function ($legacyQuery): void {
+                    $legacyQuery->whereDoesntHave(
+                        'onlineUsers',
+                        fn ($profileOnlineQuery) => $profileOnlineQuery->whereNotNull('provider_profile_id')
+                    )->whereHas('user', fn ($userQuery) => $userQuery->whereHas(
+                        'legacyOnlineUsers',
+                        fn ($legacyOnlineQuery) => $legacyOnlineQuery
+                            ->where('status', 'online')
+                            ->where(function ($onlineExpiryQuery): void {
+                                $onlineExpiryQuery->whereNull('online_expires_at')
+                                    ->orWhere('online_expires_at', '>', now());
+                            })
+                    ));
+                })
+                ->orWhere(fn ($orQuery) => $orQuery->whereCurrentlyAvailableNow());
+        });
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AvailableNow;
 use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
@@ -750,7 +751,7 @@ class SearchTest extends TestCase
         $this->assertNotContains('PendingSearchable', $names);
     }
 
-    public function test_search_suggestions_include_profile_marked_offline_even_with_legacy_online_row(): void
+    public function test_search_suggestions_excludes_profile_marked_offline_even_with_legacy_online_row(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
@@ -781,7 +782,71 @@ class SearchTest extends TestCase
 
         $response->assertOk();
         $names = array_column($response->json('suggestions'), 'name');
-        $this->assertContains('Legacy Offline Suggestion', $names);
+        $this->assertNotContains('Legacy Offline Suggestion', $names);
+    }
+
+    public function test_search_suggestions_include_profile_with_active_available_now_even_when_online_is_offline(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Available Now Suggestion',
+            'slug' => 'available-now-suggestion',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'offline',
+            'usage_date' => today(),
+            'usage_count' => 1,
+        ]);
+
+        AvailableNow::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'available_started_at' => now()->subMinutes(5),
+            'available_expires_at' => now()->addMinutes(30),
+        ]);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Available+Now+Suggestion');
+
+        $response->assertOk();
+        $names = array_column($response->json('suggestions'), 'name');
+        $this->assertContains('Available Now Suggestion', $names);
+    }
+
+    public function test_search_suggestions_excludes_profile_when_online_status_is_expired(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Expired Online Suggestion',
+            'slug' => 'expired-online-suggestion',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subHours(2),
+            'online_expires_at' => now()->subMinute(),
+        ]);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Expired+Online+Suggestion');
+
+        $response->assertOk();
+        $names = array_column($response->json('suggestions'), 'name');
+        $this->assertNotContains('Expired Online Suggestion', $names);
     }
 
     public function test_search_suggestions_returns_suggestions_with_correct_shape_when_results_found(): void
