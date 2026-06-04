@@ -36,6 +36,7 @@ Route::delete('/my-profiles/{profile}', [ProfileSwitchController::class, 'destro
 
 Route::get('/my-listings', [MyListingsController::class, 'index'])->name('my-listings');
 Route::get('/my-listings/profile/{profile}', [MyListingsController::class, 'showProfile'])->name('my-listings.profile.show');
+Route::get('/my-listings/profile/{profile}/gallery', [MyListingsController::class, 'openProfileGallery'])->name('my-listings.profile.gallery');
 Route::get('/my-listings/{listing}', [MyListingsController::class, 'show'])->name('my-listings.show');
 Route::post('/my-listings/{listing}/feature', [MyListingsController::class, 'feature'])->name('my-listings.feature');
 

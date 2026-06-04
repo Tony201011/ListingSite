@@ -140,6 +140,14 @@ class MyListingsController extends Controller
         return redirect()->route('profile-setting');
     }
 
+    public function openProfileGallery(ProviderProfile $profile): RedirectResponse
+    {
+        $this->authorizeProfileOwnership($profile);
+        session(['active_provider_profile_id' => $profile->id]);
+
+        return redirect()->route('photos');
+    }
+
     public function feature(Request $request, ProviderListing $listing)
     {
         $this->authorizeOwnership($listing);
