@@ -109,7 +109,8 @@ class ProfileSwitchController extends Controller
         session(['active_provider_profile_id' => $profile->id]);
 
         return redirect()->route('edit-profile')
-            ->with('success', 'New profile created. Please fill in your profile details.');
+            ->with('success', 'New profile created. Please fill in your profile details.')
+            ->with('profile_form_heading', 'create');
     }
 
     public function switchToEdit(ProviderProfile $profile): RedirectResponse
@@ -118,7 +119,8 @@ class ProfileSwitchController extends Controller
 
         session(['active_provider_profile_id' => $profile->id]);
 
-        return redirect()->route('edit-profile');
+        return redirect()->route('edit-profile')
+            ->with('profile_form_heading', 'edit');
     }
 
     public function switchTo(ProviderProfile $profile): RedirectResponse

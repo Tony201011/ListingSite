@@ -162,6 +162,7 @@ class ProfileSwitchDeleteTest extends TestCase
 
         $response->assertRedirect(route('edit-profile'));
         $response->assertSessionHas('success', 'New profile created. Please fill in your profile details.');
+        $response->assertSessionHas('profile_form_heading', 'create');
 
         $this->assertDatabaseHas('provider_profiles', [
             'user_id' => $user->id,
@@ -169,5 +170,22 @@ class ProfileSwitchDeleteTest extends TestCase
             'slug' => 's8www811w',
             'profile_status' => 'approved',
         ]);
+    }
+
+    public function test_switch_to_edit_sets_edit_heading_flag(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => $user->name.' One',
+            'slug' => 'provider-'.$user->id.'-one',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('profiles.switch-edit', $profile));
+
+        $response->assertRedirect(route('edit-profile'));
+        $response->assertSessionHas('active_provider_profile_id', $profile->id);
+        $response->assertSessionHas('profile_form_heading', 'edit');
     }
 }

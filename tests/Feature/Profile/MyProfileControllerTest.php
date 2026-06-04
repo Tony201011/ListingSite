@@ -203,6 +203,47 @@ class MyProfileControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('profile.my-profile-2');
+        $response->assertSeeText('Edit your profile');
+    }
+
+    public function test_edit_profile_view_shows_create_heading_when_session_flag_is_create(): void
+    {
+        $user = $this->createProvider();
+
+        $getMyProfileStepTwoData = Mockery::mock(GetMyProfileStepTwoData::class);
+        $getMyProfileStepTwoData->shouldReceive('execute')
+            ->once()
+            ->andReturn([
+                'user' => $user,
+                'profile' => $user->providerProfile,
+                'selected' => [],
+                'ageGroupOptions' => collect(),
+                'hairColorOptions' => collect(),
+                'hairLengthOptions' => collect(),
+                'ethnicityOptions' => collect(),
+                'bodyTypeOptions' => collect(),
+                'bustSizeOptions' => collect(),
+                'yourLengthOptions' => collect(),
+                'primaryTags' => collect(),
+                'attrTags' => collect(),
+                'styleTags' => collect(),
+                'services' => collect(),
+                'availabilityOptions' => collect(),
+                'contactMethodOptions' => collect(),
+                'phoneContactOptions' => collect(),
+                'timeWasterOptions' => collect(),
+                'contactEmail' => 'contact@example.com',
+            ]);
+
+        $this->app->instance(GetMyProfileStepTwoData::class, $getMyProfileStepTwoData);
+
+        $response = $this->actingAsProvider($user)
+            ->withSession(['profile_form_heading' => 'create'])
+            ->get(route('edit-profile'));
+
+        $response->assertOk();
+        $response->assertViewIs('profile.my-profile-2');
+        $response->assertSeeText('Create your profile');
     }
 
     public function test_edit_profile_view_does_not_render_bulk_error_summary_box(): void
