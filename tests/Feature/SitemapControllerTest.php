@@ -76,7 +76,7 @@ class SitemapControllerTest extends TestCase
         $response = $this->get('/sitemaps/static.xml');
 
         $response->assertOk();
-        $response->assertSee(url('/'), false);
+        $response->assertSee(route('girls.index', ['type' => 'all']), false);
         $response->assertSee(route('advanced-search'), false);
         $response->assertSee(route('blog'), false);
     }

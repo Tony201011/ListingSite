@@ -17,6 +17,7 @@
     <meta name="description" content="{{ $metaDescription ?? '' }}">
     <meta name="keywords" content="{{ $metaKeywords ?? '' }}">
     <link rel="canonical" href="@yield('canonical', url()->current())">
+    @stack('head')
     <title>@yield('title', 'Premium Directory')</title>
 
     @php
