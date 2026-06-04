@@ -75,7 +75,7 @@
 
                             {{-- Suggestions dropdown --}}
                             <div
-                                x-show="showSuggestions && suggestions.length > 0"
+                                x-show="showSuggestions"
                                 x-cloak
                                 class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded border border-gray-700 bg-gray-900 shadow-xl"
                             >
@@ -90,11 +90,31 @@
                                                 @mouseenter="highlightedIndex = index"
                                                 @mouseleave="highlightedIndex = -1"
                                             >
-                                                <i :class="item.type === 'suburb' ? 'fa-solid fa-location-dot' : 'fa-solid fa-user'" class="text-gray-500 text-xs shrink-0"></i>
-                                                <span class="truncate" x-text="item.name"></span>
+                                                <template x-if="item.type === 'profile'">
+                                                    <img
+                                                        :src="item.image || 'https://placehold.co/56x56/1f2937/9ca3af?text=%20'"
+                                                        alt=""
+                                                        class="h-10 w-10 shrink-0 rounded-full object-cover"
+                                                    >
+                                                </template>
+                                                <i
+                                                    x-show="item.type === 'suburb'"
+                                                    class="fa-solid fa-location-dot text-gray-500 text-xs shrink-0"
+                                                ></i>
+                                                <span class="min-w-0 flex-1">
+                                                    <span class="block truncate" x-text="item.name"></span>
+                                                    <span
+                                                        class="block truncate text-xs text-gray-500"
+                                                        x-show="item.type === 'profile' && item.url"
+                                                        x-text="item.url"
+                                                    ></span>
+                                                </span>
                                                 <span class="ml-auto shrink-0 text-xs text-gray-500" x-show="item.type === 'suburb' && item.label" x-text="item.label"></span>
                                             </button>
                                         </li>
+                                    </template>
+                                    <template x-if="suggestions.length === 0 && noResultsMessage">
+                                        <li class="px-4 py-3 text-sm text-gray-400" x-text="noResultsMessage"></li>
                                     </template>
                                 </ul>
                             </div>
