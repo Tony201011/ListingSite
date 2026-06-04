@@ -483,24 +483,26 @@
                 >
             <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
                 @php
-                    $currentQuery = request()->query();
-                    $girlsUrl = fn (string $mode): string => route('advanced-search', array_merge($currentQuery, ['girls' => $mode]));
+                    $girlsModeUrls = $girlsModeUrls ?? [];
+                    $newGirlsUrl = $girlsModeUrls['new'] ?? route('advanced-search', ['girls' => 'new']);
+                    $allGirlsUrl = $girlsModeUrls['all'] ?? route('advanced-search', ['girls' => 'all']);
+                    $popularGirlsUrl = $girlsModeUrls['popular'] ?? route('advanced-search', ['girls' => 'popular']);
                 @endphp
                 <div class="flex items-center gap-2">
                     <a
-                        href="{{ $girlsUrl('new') }}"
+                        href="{{ $newGirlsUrl }}"
                         class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'new' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                     >
                         New girls
                     </a>
                     <a
-                        href="{{ $girlsUrl('all') }}"
+                        href="{{ $allGirlsUrl }}"
                         class="rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'all' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                     >
                         All girls
                     </a>
                     <a
-                        href="{{ $girlsUrl('popular') }}"
+                        href="{{ $popularGirlsUrl }}"
                         class="inline-flex items-center gap-1 rounded-full border px-4 py-1.5 text-xs font-semibold transition {{ $girlsMode === 'popular' ? 'border-pink-600 bg-pink-600/10 text-pink-600' : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300 hover:text-pink-600' }}"
                     >
                         <i class="fa-solid fa-fire text-[10px]"></i>
