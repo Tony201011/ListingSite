@@ -50,7 +50,7 @@
 >
     <div class="max-w-4xl mx-auto">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 border-l-6 border-[#e04ecb] pl-4">
-            Edit your profile
+            {{ ($profile && $profile->exists) ? 'Edit your profile' : 'Create your profile' }}
         </h1>
 
         <button
