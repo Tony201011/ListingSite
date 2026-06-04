@@ -792,6 +792,25 @@ class HomeControllerTest extends TestCase
         $this->assertSame(0, $profiles->total());
     }
 
+    public function test_home_page_escort_name_filter_includes_offline_profile_matches(): void
+    {
+        $offlineUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $this->createApprovedProfile($offlineUser, [
+            'name' => 'Offline Jasmine',
+            'slug' => 'offline-jasmine',
+        ]);
+
+        $this->createApprovedProvider(['name' => 'Online Amber', 'slug' => 'online-amber']);
+
+        $response = $this->get('/?escort_name=Offline+Jasmine');
+
+        $profiles = $response->viewData('profiles');
+        $profileNames = collect($profiles->items())->pluck('name');
+
+        $this->assertSame(1, $profiles->total());
+        $this->assertTrue($profileNames->contains('Offline Jasmine'));
+    }
+
     public function test_home_page_view_data_includes_escort_name_query(): void
     {
         $response = $this->get('/?escort_name=Ruby');
