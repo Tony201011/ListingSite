@@ -289,7 +289,7 @@ class HomeControllerTest extends TestCase
         $this->assertSame(0, $response->viewData('onlineCount'));
     }
 
-    public function test_home_page_ignores_site_listing_limit_and_shows_all_online_profiles(): void
+    public function test_home_page_respects_site_listing_limit_and_paginates_online_profiles(): void
     {
         SiteSetting::query()->create([
             'home_page_records' => 2,
@@ -303,7 +303,7 @@ class HomeControllerTest extends TestCase
         $response = $this->get('/');
 
         $this->assertSame(4, $response->viewData('onlineCount'));
-        $this->assertCount(4, $response->viewData('profiles'));
+        $this->assertCount(2, $response->viewData('profiles'));
         $this->assertSame(4, $response->viewData('profiles')->total());
     }
 
