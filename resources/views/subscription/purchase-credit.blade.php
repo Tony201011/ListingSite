@@ -161,7 +161,7 @@
                             <button
                                 type="button"
                                 id="proceed-to-payment"
-                                @click="proceedToPayment($event)"
+                                @click="window.proceedToPayment($event)"
                                 :disabled="processing"
                                 class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed"
                             >
@@ -208,7 +208,7 @@
                     <button
                         type="button"
                         id="submit-payment"
-                        @click="submitPayment($event)"
+                        @click="window.submitPayment($event)"
                         :disabled="processing || !stripeReady"
                         class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed"
                     >
