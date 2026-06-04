@@ -75,6 +75,8 @@
         $showNavigationWidget = $footerWidget?->enable_navigation_widget ?? true;
         $showAdvertisersWidget = $footerWidget?->enable_advertisers_widget ?? true;
         $showLegalWidget = $footerWidget?->enable_legal_widget ?? true;
+        $brandPrimary = ($headerWidget ?? null)?->brand_primary ?: 'HOT';
+        $brandAccent = ($headerWidget ?? null)?->brand_accent ?: 'ESCORTS';
 
         $enabledWidgetCount = collect([
             $showBrandWidget,
@@ -100,7 +102,7 @@
 
 <footer id="main-footer" class="border-t border-gray-800 bg-gray-950 px-4 pt-10 pb-6" style="{{ $footerStyle }}">
 
-    <div class="mx-auto max-w-7xl">
+    <div class="mx-auto max-w-12xl">
         @if($showPromoSection)
             <div class="mb-8 rounded-2xl border border-pink-500/20 bg-gradient-to-r from-gray-900 to-gray-900/60 p-5 sm:flex sm:items-center sm:justify-between sm:p-6">
                 <div>
@@ -117,7 +119,7 @@
         <div class="{{ $footerGridClass }} {{ $footerGridWidthClass }} mx-auto">
             @if($showBrandWidget)
                 <div>
-                    <span class="text-xl font-bold text-white">HOT<span class="text-pink-500">ESCORTS</span></span>
+                    <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
                     <p class="mt-4 leading-relaxed text-gray-500">{{ $brandDescription }}</p>
                     <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-400">
                         @foreach($badges as $badge)
