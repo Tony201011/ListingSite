@@ -157,48 +157,6 @@ html {
     }
 }
 
-/* Cards grid layout */
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
-@media (max-width: 1024px) {
-    .cards-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .cards-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.card-image {
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    width: 100%;
-    display: block;
-}
-
-.card-image-placeholder {
-    aspect-ratio: 4 / 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    background-color: #f3f4f6;
-    color: #9ca3af;
-}
-
 /* Pagination light theme */
 nav[aria-label="Pagination"] span,
 nav[aria-label="Pagination"] a {
