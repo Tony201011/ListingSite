@@ -77,11 +77,12 @@ class HomeController extends Controller
         string $slug,
         ?string $sequence_id = null
     ): View|RedirectResponse {
-        $matchedProfiles = $this->getRouteMatchedProfiles($state, $suburb, $slug);
+        $legacySequenceId = null;
+        $matchedProfiles = $this->getRouteMatchedProfiles($state, $suburb, $slug, $legacySequenceId);
 
         abort_if($matchedProfiles->isEmpty(), 404);
 
-        $profile = $this->resolveProfileForRequest($matchedProfiles, $sequence_id);
+        $profile = $this->resolveProfileForRequest($matchedProfiles, $sequence_id ?? $legacySequenceId);
         $canonicalUrl = $this->buildCanonicalProfileUrl($profile);
 
         if ($this->shouldRedirectToCanonical($request, $canonicalUrl)) {
@@ -126,18 +127,21 @@ class HomeController extends Controller
         return redirect()->to($profile->getEscortUrl(), 301);
     }
 
-    private function getRouteMatchedProfiles(string $state, string $suburb, string $slug): Collection
+    private function getRouteMatchedProfiles(string $state, string $suburb, string $slug, ?string &$legacySequenceId = null): Collection
     {
         $state = strtolower(trim($state));
         $suburb = strtolower(trim($suburb));
 
-        $profiles = ProviderProfile::query()
-            ->where('slug', $slug)
-            ->where('profile_status', 'approved')
-            ->whereHas('user')
-            ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
-            ->with(['state', 'city'])
-            ->get(['id', 'slug', 'profile_sequence', 'state_id', 'city_id', 'suburb']);
+        $profiles = $this->queryPublicProfilesBySlug($slug);
+
+        if ($profiles->isEmpty()) {
+            $legacySlugData = $this->extractLegacySlugWithSequence($slug);
+
+            if ($legacySlugData !== null) {
+                $profiles = $this->queryPublicProfilesBySlug($legacySlugData['slug']);
+                $legacySequenceId = (string) $legacySlugData['sequence'];
+            }
+        }
 
         $locationMatches = $profiles->filter(function (ProviderProfile $profile) use ($state, $suburb): bool {
             return $profile->getStateSlug() === $state && $profile->getSuburbSlug() === $suburb;
@@ -150,10 +154,6 @@ class HomeController extends Controller
 
     private function resolveProfileForRequest(Collection $profiles, ?string $sequenceId): ProviderProfile
     {
-        if ($profiles->count() === 1) {
-            return $profiles->first();
-        }
-
         if ($sequenceId !== null) {
             $sequence = (int) $sequenceId;
             $profile = $profiles->firstWhere('profile_sequence', $sequence);
@@ -163,7 +163,40 @@ class HomeController extends Controller
             return $profile;
         }
 
+        if ($profiles->count() === 1) {
+            return $profiles->first();
+        }
+
         return $profiles->sortBy('profile_sequence')->first();
+    }
+
+    private function queryPublicProfilesBySlug(string $slug): Collection
+    {
+        return ProviderProfile::query()
+            ->where('slug', $slug)
+            ->where('profile_status', 'approved')
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
+            ->with(['state', 'city'])
+            ->get(['id', 'slug', 'profile_sequence', 'state_id', 'city_id', 'suburb']);
+    }
+
+    private function extractLegacySlugWithSequence(string $slug): ?array
+    {
+        if (! preg_match('/^(.+?)(\d{3})$/', $slug, $matches)) {
+            return null;
+        }
+
+        $legacySlug = trim((string) $matches[1], '-');
+
+        if ($legacySlug === '') {
+            return null;
+        }
+
+        return [
+            'slug' => $legacySlug,
+            'sequence' => (int) $matches[2],
+        ];
     }
 
     private function buildCanonicalProfileUrl(ProviderProfile $profile): string
