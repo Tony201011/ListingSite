@@ -98,6 +98,17 @@ class MyListingsControllerTest extends TestCase
         $response->assertSessionHas('active_provider_profile_id', $profile->id);
     }
 
+    public function test_owner_is_redirected_to_photos_from_my_listings_gallery_route(): void
+    {
+        $user = $this->createProvider();
+        $profile = $user->providerProfile;
+
+        $response = $this->actingAsProvider($user, $profile)->get(route('my-listings.profile.gallery', $profile));
+
+        $response->assertRedirect(route('photos'));
+        $response->assertSessionHas('active_provider_profile_id', $profile->id);
+    }
+
     public function test_my_listings_expiring_filter_shows_only_profiles_expiring_within_seven_days(): void
     {
         $user = $this->createProvider();

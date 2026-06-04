@@ -241,7 +241,13 @@
 
                                 <div class="flex flex-col gap-4 md:flex-row">
 
-    <a href="{{ route('profiles.switch', $profile) }}"
+    @php
+        $listingProfile = $listing->providerProfile;
+        $listingGalleryFallbackUrl = $listingProfile
+            ? route('my-listings.profile.gallery', $listingProfile)
+            : route('photos');
+    @endphp
+    <a href="{{ $listingProfile ? route('profiles.switch', $listingProfile) : route('profiles.index') }}"
        class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-yellow-500 bg-white px-4 py-3 text-[15px] font-semibold text-yellow-600 transition">
         <i class="fa-solid fa-star text-yellow-500"></i>
         <span>Top</span>
@@ -252,7 +258,7 @@
     @endphp
     <button type="button"
        data-gallery='@json($listingGalleryImages)'
-       onclick="(function(btn){var imgs=JSON.parse(btn.getAttribute('data-gallery')||'[]');if(imgs.length){window.dispatchEvent(new CustomEvent('open-gallery',{detail:{images:imgs,startIdx:0}}));}else{window.location='{{ route('photos') }}'}})(this)"
+       onclick="(function(btn){var imgs=JSON.parse(btn.getAttribute('data-gallery')||'[]');if(imgs.length){window.dispatchEvent(new CustomEvent('open-gallery',{detail:{images:imgs,startIdx:0}}));}else{window.location='{{ $listingGalleryFallbackUrl }}'}})(this)"
        class="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-teal-700 bg-teal-600 px-4 py-3 text-[15px] font-semibold text-white transition hover:bg-teal-700">
         <i class="fa-regular fa-image text-white"></i>
         <span>Gallery</span>
@@ -381,11 +387,12 @@
 
                                     @php
                                         $profileGalleryImages = $profile->profileImages->pluck('image_url')->filter()->values()->toArray();
+                                        $profileGalleryFallbackUrl = route('my-listings.profile.gallery', $profile);
                                     @endphp
                                     <button type="button"
                                        data-gallery='@json($profileGalleryImages)'
-                                       onclick="(function(btn){var imgs=JSON.parse(btn.getAttribute('data-gallery')||'[]');if(imgs.length){window.dispatchEvent(new CustomEvent('open-gallery',{detail:{images:imgs,startIdx:0}}));}else{window.location='{{ route('photos') }}'}})(this)"
-                                       class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-teal-700 bg-teal-600 px-4 text-base font-semibold text-white hover:bg-teal-700">
+                                      onclick="(function(btn){var imgs=JSON.parse(btn.getAttribute('data-gallery')||'[]');if(imgs.length){window.dispatchEvent(new CustomEvent('open-gallery',{detail:{images:imgs,startIdx:0}}));}else{window.location='{{ $profileGalleryFallbackUrl }}'}})(this)"
+                                      class="flex h-12 flex-1 items-center justify-center gap-3 rounded-md border-2 border-teal-700 bg-teal-600 px-4 text-base font-semibold text-white hover:bg-teal-700">
                                         <i class="fa-regular fa-image text-lg text-white"></i>
                                         Gallery
                                     </button>
