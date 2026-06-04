@@ -82,7 +82,7 @@ class HomeController extends Controller
 
         abort_if($matchedProfiles->isEmpty(), 404);
 
-        $profile = $this->resolveProfileForRequest($matchedProfiles, $sequence_id ?? $legacySequenceId);
+        $profile = $this->resolveProfileForRequest($matchedProfiles, $sequence_id, $legacySequenceId);
         $canonicalUrl = $this->buildCanonicalProfileUrl($profile);
 
         if ($this->shouldRedirectToCanonical($request, $canonicalUrl)) {
@@ -152,7 +152,11 @@ class HomeController extends Controller
             : $profiles->sortBy('profile_sequence')->values();
     }
 
-    private function resolveProfileForRequest(Collection $profiles, ?string $sequenceId): ProviderProfile
+    private function resolveProfileForRequest(
+        Collection $profiles,
+        ?string $sequenceId,
+        ?string $legacySequenceId = null
+    ): ProviderProfile
     {
         if ($sequenceId !== null) {
             $sequence = (int) $sequenceId;
@@ -161,6 +165,14 @@ class HomeController extends Controller
             abort_if($profile === null, 404);
 
             return $profile;
+        }
+
+        if ($legacySequenceId !== null) {
+            $legacyProfile = $profiles->firstWhere('profile_sequence', (int) $legacySequenceId);
+
+            if ($legacyProfile instanceof ProviderProfile) {
+                return $legacyProfile;
+            }
         }
 
         if ($profiles->count() === 1) {
