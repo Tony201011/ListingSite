@@ -125,11 +125,21 @@ Route::get('/search/{location_slug}', [HomeController::class, 'advancedSearch'])
     ->name('search.location');
 Route::get('/search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/escorts/search', [HomeController::class, 'index'])->name('escorts.search');
+Route::get('/escorts/search/page/{page}', [HomeController::class, 'index'])
+    ->whereNumber('page')
+    ->name('escorts.search.page');
 Route::get('/escorts/search/name/{search_name}', [HomeController::class, 'index'])
     ->name('escorts.search.name');
+Route::get('/escorts/search/name/{search_name}/page/{page}', [HomeController::class, 'index'])
+    ->whereNumber('page')
+    ->name('escorts.search.name.page');
 Route::get('/escorts/search/{location_slug}', [HomeController::class, 'index'])
-    ->where(['location_slug' => '(?!name$|location$)[a-z0-9-]+'])
+    ->where(['location_slug' => '(?!name$|location$|page$)[a-z0-9-]+'])
     ->name('escorts.search.slug');
+Route::get('/escorts/search/{location_slug}/page/{page}', [HomeController::class, 'index'])
+    ->where(['location_slug' => '(?!name$|location$|page$)[a-z0-9-]+'])
+    ->whereNumber('page')
+    ->name('escorts.search.slug.page');
 Route::get('/escorts/search/location/{legacy_location_slug}', [HomeController::class, 'index'])
     ->where(['legacy_location_slug' => '[a-z0-9-]+'])
     ->name('escorts.search.location.legacy');

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ListingPaginationUrlService
 {
@@ -24,18 +25,45 @@ class ListingPaginationUrlService
         $usesLocationPath = $locationData !== null && ! empty($locationData['slug']);
         $usesSearchPath = $usesLocationPath || $advancedSearch || $this->hasSearchFilters($validated);
 
-        if ($usesLocationPath) {
-            return [
-                'base_url' => route('search.location', ['location_slug' => $locationData['slug']]),
-                'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: true),
-            ];
-        }
+        if ($advancedSearch) {
+            // Advanced-search page (/search/*) canonical routes
+            if ($usesLocationPath) {
+                return [
+                    'base_url' => route('search.location', ['location_slug' => $locationData['slug']]),
+                    'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: true),
+                ];
+            }
 
-        if ($usesSearchPath) {
-            return [
-                'base_url' => route('advanced-search'),
-                'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: false),
-            ];
+            if ($usesSearchPath) {
+                return [
+                    'base_url' => route('advanced-search'),
+                    'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: false),
+                ];
+            }
+        } else {
+            // Home page (/escorts/search/*) canonical routes
+            if ($usesLocationPath) {
+                return [
+                    'base_url' => route('escorts.search.slug', ['location_slug' => $locationData['slug']]),
+                    'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: true),
+                ];
+            }
+
+            $escortName = trim((string) ($validated['escort_name'] ?? ''));
+            if ($escortName !== '') {
+                $nameSlug = Str::slug($escortName);
+                return [
+                    'base_url' => route('escorts.search.name', ['search_name' => $nameSlug]),
+                    'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: false, excludeEscortName: true),
+                ];
+            }
+
+            if ($usesSearchPath) {
+                return [
+                    'base_url' => route('escorts.search'),
+                    'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: false),
+                ];
+            }
         }
 
         return [
@@ -80,7 +108,7 @@ class ListingPaginationUrlService
         return max(1, (int) ($request->route('page') ?? $request->query('page', 1)));
     }
 
-    private function buildQueryParameters(array $validated, bool $encodeGirlsInPath, bool $encodeLocationInPath): array
+    private function buildQueryParameters(array $validated, bool $encodeGirlsInPath, bool $encodeLocationInPath, bool $excludeEscortName = false): array
     {
         $query = [];
 
@@ -97,9 +125,11 @@ class ListingPaginationUrlService
             }
         }
 
-        $escortName = trim((string) ($validated['escort_name'] ?? ''));
-        if ($escortName !== '') {
-            $query['escort_name'] = $escortName;
+        if (! $excludeEscortName) {
+            $escortName = trim((string) ($validated['escort_name'] ?? ''));
+            if ($escortName !== '') {
+                $query['escort_name'] = $escortName;
+            }
         }
 
         $minAge = (int) ($validated['min_age'] ?? self::DEFAULT_MIN_AGE);

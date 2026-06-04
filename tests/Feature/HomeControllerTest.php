@@ -765,7 +765,7 @@ class HomeControllerTest extends TestCase
         $this->createApprovedProvider(['name' => 'Unique Amber', 'slug' => 'unique-amber']);
         $this->createApprovedProvider(['name' => 'Different Belle', 'slug' => 'different-belle']);
 
-        $response = $this->get('/?escort_name=Unique+Amber');
+        $response = $this->get('/escorts/search/name/unique-amber');
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(1, $profiles->total());
@@ -776,7 +776,7 @@ class HomeControllerTest extends TestCase
     {
         $this->createApprovedProvider(['name' => 'Jasmine Rose', 'slug' => 'jasmine-rose']);
 
-        $response = $this->get('/?escort_name=jasmine');
+        $response = $this->get('/escorts/search/name/jasmine');
 
         $profiles = $response->viewData('profiles');
         $this->assertGreaterThanOrEqual(1, $profiles->total());
@@ -786,7 +786,7 @@ class HomeControllerTest extends TestCase
     {
         $this->createApprovedProvider(['name' => 'Amber', 'slug' => 'amber']);
 
-        $response = $this->get('/?escort_name=NonExistentName12345');
+        $response = $this->get('/escorts/search/name/nonexistentname12345');
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(0, $profiles->total());
@@ -794,9 +794,9 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_view_data_includes_escort_name_query(): void
     {
-        $response = $this->get('/?escort_name=Ruby');
+        $response = $this->get('/escorts/search/name/ruby');
 
-        $response->assertViewHas('escortNameQuery', 'Ruby');
+        $response->assertViewHas('escortNameQuery', 'ruby');
     }
 
     public function test_home_page_hides_featured_sections_when_search_filters_are_active(): void
@@ -811,7 +811,7 @@ class HomeControllerTest extends TestCase
         $unfilteredResponse = $this->get('/');
         $this->assertNotEmpty($unfilteredResponse->viewData('homeBannerProfiles'));
 
-        $filteredResponse = $this->get('/?escort_name=Featured+Escort');
+        $filteredResponse = $this->get('/escorts/search/name/featured-escort');
         $this->assertEmpty($filteredResponse->viewData('homeBannerProfiles'));
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
     }
@@ -831,7 +831,7 @@ class HomeControllerTest extends TestCase
         // Searching by escort_name + location with state: the profile has an active local_banner_expires_at
         // but featured is hidden when escort_name filter is active.  The profile must still appear in the
         // main results (the featured exclusion filter must NOT be applied).
-        $response = $this->get('/?escort_name=Sydney+Local+Escort&location=Sydney%2C+NSW');
+        $response = $this->get('/escorts/search/sydney-nsw?escort_name=Sydney+Local+Escort');
 
         $response->assertDontSeeText('Local Featured');
         $profiles = $response->viewData('profiles');
@@ -862,7 +862,7 @@ class HomeControllerTest extends TestCase
         ]);
 
         // Local Featured should be visible when filtering by a location with a VIC state component.
-        $response = $this->get('/?location=UNDERBOOL%2C+VIC');
+        $response = $this->get('/escorts/search/underbool-vic');
 
         $response->assertSeeText('Local Featured');
         $profiles = $response->viewData('profiles');
@@ -905,7 +905,7 @@ class HomeControllerTest extends TestCase
             'slug' => 'regular-macknade-escort',
         ]);
 
-        $response = $this->get('/?location=MACKNADE%2C+QLD');
+        $response = $this->get('/escorts/search/macknade-qld');
 
         $response->assertSeeText('Local Featured');
         $localFeaturedNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
@@ -919,7 +919,7 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_view_data_includes_location_query(): void
     {
-        $response = $this->get('/?location=Sydney');
+        $response = $this->get('/escorts/search/sydney');
 
         $response->assertViewHas('locationQuery', 'Sydney');
     }
@@ -929,7 +929,7 @@ class HomeControllerTest extends TestCase
         $this->createApprovedProviderWithSuburb('Sydney', 'NSW', ['name' => 'Sydney Escort', 'slug' => 'sydney-escort']);
         $this->createApprovedProviderWithSuburb('Adelaide', 'SA', ['name' => 'Adelaide Escort', 'slug' => 'adelaide-escort']);
 
-        $response = $this->get('/?location=Sydney%2C+NSW');
+        $response = $this->get('/escorts/search/sydney-nsw');
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(1, $profiles->total());
@@ -943,7 +943,7 @@ class HomeControllerTest extends TestCase
         $this->createApprovedProviderWithSuburb('Sydney', 'NSW', ['name' => 'Sydney NSW Escort', 'slug' => 'sydney-nsw-escort']);
         $this->createApprovedProviderWithSuburb('Sydney', 'VIC', ['name' => 'Sydney VIC Escort', 'slug' => 'sydney-vic-escort']);
 
-        $response = $this->get('/?location=Sydney%2C+NSW');
+        $response = $this->get('/escorts/search/sydney-nsw');
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(1, $profiles->total());
@@ -956,7 +956,7 @@ class HomeControllerTest extends TestCase
         $this->createApprovedProviderWithSuburb('Melbourne', 'VIC', ['name' => 'Melbourne VIC Escort', 'slug' => 'melbourne-vic-escort']);
         $this->createApprovedProviderWithSuburb('Melbourne', 'NSW', ['name' => 'Melbourne NSW Escort', 'slug' => 'melbourne-nsw-escort']);
 
-        $response = $this->get('/?location=Melbourne%2C+VIC');
+        $response = $this->get('/escorts/search/melbourne-vic');
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(1, $profiles->total());
@@ -1697,7 +1697,7 @@ class HomeControllerTest extends TestCase
 
         // Location-filtered page with no matching profiles and no local banners:
         // home banner remains visible when a national home banner is active.
-        $filteredResponse = $this->get('/?location=AMBROSE%2C+QLD');
+        $filteredResponse = $this->get('/escorts/search/ambrose-qld');
         $this->assertNotEmpty($filteredResponse->viewData('homeBannerProfiles'));
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
         $filteredResponse->assertSeeText('Featured');
