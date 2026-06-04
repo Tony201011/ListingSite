@@ -290,48 +290,13 @@ function escortSearch(config) {
             }
 
             if (this.searchMode === 'username') {
-                const seoSearchName = this.toSeoSearchName(this.term);
-
-                if (seoSearchName === '') {
+                if (this.term.trim() === '') {
                     event.preventDefault();
                     this.closeSuggestions();
-                    return;
                 }
-
-                event.preventDefault();
-                window.location.assign('/escorts/search/name/' + encodeURIComponent(seoSearchName));
-                return;
             }
 
-            // suburb / location mode – build a clean SEO-friendly URL
-            event.preventDefault();
             this.closeSuggestions();
-
-            const locationText = this.term.trim();
-            let path;
-
-            if (locationText !== '') {
-                const parts = locationText.split(',').map(function (s) { return s.trim(); });
-                const suburb = this.toSeoSearchName(parts[0]);
-                const state = parts[1] ? this.toSeoSearchName(parts[1]) : '';
-
-                if (suburb !== '') {
-                    const slug = state !== '' ? (suburb + '-' + state) : suburb;
-                    path = '/escorts/search/' + encodeURIComponent(slug);
-                } else {
-                    path = '/escorts/search/';
-                }
-            } else {
-                path = '/escorts/search/';
-            }
-
-            const params = new URLSearchParams();
-            if (this.distanceSearchEnabled && (this.locationEnabled || locationText !== '')) {
-                params.set('distance', this.distance);
-            }
-
-            const qs = params.toString();
-            window.location.assign(path + (qs ? '?' + qs : ''));
         }
     };
 }
