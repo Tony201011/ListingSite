@@ -562,7 +562,7 @@
                             <a href="{{ route('advanced-search') }}" class="text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
                         </p>
                     @endif
-                    {{ $profiles->onEachSide(1)->links('vendor.pagination.home') }}
+                    {{ $profiles->links() }}
                 </div>
             </div>
         </div>

@@ -304,21 +304,6 @@ class SearchTest extends TestCase
         $this->assertSame(url('/search/melbourne-vic/page/2'), $profiles->url(2));
     }
 
-    public function test_advanced_search_uses_home_pagination_view(): void
-    {
-        foreach (range(1, 13) as $index) {
-            $this->createApprovedProvider([
-                'name' => "Advanced Pagination {$index}",
-                'slug' => "advanced-pagination-{$index}",
-            ]);
-        }
-
-        $response = $this->get('/search');
-
-        $response->assertOk();
-        $response->assertSee('aria-label="Homepage pagination"', false);
-    }
-
     // ===============================================================
     // Home page – only approved profiles appear in search
     // ===============================================================
