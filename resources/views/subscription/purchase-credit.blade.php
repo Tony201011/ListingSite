@@ -295,7 +295,7 @@
 
             clientSecret = result.client_secret;
 
-            elements = stripe.elements({ clientSecret });
+            elements = stripe.elements({ clientSecret, paymentMethodTypes: ['card'] });
             paymentElement = elements.create('payment');
             paymentElement.mount('#payment-element');
 
