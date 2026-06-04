@@ -39,7 +39,18 @@ document.addEventListener('alpine:init', () => {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Something went wrong.');
+                    const msg = data.message || 'Something went wrong.';
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Unable to go online',
+                            text: msg,
+                            confirmButtonColor: '#db2777',
+                        });
+                    } else {
+                        this.showMessage(msg, 'error');
+                    }
+                    return;
                 }
 
                 this.online = data.status === 'online';
