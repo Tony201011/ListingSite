@@ -4,23 +4,27 @@ namespace App\Actions\Subscription;
 
 use App\Models\CreditPackage;
 use App\Models\PurchaseTransaction;
-use App\Models\SiteSetting;
+use App\Services\Payments\PaymentProviderManager;
 use Illuminate\Support\Facades\Auth;
-use Stripe\StripeClient;
 
 class ProcessCreditCheckout
 {
+    public function __construct(
+        private PaymentProviderManager $paymentProviderManager,
+    ) {}
+
     /**
      * @return array{credits: int, price: float, invoice_name: string, checkout_url?: string}
      */
     public function execute(array $validated): array
     {
-        $package = CreditPackage::where('id', $validated['package_id'])
-            ->where('status', 'active')
-            ->firstOrFail();
+        $package = CreditPackage::query()
+            ->active()
+            ->findOrFail($validated['package_id']);
 
-        $selectedCredits = $package->credits;
+        $selectedCredits = $package->total_credits;
         $selectedPrice = (float) $package->price;
+        $provider = $this->paymentProviderManager->current();
 
         $result = [
             'credits' => $selectedCredits,
@@ -28,57 +32,54 @@ class ProcessCreditCheckout
             'invoice_name' => $validated['invoice_name'],
         ];
 
-        // Check if Stripe is enabled
-        $siteSetting = SiteSetting::first();
-        if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
+        if (! $provider->isConfigured()) {
             return $result;
         }
 
-        // Create transaction record
         $transaction = PurchaseTransaction::create([
             'user_id' => Auth::id(),
             'provider_profile_id' => (int) $validated['provider_profile_id'],
-            'credits' => $selectedCredits,
+            'provider' => $provider->name(),
+            'credit_package_id' => $package->id,
+            'credits' => (int) $package->credits,
+            'bonus_credits' => (int) $package->bonus_credits,
             'amount' => $selectedPrice,
-            'currency' => 'AUD',
+            'currency' => $package->currency ?: 'AUD',
             'status' => 'pending',
             'invoice_name' => $validated['invoice_name'],
-        ]);
-
-        // Create Stripe checkout session
-        $stripe = new StripeClient($siteSetting->stripe_secret_key);
-
-        $checkoutSession = $stripe->checkout->sessions->create([
-            'payment_method_types' => ['card'],
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'aud',
-                    'product_data' => [
-                        'name' => $package->name,
-                        'description' => $package->description ?? "Purchase {$selectedCredits} credits for AUD $".number_format($selectedPrice, 2),
-                    ],
-                    'unit_amount' => (int) ($selectedPrice * 100), // Amount in cents
-                ],
-                'quantity' => 1,
-            ]],
-            'mode' => 'payment',
-            'success_url' => route('purchase-credit.success').'?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('purchase-credit'),
             'metadata' => [
-                'user_id' => Auth::id(),
-                'credits' => $selectedCredits,
-                'package_id' => $package->id,
-                'provider_profile_id' => (int) $validated['provider_profile_id'],
-                'transaction_id' => $transaction->id,
-                'invoice_name' => $validated['invoice_name'],
+                'package_name' => $package->name,
+                'base_credits' => (int) $package->credits,
+                'bonus_credits' => (int) $package->bonus_credits,
             ],
-            'customer_email' => Auth::user()->email,
         ]);
 
-        // Update transaction with Stripe session ID
-        $transaction->update(['stripe_session_id' => $checkoutSession->id]);
+        $checkoutSession = $provider->createCheckout($transaction, [
+            'price_data' => [
+                'currency' => strtolower($package->currency ?: 'AUD'),
+                'product_data' => [
+                    'name' => $package->name,
+                    'description' => $package->description ?: "Purchase {$selectedCredits} credits for ".($package->currency ?: 'AUD').' $'.number_format($selectedPrice, 2),
+                ],
+                'unit_amount' => (int) round($selectedPrice * 100),
+            ],
+            'quantity' => 1,
+        ], [
+            'user_id' => Auth::id(),
+            'credits' => (int) $package->credits,
+            'bonus_credits' => (int) $package->bonus_credits,
+            'package_id' => $package->id,
+            'provider_profile_id' => (int) $validated['provider_profile_id'],
+            'transaction_id' => $transaction->id,
+            'invoice_name' => $validated['invoice_name'],
+        ], (string) Auth::user()->email);
 
-        $result['checkout_url'] = $checkoutSession->url;
+        $transaction->update([
+            'provider_checkout_id' => $checkoutSession['id'],
+            'stripe_session_id' => $provider->name() === 'stripe' ? $checkoutSession['id'] : $transaction->stripe_session_id,
+        ]);
+
+        $result['checkout_url'] = $checkoutSession['url'];
 
         return $result;
     }

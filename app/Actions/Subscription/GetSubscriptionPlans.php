@@ -15,7 +15,7 @@ class GetSubscriptionPlans
             ->first();
 
         $packages = CreditPackage::query()
-            ->where('status', 'active')
+            ->active()
             ->orderBy('sort_order')
             ->orderBy('price')
             ->get();

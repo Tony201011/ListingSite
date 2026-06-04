@@ -205,6 +205,11 @@ class ProviderProfile extends Model
         return $this->hasOne(ShortUrl::class, 'provider_profile_id');
     }
 
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class, 'provider_profile_id');
+    }
+
     public function reports(): HasMany
     {
         return $this->hasMany(UserReport::class);

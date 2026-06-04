@@ -73,6 +73,7 @@ class CreditLogResource extends Resource
                         'daily_deduction' => 'Daily Listing Fee',
                         'used' => 'Featured/Ad Spend',
                         'purchase_credit' => 'Credit Purchase',
+                        'refund' => 'Refund',
                         'referral_reward' => 'Referral Reward',
                         default => str($state)->headline()->toString(),
                     })
@@ -80,6 +81,7 @@ class CreditLogResource extends Resource
                         'daily_deduction' => 'warning',
                         'used' => 'danger',
                         'purchase_credit' => 'success',
+                        'refund' => 'info',
                         'referral_reward' => 'info',
                         default => 'gray',
                     }),
@@ -126,6 +128,7 @@ class CreditLogResource extends Resource
                         'daily_deduction' => 'Daily Listing Fee',
                         'used' => 'Featured/Ad Spend',
                         'purchase_credit' => 'Credit Purchase',
+                        'refund' => 'Refund',
                         'referral_reward' => 'Referral Reward',
                     ]),
             ])

@@ -16,13 +16,18 @@
                 @foreach($packages as $package)
                     <div class="flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                         <div class="flex-1">
-                            <p class="text-lg font-bold text-gray-900">{{ $package->credits }} credits</p>
+                            <p class="text-lg font-bold text-gray-900">{{ $package->total_credits }} credits</p>
                             <p class="mt-1 text-3xl font-extrabold text-gray-900">
-                                AUD ${{ number_format($package->price, 2) }}
+                                {{ $package->currency }} ${{ number_format($package->price, 2) }}
                             </p>
                             <p class="mt-1 text-sm text-gray-500">
-                                Up to {{ $package->credits }} days online
+                                Up to {{ $package->total_credits }} days online
                             </p>
+                            @if($package->bonus_credits > 0)
+                                <p class="mt-2 text-sm font-medium text-emerald-600">
+                                    Includes {{ $package->bonus_credits }} bonus credits
+                                </p>
+                            @endif
                             @if($package->description)
                                 <p class="mt-2 text-sm text-gray-500">{{ $package->description }}</p>
                             @elseif($package->name)

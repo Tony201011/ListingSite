@@ -110,15 +110,18 @@ class PurchaseTransactionResource extends Resource
                             ->label('Profile ID')
                             ->placeholder('-'),
                     ]),
-                Section::make('Stripe Information')
+                Section::make('Payment Information')
                     ->columns(1)
                     ->schema([
-                        TextEntry::make('stripe_session_id')
-                            ->label('Stripe Session ID')
+                        TextEntry::make('provider')
+                            ->label('Provider')
+                            ->formatStateUsing(fn (?string $state): string => $state ? str($state)->headline()->toString() : '-'),
+                        TextEntry::make('provider_checkout_id')
+                            ->label('Checkout Reference')
                             ->copyable()
                             ->placeholder('-'),
-                        TextEntry::make('stripe_payment_intent_id')
-                            ->label('Payment Intent ID')
+                        TextEntry::make('provider_transaction_id')
+                            ->label('Payment Reference')
                             ->copyable()
                             ->placeholder('-'),
                         TextEntry::make('receipt_url')
@@ -177,6 +180,11 @@ class PurchaseTransactionResource extends Resource
                 TextColumn::make('currency')
                     ->label('Currency')
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('provider')
+                    ->label('Provider')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => $state ? str($state)->headline()->toString() : '-')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->label('Payment Status')
                     ->badge()
@@ -192,14 +200,14 @@ class PurchaseTransactionResource extends Resource
                     ->label('Invoice Name')
                     ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('stripe_session_id')
-                    ->label('Stripe Session')
+                TextColumn::make('provider_checkout_id')
+                    ->label('Checkout Reference')
                     ->copyable()
                     ->placeholder('-')
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('stripe_payment_intent_id')
-                    ->label('Payment Intent')
+                TextColumn::make('provider_transaction_id')
+                    ->label('Payment Reference')
                     ->copyable()
                     ->placeholder('-')
                     ->limit(30)
@@ -254,7 +262,7 @@ class PurchaseTransactionResource extends Resource
                         ->color('danger')
                         ->requiresConfirmation()
                         ->modalHeading('Refund Transaction')
-                        ->modalDescription(fn (PurchaseTransaction $record): string => "Refund transaction for {$record->providerProfile?->name}? The Stripe refund amount and wallet deduction will be calculated from this profile's unused balance.")
+                        ->modalDescription(fn (PurchaseTransaction $record): string => "Refund transaction for {$record->providerProfile?->name}? The provider refund amount and wallet deduction will be calculated from this profile's unused balance.")
                         ->modalSubmitActionLabel('Yes, Refund')
                         ->visible(fn (PurchaseTransaction $record): bool => $record->status === 'paid')
                         ->action(function (PurchaseTransaction $record, ProcessStripeRefund $processStripeRefund): void {

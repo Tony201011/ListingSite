@@ -5,13 +5,16 @@ namespace App\Actions\Subscription;
 use App\Actions\GetActiveProviderProfile;
 use App\Models\CreditPackage;
 use App\Models\PricingPage;
-use App\Models\SiteSetting;
+use App\Services\Payments\PaymentProviderManager;
+use App\Services\WalletLedgerService;
 use Illuminate\Support\Facades\Auth;
 
 class GetPurchaseCreditPageData
 {
     public function __construct(
         private GetActiveProviderProfile $getActiveProviderProfile,
+        private PaymentProviderManager $paymentProviderManager,
+        private WalletLedgerService $walletLedgerService,
     ) {}
 
     public function execute(): array
@@ -23,7 +26,8 @@ class GetPurchaseCreditPageData
             ->latest('updated_at')
             ->first();
 
-        $packages = CreditPackage::where('status', 'active')
+        $packages = CreditPackage::query()
+            ->active()
             ->orderBy('sort_order', 'asc')
             ->orderBy('price', 'asc')
             ->get();
@@ -40,10 +44,11 @@ class GetPurchaseCreditPageData
             ? $selectedPackage->id
             : null;
 
-        $siteSetting = SiteSetting::first();
+        $paymentProvider = $this->paymentProviderManager->current();
+        $currentBalance = $profile ? $this->walletLedgerService->currentBalance($profile) : 0;
 
         return [
-            'currentBalance' => $profile?->credits ?? 0,
+            'currentBalance' => $currentBalance,
             'userName' => $user->name ?? 'User',
             'activeProfile' => $profile,
             'pricingPage' => $pricingPage,
@@ -51,8 +56,9 @@ class GetPurchaseCreditPageData
             'selectedPackageId' => $selectedPackageId,
             'selectedPackage' => $selectedPackage,
             'lockedPackageId' => $lockedPackageId,
-            'stripePublishableKey' => $siteSetting?->stripe_publishable_key,
-            'stripeEnabled' => (bool) ($siteSetting?->stripe_enabled && $siteSetting?->stripe_publishable_key && $siteSetting?->stripe_secret_key),
+            'paymentProvider' => $paymentProvider->name(),
+            'paymentPublicKey' => $paymentProvider->publicKey(),
+            'paymentEnabled' => $paymentProvider->isConfigured() && filled($paymentProvider->publicKey()),
         ];
     }
 }

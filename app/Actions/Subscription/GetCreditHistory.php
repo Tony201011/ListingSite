@@ -5,12 +5,14 @@ namespace App\Actions\Subscription;
 use App\Actions\GetActiveProviderProfile;
 use App\Models\CreditLog;
 use App\Models\ProviderProfile;
+use App\Services\WalletLedgerService;
 use Illuminate\Support\Facades\Auth;
 
 class GetCreditHistory
 {
     public function __construct(
         private GetActiveProviderProfile $getActiveProviderProfile,
+        private WalletLedgerService $walletLedgerService,
     ) {}
 
     public function execute(?string $month = null): array
@@ -61,7 +63,7 @@ class GetCreditHistory
         $creditsUsed = abs($allMonthLogs->where('amount', '<', 0)->sum('amount'));
 
         // Compute opening balance: current balance minus net this period
-        $currentBalance = $profile?->credits ?? 0;
+        $currentBalance = $profile ? $this->walletLedgerService->currentBalance($profile) : 0;
         $openingBalance = $currentBalance - $creditsReceived + $creditsUsed;
 
         // Available months for filter dropdown

@@ -189,14 +189,23 @@ class SiteSettingResource extends Resource
                     Tab::make('Payments & Pricing')
                         ->icon('heroicon-o-credit-card')
                         ->schema([
-                            Section::make('Stripe')
+                            Section::make('Payment Provider')
                                 ->compact()
                                 ->columns(2)
                                 ->schema([
+                                    Select::make('default_payment_provider')
+                                        ->label('Default Provider')
+                                        ->options([
+                                            'stripe' => 'Stripe',
+                                        ])
+                                        ->default('stripe')
+                                        ->required()
+                                        ->native(false)
+                                        ->helperText('Core billing now uses a provider abstraction so gateways can be replaced later.'),
                                     Toggle::make('stripe_enabled')
-                                        ->label('Enable Stripe Payments')
+                                        ->label('Enable Stripe Gateway')
                                         ->default(false)
-                                        ->helperText('Allow users to pay via Stripe.')
+                                        ->helperText('Keeps Stripe available through the generic payment provider layer.')
                                         ->columnSpanFull(),
                                     Select::make('stripe_mode')
                                         ->label('Stripe Mode')

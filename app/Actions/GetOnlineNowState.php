@@ -4,9 +4,14 @@ namespace App\Actions;
 
 use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
+use App\Services\WalletLedgerService;
 
 class GetOnlineNowState
 {
+    public function __construct(
+        private WalletLedgerService $walletLedgerService,
+    ) {}
+
     public function execute(?ProviderProfile $profile): array
     {
         $onlineStatus = false;
@@ -59,6 +64,6 @@ class GetOnlineNowState
             return false;
         }
 
-        return (int) $profile->credits < 0;
+        return $this->walletLedgerService->currentBalance($profile) <= 0;
     }
 }

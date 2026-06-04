@@ -12,6 +12,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -52,23 +53,32 @@ class CreditPackageResource extends Resource
                     ->numeric()
                     ->required()
                     ->minValue(1),
+                TextInput::make('bonus_credits')
+                    ->numeric()
+                    ->default(0)
+                    ->required()
+                    ->minValue(0),
                 TextInput::make('price')
                     ->numeric()
                     ->required()
                     ->minValue(0)
                     ->prefix('AUD $')
                     ->step(0.01),
+                Select::make('currency')
+                    ->options([
+                        'AUD' => 'AUD',
+                        'USD' => 'USD',
+                        'EUR' => 'EUR',
+                    ])
+                    ->default('AUD')
+                    ->required(),
                 Textarea::make('description')
                     ->nullable()
                     ->maxLength(500)
                     ->columnSpanFull(),
-                Select::make('status')
-                    ->options([
-                        'active' => 'Active',
-                        'inactive' => 'Inactive',
-                    ])
-                    ->required()
-                    ->default('active'),
+                Toggle::make('is_active')
+                    ->label('Active')
+                    ->default(true),
                 TextInput::make('sort_order')
                     ->numeric()
                     ->default(0)
@@ -87,20 +97,20 @@ class CreditPackageResource extends Resource
                     ->sortable(),
                 TextColumn::make('credits')
                     ->sortable(),
+                TextColumn::make('bonus_credits')
+                    ->label('Bonus')
+                    ->sortable(),
                 TextColumn::make('price')
-                    ->label('Price (AUD)')
-                    ->money('AUD')
+                    ->label('Price')
+                    ->money(fn (CreditPackage $record) => $record->currency ?: 'AUD')
                     ->sortable(),
                 TextColumn::make('description')
                     ->limit(50)
                     ->toggleable(),
-                TextColumn::make('status')
+                TextColumn::make('is_active')
                     ->badge()
-                    ->color(fn (string $state) => match ($state) {
-                        'active' => 'success',
-                        'inactive' => 'danger',
-                        default => 'gray',
-                    })
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Active' : 'Disabled')
+                    ->color(fn (bool $state): string => $state ? 'success' : 'danger')
                     ->sortable(),
                 TextColumn::make('sort_order')
                     ->label('Sort')

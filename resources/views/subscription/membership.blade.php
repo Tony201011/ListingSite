@@ -28,7 +28,7 @@
                         <div class="border-b border-gray-100 bg-gray-50 p-4">
                             <div class="rounded-lg border border-gray-200 bg-white p-3 text-center">
                                 <p class="text-2xl font-bold text-gray-900">AUD ${{ number_format($package->price, 2) }}</p>
-                                <p class="text-xs font-medium text-gray-500">{{ $package->credits }} credits</p>
+                                <p class="text-xs font-medium text-gray-500">{{ $package->total_credits }} credits</p>
                             </div>
                         </div>
 

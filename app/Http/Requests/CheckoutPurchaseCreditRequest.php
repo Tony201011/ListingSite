@@ -40,7 +40,12 @@ class CheckoutPurchaseCreditRequest extends FormRequest
             'package_id' => [
                 'required',
                 'integer',
-                Rule::exists(CreditPackage::class, 'id')->where('status', 'active'),
+                Rule::exists(CreditPackage::class, 'id')->where(
+                    fn ($query) => $query->where(function ($builder): void {
+                        $builder->where('is_active', true)
+                            ->orWhere('status', 'active');
+                    })
+                ),
             ],
             'invoice_name' => ['required', 'string', 'max:120'],
             'provider_profile_id' => [

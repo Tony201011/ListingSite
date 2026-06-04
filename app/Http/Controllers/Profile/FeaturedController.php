@@ -7,6 +7,7 @@ use App\Actions\GetFeaturedState;
 use App\Actions\PurchaseFeatured;
 use App\Http\Controllers\Controller;
 use App\Models\ProviderProfile;
+use App\Services\WalletLedgerService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,8 @@ class FeaturedController extends Controller
     public function __construct(
         private GetFeaturedState $getFeaturedState,
         private PurchaseFeatured $purchaseFeatured,
-        private GetActiveProviderProfile $getActiveProviderProfile
+        private GetActiveProviderProfile $getActiveProviderProfile,
+        private WalletLedgerService $walletLedgerService,
     ) {}
 
     public function featured(): View
@@ -30,7 +32,7 @@ class FeaturedController extends Controller
         $graphData = $this->buildGraphData($data);
 
         return view('profile.featured', array_merge($data, $graphData, [
-            'userCredits' => $profile?->credits ?? 0,
+            'userCredits' => $profile ? $this->walletLedgerService->currentBalance($profile) : 0,
             'profile' => $profile,
         ]));
     }
