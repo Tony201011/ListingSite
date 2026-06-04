@@ -21,26 +21,26 @@ class SearchController extends Controller
             return response()->json(['suggestions' => []]);
         }
 
-        // Start with DB matches so currently available profiles are always included,
-        // even when Scout indexes are stale or incomplete.
-        $results = $this->queryDatabaseSuggestions($term, [], self::MAX_SUGGESTIONS);
+        $results = collect();
+
+        try {
+            $results = $this->queryScoutSuggestions($term);
+        } catch (\Throwable $e) {
+            Log::warning('Scout search unavailable, falling back to database search.', [
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         $remainingSlots = self::MAX_SUGGESTIONS - $results->count();
 
         if ($remainingSlots > 0) {
-            try {
-                $results = $results->concat(
-                    $this->queryScoutSuggestions(
-                        $term,
-                        $results->pluck('id')->all(),
-                        $remainingSlots
-                    )
-                );
-            } catch (\Throwable $e) {
-                Log::warning('Scout search unavailable while supplementing search suggestions.', [
-                    'error' => $e->getMessage(),
-                ]);
-            }
+            $results = $results->concat(
+                $this->queryDatabaseSuggestions(
+                    $term,
+                    $results->pluck('id')->all(),
+                    $remainingSlots
+                )
+            );
         }
 
         $suggestions = $results->map(fn (ProviderProfile $profile) => [
@@ -48,8 +48,6 @@ class SearchController extends Controller
             'slug' => $profile->slug,
             'location' => $this->resolveLocationLabel($profile),
             'age' => $profile->age,
-            'url' => $profile->getEscortUrl(),
-            'image' => $profile->primaryProfileImage?->thumbnail_url ?? $profile->primaryProfileImage?->image_url,
         ])->values();
 
         return response()->json(['suggestions' => $suggestions]);
@@ -74,7 +72,7 @@ class SearchController extends Controller
         return trim(strtok($suburb, ',') ?: $suburb);
     }
 
-    private function queryScoutSuggestions(string $term, array $excludedProfileIds = [], int $limit = self::MAX_SUGGESTIONS)
+    private function queryScoutSuggestions(string $term)
     {
         return ProviderProfile::search($term)
             ->where('profile_status', 'approved')
@@ -83,10 +81,6 @@ class SearchController extends Controller
                 ->where('slug', '!=', '')
                 ->whereNull('deleted_at')
                 ->where('is_blocked', false)
-                ->when(
-                    ! empty($excludedProfileIds),
-                    fn ($query) => $query->whereNotIn('id', $excludedProfileIds)
-                )
                 ->whereHas('user', fn ($userQuery) => $userQuery
                     ->where('role', User::ROLE_PROVIDER)
                     ->where('account_status', 'active')
@@ -94,14 +88,14 @@ class SearchController extends Controller
                     ->whereNull('deleted_at'))
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where(fn ($availabilityQuery) => $this->applyActiveAvailabilityConstraint($availabilityQuery)))
-            ->take($limit)
-            ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age', 'state_id'])
-            ->load(['city', 'state', 'primaryProfileImage']);
+            ->take(self::MAX_SUGGESTIONS)
+            ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age'])
+            ->load('city');
     }
 
     private function queryDatabaseSuggestions(string $term, array $excludedProfileIds = [], int $limit = self::MAX_SUGGESTIONS)
     {
-        return ProviderProfile::query()
+        $query = ProviderProfile::query()
             ->where('profile_status', 'approved')
             ->whereNull('deleted_at')
             ->whereNotNull('slug')
@@ -117,14 +111,16 @@ class SearchController extends Controller
                 $this->applyActiveAvailabilityConstraint($query);
             })
             ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
-            ->with(['city', 'state', 'primaryProfileImage'])
+            ->with('city')
             ->orderBy('name')
             ->take($limit)
             ->when(
                 ! empty($excludedProfileIds),
                 fn ($query) => $query->whereNotIn('id', $excludedProfileIds)
             )
-            ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age', 'state_id']);
+            ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age']);
+
+        return $query;
     }
 
     private function applyActiveAvailabilityConstraint($query): void
