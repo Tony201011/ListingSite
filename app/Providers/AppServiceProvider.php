@@ -169,7 +169,7 @@ class AppServiceProvider extends ServiceProvider
                     // provider_profiles.suburb stores the full "Suburb, STATE postcode" format
                     // (e.g. "Sydney, NSW 2000") written by the signup/edit-profile
                     // autocomplete.  We join postcodes on the suburb name prefix so that
-                    // the header links include the state (e.g. "/?location=Sydney, NSW")
+                    // the header links include the state (e.g. "/escorts/location/Sydney, NSW")
                     // and therefore only return providers from the correct state.
                     return Postcode::query()
                         ->select(['suburb', 'state'])

@@ -25,6 +25,11 @@ class HomeIndexRequest extends FormRequest
         $escortName = trim((string) $this->input('escort_name', ''));
 
         $routeLocationData = null;
+        $directRouteLocation = trim((string) $this->route('location', ''));
+        if ($directRouteLocation !== '') {
+            $routeLocationData = $locationSlugService->fromLocationText(urldecode($directRouteLocation));
+        }
+
         $routeLocationSlug = trim((string) $this->route('location_slug', ''));
         if ($routeLocationSlug !== '') {
             $routeLocationData = $locationSlugService->parseSlug($routeLocationSlug);
