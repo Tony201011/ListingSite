@@ -68,6 +68,7 @@
                             $price = $profile->price ?? $profile->hourly_rate ?? $profile->rate ?? null;
                             $phone = $profile->phone ?? $profile->mobile ?? null;
                             $profileSummary = $profile->introduction_line ?: $profile->description ?: $profile->profile_text;
+                            $profileSummary = filled($profileSummary) ? trim(strip_tags($profileSummary)) : null;
                             $isPhotoVerified = $profile->photoVerification->isNotEmpty();
                             $statusLabel = match ($profile->profile_status) {
                                 'approved' => 'VERIFIED PROFILE',
