@@ -67,6 +67,7 @@
                             $location = $profile->suburb ?? $profile->city ?? $profile->state ?? 'Australia';
                             $price = $profile->price ?? $profile->hourly_rate ?? $profile->rate ?? null;
                             $phone = $profile->phone ?? $profile->mobile ?? null;
+                            $profileSummary = $profile->introduction_line ?: $profile->description ?: $profile->profile_text;
                             $isPhotoVerified = $profile->photoVerification->isNotEmpty();
                             $statusLabel = match ($profile->profile_status) {
                                 'approved' => 'VERIFIED PROFILE',
@@ -195,7 +196,9 @@
                                 </div>
 
                                 <p class="mb-3 line-clamp-2 text-sm text-gray-600">
-                                    @if($profile->profile_status === 'approved')
+                                    @if(filled($profileSummary))
+                                        {{ $profileSummary }}
+                                    @elseif($profile->profile_status === 'approved')
                                         Your profile is approved and visible in search results.
                                     @elseif($profile->profile_status === 'rejected')
                                         This profile has been rejected and is not visible in search results.
