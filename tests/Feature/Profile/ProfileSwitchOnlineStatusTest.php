@@ -91,6 +91,22 @@ class ProfileSwitchOnlineStatusTest extends TestCase
         $response->assertViewHas('onlineStates');
     }
 
+    public function test_my_profiles_index_shows_profile_introduction_text_when_available(): void
+    {
+        [$user, $profiles] = $this->createProviderWithProfiles(1);
+        $profile = $profiles[0];
+        $profile->update([
+            'profile_status' => 'approved',
+            'introduction_line' => 'This is my custom introduction.',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('profiles.index'));
+
+        $response->assertOk();
+        $response->assertSeeText('This is my custom introduction.');
+        $response->assertDontSeeText('Your profile is approved and visible in search results.');
+    }
+
     public function test_select_profile_includes_online_states_and_active_profile_id(): void
     {
         [$user, $profiles] = $this->createProviderWithProfiles(2);
