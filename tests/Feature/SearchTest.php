@@ -882,6 +882,8 @@ class SearchTest extends TestCase
                 $this->assertArrayHasKey('slug', $suggestion);
                 $this->assertArrayHasKey('location', $suggestion);
                 $this->assertArrayHasKey('age', $suggestion);
+                $this->assertArrayHasKey('url', $suggestion);
+                $this->assertArrayHasKey('image', $suggestion);
             }
         } else {
             // Scout not active in test environment – just verify the structure is present.
