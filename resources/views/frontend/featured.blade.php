@@ -44,7 +44,7 @@
                         </span>
                         <span class="text-xs text-gray-500">National — shown at the top of the home page</span>
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         @foreach($homeBannerProfiles as $profile)
                             @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'home_banner'])
                         @endforeach
@@ -62,7 +62,7 @@
                         </span>
                         <span class="text-xs text-gray-500">Top of the home page listing grid</span>
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         @foreach($homeFeaturedProfiles as $profile)
                             @include('frontend.partials.profile-card', ['profile' => $profile])
                         @endforeach
@@ -80,7 +80,7 @@
                         </span>
                         <span class="text-xs text-gray-500">State-specific banner profiles</span>
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         @foreach($localBannerProfiles as $profile)
                             @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'local_banner'])
                         @endforeach
@@ -98,7 +98,7 @@
                         </span>
                         <span class="text-xs text-gray-500">Featured badge profiles</span>
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         @foreach($featuredProfiles as $profile)
                             @include('frontend.partials.profile-card', ['profile' => $profile])
                         @endforeach
