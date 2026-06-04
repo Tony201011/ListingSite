@@ -94,6 +94,7 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertOk();
         $response->assertSee('id="purchase-credit-flow"', false);
         $response->assertSee("document.getElementById('purchase-credit-flow')", false);
+        $response->assertDontSee("paymentMethodTypes: ['card']", false);
     }
 
     public function test_purchase_credit_page_shows_only_active_packages(): void

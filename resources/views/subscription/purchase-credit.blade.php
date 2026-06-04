@@ -68,6 +68,7 @@
                 <form id="package-form" action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
                     @csrf
                     <input type="hidden" name="provider_profile_id" value="{{ $activeProfile?->id }}">
+                    <div x-show="paymentError" class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-sm text-rose-700" x-text="paymentError"></div>
                     @if($lockedPackageId && $selectedPackage)
                         <input type="hidden" name="package_id" value="{{ $lockedPackageId }}">
                         <div class="rounded-xl border border-pink-100 bg-pink-50 p-4">
@@ -294,8 +295,22 @@
             }
 
             clientSecret = result.client_secret;
+            if (!clientSecret) {
+                data.paymentError = 'Failed to initialize payment. Please try again.';
+                data.processing = false;
+                return;
+            }
 
-            elements = stripe.elements({ clientSecret, paymentMethodTypes: ['card'] });
+            data.stripeReady = false;
+            if (paymentElement) {
+                paymentElement.unmount();
+            }
+            const container = document.getElementById('payment-element');
+            if (container) {
+                container.innerHTML = '';
+            }
+
+            elements = stripe.elements({ clientSecret });
             paymentElement = elements.create('payment');
             paymentElement.mount('#payment-element');
 
