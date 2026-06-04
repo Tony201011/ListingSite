@@ -34,7 +34,7 @@ class EmailVerificationTest extends TestCase
 
         $response = $this->get($url);
 
-        $response->assertRedirect('/select-profile');
+        $response->assertRedirect('/my-profiles');
         $response->assertSessionHas('success');
         $this->assertAuthenticatedAs($user);
         $this->assertNotNull($user->fresh()->email_verified_at);
@@ -48,7 +48,7 @@ class EmailVerificationTest extends TestCase
 
         $response = $this->get($url);
 
-        $response->assertRedirect('/select-profile');
+        $response->assertRedirect('/my-profiles');
         $response->assertSessionHas('success');
         $this->assertAuthenticatedAs($user);
     }

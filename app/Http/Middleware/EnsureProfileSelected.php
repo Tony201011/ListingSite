@@ -50,7 +50,7 @@ class EnsureProfileSelected
                 return response()->json(['message' => 'No profile selected.'], 403);
             }
 
-            return redirect()->route('select-profile');
+            return redirect()->route('profiles.index');
         }
 
         return $next($request);

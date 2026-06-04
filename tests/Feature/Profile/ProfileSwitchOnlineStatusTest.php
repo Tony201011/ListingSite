@@ -76,7 +76,7 @@ class ProfileSwitchOnlineStatusTest extends TestCase
 
     public function test_my_profiles_index_includes_online_states(): void
     {
-        [$user, $profiles] = $this->createProviderWithProfiles(2);
+        [$user] = $this->createProviderWithProfiles(2);
 
         $getOnlineNowState = Mockery::mock(GetOnlineNowState::class);
         $getOnlineNowState->shouldReceive('execute')
@@ -107,22 +107,13 @@ class ProfileSwitchOnlineStatusTest extends TestCase
         $response->assertDontSeeText('Your profile is approved and visible in search results.');
     }
 
-    public function test_select_profile_includes_online_states_and_active_profile_id(): void
+    public function test_select_profile_redirects_to_my_profiles_index(): void
     {
         [$user, $profiles] = $this->createProviderWithProfiles(2);
 
-        $getOnlineNowState = Mockery::mock(GetOnlineNowState::class);
-        $getOnlineNowState->shouldReceive('execute')
-            ->twice()
-            ->andReturn(['onlineStatus' => true, 'expiresAt' => null]);
-
-        $this->app->instance(GetOnlineNowState::class, $getOnlineNowState);
-
         $response = $this->actingAs($user)->get(route('select-profile'));
 
-        $response->assertOk();
-        $response->assertViewHas('onlineStates');
-        $response->assertViewHas('activeProfileId');
+        $response->assertRedirect(route('profiles.index'));
     }
 
     public function test_select_profile_redirects_to_profiles_index_when_user_has_no_profiles(): void
@@ -132,7 +123,6 @@ class ProfileSwitchOnlineStatusTest extends TestCase
         $response = $this->actingAs($user)->get(route('select-profile'));
 
         $response->assertRedirect(route('profiles.index'));
-        $response->assertSessionHas('success', 'Create your first profile to get started.');
     }
 
     public function test_owner_can_set_profile_online(): void
