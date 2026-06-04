@@ -26,6 +26,19 @@ window.galleryModal = function () {
 
                 img.dataset.galleryBound = 'true';
             });
+
+            window.addEventListener('open-gallery', (e) => {
+                const { images, startIdx } = e.detail || {};
+                if (images && images.length) {
+                    this.openWith(images, startIdx || 0);
+                }
+            });
+        },
+
+        openWith(images, startIdx) {
+            if (!images || !images.length) return;
+            this.images = images;
+            this.openAt(startIdx || 0);
         },
 
         openAt(idx) {

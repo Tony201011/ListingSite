@@ -87,7 +87,7 @@ class MyListingsController extends Controller
                 });
             })
             ->when($sort === 'newest', fn ($query) => $query->orderByDesc('created_at'), fn ($query) => $query->orderBy('created_at'))
-            ->with('providerProfile')
+            ->with('providerProfile.profileImages')
             ->get();
 
         // Also provide provider profiles so the UI can fall back to showing
@@ -104,7 +104,7 @@ class MyListingsController extends Controller
                 });
             })
             ->orderBy('id')
-            ->with('primaryProfileImage')
+            ->with('primaryProfileImage', 'profileImages')
             ->get();
 
         return view('profile.my-listings', [
