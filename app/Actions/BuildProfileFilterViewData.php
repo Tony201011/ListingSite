@@ -646,8 +646,6 @@ class BuildProfileFilterViewData
         }
 
         $profilesPerPage = $this->resolveProfilesPerPage();
-        $totalOnlineProfiles = (clone $query)->count('provider_profiles.id');
-        $profilesPerPage = max($profilesPerPage, max(1, $totalOnlineProfiles));
 
         $paginator = $query
             ->paginate($profilesPerPage)
