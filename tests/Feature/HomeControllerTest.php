@@ -1679,7 +1679,7 @@ class HomeControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_home_banner_hidden_when_location_filter_active_and_no_local_banners(): void
+    public function test_home_banner_still_shows_when_location_filter_active_and_no_local_banners(): void
     {
         // A profile with an active home banner (national).
         $this->createApprovedProvider([
@@ -1694,14 +1694,14 @@ class HomeControllerTest extends TestCase
         $unfilteredResponse->assertSeeText('Featured');
 
         // Location-filtered page with no matching profiles and no local banners:
-        // home banner must NOT be shown even though homeBannerProfiles is non-empty.
+        // home banner remains visible when a national home banner is active.
         $filteredResponse = $this->get('/?location=AMBROSE%2C+QLD');
         $this->assertNotEmpty($filteredResponse->viewData('homeBannerProfiles'));
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
-        $filteredResponse->assertDontSeeText('Featured');
+        $filteredResponse->assertSeeText('Featured');
     }
 
-    public function test_home_banner_hidden_when_location_state_filter_active_and_no_local_banners(): void
+    public function test_home_banner_still_shows_when_location_state_filter_active_and_no_local_banners(): void
     {
         $this->createApprovedProvider([
             'name' => 'National Banner Escort State Filter',
@@ -1715,6 +1715,7 @@ class HomeControllerTest extends TestCase
         $filteredResponse = $this->get('/?location_state=QLD');
         $this->assertNotEmpty($filteredResponse->viewData('homeBannerProfiles'));
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
+        $filteredResponse->assertSeeText('Featured');
     }
 
     public function test_listings_online_count_endpoint_includes_banner_and_featured_counts(): void
