@@ -464,7 +464,7 @@
             </div>
         </div>
                     @else
-                <a href="{{ route('signin') }}" class="text-sm font-medium text-gray-300 mx-4 transition hover:text-white">
+                <a href="{{ route('signin') }}" class="mx-4 text-sm font-medium text-white transition hover:text-white">
                     Sign In
                 </a>
 
