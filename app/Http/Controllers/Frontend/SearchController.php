@@ -85,7 +85,7 @@ class SearchController extends Controller
                 ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
                 ->where(fn ($availabilityQuery) => $availabilityQuery
                     ->whereCurrentlyOnline()
-                    ->orWhere(fn ($orQuery) => $orQuery->whereCurrentlyAvailableNow())))
+                    ->orWhereCurrentlyAvailableNow()))
             ->take(self::MAX_SUGGESTIONS)
             ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age'])
             ->load('city');
@@ -103,7 +103,7 @@ class SearchController extends Controller
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->where(fn ($availabilityQuery) => $availabilityQuery
                 ->whereCurrentlyOnline()
-                ->orWhere(fn ($orQuery) => $orQuery->whereCurrentlyAvailableNow()))
+                ->orWhereCurrentlyAvailableNow())
             ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
             ->with('city')
             ->orderBy('name')
