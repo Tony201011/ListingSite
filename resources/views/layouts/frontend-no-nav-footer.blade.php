@@ -19,7 +19,6 @@
     @stack('styles')
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans">
-    <x-age-verification-modal />
     @yield('content')
     @stack('scripts')
 </body>

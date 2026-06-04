@@ -58,8 +58,4 @@ return [
         ],
     ],
 
-    'age_verification' => [
-        'exit_url' => env('AGE_VERIFICATION_EXIT_URL', 'https://www.google.com'),
-    ],
-
 ];
