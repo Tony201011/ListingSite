@@ -183,7 +183,11 @@ class HomeController extends Controller
     {
         $currentPath = trim($request->getPathInfo(), '/');
 
-        if (! str_starts_with($currentPath, 'escorts/search')) {
+        if (
+            $currentPath !== ''
+            && ! str_starts_with($currentPath, 'escorts/search')
+            && ! str_starts_with($currentPath, 'escorts/location')
+        ) {
             return null;
         }
 
@@ -198,7 +202,7 @@ class HomeController extends Controller
             return null;
         }
 
-        $canonicalPath = route('escorts.search.slug', ['location_slug' => $locationData['slug']]);
+        $canonicalPath = route('escorts.location', ['location' => $locationData['location']]);
         $canonicalRoutePath = trim((string) parse_url($canonicalPath, PHP_URL_PATH), '/');
 
         $query = $rawQuery;

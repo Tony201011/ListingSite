@@ -165,7 +165,7 @@
 
             return [
                 'label' => "{$suburb} escorts",
-                'url' => url('/?location='.urlencode($location)),
+                'url' => route('escorts.location', ['location' => $location]),
                 'search' => \Illuminate\Support\Str::lower(trim("{$suburb} {$state} escorts")),
             ];
         })

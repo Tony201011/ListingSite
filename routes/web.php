@@ -121,6 +121,8 @@ Route::get('/escorts/search/location/{suburb}/{state}', [HomeController::class, 
 Route::get('/escorts/search/location/{suburb}', [HomeController::class, 'index'])
     ->where(['suburb' => '[a-z0-9-]+'])
     ->name('escorts.search.location.no-state');
+Route::get('/escorts/location/{location}', [HomeController::class, 'index'])
+    ->name('escorts.location');
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search');
 Route::get('/favourites', [HomeController::class, 'favourites'])->name('favourites');

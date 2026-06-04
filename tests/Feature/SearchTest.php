@@ -183,7 +183,7 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/escorts/search/location/melbourne/vic');
 
-        $response->assertRedirect('/escorts/search/melbourne-vic');
+        $response->assertRedirect('/escorts/location/Melbourne%2C%20VIC');
         $response->assertStatus(301);
     }
 
@@ -191,7 +191,7 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/escorts/search/location/sydney');
 
-        $response->assertRedirect('/escorts/search/sydney');
+        $response->assertRedirect('/escorts/location/Sydney');
         $response->assertStatus(301);
     }
 
@@ -199,13 +199,13 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/escorts/search/location/mount-gambier/sa');
 
-        $response->assertRedirect('/escorts/search/mount-gambier-sa');
+        $response->assertRedirect('/escorts/location/Mount%20Gambier%2C%20SA');
         $response->assertStatus(301);
     }
 
     public function test_escorts_search_slug_route_with_suburb_and_state(): void
     {
-        $response = $this->get('/escorts/search/mount-gambier-sa');
+        $response = $this->get('/escorts/location/Mount%20Gambier%2C%20SA');
 
         $response->assertStatus(200);
         $response->assertViewHas('locationQuery', 'Mount Gambier, SA');
@@ -216,7 +216,7 @@ class SearchTest extends TestCase
         $this->createApprovedProvider(['name' => 'Melbourne Escort', 'slug' => 'melbourne-escort', 'suburb' => 'Melbourne, VIC 3000']);
         $this->createApprovedProvider(['name' => 'Sydney Escort', 'slug' => 'sydney-escort', 'suburb' => 'Sydney, NSW 2000']);
 
-        $response = $this->get('/escorts/search/melbourne-vic');
+        $response = $this->get('/escorts/location/Melbourne%2C%20VIC');
 
         $response->assertStatus(200);
         $profiles = $response->viewData('profiles');
@@ -230,20 +230,20 @@ class SearchTest extends TestCase
         $response = $this->get('/escorts/search?location=Melbourne%2C+VIC&distance=250&user_lat=-37.81&user_lng=144.96');
 
         $response->assertStatus(301);
-        $response->assertRedirect('/escorts/search/melbourne-vic?distance=250');
+        $response->assertRedirect('/escorts/location/Melbourne%2C%20VIC?distance=250');
     }
 
     public function test_escorts_search_slug_route_strips_legacy_location_query_params(): void
     {
-        $response = $this->get('/escorts/search/melbourne-vic?min_age=18&max_age=40&min_price=150&max_price=400&location_slug=melbourne-vic&location_from_route=1&escort_name=&girls=all');
+        $response = $this->get('/escorts/location/Melbourne%2C%20VIC?min_age=18&max_age=40&min_price=150&max_price=400&location_slug=melbourne-vic&location_from_route=1&escort_name=&girls=all');
 
         $response->assertStatus(301);
-        $response->assertRedirect('/escorts/search/melbourne-vic?min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
+        $response->assertRedirect('/escorts/location/Melbourne%2C%20VIC?min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
     }
 
     public function test_escorts_search_slug_route_with_filters_does_not_redirect_when_location_query_is_not_present(): void
     {
-        $response = $this->get('/escorts/search/melbourne-vic?distance=500&min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
+        $response = $this->get('/escorts/location/Melbourne%2C%20VIC?distance=500&min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
 
         $response->assertStatus(200);
         $response->assertViewHas('locationQuery', 'Melbourne, VIC');
