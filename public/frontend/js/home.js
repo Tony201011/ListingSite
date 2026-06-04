@@ -402,3 +402,91 @@ function favouriteBookmark(config) {
         },
     };
 }
+
+function featuredCarousel(total) {
+    return {
+        page: 0,
+        pageSize: 1,
+        total: total,
+        isDragging: false,
+        startX: 0,
+        currentX: 0,
+        dragOffset: 0,
+        _slideW: 0,
+        _cardW: 300,
+        get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
+        computeDimensions() {
+            const track = this.$refs.track;
+            if (!track) return;
+            const container = track.parentElement;
+            if (!container) return;
+            const containerW = container.clientWidth;
+            if (containerW === 0) {
+                window.requestAnimationFrame(() => this.computeDimensions());
+                return;
+            }
+            const gap = parseFloat(getComputedStyle(track).gap) || 16;
+            const containerStyle = getComputedStyle(container);
+            const paddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+            const paddingRight = parseFloat(containerStyle.paddingRight) || 0;
+            const usableW = containerW - paddingLeft - paddingRight;
+            this._cardW = (usableW - (this.pageSize - 1) * gap) / this.pageSize;
+            this._slideW = this._cardW + gap;
+        },
+        get translateX() {
+            return -(this.page * this.pageSize * this._slideW) + this.dragOffset;
+        },
+        init() {
+            this.updatePageSize();
+            this.computeDimensions();
+            this.$nextTick(() => {
+                window.requestAnimationFrame(() => this.computeDimensions());
+                if (window.ResizeObserver) {
+                    const container = this.$refs.track && this.$refs.track.parentElement;
+                    if (container) {
+                        const ro = new ResizeObserver(() => {
+                            window.requestAnimationFrame(() => this.computeDimensions());
+                        });
+                        ro.observe(container);
+                        this.$cleanup(() => ro.disconnect());
+                    }
+                }
+            });
+        },
+        updatePageSize() {
+            this.pageSize = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 2 : 1;
+            if (this.page > this.pages - 1) {
+                this.page = this.pages - 1;
+            }
+            this.$nextTick(() => {
+                window.requestAnimationFrame(() => this.computeDimensions());
+            });
+        },
+        prev() { if (this.page > 0) this.page--; },
+        next() { if (this.page < this.pages - 1) this.page++; },
+        startDrag(event) {
+            if (this._slideW === 0) this.computeDimensions();
+            this.isDragging = true;
+            this.startX = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;
+            this.currentX = this.startX;
+            this.dragOffset = 0;
+        },
+        drag(event) {
+            if (!this.isDragging) return;
+            event.preventDefault();
+            this.currentX = event.type === 'mousemove' ? event.clientX : event.touches[0].clientX;
+            this.dragOffset = this.currentX - this.startX;
+        },
+        endDrag() {
+            if (!this.isDragging) return;
+            this.isDragging = false;
+            const threshold = this._slideW > 0 ? this._slideW / 4 : 50;
+            if (this.dragOffset > threshold && this.page > 0) {
+                this.page--;
+            } else if (this.dragOffset < -threshold && this.page < this.pages - 1) {
+                this.page++;
+            }
+            this.dragOffset = 0;
+        },
+    };
+}

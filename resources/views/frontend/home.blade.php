@@ -198,18 +198,48 @@
                         <i class="fa-solid fa-crown text-[10px]"></i> Featured
                     </span>
                 </div>
-                <div class="featured-slider" data-featured-slider>
-                    <div class="featured-slider-track" data-slider-track tabindex="0">
-                        @foreach($homeBannerProfiles as $profile)
-                            <div class="featured-slider-slide">
-                                @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'home_banner'])
-                            </div>
-                        @endforeach
+                <div
+                    x-data="featuredCarousel({{ count($homeBannerProfiles) }})"
+                    x-init="init()"
+                    @resize.window="updatePageSize()"
+                    class="relative group overflow-hidden"
+                >
+                    <div class="overflow-hidden px-4 sm:px-6 pb-2"
+                        @mousedown="startDrag($event)"
+                        @mousemove="drag($event)"
+                        @mouseup="endDrag()"
+                        @mouseleave="endDrag()"
+                        @touchstart="startDrag($event)"
+                        @touchmove="drag($event)"
+                        @touchend="endDrag()"
+                        :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
+                    >
+                        <div x-ref="track" class="flex flex-nowrap gap-4 transition-transform duration-500"
+                            :style="`transform: translateX(${translateX}px);`"
+                        >
+                            @foreach($homeBannerProfiles as $profile)
+                                <div class="flex-shrink-0" :style="`width: ${_cardW > 0 ? _cardW + 'px' : '300px'};`">
+                                    @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'home_banner'])
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                    <button type="button" class="featured-slider-button" data-slider-prev aria-label="Previous featured profiles">
+                    <button type="button"
+                        @click="prev()"
+                        :disabled="page === 0"
+                        class="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
+                        :class="page === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
+                        aria-label="Previous featured profiles"
+                    >
                         <i class="fa-solid fa-chevron-left text-lg"></i>
                     </button>
-                    <button type="button" class="featured-slider-button" data-slider-next aria-label="Next featured profiles">
+                    <button type="button"
+                        @click="next()"
+                        :disabled="page >= pages - 1"
+                        class="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
+                        :class="page >= pages - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
+                        aria-label="Next featured profiles"
+                    >
                         <i class="fa-solid fa-chevron-right text-lg"></i>
                     </button>
                 </div>
@@ -227,18 +257,48 @@
                         <i class="fa-solid fa-location-dot text-[10px]"></i> Local Featured
                     </span>
                 </div>
-                <div class="featured-slider" data-featured-slider>
-                    <div class="featured-slider-track" data-slider-track tabindex="0">
-                        @foreach($localBannerProfiles as $profile)
-                            <div class="featured-slider-slide">
-                                @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'local_banner'])
-                            </div>
-                        @endforeach
+                <div
+                    x-data="featuredCarousel({{ count($localBannerProfiles) }})"
+                    x-init="init()"
+                    @resize.window="updatePageSize()"
+                    class="relative group overflow-hidden"
+                >
+                    <div class="overflow-hidden px-4 sm:px-6 pb-2"
+                        @mousedown="startDrag($event)"
+                        @mousemove="drag($event)"
+                        @mouseup="endDrag()"
+                        @mouseleave="endDrag()"
+                        @touchstart="startDrag($event)"
+                        @touchmove="drag($event)"
+                        @touchend="endDrag()"
+                        :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
+                    >
+                        <div x-ref="track" class="flex flex-nowrap gap-4 transition-transform duration-500"
+                            :style="`transform: translateX(${translateX}px);`"
+                        >
+                            @foreach($localBannerProfiles as $profile)
+                                <div class="flex-shrink-0" :style="`width: ${_cardW > 0 ? _cardW + 'px' : '300px'};`">
+                                    @include('frontend.partials.profile-card', ['profile' => $profile, 'tierBadgeVariant' => 'local_banner'])
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                    <button type="button" class="featured-slider-button" data-slider-prev aria-label="Previous local featured profiles">
+                    <button type="button"
+                        @click="prev()"
+                        :disabled="page === 0"
+                        class="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
+                        :class="page === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
+                        aria-label="Previous local featured profiles"
+                    >
                         <i class="fa-solid fa-chevron-left text-lg"></i>
                     </button>
-                    <button type="button" class="featured-slider-button" data-slider-next aria-label="Next local featured profiles">
+                    <button type="button"
+                        @click="next()"
+                        :disabled="page >= pages - 1"
+                        class="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-pink-500 shadow-lg text-pink-600 hover:bg-pink-500 hover:text-white transition"
+                        :class="page >= pages - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'"
+                        aria-label="Next local featured profiles"
+                    >
                         <i class="fa-solid fa-chevron-right text-lg"></i>
                     </button>
                 </div>
