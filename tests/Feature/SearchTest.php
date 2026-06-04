@@ -849,6 +849,34 @@ class SearchTest extends TestCase
         $this->assertContains('Expired Online Suggestion', $names);
     }
 
+    public function test_search_suggestions_includes_profile_for_legacy_online_row_even_if_expiry_timestamp_is_in_past(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Legacy Expired Online Suggestion',
+            'slug' => 'legacy-expired-online-suggestion',
+            'profile_status' => 'approved',
+            'age' => 25,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => null,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'online_started_at' => now()->subHours(2),
+            'online_expires_at' => now()->subMinute(),
+        ]);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Legacy+Expired+Online+Suggestion');
+
+        $response->assertOk();
+        $names = array_column($response->json('suggestions'), 'name');
+        $this->assertContains('Legacy Expired Online Suggestion', $names);
+    }
+
     public function test_search_suggestions_returns_suggestions_with_correct_shape_when_results_found(): void
     {
         // Create an approved profile so Scout can potentially return it
