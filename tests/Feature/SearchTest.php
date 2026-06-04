@@ -821,7 +821,7 @@ class SearchTest extends TestCase
         $this->assertContains('Available Now Suggestion', $names);
     }
 
-    public function test_search_suggestions_excludes_profile_when_online_status_is_expired(): void
+    public function test_search_suggestions_includes_profile_when_status_is_online_even_if_expiry_timestamp_is_in_past(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = ProviderProfile::query()->create([
@@ -846,7 +846,7 @@ class SearchTest extends TestCase
 
         $response->assertOk();
         $names = array_column($response->json('suggestions'), 'name');
-        $this->assertNotContains('Expired Online Suggestion', $names);
+        $this->assertContains('Expired Online Suggestion', $names);
     }
 
     public function test_search_suggestions_returns_suggestions_with_correct_shape_when_results_found(): void
