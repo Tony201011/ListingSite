@@ -61,6 +61,7 @@
         }
     }"
 >
+    <x-age-verification-modal />
 
     @include('layouts.partials.header')
 
