@@ -18,9 +18,9 @@
     $renewalDate = optional($user->plan_expires_at ?? null)->format('M d, Y') ?? 'Auto renewal active';
 @endphp
 
-<div class="bg-white min-h-screen py-10 px-4" x-data="{}">
-    <main class="max-w-7xl mx-auto px-6 py-8">    
-        <div class="bg-white min-h-[600px]">
+<div class="min-h-screen bg-gray-50" x-data="{}">
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8">
 
             <button
                 type="button"
