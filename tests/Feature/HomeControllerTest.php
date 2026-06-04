@@ -1452,7 +1452,7 @@ class HomeControllerTest extends TestCase
         $this->assertFalse($names->contains('Featured Offline Escort'));
     }
 
-    public function test_home_featured_slider_hides_offline_profiles_even_when_home_banner_is_active(): void
+    public function test_home_banner_shows_offline_profiles_with_active_paid_placement(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1483,9 +1483,11 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
+        // Paid banner placements must appear in the home banner regardless of the provider's
+        // online status — providers pay for visibility and should always be shown in the banner.
         $homeFeaturedNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
         $this->assertTrue($homeFeaturedNames->contains('Online Featured Escort'));
-        $this->assertFalse($homeFeaturedNames->contains('Offline Featured Escort'));
+        $this->assertTrue($homeFeaturedNames->contains('Offline Featured Escort'));
     }
 
     public function test_featured_page_shows_all_profiles_with_active_paid_placements_regardless_of_online_status(): void

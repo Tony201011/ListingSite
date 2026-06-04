@@ -289,7 +289,8 @@ class BuildProfileFilterViewData
 
     /**
      * Query profiles that hold a specific ad-tier banner placement (home or local).
-     * These are shown in dedicated banner strips and must be currently online.
+     * Banner placements are paid features — profiles are shown in the banner strip
+     * regardless of their current online status.
      */
     private function queryBannerProfiles(
         string $expiryColumn,
