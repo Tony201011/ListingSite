@@ -23,10 +23,10 @@ Route::middleware('profile.selected')->group(function () {
     Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
     Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
     Route::post('/purchase-credit/create-intent', [PurchaseCreditController::class, 'createPaymentIntent'])->name('purchase-credit.create-intent');
-    Route::get('/purchase-credit/success', [PurchaseCreditController::class, 'checkoutSuccess'])->name('purchase-credit.success');
     Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
     Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');
     Route::get('/purchase-history', [PurchaseCreditController::class, 'purchaseHistory'])->name('purchase-history');
     Route::post('/purchase-history/{purchaseTransaction}/complaint', [PurchaseCreditController::class, 'storeComplaint'])->name('purchase-history.complaint');
 });
+Route::get('/purchase-credit/success', [PurchaseCreditController::class, 'checkoutSuccess'])->name('purchase-credit.success');
 Route::get('/payment-subscription', [PaymentSubscriptionController::class, 'index'])->name('payment-subscription');
