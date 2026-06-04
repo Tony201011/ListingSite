@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Listeners\LogPasswordResetNotificationEmail;
 use App\Listeners\RecordUserLogin;
 use App\Listeners\RecordUserLogout;
+use App\Services\Payments\PaymentProviderInterface;
+use App\Services\Payments\PaymentProviderManager;
 use App\Models\FooterText;
 use App\Models\FooterWidget;
 use App\Models\HeaderWidget;
@@ -48,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(FilamentResetPasswordNotification::class, BrandedAgentResetPasswordNotification::class);
+        $this->app->bind(PaymentProviderInterface::class, function ($app) {
+            return $app->make(PaymentProviderManager::class)->current();
+        });
     }
 
     /**

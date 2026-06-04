@@ -11,16 +11,19 @@ class CreditLog extends Model
     protected $fillable = [
         'user_id',
         'amount',
+        'balance_after',
         'type',
         'transaction_type',
         'status',
         'description',
+        'related_payment_id',
         'reference_type',
         'reference_id',
     ];
 
     protected $casts = [
         'amount' => 'integer',
+        'balance_after' => 'integer',
     ];
 
     public function user(): BelongsTo
@@ -31,6 +34,11 @@ class CreditLog extends Model
     public function reference(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function relatedPayment(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseTransaction::class, 'related_payment_id');
     }
 
     public function getFormattedDateAttribute(): string

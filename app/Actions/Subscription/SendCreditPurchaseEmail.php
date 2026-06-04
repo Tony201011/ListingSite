@@ -18,7 +18,7 @@ class SendCreditPurchaseEmail
         SendCreditPurchaseEmailJob::dispatchSync(
             $user->email,
             $user->name,
-            $transaction->credits,
+            $transaction->total_credits,
             (float) $transaction->amount,
             $transaction->currency,
             $transaction->invoice_name,

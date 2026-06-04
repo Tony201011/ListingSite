@@ -6,9 +6,14 @@ use App\Actions\Support\ActionResult;
 use App\Models\AvailableNow;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
+use App\Services\WalletLedgerService;
 
 class UpdateAvailableNowStatus
 {
+    public function __construct(
+        private WalletLedgerService $walletLedgerService,
+    ) {}
+
     public function execute(ProviderProfile $profile, string $status): ActionResult
     {
         $settings = SiteSetting::getStatusSettings();
@@ -131,6 +136,6 @@ class UpdateAvailableNowStatus
             return false;
         }
 
-        return (int) $profile->credits < 0;
+        return $this->walletLedgerService->currentBalance($profile) <= 0;
     }
 }

@@ -6,9 +6,14 @@ use App\Actions\Support\ActionResult;
 use App\Models\OnlineUser;
 use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
+use App\Services\WalletLedgerService;
 
 class UpdateOnlineNowStatus
 {
+    public function __construct(
+        private WalletLedgerService $walletLedgerService,
+    ) {}
+
     public function execute(ProviderProfile $profile, ?string $status): ActionResult
     {
         $onlineUser = $this->getOrCreateOnlineUser($profile);
@@ -140,6 +145,6 @@ class UpdateOnlineNowStatus
             return false;
         }
 
-        return (int) $profile->credits < 0;
+        return $this->walletLedgerService->currentBalance($profile) <= 0;
     }
 }

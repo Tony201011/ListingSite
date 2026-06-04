@@ -8,6 +8,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetProfileSpendingHistory
 {
+    public function __construct(
+        private \App\Services\WalletLedgerService $walletLedgerService,
+    ) {}
+
     public function execute(ProviderProfile $profile): array
     {
         $q = trim((string) request('q', ''));
@@ -55,7 +59,7 @@ class GetProfileSpendingHistory
 
         return [
             'profile' => $profile,
-            'currentBalance' => (int) ($profile->credits ?? 0),
+            'currentBalance' => $this->walletLedgerService->currentBalance($profile),
             'totalSpent' => $totalSpent,
             'dailyFeesSpent' => $dailyFeesSpent,
             'boostsSpent' => $boostsSpent,

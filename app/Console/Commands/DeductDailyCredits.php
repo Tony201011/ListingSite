@@ -5,12 +5,19 @@ namespace App\Console\Commands;
 use App\Models\CreditLog;
 use App\Models\HideShowProfile;
 use App\Models\ProviderProfile;
+use App\Services\WalletLedgerService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DeductDailyCredits extends Command
 {
+    public function __construct(
+        private WalletLedgerService $walletLedgerService,
+    ) {
+        parent::__construct();
+    }
+
     protected $signature = 'credits:deduct-daily';
 
     protected $description = 'Deduct 1 credit per day per visible approved profile and hide unpaid listings';
@@ -70,17 +77,34 @@ class DeductDailyCredits extends Command
                     return [0, 1];
                 }
 
-                $currentBalance = (int) $locked->credits;
-                $locked->decrement('credits', 1);
+                $currentBalance = $this->walletLedgerService->currentBalance($locked);
 
-                CreditLog::create([
-                    'user_id' => $locked->user_id,
-                    'amount' => -1,
-                    'type' => 'daily_deduction',
-                    'description' => "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
-                    'reference_type' => ProviderProfile::class,
-                    'reference_id' => $locked->id,
-                ]);
+                if ($currentBalance <= 0) {
+                    HideShowProfile::updateOrCreate(
+                        ['user_id' => $locked->user_id, 'provider_profile_id' => $locked->id],
+                        ['user_id' => $locked->user_id, 'status' => 'hide']
+                    );
+
+                    return [0, 1];
+                }
+
+                $this->walletLedgerService->record(
+                    $locked,
+                    -1,
+                    'daily_deduction',
+                    "Your current credits balance is {$currentBalance}. You are charged 1 credit per day while your profile is visible.",
+                    null,
+                    'debit',
+                );
+
+                if ($currentBalance - 1 <= 0) {
+                    HideShowProfile::updateOrCreate(
+                        ['user_id' => $locked->user_id, 'provider_profile_id' => $locked->id],
+                        ['user_id' => $locked->user_id, 'status' => 'hide']
+                    );
+
+                    return [1, 1];
+                }
 
                 return [1, 0];
             });

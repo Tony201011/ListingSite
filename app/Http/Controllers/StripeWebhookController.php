@@ -3,24 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Subscription\HandleStripeWebhook;
-use App\Models\SiteSetting;
+use App\Services\Payments\PaymentProviderManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Stripe\Exception\SignatureVerificationException;
-use Stripe\Webhook;
 
 class StripeWebhookController extends Controller
 {
     public function __construct(
         private HandleStripeWebhook $handleStripeWebhook,
+        private PaymentProviderManager $paymentProviderManager,
     ) {}
 
     public function handleWebhook(Request $request)
     {
-        $siteSetting = SiteSetting::first();
+        $provider = $this->paymentProviderManager->for('stripe');
 
-        if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_webhook_secret) {
-            Log::warning('Stripe webhook received but Stripe is not configured');
+        if (! $provider->isConfigured()) {
+            Log::warning('Payment webhook received but Stripe is not configured');
 
             return response('Stripe not configured', 400);
         }
@@ -29,7 +29,7 @@ class StripeWebhookController extends Controller
         $sigHeader = $request->header('Stripe-Signature');
 
         try {
-            $event = Webhook::constructEvent($payload, $sigHeader, $siteSetting->stripe_webhook_secret);
+            $event = $provider->constructWebhookEvent($payload, $sigHeader);
         } catch (\UnexpectedValueException $e) {
             Log::error('Invalid Stripe payload', ['error' => $e->getMessage()]);
 

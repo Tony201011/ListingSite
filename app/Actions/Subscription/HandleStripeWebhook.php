@@ -2,20 +2,13 @@
 
 namespace App\Actions\Subscription;
 
-use App\Actions\Referral\ProcessReferralRewardForFirstPayment;
-use App\Models\CreditLog;
-use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
-use App\Models\SiteSetting;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Stripe\StripeClient;
 
 class HandleStripeWebhook
 {
     public function __construct(
-        private SendCreditPurchaseEmail $sendCreditPurchaseEmail,
-        private ProcessReferralRewardForFirstPayment $processReferralRewardForFirstPayment,
+        private FinalizeCreditPurchase $finalizeCreditPurchase,
     ) {}
 
     public function execute(object $event): void
@@ -56,51 +49,20 @@ class HandleStripeWebhook
             return;
         }
 
-        $receiptUrl = $this->fetchReceiptUrl($session->payment_intent ?? null);
+        $transaction = $this->finalizeCreditPurchase->execute($transaction, [
+            'provider_checkout_id' => $session->id,
+            'provider_transaction_id' => (string) ($session->payment_intent ?? ''),
+            'receipt_url' => $this->fetchReceiptUrl($session->payment_intent ?? null),
+            'paid_at' => now(),
+        ]);
 
-        DB::transaction(function () use ($session, $transaction, $receiptUrl) {
-            $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
-
-            if (! $locked || $locked->status === 'paid') {
-                return;
-            }
-
-            $locked->update([
-                'status' => 'paid',
-                'stripe_payment_intent_id' => $session->payment_intent,
-                'receipt_url' => $receiptUrl,
-                'paid_at' => now(),
-                'provider_profile_id' => $locked->provider_profile_id ?: (int) ($session->metadata->provider_profile_id ?? 0) ?: null,
-            ]);
-
-            $profile = $locked->providerProfile;
-            if ($profile) {
-                $profile->increment('credits', $locked->credits);
-                CreditLog::create([
-                    'user_id' => $locked->user_id,
-                    'amount' => $locked->credits,
-                    'type' => 'purchase_credit',
-                    'description' => "Purchased {$locked->credits} credits",
-                    'reference_type' => ProviderProfile::class,
-                    'reference_id' => $profile->id,
-                ]);
-                Log::info('Credits added to user via webhook', [
-                    'user_id' => $locked->user_id,
-                    'provider_profile_id' => $profile->id,
-                    'credits_added' => $locked->credits,
-                    'transaction_id' => $locked->id,
-                    'session_id' => $session->id,
-                ]);
-            }
-
-            $this->processReferralRewardForFirstPayment->execute($locked);
-        });
-
-        $transaction->refresh();
-
-        if ($transaction->status === 'paid') {
-            $this->sendCreditPurchaseEmail->execute($transaction);
-        }
+        Log::info('Wallet credited from webhook', [
+            'user_id' => $transaction->user_id,
+            'provider_profile_id' => $transaction->provider_profile_id,
+            'credits_added' => $transaction->total_credits,
+            'transaction_id' => $transaction->id,
+            'session_id' => $session->id,
+        ]);
     }
 
     private function handlePaymentIntentSucceeded(object $paymentIntent): void
@@ -113,51 +75,19 @@ class HandleStripeWebhook
             return;
         }
 
-        $receiptUrl = $paymentIntent->latest_charge?->receipt_url ?? null;
+        $transaction = $this->finalizeCreditPurchase->execute($transaction, [
+            'provider_transaction_id' => $paymentIntent->id,
+            'receipt_url' => $paymentIntent->latest_charge?->receipt_url ?? null,
+            'paid_at' => now(),
+        ]);
 
-        DB::transaction(function () use ($paymentIntent, $transaction, $receiptUrl) {
-            $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
-
-            if (! $locked || $locked->status === 'paid') {
-                return;
-            }
-
-            $locked->update([
-                'status' => 'paid',
-                'stripe_payment_intent_id' => $paymentIntent->id,
-                'receipt_url' => $receiptUrl,
-                'paid_at' => now(),
-                'provider_profile_id' => $locked->provider_profile_id ?: (int) ($paymentIntent->metadata->provider_profile_id ?? 0) ?: null,
-            ]);
-
-            $profile = $locked->providerProfile;
-            if ($profile) {
-                $profile->increment('credits', $locked->credits);
-                CreditLog::create([
-                    'user_id' => $locked->user_id,
-                    'amount' => $locked->credits,
-                    'type' => 'purchase_credit',
-                    'description' => "Purchased {$locked->credits} credits",
-                    'reference_type' => ProviderProfile::class,
-                    'reference_id' => $profile->id,
-                ]);
-                Log::info('Credits added to user via payment_intent webhook', [
-                    'user_id' => $locked->user_id,
-                    'provider_profile_id' => $profile->id,
-                    'credits_added' => $locked->credits,
-                    'transaction_id' => $locked->id,
-                    'payment_intent_id' => $paymentIntent->id,
-                ]);
-            }
-
-            $this->processReferralRewardForFirstPayment->execute($locked);
-        });
-
-        $transaction->refresh();
-
-        if ($transaction->status === 'paid') {
-            $this->sendCreditPurchaseEmail->execute($transaction);
-        }
+        Log::info('Wallet credited from payment intent webhook', [
+            'user_id' => $transaction->user_id,
+            'provider_profile_id' => $transaction->provider_profile_id,
+            'credits_added' => $transaction->total_credits,
+            'transaction_id' => $transaction->id,
+            'payment_intent_id' => $paymentIntent->id,
+        ]);
     }
 
     private function fetchReceiptUrl(?string $paymentIntentId): ?string
@@ -167,15 +97,9 @@ class HandleStripeWebhook
         }
 
         try {
-            $siteSetting = SiteSetting::first();
-            if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
-                return null;
-            }
-
-            $stripe = new StripeClient($siteSetting->stripe_secret_key);
-            $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId, [
-                'expand' => ['latest_charge'],
-            ]);
+            $paymentIntent = app(\App\Services\Payments\PaymentProviderManager::class)
+                ->for('stripe')
+                ->retrievePaymentIntent($paymentIntentId);
 
             return $paymentIntent->latest_charge?->receipt_url ?? null;
         } catch (\Exception $e) {

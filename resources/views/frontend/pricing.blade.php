@@ -55,7 +55,7 @@
                         <tbody class="text-gray-700">
                             @foreach($packages as $package)
                                 <tr class="border-t border-gray-100 {{ $loop->odd ? 'bg-white' : 'bg-gray-50' }}">
-                                    <td class="px-3 py-3 sm:px-4">{{ $package->credits }}</td>
+                                    <td class="px-3 py-3 sm:px-4">{{ $package->total_credits }}</td>
                                     <td class="px-3 py-3 font-semibold sm:px-4">{{ $package->total_price }}</td>
                                     <td class="px-3 py-3 text-right sm:px-4">{{ $package->price_per_credit }}</td>
                                 </tr>

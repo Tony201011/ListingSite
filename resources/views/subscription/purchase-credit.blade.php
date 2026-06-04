@@ -5,8 +5,10 @@
     $packagesJson = $packages->map(fn ($p) => [
         'id' => $p->id,
         'name' => $p->name,
-        'credits' => $p->credits,
+        'credits' => $p->total_credits,
+        'bonus_credits' => $p->bonus_credits,
         'price' => number_format($p->price, 2),
+        'currency' => $p->currency,
     ])->values()->toJson();
 @endphp
 <div id="purchase-credit-flow" class="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8" x-data="{
@@ -24,7 +26,7 @@
     <div class="mx-auto w-full max-w-5xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Add Balance</h1>
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Add Wallet Credits</h1>
                 <p class="mt-3 text-gray-600">One credit for every day your profile is online.</p>
             </div>
             <a href="{{ route('my-profile') }}" class="text-xs sm:text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
@@ -70,8 +72,8 @@
                         <input type="hidden" name="package_id" value="{{ $lockedPackageId }}">
                         <div class="rounded-xl border border-pink-100 bg-pink-50 p-4">
                             <p class="text-xs font-semibold uppercase tracking-wide text-[#e04ecb]">Selected membership</p>
-                            <p class="mt-2 text-lg font-bold text-gray-900">{{ $selectedPackage->credits }} credits</p>
-                            <p class="mt-1 text-sm text-gray-700">Up to {{ $selectedPackage->credits }} days online &mdash; AUD ${{ number_format($selectedPackage->price, 2) }} (incl. GST)</p>
+                            <p class="mt-2 text-lg font-bold text-gray-900">{{ $selectedPackage->total_credits }} credits</p>
+                            <p class="mt-1 text-sm text-gray-700">Up to {{ $selectedPackage->total_credits }} days online &mdash; {{ $selectedPackage->currency }} ${{ number_format($selectedPackage->price, 2) }} (incl. GST)</p>
                             @if($selectedPackage->description)
                                 <p class="mt-1 text-xs text-gray-500">{{ $selectedPackage->description }}</p>
                             @elseif($selectedPackage->name)
@@ -99,8 +101,11 @@
                                             {{ $package->id === $selectedPackageId ? 'checked' : '' }}
                                          >
                                          <div>
-                                            <p class="text-sm font-semibold text-gray-900">{{ $package->credits }} credits</p>
-                                            <p class="text-xs text-gray-700">Up to {{ $package->credits }} days online &mdash; AUD ${{ number_format($package->price, 2) }} (incl. GST)</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ $package->total_credits }} credits</p>
+                                            <p class="text-xs text-gray-700">Up to {{ $package->total_credits }} days online &mdash; {{ $package->currency }} ${{ number_format($package->price, 2) }} (incl. GST)</p>
+                                            @if($package->bonus_credits > 0)
+                                                <p class="text-xs font-medium text-emerald-600">Includes {{ $package->bonus_credits }} bonus credits</p>
+                                            @endif
                                             @if($package->description)
                                                 <p class="text-xs text-gray-500">{{ $package->description }}</p>
                                             @elseif($package->name)
@@ -141,7 +146,8 @@
                                 <div>
                                     <p class="mt-2 text-xl font-bold text-gray-900" x-text="selected.credits + ' credits'"></p>
                                     <p class="mt-1 text-sm text-gray-700" x-text="'Up to ' + selected.credits + ' days online'"></p>
-                                    <p class="mt-0.5 text-sm font-semibold text-gray-900" x-text="'AUD $' + selected.price"></p>
+                                    <p class="mt-0.5 text-sm font-semibold text-gray-900" x-text="selected.currency + ' $' + selected.price"></p>
+                                    <p class="mt-1 text-xs font-medium text-emerald-600" x-show="selected.bonus_credits > 0" x-text="'Includes ' + selected.bonus_credits + ' bonus credits'"></p>
                                     <p class="mt-1 text-xs text-gray-500" x-text="selected.name"></p>
                                 </div>
                             </template>
@@ -151,7 +157,7 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
                         <p class="text-xs text-gray-500">All prices are in Australian Dollars (AUD) and include GST.</p>
-                        @if($stripeEnabled)
+                        @if($paymentEnabled && $paymentProvider === 'stripe')
                             <button
                                 type="button"
                                 id="proceed-to-payment"
@@ -177,8 +183,8 @@
                 </form>
             </div>
 
-            {{-- Step 2: Stripe PaymentElement (only rendered when stripe is enabled) --}}
-            @if($stripeEnabled)
+            {{-- Step 2: payment provider element --}}
+            @if($paymentEnabled && $paymentProvider === 'stripe')
             <div x-show="step === 'payment'" x-cloak class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6 space-y-5">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-900">Enter payment details</h2>
@@ -198,7 +204,7 @@
                 <div id="payment-element" class="rounded-xl border border-gray-200 p-4"></div>
 
                 <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                    <p class="text-xs text-gray-500">Secured by Stripe. All prices in AUD include GST.</p>
+                    <p class="text-xs text-gray-500">Secured by {{ ucfirst($paymentProvider) }}. All prices in AUD include GST.</p>
                     <button
                         type="button"
                         id="submit-payment"
@@ -223,12 +229,12 @@
 </div>
 @endsection
 
-@if($stripeEnabled)
+@if($paymentEnabled && $paymentProvider === 'stripe')
 @push('scripts')
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 (function () {
-    const stripe = Stripe('{{ $stripePublishableKey }}');
+    const stripe = Stripe('{{ $paymentPublicKey }}');
     let elements = null;
     let paymentElement = null;
     let clientSecret = null;

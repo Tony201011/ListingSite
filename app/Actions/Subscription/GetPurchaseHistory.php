@@ -6,6 +6,7 @@ use App\Actions\GetActiveProviderProfile;
 use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
+use App\Services\WalletLedgerService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,6 +14,7 @@ class GetPurchaseHistory
 {
     public function __construct(
         private GetActiveProviderProfile $getActiveProviderProfile,
+        private WalletLedgerService $walletLedgerService,
     ) {}
 
     public function execute(): array
@@ -101,11 +103,12 @@ class GetPurchaseHistory
         ];
 
         // Wallet summary
-        $currentBalance = $profile?->credits ?? 0;
+        $currentBalance = $profile ? $this->walletLedgerService->currentBalance($profile) : 0;
         $totalPurchased = PurchaseTransaction::where('user_id', $user->id)
             ->where('provider_profile_id', $profileId)
             ->where('status', 'paid')
-            ->sum('credits');
+            ->get()
+            ->sum(fn (PurchaseTransaction $payment) => $payment->total_credits);
         $totalSpent = abs(
             CreditLog::where('user_id', $user->id)
                 ->where('reference_type', ProviderProfile::class)

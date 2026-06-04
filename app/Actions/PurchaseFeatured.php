@@ -4,15 +4,19 @@ namespace App\Actions;
 
 use App\Actions\Support\ActionResult;
 use App\Jobs\SendFeaturedPurchaseEmailJob;
-use App\Models\CreditLog;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Services\WalletLedgerService;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseFeatured
 {
     private const AD_TIER_DURATION_DAYS = 1;
+
+    public function __construct(
+        private WalletLedgerService $walletLedgerService,
+    ) {}
 
     /** Valid tier identifiers */
     public const TIER_NORMAL = 'normal';
@@ -41,12 +45,13 @@ class PurchaseFeatured
         $durationDays = self::AD_TIER_DURATION_DAYS;
 
         [$creditCost, $expiryColumn, $tierLabel] = $this->resolveTier($tier, $settings);
+        $availableCredits = $this->walletLedgerService->currentBalance($profile);
 
-        if ((int) $profile->credits < $creditCost) {
+        if ($availableCredits < $creditCost) {
             return new ActionResult(
                 false,
                 422,
-                "You need {$creditCost} credits to activate this ad. You currently have {$profile->credits} credits on this profile.",
+                "You need {$creditCost} credits to activate this ad. You currently have {$availableCredits} credits on this profile.",
                 $this->buildPayload($profile, $tier, $creditCost, $durationDays, $expiryColumn),
                 'domain'
             );
@@ -72,16 +77,14 @@ class PurchaseFeatured
 
             $profile->save();
 
-            $profile->decrement('credits', $creditCost);
-
-            CreditLog::create([
-                'user_id' => $user->id,
-                'amount' => -$creditCost,
-                'type' => 'used',
-                'description' => "Activated {$tierLabel} for {$durationDays} day",
-                'reference_type' => ProviderProfile::class,
-                'reference_id' => $profile->id,
-            ]);
+            $this->walletLedgerService->record(
+                $profile,
+                -$creditCost,
+                'used',
+                "Activated {$tierLabel} for {$durationDays} day",
+                null,
+                'debit',
+            );
         });
 
         $profile->refresh();

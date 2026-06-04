@@ -447,6 +447,48 @@ class PurchaseCreditFlowTest extends TestCase
             'id' => $profile->id,
             'credits' => 50,
         ]);
+        $this->assertDatabaseHas('credit_logs', [
+            'user_id' => $user->id,
+            'amount' => 50,
+            'type' => 'purchase_credit',
+            'related_payment_id' => $transaction->id,
+        ]);
+        $this->assertDatabaseHas('invoices', [
+            'payment_id' => $transaction->id,
+            'user_id' => $user->id,
+            'credits' => 50,
+            'payment_provider' => 'stripe',
+        ]);
+    }
+
+    public function test_webhook_applies_bonus_credits_and_generates_invoice(): void
+    {
+        $user = $this->createProvider();
+        $profile = $user->providerProfile;
+        $profile->update(['credits' => 0]);
+
+        $transaction = PurchaseTransaction::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'provider' => 'stripe',
+            'credits' => 30,
+            'bonus_credits' => 5,
+            'amount' => '19.99',
+            'currency' => 'AUD',
+            'status' => 'pending',
+            'invoice_name' => 'Bonus Test',
+        ]);
+
+        $this->invokeWebhookHandler($transaction, 'cs_test_bonus');
+
+        $this->assertDatabaseHas('provider_profiles', [
+            'id' => $profile->id,
+            'credits' => 35,
+        ]);
+        $this->assertDatabaseHas('invoices', [
+            'payment_id' => $transaction->id,
+            'credits' => 35,
+        ]);
     }
 
     public function test_webhook_credits_only_target_profile_under_same_account(): void
@@ -500,7 +542,10 @@ class PurchaseCreditFlowTest extends TestCase
             ->method('execute')
             ->with($this->callback(fn ($t) => $t->id === $transaction->id));
 
-        $controller = new HandleStripeWebhook($emailAction, $this->createMock(ProcessReferralRewardForFirstPayment::class));
+        $this->app->instance(SendCreditPurchaseEmail::class, $emailAction);
+        $this->app->instance(ProcessReferralRewardForFirstPayment::class, $this->createMock(ProcessReferralRewardForFirstPayment::class));
+
+        $controller = $this->app->make(HandleStripeWebhook::class);
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
@@ -573,10 +618,8 @@ class PurchaseCreditFlowTest extends TestCase
     {
         Log::spy();
 
-        $controller = new HandleStripeWebhook(
-            new SendCreditPurchaseEmail,
-            $this->createMock(ProcessReferralRewardForFirstPayment::class)
-        );
+        $this->app->instance(ProcessReferralRewardForFirstPayment::class, $this->createMock(ProcessReferralRewardForFirstPayment::class));
+        $controller = $this->app->make(HandleStripeWebhook::class);
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 
@@ -688,10 +731,8 @@ class PurchaseCreditFlowTest extends TestCase
     ): void {
         Mail::fake();
 
-        $controller = new HandleStripeWebhook(
-            new SendCreditPurchaseEmail,
-            $this->createMock(ProcessReferralRewardForFirstPayment::class)
-        );
+        $this->app->instance(ProcessReferralRewardForFirstPayment::class, $this->createMock(ProcessReferralRewardForFirstPayment::class));
+        $controller = $this->app->make(HandleStripeWebhook::class);
         $method = new \ReflectionMethod($controller, 'handleCheckoutSessionCompleted');
         $method->setAccessible(true);
 

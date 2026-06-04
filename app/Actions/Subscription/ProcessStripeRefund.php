@@ -3,17 +3,19 @@
 namespace App\Actions\Subscription;
 
 use App\Actions\Referral\ReverseReferralRewardForRefund;
-use App\Models\CreditLog;
+use App\Models\Refund;
 use App\Models\PurchaseTransaction;
-use App\Models\SiteSetting;
+use App\Services\Payments\PaymentProviderManager;
+use App\Services\WalletLedgerService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Stripe\StripeClient;
 
 class ProcessStripeRefund
 {
     public function __construct(
         private ReverseReferralRewardForRefund $reverseReferralRewardForRefund,
+        private PaymentProviderManager $paymentProviderManager,
+        private WalletLedgerService $walletLedgerService,
     ) {}
 
     public function execute(PurchaseTransaction $transaction): void
@@ -22,14 +24,14 @@ class ProcessStripeRefund
             throw new \RuntimeException('Only paid transactions can be refunded.');
         }
 
-        $siteSetting = SiteSetting::first();
+        $provider = $this->paymentProviderManager->for($transaction->provider ?: 'stripe');
 
-        if (! $siteSetting?->stripe_enabled || ! $siteSetting->stripe_secret_key) {
-            throw new \RuntimeException('Stripe is not configured.');
+        if (! $provider->isConfigured()) {
+            throw new \RuntimeException('Payment provider is not configured.');
         }
 
-        if (! $transaction->stripe_payment_intent_id) {
-            throw new \RuntimeException('No Stripe payment intent found for this transaction.');
+        if (! ($transaction->provider_transaction_id ?: $transaction->stripe_payment_intent_id)) {
+            throw new \RuntimeException('No payment reference found for this transaction.');
         }
 
         $refundBreakdown = $this->calculateRefundBreakdown($transaction);
@@ -49,28 +51,16 @@ class ProcessStripeRefund
             throw new \RuntimeException('Unable to calculate a refundable amount for this transaction.');
         }
 
-        $fullAmountInCents = $this->toStripeAmountInCents((float) $transaction->amount);
+        $refund = $provider->refund($transaction, $refundAmountInCents);
 
-        $stripe = new StripeClient($siteSetting->stripe_secret_key);
-
-        $refundPayload = [
-            'payment_intent' => $transaction->stripe_payment_intent_id,
-        ];
-
-        if ($refundAmountInCents < $fullAmountInCents) {
-            $refundPayload['amount'] = $refundAmountInCents;
-        }
-
-        $refund = $stripe->refunds->create($refundPayload);
-
-        Log::info('Stripe refund created', [
+        Log::info('Payment refund created', [
             'refund_id' => $refund->id,
             'transaction_id' => $transaction->id,
             'amount' => $refundAmountInCents / 100,
             'refundable_credits' => $refundableCredits,
         ]);
 
-        DB::transaction(function () use ($transaction, $refundableCredits): void {
+        DB::transaction(function () use ($transaction, $refundableCredits, $refundAmountInCents, $refund): void {
             $locked = PurchaseTransaction::lockForUpdate()->find($transaction->id);
             $creditsToDeduct = 0;
 
@@ -78,10 +68,9 @@ class ProcessStripeRefund
                 throw new \RuntimeException('Transaction is no longer eligible for refund.');
             }
 
-            $user = $locked->user;
             $profile = $locked->providerProfile;
             if ($profile) {
-                $availableCredits = max((int) $profile->credits, 0);
+                $availableCredits = max($this->walletLedgerService->currentBalance($profile), 0);
                 $creditsToDeduct = min($availableCredits, $refundableCredits);
 
                 if ($creditsToDeduct <= 0) {
@@ -98,10 +87,27 @@ class ProcessStripeRefund
                     ]);
                 }
 
-                $profile->decrement('credits', $creditsToDeduct);
+                $this->walletLedgerService->record(
+                    $profile,
+                    -$creditsToDeduct,
+                    'refund',
+                    "Refund processed for payment #{$locked->id}",
+                    $locked,
+                    'refund',
+                );
             }
 
             $locked->update(['status' => 'refunded']);
+
+            Refund::query()->create([
+                'payment_id' => $locked->id,
+                'user_id' => $locked->user_id,
+                'amount' => $refundAmountInCents / 100,
+                'refunded_credits' => $creditsToDeduct,
+                'provider_refund_id' => $refund->id ?? null,
+                'reason' => 'Unused wallet credits refunded by admin.',
+                'status' => 'completed',
+            ]);
 
             $this->reverseReferralRewardForRefund->execute($locked);
 
@@ -119,7 +125,7 @@ class ProcessStripeRefund
      */
     private function calculateRefundBreakdown(PurchaseTransaction $transaction): array
     {
-        $transactionCredits = max((int) $transaction->credits, 0);
+        $transactionCredits = max((int) $transaction->total_credits, 0);
         $userId = $transaction->user_id;
         $profileId = $transaction->provider_profile_id;
 
@@ -132,11 +138,12 @@ class ProcessStripeRefund
             ];
         }
 
-        $totalUsedCredits = (int) abs(CreditLog::query()
+        $totalUsedCredits = (int) abs(\App\Models\CreditLog::query()
             ->where('user_id', $userId)
             ->where('reference_type', \App\Models\ProviderProfile::class)
             ->where('reference_id', $profileId)
             ->where('amount', '<', 0)
+            ->where('type', '!=', 'refund')
             ->sum('amount'));
 
         $transactionSortDate = $transaction->paid_at ?? $transaction->created_at;
@@ -155,13 +162,13 @@ class ProcessStripeRefund
             })
             ->orderByRaw('COALESCE(paid_at, created_at) ASC')
             ->orderBy('id')
-            ->get(['id', 'credits']);
+            ->get(['id', 'credits', 'bonus_credits']);
 
         $remainingUsedCredits = $totalUsedCredits;
         $usedCreditsFromTransaction = 0;
 
         foreach ($paidTransactions as $paidTransaction) {
-            $paidCredits = max((int) $paidTransaction->credits, 0);
+            $paidCredits = max((int) $paidTransaction->total_credits, 0);
             $allocatedUsedCredits = min($remainingUsedCredits, $paidCredits);
 
             if ((int) $paidTransaction->id === (int) $transaction->id) {
@@ -174,7 +181,12 @@ class ProcessStripeRefund
 
         $unusedCredits = max($transactionCredits - $usedCreditsFromTransaction, 0);
         $transaction->loadMissing('providerProfile:id,credits');
-        $availableCredits = max((int) ($transaction->providerProfile?->credits ?? 0), 0);
+        $availableCredits = max(
+            $transaction->providerProfile
+                ? $this->walletLedgerService->currentBalance($transaction->providerProfile)
+                : 0,
+            0
+        );
 
         return [
             'transaction_credits' => $transactionCredits,
