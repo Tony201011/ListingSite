@@ -32,7 +32,7 @@
     $hasStatusBadges = $profile['verified'] || !empty($profile['available_now']);
 @endphp
 <article
-    class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 flex flex-col h-full"
+    class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
 >
     <a href="{{ $profile['profile_url'] ?? route('profile.show.no-sequence', array_merge(['state' => 'au', 'suburb' => 'australia', 'slug' => $profile['slug']], request()->query())) }}" class="absolute inset-0 z-10" aria-label="View profile for {{ $profile['name'] }}"></a>
 
@@ -42,13 +42,13 @@
             <img
                 src="{{ $profile['image'] }}"
                 alt="{{ $profile['name'] }}"
-                class="card-image origin-center transition-transform duration-500 group-hover:scale-105"
+                class="w-full object-cover origin-center transition-transform duration-500 group-hover:scale-105 h-52"
                 loading="lazy"
                 decoding="async"
                 fetchpriority="low"
             >
         @else
-            <div class="card-image-placeholder text-gray-400">
+            <div class="flex items-center justify-center bg-gray-100 text-gray-400 h-52">
                 <i class="fa-solid fa-image text-4xl"></i>
             </div>
         @endif
@@ -76,7 +76,7 @@
     </div>
 
     {{-- Content --}}
-    <div class="p-3.5 flex-1 flex flex-col">
+    <div class="p-3.5">
         {{-- Date + Actions row --}}
         <div class="mb-2 flex items-center justify-between">
             <span class="text-[11px] text-gray-400">{{ $profile['date'] }}</span>
