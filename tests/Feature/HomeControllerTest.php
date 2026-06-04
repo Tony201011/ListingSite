@@ -191,7 +191,6 @@ class HomeControllerTest extends TestCase
             'maxPrice',
             'locationQuery',
             'girlsMode',
-            'girlsModeUrls',
             'hasAgeFilter',
             'hasPriceFilter',
             'hasDistanceFilter',
@@ -1080,19 +1079,7 @@ class HomeControllerTest extends TestCase
             'minPrice',
             'maxPrice',
             'locationQuery',
-            'girlsModeUrls',
         ]);
-    }
-
-    public function test_advanced_search_location_route_builds_girls_mode_urls_with_location_slug(): void
-    {
-        $response = $this->get('/search/melbourne-vic?distance=250');
-
-        $girlsModeUrls = $response->viewData('girlsModeUrls');
-
-        $this->assertSame(url('/search/melbourne-vic?distance=250&girls=new'), $girlsModeUrls['new']);
-        $this->assertSame(url('/search/melbourne-vic?distance=250'), $girlsModeUrls['all']);
-        $this->assertSame(url('/search/melbourne-vic?distance=250&girls=popular'), $girlsModeUrls['popular']);
     }
 
     // ---------------------------------------------------------------

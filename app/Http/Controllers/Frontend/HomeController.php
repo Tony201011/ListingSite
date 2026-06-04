@@ -39,7 +39,6 @@ class HomeController extends Controller
         $viewData = $this->buildProfileFilterViewData->execute($validated, syncWithAdminOnlineListing: true);
 
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
-        $viewData['girlsModeUrls'] = $this->buildGirlsModeUrls($validated);
 
         return view('frontend.home', $viewData);
     }
@@ -54,7 +53,6 @@ class HomeController extends Controller
 
         $viewData = $this->buildProfileFilterViewData->execute($validated, syncWithAdminOnlineListing: true, advancedSearch: true);
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
-        $viewData['girlsModeUrls'] = $this->buildGirlsModeUrls($validated, advancedSearch: true);
 
         return view('frontend.advanced-search', $viewData);
     }
@@ -276,18 +274,5 @@ class HomeController extends Controller
                 $homeBannerIds->implode(','),
             ])),
         ]);
-    }
-
-    private function buildGirlsModeUrls(array $validated, bool $advancedSearch = false): array
-    {
-        return collect(['new', 'all', 'popular'])
-            ->mapWithKeys(fn (string $mode): array => [
-                $mode => $this->listingPaginationUrlService->buildUrl(
-                    array_merge($validated, ['girls' => $mode]),
-                    1,
-                    $advancedSearch
-                ),
-            ])
-            ->all();
     }
 }
