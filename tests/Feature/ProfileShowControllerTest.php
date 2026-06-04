@@ -87,6 +87,19 @@ class ProfileShowControllerTest extends TestCase
         $response->assertStatus(301);
     }
 
+    public function test_profile_show_redirects_legacy_slug_with_embedded_sequence_to_canonical_url(): void
+    {
+        $this->createApprovedProvider([
+            'slug' => 'kelly',
+            'profile_sequence' => 661,
+        ]);
+
+        $response = $this->get($this->profileUrl('kelly661'));
+
+        $response->assertRedirect($this->profileUrl('kelly'));
+        $response->assertStatus(301);
+    }
+
     public function test_profile_show_renders_correct_view(): void
     {
         $this->createApprovedProvider();
