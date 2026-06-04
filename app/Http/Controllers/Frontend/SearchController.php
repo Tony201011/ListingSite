@@ -127,15 +127,7 @@ class SearchController extends Controller
     {
         $query->where(function ($availabilityQuery): void {
             $availabilityQuery
-                ->where(function ($onlineQuery): void {
-                    $onlineQuery->whereHas('onlineUsers', fn ($profileOnlineQuery) => $profileOnlineQuery
-                        ->whereNotNull('provider_profile_id')
-                        ->where('status', 'online')
-                        ->where(function ($onlineExpiryQuery): void {
-                            $onlineExpiryQuery->whereNull('online_expires_at')
-                                ->orWhere('online_expires_at', '>', now());
-                        }));
-                })
+                ->where(fn ($onlineQuery) => $onlineQuery->whereCurrentlyOnline())
                 ->orWhere(function ($legacyQuery): void {
                     $legacyQuery->whereDoesntHave(
                         'onlineUsers',
