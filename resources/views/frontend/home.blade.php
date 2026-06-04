@@ -274,7 +274,7 @@
                     <a href="{{ url('/') }}" class="text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
                 </p>
             @endif
-            {{ $profiles->links() }}
+            {{ $profiles->onEachSide(1)->links('vendor.pagination.home') }}
         </div>
 
         {{-- Ad: Home Bottom --}}
