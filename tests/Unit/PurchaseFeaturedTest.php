@@ -193,6 +193,26 @@ class PurchaseFeaturedTest extends TestCase
         $this->assertTrue($profile->local_banner_expires_at->isFuture());
     }
 
+    public function test_purchase_works_for_profile_with_active_free_listing_period(): void
+    {
+        SiteSetting::query()->create([
+            'featured_duration_days' => 1,
+            'normal_featured_credit_cost' => 1,
+        ]);
+        [$user, $profile] = $this->createProvider(credits: 20);
+        $profile->update([
+            'free_listing_expires_at' => now()->addDays(21),
+        ]);
+
+        $result = app(PurchaseFeatured::class)->execute($user, $profile, PurchaseFeatured::TIER_NORMAL);
+
+        $this->assertTrue($result->isSuccess());
+        $profile->refresh();
+        $this->assertTrue((bool) $profile->is_featured);
+        $this->assertNotNull($profile->featured_expires_at);
+        $this->assertTrue($profile->featured_expires_at->isFuture());
+    }
+
     public function test_get_featured_state_includes_all_tier_expiries(): void
     {
         $this->createSettings(creditCost: 1, durationDays: 1);
