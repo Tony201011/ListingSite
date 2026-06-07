@@ -1720,6 +1720,20 @@ class HomeControllerTest extends TestCase
         $filteredResponse->assertSeeText('Featured');
     }
 
+    public function test_home_banner_includes_profile_when_banner_expires_later_today(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Today Active Banner Escort',
+            'slug' => 'today-active-banner-escort',
+            'home_banner_expires_at' => now()->startOfDay(),
+        ]);
+
+        $response = $this->get('/');
+
+        $homeBannerNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($homeBannerNames->contains('Today Active Banner Escort'));
+    }
+
     public function test_listings_online_count_endpoint_includes_banner_and_featured_counts(): void
     {
         $this->createApprovedProvider([
