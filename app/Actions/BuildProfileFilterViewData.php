@@ -313,7 +313,10 @@ class BuildProfileFilterViewData
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
             ->whereNotNull("provider_profiles.{$expiryColumn}")
-            ->where("provider_profiles.{$expiryColumn}", '>', now())
+            ->where(function (Builder $q) use ($expiryColumn): void {
+                $q->where("provider_profiles.{$expiryColumn}", '>', now())
+                    ->orWhereDate("provider_profiles.{$expiryColumn}", today());
+            })
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'photoVerification' => fn ($q) => $q->where('status', 'approved')->orderByDesc('submitted_at'),
