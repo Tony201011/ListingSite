@@ -42,16 +42,6 @@ class ProfileSwitchController extends Controller
     {
         $this->authorizeProfileOwnership($profile);
 
-        if (
-            $request->validated('status') === 'online' &&
-            ! $this->isProfileReadyForOnline($profile)
-        ) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please complete your profile in Edit Profile and upload at least one photo before going online.',
-            ], 403);
-        }
-
         $result = $this->updateOnlineNowStatus->execute($profile, $request->validated('status'));
 
         return response()->json($result->toPayload(), $result->status());
@@ -214,38 +204,5 @@ class ProfileSwitchController extends Controller
         if ($profile->user_id !== Auth::id()) {
             abort(403);
         }
-    }
-
-    private function isProfileReadyForOnline(ProviderProfile $profile): bool
-    {
-        return $this->isProfileStepOneCompleted($profile) && $this->hasProfilePhoto($profile);
-    }
-
-    private function isProfileStepOneCompleted(ProviderProfile $profile): bool
-    {
-        return ! empty($profile->introduction_line) &&
-            ! empty($profile->profile_text) &&
-            ! empty($profile->age_group_id) &&
-            ! empty($profile->hair_color_id) &&
-            ! empty($profile->hair_length_id) &&
-            ! empty($profile->ethnicity_id) &&
-            ! empty($profile->body_type_id) &&
-            ! empty($profile->bust_size_id) &&
-            ! empty($profile->your_length_id) &&
-            ! empty($profile->availability) &&
-            ! empty($profile->contact_method) &&
-            ! empty($profile->phone_contact_preference) &&
-            ! empty($profile->time_waster_shield) &&
-            ! empty($profile->primary_identity) &&
-            ! empty($profile->attributes) &&
-            ! empty($profile->services_style) &&
-            ! empty($profile->services_provided);
-    }
-
-    private function hasProfilePhoto(ProviderProfile $profile): bool
-    {
-        return $profile->profileImages()
-            ->whereNull('deleted_at')
-            ->exists();
     }
 }
