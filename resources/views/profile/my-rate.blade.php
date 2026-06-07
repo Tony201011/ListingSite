@@ -1,31 +1,30 @@
 @extends('layouts.frontend')
 
 @section('content')
-<!-- Main Content -->
-<div class="bg-[#f8fafc] min-h-screen py-8 sm:py-10">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6">
+<div class="min-h-screen bg-gray-50">
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8">
 
         <!-- Back button -->
-        <button onclick="window.history.back()" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium bg-transparent border-0 cursor-pointer">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Go back
+        <button
+            type="button"
+            onclick="window.history.back()"
+            class="inline-flex items-center text-pink-500 hover:text-pink-600 transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
+        >
+            <span class="mr-1">&lt;</span> back
         </button>
 
         <!-- Page Title -->
         <div class="mb-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 border-l-4 border-[#e04ecb] pl-4">
-                My <span class="text-[#e04ecb]">Rates</span>
-            </h2>
+            <h1 class="text-3xl font-bold text-gray-900">My Rate</h1>
         </div>
 
         <!-- Description card -->
-        <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100 mb-8">
+        <div class="rounded-lg border border-gray-300 p-6 mb-8">
             <p class="text-gray-700 text-lg leading-relaxed">
                 You can group your rates by the type of services you offer, for example:
                 <span class="block mt-2 text-gray-600 text-base">
-                    massages, <span class="font-semibold text-[#e04ecb]">gfe</span>, <span class="font-semibold text-[#e04ecb]">pse</span>, kink/bdsm, netflix and chill, online services, lunch / dinner dates, extended & overnight dates, fmty, etc.
+                    massages, <span class="font-semibold text-pink-500">gfe</span>, <span class="font-semibold text-pink-500">pse</span>, kink/bdsm, netflix and chill, online services, lunch / dinner dates, extended & overnight dates, fmty, etc.
                 </span>
             </p>
         </div>
@@ -52,7 +51,7 @@
             class="space-y-8"
         >
             <!-- Rates List -->
-            <div id="rates-container" class="bg-white rounded-2xl p-5 sm:p-6 md:p-8 shadow-md border border-gray-100">
+            <div id="rates-container" class="rounded-lg border border-gray-300 p-5 sm:p-6 md:p-8">
                 <div class="flex items-baseline flex-wrap gap-2 mb-2">
                     <h2 class="text-2xl font-semibold text-gray-800">Your rates</h2>
                     <span class="text-gray-500 text-sm">(not in a group)</span>
@@ -110,7 +109,6 @@
                                 <div>
                                     <p class="text-xs text-gray-500 mb-1">Outcall</p>
                                     <p class="text-gray-800 font-medium" x-text="rate.outcall ? '$' + rate.outcall : '—'"></p>
-                                </div>
                             </div>
 
                             <div class="flex items-center gap-4">
@@ -130,14 +128,14 @@
                 </div>
 
                 <!-- Add / Edit Rate Button -->
-                <button x-show="!showForm" @click="openFormForAdd()" aria-label="Add a new rate" class="w-full sm:w-auto bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                <button x-show="!showForm" @click="openFormForAdd()" aria-label="Add a new rate" class="w-full sm:w-auto bg-pink-500 hover:bg-pink-600 text-white font-medium px-8 py-3 rounded transition">
                     + Add rate
                 </button>
 
                 <!-- Rate Form -->
                 <div id="rate-form" x-show="showForm" x-transition class="mt-8">
-                    <div class="bg-pink-50 border border-[#e04ecb] rounded-xl p-6">
-                        <div class="border-b border-[#e04ecb]/30 pb-4 mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center items-start gap-2">
+                    <div class="bg-pink-50 border border-pink-300 rounded-lg p-6">
+                        <div class="border-b border-pink-300 pb-4 mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center items-start gap-2">
                             <span class="text-xl font-semibold text-gray-800" x-text="editingId ? 'Edit rate' : 'Add new rate'"></span>
                             <span class="text-gray-600 text-sm">If you don't have an incall or outcall rate, leave blank</span>
                         </div>
@@ -145,9 +143,9 @@
                         <form @submit.prevent="saveRate" class="space-y-5">
                             <!-- Description -->
                             <div>
-                                <label class="block font-semibold text-[#e04ecb] mb-1">Description</label>
+                                <label class="block font-semibold text-pink-500 mb-1">Description</label>
                                 <input type="text" x-model="form.desc"
-                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent text-gray-900"
+                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900"
                                     :class="{ 'border-red-500': validationErrors.desc, 'border-gray-300': !validationErrors.desc }"
                                     placeholder="e.g. 1 hour GFE">
                                 <template x-if="validationErrors.desc">
@@ -159,9 +157,9 @@
                             <!-- Incall & Outcall -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block font-semibold text-[#e04ecb] mb-1">Incall ($)</label>
+                                    <label class="block font-semibold text-pink-500 mb-1">Incall ($)</label>
                                     <input type="text" x-model="form.incall"
-                                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent text-gray-900"
+                                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900"
                                         :class="{ 'border-red-500': validationErrors.incall, 'border-gray-300': !validationErrors.incall }"
                                         placeholder="250">
                                     <template x-if="validationErrors.incall">
@@ -169,9 +167,9 @@
                                     </template>
                                 </div>
                                 <div>
-                                    <label class="block font-semibold text-[#e04ecb] mb-1">Outcall ($)</label>
+                                    <label class="block font-semibold text-pink-500 mb-1">Outcall ($)</label>
                                     <input type="text" x-model="form.outcall"
-                                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent text-gray-900"
+                                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900"
                                         :class="{ 'border-red-500': validationErrors.outcall, 'border-gray-300': !validationErrors.outcall }"
                                         placeholder="300">
                                     <template x-if="validationErrors.outcall">
@@ -182,9 +180,9 @@
 
                             <!-- Extra info -->
                             <div>
-                                <label class="block font-semibold text-[#e04ecb] mb-1">Extra info <span class="text-gray-400 font-normal">(optional)</span></label>
+                                <label class="block font-semibold text-pink-500 mb-1">Extra info <span class="text-gray-400 font-normal">(optional)</span></label>
                                 <textarea x-model="form.extra" rows="2"
-                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#e04ecb] focus:border-transparent text-gray-900"
+                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900"
                                     :class="{ 'border-red-500': validationErrors.extra, 'border-gray-300': !validationErrors.extra }"
                                     placeholder="Additional details..."></textarea>
                                 <template x-if="validationErrors.extra">
@@ -195,7 +193,7 @@
 
                             <!-- Form Buttons -->
                             <div class="flex flex-wrap gap-3">
-                                <button type="submit" class="bg-[#e04ecb] hover:bg-[#c13ab0] text-white font-medium px-8 py-3 rounded-full shadow-md hover:shadow-lg transition" :disabled="isSubmitting">
+                                <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white font-medium px-8 py-3 rounded transition" :disabled="isSubmitting">
                                     <span x-show="!isSubmitting" x-text="editingId ? 'Update rate' : '+ Add rate'"></span>
                                     <span x-show="isSubmitting">Processing...</span>
                                 </button>
@@ -217,9 +215,9 @@
                 </button>
             </div> --}}
         </div>
+        </div>
+    </main>
     </div>
-</div>
-
 @push('scripts')
 <script src="{{ asset('profile/js/rates-manager.js') }}?v={{ filemtime(public_path('profile/js/rates-manager.js')) }}"></script>
 @endpush
