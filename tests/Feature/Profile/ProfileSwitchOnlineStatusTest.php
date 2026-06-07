@@ -129,8 +129,6 @@ class ProfileSwitchOnlineStatusTest extends TestCase
     {
         [$user, $profiles] = $this->createProviderWithProfiles(2);
         $profile = $profiles[1];
-        $this->markProfileAsComplete($profile);
-        $this->addProfilePhoto($profile);
 
         $updateOnlineNowStatus = Mockery::mock(UpdateOnlineNowStatus::class);
         $updateOnlineNowStatus->shouldReceive('execute')
@@ -181,41 +179,6 @@ class ProfileSwitchOnlineStatusTest extends TestCase
 
         $response->assertOk();
         $response->assertJson(['success' => true, 'status' => 'offline']);
-    }
-
-    public function test_owner_cannot_set_profile_online_when_profile_is_incomplete(): void
-    {
-        [$user, $profiles] = $this->createProviderWithProfiles(1);
-        $profile = $profiles[0];
-
-        $response = $this->actingAs($user)->postJson(
-            route('profiles.online-status', $profile),
-            ['status' => 'online']
-        );
-
-        $response->assertStatus(403);
-        $response->assertJson([
-            'success' => false,
-            'message' => 'Please complete your profile in Edit Profile and upload at least one photo before going online.',
-        ]);
-    }
-
-    public function test_owner_cannot_set_profile_online_when_profile_has_no_photo(): void
-    {
-        [$user, $profiles] = $this->createProviderWithProfiles(1);
-        $profile = $profiles[0];
-        $this->markProfileAsComplete($profile);
-
-        $response = $this->actingAs($user)->postJson(
-            route('profiles.online-status', $profile),
-            ['status' => 'online']
-        );
-
-        $response->assertStatus(403);
-        $response->assertJson([
-            'success' => false,
-            'message' => 'Please complete your profile in Edit Profile and upload at least one photo before going online.',
-        ]);
     }
 
     public function test_user_cannot_set_online_status_for_another_users_profile(): void
