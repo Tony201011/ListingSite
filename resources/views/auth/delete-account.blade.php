@@ -1,17 +1,18 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="bg-[#f8fafc] min-h-screen py-10">
-    <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
-        <a href="{{ url('/profile') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Back to dashboard
-        </a>
+<div class="min-h-screen bg-gray-50">
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8">
+            <button
+                type="button"
+                onclick="window.history.back()"
+                class="inline-flex items-center text-pink-500 hover:text-pink-600 transition-colors mb-6 text-sm font-medium bg-transparent border-0 cursor-pointer"
+            >
+                <span class="mr-1">&lt;</span> back
+            </button>
 
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-md p-6 md:p-10">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-3">Delete Account</h1>
+            <h1 class="text-3xl font-bold mb-3 text-gray-900">Delete Account</h1>
             <p class="text-sm text-gray-600 mb-6">
                 This action is permanent. Once deleted, your profile, photos, videos, and account data cannot be recovered.
             </p>
@@ -32,7 +33,7 @@
                 </div>
             @endif
 
-            <form id="delete-account-form" action="{{ route('account.destroy') }}" method="POST" class="space-y-5">
+            <form id="delete-account-form" action="{{ route('account.destroy') }}" method="POST" class="space-y-5 max-w-3xl">
                 @csrf
                 @method('DELETE')
 
@@ -71,22 +72,22 @@
                 <div class="flex flex-wrap gap-3">
                     <button
                         type="submit"
-                        class="inline-flex items-center px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition"
+                        class="inline-flex items-center px-5 py-2.5 rounded bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition"
                     >
                         Send account delete email
                     </button>
 
-                    <a href="{{ route('contact-us') }}" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-[#e04ecb] hover:bg-[#c13ab0] text-white text-sm font-semibold transition">
+                    <a href="{{ route('contact-us') }}" class="inline-flex items-center px-5 py-2.5 rounded bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold transition">
                         Contact support
                     </a>
 
-                    <a href="{{ url('/profile') }}" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition">
+                    <a href="{{ url('/profile') }}" class="inline-flex items-center px-5 py-2.5 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition">
                         Cancel
                     </a>
                 </div>
             </form>
         </div>
-    </div>
+    </main>
 </div>
 @endsection
 
