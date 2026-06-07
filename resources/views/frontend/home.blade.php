@@ -212,9 +212,9 @@
                     x-data="featuredCarousel({{ count($homeBannerProfiles) }})"
                     x-init="init()"
                     @resize.window="updatePageSize()"
-                    class="relative group overflow-hidden"
+                    class="relative group overflow-visible"
                 >
-                    <div class="overflow-hidden px-4 sm:px-6 pb-2"
+                    <div class="overflow-x-hidden overflow-y-visible px-4 sm:px-6 pb-2"
                         @mousedown="startDrag($event)"
                         @mousemove="drag($event)"
                         @mouseup="endDrag()"
@@ -222,6 +222,7 @@
                         @touchstart="startDrag($event)"
                         @touchmove="drag($event)"
                         @touchend="endDrag()"
+                        style="touch-action: pan-y pinch-zoom;"
                         :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
                     >
                         <div x-ref="track" class="flex flex-nowrap gap-4 transition-transform duration-500"
@@ -271,9 +272,9 @@
                     x-data="featuredCarousel({{ count($localBannerProfiles) }})"
                     x-init="init()"
                     @resize.window="updatePageSize()"
-                    class="relative group overflow-hidden"
+                    class="relative group overflow-visible"
                 >
-                    <div class="overflow-hidden px-4 sm:px-6 pb-2"
+                    <div class="overflow-x-hidden overflow-y-visible px-4 sm:px-6 pb-2"
                         @mousedown="startDrag($event)"
                         @mousemove="drag($event)"
                         @mouseup="endDrag()"
@@ -281,6 +282,7 @@
                         @touchstart="startDrag($event)"
                         @touchmove="drag($event)"
                         @touchend="endDrag()"
+                        style="touch-action: pan-y pinch-zoom;"
                         :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
                     >
                         <div x-ref="track" class="flex flex-nowrap gap-4 transition-transform duration-500"

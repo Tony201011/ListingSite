@@ -661,8 +661,12 @@ $profileTags = array_values(array_unique(array_merge(
                 total: {{ count($nearbyProfiles) }},
                 isDragging: false,
                 startX: 0,
+                startY: 0,
                 currentX: 0,
+                currentY: 0,
                 dragOffset: 0,
+                dragAxis: null,
+                dragAxisLocked: false,
                 _slideW: 0,
                 _cardW: 300,
                 get pages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); },
@@ -717,16 +721,45 @@ $profileTags = array_values(array_unique(array_merge(
                 next() { if (this.page < this.pages - 1) this.page++; },
                 startDrag(event) {
                     if (this._slideW === 0) this.computeDimensions();
+                    const point = event.type === 'mousedown' ? event : event.touches[0];
                     this.isDragging = true;
-                    this.startX = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;
+                    this.startX = point.clientX;
+                    this.startY = point.clientY;
                     this.currentX = this.startX;
+                    this.currentY = this.startY;
                     this.dragOffset = 0;
+                    this.dragAxis = null;
+                    this.dragAxisLocked = false;
                 },
                 drag(event) {
                     if (!this.isDragging) return;
-                    event.preventDefault();
-                    this.currentX = event.type === 'mousemove' ? event.clientX : event.touches[0].clientX;
-                    this.dragOffset = this.currentX - this.startX;
+                    const isMouseEvent = event.type === 'mousemove';
+                    const point = isMouseEvent ? event : event.touches[0];
+                    this.currentX = point.clientX;
+                    this.currentY = point.clientY;
+                    const deltaX = this.currentX - this.startX;
+                    const deltaY = this.currentY - this.startY;
+
+                    if (!isMouseEvent) {
+                        if (!this.dragAxisLocked) {
+                            if (Math.abs(deltaX) < 6 && Math.abs(deltaY) < 6) {
+                                return;
+                            }
+
+                            this.dragAxis = Math.abs(deltaX) >= Math.abs(deltaY) ? 'x' : 'y';
+                            this.dragAxisLocked = true;
+                        }
+
+                        if (this.dragAxis !== 'x') {
+                            return;
+                        }
+                    }
+
+                    if (event.cancelable) {
+                        event.preventDefault();
+                    }
+
+                    this.dragOffset = deltaX;
                 },
                 endDrag() {
                     if (!this.isDragging) return;
@@ -738,11 +771,13 @@ $profileTags = array_values(array_unique(array_merge(
                         this.page++;
                     }
                     this.dragOffset = 0;
+                    this.dragAxis = null;
+                    this.dragAxisLocked = false;
                 }
             }"
             x-init="init()"
             @resize.window="updatePageSize()"
-            class="mt-16 overflow-hidden"
+            class="mt-16 overflow-visible"
         >
             <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex flex-col gap-1">
@@ -754,7 +789,7 @@ $profileTags = array_values(array_unique(array_merge(
 
             @if(count($nearbyProfiles) > 0)
             <div class="relative group">
-                <div class="overflow-hidden px-4 sm:px-6 pb-2"
+                <div class="overflow-x-hidden overflow-y-visible px-4 sm:px-6 pb-2"
                     @mousedown="startDrag($event)"
                     @mousemove="drag($event)"
                     @mouseup="endDrag()"
@@ -762,6 +797,7 @@ $profileTags = array_values(array_unique(array_merge(
                     @touchstart="startDrag($event)"
                     @touchmove="drag($event)"
                     @touchend="endDrag()"
+                    style="touch-action: pan-y pinch-zoom;"
                     :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
                 >
                     <div x-ref="track" class="flex flex-nowrap gap-4 transition-transform duration-500"
