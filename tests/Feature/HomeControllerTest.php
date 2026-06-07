@@ -1802,4 +1802,104 @@ class HomeControllerTest extends TestCase
 
         $this->assertNotSame($firstSignature, $secondSignature);
     }
+
+    // ---------------------------------------------------------------
+    // Home banner exclusion from local-page main listing
+    // ---------------------------------------------------------------
+
+    public function test_home_banner_profile_excluded_from_main_listing_on_local_page_search(): void
+    {
+        // A Melbourne-based profile with an active home banner placement.
+        $this->createApprovedProviderWithSuburb('Melbourne', 'VIC', [
+            'name' => 'Melbourne Home Banner Escort',
+            'slug' => 'melbourne-home-banner-escort',
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+
+        // A regular Melbourne-based profile without any banner.
+        $this->createApprovedProviderWithSuburb('Melbourne', 'VIC', [
+            'name' => 'Regular Melbourne Escort',
+            'slug' => 'regular-melbourne-escort',
+        ]);
+
+        $response = $this->get('/escorts/search/melbourne-vic');
+
+        $response->assertOk();
+
+        // Home banner profile must still appear in the banner section.
+        $homeBannerNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($homeBannerNames->contains('Melbourne Home Banner Escort'));
+
+        // Home banner profile must NOT appear in the main paginated results.
+        $profileNames = collect($response->viewData('profiles')->items())->pluck('name');
+        $this->assertFalse($profileNames->contains('Melbourne Home Banner Escort'));
+
+        // Regular profiles without a home banner must still appear in the main results.
+        $this->assertTrue($profileNames->contains('Regular Melbourne Escort'));
+    }
+
+    public function test_home_banner_profile_appears_in_main_listing_on_home_page_without_location_filter(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'National Home Banner Escort',
+            'slug' => 'national-home-banner-escort',
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+
+        // Home banner profile must appear in the banner section.
+        $homeBannerNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($homeBannerNames->contains('National Home Banner Escort'));
+
+        // On the home page (no location filter) home banner profiles are also
+        // shown in the main listing — this is the expected behaviour.
+        $profileNames = collect($response->viewData('profiles')->items())->pluck('name');
+        $this->assertTrue($profileNames->contains('National Home Banner Escort'));
+    }
+
+    public function test_home_banner_profile_appears_in_main_listing_when_escort_name_filter_active(): void
+    {
+        // When an escort_name filter is active the banner section is hidden, so the
+        // profile must still be reachable via the main results.
+        $this->createApprovedProviderWithSuburb('Melbourne', 'VIC', [
+            'name' => 'Searched Home Banner Escort',
+            'slug' => 'searched-home-banner-escort',
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $response = $this->get('/escorts/search/melbourne-vic?escort_name=Searched+Home+Banner+Escort');
+
+        $response->assertOk();
+
+        // Banner section must be hidden when escort_name filter is active.
+        $this->assertEmpty($response->viewData('homeBannerProfiles'));
+
+        // Profile must appear in the main results.
+        $profileNames = collect($response->viewData('profiles')->items())->pluck('name');
+        $this->assertTrue($profileNames->contains('Searched Home Banner Escort'));
+    }
+
+    public function test_home_banner_profile_excluded_from_main_listing_when_state_filter_active(): void
+    {
+        $this->createApprovedProvider([
+            'name' => 'Interstate Home Banner Escort',
+            'slug' => 'interstate-home-banner-escort',
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+
+        $response = $this->get('/?location_state=VIC');
+
+        $response->assertOk();
+
+        // Home banner profile must still appear in the banner section.
+        $homeBannerNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($homeBannerNames->contains('Interstate Home Banner Escort'));
+
+        // Home banner profile must NOT appear in the main listing.
+        $profileNames = collect($response->viewData('profiles')->items())->pluck('name');
+        $this->assertFalse($profileNames->contains('Interstate Home Banner Escort'));
+    }
 }
