@@ -170,6 +170,11 @@ class BuildProfileFilterViewData
             ? $this->resolveLocalFeaturedStateName($locationQuery, $locationStateQuery)
             : null;
 
+        // Home banner profiles (national) are shown in their own strip on local pages too.
+        // When a location filter is active and the home banner section is visible, exclude those
+        // profiles from the main listing so they do not appear in both places.
+        $excludeHomeBannerProfiles = $escortNameQuery === '' && ($locationQuery !== '' || $locationStateQuery !== '');
+
         $geocodedLat = null;
         $geocodedLng = null;
 
@@ -214,6 +219,7 @@ class BuildProfileFilterViewData
             $syncWithAdminOnlineListing,
             $validated,
             $advancedSearch,
+            $excludeHomeBannerProfiles,
         );
         $onlineCount = $profiles->total();
 
@@ -427,6 +433,7 @@ class BuildProfileFilterViewData
         bool $syncWithAdminOnlineListing = false,
         array $validated = [],
         bool $advancedSearch = false,
+        bool $excludeHomeBannerProfiles = false,
     ): LengthAwarePaginator {
         $hasLocationQuery = $locationQuery !== '';
         $exactLocation = $this->resolveExactLocation($locationQuery, $locationStateQuery);
@@ -485,6 +492,15 @@ class BuildProfileFilterViewData
                     ->orWhereDoesntHave('state', function (Builder $stateQuery) use ($localFeaturedStateName): void {
                         $stateQuery->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($localFeaturedStateName)]);
                     });
+            });
+        }
+
+        // On local pages the home banner strip already displays these profiles nationally.
+        // Exclude them from the main paginated listing to avoid showing them twice.
+        if ($excludeHomeBannerProfiles) {
+            $query->where(function (Builder $q): void {
+                $q->whereNull('provider_profiles.home_banner_expires_at')
+                    ->orWhere('provider_profiles.home_banner_expires_at', '<=', now());
             });
         }
 
