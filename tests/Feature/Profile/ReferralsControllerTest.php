@@ -57,6 +57,7 @@ class ReferralsControllerTest extends TestCase
             ->once()
             ->with(Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($profile)))
             ->andReturn([
+                'referralCode' => 'CODE123',
                 'referralLink' => 'REF123',
                 'referralCount' => 5,
             ]);
@@ -68,8 +69,10 @@ class ReferralsControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('profile.referral');
+        $response->assertViewHas('referralCode', 'CODE123');
         $response->assertViewHas('referralLink', 'REF123');
         $response->assertViewHas('referralCount', 5);
+        $response->assertSee('CODE123');
     }
 
     public function test_referral_view_shows_zero_count_when_no_referrals(): void
@@ -86,6 +89,7 @@ class ReferralsControllerTest extends TestCase
         $getReferralPageData->shouldReceive('execute')
             ->once()
             ->andReturn([
+                'referralCode' => null,
                 'referralLink' => null,
                 'referralCount' => 0,
             ]);
@@ -119,6 +123,7 @@ class ReferralsControllerTest extends TestCase
             ->once()
             ->with(Mockery::on(fn ($arg) => $arg instanceof ProviderProfile && $arg->is($secondProfile)))
             ->andReturn([
+                'referralCode' => 'CODE_SECOND',
                 'referralLink' => 'REF_SECOND',
                 'referralCount' => 2,
             ]);
@@ -129,6 +134,7 @@ class ReferralsControllerTest extends TestCase
         $response = $this->actingAs($user)->get(route('referral'));
 
         $response->assertOk();
+        $response->assertViewHas('referralCode', 'CODE_SECOND');
         $response->assertViewHas('referralLink', 'REF_SECOND');
         $response->assertViewHas('referralCount', 2);
     }

@@ -1,7 +1,30 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('referralPage', (config = {}) => ({
+        referralCode: config.referralCode || '',
         referralLink: config.referralLink || '',
-        buttonText: 'Copy link',
+        codeButtonText: 'Copy code',
+        linkButtonText: 'Copy link',
+
+        async copyCode() {
+            if (!this.referralCode) {
+                this.error('No referral code found');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(this.referralCode);
+
+                this.codeButtonText = 'Copied';
+
+                this.toast('Referral code copied successfully');
+
+                setTimeout(() => {
+                    this.codeButtonText = 'Copy code';
+                }, 2000);
+            } catch {
+                this.error('Copy failed. Try manually.');
+            }
+        },
 
         async copyLink() {
             if (!this.referralLink) {
@@ -12,12 +35,12 @@ document.addEventListener('alpine:init', () => {
             try {
                 await navigator.clipboard.writeText(this.referralLink);
 
-                this.buttonText = 'Copied';
+                this.linkButtonText = 'Copied';
 
                 this.toast('Referral link copied successfully');
 
                 setTimeout(() => {
-                    this.buttonText = 'Copy link';
+                    this.linkButtonText = 'Copy link';
                 }, 2000);
 
             } catch {
