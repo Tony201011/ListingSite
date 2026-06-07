@@ -23,6 +23,7 @@
                 <div
                     class="border border-dashed border-gray-200 rounded-xl p-6 sm:p-8 bg-gray-50 mb-8"
                     x-data="referralPage({
+                        referralCode: @js($referralCode),
                         referralLink: @js($referralLink)
                     })"
                 >
