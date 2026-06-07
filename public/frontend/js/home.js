@@ -413,7 +413,7 @@ function featuredCarousel(total) {
                             window.requestAnimationFrame(() => this.computeDimensions());
                         });
                         ro.observe(container);
-                        this.$cleanup(() => ro.disconnect());
+                        window.addEventListener('pagehide', () => ro.disconnect(), { once: true });
                     }
                 }
             });
