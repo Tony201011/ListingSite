@@ -323,6 +323,10 @@ class BuildProfileFilterViewData
                 $q->where("provider_profiles.{$expiryColumn}", '>', now())
                     ->orWhereDate("provider_profiles.{$expiryColumn}", today());
             })
+            ->where(function (Builder $q): void {
+                $q->whereNull('provider_profiles.free_listing_expires_at')
+                    ->orWhere('provider_profiles.free_listing_expires_at', '<=', now());
+            })
             ->with([
                 'profileImages' => fn ($q) => $q->orderByDesc('is_primary'),
                 'photoVerification' => fn ($q) => $q->where('status', 'approved')->orderByDesc('submitted_at'),
@@ -385,12 +389,35 @@ class BuildProfileFilterViewData
     /**
      * Apply home-featured tier ordering so that profiles with an active
      * home_featured_expires_at appear before non-home-featured profiles.
+     * Profiles still within their free listing period are excluded from this
+     * ordering boost — they must pay to benefit from priority placement.
      * Works with both MySQL (NOW()) and SQLite (parameterized datetime string).
      */
     private function applyHomeFeaturedOrdering(Builder $query): void
     {
+        $now = now()->toDateTimeString();
         $query->orderByRaw(
-            'CASE WHEN provider_profiles.home_featured_expires_at > ? THEN 1 ELSE 0 END DESC',
+            'CASE WHEN provider_profiles.home_featured_expires_at > ?
+                  AND (provider_profiles.free_listing_expires_at IS NULL
+                       OR provider_profiles.free_listing_expires_at <= ?)
+             THEN 1 ELSE 0 END DESC',
+            [$now, $now]
+        );
+    }
+
+    /**
+     * Apply is_featured ordering so that profiles with the featured badge
+     * appear before non-featured profiles.
+     * Profiles still within their free listing period are excluded from this
+     * ordering boost — they must pay to benefit from the featured badge.
+     */
+    private function applyFeaturedBadgeOrdering(Builder $query): void
+    {
+        $query->orderByRaw(
+            'CASE WHEN provider_profiles.is_featured = 1
+                  AND (provider_profiles.free_listing_expires_at IS NULL
+                       OR provider_profiles.free_listing_expires_at <= ?)
+             THEN 1 ELSE 0 END DESC',
             [now()->toDateTimeString()]
         );
     }
@@ -635,8 +662,8 @@ class BuildProfileFilterViewData
                 if (! $distanceOrderingApplied) {
                     $query->orderByDesc('popularity_score');
                     $this->applyHomeFeaturedOrdering($query);
-                    $query->orderByDesc('provider_profiles.is_featured')
-                        ->orderByDesc('provider_profiles.created_at');
+                    $this->applyFeaturedBadgeOrdering($query);
+                    $query->orderByDesc('provider_profiles.created_at');
                 }
                 break;
 
@@ -644,15 +671,15 @@ class BuildProfileFilterViewData
                 if (! $distanceOrderingApplied) {
                     $query->orderByDesc('provider_profiles.created_at');
                     $this->applyHomeFeaturedOrdering($query);
-                    $query->orderByDesc('provider_profiles.is_featured');
+                    $this->applyFeaturedBadgeOrdering($query);
                 }
                 break;
 
             default:
                 if (! $distanceOrderingApplied) {
                     $this->applyHomeFeaturedOrdering($query);
-                    $query->orderByDesc('provider_profiles.is_featured')
-                        ->orderByDesc('provider_profiles.created_at');
+                    $this->applyFeaturedBadgeOrdering($query);
+                    $query->orderByDesc('provider_profiles.created_at');
                 }
                 break;
         }
