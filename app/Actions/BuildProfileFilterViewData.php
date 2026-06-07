@@ -296,7 +296,9 @@ class BuildProfileFilterViewData
     }
 
     /**
-     * Query profiles that hold a specific ad-tier placement and are currently online.
+     * Query profiles that hold a specific ad-tier placement.
+     * Featured/banner sections show all profiles with an active paid placement
+     * regardless of online status; only the main listing requires online status.
      */
     private function queryBannerProfiles(
         string $expiryColumn,
@@ -327,8 +329,6 @@ class BuildProfileFilterViewData
                 'state',
             ])
             ->orderByDesc("provider_profiles.{$expiryColumn}");
-
-        $this->applyActiveOnlineProfileConstraint($query);
 
         // For local banner: restrict to the state being viewed
         if ($expiryColumn === 'local_banner_expires_at' && ($locationStateQuery !== null || $locationQuery !== null)) {
