@@ -3,6 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Actions\GetOnlineNowState;
+use App\Models\SiteSetting;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -154,6 +155,7 @@ class ProfileSwitchDeleteTest extends TestCase
     public function test_store_creates_approved_profile(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        SiteSetting::query()->create(['free_listing_days' => 21]);
 
         $response = $this->actingAs($user)->post(route('profiles.store'), [
             'name' => 'S8www811w',
@@ -170,6 +172,14 @@ class ProfileSwitchDeleteTest extends TestCase
             'slug' => 's8www811w',
             'profile_status' => 'approved',
         ]);
+
+        $profile = ProviderProfile::query()
+            ->where('user_id', $user->id)
+            ->where('slug', 's8www811w')
+            ->first();
+
+        $this->assertNotNull($profile?->free_listing_expires_at);
+        $this->assertTrue($profile->free_listing_expires_at->greaterThan(now()->addDays(20)));
     }
 
     public function test_switch_to_edit_sets_edit_heading_flag(): void
