@@ -49,9 +49,10 @@ class CheckProfileSteps
             ! empty($profile->services_style) &&
             ! empty($profile->services_provided);
 
-        $stepTwoCompleted = $user->profileImages()
-            ->whereNull('deleted_at')
-            ->exists();
+        $stepTwoCompleted = $profile &&
+            $profile->profileImages()
+                ->whereNull('deleted_at')
+                ->exists();
 
         if (! $stepOneCompleted) {
             if ($request->expectsJson()) {
