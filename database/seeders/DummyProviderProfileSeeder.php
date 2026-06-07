@@ -15,6 +15,7 @@ use App\Models\ProviderListing;
 use App\Models\ProviderProfile;
 use App\Models\Rate;
 use App\Models\RateGroup;
+use App\Models\SiteSetting;
 use App\Models\State;
 use App\Models\Tour;
 use App\Models\TourCity;
@@ -70,6 +71,8 @@ class DummyProviderProfileSeeder extends Seeder
 
     public function run(): void
     {
+        $freeListingDays = (int) (SiteSetting::getAdTierSettings()['free_listing_days'] ?? 21);
+
         $categoryIds = Category::query()
             ->where('is_active', true)
             ->whereNull('parent_id')
@@ -325,7 +328,12 @@ class DummyProviderProfileSeeder extends Seeder
                     'phone' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 7) % 1000, ($i * 13) % 1000),
                     'whatsapp' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 11) % 1000, ($i * 17) % 1000),
                     'is_verified' => $i % 3 === 0,
-                    'is_featured' => $i <= 10,
+                    'is_featured' => false,
+                    'featured_expires_at' => null,
+                    'home_featured_expires_at' => null,
+                    'local_banner_expires_at' => null,
+                    'home_banner_expires_at' => null,
+                    'free_listing_expires_at' => now()->addDays($freeListingDays),
                     'profile_status' => 'approved',
                     'expires_at' => now()->addMonths(rand(1, 12)),
                 ],
