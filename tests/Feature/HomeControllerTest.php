@@ -1483,13 +1483,13 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        // Paid banner placements only show once the provider is currently online.
+        // Paid banner placements show regardless of online status.
         $homeFeaturedNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
         $this->assertTrue($homeFeaturedNames->contains('Online Featured Escort'));
-        $this->assertFalse($homeFeaturedNames->contains('Offline Featured Escort'));
+        $this->assertTrue($homeFeaturedNames->contains('Offline Featured Escort'));
     }
 
-    public function test_featured_page_only_shows_online_profiles_with_active_paid_placements(): void
+    public function test_featured_page_shows_all_profiles_with_active_paid_placements(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1547,11 +1547,11 @@ class HomeControllerTest extends TestCase
         $this->assertTrue(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Online Local Banner'));
         $this->assertTrue(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Online Featured'));
 
-        // Offline provider with active paid placements stays hidden
-        $this->assertFalse(collect($response->viewData('homeBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
-        $this->assertFalse(collect($response->viewData('homeFeaturedProfiles'))->pluck('name')->contains('Offline Tier Escort'));
-        $this->assertFalse(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
-        $this->assertFalse(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        // Offline provider with active paid placements also shows in featured sections
+        $this->assertTrue(collect($response->viewData('homeBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertTrue(collect($response->viewData('homeFeaturedProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertTrue(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertTrue(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
     }
 
     public function test_home_page_does_not_show_offline_profile_even_when_online_filter_disabled(): void
@@ -1755,7 +1755,7 @@ class HomeControllerTest extends TestCase
         $this->assertNotSame('', (string) $response->json('refresh_signature'));
     }
 
-    public function test_listings_online_count_endpoint_excludes_active_home_banner_for_available_now_profile_when_offline(): void
+    public function test_listings_online_count_endpoint_includes_banner_and_featured_counts_regardless_of_online_status(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = $this->createApprovedProfile($user, [
@@ -1770,7 +1770,7 @@ class HomeControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('online_count', 0)
-            ->assertJsonPath('home_banner_count', 0);
+            ->assertJsonPath('home_banner_count', 1);
 
         $this->assertNotSame('', (string) $response->json('refresh_signature'));
     }
@@ -1795,9 +1795,9 @@ class HomeControllerTest extends TestCase
         $second = $this->getJson('/api/listings/online-count')
             ->assertOk()
             ->assertJsonPath('online_count', 0)
-            ->assertJsonPath('home_featured_count', 0)
-            ->assertJsonPath('local_banner_count', 0)
-            ->assertJsonPath('home_banner_count', 0);
+            ->assertJsonPath('home_featured_count', 1)
+            ->assertJsonPath('local_banner_count', 1)
+            ->assertJsonPath('home_banner_count', 1);
         $secondSignature = (string) $second->json('refresh_signature');
 
         $this->assertNotSame($firstSignature, $secondSignature);

@@ -232,23 +232,15 @@ class HomeController extends Controller
 
     public function listingsOnlineCount(): JsonResponse
     {
-        $onlineProfiles = ProviderProfile::query()
-            ->select([
-                'id',
-                'home_featured_expires_at',
-                'local_banner_expires_at',
-                'home_banner_expires_at',
-            ])
+        $onlineIds = ProviderProfile::query()
+            ->select('id')
             ->whereCurrentlyOnline()
-            ->get();
-
-        $onlineIds = $onlineProfiles->pluck('id')->map(fn ($id) => (int) $id)->sort()->values();
-        $homeFeaturedIds = $onlineProfiles
-            ->filter(fn (ProviderProfile $profile): bool => $profile->home_featured_expires_at?->isFuture() ?? false)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->sort()
             ->values();
+
+        $homeFeaturedIds = $this->activeBannerPlacementIds('home_featured_expires_at');
         $localBannerIds = $this->activeBannerPlacementIds('local_banner_expires_at');
         $homeBannerIds = $this->activeBannerPlacementIds('home_banner_expires_at');
 
@@ -275,7 +267,6 @@ class HomeController extends Controller
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
-            ->whereCurrentlyOnline()
             ->whereNotNull("provider_profiles.{$expiryColumn}")
             ->where(function ($query) use ($expiryColumn): void {
                 $query->where("provider_profiles.{$expiryColumn}", '>', now())
