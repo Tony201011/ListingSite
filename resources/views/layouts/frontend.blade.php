@@ -101,29 +101,54 @@
     @if($siteSetting && $siteSetting->enable_cookies)
         <div
             x-data="{
-                show: window.safeStorage.getLocal('cookieConsent') === null,
-                accept() {
-                    window.safeStorage.setLocal('cookieConsent', 'accepted');
-                    this.show = false;
+                show: window.safeStorage.getLocal('ageVerified') !== 'yes',
+                init() {
+                    this.$watch('show', (isVisible) => {
+                        document.body.classList.toggle('overflow-hidden', isVisible);
+                    });
+                    document.body.classList.toggle('overflow-hidden', this.show);
                 },
-                reject() {
-                    window.safeStorage.setLocal('cookieConsent', 'rejected');
+                enter() {
+                    window.safeStorage.setLocal('ageVerified', 'yes');
                     this.show = false;
                 }
             }"
             x-show="show"
             x-cloak
-            class="fixed bottom-0 inset-x-0 z-50 flex justify-center items-end pb-8 pointer-events-none"
+            class="fixed inset-0 z-[80] flex items-center justify-center bg-gray-950/75 backdrop-blur-sm px-4 py-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="age-warning-title"
         >
-            <div class="pointer-events-auto bg-gray-800 text-gray-100 rounded-xl shadow-lg px-6 py-5 flex flex-col md:flex-row items-center gap-4 max-w-xl w-full mx-4 border border-gray-700">
-                <div class="flex-1 text-sm">
-                    {!! nl2br(e($siteSetting->cookies_text ?? 'We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies. See our <a href=\'' . route('privacy-policy') . '\' class=\'underline text-pink-400 hover:text-pink-300\'>Privacy Policy</a>.')) !!}
+            <div class="w-full max-w-md rounded-2xl border border-pink-400/30 bg-gray-900 p-6 text-center text-gray-100 shadow-2xl sm:p-8">
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-pink-400 bg-pink-500/20 text-pink-300">
+                    <span class="text-lg font-extrabold tracking-wide">18+</span>
                 </div>
-                <div class="flex gap-2 mt-3 md:mt-0">
-                    <button @click="accept" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-semibold transition">Accept</button>
-                    <button @click="reject" class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded-lg font-semibold transition">Reject</button>
-                </div>
+
+                <h2 id="age-warning-title" class="text-xl font-bold text-white sm:text-2xl">
+                    Adults Only (18+)
+                </h2>
+                <p class="mt-3 text-sm leading-relaxed text-gray-300 sm:text-base">
+                    This website contains adult content and is intended only for individuals who are 18 years of age or older.
+                    By entering, you confirm you meet this requirement.
+                </p>
+
+                <button
+                    @click="enter"
+                    type="button"
+                    class="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-pink-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-gray-900 sm:text-base"
+                >
+                    I am 18+ years old / Enter
+                </button>
+
+                <a
+                    href="https://www.google.com"
+                    class="mt-4 inline-block text-sm font-medium text-gray-400 underline transition hover:text-gray-200"
+                >
+                    Exit
+                </a>
             </div>
+
         </div>
     @endif
 
