@@ -1900,4 +1900,202 @@ class HomeControllerTest extends TestCase
         $profileNames = collect($response->viewData('profiles')->items())->pluck('name');
         $this->assertTrue($profileNames->contains('Interstate Home Banner Escort'));
     }
+
+    // -----------------------------------------------------------------------
+    // Free listing period: promotional restrictions
+    // -----------------------------------------------------------------------
+
+    public function test_free_period_profile_excluded_from_home_banner_section(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        // Paid profile with home_banner — should appear in home banner
+        $this->createApprovedProvider([
+            'name' => 'Paid Home Banner',
+            'slug' => 'paid-home-banner',
+            'home_banner_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => null,
+        ]);
+
+        // Free-period profile with home_banner set — should NOT appear in banner section
+        $this->createApprovedProvider([
+            'name' => 'Free Period Home Banner',
+            'slug' => 'free-period-home-banner',
+            'home_banner_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => now()->addDays(10),
+        ]);
+
+        $response = $this->get('/');
+
+        $bannerNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($bannerNames->contains('Paid Home Banner'));
+        $this->assertFalse($bannerNames->contains('Free Period Home Banner'));
+    }
+
+    public function test_free_period_profile_excluded_from_home_featured_section(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        // Paid profile
+        $this->createApprovedProvider([
+            'name' => 'Paid Home Featured',
+            'slug' => 'paid-home-featured',
+            'home_featured_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => null,
+        ]);
+
+        // Free-period profile
+        $this->createApprovedProvider([
+            'name' => 'Free Period Home Featured',
+            'slug' => 'free-period-home-featured',
+            'home_featured_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => now()->addDays(10),
+        ]);
+
+        $response = $this->get('/featured');
+        $response->assertOk();
+
+        $featuredNames = collect($response->viewData('homeFeaturedProfiles'))->pluck('name');
+        $this->assertTrue($featuredNames->contains('Paid Home Featured'));
+        $this->assertFalse($featuredNames->contains('Free Period Home Featured'));
+    }
+
+    public function test_free_period_profile_excluded_from_local_banner_section(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        // Paid profile
+        $this->createApprovedProvider([
+            'name' => 'Paid Local Banner',
+            'slug' => 'paid-local-banner',
+            'local_banner_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => null,
+        ]);
+
+        // Free-period profile
+        $this->createApprovedProvider([
+            'name' => 'Free Period Local Banner',
+            'slug' => 'free-period-local-banner',
+            'local_banner_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => now()->addDays(10),
+        ]);
+
+        $response = $this->get('/featured');
+        $response->assertOk();
+
+        $localBannerNames = collect($response->viewData('localBannerProfiles'))->pluck('name');
+        $this->assertFalse($localBannerNames->contains('Free Period Local Banner'));
+    }
+
+    public function test_free_period_profile_excluded_from_featured_section(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        // Paid profile
+        $this->createApprovedProvider([
+            'name' => 'Paid Featured',
+            'slug' => 'paid-featured',
+            'featured_expires_at' => now()->addDay(),
+            'is_featured' => true,
+            'free_listing_expires_at' => null,
+        ]);
+
+        // Free-period profile
+        $this->createApprovedProvider([
+            'name' => 'Free Period Featured',
+            'slug' => 'free-period-featured',
+            'featured_expires_at' => now()->addDay(),
+            'is_featured' => true,
+            'free_listing_expires_at' => now()->addDays(10),
+        ]);
+
+        $response = $this->get('/featured');
+        $response->assertOk();
+
+        $featuredNames = collect($response->viewData('featuredProfiles'))->pluck('name');
+        $this->assertTrue($featuredNames->contains('Paid Featured'));
+        $this->assertFalse($featuredNames->contains('Free Period Featured'));
+    }
+
+    public function test_expired_free_period_profile_can_appear_in_banner_sections(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        // Profile whose free period has expired — paid placement should work normally
+        $this->createApprovedProvider([
+            'name' => 'Expired Free Period Banner',
+            'slug' => 'expired-free-period-banner',
+            'home_banner_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => now()->subDay(), // expired yesterday
+        ]);
+
+        $response = $this->get('/');
+
+        $bannerNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
+        $this->assertTrue($bannerNames->contains('Expired Free Period Banner'));
+    }
+
+    public function test_free_period_profile_appears_in_main_listing_as_regular_profile(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        $this->createApprovedProvider([
+            'name' => 'Free Period Regular Listing',
+            'slug' => 'free-period-regular-listing',
+            'free_listing_expires_at' => now()->addDays(10),
+        ]);
+
+        $response = $this->get('/');
+        $response->assertOk();
+
+        $profileNames = collect($response->viewData('profiles')->items())->pluck('name');
+        $this->assertTrue($profileNames->contains('Free Period Regular Listing'));
+    }
+
+    public function test_free_period_profile_does_not_get_home_featured_ordering_boost(): void
+    {
+        SiteSetting::query()->create(['online_filter_enabled' => true]);
+
+        // Free-period profile with home_featured_expires_at set — should NOT appear before paid profiles
+        $freePeriodUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $freePeriodProfile = ProviderProfile::query()->create([
+            'user_id' => $freePeriodUser->id,
+            'name' => 'Free Period Ordering Profile',
+            'slug' => 'free-period-ordering',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'home_featured_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => now()->addDays(10),
+            'created_at' => now()->subMinutes(5),
+        ]);
+        $this->createActiveOnlineUser($freePeriodUser, $freePeriodProfile->id);
+
+        // Regular paid profile with home_featured but no free period
+        $paidUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $paidProfile = ProviderProfile::query()->create([
+            'user_id' => $paidUser->id,
+            'name' => 'Paid Ordering Profile',
+            'slug' => 'paid-ordering',
+            'profile_status' => 'approved',
+            'age' => 25,
+            'home_featured_expires_at' => now()->addDay(),
+            'free_listing_expires_at' => null,
+            'created_at' => now()->subMinutes(10),
+        ]);
+        $this->createActiveOnlineUser($paidUser, $paidProfile->id);
+
+        $response = $this->get('/');
+        $response->assertOk();
+
+        $profileNames = collect($response->viewData('profiles')->items())->pluck('name')->all();
+
+        // The paid profile should appear before the free-period profile
+        // (paid profile gets the home_featured ordering boost, free-period profile does not)
+        $paidIndex = array_search('Paid Ordering Profile', $profileNames, true);
+        $freeIndex = array_search('Free Period Ordering Profile', $profileNames, true);
+
+        $this->assertNotFalse($paidIndex);
+        $this->assertNotFalse($freeIndex);
+        $this->assertLessThan($freeIndex, $paidIndex, 'Paid profile with home_featured should rank above free-period profile');
+    }
 }
