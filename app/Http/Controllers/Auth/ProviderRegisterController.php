@@ -91,14 +91,18 @@ class ProviderRegisterController extends Controller
         return view('auth.change-password');
     }
 
-    public function updatePassword(UpdatePasswordRequest $request): JsonResponse
+    public function updatePassword(UpdatePasswordRequest $request): JsonResponse|RedirectResponse
     {
-        return response()->json(
-            $this->changeProviderPassword->execute(
-                $request->user(),
-                $request->validated('new_password')
-            )
+        $result = $this->changeProviderPassword->execute(
+            $request->user(),
+            $request->validated('new_password')
         );
+
+        if ($request->expectsJson()) {
+            return response()->json($result);
+        }
+
+        return back()->with('success', $result['message']);
     }
 
     public function changeEmail(): View

@@ -1,252 +1,109 @@
 @extends('layouts.frontend')
 
 @section('content')
-<div class="bg-[#f8fafc] min-h-screen py-10">
-    <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
+<div class="min-h-screen bg-gray-50" x-data="{}">
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8">
+            <button
+                type="button"
+                onclick="window.history.back()"
+                class="mb-6 inline-flex cursor-pointer items-center border-0 bg-transparent text-sm font-medium text-pink-500 transition-colors hover:text-pink-600"
+            >
+                <span class="mr-1">&lt;</span> back
+            </button>
 
-        <a href="{{ url('/my-profile') }}" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Back to dashboard
-        </a>
+            <h1 class="mb-8 text-3xl font-bold text-gray-900">
+                Change Password
+            </h1>
 
-        <div class="mb-8">
-            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-                Change Your Password
-            </h2>
-        </div>
-
-        <p class="text-gray-600 mb-8 text-lg">
-            Update your account password to keep your profile secure.
-        </p>
-
-        <div
-            x-data="passwordForm({
-                updateUrl: @js(route('change-password.update')),
-                csrfToken: @js(csrf_token())
-            })"
-            class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100"
-        >
-            <form @submit.prevent="submitForm">
-                @csrf
-
-                <div class="mb-6">
-                    <label class="block font-semibold text-gray-800 mb-1">
-                        Current password <span class="text-red-600">*</span>
-                    </label>
-                    <input
-                        type="password"
-                        x-model="form.current_password"
-                        @input="clearFieldError('current_password')"
-                        :class="{ 'border-red-500 ring-red-200': errors.current_password }"
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base"
-                        required
-                    >
-                    <template x-if="errors.current_password">
-                        <p class="text-red-600 text-sm mt-2" x-text="Array.isArray(errors.current_password) ? errors.current_password[0] : errors.current_password"></p>
-                    </template>
-                </div>
-
-                <div class="mb-6 relative">
-                    <label class="block font-semibold text-gray-800 mb-1">
-                        New password <span class="text-red-600">*</span>
-                    </label>
-
-                    <div class="flex gap-2">
-                        <div class="relative flex-1">
-                            <input
-                                :type="showPassword ? 'text' : 'password'"
-                                x-model="form.new_password"
-                                @input="validateNewPassword(); validatePasswordMatch();"
-                                placeholder="Enter your new password"
-                                class="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base"
-                                required
-                            >
-
-                            <button
-                                type="button"
-                                @click="showPassword = !showPassword"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#e04ecb]"
-                                :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                                :title="showPassword ? 'Hide password' : 'Show password'"
-                            >
-                                <svg x-show="!showPassword" x-cloak xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
-                                </svg>
-                                <svg x-show="showPassword" x-cloak xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.252-3.592M6.223 6.223A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.969 9.969 0 01-4.132 5.411M15 12a3 3 0 00-4.243-2.829M9.88 9.88A3 3 0 0014.12 14.12" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mt-2">
-                        <div class="flex flex-wrap items-center justify-between text-xs mb-1 gap-y-0.5">
-                            <span class="text-gray-500">Use 8+ characters with uppercase, lowercase, number and symbol</span>
-                            <span
-                                class="font-semibold"
-                                :class="passwordStrength.text === 'Strong' ? 'text-green-600' : (passwordStrength.text === 'Medium' ? 'text-yellow-600' : 'text-red-600')"
-                                x-text="passwordStrength.text"
-                            ></span>
-                        </div>
-                        <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                                class="h-full rounded-full transition-all duration-300"
-                                :class="passwordStrength.color"
-                                :style="`width: ${passwordStrength.width}`"
-                            ></div>
-                        </div>
-                    </div>
-
-                    <button
-                        type="button"
-                        @click="generatePasswordPopup()"
-                        class="mt-2 px-4 py-2 rounded-xl bg-[#fdf0fb] text-[#c13ab0] font-semibold border border-[#f3c4ea] hover:bg-[#fae3f6] transition"
-                    >
-                        Generate
-                    </button>
-
-                    <template x-if="errors.new_password">
-                        <div class="text-xs text-red-600 mt-1" x-text="Array.isArray(errors.new_password) ? errors.new_password[0] : errors.new_password"></div>
-                    </template>
-
+            <div x-data="{ show: true }">
+                @if(session('success'))
                     <div
-                        x-show="showPasswordPopup"
-                        x-cloak
+                        x-show="show"
                         x-transition
-                        class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-                        @click.away="showPasswordPopup = false"
+                        class="mb-6 flex items-start justify-between gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700"
                     >
-                        <div class="w-full max-w-sm bg-white border border-gray-200 rounded-2xl shadow-xl p-4">
-                            <div class="flex items-start justify-between gap-3 mb-3">
-                                <div>
-                                    <h4 class="font-bold text-gray-800">Strong password suggestion</h4>
-                                    <p class="text-sm text-gray-500">Save this password somewhere safe before using it.</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    @click="showPasswordPopup = false"
-                                    class="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                        <span>{{ session('success') }}</span>
+                        <button type="button" @click="show = false" class="text-lg leading-none text-green-500 hover:text-green-700">&times;</button>
+                    </div>
+                @endif
+            </div>
+
+            <div x-data="{ show: true }">
+                @if($errors->any())
+                    <div
+                        x-show="show"
+                        x-transition
+                        class="mb-6 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    >
+                        <div>
+                            <p class="mb-1 font-semibold">Please fix the following errors:</p>
+                            <ul class="list-disc space-y-1 pl-5">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <button type="button" @click="show = false" class="text-lg leading-none text-red-400 hover:text-red-600">&times;</button>
+                    </div>
+                @endif
+            </div>
+
+            <div class="max-w-3xl">
+                <div class="rounded-lg border border-gray-300 p-6">
+                    <h2 class="mb-4 text-xl font-bold text-gray-900">Password &amp; Security</h2>
+
+                    <form action="{{ route('change-password.update') }}" method="POST" class="space-y-4" autocomplete="off">
+                        @csrf
+
+                        <div>
+                            <label for="current_password" class="mb-1 block text-sm font-medium text-gray-700">Current Password</label>
+                            <input
+                                id="current_password"
+                                name="current_password"
+                                type="password"
+                                placeholder="Enter current password"
+                                class="w-full rounded border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 {{ $errors->has('current_password') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}"
+                            >
+                            @error('current_password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label for="new_password" class="mb-1 block text-sm font-medium text-gray-700">New Password</label>
+                                <input
+                                    id="new_password"
+                                    name="new_password"
+                                    type="password"
+                                    placeholder="Enter new password"
+                                    class="w-full rounded border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 {{ $errors->has('new_password') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}"
                                 >
-                                    &times;
-                                </button>
+                                @error('new_password')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
-                            <div
-                                class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm break-all text-gray-800 mb-4"
-                                x-text="generatedPassword"
-                            ></div>
-
-                            <div class="flex flex-wrap gap-2">
-                                <button
-                                    type="button"
-                                    @click="generatePasswordPopup()"
-                                    class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
+                            <div>
+                                <label for="new_password_confirmation" class="mb-1 block text-sm font-medium text-gray-700">Confirm New Password</label>
+                                <input
+                                    id="new_password_confirmation"
+                                    name="new_password_confirmation"
+                                    type="password"
+                                    placeholder="Confirm new password"
+                                    class="w-full rounded border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-pink-500"
                                 >
-                                    Regenerate
-                                </button>
-
-                                <button
-                                    type="button"
-                                    @click="copyGeneratedPassword()"
-                                    class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
-                                >
-                                    <span x-text="copied ? 'Copied!' : 'Copy'"></span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    @click="useGeneratedPassword()"
-                                    class="px-4 py-2 rounded-lg bg-[#e04ecb] text-white font-semibold hover:bg-[#c13ab0]"
-                                >
-                                    Use this password
-                                </button>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="mb-8">
-                    <label class="block font-semibold text-gray-800 mb-1">
-                        Confirm new password <span class="text-red-600">*</span>
-                    </label>
-
-                    <div class="relative">
-                        <input
-                            :type="showConfirmPassword ? 'text' : 'password'"
-                            x-model="form.new_password_confirmation"
-                            @input="validatePasswordMatch()"
-                            placeholder="Confirm your new password"
-                            class="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition bg-white text-gray-900 placeholder-gray-500 text-base"
-                            required
-                        >
-
-                        <button
-                            type="button"
-                            @click="showConfirmPassword = !showConfirmPassword"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-[#e04ecb]"
-                            :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
-                            :title="showConfirmPassword ? 'Hide password' : 'Show password'"
-                        >
-                            <svg x-show="!showConfirmPassword" x-cloak xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
-                            </svg>
-                            <svg x-show="showConfirmPassword" x-cloak xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.252-3.592M6.223 6.223A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.969 9.969 0 01-4.132 5.411M15 12a3 3 0 00-4.243-2.829M9.88 9.88A3 3 0 0014.12 14.12" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />
-                            </svg>
+                        <button type="submit" class="rounded bg-pink-500 px-6 py-2 text-white transition hover:bg-pink-600">
+                            Update Password
                         </button>
-                    </div>
-
-                    <template x-if="errors.new_password_confirmation">
-                        <div class="text-xs text-red-600 mt-1" x-text="Array.isArray(errors.new_password_confirmation) ? errors.new_password_confirmation[0] : errors.new_password_confirmation"></div>
-                    </template>
+                    </form>
                 </div>
-
-                <button
-                    type="submit"
-                    :disabled="loading"
-                    class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <span x-show="!loading" x-cloak>UPDATE PASSWORD</span>
-                    <span x-show="loading" x-cloak class="flex items-center justify-center gap-2">
-                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Updating...
-                    </span>
-                </button>
-            </form>
-
-            <template x-if="message">
-                <div
-                    class="mt-6 rounded-xl p-4"
-                    :class="message.type === 'success'
-                        ? 'bg-green-50 text-green-800 border border-green-200'
-                        : 'bg-red-50 text-red-800 border border-red-200'"
-                >
-                    <p class="text-sm" x-text="message.text"></p>
-                </div>
-            </template>
-
-            <div class="text-center border-t border-gray-200 mt-8 pt-6">
-                <p class="text-gray-500 text-sm">
-                    <a href="{{ url('/profile') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">
-                        Return to dashboard
-                    </a>
-                </p>
             </div>
         </div>
-    </div>
+    </main>
 </div>
-
-@push('scripts')
-    <script src="{{ asset('auth/js/password-tools.js') }}"></script>
-    <script src="{{ asset('auth/js/change-password.js') }}"></script>
-@endpush
 @endsection
