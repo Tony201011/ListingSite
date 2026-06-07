@@ -41,6 +41,68 @@
         static fn (mixed $middleware): bool => is_string($middleware)
             && ($middleware === 'provider.auth' || str_starts_with($middleware, 'auth'))
     );
+
+    $routeName = request()->route()?->getName();
+    $providerProfileRouteNames = [
+        'select-profile',
+        'my-listings',
+        'my-listings.profile.show',
+        'my-listings.profile.gallery',
+        'my-listings.show',
+        'my-listings.feature',
+        'my-profile',
+        'activity-logs',
+        'profile-spending-history',
+        'edit-profile',
+        'edit-profile.save',
+        'add-photos',
+        'photos.index',
+        'photos',
+        'photos.upload',
+        'editor.upload-image',
+        'photos.setCover',
+        'photos.destroy',
+        'availability.edit',
+        'availability.update',
+        'availability.show',
+        'featured',
+        'featured.purchase',
+        'upload-video',
+        'my-videos',
+        'videos.upload',
+        'videos.destroy',
+        'my-tours',
+        'my-tours.store',
+        'my-tours.update',
+        'my-tours.toggle',
+        'my-tours.destroy',
+        'search-cities',
+        'verify.photos',
+        'photo-verification.upload',
+        'photo-verification.delete-photo',
+        'short-url',
+        'short-url.update',
+        'referral',
+        'online-now',
+        'online.update-status',
+        'available-now',
+        'available.update-status',
+        'set-and-forget',
+        'set-and-forget.save',
+        'my-babe-rank',
+        'babe-rank-read-more',
+        'profile-message',
+        'profile-message.store',
+        'hide-show-profile',
+        'update-hide-show-profile',
+        'status',
+        'profile-setting',
+    ];
+
+    $isProviderProfileRoute = is_string($routeName)
+        && (str_starts_with($routeName, 'profiles.')
+            || str_starts_with($routeName, 'my-rate.')
+            || in_array($routeName, $providerProfileRouteNames, true));
 @endphp
 
 <body
@@ -69,7 +131,19 @@
 
         @include('layouts.partials.ads', ['position' => 'all_pages_top'])
 
-        @yield('content')
+        @if($isProviderProfileRoute)
+            <div class="provider-page-shell min-h-screen bg-gray-50">
+                <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                    <div class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8">
+                        <div class="provider-page-shell-content">
+                            @yield('content')
+                        </div>
+                    </div>
+                </main>
+            </div>
+        @else
+            @yield('content')
+        @endif
 
         @include('layouts.partials.ads', ['position' => 'all_pages_bottom'])
     </main>

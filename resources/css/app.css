@@ -20,3 +20,14 @@
 		border-radius: 0.5rem;
 	}
 }
+
+.provider-page-shell-content > .min-h-screen {
+	min-height: auto !important;
+	background: transparent !important;
+	padding: 0 !important;
+}
+
+.provider-page-shell-content > .min-h-screen > main {
+	max-width: 100% !important;
+	padding: 0 !important;
+}
