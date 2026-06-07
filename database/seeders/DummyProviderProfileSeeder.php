@@ -468,8 +468,8 @@ class DummyProviderProfileSeeder extends Seeder
                 ],
             );
 
-            // 10. OnlineUser (every second profile is online)
-            $isOnline = $i % 2 === 0;
+            // 10. OnlineUser (keep all seeded profiles online so seeded profile URLs are publicly accessible)
+            $isOnline = true;
 
             OnlineUser::updateOrCreate(
                 ['provider_profile_id' => $providerProfile->id],
