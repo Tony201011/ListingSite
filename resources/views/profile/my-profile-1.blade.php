@@ -217,7 +217,7 @@
                 </div>
         </div>
 
-        @if($stepOneCompleted && $stepTwoCompleted)
+        @if($stepOneCompleted)
             <div class="mb-4 rounded-lg bg-[#e04ecb] p-6 text-white">
                 @if(!$stepPhotoVerificationCompleted)
                     <h2 class="mb-2 flex items-center gap-2 text-xl font-bold">
@@ -478,7 +478,7 @@
                 @endif
             </div>
         @endif
-        @if(!$stepOneCompleted && !$stepTwoCompleted)
+        @if(!$stepOneCompleted)
                 <div class="border border-gray-300 rounded-lg p-6 md:col-span-2 xl:col-span-1">
                     <h3 class="mb-2 text-lg font-bold text-gray-800">ACCOUNT SECURITY</h3>
 
