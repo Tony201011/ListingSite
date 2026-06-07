@@ -8,6 +8,7 @@ use App\Actions\UpdateOnlineNowStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOnlineStatusRequest;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -94,6 +95,9 @@ class ProfileSwitchController extends Controller
             'slug' => $slug,
             'profile_sequence' => $sequence,
             'profile_status' => 'approved',
+            'free_listing_expires_at' => now()->addDays(
+                SiteSetting::getAdTierSettings()['free_listing_days']
+            ),
         ]);
 
         session(['active_provider_profile_id' => $profile->id]);
