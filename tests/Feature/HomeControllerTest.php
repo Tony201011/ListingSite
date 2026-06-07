@@ -1756,6 +1756,26 @@ class HomeControllerTest extends TestCase
         $this->assertNotSame('', (string) $response->json('refresh_signature'));
     }
 
+    public function test_listings_online_count_endpoint_includes_active_home_banner_for_available_now_profile(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = $this->createApprovedProfile($user, [
+            'name' => 'Available Banner Escort',
+            'slug' => 'available-banner-escort',
+            'home_banner_expires_at' => now()->addDay(),
+        ]);
+        $this->createActiveAvailableNow($user, $profile->id);
+
+        $response = $this->getJson('/api/listings/online-count');
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('online_count', 0)
+            ->assertJsonPath('home_banner_count', 1);
+
+        $this->assertNotSame('', (string) $response->json('refresh_signature'));
+    }
+
     public function test_listings_online_count_endpoint_refresh_signature_changes_after_online_toggle(): void
     {
         $user = $this->createApprovedProvider([

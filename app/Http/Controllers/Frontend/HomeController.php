@@ -249,18 +249,8 @@ class HomeController extends Controller
             ->map(fn ($id) => (int) $id)
             ->sort()
             ->values();
-        $localBannerIds = $onlineProfiles
-            ->filter(fn (ProviderProfile $profile): bool => $profile->local_banner_expires_at?->isFuture() ?? false)
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->sort()
-            ->values();
-        $homeBannerIds = $onlineProfiles
-            ->filter(fn (ProviderProfile $profile): bool => $profile->home_banner_expires_at?->isFuture() ?? false)
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->sort()
-            ->values();
+        $localBannerIds = $this->activeBannerPlacementIds('local_banner_expires_at');
+        $homeBannerIds = $this->activeBannerPlacementIds('home_banner_expires_at');
 
         return response()->json([
             'online_count' => $onlineIds->count(),
@@ -274,5 +264,25 @@ class HomeController extends Controller
                 $homeBannerIds->implode(','),
             ])),
         ]);
+    }
+
+    private function activeBannerPlacementIds(string $expiryColumn): Collection
+    {
+        return ProviderProfile::query()
+            ->select('id')
+            ->whereNull('provider_profiles.deleted_at')
+            ->where('provider_profiles.profile_status', 'approved')
+            ->where('provider_profiles.is_blocked', false)
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
+            ->whereNotNull("provider_profiles.{$expiryColumn}")
+            ->where(function ($query) use ($expiryColumn): void {
+                $query->where("provider_profiles.{$expiryColumn}", '>', now())
+                    ->orWhereDate("provider_profiles.{$expiryColumn}", today());
+            })
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->sort()
+            ->values();
     }
 }
