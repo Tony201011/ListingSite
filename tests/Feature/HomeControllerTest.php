@@ -1680,7 +1680,7 @@ class HomeControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_home_banner_still_shows_when_location_filter_active_and_no_local_banners(): void
+    public function test_home_banner_hides_when_location_filter_active_and_no_local_banners(): void
     {
         // A profile with an active home banner (national).
         $this->createApprovedProvider([
@@ -1695,14 +1695,14 @@ class HomeControllerTest extends TestCase
         $unfilteredResponse->assertSeeText('Featured');
 
         // Location-filtered page with no matching profiles and no local banners:
-        // home banner remains visible when a national home banner is active.
+        // hide the national home banner strip.
         $filteredResponse = $this->get('/escorts/search/ambrose-qld');
-        $this->assertNotEmpty($filteredResponse->viewData('homeBannerProfiles'));
+        $this->assertEmpty($filteredResponse->viewData('homeBannerProfiles'));
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
-        $filteredResponse->assertSeeText('Featured');
+        $filteredResponse->assertDontSeeText('Featured');
     }
 
-    public function test_home_banner_still_shows_when_location_state_filter_active_and_no_local_banners(): void
+    public function test_home_banner_hides_when_location_state_filter_active_and_no_local_banners(): void
     {
         $this->createApprovedProvider([
             'name' => 'National Banner Escort State Filter',
@@ -1714,9 +1714,9 @@ class HomeControllerTest extends TestCase
         $this->assertNotEmpty($unfilteredResponse->viewData('homeBannerProfiles'));
 
         $filteredResponse = $this->get('/?location_state=QLD');
-        $this->assertNotEmpty($filteredResponse->viewData('homeBannerProfiles'));
+        $this->assertEmpty($filteredResponse->viewData('homeBannerProfiles'));
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
-        $filteredResponse->assertSeeText('Featured');
+        $filteredResponse->assertDontSeeText('Featured');
     }
 
     public function test_home_banner_includes_profile_when_banner_expires_later_today(): void
@@ -1804,10 +1804,10 @@ class HomeControllerTest extends TestCase
     }
 
     // ---------------------------------------------------------------
-    // Home banner exclusion from local-page main listing
+    // Home banner visibility on location-filtered pages
     // ---------------------------------------------------------------
 
-    public function test_home_banner_profile_excluded_from_main_listing_on_local_page_search(): void
+    public function test_home_banner_profile_appears_in_main_listing_on_local_page_search_when_banner_strip_is_hidden(): void
     {
         // A Melbourne-based profile with an active home banner placement.
         $this->createApprovedProviderWithSuburb('Melbourne', 'VIC', [
@@ -1826,13 +1826,12 @@ class HomeControllerTest extends TestCase
 
         $response->assertOk();
 
-        // Home banner profile must still appear in the banner section.
-        $homeBannerNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
-        $this->assertTrue($homeBannerNames->contains('Melbourne Home Banner Escort'));
+        // Home banner strip is hidden on location-filtered pages.
+        $this->assertEmpty($response->viewData('homeBannerProfiles'));
 
-        // Home banner profile must NOT appear in the main paginated results.
+        // Home banner profile should appear in the main paginated results.
         $profileNames = collect($response->viewData('profiles')->items())->pluck('name');
-        $this->assertFalse($profileNames->contains('Melbourne Home Banner Escort'));
+        $this->assertTrue($profileNames->contains('Melbourne Home Banner Escort'));
 
         // Regular profiles without a home banner must still appear in the main results.
         $this->assertTrue($profileNames->contains('Regular Melbourne Escort'));
@@ -1882,9 +1881,9 @@ class HomeControllerTest extends TestCase
         $this->assertTrue($profileNames->contains('Searched Home Banner Escort'));
     }
 
-    public function test_home_banner_profile_excluded_from_main_listing_when_state_filter_active(): void
+    public function test_home_banner_profile_appears_in_main_listing_when_state_filter_active(): void
     {
-        $this->createApprovedProvider([
+        $this->createApprovedProviderWithSuburb('Melbourne', 'VIC', [
             'name' => 'Interstate Home Banner Escort',
             'slug' => 'interstate-home-banner-escort',
             'home_banner_expires_at' => now()->addDay(),
@@ -1894,12 +1893,11 @@ class HomeControllerTest extends TestCase
 
         $response->assertOk();
 
-        // Home banner profile must still appear in the banner section.
-        $homeBannerNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
-        $this->assertTrue($homeBannerNames->contains('Interstate Home Banner Escort'));
+        // Home banner strip is hidden when filtering by location/state.
+        $this->assertEmpty($response->viewData('homeBannerProfiles'));
 
-        // Home banner profile must NOT appear in the main listing.
+        // Matching home-banner profiles still appear in the main listing.
         $profileNames = collect($response->viewData('profiles')->items())->pluck('name');
-        $this->assertFalse($profileNames->contains('Interstate Home Banner Escort'));
+        $this->assertTrue($profileNames->contains('Interstate Home Banner Escort'));
     }
 }

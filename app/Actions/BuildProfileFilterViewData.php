@@ -170,10 +170,10 @@ class BuildProfileFilterViewData
             ? $this->resolveLocalFeaturedStateName($locationQuery, $locationStateQuery)
             : null;
 
-        // Home banner profiles (national) are shown in their own strip on local pages too.
-        // When a location filter is active and the home banner section is visible, exclude those
-        // profiles from the main listing so they do not appear in both places.
-        $excludeHomeBannerProfiles = $escortNameQuery === '' && ($locationQuery !== '' || $locationStateQuery !== '');
+        $hasLocationFilter = $locationQuery !== '' || $locationStateQuery !== '';
+
+        // Home banner profiles (national) are only shown on unfiltered listings.
+        $excludeHomeBannerProfiles = false;
 
         $geocodedLat = null;
         $geocodedLng = null;
@@ -235,7 +235,7 @@ class BuildProfileFilterViewData
 
         // Load home-banner profiles (national) — shown in dedicated banner section
         // Featured sections are hidden when an escort_name filter is active.
-        $homeBannerProfiles = $escortNameQuery === ''
+        $homeBannerProfiles = $escortNameQuery === '' && ! $hasLocationFilter
             ? $this->queryBannerProfiles('home_banner_expires_at')
             : collect();
 
