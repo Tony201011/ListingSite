@@ -275,6 +275,7 @@ class HomeController extends Controller
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
+            ->whereCurrentlyOnline()
             ->whereNotNull("provider_profiles.{$expiryColumn}")
             ->where(function ($query) use ($expiryColumn): void {
                 $query->where("provider_profiles.{$expiryColumn}", '>', now())

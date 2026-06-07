@@ -1483,14 +1483,13 @@ class HomeControllerTest extends TestCase
 
         $response = $this->get('/');
 
-        // Paid banner placements must appear in the home banner regardless of the provider's
-        // online status — providers pay for visibility and should always be shown in the banner.
+        // Paid banner placements only show once the provider is currently online.
         $homeFeaturedNames = collect($response->viewData('homeBannerProfiles'))->pluck('name');
         $this->assertTrue($homeFeaturedNames->contains('Online Featured Escort'));
-        $this->assertTrue($homeFeaturedNames->contains('Offline Featured Escort'));
+        $this->assertFalse($homeFeaturedNames->contains('Offline Featured Escort'));
     }
 
-    public function test_featured_page_shows_all_profiles_with_active_paid_placements_regardless_of_online_status(): void
+    public function test_featured_page_only_shows_online_profiles_with_active_paid_placements(): void
     {
         SiteSetting::query()->create(['online_filter_enabled' => true]);
 
@@ -1516,7 +1515,7 @@ class HomeControllerTest extends TestCase
             'featured_expires_at' => now()->addDay(),
         ]);
 
-        // Offline provider with active placements — should still appear because placements are paid
+        // Offline provider with active placements should stay hidden until online
         $offlineUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $offlineProfile = ProviderProfile::query()->create([
             'user_id' => $offlineUser->id,
@@ -1548,11 +1547,11 @@ class HomeControllerTest extends TestCase
         $this->assertTrue(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Online Local Banner'));
         $this->assertTrue(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Online Featured'));
 
-        // Offline provider with active paid placements also shows
-        $this->assertTrue(collect($response->viewData('homeBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
-        $this->assertTrue(collect($response->viewData('homeFeaturedProfiles'))->pluck('name')->contains('Offline Tier Escort'));
-        $this->assertTrue(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
-        $this->assertTrue(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        // Offline provider with active paid placements stays hidden
+        $this->assertFalse(collect($response->viewData('homeBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertFalse(collect($response->viewData('homeFeaturedProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertFalse(collect($response->viewData('localBannerProfiles'))->pluck('name')->contains('Offline Tier Escort'));
+        $this->assertFalse(collect($response->viewData('featuredProfiles'))->pluck('name')->contains('Offline Tier Escort'));
     }
 
     public function test_home_page_does_not_show_offline_profile_even_when_online_filter_disabled(): void
@@ -1756,7 +1755,7 @@ class HomeControllerTest extends TestCase
         $this->assertNotSame('', (string) $response->json('refresh_signature'));
     }
 
-    public function test_listings_online_count_endpoint_includes_active_home_banner_for_available_now_profile(): void
+    public function test_listings_online_count_endpoint_excludes_active_home_banner_for_available_now_profile_when_offline(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
         $profile = $this->createApprovedProfile($user, [
@@ -1771,7 +1770,7 @@ class HomeControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('online_count', 0)
-            ->assertJsonPath('home_banner_count', 1);
+            ->assertJsonPath('home_banner_count', 0);
 
         $this->assertNotSame('', (string) $response->json('refresh_signature'));
     }
