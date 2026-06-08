@@ -3,8 +3,17 @@
 namespace Tests\Feature;
 
 use App\Filament\Clusters\Settings\Resources\GlobalBanners\GlobalBannerResource;
+use App\Models\AgeAndConsentPolicy;
+use App\Models\ContentModerationPolicy;
+use App\Models\ContactUsPage;
 use App\Models\FooterWidget;
 use App\Models\GlobalBanner;
+use App\Models\PrivacyPolicy;
+use App\Models\ProhibitedContentPolicy;
+use App\Models\RefundPolicy;
+use App\Models\ReportAListingPage;
+use App\Models\TermCondition;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -27,6 +36,77 @@ class GlobalBannerLegalPagesTest extends TestCase
                 ['label' => 'Age and Consent Policy', 'url' => '/age-and-consent-policy'],
                 ['label' => 'Prohibited Content/Services Policy', 'url' => '/prohibited-content-policy'],
             ],
+            'is_active' => true,
+        ]);
+
+        $options = GlobalBannerResource::getPageOptions();
+
+        $this->assertSame('Terms & Conditions', $options['terms-and-conditions'] ?? null);
+        $this->assertSame('Privacy Policy', $options['privacy-policy'] ?? null);
+        $this->assertSame('Refund Policy', $options['refund-policy'] ?? null);
+        $this->assertSame('Contact/Support', $options['contact-us'] ?? null);
+        $this->assertSame('Content Moderation Policy', $options['content-moderation-policy'] ?? null);
+        $this->assertSame('Report a Listing', $options['report-a-listing'] ?? null);
+        $this->assertSame('Age and Consent Policy', $options['age-and-consent-policy'] ?? null);
+        $this->assertSame('Prohibited Content/Services Policy', $options['prohibited-content-policy'] ?? null);
+    }
+
+    public function test_global_banner_page_options_fall_back_to_active_legal_pages_without_footer_links(): void
+    {
+        TermCondition::create([
+            'title' => 'Terms & Conditions',
+            'content' => 'Terms content',
+            'is_active' => true,
+        ]);
+
+        PrivacyPolicy::create([
+            'title' => 'Privacy Policy',
+            'content' => 'Privacy content',
+            'is_active' => true,
+        ]);
+
+        RefundPolicy::create([
+            'title' => 'Refund Policy',
+            'content' => 'Refund content',
+            'is_active' => true,
+        ]);
+
+        ContactUsPage::create([
+            'title' => 'Contact/Support',
+            'subtitle' => 'Support',
+            'support_heading' => 'Support',
+            'response_time' => '24 hours',
+            'support_email' => 'support@example.com',
+            'category_label' => 'Support',
+            'enable_name_field' => true,
+            'enable_email_field' => true,
+            'enable_subject_field' => true,
+            'enable_message_field' => true,
+            'enable_map' => false,
+            'is_active' => true,
+        ]);
+
+        ContentModerationPolicy::create([
+            'title' => 'Content Moderation Policy',
+            'content' => 'Moderation content',
+            'is_active' => true,
+        ]);
+
+        ReportAListingPage::create([
+            'title' => 'Report a Listing',
+            'content' => 'Report content',
+            'is_active' => true,
+        ]);
+
+        AgeAndConsentPolicy::create([
+            'title' => 'Age and Consent Policy',
+            'content' => 'Age content',
+            'is_active' => true,
+        ]);
+
+        ProhibitedContentPolicy::create([
+            'title' => 'Prohibited Content/Services Policy',
+            'content' => 'Prohibited content',
             'is_active' => true,
         ]);
 
@@ -75,5 +155,18 @@ class GlobalBannerLegalPagesTest extends TestCase
                 ->assertOk()
                 ->assertSee('Legal Pages Banner');
         }
+    }
+
+    public function test_admin_can_open_global_banner_page_without_errors_when_no_legal_pages_exist(): void
+    {
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'email_verified_at' => now(),
+            'is_blocked' => false,
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->get('/admin/settings/global-banners')
+            ->assertOk();
     }
 }

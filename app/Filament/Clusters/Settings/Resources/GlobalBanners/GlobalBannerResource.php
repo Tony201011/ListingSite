@@ -2,12 +2,20 @@
 
 namespace App\Filament\Clusters\Settings\Resources\GlobalBanners;
 
+use App\Models\AgeAndConsentPolicy;
+use App\Models\ContactUsPage;
+use App\Models\ContentModerationPolicy;
 use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\GlobalBanners\Pages\ManageGlobalBanners;
 use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Models\FooterWidget;
 use App\Models\GlobalBanner;
+use App\Models\PrivacyPolicy;
+use App\Models\ProhibitedContentPolicy;
+use App\Models\RefundPolicy;
+use App\Models\ReportAListingPage;
+use App\Models\TermCondition;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -28,6 +36,20 @@ use Illuminate\Support\Str;
 
 class GlobalBannerResource extends Resource
 {
+    /**
+     * @var array<string, array{label: string, model: class-string<\Illuminate\Database\Eloquent\Model>}>
+     */
+    private const LEGAL_PAGE_DEFINITIONS = [
+        'terms-and-conditions' => ['label' => 'Terms & Conditions', 'model' => TermCondition::class],
+        'privacy-policy' => ['label' => 'Privacy Policy', 'model' => PrivacyPolicy::class],
+        'refund-policy' => ['label' => 'Refund Policy', 'model' => RefundPolicy::class],
+        'contact-us' => ['label' => 'Contact/Support', 'model' => ContactUsPage::class],
+        'content-moderation-policy' => ['label' => 'Content Moderation Policy', 'model' => ContentModerationPolicy::class],
+        'report-a-listing' => ['label' => 'Report a Listing', 'model' => ReportAListingPage::class],
+        'age-and-consent-policy' => ['label' => 'Age and Consent Policy', 'model' => AgeAndConsentPolicy::class],
+        'prohibited-content-policy' => ['label' => 'Prohibited Content/Services Policy', 'model' => ProhibitedContentPolicy::class],
+    ];
+
     protected static ?string $model = GlobalBanner::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
@@ -162,7 +184,7 @@ class GlobalBannerResource extends Resource
 
     public static function getPageOptions(): array
     {
-        $footerLegalPageOptions = self::footerLegalPageOptions();
+        $footerLegalPageOptions = self::legalPageOptions();
 
         return collect([
             'all-pages' => 'All Pages (Global)',
@@ -215,6 +237,40 @@ class GlobalBannerResource extends Resource
     /**
      * @return array<string, string>
      */
+    private static function legalPageOptions(): array
+    {
+        return collect(self::managedLegalPageOptions())
+            ->merge(self::footerLegalPageOptions())
+            ->all();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function managedLegalPageOptions(): array
+    {
+        /** @var array<string, string> $options */
+        $options = collect(self::LEGAL_PAGE_DEFINITIONS)
+            ->mapWithKeys(function (array $definition, string $path): array {
+                $title = $definition['model']::query()
+                    ->where('is_active', true)
+                    ->latest('updated_at')
+                    ->value('title');
+
+                if (blank($title)) {
+                    return [];
+                }
+
+                return [$path => trim((string) $title)];
+            })
+            ->all();
+
+        return $options;
+    }
+
+    /**
+     * @return array<string, string>
+     */
     private static function footerLegalPageOptions(): array
     {
         /** @var array<int, array{label?: mixed, url?: mixed}> $legalLinks */
@@ -255,6 +311,12 @@ class GlobalBannerResource extends Resource
 
         if (filled($footerLabel)) {
             return $footerLabel;
+        }
+
+        $managedLabel = self::LEGAL_PAGE_DEFINITIONS[$key]['label'] ?? null;
+
+        if (filled($managedLabel)) {
+            return $managedLabel;
         }
 
         return Str::of($key)
