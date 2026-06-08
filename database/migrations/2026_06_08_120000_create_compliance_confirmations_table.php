@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('ip_address', 45)->nullable();
             $table->timestamps();
 
-            $table->index(['user_id', 'confirmation_type']);
-            $table->index(['provider_profile_id', 'confirmation_type']);
+            $table->index(['user_id', 'confirmation_type'], 'cc_user_type_idx');
+            $table->index(['provider_profile_id', 'confirmation_type'], 'cc_profile_type_idx');
         });
     }
 
