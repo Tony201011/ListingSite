@@ -2,13 +2,17 @@
 
 namespace App\Actions;
 
+use App\Models\AgeAndConsentPolicy;
 use App\Models\BabeRankReadMorePage;
+use App\Models\ContentModerationPolicy;
 use App\Models\HelpPage;
 use App\Models\NaughtyCornerPage;
 use App\Models\PricingPackage;
 use App\Models\PricingPage;
 use App\Models\PrivacyPolicy;
+use App\Models\ProhibitedContentPolicy;
 use App\Models\RefundPolicy;
+use App\Models\ReportAListingPage;
 use App\Models\TermCondition;
 
 class GetFrontendSimplePage
@@ -80,6 +84,38 @@ class GetFrontendSimplePage
     public function babeRankReadMore(): ?BabeRankReadMorePage
     {
         return BabeRankReadMorePage::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    public function contentModerationPolicy(): ?ContentModerationPolicy
+    {
+        return ContentModerationPolicy::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    public function reportAListing(): ?ReportAListingPage
+    {
+        return ReportAListingPage::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    public function ageAndConsentPolicy(): ?AgeAndConsentPolicy
+    {
+        return AgeAndConsentPolicy::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    public function prohibitedContentPolicy(): ?ProhibitedContentPolicy
+    {
+        return ProhibitedContentPolicy::query()
             ->where('is_active', true)
             ->latest('updated_at')
             ->first();

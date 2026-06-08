@@ -94,6 +94,34 @@ class FrontendPageController extends Controller
         return view('frontend.anti-spam-policy', $this->getAntiSpamPolicyPageData->execute());
     }
 
+    public function contentModerationPolicy(): View
+    {
+        return view('frontend.content-moderation-policy', [
+            'policy' => $this->getFrontendSimplePage->contentModerationPolicy(),
+        ]);
+    }
+
+    public function reportAListing(): View
+    {
+        return view('frontend.report-a-listing', [
+            'page' => $this->getFrontendSimplePage->reportAListing(),
+        ]);
+    }
+
+    public function ageAndConsentPolicy(): View
+    {
+        return view('frontend.age-and-consent-policy', [
+            'policy' => $this->getFrontendSimplePage->ageAndConsentPolicy(),
+        ]);
+    }
+
+    public function prohibitedContentPolicy(): View
+    {
+        return view('frontend.prohibited-content-policy', [
+            'policy' => $this->getFrontendSimplePage->prohibitedContentPolicy(),
+        ]);
+    }
+
     public function contactUs(): View
     {
         return view('frontend.contact-us', $this->getContactUsPageData->execute());
