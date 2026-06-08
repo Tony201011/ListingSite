@@ -269,6 +269,14 @@ class SearchTest extends TestCase
         $response->assertRedirect('/girls/all/page/2');
     }
 
+    public function test_girls_route_respects_query_mode_and_redirects_to_matching_girls_path(): void
+    {
+        $response = $this->get('/girls/all?girls=popular');
+
+        $response->assertStatus(301);
+        $response->assertRedirect('/girls/popular');
+    }
+
     public function test_advanced_search_query_string_pagination_redirects_to_seo_friendly_search_url(): void
     {
         $response = $this->get('/advanced-search?page=2');
