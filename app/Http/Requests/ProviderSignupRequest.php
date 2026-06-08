@@ -37,7 +37,8 @@ class ProviderSignupRequest extends FormRequest
             'nickname' => ['required', 'string', 'min:3', 'max:255', 'unique:users,name'],
             'password' => ['required', 'min:8', 'confirmed'],
             'mobile' => ['required', 'regex:/^04\d{8}$/'],
-            'age_confirm' => ['accepted'],
+            'age_confirm' => ['required', 'accepted'],
+            'content_policy_confirm' => ['required', 'accepted'],
             'referral_code' => ['nullable', 'string', 'max:255'],
             'account_user_referral_code' => ['nullable', 'string', 'max:255'],
         ];
@@ -53,7 +54,10 @@ class ProviderSignupRequest extends FormRequest
     {
         return [
             'mobile.regex' => 'The mobile number must be a valid Australian mobile starting with 04.',
-            'age_confirm.accepted' => 'You must confirm your age.',
+            'age_confirm.required' => 'You must confirm your age and content ownership.',
+            'age_confirm.accepted' => 'You must confirm your age and content ownership.',
+            'content_policy_confirm.required' => 'You must agree to the content policy confirmation.',
+            'content_policy_confirm.accepted' => 'You must agree to the content policy confirmation.',
             'g-recaptcha-response.required' => 'Google reCAPTCHA verification failed. Please try again.',
         ];
     }

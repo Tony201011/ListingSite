@@ -29,6 +29,10 @@
             <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Login to your HOTESCORTS profile</h2>
         </div>
 
+        <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+            This website is intended for adults only.
+        </div>
+
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
             <div id="js-flash-success" class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 text-sm hidden"></div>
             <script>

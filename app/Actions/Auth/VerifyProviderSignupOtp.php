@@ -4,7 +4,9 @@ namespace App\Actions\Auth;
 
 use App\Actions\Support\ActionResult;
 use App\Actions\Referral\CreatePendingReferralOnSignup;
+use App\Models\ComplianceConfirmation;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -82,6 +84,33 @@ class VerifyProviderSignupOtp
             'role' => $pendingUser['role'],
             'mobile_verified' => true,
             'referral_code' => $pendingUser['referral_code'],
+        ]);
+
+        $acceptedAt = now();
+        if (filled($pendingUser['confirmation_accepted_at'] ?? null)) {
+            try {
+                $acceptedAt = Carbon::parse((string) $pendingUser['confirmation_accepted_at']);
+            } catch (\Throwable) {
+                $acceptedAt = now();
+            }
+        }
+
+        ComplianceConfirmation::query()->create([
+            'user_id' => $user->id,
+            'confirmation_type' => ComplianceConfirmation::TYPE_AGE_CONTENT_OWNERSHIP,
+            'context' => ComplianceConfirmation::CONTEXT_SIGNUP,
+            'accepted' => (bool) ($pendingUser['age_confirm'] ?? false),
+            'accepted_at' => $acceptedAt,
+            'ip_address' => $pendingUser['confirmation_ip'] ?? null,
+        ]);
+
+        ComplianceConfirmation::query()->create([
+            'user_id' => $user->id,
+            'confirmation_type' => ComplianceConfirmation::TYPE_CONTENT_POLICY,
+            'context' => ComplianceConfirmation::CONTEXT_SIGNUP,
+            'accepted' => (bool) ($pendingUser['content_policy_confirm'] ?? false),
+            'accepted_at' => $acceptedAt,
+            'ip_address' => $pendingUser['confirmation_ip'] ?? null,
         ]);
 
         $this->createPendingReferralOnSignup->execute($user, $pendingUser['referral_code'] ?? null);

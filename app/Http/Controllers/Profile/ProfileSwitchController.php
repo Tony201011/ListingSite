@@ -7,12 +7,14 @@ use App\Actions\GetOnlineNowState;
 use App\Actions\UpdateOnlineNowStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOnlineStatusRequest;
+use App\Models\ComplianceConfirmation;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ProfileSwitchController extends Controller
@@ -82,23 +84,56 @@ class ProfileSwitchController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
+            'age_and_ownership_confirm' => ['required', 'accepted'],
+            'content_policy_confirm' => ['required', 'accepted'],
+        ], [
+            'age_and_ownership_confirm.required' => 'You must confirm age and content ownership before creating a profile.',
+            'age_and_ownership_confirm.accepted' => 'You must confirm age and content ownership before creating a profile.',
+            'content_policy_confirm.required' => 'You must agree to the content policy before creating a profile.',
+            'content_policy_confirm.accepted' => 'You must agree to the content policy before creating a profile.',
         ]);
 
         $slug = $this->generateSlug->execute($validated['name']);
 
         $sequence = (ProviderProfile::withTrashed()->where('slug', $slug)->max('profile_sequence') ?? 0) + 1;
 
-        $profile = ProviderProfile::create([
-            'user_id' => $user->id,
-            'name' => $validated['name'],
-            'phone' => $validated['phone'] ?? null,
-            'slug' => $slug,
-            'profile_sequence' => $sequence,
-            'profile_status' => 'approved',
-            'free_listing_expires_at' => now()->addDays(
-                SiteSetting::getAdTierSettings()['free_listing_days']
-            ),
-        ]);
+        $profile = DB::transaction(function () use ($user, $validated, $slug, $sequence, $request): ProviderProfile {
+            $profile = ProviderProfile::create([
+                'user_id' => $user->id,
+                'name' => $validated['name'],
+                'phone' => $validated['phone'] ?? null,
+                'slug' => $slug,
+                'profile_sequence' => $sequence,
+                'profile_status' => 'approved',
+                'free_listing_expires_at' => now()->addDays(
+                    SiteSetting::getAdTierSettings()['free_listing_days']
+                ),
+            ]);
+
+            $acceptedAt = now();
+
+            ComplianceConfirmation::query()->create([
+                'user_id' => $user->id,
+                'provider_profile_id' => $profile->id,
+                'confirmation_type' => ComplianceConfirmation::TYPE_AGE_CONTENT_OWNERSHIP,
+                'context' => ComplianceConfirmation::CONTEXT_PROFILE_CREATION,
+                'accepted' => (bool) ($validated['age_and_ownership_confirm'] ?? false),
+                'accepted_at' => $acceptedAt,
+                'ip_address' => $request->ip(),
+            ]);
+
+            ComplianceConfirmation::query()->create([
+                'user_id' => $user->id,
+                'provider_profile_id' => $profile->id,
+                'confirmation_type' => ComplianceConfirmation::TYPE_CONTENT_POLICY,
+                'context' => ComplianceConfirmation::CONTEXT_PROFILE_CREATION,
+                'accepted' => (bool) ($validated['content_policy_confirm'] ?? false),
+                'accepted_at' => $acceptedAt,
+                'ip_address' => $request->ip(),
+            ]);
+
+            return $profile;
+        });
 
         session(['active_provider_profile_id' => $profile->id]);
 

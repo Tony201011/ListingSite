@@ -6,7 +6,8 @@ function signupForm(config = {}) {
             'password',
             'confirmPassword',
             'mobile',
-            'ageConfirm'
+            'ageConfirm',
+            'contentPolicyConfirm'
         ],
 
         email: config.email || '',
@@ -15,6 +16,7 @@ function signupForm(config = {}) {
         confirmPassword: '',
         mobile: config.mobile || '',
         ageConfirm: !!config.ageConfirm,
+        contentPolicyConfirm: !!config.contentPolicyConfirm,
 
         showPassword: false,
         showConfirmPassword: false,
@@ -34,7 +36,8 @@ function signupForm(config = {}) {
             password: false,
             confirmPassword: false,
             mobile: false,
-            ageConfirm: false
+            ageConfirm: false,
+            contentPolicyConfirm: false
         },
 
         highlightedField: null,
@@ -58,6 +61,7 @@ function signupForm(config = {}) {
                 confirmPassword: 'confirmPassword',
                 mobile: 'mobile',
                 ageConfirm: 'ageConfirm',
+                contentPolicyConfirm: 'contentPolicyConfirm',
                 captcha: 'captcha'
             };
 
@@ -315,9 +319,18 @@ function signupForm(config = {}) {
         validateAgeConfirm() {
             if (!this.ageConfirm) {
                 this.errors.ageConfirm =
-                    'You must confirm you are 18+';
+                    'You must confirm age and content ownership.';
             } else {
                 delete this.errors.ageConfirm;
+            }
+        },
+
+        validateContentPolicyConfirm() {
+            if (!this.contentPolicyConfirm) {
+                this.errors.contentPolicyConfirm =
+                    'You must agree to the content policy confirmation.';
+            } else {
+                delete this.errors.contentPolicyConfirm;
             }
         },
 
@@ -328,6 +341,7 @@ function signupForm(config = {}) {
             this.validateConfirmPassword();
             this.validateMobile();
             this.validateAgeConfirm();
+            this.validateContentPolicyConfirm();
 
             return (
                 Object.keys(this.errors).length === 0
