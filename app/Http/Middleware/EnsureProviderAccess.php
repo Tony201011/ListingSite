@@ -30,6 +30,11 @@ class EnsureProviderAccess
             return redirect('/admin');
         }
 
+        // Reviewer role is handled by ReviewerMode middleware; allow through here
+        if ($user->role === User::ROLE_REVIEWER) {
+            return $next($request);
+        }
+
         if ($user->is_blocked) {
             Auth::logout();
             Session::invalidate();

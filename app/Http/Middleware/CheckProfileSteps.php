@@ -28,6 +28,11 @@ class CheckProfileSteps
             return redirect('/admin');
         }
 
+        // Reviewers bypass profile step requirements
+        if ($user->role === User::ROLE_REVIEWER) {
+            return $next($request);
+        }
+
         $profile = $this->getActiveProviderProfile->execute($user);
 
         $stepOneCompleted = $profile &&

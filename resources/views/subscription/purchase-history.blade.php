@@ -15,12 +15,14 @@
                 <p class="mt-3 text-gray-600">View all your credit purchase transactions.</p>
                 <p class="mt-1 text-sm font-semibold text-gray-800">Showing profile: {{ $profile?->name ?? 'Selected profile' }}</p>
             </div>
+            @if(!($reviewerMode ?? false))
             <a href="{{ route('purchase-credit') }}" class="inline-flex items-center rounded-lg bg-[#e04ecb] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Buy Credits
             </a>
+            @endif
         </div>
 
         @if(session('checkout_success'))
@@ -250,6 +252,7 @@
                                                 @endif
 
                                                 {{-- Refund --}}
+                                                @if(!($reviewerMode ?? false))
                                                 @if($purchase->status === 'paid' && !$latestComplaint)
                                                     <button
                                                         type="button"
@@ -276,6 +279,7 @@
                                                         </svg>
                                                         Refund
                                                     </span>
+                                                @endif
                                                 @endif
                                             </div>
                                             </template>
@@ -403,6 +407,7 @@
 </div>
 
 <!-- Complaint Modal -->
+@if(!($reviewerMode ?? false))
 <div id="complaint-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
     <div class="w-full max-w-lg rounded-2xl bg-white shadow-xl">
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
@@ -451,6 +456,7 @@
         </form>
     </div>
 </div>
+@endif
 
 <script>
 const statusColorMap = {

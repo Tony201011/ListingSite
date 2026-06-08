@@ -23,6 +23,7 @@
             <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <h1 class="text-3xl font-bold text-gray-900">My Profiles</h1>
 
+                @if(!($reviewerMode ?? false))
                 <button
                     type="button"
                     @click="showCreateModal = true; createName = ''; createPhone = ''; createErrors = []"
@@ -30,6 +31,7 @@
                 >
                     + Create New Profile
                 </button>
+                @endif
             </div>
 
             @if(session('success'))
@@ -138,7 +140,7 @@
                                         </svg>
                                     </a>
 
-                                    @if($profile->profile_status === 'approved')
+                                    @if($profile->profile_status === 'approved' && !($reviewerMode ?? false))
                                         <button
                                             type="button"
                                             @click="toggleOnline"
@@ -223,6 +225,7 @@
                                         </button>
                                     </form>
 
+                                    @if(!($reviewerMode ?? false))
                                     <form class="flex-1" method="POST" action="{{ route('profiles.switch-edit', $profile) }}">
                                         @csrf
                                         <button type="submit" class="w-full rounded bg-gray-200 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300">
@@ -242,6 +245,7 @@
                                             Delete
                                         </button>
                                     </form>
+                                    @endif
                                 </div>
 
                                 @if((int)$activeProfileId === $profile->id)

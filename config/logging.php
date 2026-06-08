@@ -131,6 +131,14 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'reviewer' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/reviewer-access.log'),
+            'level' => 'info',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

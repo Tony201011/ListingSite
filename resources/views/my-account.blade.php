@@ -135,12 +135,14 @@
                             @enderror
                         </div>
 
+                        @if(!($reviewerMode ?? false))
                         <button
                             type="submit"
                             class="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded transition"
                         >
                             Save Changes
                         </button>
+                        @endif
                     </form>
                 </div>
 
@@ -148,6 +150,9 @@
                 <div class="border border-gray-300 rounded-lg p-6">
                     <h2 class="text-xl font-bold mb-4 text-gray-900">Password &amp; Security</h2>
 
+                    @if($reviewerMode ?? false)
+                        <p class="text-sm text-amber-700 rounded border border-amber-200 bg-amber-50 px-3 py-2">Password changes are disabled in reviewer mode.</p>
+                    @else
                     <form action="{{ route('change-password.update') }}" method="POST" class="space-y-4" autocomplete="off">
                         @csrf
 
@@ -199,6 +204,7 @@
                             Update Password
                         </button>
                     </form>
+                    @endif
                 </div>
 
                 {{-- Notification Preferences --}}
@@ -270,12 +276,14 @@
                             >
                         </div>
 
+                        @if(!($reviewerMode ?? false))
                         <button
                             type="submit"
                             class="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded transition"
                         >
                             Save Preferences
                         </button>
+                        @endif
                     </form>
                 </div>
 
@@ -306,6 +314,7 @@
                 </div>
 
                 {{-- Danger Zone --}}
+                @if(!($reviewerMode ?? false))
                 <div class="border border-red-300 rounded-lg p-6 bg-red-50">
                     <h2 class="text-xl font-bold mb-4 text-red-700">Danger Zone</h2>
 
@@ -323,6 +332,7 @@
                         </a>
                     </div>
                 </div>
+                @endif
 
             </div>
         </div>
