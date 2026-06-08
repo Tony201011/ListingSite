@@ -15,7 +15,7 @@ class ManageAntiSpamPolicies extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->label('Add Anti Spam Policy')
+                ->label('Add Credit Usage and Expiry Policy')
                 ->createAnother(false)
                 ->visible(fn (): bool => AntiSpamPolicy::query()->doesntExist()),
         ];

@@ -122,6 +122,20 @@ class FrontendPageController extends Controller
         ]);
     }
 
+    public function creditUsageAndExpiryPolicy(): View
+    {
+        return view('frontend.credit-usage-and-expiry-policy', [
+            'policy' => $this->getFrontendSimplePage->creditUsageAndExpiryPolicy(),
+        ]);
+    }
+
+    public function howCreditsWork(): View
+    {
+        return view('frontend.how-credits-work', [
+            'page' => $this->getFrontendSimplePage->help(),
+        ]);
+    }
+
     public function contactUs(): View
     {
         return view('frontend.contact-us', $this->getContactUsPageData->execute());

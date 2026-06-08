@@ -23,15 +23,15 @@ class AntiSpamPolicyResource extends Resource
 {
     protected static ?string $model = AntiSpamPolicy::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNoSymbol;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
 
-    protected static ?string $navigationLabel = 'Anti Spam Policy';
+    protected static ?string $navigationLabel = 'Credit Usage & Expiry Policy';
 
-    protected static ?string $modelLabel = 'Anti Spam Policy';
+    protected static ?string $modelLabel = 'Credit Usage and Expiry Policy';
 
-    protected static ?string $pluralModelLabel = 'Anti Spam Policy';
+    protected static ?string $pluralModelLabel = 'Credit Usage and Expiry Policy';
 
-    protected static ?string $slug = 'anti-spam-policy';
+    protected static ?string $slug = 'credit-usage-and-expiry-policy';
 
     protected static ?string $cluster = Pages::class;
 
@@ -80,7 +80,7 @@ class AntiSpamPolicyResource extends Resource
                     ])
                     ->columnSpanFull()
                     ->fileAttachmentsDisk('public')
-                    ->fileAttachmentsDirectory('pages/anti-spam')
+                    ->fileAttachmentsDirectory('pages/credit-usage-policy')
                     ->fileAttachmentsVisibility('public'),
                 Toggle::make('is_active')
                     ->label('Active')
@@ -110,8 +110,8 @@ class AntiSpamPolicyResource extends Resource
             ])
             ->defaultSort('updated_at', 'desc')
             ->striped()
-            ->emptyStateHeading('No anti spam policy added yet')
-            ->emptyStateDescription('Admin can create, edit, or delete anti spam policy from here.');
+            ->emptyStateHeading('No credit usage and expiry policy added yet')
+            ->emptyStateDescription('Admin can create, edit, or delete the credit usage and expiry policy from here.');
     }
 
     public static function getPages(): array

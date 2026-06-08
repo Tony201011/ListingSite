@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Models\AgeAndConsentPolicy;
+use App\Models\AntiSpamPolicy;
 use App\Models\BabeRankReadMorePage;
 use App\Models\ContentModerationPolicy;
 use App\Models\HelpPage;
@@ -116,6 +117,14 @@ class GetFrontendSimplePage
     public function prohibitedContentPolicy(): ?ProhibitedContentPolicy
     {
         return ProhibitedContentPolicy::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    public function creditUsageAndExpiryPolicy(): ?AntiSpamPolicy
+    {
+        return AntiSpamPolicy::query()
             ->where('is_active', true)
             ->latest('updated_at')
             ->first();
