@@ -25,6 +25,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public const ROLE_REVIEWER = 'reviewer';
 
+    public const ROLE_TEST_ADVERTISER = 'test_advertiser';
+
     protected $fillable = [
         'name',
         'profile_image',
