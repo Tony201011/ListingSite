@@ -8,7 +8,6 @@ use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\OnlineUser;
-use App\Models\Postcode;
 use App\Models\ProfileImage;
 use App\Models\ProfileMessage;
 use App\Models\ProviderListing;
@@ -21,6 +20,7 @@ use App\Models\Tour;
 use App\Models\TourCity;
 use App\Models\User;
 use App\Models\UserVideo;
+use App\Support\EscortLocationData;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -74,6 +74,17 @@ class DummyProviderProfileSeeder extends Seeder
     {
         $freeListingDays = (int) (SiteSetting::getAdTierSettings()['free_listing_days'] ?? 21);
 
+        $stateNameMap = [
+            'ACT' => 'Australian Capital Territory',
+            'NSW' => 'New South Wales',
+            'VIC' => 'Victoria',
+            'QLD' => 'Queensland',
+            'WA' => 'Western Australia',
+            'SA' => 'South Australia',
+            'TAS' => 'Tasmania',
+            'NT' => 'Northern Territory',
+        ];
+
         $categoryIds = Category::query()
             ->where('is_active', true)
             ->whereNull('parent_id')
@@ -82,13 +93,39 @@ class DummyProviderProfileSeeder extends Seeder
             ->values()
             ->all();
 
+        $australia = Country::query()
+            ->where(function ($query): void {
+                $query->where('code', 'AU')
+                    ->orWhere('name', 'Australia');
+            })
+            ->first();
         $cityRows = City::query()->with('state.country')->get();
-        $countries = Country::query()->pluck('id')->values()->all();
-        $states = State::query()->pluck('id')->values()->all();
-        $cities = $cityRows->pluck('id')->values()->all();
-        $melbourneVicCity = $cityRows->first(
-            fn (City $city): bool => strcasecmp($city->name, 'Melbourne') === 0
-                && strcasecmp((string) $city->state?->name, 'Victoria') === 0
+        $stateRows = State::query()->with('country')->get();
+        $seedLocations = collect(EscortLocationData::profileLocations())
+            ->map(function (array $location) use ($australia, $cityRows, $stateNameMap, $stateRows): array {
+                $stateCode = $location['state'];
+                $stateName = $stateNameMap[$stateCode] ?? $stateCode;
+                $stateModel = $stateRows->first(
+                    fn (State $state): bool => strcasecmp($state->name, $stateName) === 0
+                        && strcasecmp((string) ($state->country?->code ?? ''), 'AU') === 0
+                );
+                $cityModel = $cityRows->first(
+                    fn (City $city): bool => strcasecmp($city->name, $location['suburb']) === 0
+                        && strcasecmp((string) $city->state?->name, $stateName) === 0
+                        && strcasecmp((string) ($city->state?->country?->code ?? ''), 'AU') === 0
+                );
+
+                return [
+                    ...$location,
+                    'city_id' => $cityModel?->id,
+                    'state_id' => $stateModel?->id,
+                    'country_id' => $stateModel?->country_id ?? $australia?->id,
+                    'suburb_value' => EscortLocationData::formatProfileSuburb($location),
+                ];
+            })
+            ->values();
+        $melbourneLocation = $seedLocations->first(
+            fn (array $location): bool => $location['suburb'] === 'Melbourne' && $location['state'] === 'VIC'
         );
 
         $ageGroupIds = Category::query()->where('slug', 'age-group')
@@ -106,9 +143,9 @@ class DummyProviderProfileSeeder extends Seeder
         $yourLengthIds = Category::query()->where('slug', 'your-length')
             ->first()?->children()->pluck('id')->values()->all() ?? [];
 
-        $tourCityNames = TourCity::pluck('name')->values()->all();
+        $tourCityNames = TourCity::query()->pluck('name')->values()->all();
         if (empty($tourCityNames)) {
-            $tourCityNames = ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Canberra', 'Hobart', 'Darwin'];
+            $tourCityNames = $seedLocations->pluck('suburb')->all();
         }
 
         $primaryIdentityIds = Category::query()->where('slug', 'primary-identity')
@@ -120,146 +157,17 @@ class DummyProviderProfileSeeder extends Seeder
         $servicesProvidedIds = Category::query()->where('slug', 'services-you-provide')
             ->first()?->children()->pluck('id')->values()->all() ?? [];
 
-        $suburbs = Postcode::query()
-            ->select(['suburb', 'state', 'postcode'])
-            ->inRandomOrder()
-            ->limit(500)
-            ->get()
-            ->map(fn ($row) => "{$row->suburb}, {$row->state} {$row->postcode}")
-            ->values()
-            ->all();
-
-        // If the postcodes table is empty, read directly from the CSV file used by PostcodeSeeder.
-        if (empty($suburbs)) {
-            $csvPath = database_path('seeders/2 (2).csv');
-            if (file_exists($csvPath) && is_readable($csvPath)) {
-                $handle = fopen($csvPath, 'r');
-                fgetcsv($handle); // skip header
-                $csvSuburbs = [];
-                while (($data = fgetcsv($handle)) !== false) {
-                    $state = trim($data[0] ?? '');
-                    $suburb = trim($data[2] ?? '');
-                    $postcode = trim($data[3] ?? '');
-                    if ($suburb !== '' && $postcode !== '' && $state !== '') {
-                        $csvSuburbs[] = "{$suburb}, {$state} {$postcode}";
-                    }
-                }
-                fclose($handle);
-                if (! empty($csvSuburbs)) {
-                    shuffle($csvSuburbs);
-                    $suburbs = array_slice($csvSuburbs, 0, 500);
-                }
-            }
-        }
-
-        if (empty($suburbs)) {
-            $suburbs = [
-                // NSW
-                'Bondi, NSW 2026',
-                'Surry Hills, NSW 2010',
-                'Newtown, NSW 2042',
-                'Manly, NSW 2095',
-                'Parramatta, NSW 2150',
-                'Chatswood, NSW 2067',
-                'Randwick, NSW 2031',
-                'Leichhardt, NSW 2040',
-                'Glebe, NSW 2037',
-                'Paddington, NSW 2021',
-                'Dee Why, NSW 2099',
-                'Cronulla, NSW 2230',
-                'Penrith, NSW 2750',
-                'Blacktown, NSW 2148',
-                'Liverpool, NSW 2170',
-                'Campbelltown, NSW 2560',
-                'Hornsby, NSW 2077',
-                'Gosford, NSW 2250',
-                'Newcastle, NSW 2300',
-                'Wollongong, NSW 2500',
-                // VIC
-                'Melbourne, VIC 3000',
-                'St Kilda, VIC 3182',
-                'Richmond, VIC 3121',
-                'Fitzroy, VIC 3065',
-                'Carlton, VIC 3053',
-                'South Yarra, VIC 3141',
-                'Prahran, VIC 3181',
-                'Collingwood, VIC 3066',
-                'Brunswick, VIC 3056',
-                'Footscray, VIC 3011',
-                'Caulfield, VIC 3162',
-                'Brighton, VIC 3186',
-                'Geelong, VIC 3220',
-                'Ballarat, VIC 3350',
-                'Bendigo, VIC 3550',
-                'Dandenong, VIC 3175',
-                'Frankston, VIC 3199',
-                'Box Hill, VIC 3128',
-                'Glen Waverley, VIC 3150',
-                'Ringwood, VIC 3134',
-                // QLD
-                'Brisbane City, QLD 4000',
-                'South Brisbane, QLD 4101',
-                'Fortitude Valley, QLD 4006',
-                'Toowong, QLD 4066',
-                'Indooroopilly, QLD 4068',
-                'Chermside, QLD 4032',
-                'Carindale, QLD 4152',
-                'Southport, QLD 4215',
-                'Surfers Paradise, QLD 4217',
-                'Broadbeach, QLD 4218',
-                'Robina, QLD 4226',
-                'Bundall, QLD 4217',
-                'Cairns, QLD 4870',
-                'Townsville, QLD 4810',
-                'Sunshine Coast, QLD 4558',
-                // SA
-                'Adelaide, SA 5000',
-                'Glenelg, SA 5045',
-                'Norwood, SA 5067',
-                'Unley, SA 5061',
-                'Prospect, SA 5082',
-                'Port Adelaide, SA 5015',
-                'Marion, SA 5043',
-                'Tea Tree Gully, SA 5091',
-                'Elizabeth, SA 5112',
-                'Mount Gambier, SA 5290',
-                // WA
-                'Perth, WA 6000',
-                'Fremantle, WA 6160',
-                'Subiaco, WA 6008',
-                'Cottesloe, WA 6011',
-                'Victoria Park, WA 6100',
-                'Joondalup, WA 6027',
-                'Rockingham, WA 6168',
-                'Mandurah, WA 6210',
-                'Bunbury, WA 6230',
-                'Geraldton, WA 6530',
-                // ACT
-                'Canberra, ACT 2600',
-                'Belconnen, ACT 2617',
-                'Tuggeranong, ACT 2900',
-                'Woden, ACT 2606',
-                'Gungahlin, ACT 2912',
-                // TAS
-                'Hobart, TAS 7000',
-                'Sandy Bay, TAS 7005',
-                'Launceston, TAS 7250',
-                'Devonport, TAS 7310',
-                // NT
-                'Darwin, NT 0800',
-                'Palmerston, NT 0830',
-            ];
-        }
-
         for ($i = 1; $i <= self::TOTAL; $i++) {
             $accountIndex = intdiv($i - 1, self::PROFILES_PER_ACCOUNT) + 1;
             $profileNumberWithinAccount = (($i - 1) % self::PROFILES_PER_ACCOUNT) + 1;
             $email = "provider{$accountIndex}@yopmail.com";
             $name = $this->pickName($i);
-            $isJerryProfile = $i === 90 && $melbourneVicCity !== null;
+            $seedLocation = $seedLocations[($i - 1) % max($seedLocations->count(), 1)];
+            $isJerryProfile = $i === 90 && $melbourneLocation !== null;
 
             if ($isJerryProfile) {
                 $name = 'Jerry09090';
+                $seedLocation = $melbourneLocation;
             }
 
             // 1. User
@@ -278,14 +186,9 @@ class DummyProviderProfileSeeder extends Seeder
             );
 
             // 2. ProviderProfile
-            $cityId = $isJerryProfile
-                ? $melbourneVicCity->id
-                : (count($cities) > 0 ? $cities[$i % count($cities)] : null);
-            $cityModel = $isJerryProfile
-                ? $melbourneVicCity
-                : ($cityId ? $cityRows->firstWhere('id', $cityId) : null);
-            $stateId = $cityModel ? $cityModel->state_id : (count($states) > 0 ? $states[$i % count($states)] : null);
-            $countryId = $cityModel ? ($cityModel->state?->country_id ?? null) : (count($countries) > 0 ? $countries[$i % count($countries)] : null);
+            $cityId = $seedLocation['city_id'] ?? null;
+            $stateId = $seedLocation['state_id'] ?? null;
+            $countryId = $seedLocation['country_id'] ?? $australia?->id;
 
             $slug = Str::slug($name) ?: 'profile';
             $existingProfile = ProviderProfile::withTrashed()
@@ -301,9 +204,7 @@ class DummyProviderProfileSeeder extends Seeder
                     'name' => $name,
                     'slug' => $slug,
                     'profile_sequence' => $profileSequence,
-                    'suburb' => $isJerryProfile
-                        ? 'Melbourne, VIC 3000'
-                        : $this->pickFrom($suburbs, $i),
+                    'suburb' => $seedLocation['suburb_value'],
                     'age' => rand(21, 45),
                     'description' => "Hi, I'm {$name}. I am a professional and discreet companion offering premium companionship services. I love to meet new people and create unforgettable experiences.",
                     'introduction_line' => "Welcome to my profile! I'm {$name}, your perfect companion.",
