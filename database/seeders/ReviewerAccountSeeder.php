@@ -8,7 +8,6 @@ use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
