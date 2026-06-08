@@ -1,13 +1,13 @@
 @extends('layouts.frontend')
 
-@section('title', 'Anti Spam Policy')
+@section('title', $policy?->title ?? 'Credit Usage and Expiry Policy')
 
 @section('content')
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-5xl mx-auto">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 mb-6">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Anti Spam Policy</h1>
-            <p class="mt-3 text-gray-600">Read our anti-spam rules, prohibited behavior, and enforcement policy.</p>
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">{{ $policy?->title ?? 'Credit Usage and Expiry Policy' }}</h1>
+            <p class="mt-3 text-gray-600">Read how credits are consumed, when they expire, and where to get support for credit usage issues.</p>
             @if($policy?->updated_at)
                 <p class="mt-3 text-sm text-gray-500">Last updated: {{ $policy->updated_at->format('M d, Y') }}</p>
             @endif
@@ -21,7 +21,7 @@
             </div>
         @else
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-gray-500">
-                Anti-spam policy is not available yet.
+                Credit usage and expiry policy is not available yet.
             </div>
         @endif
     </div>

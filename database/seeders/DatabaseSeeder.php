@@ -43,6 +43,8 @@ class DatabaseSeeder extends Seeder
             OnlineUserSeeder::class,
             VerificationExampleImageSeeder::class,
             BlogPostSeeder::class,
+            AboutUsPageSeeder::class,
+            ContactUsPageSeeder::class,
             TermConditionSeeder::class,
             PrivacyPolicySeeder::class,
             RefundPolicySeeder::class,

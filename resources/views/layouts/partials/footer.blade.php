@@ -23,24 +23,29 @@
 
         $navigationLinks = collect($footerWidget?->navigation_links ?? [
             ['label' => 'Home', 'url' => url('/')],
-            ['label' => 'Escorts', 'url' => url('/')],
-            ['label' => 'Naughty corner', 'url' => route('naughty-corner')],
-            ['label' => 'Blog', 'url' => route('blog')],
+            ['label' => 'About', 'url' => route('about-us')],
+            ['label' => 'Browse Listings', 'url' => route('escorts.search')],
+            ['label' => 'Sample Listing', 'url' => route('sample-listing')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
         $advertiserLinks = collect($footerWidget?->advertisers_links ?? [
-            ['label' => 'Create Profile', 'url' => url('/signup')],
-            ['label' => 'Provider Login', 'url' => url('/signin')],
-            ['label' => 'Membership Plans', 'url' => url('/membership')],
-            ['label' => 'Pricing & Refunds', 'url' => route('refund-policy')],
+            ['label' => 'Advertiser registration', 'url' => url('/signup')],
+            ['label' => 'Advertiser login', 'url' => url('/signin')],
+            ['label' => 'Pricing/credit packages', 'url' => route('pricing')],
+            ['label' => 'How credits work', 'url' => route('how-credits-work')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
         $legalLinks = collect($footerWidget?->legal_links ?? [
-            ['label' => 'FAQ', 'url' => route('faq')],
-            ['label' => 'Contact Us', 'url' => route('contact-us')],
-            ['label' => 'Terms & Conditions', 'url' => route('terms-and-conditions')],
+            ['label' => 'Terms and conditions', 'url' => route('terms-and-conditions')],
             ['label' => 'Privacy Policy', 'url' => route('privacy-policy')],
-            ['label' => 'Anti-Spam Policy', 'url' => route('anti-spam-policy')],
+            ['label' => 'Refund policy', 'url' => route('refund-policy')],
+            ['label' => 'Contact/support', 'url' => route('contact-us')],
+            ['label' => 'Credit usage and expiry policy', 'url' => route('credit-usage-and-expiry-policy')],
+            ['label' => 'Content Moderation Policy', 'url' => route('content-moderation-policy')],
+            ['label' => 'Report a Listing', 'url' => route('report-a-listing')],
+            ['label' => 'Age and Consent Policy', 'url' => route('age-and-consent-policy')],
+            ['label' => 'Prohibited content/services policy', 'url' => route('prohibited-content-policy')],
+            ['label' => 'Complaints/contact page', 'url' => route('complaints-contact')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
         $currentPath = '/'.trim((string) request()->path(), '/');

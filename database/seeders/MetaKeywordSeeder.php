@@ -36,6 +36,11 @@ class MetaKeywordSeeder extends Seeder
                 'is_active' => true,
             ],
             [
+                'page_name' => 'complaints-contact',
+                'meta_keyword' => 'complaints contact, dispute support, listing complaints, support enquiry, contact help, user grievance',
+                'is_active' => true,
+            ],
+            [
                 'page_name' => 'privacy-policy',
                 'meta_keyword' => 'privacy policy, data protection, personal data, user privacy, cookies policy, account privacy, information security',
                 'is_active' => true,
@@ -56,6 +61,11 @@ class MetaKeywordSeeder extends Seeder
                 'is_active' => true,
             ],
             [
+                'page_name' => 'credit-usage-and-expiry-policy',
+                'meta_keyword' => 'credit usage policy, credit expiry, listing credit rules, advertiser credits, package validity, credit balance',
+                'is_active' => true,
+            ],
+            [
                 'page_name' => 'faq',
                 'meta_keyword' => 'escort faq, frequently asked questions, booking help, profile help, account support, payment questions',
                 'is_active' => true,
@@ -63,6 +73,11 @@ class MetaKeywordSeeder extends Seeder
             [
                 'page_name' => 'help',
                 'meta_keyword' => 'help center, support guide, escort listing help, account help, profile management help, user support',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'how-credits-work',
+                'meta_keyword' => 'how credits work, credits guide, advertiser credit system, daily credit usage, listing credits explained',
                 'is_active' => true,
             ],
             [
@@ -78,6 +93,11 @@ class MetaKeywordSeeder extends Seeder
             [
                 'page_name' => 'pricing',
                 'meta_keyword' => 'escort pricing, listing packages, ad pricing, premium listing cost, subscription pricing, plan comparison',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'sample-listing',
+                'meta_keyword' => 'sample listing, sample profile, escort profile demo, listing preview, profile page example',
                 'is_active' => true,
             ],
             [

@@ -24,9 +24,9 @@
     ])->filter(fn ($item) => filled($item['label'] ?? null))->values();
 
     $topRightLinks = collect($headerWidget?->top_right_links ?? [
-        ['label' => 'Follow Alice', 'url' => route('blog')],
         ['label' => 'Help', 'url' => route('help')],
-        ['label' => 'Contact', 'url' => route('contact-us')],
+        ['label' => 'Contact/Support', 'url' => route('contact-us')],
+        ['label' => 'Complaints/Contact', 'url' => route('complaints-contact')],
     ])
         ->map(function ($item) {
             $label = strtolower(trim((string) ($item['label'] ?? '')));
@@ -42,9 +42,9 @@
 
     $actionLinks = collect($headerWidget?->action_links ?? [
         ['label' => 'Pricing', 'url' => url('/pricing')],
-        ['label' => 'Diamonds', 'url' => url('/purchase-credit')],
-        ['label' => 'Superboost', 'url' => url('/purchase-credit')],
-        ['label' => 'Add advertisement', 'url' => url('/signup')],
+        ['label' => 'Credit Packages', 'url' => url('/membership')],
+        ['label' => 'Advertiser Login', 'url' => url('/signin')],
+        ['label' => 'Advertiser Register', 'url' => url('/signup')],
     ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null));
 
     $currentUser = auth()->user();
@@ -85,10 +85,10 @@
     $mainNavLinks = collect($headerWidget?->main_nav_links ?? [
         ['label' => 'Home', 'url' => url('/')],
         ['label' => 'About us', 'url' => route('about-us')],
+        ['label' => 'Browse Listings', 'url' => route('escorts.search')],
+        ['label' => 'Sample Listing', 'url' => route('sample-listing')],
         ['label' => 'Pricing', 'url' => url('/pricing')],
-        ['label' => 'Escorts', 'url' => url('/')],
-        ['label' => 'Naughty corner', 'url' => route('naughty-corner')],
-        ['label' => 'Blog', 'url' => route('blog')],
+        ['label' => 'How credits work', 'url' => route('how-credits-work')],
         ['label' => 'Sign Up', 'url' => url('/signup')],
         ['label' => 'Sign In', 'url' => url('/signin')],
     ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
@@ -132,7 +132,8 @@
     }
 
     $mobileExtraLinks = collect($headerWidget?->mobile_extra_links ?? [
-        ['label' => 'Contact', 'url' => route('contact-us')],
+        ['label' => 'Contact/Support', 'url' => route('contact-us')],
+        ['label' => 'Report a Listing', 'url' => route('report-a-listing')],
     ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
     $showTopBar = $headerWidget?->enable_top_bar ?? false;

@@ -12,14 +12,17 @@ class AntiSpamPolicySeeder extends Seeder
      */
     public function run(): void
     {
-        AntiSpamPolicy::updateOrCreate(
-            [
-                'title' => 'Anti Spam Policy',
-            ],
-            [
-                'content' => '<h2>Purpose</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi.</p><h3>Prohibited Activity</h3><p>Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.</p><h3>Monitoring</h3><p>Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p><h3>Enforcement</h3><p>Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam.</p><h3>Contact</h3><p>In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor.</p>',
-                'is_active' => true,
-            ],
-        );
+        $policy = AntiSpamPolicy::query()
+            ->whereIn('title', ['Credit Usage and Expiry Policy', 'Anti Spam Policy'])
+            ->latest('updated_at')
+            ->first() ?? new AntiSpamPolicy;
+
+        $policy->fill([
+            'title' => 'Credit Usage and Expiry Policy',
+            'content' => '<h2>How credits are used</h2><p>One credit is used for each day an advertiser profile stays live and visible on the platform. If a profile is hidden or paused, credits are not consumed during that period.</p><h3>Daily usage timing</h3><p>Credit deductions are processed daily for active profiles. Advertisers can monitor remaining balance from their account dashboard and top up at any time.</p><h3>Expiry rules</h3><p>Purchased credits remain available until their listed expiry date in the package terms. If no expiry date is stated for a package, credits remain valid and usable while the account is active.</p><h3>Refund and reversal</h3><p>Any approved reversal or refund is handled according to the published refund policy. Used credits are generally non-refundable unless required by law.</p><h3>Support</h3><p>For credit usage disputes or expiry questions, please contact support from the contact/support page with account and transaction details.</p>',
+            'is_active' => true,
+        ]);
+
+        $policy->save();
     }
 }
