@@ -25,15 +25,13 @@
             <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <h1 class="text-3xl font-bold text-gray-900">My Profiles</h1>
 
-                @if(!($reviewerMode ?? false))
                 <button
                     type="button"
                     @click="showCreateModal = true; createName = ''; createPhone = ''; createAgeOwnershipConfirm = false; createContentPolicyConfirm = false; createErrors = []"
                     class="inline-flex items-center justify-center rounded bg-pink-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-pink-600"
                 >
-                    + Create New Profile
+                    {{ ($reviewerMode ?? false) ? '+ Preview Create Profile' : '+ Create New Profile' }}
                 </button>
-                @endif
             </div>
 
             <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
@@ -231,7 +229,6 @@
                                         </button>
                                     </form>
 
-                                    @if(!($reviewerMode ?? false))
                                     <form class="flex-1" method="POST" action="{{ route('profiles.switch-edit', $profile) }}">
                                         @csrf
                                         <button type="submit" class="w-full rounded bg-gray-200 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300">
@@ -239,6 +236,7 @@
                                         </button>
                                     </form>
 
+                                    @if(!($reviewerMode ?? false))
                                     <form
                                         method="POST"
                                         action="{{ route('profiles.destroy', $profile) }}"
@@ -310,6 +308,11 @@
                     <p class="mb-4 text-sm text-gray-600">
                         Each profile can have its own name and phone number, so you can manage multiple listings from one account.
                     </p>
+                    @if($reviewerMode ?? false)
+                        <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                            Reviewer mode is read-only. This form is displayed for processor review only.
+                        </div>
+                    @endif
 
                     <template x-if="createErrors.length > 0">
                         <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -323,6 +326,10 @@
                         method="POST"
                         action="{{ route('profiles.store') }}"
                         @submit.prevent="
+                            @if($reviewerMode ?? false)
+                            createErrors = ['Read-only mode: profile creation is disabled for reviewer accounts.'];
+                            return;
+                            @endif
                             createErrors = [];
                             if (!createName.trim()) {
                                 createErrors.push('Profile name is required.');
@@ -420,9 +427,10 @@
                             </button>
                             <button
                                 type="submit"
-                                class="w-full rounded-lg bg-pink-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-pink-600 sm:w-auto"
+                                class="w-full rounded-lg bg-pink-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+                                @if($reviewerMode ?? false) disabled @endif
                             >
-                                Create Profile
+                                {{ ($reviewerMode ?? false) ? 'Create disabled (read-only)' : 'Create Profile' }}
                             </button>
                         </div>
                     </form>
