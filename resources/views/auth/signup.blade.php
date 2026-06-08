@@ -20,6 +20,10 @@
             <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Create your free profile</h2>
         </div>
 
+        <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+            This website is intended for adults only.
+        </div>
+
         <div class="bg-white rounded-2xl p-6 md:p-8 mb-8 shadow-md border border-gray-100">
             <div class="flex items-center gap-4 mb-5">
                 <div class="w-12 h-12 bg-[#e04ecb] rounded-xl flex items-center justify-center">
@@ -48,7 +52,8 @@
                 email: @js(old('email', '')),
                 nickname: @js(old('nickname', '')),
                 mobile: @js(old('mobile', '')),
-                ageConfirm: @js((bool) old('age_confirm'))
+                ageConfirm: @js((bool) old('age_confirm')),
+                contentPolicyConfirm: @js((bool) old('content_policy_confirm'))
             })"
             @submit="submitForm"
             class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100"
@@ -361,8 +366,8 @@
                     >
                 </div>
 
-                <div class="flex flex-col gap-0">
-                    <div class="flex items-center gap-2.5 bg-gray-50 px-5 py-3 rounded-full">
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-start gap-2.5 bg-gray-50 px-5 py-3 rounded-2xl">
                         <input
                             name="age_confirm"
                             type="checkbox"
@@ -374,7 +379,15 @@
                             class="w-5 h-5 accent-[#e04ecb]"
                             {{ old('age_confirm') ? 'checked' : '' }}
                         >
-                        <label for="age_confirm" class="font-semibold text-gray-800">I am 18+</label>
+                        <label for="age_confirm" class="font-semibold text-gray-800">
+                            I confirm that I am at least 18 years old and that all content I upload is my own or I have legal permission to use it.
+                            <span class="block mt-1 text-xs font-medium text-gray-600">
+                                Read:
+                                <a href="{{ route('age-and-consent-policy') }}" target="_blank" rel="noopener" class="text-[#e04ecb] underline">Age & Consent Policy</a>
+                                and
+                                <a href="{{ route('terms-and-conditions') }}" target="_blank" rel="noopener" class="text-[#e04ecb] underline">Terms & Conditions</a>.
+                            </span>
+                        </label>
                     </div>
                     <div class="mt-1 min-h-5" data-error-container="ageConfirm">
                         @error('age_confirm')
@@ -382,6 +395,38 @@
                         @enderror
                         <template x-if="touched.ageConfirm && errors.ageConfirm">
                             <div class="text-xs text-red-600 pl-12" x-text="errors.ageConfirm"></div>
+                        </template>
+                    </div>
+
+                    <div class="flex items-start gap-2.5 bg-gray-50 px-5 py-3 rounded-2xl">
+                        <input
+                            name="content_policy_confirm"
+                            type="checkbox"
+                            id="content_policy_confirm"
+                            x-ref="contentPolicyConfirm"
+                            x-model="contentPolicyConfirm"
+                            @change="touched.contentPolicyConfirm = true; validateContentPolicyConfirm()"
+                            :aria-invalid="errors.contentPolicyConfirm ? 'true' : 'false'"
+                            class="w-5 h-5 mt-0.5 accent-[#e04ecb]"
+                            {{ old('content_policy_confirm') ? 'checked' : '' }}
+                        >
+                        <label for="content_policy_confirm" class="font-semibold text-gray-800">
+                            I agree not to upload prohibited, illegal, misleading, or non-consensual content.
+                            <span class="block mt-1 text-xs font-medium text-gray-600">
+                                Read:
+                                <a href="{{ route('content-moderation-policy') }}" target="_blank" rel="noopener" class="text-[#e04ecb] underline">Content Moderation Policy</a>,
+                                <a href="{{ route('prohibited-content-policy') }}" target="_blank" rel="noopener" class="text-[#e04ecb] underline">Prohibited Content / Services Policy</a>,
+                                and
+                                <a href="{{ route('terms-and-conditions') }}" target="_blank" rel="noopener" class="text-[#e04ecb] underline">Terms & Conditions</a>.
+                            </span>
+                        </label>
+                    </div>
+                    <div class="mt-1 min-h-5" data-error-container="contentPolicyConfirm">
+                        @error('content_policy_confirm')
+                            <div class="text-xs text-red-600 pl-12" data-server-error="true" data-field="contentPolicyConfirm">{{ $message }}</div>
+                        @enderror
+                        <template x-if="touched.contentPolicyConfirm && errors.contentPolicyConfirm">
+                            <div class="text-xs text-red-600 pl-12" x-text="errors.contentPolicyConfirm"></div>
                         </template>
                     </div>
                 </div>

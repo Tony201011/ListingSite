@@ -6,9 +6,11 @@
         <div
             class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8"
             x-data="{
-                showCreateModal: false,
-                createName: '',
-                createPhone: '',
+                showCreateModal: @js($errors->any() && (old('name') !== null || old('age_and_ownership_confirm') !== null || old('content_policy_confirm') !== null)),
+                createName: @js(old('name', '')),
+                createPhone: @js(old('phone', '')),
+                createAgeOwnershipConfirm: @js((bool) old('age_and_ownership_confirm')),
+                createContentPolicyConfirm: @js((bool) old('content_policy_confirm')),
                 createErrors: []
             }"
         >
@@ -26,12 +28,16 @@
                 @if(!($reviewerMode ?? false))
                 <button
                     type="button"
-                    @click="showCreateModal = true; createName = ''; createPhone = ''; createErrors = []"
+                    @click="showCreateModal = true; createName = ''; createPhone = ''; createAgeOwnershipConfirm = false; createContentPolicyConfirm = false; createErrors = []"
                     class="inline-flex items-center justify-center rounded bg-pink-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-pink-600"
                 >
                     + Create New Profile
                 </button>
                 @endif
+            </div>
+
+            <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                This website is intended for adults only.
             </div>
 
             @if(session('success'))
@@ -322,6 +328,14 @@
                                 createErrors.push('Profile name is required.');
                                 return;
                             }
+                            if (!createAgeOwnershipConfirm) {
+                                createErrors.push('You must confirm age and content ownership.');
+                                return;
+                            }
+                            if (!createContentPolicyConfirm) {
+                                createErrors.push('You must agree to the content policy confirmation.');
+                                return;
+                            }
                             $el.submit();
                         "
                         class="space-y-4"
@@ -354,6 +368,46 @@
                                 class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/30"
                                 placeholder="e.g. 0400 000 000"
                             >
+                        </div>
+
+                        <div class="space-y-3">
+                            <label for="age_and_ownership_confirm" class="flex items-start gap-2.5 rounded-xl bg-gray-50 px-4 py-3">
+                                <input
+                                    id="age_and_ownership_confirm"
+                                    type="checkbox"
+                                    name="age_and_ownership_confirm"
+                                    x-model="createAgeOwnershipConfirm"
+                                    class="mt-0.5 h-5 w-5 accent-pink-500"
+                                >
+                                <span class="text-sm font-semibold text-gray-800">
+                                    I confirm that I am at least 18 years old and that all content I upload is my own or I have legal permission to use it.
+                                    <span class="mt-1 block text-xs font-medium text-gray-600">
+                                        <a href="{{ route('age-and-consent-policy') }}" class="text-pink-600 underline" target="_blank" rel="noopener">Age & Consent Policy</a>
+                                        and
+                                        <a href="{{ route('terms-and-conditions') }}" class="text-pink-600 underline" target="_blank" rel="noopener">Terms & Conditions</a>
+                                    </span>
+                                </span>
+                            </label>
+
+                            <label for="content_policy_confirm" class="flex items-start gap-2.5 rounded-xl bg-gray-50 px-4 py-3">
+                                <input
+                                    id="content_policy_confirm"
+                                    type="checkbox"
+                                    name="content_policy_confirm"
+                                    x-model="createContentPolicyConfirm"
+                                    class="mt-0.5 h-5 w-5 accent-pink-500"
+                                >
+                                <span class="text-sm font-semibold text-gray-800">
+                                    I agree not to upload prohibited, illegal, misleading, or non-consensual content.
+                                    <span class="mt-1 block text-xs font-medium text-gray-600">
+                                        <a href="{{ route('content-moderation-policy') }}" class="text-pink-600 underline" target="_blank" rel="noopener">Content Moderation Policy</a>,
+                                        <a href="{{ route('prohibited-content-policy') }}" class="text-pink-600 underline" target="_blank" rel="noopener">Prohibited Content / Services Policy</a>,
+                                        <a href="{{ route('age-and-consent-policy') }}" class="text-pink-600 underline" target="_blank" rel="noopener">Age & Consent Policy</a>,
+                                        and
+                                        <a href="{{ route('terms-and-conditions') }}" class="text-pink-600 underline" target="_blank" rel="noopener">Terms & Conditions</a>
+                                    </span>
+                                </span>
+                            </label>
                         </div>
 
                         <div class="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">

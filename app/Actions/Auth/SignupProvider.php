@@ -40,6 +40,10 @@ class SignupProvider
             'mobile_verified' => false,
             'referral_code' => $validated['referral_code'] ?? null,
             'account_user_referral_code' => $validated['account_user_referral_code'] ?? null,
+            'age_confirm' => (bool) ($validated['age_confirm'] ?? false),
+            'content_policy_confirm' => (bool) ($validated['content_policy_confirm'] ?? false),
+            'confirmation_ip' => request()->ip(),
+            'confirmation_accepted_at' => now()->toDateTimeString(),
         ], now()->addMinutes(10));
 
         Cache::put($pendingKey.'_otp', [
