@@ -214,7 +214,7 @@ class GlobalBannerResource extends Resource
                 return str_starts_with($action, FrontendPageController::class.'@')
                     || str_starts_with($action, BlogController::class.'@');
             })
-            ->mapWithKeys(function (Route $route): array {
+            ->mapWithKeys(function (Route $route) use ($footerLegalPageOptions): array {
                 $uri = trim((string) $route->uri(), '/');
 
                 if ($uri === '' || str_contains($uri, '{') || str_starts_with($uri, 'api/')) {
