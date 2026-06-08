@@ -3,13 +3,16 @@
 namespace App\Filament\Pages\Auth;
 
 use App\Models\City;
+use App\Models\ComplianceConfirmation;
 use App\Models\Country;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\State;
 use App\Models\User;
 use Filament\Auth\Pages\Register;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -30,6 +33,9 @@ class ProviderRegister extends Register
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
+                $this->getAdultNoticeFormComponent(),
+                $this->getAgeConfirmFormComponent(),
+                $this->getContentPolicyConfirmFormComponent(),
                 $this->getProfileNameFormComponent(),
                 $this->getProfileSlugFormComponent(),
                 $this->getProfileAgeFormComponent(),
@@ -62,7 +68,7 @@ class ProviderRegister extends Register
             'is_blocked' => false,
         ]);
 
-        ProviderProfile::query()->create([
+        $profile = ProviderProfile::query()->create([
             'user_id' => $user->id,
             'name' => $data['profile_name'] ?? null,
             'slug' => filled($data['profile_slug'] ?? null) ? $data['profile_slug'] : Str::slug($data['profile_name'] ?? ''),
@@ -84,7 +90,63 @@ class ProviderRegister extends Register
             ),
         ]);
 
+        $acceptedAt = now();
+
+        ComplianceConfirmation::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'confirmation_type' => ComplianceConfirmation::TYPE_AGE_CONTENT_OWNERSHIP,
+            'context' => ComplianceConfirmation::CONTEXT_SIGNUP,
+            'accepted' => (bool) ($data['age_confirm'] ?? false),
+            'accepted_at' => $acceptedAt,
+            'ip_address' => request()->ip(),
+        ]);
+
+        ComplianceConfirmation::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'confirmation_type' => ComplianceConfirmation::TYPE_CONTENT_POLICY,
+            'context' => ComplianceConfirmation::CONTEXT_SIGNUP,
+            'accepted' => (bool) ($data['content_policy_confirm'] ?? false),
+            'accepted_at' => $acceptedAt,
+            'ip_address' => request()->ip(),
+        ]);
+
         return $user;
+    }
+
+    protected function getAdultNoticeFormComponent(): Component
+    {
+        return Placeholder::make('adult_notice')
+            ->hiddenLabel()
+            ->content('This website is intended for adults only.')
+            ->columnSpanFull();
+    }
+
+    protected function getAgeConfirmFormComponent(): Component
+    {
+        return Checkbox::make('age_confirm')
+            ->label('I confirm that I am at least 18 years old and that all content I upload is my own or I have legal permission to use it.')
+            ->accepted()
+            ->required()
+            ->validationMessages([
+                'accepted' => 'You must confirm your age and content ownership.',
+                'required' => 'You must confirm your age and content ownership.',
+            ])
+            ->columnSpanFull();
+    }
+
+    protected function getContentPolicyConfirmFormComponent(): Component
+    {
+        return Checkbox::make('content_policy_confirm')
+            ->label('I agree not to upload prohibited, illegal, misleading, or non-consensual content.')
+            ->accepted()
+            ->required()
+            ->validationMessages([
+                'accepted' => 'You must agree to the content policy confirmation.',
+                'required' => 'You must agree to the content policy confirmation.',
+            ])
+            ->columnSpanFull();
     }
 
     protected function getProfileNameFormComponent(): Component
