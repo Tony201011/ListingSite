@@ -27,6 +27,7 @@ use Illuminate\Support\Str;
 class DummyProviderProfileSeeder extends Seeder
 {
     private const TOTAL = 1000;
+    private const PROFILES_PER_ACCOUNT = 3;
 
     private const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -251,7 +252,9 @@ class DummyProviderProfileSeeder extends Seeder
         }
 
         for ($i = 1; $i <= self::TOTAL; $i++) {
-            $email = "provider{$i}@yopmail.com";
+            $accountIndex = intdiv($i - 1, self::PROFILES_PER_ACCOUNT) + 1;
+            $profileNumberWithinAccount = (($i - 1) % self::PROFILES_PER_ACCOUNT) + 1;
+            $email = "provider{$accountIndex}@yopmail.com";
             $name = $this->pickName($i);
             $isJerryProfile = $i === 90 && $melbourneVicCity !== null;
 
@@ -263,11 +266,11 @@ class DummyProviderProfileSeeder extends Seeder
             $user = User::updateOrCreate(
                 ['email' => $email],
                 [
-                    'name' => $name,
+                    'name' => $this->pickName($accountIndex),
                     'password' => bcrypt('Provider@12345'),
                     'role' => User::ROLE_PROVIDER,
                     'is_blocked' => false,
-                    'mobile' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 7) % 1000, ($i * 13) % 1000),
+                    'mobile' => sprintf('+61 4%02d %03d %03d', $accountIndex % 100, ($accountIndex * 7) % 1000, ($accountIndex * 13) % 1000),
                     'mobile_verified' => true,
                     'email_verified_at' => now(),
                     'account_status' => 'active',
@@ -285,10 +288,15 @@ class DummyProviderProfileSeeder extends Seeder
             $countryId = $cityModel ? ($cityModel->state?->country_id ?? null) : (count($countries) > 0 ? $countries[$i % count($countries)] : null);
 
             $slug = Str::slug($name) ?: 'profile';
-            $profileSequence = (ProviderProfile::withTrashed()->where('slug', $slug)->max('profile_sequence') ?? 0) + 1;
+            $existingProfile = ProviderProfile::withTrashed()
+                ->where('user_id', $user->id)
+                ->where('name', $name)
+                ->first();
+            $profileSequence = $existingProfile?->profile_sequence
+                ?? ((ProviderProfile::withTrashed()->where('slug', $slug)->max('profile_sequence') ?? 0) + 1);
 
             $providerProfile = ProviderProfile::updateOrCreate(
-                ['user_id' => $user->id],
+                ['user_id' => $user->id, 'name' => $name],
                 [
                     'name' => $name,
                     'slug' => $slug,
@@ -343,20 +351,22 @@ class DummyProviderProfileSeeder extends Seeder
             $categoryId = count($categoryIds) > 0 ? $categoryIds[$i % count($categoryIds)] : null;
             $thumbnailUrl = "https://picsum.photos/seed/listing-{$i}/512/512";
 
-            ProviderListing::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'title' => "{$name}'s Live Cam",
-                    'age' => rand(21, 45),
-                    'category_id' => $categoryId,
-                    'website_type' => $this->pickFrom(self::WEBSITE_TYPES, $i),
-                    'audience_score' => rand(60, 98),
-                    'thumbnail' => $thumbnailUrl,
-                    'is_live' => $i % 3 === 0,
-                    'is_vip' => $i <= 10,
-                    'is_active' => true,
-                ],
-            );
+            if ($profileNumberWithinAccount === 1) {
+                ProviderListing::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'title' => "{$name}'s Live Cam",
+                        'age' => rand(21, 45),
+                        'category_id' => $categoryId,
+                        'website_type' => $this->pickFrom(self::WEBSITE_TYPES, $i),
+                        'audience_score' => rand(60, 98),
+                        'thumbnail' => $thumbnailUrl,
+                        'is_live' => $i % 3 === 0,
+                        'is_vip' => $i <= 10,
+                        'is_active' => true,
+                    ],
+                );
+            }
 
             // 4. RateGroup + Rates
             $rateGroup = RateGroup::updateOrCreate(
