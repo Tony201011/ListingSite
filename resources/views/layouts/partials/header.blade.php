@@ -25,7 +25,6 @@
 
     $topRightLinks = collect($headerWidget?->top_right_links ?? [
         ['label' => 'Help', 'url' => route('help')],
-        ['label' => 'Contact/Support', 'url' => route('contact-us')],
         ['label' => 'Complaints/Contact', 'url' => route('complaints-contact')],
     ])
         ->map(function ($item) {
@@ -85,9 +84,7 @@
     $mainNavLinks = collect($headerWidget?->main_nav_links ?? [
         ['label' => 'Home', 'url' => url('/')],
         ['label' => 'About us', 'url' => route('about-us')],
-        ['label' => 'Contact/Support', 'url' => route('contact-us')],
-        ['label' => 'Browse Listings', 'url' => route('escorts.search')],
-        ['label' => 'Sample Listing', 'url' => route('sample-listing')],
+        ['label' => 'Escorts', 'url' => route('escorts.search')],
         ['label' => 'Pricing', 'url' => url('/pricing')],
         ['label' => 'How credits work', 'url' => route('how-credits-work')],
         ['label' => 'Sign Up', 'url' => url('/signup')],
@@ -133,7 +130,6 @@
     }
 
     $mobileExtraLinks = collect($headerWidget?->mobile_extra_links ?? [
-        ['label' => 'Contact/Support', 'url' => route('contact-us')],
         ['label' => 'Report a Listing', 'url' => route('report-a-listing')],
     ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();
 
@@ -151,7 +147,7 @@
             $location = trim(collect([$suburb, $state])->filter()->implode(', '));
 
             return [
-                'label' => "{$suburb} escorts",
+                'label' => "{$suburb} Escorts",
                 'url' => route('escorts.location', ['location' => $location]),
                 'search' => \Illuminate\Support\Str::lower(trim("{$suburb} {$state} escorts")),
             ];
