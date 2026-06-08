@@ -142,22 +142,7 @@
     $freeTrialCtaText = trim((string) ($headerWidget?->free_trial_cta_text ?? 'Get 21 days for free'));
     $freeTrialCtaUrl = trim((string) ($headerWidget?->free_trial_cta_url ?? url('/signup')));
 
-    $defaultEscortCities = collect([
-        ['suburb' => 'Brisbane', 'state' => 'QLD'],
-        ['suburb' => 'Sydney', 'state' => 'NSW'],
-        ['suburb' => 'Melbourne', 'state' => 'VIC'],
-        ['suburb' => 'Adelaide', 'state' => 'SA'],
-        ['suburb' => 'Canberra', 'state' => 'ACT'],
-        ['suburb' => 'Perth', 'state' => 'WA'],
-        ['suburb' => 'Darwin', 'state' => 'NT'],
-        ['suburb' => 'Gold Coast', 'state' => 'QLD'],
-        ['suburb' => 'Sunshine Coast', 'state' => 'QLD'],
-        ['suburb' => 'Newcastle', 'state' => 'NSW'],
-        ['suburb' => 'Cairns', 'state' => 'QLD'],
-        ['suburb' => 'Hobart', 'state' => 'TAS'],
-    ]);
-
-    $escortMenuLinks = ($escortCities->isNotEmpty() ? $escortCities : $defaultEscortCities)
+    $escortMenuLinks = $escortCities
         ->map(function ($city) {
             $suburb = trim((string) ($city->suburb ?? $city['suburb'] ?? ''));
             $state = trim((string) ($city->state ?? $city['state'] ?? ''));
@@ -169,13 +154,7 @@
                 'search' => \Illuminate\Support\Str::lower(trim("{$suburb} {$state} escorts")),
             ];
         })
-        ->concat(collect([
-            ['label' => 'Touring escorts', 'url' => url('/advanced-search')],
-            ['label' => 'Escorts directory', 'url' => url('/')],
-            ['label' => 'Search for escorts', 'url' => route('advanced-search')],
-            ['label' => 'Escorts near me', 'url' => url('/advanced-search')],
-            ['label' => 'View all our escorts', 'url' => url('/')],
-        ])->map(fn (array $item) => [
+        ->concat(collect(\App\Support\EscortLocationData::extraMenuLinks())->map(fn (array $item) => [
             ...$item,
             'search' => \Illuminate\Support\Str::lower($item['label']),
         ]))

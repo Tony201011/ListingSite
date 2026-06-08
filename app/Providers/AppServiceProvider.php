@@ -5,15 +5,15 @@ namespace App\Providers;
 use App\Listeners\LogPasswordResetNotificationEmail;
 use App\Listeners\RecordUserLogin;
 use App\Listeners\RecordUserLogout;
-use App\Services\Payments\PaymentProviderInterface;
-use App\Services\Payments\PaymentProviderManager;
 use App\Models\FooterText;
 use App\Models\FooterWidget;
 use App\Models\HeaderWidget;
-use App\Models\Postcode;
 use App\Models\S3BucketSetting;
 use App\Models\SmtpSetting;
 use App\Notifications\BrandedAgentResetPasswordNotification;
+use App\Services\Payments\PaymentProviderInterface;
+use App\Services\Payments\PaymentProviderManager;
+use App\Support\EscortLocationData;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -32,9 +32,7 @@ use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\QueryException;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Events\NotificationSent;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -152,9 +150,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('layouts.partials.header', function ($view): void {
+            $escortCities = collect(EscortLocationData::profileLocations());
+
             if (! Schema::hasTable('header_widgets')) {
                 $view->with('headerWidget', null);
-                $view->with('escortCities', collect());
+                $view->with('escortCities', $escortCities);
 
                 return;
             }
@@ -163,35 +163,6 @@ class AppServiceProvider extends ServiceProvider
                 ->where('is_active', true)
                 ->latest('updated_at')
                 ->first();
-
-            $escortCities = Schema::hasTable('postcodes')
-                ? Cache::remember('header_escort_suburbs', now()->addHour(), function () {
-                    // provider_profiles.suburb stores the full "Suburb, STATE postcode" format
-                    // (e.g. "Sydney, NSW 2000") written by the signup/edit-profile
-                    // autocomplete.  We join postcodes on the suburb name prefix so that
-                    // the header links include the state (e.g. "/escorts/location/Sydney, NSW")
-                    // and therefore only return providers from the correct state.
-                    return Postcode::query()
-                        ->select(['suburb', 'state'])
-                        ->groupBy(['suburb', 'state'])
-                        ->whereExists(function ($q) {
-                            $suburbLikeExpression = DB::connection()->getDriverName() === 'sqlite'
-                                ? "provider_profiles.suburb LIKE postcodes.suburb || ', ' || postcodes.state || '%'"
-                                : "provider_profiles.suburb LIKE CONCAT(postcodes.suburb, ', ', postcodes.state, '%')";
-
-                            $q->selectRaw('1')
-                                ->from('provider_profiles')
-                                ->whereNotNull('provider_profiles.suburb')
-                                ->where('provider_profiles.suburb', '!=', '')
-                                ->whereRaw($suburbLikeExpression)
-                                ->where('provider_profiles.profile_status', 'approved')
-                                ->where('provider_profiles.is_blocked', false)
-                                ->whereNull('provider_profiles.deleted_at');
-                        })
-                        ->orderBy('suburb')
-                        ->get();
-                })
-                : collect();
 
             $view->with('headerWidget', $headerWidget);
             $view->with('escortCities', $escortCities);
