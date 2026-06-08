@@ -4,6 +4,9 @@ namespace App\Filament\Clusters\Settings\Resources\GlobalBanners;
 
 use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\GlobalBanners\Pages\ManageGlobalBanners;
+use App\Http\Controllers\Frontend\BlogController;
+use App\Http\Controllers\Frontend\FrontendPageController;
+use App\Models\FooterWidget;
 use App\Models\GlobalBanner;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
@@ -19,6 +22,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Route as RouteFacade;
+use Illuminate\Support\Str;
 
 class GlobalBannerResource extends Resource
 {
@@ -50,7 +56,7 @@ class GlobalBannerResource extends Resource
                 Select::make('page_keys')
                     ->label('Pages')
                     ->multiple()
-                    ->options(self::pageOptions())
+                    ->options(self::getPageOptions())
                     ->searchable()
                     ->required()
                     ->live()
@@ -121,7 +127,7 @@ class GlobalBannerResource extends Resource
                         }
 
                         return $keys
-                            ->map(fn ($key) => self::pageOptions()[$key] ?? $key)
+                            ->map(fn ($key) => self::getPageOptions()[$key] ?? $key)
                             ->implode(', ');
                     })
                     ->searchable(),
@@ -154,9 +160,9 @@ class GlobalBannerResource extends Resource
         ];
     }
 
-    private static function pageOptions(): array
+    public static function getPageOptions(): array
     {
-        return [
+        return collect([
             'all-pages' => 'All Pages (Global)',
             'home' => 'Home',
             'signin' => 'Sign In',
@@ -164,16 +170,95 @@ class GlobalBannerResource extends Resource
             'reset-password' => 'Reset Password',
             'otp-verification' => 'OTP Verification',
             'my-rate' => 'My Rate',
-            'about-us' => 'About Us',
-            'pricing' => 'Pricing',
-            'help' => 'Help',
-            'blog' => 'Blog',
-            'faq' => 'FAQ',
-            'contact-us' => 'Contact Us',
-            'privacy-policy' => 'Privacy Policy',
-            'terms-and-conditions' => 'Terms & Conditions',
-            'refund-policy' => 'Refund Policy',
-            'anti-spam-policy' => 'Anti-Spam Policy',
-        ];
+        ])
+            ->merge(self::frontendPageOptions())
+            ->merge(self::footerLegalPageOptions())
+            ->all();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function frontendPageOptions(): array
+    {
+        $footerLegalPageOptions = self::footerLegalPageOptions();
+
+        /** @var array<string, string> $options */
+        $options = collect(RouteFacade::getRoutes()->getRoutesByMethod()['GET'] ?? [])
+            ->filter(function (Route $route): bool {
+                $action = (string) $route->getActionName();
+
+                return str_starts_with($action, FrontendPageController::class.'@')
+                    || str_starts_with($action, BlogController::class.'@');
+            })
+            ->mapWithKeys(function (Route $route): array {
+                $uri = trim((string) $route->uri(), '/');
+
+                if ($uri === '' || str_contains($uri, '{') || str_starts_with($uri, 'api/')) {
+                    return [];
+                }
+
+                $name = (string) $route->getName();
+                if ($name !== '' && (str_ends_with($name, '.load-more') || str_ends_with($name, '.submit'))) {
+                    return [];
+                }
+
+                return [$uri => self::resolvePageLabel($uri, $footerLegalPageOptions)];
+            })
+            ->sortBy(fn (string $label): string => Str::lower($label))
+            ->all();
+
+        return $options;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function footerLegalPageOptions(): array
+    {
+        /** @var array<int, array{label?: mixed, url?: mixed}> $legalLinks */
+        $legalLinks = FooterWidget::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first()?->legal_links ?? [];
+
+        /** @var array<string, string> $options */
+        $options = collect($legalLinks)
+            ->mapWithKeys(function (array $link): array {
+                $label = trim((string) ($link['label'] ?? ''));
+                $url = trim((string) ($link['url'] ?? ''));
+
+                if ($label === '' || $url === '') {
+                    return [];
+                }
+
+                $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
+
+                if ($path === '' || str_contains($path, '{')) {
+                    return [];
+                }
+
+                return [$path => $label];
+            })
+            ->all();
+
+        return $options;
+    }
+
+    /**
+     * @param  array<string, string>  $footerLegalPageOptions
+     */
+    private static function resolvePageLabel(string $key, array $footerLegalPageOptions): string
+    {
+        $footerLabel = $footerLegalPageOptions[$key] ?? null;
+
+        if (filled($footerLabel)) {
+            return $footerLabel;
+        }
+
+        return Str::of($key)
+            ->replace('-', ' ')
+            ->title()
+            ->toString();
     }
 }
