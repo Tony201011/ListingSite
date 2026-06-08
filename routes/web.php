@@ -97,6 +97,10 @@ Route::get('/refund-policy', [FrontendPageController::class, 'refundPolicy'])->n
 Route::get('/faq', [FrontendPageController::class, 'faq'])->name('faq');
 Route::get('/faq/load-more', [FrontendPageController::class, 'faqLoadMore'])->name('faq.load-more');
 Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('anti-spam-policy');
+Route::get('/content-moderation-policy', [FrontendPageController::class, 'contentModerationPolicy'])->name('content-moderation-policy');
+Route::get('/report-a-listing', [FrontendPageController::class, 'reportAListing'])->name('report-a-listing');
+Route::get('/age-and-consent-policy', [FrontendPageController::class, 'ageAndConsentPolicy'])->name('age-and-consent-policy');
+Route::get('/prohibited-content-policy', [FrontendPageController::class, 'prohibitedContentPolicy'])->name('prohibited-content-policy');
 
 Route::get('api/suburbs/search', [SuburbController::class, 'search'])->name('api.suburbs.search');
 Route::get('api/search/suggestions', [SearchController::class, 'suggestions'])->name('api.search.suggestions');
