@@ -65,6 +65,25 @@ class HomeController extends Controller
         return view('frontend.featured', $data);
     }
 
+    public function sampleListing(): RedirectResponse
+    {
+        $profile = ProviderProfile::query()
+            ->where('profile_status', 'approved')
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->whereHas('user')
+            ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
+            ->with(['state', 'city'])
+            ->orderBy('id')
+            ->first();
+
+        if ($profile === null) {
+            return redirect()->route('escorts.search');
+        }
+
+        return redirect()->to($profile->getEscortUrl());
+    }
+
     public function favourites(): View
     {
         $favouriteProfileIds = $this->favouriteBookmarkService->getFavourites();

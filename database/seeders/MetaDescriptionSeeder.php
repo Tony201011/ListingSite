@@ -47,6 +47,11 @@ class MetaDescriptionSeeder extends Seeder
                 'is_active' => true,
             ],
             [
+                'page_name' => 'credit-usage-and-expiry-policy',
+                'meta_description' => 'Understand how listing credits are used, tracked, and when package expiry rules apply.',
+                'is_active' => true,
+            ],
+            [
                 'page_name' => 'about-us',
                 'meta_description' => 'Learn about our mission, values, and commitment to building a trusted listing experience.',
                 'is_active' => true,
@@ -57,6 +62,11 @@ class MetaDescriptionSeeder extends Seeder
                 'is_active' => true,
             ],
             [
+                'page_name' => 'complaints-contact',
+                'meta_description' => 'Submit complaints, support requests, and contact enquiries to our team.',
+                'is_active' => true,
+            ],
+            [
                 'page_name' => 'faq',
                 'meta_description' => 'Find answers to common questions about accounts, listings, billing, and support.',
                 'is_active' => true,
@@ -64,6 +74,11 @@ class MetaDescriptionSeeder extends Seeder
             [
                 'page_name' => 'help',
                 'meta_description' => 'Access help resources and guides to get the most from your account and listings.',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'how-credits-work',
+                'meta_description' => 'Learn how daily listing credits work, how to manage usage, and where to top up.',
                 'is_active' => true,
             ],
             [
@@ -89,6 +104,11 @@ class MetaDescriptionSeeder extends Seeder
             [
                 'page_name' => 'profile',
                 'meta_description' => 'View provider profile details, services, and contact information.',
+                'is_active' => true,
+            ],
+            [
+                'page_name' => 'sample-listing',
+                'meta_description' => 'Open a sample listing profile and preview the public profile experience.',
                 'is_active' => true,
             ],
             [

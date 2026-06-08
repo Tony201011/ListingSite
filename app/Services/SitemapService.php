@@ -60,12 +60,16 @@ class SitemapService
             $this->urlEntry(route('blog'), $blogLastModified, 'daily', '0.8'),
             $this->urlEntry(route('about-us'), $this->latestModelTimestamp(AboutUsPage::query()->where('is_active', true)), 'monthly', '0.7'),
             $this->urlEntry(route('contact-us'), $this->latestModelTimestamp(ContactUsPage::query()->where('is_active', true)), 'monthly', '0.7'),
+            $this->urlEntry(route('complaints-contact'), $this->latestModelTimestamp(ContactUsPage::query()->where('is_active', true)), 'monthly', '0.6'),
             $this->urlEntry(route('help'), $this->latestModelTimestamp(HelpPage::query()->where('is_active', true)), 'monthly', '0.6'),
+            $this->urlEntry(route('how-credits-work'), $this->latestModelTimestamp(HelpPage::query()->where('is_active', true)), 'monthly', '0.6'),
             $this->urlEntry(route('faq'), $this->latestModelTimestamp(Faq::query()->where('is_active', true)), 'monthly', '0.6'),
             $this->urlEntry(route('privacy-policy'), $this->latestModelTimestamp(PrivacyPolicy::query()->where('is_active', true)), 'yearly', '0.4'),
             $this->urlEntry(route('terms-and-conditions'), $this->latestModelTimestamp(TermCondition::query()->where('is_active', true)), 'yearly', '0.4'),
             $this->urlEntry(route('refund-policy'), $this->latestModelTimestamp(RefundPolicy::query()->where('is_active', true)), 'yearly', '0.4'),
             $this->urlEntry(route('anti-spam-policy'), $this->latestModelTimestamp(AntiSpamPolicy::query()->where('is_active', true)), 'yearly', '0.4'),
+            $this->urlEntry(route('credit-usage-and-expiry-policy'), $this->latestModelTimestamp(AntiSpamPolicy::query()->where('is_active', true)), 'yearly', '0.4'),
+            $this->urlEntry(route('sample-listing'), $profilesLastModified, 'daily', '0.5'),
         ]);
 
         return $this->buildUrlSetXml($urls);
