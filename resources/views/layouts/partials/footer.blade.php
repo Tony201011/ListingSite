@@ -24,6 +24,7 @@
         $navigationLinks = collect($footerWidget?->navigation_links ?? [
             ['label' => 'Home', 'url' => url('/')],
             ['label' => 'About', 'url' => route('about-us')],
+            ['label' => 'Contact/Support', 'url' => route('contact-us')],
             ['label' => 'Browse Listings', 'url' => route('escorts.search')],
             ['label' => 'Sample Listing', 'url' => route('sample-listing')],
         ])->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))->values();

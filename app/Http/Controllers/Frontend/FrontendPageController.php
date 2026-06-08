@@ -132,7 +132,7 @@ class FrontendPageController extends Controller
     public function howCreditsWork(): View
     {
         return view('frontend.how-credits-work', [
-            'page' => $this->getFrontendSimplePage->help(),
+            'page' => $this->getFrontendSimplePage->howCreditsWork(),
         ]);
     }
 

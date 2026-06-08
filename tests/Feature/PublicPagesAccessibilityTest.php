@@ -12,6 +12,7 @@ use Database\Seeders\ContentModerationPolicySeeder;
 use Database\Seeders\FooterWidgetSeeder;
 use Database\Seeders\HeaderWidgetSeeder;
 use Database\Seeders\HelpPageSeeder;
+use Database\Seeders\HowCreditsWorkPageSeeder;
 use Database\Seeders\PricingPageSeeder;
 use Database\Seeders\PrivacyPolicySeeder;
 use Database\Seeders\ProhibitedContentPolicySeeder;
@@ -31,6 +32,7 @@ class PublicPagesAccessibilityTest extends TestCase
             AboutUsPageSeeder::class,
             ContactUsPageSeeder::class,
             HelpPageSeeder::class,
+            HowCreditsWorkPageSeeder::class,
             PricingPageSeeder::class,
             TermConditionSeeder::class,
             PrivacyPolicySeeder::class,
@@ -71,6 +73,7 @@ class PublicPagesAccessibilityTest extends TestCase
             AboutUsPageSeeder::class,
             ContactUsPageSeeder::class,
             AntiSpamPolicySeeder::class,
+            HowCreditsWorkPageSeeder::class,
             HeaderWidgetSeeder::class,
             FooterWidgetSeeder::class,
         ]);
@@ -79,6 +82,7 @@ class PublicPagesAccessibilityTest extends TestCase
             AboutUsPageSeeder::class,
             ContactUsPageSeeder::class,
             AntiSpamPolicySeeder::class,
+            HowCreditsWorkPageSeeder::class,
             HeaderWidgetSeeder::class,
             FooterWidgetSeeder::class,
         ]);
@@ -86,6 +90,7 @@ class PublicPagesAccessibilityTest extends TestCase
         $this->assertDatabaseCount('about_us_pages', 1);
         $this->assertDatabaseCount('contact_us_pages', 1);
         $this->assertDatabaseCount('anti_spam_policies', 1);
+        $this->assertDatabaseCount('how_credits_work_pages', 1);
         $this->assertDatabaseCount('header_widgets', 1);
         $this->assertDatabaseCount('footer_widgets', 1);
 
@@ -100,5 +105,14 @@ class PublicPagesAccessibilityTest extends TestCase
             ->filter()
             ->values();
         $this->assertSame($footerLegalUrls->count(), $footerLegalUrls->unique()->count());
+
+        $this->assertContains('/contact-us', $headerLinkUrls->all());
+
+        $footerNavigationUrls = collect(FooterWidget::query()->firstOrFail()->navigation_links)
+            ->pluck('url')
+            ->filter()
+            ->values();
+        $this->assertSame($footerNavigationUrls->count(), $footerNavigationUrls->unique()->count());
+        $this->assertContains('/contact-us', $footerNavigationUrls->all());
     }
 }

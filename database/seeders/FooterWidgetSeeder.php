@@ -22,6 +22,7 @@ class FooterWidgetSeeder extends Seeder
                 'navigation_links' => [
                     ['label' => 'Home', 'url' => '/'],
                     ['label' => 'About', 'url' => '/about-us'],
+                    ['label' => 'Contact/Support', 'url' => '/contact-us'],
                     ['label' => 'Browse Listings', 'url' => '/escorts/search'],
                     ['label' => 'Sample Listing', 'url' => '/sample-listing'],
                 ],

@@ -60,6 +60,7 @@ class DatabaseSeeder extends Seeder
             PricingPackageSeeder::class,
             CreditPackageSeeder::class,
             HelpPageSeeder::class,
+            HowCreditsWorkPageSeeder::class,
             GlobalBannerSeeder::class,
             FooterWidgetSeeder::class,
             FooterTextSeeder::class,

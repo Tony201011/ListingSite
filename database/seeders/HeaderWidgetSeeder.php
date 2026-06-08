@@ -44,6 +44,7 @@ class HeaderWidgetSeeder extends Seeder
                 'main_nav_links' => [
                     ['label' => 'Home', 'url' => url('/')],
                     ['label' => 'About us', 'url' => route('about-us')],
+                    ['label' => 'Contact/Support', 'url' => route('contact-us')],
                     ['label' => 'Browse Listings', 'url' => route('escorts.search')],
                     ['label' => 'Sample Listing', 'url' => route('sample-listing')],
                     ['label' => 'Pricing', 'url' => url('/pricing')],
