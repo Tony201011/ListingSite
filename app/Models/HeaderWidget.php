@@ -15,20 +15,49 @@ class HeaderWidget extends Model
         '/my-profile-2' => '/edit-profile',
     ];
 
+    private const REMOVED_TOP_NAV_LABELS = [
+        'contactsupport',
+        'samplelisting',
+        'sampleprofile',
+        'samplelistingprofile',
+        'browselistings',
+    ];
+
     protected static function booted(): void
     {
         static::saving(function (HeaderWidget $headerWidget): void {
             $headerWidget->action_links = self::normalizeLegacyLinks($headerWidget->action_links);
-            $headerWidget->main_nav_links = self::normalizeLegacyLinks($headerWidget->main_nav_links);
-            $headerWidget->mobile_extra_links = self::normalizeLegacyLinks($headerWidget->mobile_extra_links);
-            $headerWidget->top_right_links = self::normalizeLegacyLinks($headerWidget->top_right_links);
+            $headerWidget->main_nav_links = self::normalizeTopNavigationLinks($headerWidget->main_nav_links);
+            $headerWidget->mobile_extra_links = self::normalizeHeaderSupportLinks($headerWidget->mobile_extra_links);
+            $headerWidget->top_right_links = self::normalizeHeaderSupportLinks($headerWidget->top_right_links);
 
             $links = collect($headerWidget->main_nav_links ?? [])
                 ->filter(fn ($item) => filled($item['label'] ?? null) && filled($item['url'] ?? null))
                 ->values();
 
+            $hasEscortLink = $links->contains(function ($item): bool {
+                return self::normalizeLabel((string) ($item['label'] ?? '')) === 'escorts';
+            });
+
+            if (! $hasEscortLink) {
+                $pricingIndex = $links->search(function ($item): bool {
+                    return self::normalizeLabel((string) ($item['label'] ?? '')) === 'pricing';
+                });
+
+                $escortLink = [
+                    'label' => 'Escorts',
+                    'url' => route('escorts.search'),
+                ];
+
+                if ($pricingIndex === false) {
+                    $links->push($escortLink);
+                } else {
+                    $links->splice($pricingIndex, 0, [$escortLink]);
+                }
+            }
+
             $hasPricingLink = $links->contains(function ($item): bool {
-                $label = strtolower(trim((string) ($item['label'] ?? '')));
+                $label = self::normalizeLabel((string) ($item['label'] ?? ''));
                 $rawUrl = trim((string) ($item['url'] ?? ''));
                 $path = parse_url($rawUrl, PHP_URL_PATH);
                 $normalizedPath = '/'.ltrim((string) ($path ?? $rawUrl), '/');
@@ -72,6 +101,41 @@ class HeaderWidget extends Model
 
             return $item;
         })->filter(fn ($item) => is_array($item) && ! empty($item))->values()->all();
+    }
+
+    private static function normalizeTopNavigationLinks(mixed $links): array
+    {
+        return collect(self::normalizeLegacyLinks($links))
+            ->map(function (array $item): array {
+                if (self::normalizeLabel((string) ($item['label'] ?? '')) === 'browselistings') {
+                    $item['label'] = 'Escorts';
+                    $item['url'] = route('escorts.search');
+                }
+
+                return $item;
+            })
+            ->reject(function (array $item): bool {
+                return in_array(self::normalizeLabel((string) ($item['label'] ?? '')), self::REMOVED_TOP_NAV_LABELS, true);
+            })
+            ->unique(fn (array $item): string => self::normalizeLabel((string) ($item['label'] ?? '')).'|'.trim((string) ($item['url'] ?? '')))
+            ->values()
+            ->all();
+    }
+
+    private static function normalizeHeaderSupportLinks(mixed $links): array
+    {
+        return collect(self::normalizeLegacyLinks($links))
+            ->reject(function (array $item): bool {
+                return self::normalizeLabel((string) ($item['label'] ?? '')) === 'contactsupport';
+            })
+            ->unique(fn (array $item): string => self::normalizeLabel((string) ($item['label'] ?? '')).'|'.trim((string) ($item['url'] ?? '')))
+            ->values()
+            ->all();
+    }
+
+    private static function normalizeLabel(string $label): string
+    {
+        return preg_replace('/[^a-z0-9]+/', '', strtolower(trim($label))) ?? '';
     }
 
     protected $fillable = [

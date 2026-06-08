@@ -28,7 +28,6 @@ class HeaderWidgetSeeder extends Seeder
                 ],
                 'top_right_links' => [
                     ['label' => 'Help', 'url' => route('help')],
-                    ['label' => 'Contact/Support', 'url' => route('contact-us')],
                     ['label' => 'Complaints/Contact', 'url' => route('complaints-contact')],
                 ],
                 'enable_search' => true,
@@ -44,16 +43,13 @@ class HeaderWidgetSeeder extends Seeder
                 'main_nav_links' => [
                     ['label' => 'Home', 'url' => url('/')],
                     ['label' => 'About us', 'url' => route('about-us')],
-                    ['label' => 'Contact/Support', 'url' => route('contact-us')],
-                    ['label' => 'Browse Listings', 'url' => route('escorts.search')],
-                    ['label' => 'Sample Listing', 'url' => route('sample-listing')],
+                    ['label' => 'Escorts', 'url' => route('escorts.search')],
                     ['label' => 'Pricing', 'url' => url('/pricing')],
                     ['label' => 'How credits work', 'url' => route('how-credits-work')],
                     ['label' => 'Sign Up', 'url' => url('/signup')],
                     ['label' => 'Sign In', 'url' => url('/signin')],
                 ],
                 'mobile_extra_links' => [
-                    ['label' => 'Contact/Support', 'url' => route('contact-us')],
                     ['label' => 'Report a Listing', 'url' => route('report-a-listing')],
                 ],
                 'is_active' => true,

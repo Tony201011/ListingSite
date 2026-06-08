@@ -119,13 +119,28 @@ class PublicPagesAccessibilityTest extends TestCase
             ->values();
         $this->assertSame($headerLinkUrls->count(), $headerLinkUrls->unique()->count());
 
+        $headerLinkLabels = collect(HeaderWidget::query()->firstOrFail()->main_nav_links)
+            ->pluck('label')
+            ->filter()
+            ->values();
+
+        $this->assertContains('Escorts', $headerLinkLabels->all());
+        $this->assertNotContains('Contact/Support', $headerLinkLabels->all());
+        $this->assertNotContains('Browse Listings', $headerLinkLabels->all());
+        $this->assertNotContains('Sample Listing', $headerLinkLabels->all());
+
+        $headerWidget = HeaderWidget::query()->firstOrFail();
+        $topRightLabels = collect($headerWidget->top_right_links)->pluck('label')->filter()->values();
+        $mobileExtraLabels = collect($headerWidget->mobile_extra_links)->pluck('label')->filter()->values();
+
+        $this->assertNotContains('Contact/Support', $topRightLabels->all());
+        $this->assertNotContains('Contact/Support', $mobileExtraLabels->all());
+
         $footerLegalUrls = collect(FooterWidget::query()->firstOrFail()->legal_links)
             ->pluck('url')
             ->filter()
             ->values();
         $this->assertSame($footerLegalUrls->count(), $footerLegalUrls->unique()->count());
-
-        $this->assertContains('/contact-us', $headerLinkUrls->all());
 
         $footerNavigationUrls = collect(FooterWidget::query()->firstOrFail()->navigation_links)
             ->pluck('url')
@@ -133,5 +148,7 @@ class PublicPagesAccessibilityTest extends TestCase
             ->values();
         $this->assertSame($footerNavigationUrls->count(), $footerNavigationUrls->unique()->count());
         $this->assertContains('/contact-us', $footerNavigationUrls->all());
+        $this->assertContains('/sample-listing', $footerNavigationUrls->all());
+        $this->assertContains('/escorts/search', $footerNavigationUrls->all());
     }
 }
