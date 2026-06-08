@@ -24,7 +24,8 @@ class MetaKeywordsTable
                     ->searchable(),
                 TextColumn::make('meta_keyword')
                     ->searchable()
-                    ->limit(20),
+                    ->formatStateUsing(fn ($state): string => is_array($state) ? implode(', ', $state) : (string) $state)
+                    ->wrap(),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')
