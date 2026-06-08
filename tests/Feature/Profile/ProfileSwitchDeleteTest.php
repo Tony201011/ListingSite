@@ -3,6 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Actions\GetOnlineNowState;
+use App\Models\ComplianceConfirmation;
 use App\Models\SiteSetting;
 use App\Models\ProviderProfile;
 use App\Models\User;
@@ -160,6 +161,8 @@ class ProfileSwitchDeleteTest extends TestCase
         $response = $this->actingAs($user)->post(route('profiles.store'), [
             'name' => 'S8www811w',
             'phone' => '0400000000',
+            'age_and_ownership_confirm' => '1',
+            'content_policy_confirm' => '1',
         ]);
 
         $response->assertRedirect(route('edit-profile'));
@@ -180,6 +183,20 @@ class ProfileSwitchDeleteTest extends TestCase
 
         $this->assertNotNull($profile?->free_listing_expires_at);
         $this->assertTrue($profile->free_listing_expires_at->greaterThan(now()->addDays(20)));
+        $this->assertDatabaseHas('compliance_confirmations', [
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile?->id,
+            'confirmation_type' => ComplianceConfirmation::TYPE_AGE_CONTENT_OWNERSHIP,
+            'context' => ComplianceConfirmation::CONTEXT_PROFILE_CREATION,
+            'accepted' => true,
+        ]);
+        $this->assertDatabaseHas('compliance_confirmations', [
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile?->id,
+            'confirmation_type' => ComplianceConfirmation::TYPE_CONTENT_POLICY,
+            'context' => ComplianceConfirmation::CONTEXT_PROFILE_CREATION,
+            'accepted' => true,
+        ]);
     }
 
     public function test_switch_to_edit_sets_edit_heading_flag(): void
