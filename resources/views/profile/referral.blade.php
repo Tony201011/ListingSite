@@ -23,6 +23,7 @@
                 <div
                     class="border border-dashed border-gray-200 rounded-xl p-6 sm:p-8 bg-gray-50 mb-8"
                     x-data="referralPage({
+                        referralCode: @js($referralCode),
                         referralLink: @js($referralLink)
                     })"
                 >
@@ -37,7 +38,29 @@
                             Share your referral link with others and grow your network while earning rewards.
                         </p>
 
-                        <!-- Copy Link -->
+                        <div class="text-left mb-6">
+                            <label class="block text-sm font-medium text-gray-600 mb-2">
+                                Your Referral Code
+                            </label>
+
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input
+                                    type="text"
+                                    :value="referralCode"
+                                    readonly
+                                    class="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none"
+                                >
+
+                                <button
+                                    type="button"
+                                    @click="copyCode()"
+                                    class="inline-flex justify-center items-center px-6 py-3 text-sm font-medium rounded-xl text-white bg-gray-800 hover:bg-gray-900 transition"
+                                >
+                                    <span x-text="codeButtonText"></span>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="text-left mb-6">
                             <label class="block text-sm font-medium text-gray-600 mb-2">
                                 Your Referral Link
@@ -56,7 +79,7 @@
                                     @click="copyLink()"
                                     class="inline-flex justify-center items-center px-6 py-3 text-sm font-medium rounded-xl text-white bg-pink-600 hover:bg-pink-700 transition"
                                 >
-                                    <span x-text="buttonText"></span>
+                                    <span x-text="linkButtonText"></span>
                                 </button>
                             </div>
                         </div>
