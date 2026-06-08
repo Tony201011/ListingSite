@@ -57,7 +57,7 @@ class ReviewerAccountSeeder extends Seeder
                 'slug'                   => 'demo-profile-reviewer',
                 'profile_sequence'       => 1,
                 'age'                    => 25,
-                'description'            => 'This is a sample profile used for payment processor review. No real personal data is shown.',
+                'description'            => 'This is a sample profile used for compliance review. No real personal data is shown.',
                 'introduction_line'      => 'Sample Advertiser Profile',
                 'profile_text'           => 'This is a demonstration profile. All data shown here is fictitious and for review purposes only.',
                 'availability'           => 'incalls-and-outcalls',
