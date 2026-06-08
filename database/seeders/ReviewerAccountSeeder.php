@@ -72,6 +72,7 @@ class ReviewerAccountSeeder extends Seeder
         ProviderListing::firstOrCreate(
             ['user_id' => $reviewer->id, 'provider_profile_id' => $profile->id],
             [
+                'title'     => 'Demo Profile (Reviewer) Listing',
                 'is_live'   => false,
                 'is_active' => false,
             ]
