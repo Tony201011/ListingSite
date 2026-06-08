@@ -97,7 +97,7 @@ Route::get('/refund-policy', [FrontendPageController::class, 'refundPolicy'])->n
 Route::get('/faq', [FrontendPageController::class, 'faq'])->name('faq');
 Route::get('/faq/load-more', [FrontendPageController::class, 'faqLoadMore'])->name('faq.load-more');
 Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('anti-spam-policy');
-Route::get('/credit-usage-and-expiry-policy', [FrontendPageController::class, 'antiSpamPolicy'])->name('credit-usage-and-expiry-policy');
+Route::get('/credit-usage-and-expiry-policy', [FrontendPageController::class, 'creditUsageAndExpiryPolicy'])->name('credit-usage-and-expiry-policy');
 Route::get('/content-moderation-policy', [FrontendPageController::class, 'contentModerationPolicy'])->name('content-moderation-policy');
 Route::get('/report-a-listing', [FrontendPageController::class, 'reportAListing'])->name('report-a-listing');
 Route::get('/age-and-consent-policy', [FrontendPageController::class, 'ageAndConsentPolicy'])->name('age-and-consent-policy');
@@ -193,7 +193,7 @@ Route::post('/booking-enquiry', [BookingController::class, 'send'])
 
 Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
 Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
-Route::get('/how-credits-work', [FrontendPageController::class, 'help'])->name('how-credits-work');
+Route::get('/how-credits-work', [FrontendPageController::class, 'howCreditsWork'])->name('how-credits-work');
 Route::get('/naughty-corner', [FrontendPageController::class, 'naughtyCorner'])->name('naughty-corner');
 Route::get('/membership', [MemberShipController::class, 'membership'])->name('membership');
 
