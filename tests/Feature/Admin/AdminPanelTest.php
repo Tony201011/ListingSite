@@ -123,6 +123,37 @@ class AdminPanelTest extends TestCase
         $this->assertStringContainsString('/admin/providers?tableFilters%5Bavailable_now_status%5D%5Bvalue%5D=online', $html);
     }
 
+    public function test_admin_dashboard_shows_total_providers_card(): void
+    {
+        $this->createAdmin();
+        $this->createProvider();
+        $this->createProvider();
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+
+        $html = Livewire::test(ProviderStatsOverview::class)->html();
+
+        $this->assertStringContainsString('Total Providers', $html);
+        $this->assertStringContainsString('2', $html);
+    }
+
+    public function test_admin_dashboard_registration_chart_shows_account_and_provider_series(): void
+    {
+        $this->createAdmin();
+        $this->createProvider();
+        User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'email_verified_at' => now(),
+        ]);
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+
+        $html = Livewire::test(ProviderRegistrationsChart::class)->html();
+
+        $this->assertStringContainsString('Account Registrations', $html);
+        $this->assertStringContainsString('Provider Registrations', $html);
+    }
+
     public function test_admin_dashboard_registers_all_summary_and_chart_widgets(): void
     {
         $this->assertSame([

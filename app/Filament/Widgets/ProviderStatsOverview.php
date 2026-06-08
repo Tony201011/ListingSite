@@ -26,19 +26,28 @@ class ProviderStatsOverview extends StatsOverviewWidget
      */
     protected function getStats(): array
     {
-        $users = User::query()->where('role', User::ROLE_PROVIDER)->withoutTrashed();
-        $profiles = ProviderProfile::query()->where(function ($query) {
+        $totalAccounts = User::query()->count();
+        $providerProfiles = ProviderProfile::query();
+        $providerProfilesWithoutTrashed = ProviderProfile::query()->withoutTrashed();
+
+        $activeProviders = (clone $providerProfilesWithoutTrashed)
+            ->where('profile_status', 'approved')
+            ->whereNull('anonymized_at')
+            ->where('is_blocked', false)
+            ->count();
+        $inactiveProviders = (clone $providerProfilesWithoutTrashed)
+            ->where('profile_status', '!=', 'approved')
+            ->whereNull('anonymized_at')
+            ->where('is_blocked', false)
+            ->count();
+        $softDeletedProviders = ProviderProfile::query()->onlyTrashed()->count();
+        $anonymizedProviders = (clone $providerProfiles)->whereNotNull('anonymized_at')->count();
+        $blockedProviders = (clone $providerProfilesWithoutTrashed)->where('is_blocked', true)->count();
+        $totalProviders = (clone $providerProfiles)->withTrashed()->count();
+        $availableNow = (clone $providerProfilesWithoutTrashed)->where(function ($query) {
             $query->whereCurrentlyOnline()
                 ->orWhere(fn ($orQuery) => $orQuery->whereCurrentlyAvailableNow());
-        });
-
-        $total = (clone $users)->count();
-        $active = (clone $users)->where('account_status', 'active')->count();
-        $inactive = (clone $users)->where('account_status', 'inactive')->count();
-        $softDeleted = (clone $users)->where('account_status', 'soft_deleted')->count();
-        $anonymized = (clone $users)->where('account_status', 'anonymized')->count();
-        $blocked = (clone $users)->where('is_blocked', true)->count();
-        $availableNow = (clone $profiles)->count();
+        })->count();
 
         $accountsUrl = fn (array $filters): string => AccountResource::getUrl('index', [
             'filters' => $filters,
@@ -48,34 +57,38 @@ class ProviderStatsOverview extends StatsOverviewWidget
         ]);
 
         return [
-            Stat::make('Total Accounts', (string) $total)
+            Stat::make('Total Accounts', (string) $totalAccounts)
                 ->color('primary')
                 ->icon('heroicon-o-users')
                 ->url($accountsUrl([])),
+            Stat::make('Total Providers', (string) $totalProviders)
+                ->color('info')
+                ->icon('heroicon-o-identification')
+                ->url($profilesUrl([])),
             Stat::make('Available Now', (string) $availableNow)
                 ->color('success')
                 ->icon('heroicon-o-bolt')
                 ->url($profilesUrl(['available_now_status' => ['value' => 'online']])),
-            Stat::make('Active', (string) $active)
+            Stat::make('Active', (string) $activeProviders)
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
-                ->url($accountsUrl(['account_status' => ['value' => 'active']])),
-            Stat::make('Inactive', (string) $inactive)
+                ->url($profilesUrl(['profile_status' => ['value' => 'approved']])),
+            Stat::make('Inactive', (string) $inactiveProviders)
                 ->color('warning')
                 ->icon('heroicon-o-pause-circle')
-                ->url($accountsUrl(['account_status' => ['value' => 'inactive']])),
-            Stat::make('Soft Deleted', (string) $softDeleted)
+                ->url($profilesUrl(['profile_status' => ['value' => 'pending']])),
+            Stat::make('Soft Deleted', (string) $softDeletedProviders)
                 ->color('gray')
                 ->icon('heroicon-o-trash')
-                ->url($accountsUrl(['account_status' => ['value' => 'soft_deleted']])),
-            Stat::make('Anonymized', (string) $anonymized)
+                ->url($profilesUrl(['deleted_status' => ['value' => 'deleted']])),
+            Stat::make('Anonymized', (string) $anonymizedProviders)
                 ->color('gray')
                 ->icon('heroicon-o-eye-slash')
-                ->url($accountsUrl(['account_status' => ['value' => 'anonymized']])),
-            Stat::make('Blocked', (string) $blocked)
+                ->url($profilesUrl([])),
+            Stat::make('Blocked', (string) $blockedProviders)
                 ->color('danger')
                 ->icon('heroicon-o-no-symbol')
-                ->url($accountsUrl(['is_blocked' => ['value' => '1']])),
+                ->url($profilesUrl(['is_blocked' => ['value' => '1']])),
         ];
     }
 
