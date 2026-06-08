@@ -39,6 +39,7 @@ class SigninProvider
 
             $destination = match ($user->role) {
                 User::ROLE_ADMIN => '/admin',
+                User::ROLE_REVIEWER => '/my-listings',
                 default => '/my-profiles',
             };
 

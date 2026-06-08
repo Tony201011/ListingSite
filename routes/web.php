@@ -238,7 +238,7 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/reset-password/update', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-Route::middleware('provider.auth')->group(function () {
+Route::middleware(['provider.auth', 'reviewer.mode'])->group(function () {
     require __DIR__.'/provider-account.php';
     require __DIR__.'/provider-profile.php';
 });

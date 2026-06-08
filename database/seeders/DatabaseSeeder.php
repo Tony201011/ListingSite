@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call([
+            ReviewerAccountSeeder::class,
             BabeRankReadMorePageSeeder::class,
             LocationImportSeeder::class,
             LocationSeeder::class,

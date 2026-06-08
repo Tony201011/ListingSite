@@ -23,6 +23,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public const ROLE_PROVIDER = 'provider';
 
+    public const ROLE_REVIEWER = 'reviewer';
+
     protected $fillable = [
         'name',
         'profile_image',
@@ -80,6 +82,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             'admin' => $this->role === self::ROLE_ADMIN,
             default => false,
         };
+    }
+
+    public function isReviewer(): bool
+    {
+        return $this->role === self::ROLE_REVIEWER;
     }
 
     public function getFilamentAvatarUrl(): ?string

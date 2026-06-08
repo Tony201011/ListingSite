@@ -63,6 +63,12 @@
                 No credit packages are currently available. Please check back later.
             </div>
         @else
+            @if($reviewerMode ?? false)
+                <div class="mb-5 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800 shadow-sm">
+                    <p class="font-semibold">Read-Only Mode — Sample Credit Packages</p>
+                    <p class="mt-1">The packages below are shown for review purposes only. Checkout and payment are disabled for reviewer accounts.</p>
+                </div>
+            @endif
             {{-- Step 1: Package selection --}}
             <div x-show="step === 'select'" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
                 <form id="package-form" action="{{ route('purchase-credit.checkout') }}" method="POST" class="space-y-5">
@@ -158,34 +164,40 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
                         <p class="text-xs text-gray-500">All prices are in Australian Dollars (AUD) and include GST.</p>
-                        @if($paymentEnabled && $paymentProvider === 'stripe')
-                            <button
-                                type="button"
-                                id="proceed-to-payment"
-                                @click="window.proceedToPayment($event)"
-                                :disabled="processing"
-                                class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                <span x-show="!processing">Continue to payment</span>
-                                <span x-show="processing" class="flex items-center gap-2">
-                                    <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                    </svg>
-                                    Processing&hellip;
-                                </span>
-                            </button>
+                        @if(!($reviewerMode ?? false))
+                            @if($paymentEnabled && $paymentProvider === 'stripe')
+                                <button
+                                    type="button"
+                                    id="proceed-to-payment"
+                                    @click="window.proceedToPayment($event)"
+                                    :disabled="processing"
+                                    class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed"
+                                >
+                                    <span x-show="!processing">Continue to payment</span>
+                                    <span x-show="processing" class="flex items-center gap-2">
+                                        <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                        </svg>
+                                        Processing&hellip;
+                                    </span>
+                                </button>
+                            @else
+                                <button type="submit" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
+                                    Continue to checkout
+                                </button>
+                            @endif
                         @else
-                            <button type="submit" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
-                                Continue to checkout
-                            </button>
+                            <span class="inline-flex h-11 items-center rounded-full border border-amber-400 bg-amber-50 px-6 text-sm font-semibold text-amber-700 cursor-not-allowed opacity-75">
+                                Checkout disabled (read-only)
+                            </span>
                         @endif
                     </div>
                 </form>
             </div>
 
             {{-- Step 2: payment provider element --}}
-            @if($paymentEnabled && $paymentProvider === 'stripe')
+            @if($paymentEnabled && $paymentProvider === 'stripe' && !($reviewerMode ?? false))
             <div x-show="step === 'payment'" x-cloak class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6 space-y-5">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-900">Enter payment details</h2>

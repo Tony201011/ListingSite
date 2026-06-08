@@ -166,6 +166,7 @@
                                             </div>
 
                                             <div x-data="{ open: false }" class="relative shrink-0">
+                                                @if(!($reviewerMode ?? false))
                                                 <button
                                                     type="button"
                                                     @click="open = !open"
@@ -203,6 +204,12 @@
                                                         </button>
                                                     </form>
                                                 </div>
+                                                @else
+                                                <a href="{{ route('my-listings.show', $listing) }}"
+                                                   class="rounded px-3 py-1 text-sm text-blue-600 hover:bg-blue-50">
+                                                    View Details
+                                                </a>
+                                                @endif
                                             </div>
                                         </div>
 

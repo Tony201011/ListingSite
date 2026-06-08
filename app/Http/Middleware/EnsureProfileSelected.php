@@ -24,6 +24,11 @@ class EnsureProfileSelected
             return $next($request);
         }
 
+        // Reviewers bypass profile selection — they use their demo profile
+        if ($user->role === User::ROLE_REVIEWER) {
+            return $next($request);
+        }
+
         // If the user has no profiles at all, let them through so they can create their first one
         $profileCount = $user->providerProfiles()->count();
 

@@ -64,6 +64,13 @@
 
     @include('layouts.partials.header')
 
+    @if($reviewerMode ?? false)
+        <div class="sticky top-0 z-50 flex items-center justify-center gap-2 bg-amber-500 px-4 py-2 text-center text-sm font-semibold text-white shadow-md">
+            <i class="fa-solid fa-eye"></i>
+            <span>Read-Only Reviewer Mode — You are viewing a demo account. No changes can be made.</span>
+        </div>
+    @endif
+
     <main class="flex-1">
         @include('layouts.partials.global-banner')
 

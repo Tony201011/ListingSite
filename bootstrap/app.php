@@ -3,6 +3,7 @@
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
 use App\Http\Middleware\EnsureProviderAccess;
+use App\Http\Middleware\ReviewerMode;
 use App\Http\Middleware\SitePassword;
 use App\Models\SiteSetting;
 use Illuminate\Foundation\Application;
@@ -20,10 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'profile.steps' => CheckProfileSteps::class,
-            'provider.auth' => EnsureProviderAccess::class,
+            'profile.steps'   => CheckProfileSteps::class,
+            'provider.auth'   => EnsureProviderAccess::class,
             'profile.selected' => EnsureProfileSelected::class,
-            'site.password' => SitePassword::class,
+            'site.password'   => SitePassword::class,
+            'reviewer.mode'   => ReviewerMode::class,
         ]);
 
         $middleware->web(append: [
