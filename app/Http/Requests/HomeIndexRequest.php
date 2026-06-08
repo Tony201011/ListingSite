@@ -24,6 +24,8 @@ class HomeIndexRequest extends FormRequest
             : '';
         $escortName = trim((string) $this->input('escort_name', ''));
         $routeGirls = trim((string) $this->route('type', ''));
+        $requestGirls = trim((string) $this->input('girls', ''));
+        $girlsMode = $requestGirls !== '' ? $requestGirls : ($routeGirls !== '' ? $routeGirls : 'all');
 
         $routeLocationData = null;
         $directRouteLocation = trim((string) $this->route('location', ''));
@@ -71,7 +73,7 @@ class HomeIndexRequest extends FormRequest
             'user_lat' => $this->input('user_lat'),
             'user_lng' => $this->input('user_lng'),
             'distance' => $this->input('distance'),
-            'girls' => $routeGirls !== '' ? $routeGirls : $this->input('girls', 'all'),
+            'girls' => $girlsMode,
         ]);
     }
 
