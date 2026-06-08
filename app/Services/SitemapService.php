@@ -8,6 +8,7 @@ use App\Models\BlogPost;
 use App\Models\ContactUsPage;
 use App\Models\Faq;
 use App\Models\HelpPage;
+use App\Models\HowCreditsWorkPage;
 use App\Models\PrivacyPolicy;
 use App\Models\ProviderProfile;
 use App\Models\RefundPolicy;
@@ -62,7 +63,7 @@ class SitemapService
             $this->urlEntry(route('contact-us'), $this->latestModelTimestamp(ContactUsPage::query()->where('is_active', true)), 'monthly', '0.7'),
             $this->urlEntry(route('complaints-contact'), $this->latestModelTimestamp(ContactUsPage::query()->where('is_active', true)), 'monthly', '0.6'),
             $this->urlEntry(route('help'), $this->latestModelTimestamp(HelpPage::query()->where('is_active', true)), 'monthly', '0.6'),
-            $this->urlEntry(route('how-credits-work'), $this->latestModelTimestamp(HelpPage::query()->where('is_active', true)), 'monthly', '0.6'),
+            $this->urlEntry(route('how-credits-work'), $this->latestModelTimestamp(HowCreditsWorkPage::query()->where('is_active', true)), 'monthly', '0.6'),
             $this->urlEntry(route('faq'), $this->latestModelTimestamp(Faq::query()->where('is_active', true)), 'monthly', '0.6'),
             $this->urlEntry(route('privacy-policy'), $this->latestModelTimestamp(PrivacyPolicy::query()->where('is_active', true)), 'yearly', '0.4'),
             $this->urlEntry(route('terms-and-conditions'), $this->latestModelTimestamp(TermCondition::query()->where('is_active', true)), 'yearly', '0.4'),
@@ -142,6 +143,7 @@ class SitemapService
             $this->latestModelTimestamp(AboutUsPage::query()->where('is_active', true)),
             $this->latestModelTimestamp(ContactUsPage::query()->where('is_active', true)),
             $this->latestModelTimestamp(HelpPage::query()->where('is_active', true)),
+            $this->latestModelTimestamp(HowCreditsWorkPage::query()->where('is_active', true)),
             $this->latestModelTimestamp(Faq::query()->where('is_active', true)),
             $this->latestModelTimestamp(PrivacyPolicy::query()->where('is_active', true)),
             $this->latestModelTimestamp(TermCondition::query()->where('is_active', true)),

@@ -7,6 +7,7 @@ use App\Models\AntiSpamPolicy;
 use App\Models\BabeRankReadMorePage;
 use App\Models\ContentModerationPolicy;
 use App\Models\HelpPage;
+use App\Models\HowCreditsWorkPage;
 use App\Models\NaughtyCornerPage;
 use App\Models\PricingPackage;
 use App\Models\PricingPage;
@@ -125,6 +126,14 @@ class GetFrontendSimplePage
     public function creditUsageAndExpiryPolicy(): ?AntiSpamPolicy
     {
         return AntiSpamPolicy::query()
+            ->where('is_active', true)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    public function howCreditsWork(): ?HowCreditsWorkPage
+    {
+        return HowCreditsWorkPage::query()
             ->where('is_active', true)
             ->latest('updated_at')
             ->first();
