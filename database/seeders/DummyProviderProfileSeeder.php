@@ -33,9 +33,9 @@ class DummyProviderProfileSeeder extends Seeder
 
     private const RATE_DESCRIPTIONS = ['30 min', '1 hour', '2 hours', 'Overnight'];
 
-    private const INCALL_PRICES = ['$150', '$250', '$400', '$800'];
+    private const INCALL_PRICES = ['Demo', 'Demo', 'Demo', 'Demo'];
 
-    private const OUTCALL_PRICES = ['$200', '$300', '$500', '$1000'];
+    private const OUTCALL_PRICES = ['Demo', 'Demo', 'Demo', 'Demo'];
 
     private const AVAILABILITY_OPTIONS = ['incalls-only', 'outcalls-only', 'incalls-and-outcalls'];
 
@@ -152,11 +152,6 @@ class DummyProviderProfileSeeder extends Seeder
             ->first()?->children()->pluck('id')->values()->all() ?? [];
         $attributeIds = Category::query()->where('slug', 'attributes')
             ->first()?->children()->pluck('id')->values()->all() ?? [];
-        $servicesStyleIds = Category::query()->where('slug', 'services-style')
-            ->first()?->children()->pluck('id')->values()->all() ?? [];
-        $servicesProvidedIds = Category::query()->where('slug', 'services-you-provide')
-            ->first()?->children()->pluck('id')->values()->all() ?? [];
-
         for ($i = 1; $i <= self::TOTAL; $i++) {
             $accountIndex = intdiv($i - 1, self::PROFILES_PER_ACCOUNT) + 1;
             $profileNumberWithinAccount = (($i - 1) % self::PROFILES_PER_ACCOUNT) + 1;
@@ -206,15 +201,15 @@ class DummyProviderProfileSeeder extends Seeder
                     'profile_sequence' => $profileSequence,
                     'suburb' => $seedLocation['suburb_value'],
                     'age' => rand(21, 45),
-                    'description' => "Hi, I'm {$name}. I am a professional and discreet companion offering premium companionship services. I love to meet new people and create unforgettable experiences.",
-                    'introduction_line' => "Welcome to my profile! I'm {$name}, your perfect companion.",
-                    'profile_text' => 'I provide a warm and genuine experience. Available for incalls and outcalls throughout the city. Contact me to arrange an unforgettable time together.',
+                    'description' => "Demo profile for {$name} used to showcase listing layout, filters, and advertising placements only.",
+                    'introduction_line' => "Demo listing for {$name} (sample data only).",
+                    'profile_text' => 'Sample content only. This profile demonstrates page structure and ad placement behaviour in a test environment.',
                     'primary_identity' => count($primaryIdentityIds) > 0
                         ? [$this->pickFrom($primaryIdentityIds, $i)]
                         : [],
                     'attributes' => $this->pickMultiple($attributeIds, $i, 3),
-                    'services_style' => $this->pickMultiple($servicesStyleIds, $i, 4),
-                    'services_provided' => $this->pickMultiple($servicesProvidedIds, $i, 3),
+                    'services_style' => [],
+                    'services_provided' => [],
                     'age_group_id' => count($ageGroupIds) > 0 ? $this->pickFrom($ageGroupIds, $i) : null,
                     'hair_color_id' => count($hairColorIds) > 0 ? $this->pickFrom($hairColorIds, $i) : null,
                     'hair_length_id' => count($hairLengthIds) > 0 ? $this->pickFrom($hairLengthIds, $i) : null,
@@ -234,8 +229,8 @@ class DummyProviderProfileSeeder extends Seeder
                     'city_id' => $cityId,
                     'latitude' => round(-33.8688 + ($i * 0.01), 7),
                     'longitude' => round(151.2093 + ($i * 0.01), 7),
-                    'phone' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 7) % 1000, ($i * 13) % 1000),
-                    'whatsapp' => sprintf('+61 4%02d %03d %03d', $i % 100, ($i * 11) % 1000, ($i * 17) % 1000),
+                    'phone' => null,
+                    'whatsapp' => null,
                     'is_verified' => $i % 3 === 0,
                     'is_featured' => false,
                     'featured_expires_at' => null,
@@ -256,7 +251,7 @@ class DummyProviderProfileSeeder extends Seeder
                 ProviderListing::updateOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'title' => "{$name}'s Live Cam",
+                        'title' => "{$name} Demo Listing",
                         'age' => rand(21, 45),
                         'category_id' => $categoryId,
                         'website_type' => $this->pickFrom(self::WEBSITE_TYPES, $i),
@@ -283,7 +278,7 @@ class DummyProviderProfileSeeder extends Seeder
                         'incall' => self::INCALL_PRICES[$rateIndex],
                         'outcall' => self::OUTCALL_PRICES[$rateIndex],
                         'extra' => $rateIndex === count(self::RATE_DESCRIPTIONS) - 1
-                            ? 'Includes dinner and overnight stay'
+                            ? 'Demo tier information for layout preview only'
                             : null,
                         'group_id' => $rateGroup->id,
                     ],
@@ -336,7 +331,7 @@ class DummyProviderProfileSeeder extends Seeder
                 ['provider_profile_id' => $providerProfile->id],
                 [
                     'user_id' => $user->id,
-                    'message' => "Hi there! I'm {$name}. Feel free to send me a message to discuss your requirements or arrange a meeting. I'm responsive and discreet.",
+                    'message' => "Hi there! I'm {$name}. This inbox copy is demo-only and is shown to preview message card layout.",
                 ],
             );
 
@@ -364,7 +359,7 @@ class DummyProviderProfileSeeder extends Seeder
                     [
                         'user_id' => $user->id,
                         'to' => $to,
-                        'description' => "I will be visiting {$city}. Contact me to arrange a meeting during my stay.",
+                        'description' => "Demo travel note for {$city}. This sample text is for UI preview only.",
                         'enabled' => true,
                     ],
                 );
