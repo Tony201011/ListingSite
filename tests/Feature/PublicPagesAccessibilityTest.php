@@ -46,7 +46,26 @@ class PublicPagesAccessibilityTest extends TestCase
             FooterWidgetSeeder::class,
         ]);
 
-        $this->get('/')->assertOk();
+        $homeResponse = $this->get('/');
+        $homeResponse->assertOk();
+        $homeResponse->assertSee('href="/about-us"', false);
+        $homeResponse->assertSee('href="/contact-us"', false);
+        $homeResponse->assertSee('href="/terms-and-conditions"', false);
+        $homeResponse->assertSee('href="/privacy-policy"', false);
+        $homeResponse->assertSee('href="/refund-policy"', false);
+        $homeResponse->assertSee('href="/credit-usage-and-expiry-policy"', false);
+        $homeResponse->assertSee('href="/content-moderation-policy"', false);
+        $homeResponse->assertSee('href="/age-and-consent-policy"', false);
+        $homeResponse->assertSee('href="/prohibited-content-policy"', false);
+        $homeResponse->assertSee('href="/report-a-listing"', false);
+        $homeResponse->assertSee('href="/complaints-contact"', false);
+        $homeResponse->assertSee('href="/how-credits-work"', false);
+        $homeResponse->assertSee('href="/signup"', false);
+        $homeResponse->assertSee('href="/signin"', false);
+        $homeResponse->assertSee('href="/pricing"', false);
+        $homeResponse->assertSee('href="/sample-listing"', false);
+        $homeResponse->assertSee('href="/escorts/search"', false);
+
         $this->get('/about-us')->assertOk();
         $this->get('/contact-us')->assertOk();
         $this->get('/complaints-contact')->assertOk();
