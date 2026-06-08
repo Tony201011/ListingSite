@@ -162,6 +162,8 @@ class GlobalBannerResource extends Resource
 
     public static function getPageOptions(): array
     {
+        $footerLegalPageOptions = self::footerLegalPageOptions();
+
         return collect([
             'all-pages' => 'All Pages (Global)',
             'home' => 'Home',
@@ -171,18 +173,17 @@ class GlobalBannerResource extends Resource
             'otp-verification' => 'OTP Verification',
             'my-rate' => 'My Rate',
         ])
-            ->merge(self::frontendPageOptions())
-            ->merge(self::footerLegalPageOptions())
+            ->merge(self::frontendPageOptions($footerLegalPageOptions))
+            ->merge($footerLegalPageOptions)
             ->all();
     }
 
     /**
+     * @param  array<string, string>  $footerLegalPageOptions
      * @return array<string, string>
      */
-    private static function frontendPageOptions(): array
+    private static function frontendPageOptions(array $footerLegalPageOptions): array
     {
-        $footerLegalPageOptions = self::footerLegalPageOptions();
-
         /** @var array<string, string> $options */
         $options = collect(RouteFacade::getRoutes()->getRoutesByMethod()['GET'] ?? [])
             ->filter(function (Route $route): bool {
