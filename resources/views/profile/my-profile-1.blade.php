@@ -22,6 +22,25 @@
             My Profile
         </h1>
 
+        @if($reviewerMode ?? false)
+            <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                <h2 class="text-base font-semibold text-amber-900">Advertiser review flow (sample data only)</h2>
+                <p class="mt-1 text-sm text-amber-800">Use the links below to review the advertiser journey. Real advertiser data is not exposed in this account.</p>
+                <div class="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+                    <a href="{{ route('my-profile') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Advertiser dashboard</a>
+                    <a href="{{ route('profiles.index') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Profile creation page</a>
+                    <a href="{{ route('edit-profile') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Profile edit page</a>
+                    <a href="{{ route('status') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Profile status & visibility</a>
+                    <a href="{{ route('profile-spending-history') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Credit balance / wallet</a>
+                    <a href="{{ route('purchase-credit') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Credit purchase page</a>
+                    <a href="{{ route('credit-history') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Credit transaction history</a>
+                    <a href="{{ route('my-listings') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Listing visibility status</a>
+                    <a href="{{ route('status') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Pause / resume options</a>
+                    <a href="{{ route('featured') }}" class="rounded border border-amber-300 bg-white px-3 py-2 font-medium text-amber-800 hover:bg-amber-100">Upgrade / featured / boost options</a>
+                </div>
+            </div>
+        @endif
+
         <div class="mb-6 border border-gray-300 rounded-lg p-6">
                 <div x-data="{ showSuccess: true }">
                     @if(session('success'))
