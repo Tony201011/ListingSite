@@ -12,6 +12,7 @@ class FooterText extends Model
     protected $fillable = [
         'copyright_text',
         'disclaimer_text',
+        'adults_only_text',
         'is_active',
     ];
 

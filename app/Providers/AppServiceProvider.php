@@ -149,6 +149,21 @@ class AppServiceProvider extends ServiceProvider
             $view->with('footerWidget', $footerWidget);
         });
 
+        View::composer(['auth.signup', 'auth.signin'], function ($view): void {
+            if (! Schema::hasTable('footer_texts')) {
+                $view->with('footerText', null);
+
+                return;
+            }
+
+            $footerText = FooterText::query()
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->first();
+
+            $view->with('footerText', $footerText);
+        });
+
         View::composer('layouts.partials.header', function ($view): void {
             $escortCities = collect(EscortLocationData::profileLocations());
 

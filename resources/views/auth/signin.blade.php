@@ -51,7 +51,7 @@
         </div>
 
         <div class="mb-6 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3 text-sm font-semibold text-gray-800">
-            This website is intended for adults only.
+            {{ $footerText?->adults_only_text ?? 'This website is intended for adults only.' }}
         </div>
 
         <div class="bg-white rounded-2xl p-6 md:p-8 mb-8 shadow-md border border-gray-100">
