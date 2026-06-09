@@ -84,25 +84,16 @@
         $brandPrimary = ($headerWidget ?? null)?->brand_primary ?: 'HOT';
         $brandAccent = ($headerWidget ?? null)?->brand_accent ?: 'ESCORTS';
 
-        $enabledWidgetCount = collect([
-            $showBrandWidget,
+        $enabledMenuWidgetCount = collect([
             $showNavigationWidget,
             $showAdvertisersWidget,
             $showLegalWidget,
         ])->filter()->count();
 
-        $footerGridClass = match ($enabledWidgetCount) {
-            1 => 'grid gap-8 text-sm md:grid-cols-1 lg:grid-cols-1',
-            2 => 'grid gap-8 text-sm md:grid-cols-2 lg:grid-cols-2',
-            3 => 'grid gap-8 text-sm md:grid-cols-2 lg:grid-cols-3',
-            default => 'grid gap-8 text-sm md:grid-cols-2 lg:grid-cols-4',
-        };
-
-        $footerGridWidthClass = match ($enabledWidgetCount) {
-            1 => 'max-w-xl',
-            2 => 'max-w-3xl',
-            3 => 'max-w-5xl',
-            default => 'max-w-full',
+        $footerMenuGridClass = match ($enabledMenuWidgetCount) {
+            1 => 'grid gap-8 text-sm md:grid-cols-1',
+            2 => 'grid gap-8 text-sm md:grid-cols-2',
+            default => 'grid gap-8 text-sm md:grid-cols-2 lg:grid-cols-3',
         };
 @endphp
 
@@ -122,19 +113,20 @@
             </div>
         @endif
 
-        <div class="{{ $footerGridClass }} {{ $footerGridWidthClass }} mx-auto">
-            @if($showBrandWidget)
-                <div>
-                    <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
-                    <p class="mt-4 leading-relaxed text-gray-500">{{ $brandDescription }}</p>
-                    <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-400">
-                        @foreach($badges as $badge)
-                            <span class="rounded-full border border-gray-700 px-2 py-1">{{ $badge['label'] }}</span>
-                        @endforeach
-                    </div>
+        @if($showBrandWidget)
+            <div class="mx-auto mb-8 max-w-4xl text-center">
+                <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
+                <p class="mt-4 leading-relaxed text-gray-500">{{ $brandDescription }}</p>
+                <div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400">
+                    @foreach($badges as $badge)
+                        <span class="rounded-full border border-gray-700 px-2 py-1">{{ $badge['label'] }}</span>
+                    @endforeach
                 </div>
-            @endif
+            </div>
+        @endif
 
+        @if($enabledMenuWidgetCount > 0)
+            <div class="{{ $footerMenuGridClass }} mx-auto">
             @if($showNavigationWidget)
                 <div>
                     <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $navigationHeading }}</h4>
@@ -176,7 +168,8 @@
                     </div>
                 </div>
             @endif
-        </div>
+            </div>
+        @endif
 
         @php
             $rawCopyrightText = $footerText?->copyright_text ?? '© {year} Hotescorts Directory. All rights reserved.';
