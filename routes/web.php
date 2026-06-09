@@ -80,6 +80,9 @@ Route::get('/anti-spam-policy', [FrontendPageController::class, 'antiSpamPolicy'
 Route::get('/credit-usage-and-expiry-policy', [FrontendPageController::class, 'creditUsageAndExpiryPolicy'])->name('credit-usage-and-expiry-policy');
 Route::get('/content-moderation-policy', [FrontendPageController::class, 'contentModerationPolicy'])->name('content-moderation-policy');
 Route::get('/report-a-listing', [FrontendPageController::class, 'reportAListing'])->name('report-a-listing');
+Route::post('/report-a-listing', [FrontendPageController::class, 'submitReportAListing'])
+    ->middleware('throttle:'.config('security.throttles.booking_enquiry', '5,1'))
+    ->name('report-a-listing.submit');
 Route::get('/age-and-consent-policy', [FrontendPageController::class, 'ageAndConsentPolicy'])->name('age-and-consent-policy');
 Route::get('/prohibited-content-policy', [FrontendPageController::class, 'prohibitedContentPolicy'])->name('prohibited-content-policy');
 
