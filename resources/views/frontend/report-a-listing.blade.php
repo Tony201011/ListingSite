@@ -3,9 +3,9 @@
 @section('title', 'Report a Listing')
 
 @section('content')
-<div class="min-h-screen bg-gray-50">
-    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div class="rounded-lg bg-white p-6 shadow-sm sm:p-8">
+<div class="min-h-screen bg-[#f8fafc] py-10">
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="rounded-2xl bg-white p-6 shadow-md border border-gray-100 md:p-8">
             <button
                 type="button"
                 onclick="window.history.back()"
@@ -52,13 +52,13 @@
             @endif
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div class="rounded-lg border border-gray-300 p-6 lg:col-span-2">
+                <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-md md:p-8 lg:col-span-2">
                     <form action="{{ route('report-a-listing.submit') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                         @csrf
 
                         <section class="space-y-3">
                             <h2 class="text-xl font-bold text-gray-900">Report Category <span class="text-red-500">*</span></h2>
-                            <select name="category" required class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                            <select name="category" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-800 font-semibold focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition">
                                 <option value="" disabled {{ old('category') ? '' : 'selected' }}>Select a category</option>
                                 @foreach($categoryOptions as $value => $label)
                                     <option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>
@@ -70,24 +70,24 @@
                             <h2 class="text-xl font-bold text-gray-900">Listing Information</h2>
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div class="md:col-span-2">
-                                    <label class="mb-1 block text-sm font-semibold text-gray-700">Listing URL <span class="text-red-500">*</span></label>
-                                    <input type="url" name="listing_url" required value="{{ old('listing_url', $prefill['listing_url'] ?? '') }}" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500" placeholder="https://hotescort.com.au/...">
+                                    <label class="block font-semibold text-gray-800 mb-1">Listing URL <span class="text-red-500">*</span></label>
+                                    <input type="url" name="listing_url" required value="{{ old('listing_url', $prefill['listing_url'] ?? '') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold" placeholder="https://hotescort.com.au/...">
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-semibold text-gray-700">Profile / Advertiser Name <span class="text-red-500">*</span></label>
-                                    <input type="text" name="advertiser_name" required value="{{ old('advertiser_name', $prefill['advertiser_name'] ?? '') }}" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                                    <label class="block font-semibold text-gray-800 mb-1">Profile / Advertiser Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="advertiser_name" required value="{{ old('advertiser_name', $prefill['advertiser_name'] ?? '') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-semibold text-gray-700">Listing ID</label>
-                                    <input type="text" name="listing_id" value="{{ old('listing_id', $prefill['listing_id'] ?? '') }}" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                                    <label class="block font-semibold text-gray-800 mb-1">Listing ID</label>
+                                    <input type="text" name="listing_id" value="{{ old('listing_id', $prefill['listing_id'] ?? '') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-semibold text-gray-700">Phone Number</label>
-                                    <input type="text" name="listing_phone" value="{{ old('listing_phone') }}" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                                    <label class="block font-semibold text-gray-800 mb-1">Phone Number</label>
+                                    <input type="text" name="listing_phone" value="{{ old('listing_phone') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-semibold text-gray-700">City / Location</label>
-                                    <input type="text" name="listing_location" value="{{ old('listing_location') }}" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                                    <label class="block font-semibold text-gray-800 mb-1">City / Location</label>
+                                    <input type="text" name="listing_location" value="{{ old('listing_location') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                                 </div>
                             </div>
                         </section>
@@ -96,16 +96,16 @@
                             <h2 class="text-xl font-bold text-gray-900">Reporter Information</h2>
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
-                                    <label class="mb-1 block text-sm font-semibold text-gray-700">Full Name</label>
-                                    <input type="text" name="reporter_name" value="{{ old('reporter_name') }}" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                                    <label class="block font-semibold text-gray-800 mb-1">Full Name</label>
+                                    <input type="text" name="reporter_name" value="{{ old('reporter_name') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-semibold text-gray-700">Email Address <span class="text-red-500">*</span></label>
-                                    <input type="email" name="reporter_email" required value="{{ old('reporter_email') }}" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                                    <label class="block font-semibold text-gray-800 mb-1">Email Address <span class="text-red-500">*</span></label>
+                                    <input type="email" name="reporter_email" required value="{{ old('reporter_email') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-semibold text-gray-700">Phone Number</label>
-                                    <input type="text" name="reporter_phone" value="{{ old('reporter_phone') }}" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                                    <label class="block font-semibold text-gray-800 mb-1">Phone Number</label>
+                                    <input type="text" name="reporter_phone" value="{{ old('reporter_phone') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold">
                                 </div>
                             </div>
                             <label class="inline-flex items-center gap-2 text-sm text-gray-700">
@@ -116,14 +116,14 @@
 
                         <section class="space-y-3">
                             <h2 class="text-xl font-bold text-gray-900">Report Details</h2>
-                            <label class="mb-1 block text-sm font-semibold text-gray-700">Describe the issue <span class="text-red-500">*</span></label>
-                            <textarea name="description" rows="6" required class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500" placeholder="Please explain what content you are reporting, why it violates our policies, and provide any relevant details that may assist our review.">{{ old('description') }}</textarea>
+                            <label class="block font-semibold text-gray-800 mb-1">Describe the issue <span class="text-red-500">*</span></label>
+                            <textarea name="description" rows="6" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold" placeholder="Please explain what content you are reporting, why it violates our policies, and provide any relevant details that may assist our review.">{{ old('description') }}</textarea>
                         </section>
 
                         <section class="space-y-3">
                             <h2 class="text-xl font-bold text-gray-900">Evidence Upload</h2>
                             <p class="text-sm text-gray-600">Upload screenshots, images, or supporting documents. Accepted formats: JPG, PNG, PDF (max 10MB per file).</p>
-                            <input type="file" name="evidence[]" multiple accept=".jpg,.jpeg,.png,.pdf" class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500">
+                            <input type="file" name="evidence[]" multiple accept=".jpg,.jpeg,.png,.pdf" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900">
                         </section>
 
                         <section class="space-y-3">
@@ -150,14 +150,14 @@
                             </label>
                         </section>
 
-                        <button type="submit" class="rounded bg-pink-500 px-6 py-2 text-white transition hover:bg-pink-600">
+                        <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-lg py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">
                             Submit Report
                         </button>
                     </form>
                 </div>
 
                 <div class="space-y-6">
-                    <div class="rounded-lg border border-gray-300 p-6">
+                    <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-md">
                         <h2 class="mb-2 text-xl font-semibold text-gray-900">Helpful Links</h2>
                         <ul class="space-y-2 text-pink-600">
                             <li><a href="{{ route('terms-and-conditions') }}" class="hover:text-pink-700">Terms & Conditions</a></li>
