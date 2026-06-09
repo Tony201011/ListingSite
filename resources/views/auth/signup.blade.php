@@ -407,7 +407,7 @@
                             x-model="contentPolicyConfirm"
                             @change="touched.contentPolicyConfirm = true; validateContentPolicyConfirm()"
                             :aria-invalid="errors.contentPolicyConfirm ? 'true' : 'false'"
-                            class="w-5 h-5 mt-0.5 accent-[#e04ecb]"
+                            class="w-5 h-5 accent-[#e04ecb]"
                             {{ old('content_policy_confirm') ? 'checked' : '' }}
                         >
                         <label for="content_policy_confirm" class="font-semibold text-gray-800">
