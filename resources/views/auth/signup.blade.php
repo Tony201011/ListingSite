@@ -7,6 +7,37 @@
             outline-offset: 2px;
             box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2) !important;
         }
+
+        .auth-consent-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            min-width: 1.25rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: #fff;
+            display: inline-block;
+            vertical-align: top;
+            margin-top: 0.125rem;
+            transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+            cursor: pointer;
+        }
+
+        .auth-consent-checkbox:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(224, 78, 203, 0.25);
+            border-color: #e04ecb;
+        }
+
+        .auth-consent-checkbox:checked {
+            background-color: #e04ecb;
+            border-color: #e04ecb;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 0.85rem 0.85rem;
+        }
     </style>
 @endpush
 
@@ -376,7 +407,7 @@
                             x-model="ageConfirm"
                             @change="touched.ageConfirm = true; validateAgeConfirm()"
                             :aria-invalid="errors.ageConfirm ? 'true' : 'false'"
-                            class="w-5 h-5 accent-[#e04ecb]"
+                            class="auth-consent-checkbox"
                             {{ old('age_confirm') ? 'checked' : '' }}
                         >
                         <label for="age_confirm" class="font-semibold text-gray-800">
@@ -407,7 +438,7 @@
                             x-model="contentPolicyConfirm"
                             @change="touched.contentPolicyConfirm = true; validateContentPolicyConfirm()"
                             :aria-invalid="errors.contentPolicyConfirm ? 'true' : 'false'"
-                            class="w-5 h-5 accent-[#e04ecb]"
+                            class="auth-consent-checkbox"
                             {{ old('content_policy_confirm') ? 'checked' : '' }}
                         >
                         <label for="content_policy_confirm" class="font-semibold text-gray-800">
@@ -452,12 +483,21 @@
                 Yes, sign me up — it's free
             </button>
 
-            <p class="text-center mt-5 text-gray-500 text-sm">
-                By signing up, you agree to our
-                <a href="{{ route('terms-and-conditions') }}" class="text-[#e04ecb] underline">Terms</a>
-                and
-                <a href="{{ route('privacy-policy') }}" class="text-[#e04ecb] underline">Privacy Policy</a>.
-            </p>
+            <div class="text-center mt-5 text-gray-500 text-sm space-y-2">
+                <p>
+                    By signing up, you agree to our
+                    <a href="{{ route('terms-and-conditions') }}" class="text-[#e04ecb] underline">Terms</a>
+                    and
+                    <a href="{{ route('privacy-policy') }}" class="text-[#e04ecb] underline">Privacy Policy</a>.
+                </p>
+                <p class="text-xs leading-relaxed">
+                    Also review
+                    <a href="{{ route('age-and-consent-policy') }}" class="text-[#e04ecb] underline">Age & Consent Policy</a>,
+                    <a href="{{ route('content-moderation-policy') }}" class="text-[#e04ecb] underline">Content Moderation Policy</a>,
+                    and
+                    <a href="{{ route('contact-us') }}" class="text-[#e04ecb] underline">Contact/Support</a>.
+                </p>
+            </div>
         </form>
     </div>
 </div>
