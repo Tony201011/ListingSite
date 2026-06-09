@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,21 +14,8 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        $admin = User::where('email', 'admin@example.com')->first();
-        if ($admin) {
-            $admin->update([
-                'password' => bcrypt('admin123'), // Change password as needed
-            ]);
-        } else {
-            User::factory()->create([
-                'name' => 'Admin User',
-                'email' => 'admin@example.com',
-                'role' => 'admin',
-                'password' => bcrypt('admin123'), // Change password as needed
-            ]);
-        }
-
         $this->call([
+            AdminAccountSeeder::class,
             ReviewerAccountSeeder::class,
             BabeRankReadMorePageSeeder::class,
             LocationImportSeeder::class,

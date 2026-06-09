@@ -62,6 +62,16 @@ class AdminPanelTest extends TestCase
         return $user;
     }
 
+    private function createReviewer(array $overrides = []): User
+    {
+        return User::factory()->create(array_merge([
+            'role' => User::ROLE_REVIEWER,
+            'email_verified_at' => now(),
+            'is_blocked' => false,
+            'password' => Hash::make('ReviewPass123!'),
+        ], $overrides));
+    }
+
     // ---------------------------------------------------------------
     // Access control
     // ---------------------------------------------------------------
@@ -185,6 +195,15 @@ class AdminPanelTest extends TestCase
         $response->assertForbidden();
     }
 
+    public function test_reviewer_user_cannot_access_admin_panel(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer, 'admin')->get('/admin');
+
+        $response->assertForbidden();
+    }
+
     // ---------------------------------------------------------------
     // canAccessPanel logic
     // ---------------------------------------------------------------
@@ -203,6 +222,14 @@ class AdminPanelTest extends TestCase
         $panel = app(Panel::class)::make()->id('admin');
 
         $this->assertFalse($provider->canAccessPanel($panel));
+    }
+
+    public function test_reviewer_cannot_access_admin_panel_via_can_access_panel(): void
+    {
+        $reviewer = $this->createReviewer();
+        $panel = app(Panel::class)::make()->id('admin');
+
+        $this->assertFalse($reviewer->canAccessPanel($panel));
     }
 
     // ---------------------------------------------------------------
