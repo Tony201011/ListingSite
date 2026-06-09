@@ -384,7 +384,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-start mb-6">
+            <div class="grid grid-cols-1 gap-5 items-start mb-6">
                 <div>
                     <label class="block font-semibold text-gray-800 mb-1">Referral code (optional)</label>
                     <input
