@@ -532,6 +532,36 @@ class HomeControllerTest extends TestCase
         $response->assertSeeText('Available Now');
     }
 
+    public function test_favourite_toggle_endpoint_accepts_numeric_profile_id(): void
+    {
+        $provider = $this->createApprovedProvider([
+            'name' => 'Favourite Toggle Escort',
+            'slug' => 'favourite-toggle-escort',
+        ]);
+        $profileId = (string) ProviderProfile::query()->where('user_id', $provider->id)->value('id');
+        $viewer = User::factory()->create();
+
+        $this->actingAs($viewer)
+            ->postJson('/favourite/'.$profileId)
+            ->assertOk()
+            ->assertJson(['active' => true]);
+
+        $this->assertSame(
+            [$profileId],
+            Cache::get("favourites_user_{$viewer->id}", [])
+        );
+
+        $this->actingAs($viewer)
+            ->postJson('/favourite/'.$profileId)
+            ->assertOk()
+            ->assertJson(['active' => false]);
+
+        $this->assertSame(
+            [],
+            Cache::get("favourites_user_{$viewer->id}", [])
+        );
+    }
+
     public function test_home_page_shows_default_filter_values(): void
     {
         $response = $this->get('/');
