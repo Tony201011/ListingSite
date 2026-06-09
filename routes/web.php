@@ -194,6 +194,7 @@ Route::post('/booking-enquiry', [BookingController::class, 'send'])
 Route::get('/about-us', [FrontendPageController::class, 'aboutUs'])->name('about-us');
 Route::get('/help', [FrontendPageController::class, 'help'])->name('help');
 Route::get('/how-credits-work', [FrontendPageController::class, 'howCreditsWork'])->name('how-credits-work');
+Route::view('/processor-review-access', 'frontend.processor-review-access')->name('processor-review-access');
 Route::get('/naughty-corner', [FrontendPageController::class, 'naughtyCorner'])->name('naughty-corner');
 Route::get('/membership', [MemberShipController::class, 'membership'])->name('membership');
 
