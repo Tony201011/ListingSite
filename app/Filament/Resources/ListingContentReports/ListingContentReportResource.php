@@ -136,7 +136,6 @@ class ListingContentReportResource extends Resource
                                             .'<a href="'.e($url).'" target="_blank" rel="noopener noreferrer">'
                                             .'<img src="'.e($url).'" alt="'.e($name).'" style="max-width:260px;height:auto;border-radius:0.5rem;border:1px solid #e5e7eb;" />'
                                             .'</a>'
-                                            .'<div><a href="'.e($url).'" target="_blank" rel="noopener noreferrer">'.e($name).'</a></div>'
                                             .'</div>';
                                     } else {
                                         $items[] = '<div style="margin-bottom:0.75rem;"><a href="'.e($url).'" target="_blank" rel="noopener noreferrer">'.e($name).'</a></div>';
