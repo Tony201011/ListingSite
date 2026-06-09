@@ -44,7 +44,7 @@
 @section('content')
 @include('auth.partials.recaptcha-responsive-assets')
 
-<div class="bg-[#f8fafc] min-h-screen py-10">
+<div class="bg-[#f8fafc] min-h-screen py-10 text-gray-900">
     <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
 
         <!-- Optional back link (can be removed if not needed) -->
@@ -64,7 +64,7 @@
             This website is intended for adults only.
         </div>
 
-        <div class="mb-6 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3 text-sm text-gray-700">
+        <div class="mb-6 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3 text-sm text-gray-800">
             <p class="font-semibold text-[#c13ab0]">We verify every babe.</p>
             <p class="mt-1">Verification and moderation checks are completed before profiles go live. Your account data and contact information are handled under our privacy and consent policies.</p>
             <p class="mt-2 text-xs leading-relaxed">
@@ -182,15 +182,15 @@
 
             <!-- Footer links -->
             <div class="text-center border-t border-gray-200 mt-8 pt-6">
-                <p class="text-gray-500 text-sm mb-2">
+                <p class="text-gray-700 text-sm mb-2">
                     Forgot your login details?
                     <a href="{{ url('/reset-password') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can reset it here</a>
                 </p>
-                <p class="text-gray-500 text-sm">
+                <p class="text-gray-700 text-sm">
                     If you haven't signed up before,
                     <a href="{{ url('/signup') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can sign up here</a>
                 </p>
-                <p class="text-gray-500 text-xs mt-3 leading-relaxed">
+                <p class="text-gray-700 text-xs mt-3 leading-relaxed">
                     Legal:
                     <a href="{{ route('terms-and-conditions') }}" class="text-[#e04ecb] underline">Terms & Conditions</a>,
                     <a href="{{ route('privacy-policy') }}" class="text-[#e04ecb] underline">Privacy Policy</a>,
