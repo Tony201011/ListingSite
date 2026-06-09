@@ -19,25 +19,7 @@ use App\Http\Controllers\MediaController;
 
 /***profile Controllers start*/
 use App\Http\Controllers\Profile\AccountController;
-use App\Http\Controllers\Profile\AvailabilityController;
-use App\Http\Controllers\Profile\AvailableController;
-use App\Http\Controllers\Profile\BabeRankController;
 use App\Http\Controllers\Profile\BookingController;
-use App\Http\Controllers\Profile\FeaturedController;
-use App\Http\Controllers\Profile\ForgetController;
-use App\Http\Controllers\Profile\MyProfileController;
-use App\Http\Controllers\Profile\MyRateController;
-use App\Http\Controllers\Profile\MyToursController;
-use App\Http\Controllers\Profile\MyVideosController;
-use App\Http\Controllers\Profile\OnlineController;
-use App\Http\Controllers\Profile\PhotoController;
-use App\Http\Controllers\Profile\PhotoVerificationController;
-use App\Http\Controllers\Profile\ProfileMessageController;
-use App\Http\Controllers\Profile\ProfileSettingController;
-use App\Http\Controllers\Profile\ProfileSwitchController;
-use App\Http\Controllers\Profile\ReferralsController;
-use App\Http\Controllers\Profile\ShowHideProfileController;
-use App\Http\Controllers\Profile\StatusTabsController;
 use App\Http\Controllers\Profile\SuburbController;
 use App\Http\Controllers\Profile\UrlController;
 use App\Http\Controllers\SiteAccess\SitePasswordController;
@@ -47,11 +29,9 @@ use App\Http\Controllers\SiteAccess\SitePasswordController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Subscription\MemberShipController;
-use App\Http\Controllers\Subscription\PaymentSubscriptionController;
 /**subscription controller end */
 
 /*******site access controller start here  */
-use App\Http\Controllers\Subscription\PurchaseCreditController;
 /*******site access controller end here  */
 
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;

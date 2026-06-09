@@ -76,11 +76,6 @@ class PublicPagesAccessibilityTest extends TestCase
         $this->get('/pricing')->assertOk();
         $this->get('/membership')->assertOk();
         $this->get('/how-credits-work')->assertOk();
-        $this->get('/processor-review-access')
-            ->assertOk()
-            ->assertSeeText('Processor Review Access')
-            ->assertSeeText('HotEscort is an Australian adult advertising/listing platform.')
-            ->assertSeeText('Checkout/test payment page');
         $this->get('/terms-and-conditions')->assertOk();
         $this->get('/privacy-policy')->assertOk();
         $this->get('/refund-policy')->assertOk();
@@ -155,5 +150,17 @@ class PublicPagesAccessibilityTest extends TestCase
         $this->assertContains('/contact-us', $footerNavigationUrls->all());
         $this->assertContains('/sample-listing', $footerNavigationUrls->all());
         $this->assertContains('/escorts/search', $footerNavigationUrls->all());
+    }
+
+    public function test_processor_review_access_page_is_available(): void
+    {
+        $response = $this->get('/processor-review-access');
+
+        $response->assertOk();
+        $response->assertSeeText('Processor Review Access');
+        $response->assertSeeText('HotEscort is an Australian adult advertising/listing platform.');
+        $response->assertSeeText('Checkout/test payment page');
+        $response->assertSee(route('pricing'), false);
+        $response->assertSee(route('contact-us'), false);
     }
 }
