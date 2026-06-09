@@ -56,13 +56,13 @@
                     </dl>
                 </div>
 
-                <div class="rounded-lg border border-amber-300 bg-amber-50 p-6">
+                <div class="rounded-lg border border-amber-400 bg-amber-100 p-6">
                     <h2 class="text-xl font-semibold text-gray-900">Access restriction</h2>
-                    <p class="mt-3 text-sm leading-6 text-amber-900">
-                        Real admin access is not provided for processor review.
-                        If additional access is requested, only the limited read-only reviewer account may be shared.
-                        No credentials with write access to users, listings, payments, credits, or settings are provided for processor reviews.
-                    </p>
+                    <ul class="mt-3 list-disc space-y-2 pl-5 text-base leading-7 text-gray-800">
+                        <li>Real admin access is not provided for processor review.</li>
+                        <li>If additional access is requested, only the limited read-only reviewer account may be shared.</li>
+                        <li>No credentials with write access to users, listings, payments, credits, or settings are provided for processor reviews.</li>
+                    </ul>
                 </div>
             </div>
 
