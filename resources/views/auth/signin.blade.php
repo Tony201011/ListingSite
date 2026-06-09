@@ -46,17 +46,7 @@
 
 <div class="bg-[#f8fafc] min-h-screen py-10 text-gray-900">
     <div class="max-w-3xl lg:max-w-4xl mx-auto px-5">
-
-        <!-- Optional back link (can be removed if not needed) -->
-        <a href="javascript:history.back()" class="inline-flex items-center text-[#e04ecb] hover:text-[#c13ab0] transition-colors mb-4 text-sm font-medium">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Go back
-        </a>
-
-
-        <div class="mb-8">
+        <div class="flex items-center justify-between flex-wrap gap-4 mb-8">
             <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Login to your HOTESCORTS profile</h2>
         </div>
 
@@ -64,10 +54,19 @@
             This website is intended for adults only.
         </div>
 
-        <div class="mb-6 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3 text-sm text-gray-800">
-            <p class="font-semibold text-[#c13ab0]">We verify every babe.</p>
-            <p class="mt-1">Verification and moderation checks are completed before profiles go live. Your account data and contact information are handled under our privacy and consent policies.</p>
-            <p class="mt-2 text-xs leading-relaxed">
+        <div class="bg-white rounded-2xl p-6 md:p-8 mb-8 shadow-md border border-gray-100">
+            <div class="flex items-center gap-4 mb-5">
+                <div class="w-12 h-12 bg-[#e04ecb] rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9h6"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800">Welcome back</h3>
+            </div>
+
+            <p class="text-gray-600 mb-3 text-lg">Sign in to manage your profile, listings, and account settings.</p>
+            <p class="text-xs leading-relaxed text-gray-700">
                 Read:
                 <a href="{{ route('age-and-consent-policy') }}" class="text-[#e04ecb] underline">Age & Consent Policy</a>,
                 <a href="{{ route('content-moderation-policy') }}" class="text-[#e04ecb] underline">Content Moderation Policy</a>,
@@ -120,6 +119,8 @@
                 novalidate
             >
                 @csrf
+                <input type="text" name="fake_username" autocomplete="username" tabindex="-1" class="hidden" aria-hidden="true">
+                <input type="password" name="fake_password" autocomplete="current-password" tabindex="-1" class="hidden" aria-hidden="true">
 
                 <!-- Email -->
                 <div class="mb-6" data-field-group>
@@ -147,7 +148,7 @@
 
                 <!-- Keep me logged in (styled like the age confirmation pill) -->
                 <div class="mb-6" data-field-group>
-                    <label for="keep_logged_in" class="flex items-center gap-2.5 bg-gray-50 px-4 py-3 rounded-xl cursor-pointer w-full sm:w-fit">
+                    <label for="keep_logged_in" class="flex items-start gap-2.5 bg-gray-50 px-5 py-3 rounded-2xl cursor-pointer">
                         <input type="checkbox" id="keep_logged_in" x-ref="remember" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="auth-consent-checkbox">
                         <span class="font-semibold text-gray-800">Keep me logged in on this device</span>
                     </label>
@@ -175,13 +176,13 @@
                 @endif
 
                 <!-- Login Button (same gradient as sign-up) -->
-                <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">
-                    Login
+                <button type="submit" class="w-full bg-gradient-to-r from-[#e04ecb] to-[#c13ab0] text-white font-bold text-xl py-5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition transform duration-200">
+                    Yes, log me in
                 </button>
             </form>
 
             <!-- Footer links -->
-            <div class="text-center border-t border-gray-200 mt-8 pt-6">
+            <div class="text-center border-t border-gray-200 mt-8 pt-6 space-y-2">
                 <p class="text-gray-700 text-sm mb-2">
                     Forgot your login details?
                     <a href="{{ url('/reset-password') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can reset it here</a>
@@ -189,6 +190,12 @@
                 <p class="text-gray-700 text-sm">
                     If you haven't signed up before,
                     <a href="{{ url('/signup') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can sign up here</a>
+                </p>
+                <p class="text-gray-500 text-sm">
+                    By signing in, you agree to our
+                    <a href="{{ route('terms-and-conditions') }}" class="text-[#e04ecb] underline">Terms</a>
+                    and
+                    <a href="{{ route('privacy-policy') }}" class="text-[#e04ecb] underline">Privacy Policy</a>.
                 </p>
                 <p class="text-gray-700 text-xs mt-3 leading-relaxed">
                     Legal:
