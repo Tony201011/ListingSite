@@ -393,7 +393,7 @@
                         value="{{ old('referral_code', request('ref')) }}"
                         placeholder="Enter code if you have one"
                         autocomplete="off"
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 placeholder:text-gray-400"
                     >
                 </div>
 
