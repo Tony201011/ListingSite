@@ -25,6 +25,8 @@
                     declarationAccuracy: false,
                     declarationContact: false,
                 },
+                evidenceFiles: [],
+                isDraggingEvidence: false,
                 fieldOrder: [
                     'category',
                     'otherCategory',
@@ -161,10 +163,51 @@
 
                     firstServerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 },
+                isEvidenceFileDuplicate(file) {
+                    return this.evidenceFiles.some(
+                        (f) => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified
+                    );
+                },
+                addEvidenceFiles(newFiles) {
+                    Array.from(newFiles).forEach((file) => {
+                        const allowed = ['image/jpeg', 'image/png', 'application/pdf'];
+                        if (!allowed.includes(file.type)) return;
+                        if (file.size > 10 * 1024 * 1024) return;
+                        if (this.isEvidenceFileDuplicate(file)) return;
+                        const isPdf = file.type === 'application/pdf';
+                        const preview = isPdf ? 'pdf' : URL.createObjectURL(file);
+                        this.evidenceFiles.push({ file, preview, name: file.name });
+                    });
+                },
+                handleEvidenceFileSelect(event) {
+                    this.addEvidenceFiles(event.target.files);
+                    event.target.value = '';
+                },
+                handleEvidenceDrop(event) {
+                    this.isDraggingEvidence = false;
+                    this.addEvidenceFiles(event.dataTransfer.files);
+                },
+                removeEvidenceFile(index) {
+                    const entry = this.evidenceFiles[index];
+                    if (entry && entry.preview && entry.preview !== 'pdf') {
+                        URL.revokeObjectURL(entry.preview);
+                    }
+                    this.evidenceFiles.splice(index, 1);
+                },
+                openEvidenceFilePicker() {
+                    this.$refs.evidenceFileInput.click();
+                },
                 submitForm(event) {
                     this.markAllTouched();
 
                     if (this.validate()) {
+                        if (this.evidenceFiles.length > 0 && typeof DataTransfer !== 'undefined') {
+                            try {
+                                const dt = new DataTransfer();
+                                this.evidenceFiles.forEach((entry) => dt.items.add(entry.file));
+                                this.$refs.evidenceInput.files = dt.files;
+                            } catch (_) {}
+                        }
                         return true;
                     }
 
@@ -440,8 +483,93 @@
 
                         <section class="space-y-3">
                             <h2 class="text-xl font-bold text-gray-900">Evidence Upload</h2>
-                            <p class="text-sm text-gray-600">Upload screenshots, images, or supporting documents. Accepted formats: JPG, PNG, PDF (max 10MB per file).</p>
-                            <input type="file" name="evidence[]" multiple accept=".jpg,.jpeg,.png,.pdf" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900">
+                            <p class="text-sm text-gray-600">Upload screenshots or images as supporting evidence. Accepted formats: JPG, PNG, PDF (max 10MB per file).</p>
+
+                            {{-- Hidden inputs that will be populated with the managed files on submit --}}
+                            <input x-ref="evidenceInput" type="file" name="evidence[]" multiple class="hidden">
+                            <input x-ref="evidenceFileInput" type="file" multiple accept=".jpg,.jpeg,.png,.pdf" class="hidden" @change="handleEvidenceFileSelect($event)">
+
+                            <div
+                                class="rounded-xl border-2 border-dashed p-6 text-center transition"
+                                :class="isDraggingEvidence ? 'border-[#e04ecb] bg-pink-50' : 'border-gray-300 bg-white'"
+                                @dragenter.prevent="isDraggingEvidence = true"
+                                @dragover.prevent="isDraggingEvidence = true"
+                                @dragleave.prevent="isDraggingEvidence = false"
+                                @drop.prevent="handleEvidenceDrop($event)"
+                            >
+                                <div class="mb-3 text-4xl">📎</div>
+                                <p class="text-sm font-semibold text-gray-700">Drag &amp; drop files here or</p>
+                                <button
+                                    type="button"
+                                    @click="openEvidenceFilePicker()"
+                                    class="mt-3 inline-flex items-center rounded-full bg-pink-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-pink-700"
+                                >
+                                    Browse files
+                                </button>
+                                <p class="mt-2 text-xs text-gray-400">JPG, PNG, PDF — max 10 MB each</p>
+                            </div>
+
+                            <template x-if="evidenceFiles.length > 0">
+                                <div class="rounded-xl border border-gray-200 bg-white p-4">
+                                    <div class="mb-3 flex items-center justify-between">
+                                        <p class="text-sm font-semibold text-gray-700">
+                                            Selected (<span x-text="evidenceFiles.length"></span>)
+                                        </p>
+                                        <button
+                                            type="button"
+                                            @click="evidenceFiles.forEach(e => { if (e.preview && e.preview !== 'pdf') URL.revokeObjectURL(e.preview); }); evidenceFiles = []"
+                                            class="text-xs font-semibold text-red-500 hover:text-red-700"
+                                        >
+                                            Remove all
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                                        <template x-for="(entry, index) in evidenceFiles" :key="entry.name + '-' + index">
+                                            <div class="group relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                                                <template x-if="entry.preview !== 'pdf'">
+                                                    <img :src="entry.preview" :alt="'Evidence ' + (index + 1)" class="h-full w-full object-cover" loading="lazy">
+                                                </template>
+                                                <template x-if="entry.preview === 'pdf'">
+                                                    <div class="flex h-full w-full flex-col items-center justify-center gap-1 px-1 text-center">
+                                                        <svg class="h-8 w-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8.5 17H8v1H7v-4h1.5c.83 0 1.5.67 1.5 1.5S9.33 17 8.5 17zm4.5-1h-1v3h-1v-4h2c.55 0 1 .45 1 1v1c0 .55-.45 1-1 1zm4-2h-2v4h-1v-4h-1v-1h4v1z"/>
+                                                        </svg>
+                                                        <span class="line-clamp-2 text-[10px] text-gray-600" x-text="entry.name"></span>
+                                                    </div>
+                                                </template>
+                                                <button
+                                                    type="button"
+                                                    @click="removeEvidenceFile(index)"
+                                                    class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full border border-red-200 bg-white/90 text-red-600 opacity-0 transition-opacity hover:bg-red-50 group-hover:opacity-100"
+                                                    :aria-label="'Remove evidence ' + (index + 1)"
+                                                >
+                                                    <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </template>
+                                        {{-- Add more button --}}
+                                        <button
+                                            type="button"
+                                            @click="openEvidenceFilePicker()"
+                                            class="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400 transition hover:border-pink-400 hover:text-pink-500"
+                                            aria-label="Add more files"
+                                        >
+                                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            @error('evidence')
+                                <p class="text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                            @error('evidence.*')
+                                <p class="text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </section>
 
                         <section class="space-y-3">
