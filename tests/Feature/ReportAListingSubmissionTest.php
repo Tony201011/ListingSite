@@ -112,4 +112,28 @@ class ReportAListingSubmissionTest extends TestCase
         $response->assertRedirect(route('report-a-listing'));
         $response->assertSessionHasErrors(['other_category']);
     }
+
+    public function test_report_a_listing_page_renders_inline_validation_errors(): void
+    {
+        $response = $this->followingRedirects()
+            ->from(route('report-a-listing'))
+            ->post(route('report-a-listing.submit'), []);
+
+        $response->assertOk();
+        $response->assertSee('novalidate', false);
+        $response->assertSee('data-field="category"', false);
+        $response->assertSee('data-field="listingUrl"', false);
+        $response->assertSee('data-field="advertiserName"', false);
+        $response->assertSee('data-field="reporterEmail"', false);
+        $response->assertSee('data-field="description"', false);
+        $response->assertSee('data-field="declarationAccuracy"', false);
+        $response->assertSee('data-field="declarationContact"', false);
+        $response->assertSeeText('The category field is required.');
+        $response->assertSeeText('The listing url field is required.');
+        $response->assertSeeText('The advertiser name field is required.');
+        $response->assertSeeText('The reporter email field is required.');
+        $response->assertSeeText('The description field is required.');
+        $response->assertSeeText('The declaration accuracy field must be accepted.');
+        $response->assertSeeText('The declaration contact field must be accepted.');
+    }
 }
