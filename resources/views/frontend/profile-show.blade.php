@@ -646,11 +646,11 @@ $profileTags = array_values(array_unique(array_merge(
                     @endif
 
 
-                      <button
-                            onclick="document.getElementById('report-modal').classList.remove('hidden')"
+                      <a
+                            href="{{ route('report-a-listing', ['listing_url' => request()->url(), 'listing_id' => $profile['id'], 'advertiser_name' => $profile['name']]) }}"
                             class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-lg sm:rounded-full border border-gray-300 bg-white px-3 py-2 text-xs sm:text-sm text-gray-700 font-semibold hover:bg-gray-50 transition">
-                            <i class="fa-regular fa-flag"></i> <span>Report User</span>
-                        </button>
+                            <i class="fa-regular fa-flag"></i> <span>Report this Listing</span>
+                        </a>
                 </div>
             </div>
         </div>

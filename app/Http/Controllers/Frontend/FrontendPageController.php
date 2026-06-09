@@ -10,7 +10,9 @@ use App\Actions\GetFaqPageData;
 use App\Actions\GetFrontendSimplePage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FaqLoadMoreRequest;
+use App\Http\Requests\StoreListingContentReportRequest;
 use App\Http\Requests\SubmitContactUsRequest;
+use App\Models\ListingContentReport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -105,7 +107,60 @@ class FrontendPageController extends Controller
     {
         return view('frontend.report-a-listing', [
             'page' => $this->getFrontendSimplePage->reportAListing(),
+            'prefill' => [
+                'listing_url' => (string) request()->query('listing_url', ''),
+                'listing_id' => (string) request()->query('listing_id', ''),
+                'advertiser_name' => (string) request()->query('advertiser_name', ''),
+            ],
+            'categoryOptions' => ListingContentReport::categoryOptions(),
         ]);
+    }
+
+    public function submitReportAListing(StoreListingContentReportRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        $evidencePaths = [];
+
+        foreach ($request->file('evidence', []) as $file) {
+            $evidencePaths[] = $file->store('listing-reports/evidence', config('media.upload_disk', 'public'));
+        }
+
+        ListingContentReport::query()->create([
+            'listing_id' => $validated['listing_id'] ?? null,
+            'listing_url' => $validated['listing_url'],
+            'advertiser_name' => $validated['advertiser_name'],
+            'listing_phone' => $validated['listing_phone'] ?? null,
+            'listing_location' => $validated['listing_location'] ?? null,
+            'category' => $validated['category'],
+            'reporter_name' => $validated['is_anonymous'] ? null : ($validated['reporter_name'] ?? null),
+            'reporter_email' => $validated['reporter_email'],
+            'reporter_phone' => $validated['reporter_phone'] ?? null,
+            'is_anonymous' => (bool) $validated['is_anonymous'],
+            'description' => $validated['description'],
+            'uploaded_evidence' => $evidencePaths,
+            'is_urgent' => (bool) $validated['is_urgent'],
+            'is_person_shown' => (bool) $validated['is_person_shown'],
+            'priority_level' => $this->resolveListingReportPriority($validated['category'], (bool) $validated['is_urgent']),
+            'status' => ListingContentReport::STATUS_NEW,
+        ]);
+
+        return redirect()
+            ->route('report-a-listing')
+            ->with('success', 'Thank you. Your report has been submitted successfully.');
+    }
+
+    private function resolveListingReportPriority(string $category, bool $isUrgent): string
+    {
+        if ($isUrgent || in_array($category, ['underage_or_age_concern', 'non_consensual_image_or_video'], true)) {
+            return ListingContentReport::PRIORITY_HIGH;
+        }
+
+        if (in_array($category, ['fake_profile_or_impersonation', 'scam_or_fraudulent_activity', 'privacy_violation'], true)) {
+            return ListingContentReport::PRIORITY_MEDIUM;
+        }
+
+        return ListingContentReport::PRIORITY_NORMAL;
     }
 
     public function ageAndConsentPolicy(): View
