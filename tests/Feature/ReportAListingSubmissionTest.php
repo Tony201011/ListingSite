@@ -71,4 +71,45 @@ class ReportAListingSubmissionTest extends TestCase
             Storage::disk('public')->assertExists($path);
         }
     }
+
+    public function test_user_can_submit_custom_other_category(): void
+    {
+        Storage::fake('public');
+        config(['media.upload_disk' => 'public']);
+
+        $response = $this->post(route('report-a-listing.submit'), [
+            'category' => 'other',
+            'other_category' => 'Suspicious deepfake',
+            'listing_url' => 'https://hotescort.com.au/escorts/nsw/sydney/sample',
+            'advertiser_name' => 'Sample Advertiser',
+            'reporter_email' => 'john@example.com',
+            'description' => 'Custom category report.',
+            'declaration_accuracy' => '1',
+            'declaration_contact' => '1',
+        ]);
+
+        $response->assertRedirect(route('report-a-listing'));
+
+        $report = ListingContentReport::query()->latest('id')->first();
+
+        $this->assertNotNull($report);
+        $this->assertSame('Suspicious deepfake', $report->category);
+        $this->assertSame(ListingContentReport::PRIORITY_NORMAL, $report->priority_level);
+    }
+
+    public function test_other_category_text_is_required_when_other_is_selected(): void
+    {
+        $response = $this->from(route('report-a-listing'))->post(route('report-a-listing.submit'), [
+            'category' => 'other',
+            'listing_url' => 'https://hotescort.com.au/escorts/nsw/sydney/sample',
+            'advertiser_name' => 'Sample Advertiser',
+            'reporter_email' => 'john@example.com',
+            'description' => 'Custom category report.',
+            'declaration_accuracy' => '1',
+            'declaration_contact' => '1',
+        ]);
+
+        $response->assertRedirect(route('report-a-listing'));
+        $response->assertSessionHasErrors(['other_category']);
+    }
 }

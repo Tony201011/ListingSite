@@ -126,13 +126,18 @@ class FrontendPageController extends Controller
             $evidencePaths[] = $file->store('listing-reports/evidence', config('media.upload_disk', 'public'));
         }
 
+        $selectedCategory = $validated['category'];
+        $resolvedCategory = $selectedCategory === 'other'
+            ? ($validated['other_category'] ?? 'other')
+            : $selectedCategory;
+
         ListingContentReport::query()->create([
             'listing_id' => $validated['listing_id'] ?? null,
             'listing_url' => $validated['listing_url'],
             'advertiser_name' => $validated['advertiser_name'],
             'listing_phone' => $validated['listing_phone'] ?? null,
             'listing_location' => $validated['listing_location'] ?? null,
-            'category' => $validated['category'],
+            'category' => $resolvedCategory,
             'reporter_name' => $validated['is_anonymous'] ? null : ($validated['reporter_name'] ?? null),
             'reporter_email' => $validated['reporter_email'],
             'reporter_phone' => $validated['reporter_phone'] ?? null,
@@ -141,7 +146,7 @@ class FrontendPageController extends Controller
             'uploaded_evidence' => $evidencePaths,
             'is_urgent' => (bool) $validated['is_urgent'],
             'is_person_shown' => (bool) $validated['is_person_shown'],
-            'priority_level' => $this->resolveListingReportPriority($validated['category'], (bool) $validated['is_urgent']),
+            'priority_level' => $this->resolveListingReportPriority($selectedCategory, (bool) $validated['is_urgent']),
             'status' => ListingContentReport::STATUS_NEW,
         ]);
 

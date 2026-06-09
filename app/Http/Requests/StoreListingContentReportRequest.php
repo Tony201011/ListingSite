@@ -16,6 +16,7 @@ class StoreListingContentReportRequest extends FormRequest
     {
         return [
             'category' => ['required', 'string', 'in:'.implode(',', array_keys(ListingContentReport::categoryOptions()))],
+            'other_category' => ['nullable', 'required_if:category,other', 'string', 'max:255'],
             'listing_url' => ['required', 'url', 'max:2048'],
             'advertiser_name' => ['required', 'string', 'max:255'],
             'listing_id' => ['nullable', 'string', 'max:255'],

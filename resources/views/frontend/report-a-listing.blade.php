@@ -56,14 +56,25 @@
                     <form action="{{ route('report-a-listing.submit') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                         @csrf
 
-                        <section class="space-y-3">
+                        <section class="space-y-3" x-data="{ category: @js(old('category', '')) }">
                             <h2 class="text-xl font-bold text-gray-900">Report Category <span class="text-red-500">*</span></h2>
-                            <select name="category" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-800 font-semibold focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition">
+                            <select name="category" x-model="category" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-800 font-semibold focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition">
                                 <option value="" disabled {{ old('category') ? '' : 'selected' }}>Select a category</option>
                                 @foreach($categoryOptions as $value => $label)
                                     <option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>
                                 @endforeach
                             </select>
+                            <div x-show="category === 'other'" x-cloak>
+                                <label class="block font-semibold text-gray-800 mb-1">Other Category <span class="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    name="other_category"
+                                    :required="category === 'other'"
+                                    value="{{ old('other_category') }}"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#e04ecb] focus:ring-2 focus:ring-[#e04ecb]/20 transition text-gray-900 font-semibold"
+                                    placeholder="Please enter category"
+                                >
+                            </div>
                         </section>
 
                         <section class="space-y-4">
