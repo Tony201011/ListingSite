@@ -63,6 +63,13 @@ class FooterTextResource extends Resource
                     ->rows(2)
                     ->maxLength(1000)
                     ->columnSpanFull(),
+                Textarea::make('adults_only_text')
+                    ->label('Adults only text')
+                    ->required()
+                    ->rows(2)
+                    ->maxLength(1000)
+                    ->helperText('Shown in the footer and on the registration page. Example: This website is intended for adults only.')
+                    ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
@@ -81,6 +88,10 @@ class FooterTextResource extends Resource
                 TextColumn::make('disclaimer_text')
                     ->label('Disclaimer')
                     ->limit(90)
+                    ->wrap(),
+                TextColumn::make('adults_only_text')
+                    ->label('Adults only text')
+                    ->limit(70)
                     ->wrap(),
                 IconColumn::make('is_active')
                     ->label('Active')

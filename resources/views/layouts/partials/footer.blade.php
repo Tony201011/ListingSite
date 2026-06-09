@@ -194,7 +194,7 @@
         <div class="mt-8 border-t border-gray-800 pt-5 text-xs text-gray-500 sm:flex sm:items-center sm:justify-between">
             <p>{{ $copyrightText }}</p>
             <div class="mt-2 text-right sm:mt-0">
-                <p class="font-semibold text-amber-300">This website is intended for adults only.</p>
+                <p class="font-semibold text-amber-300">{{ $footerText?->adults_only_text ?? 'This website is intended for adults only.' }}</p>
                 <p>{{ $disclaimerText }}</p>
             </div>
         </div>

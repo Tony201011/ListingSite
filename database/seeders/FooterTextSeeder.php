@@ -17,6 +17,7 @@ class FooterTextSeeder extends Seeder
             [
                 'copyright_text' => '© {year} Hotescorts Directory. All rights reserved.',
                 'disclaimer_text' => 'This platform is for adults only (18+) and provides advertising listings only.',
+                'adults_only_text' => 'This website is intended for adults only.',
                 'is_active' => true,
             ],
         );
