@@ -204,7 +204,7 @@
 
                 @if($photoVerification)
                     <div class="rounded-xl border border-pink-200 bg-pink-50 p-4 text-pink-700 font-semibold">
-                        Verified profiles get a verified badge. Verified profiles are more likely to be contacted by clients and get more bookings.
+                        Verified profiles get a verified badge. Verified profiles are more likely to be contacted by potential clients and get more enquiries.
                     </div>
                 @else
                     <div class="rounded-xl border border-pink-200 bg-pink-50 p-4 text-pink-700 font-semibold">
@@ -231,7 +231,7 @@
                         @click="bookingOpen = true"
                         class="w-full px-4 py-2.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-semibold transition"
                     >
-                        Booking enquiries
+                        Contact enquiries
                     </button>
                 </div>
 
@@ -399,14 +399,14 @@
                 class="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[90vh]"
                 role="dialog"
                 aria-modal="true"
-                aria-label="Email booking enquiry"
+                aria-label="Email contact enquiry"
             >
                 <div class="border-b border-gray-200 px-4 py-4 sm:px-6">
                     <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0">
-                            <h2 class="text-lg font-bold text-gray-900 sm:text-xl">Email booking enquiry</h2>
+                            <h2 class="text-lg font-bold text-gray-900 sm:text-xl">Email contact enquiry</h2>
                             <p class="mt-1 text-sm text-gray-600">
-                                Send your preferred date, duration, and booking details.
+                                Send your preferred date, time, and contact details.
                             </p>
                         </div>
 

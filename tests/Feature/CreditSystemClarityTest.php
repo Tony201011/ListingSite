@@ -24,7 +24,7 @@ class CreditSystemClarityTest extends TestCase
         $pricingResponse->assertOk();
         $pricingResponse->assertSeeText('Advertisers purchase prepaid advertising credits.');
         $pricingResponse->assertSeeText('Credits are used for profile visibility and promotional listing features');
-        $pricingResponse->assertSeeText('The platform does not process bookings, deposits, appointment payments, escort payments, or payments between visitors and advertisers.');
+        $pricingResponse->assertSeeText('All payments on this platform are exclusively for purchasing advertising credits and promotional listing packages. No payments are processed between visitors and advertisers.');
 
         $howCreditsWorkResponse = $this->get('/how-credits-work');
         $howCreditsWorkResponse->assertOk();

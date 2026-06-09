@@ -20,7 +20,7 @@
                     <div>
                         <h2 class="text-xl font-semibold text-gray-900 mb-2">What your credits pay for</h2>
                         <p class="text-gray-600 leading-7">Advertisers buy prepaid advertising credits to keep approved profiles visible and to use promotional listing features.</p>
-                        <p class="text-gray-600 leading-7 mt-3">This platform does not process bookings, deposits, appointment payments, escort payments, or any payments between visitors and advertisers.</p>
+                        <p class="text-gray-600 leading-7 mt-3">All payments on this platform are exclusively for purchasing advertising credits and promotional listing packages. No payments are processed between visitors and advertisers.</p>
                     </div>
 
                     <div>
