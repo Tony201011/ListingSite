@@ -7,6 +7,37 @@
             outline-offset: 2px;
             box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2) !important;
         }
+
+        .auth-consent-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            min-width: 1.25rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: #fff;
+            display: inline-block;
+            vertical-align: top;
+            margin-top: 0.125rem;
+            transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+            cursor: pointer;
+        }
+
+        .auth-consent-checkbox:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(224, 78, 203, 0.25);
+            border-color: #e04ecb;
+        }
+
+        .auth-consent-checkbox:checked {
+            background-color: #e04ecb;
+            border-color: #e04ecb;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 10.5l3.2 3.2L15 7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 0.85rem 0.85rem;
+        }
     </style>
 @endpush
 
@@ -31,6 +62,18 @@
 
         <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
             This website is intended for adults only.
+        </div>
+
+        <div class="mb-6 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3 text-sm text-gray-700">
+            <p class="font-semibold text-[#c13ab0]">We verify every babe.</p>
+            <p class="mt-1">Verification and moderation checks are completed before profiles go live. Your account data and contact information are handled under our privacy and consent policies.</p>
+            <p class="mt-2 text-xs leading-relaxed">
+                Read:
+                <a href="{{ route('age-and-consent-policy') }}" class="text-[#e04ecb] underline">Age & Consent Policy</a>,
+                <a href="{{ route('content-moderation-policy') }}" class="text-[#e04ecb] underline">Content Moderation Policy</a>,
+                <a href="{{ route('privacy-policy') }}" class="text-[#e04ecb] underline">Privacy Policy</a>,
+                <a href="{{ route('terms-and-conditions') }}" class="text-[#e04ecb] underline">Terms & Conditions</a>.
+            </p>
         </div>
 
         <div class="bg-white rounded-2xl p-6 md:p-10 shadow-md border border-gray-100">
@@ -105,7 +148,7 @@
                 <!-- Keep me logged in (styled like the age confirmation pill) -->
                 <div class="mb-6" data-field-group>
                     <label for="keep_logged_in" class="flex items-center gap-2.5 bg-gray-50 px-4 py-3 rounded-xl cursor-pointer w-full sm:w-fit">
-                        <input type="checkbox" id="keep_logged_in" x-ref="remember" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="w-5 h-5 flex-shrink-0 accent-[#e04ecb]">
+                        <input type="checkbox" id="keep_logged_in" x-ref="remember" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="auth-consent-checkbox">
                         <span class="font-semibold text-gray-800">Keep me logged in on this device</span>
                     </label>
                     <div data-error-container="remember">
@@ -146,6 +189,14 @@
                 <p class="text-gray-500 text-sm">
                     If you haven't signed up before,
                     <a href="{{ url('/signup') }}" class="text-[#e04ecb] font-medium border-b border-dotted border-[#e04ecb] hover:text-[#c13ab0] hover:border-[#c13ab0] transition">you can sign up here</a>
+                </p>
+                <p class="text-gray-500 text-xs mt-3 leading-relaxed">
+                    Legal:
+                    <a href="{{ route('terms-and-conditions') }}" class="text-[#e04ecb] underline">Terms & Conditions</a>,
+                    <a href="{{ route('privacy-policy') }}" class="text-[#e04ecb] underline">Privacy Policy</a>,
+                    <a href="{{ route('age-and-consent-policy') }}" class="text-[#e04ecb] underline">Age & Consent Policy</a>,
+                    <a href="{{ route('content-moderation-policy') }}" class="text-[#e04ecb] underline">Content Moderation Policy</a>,
+                    <a href="{{ route('contact-us') }}" class="text-[#e04ecb] underline">Contact/Support</a>.
                 </p>
             </div>
         </div>
