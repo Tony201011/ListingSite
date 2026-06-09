@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Booking Enquiry</title>
+    <title>New Contact Enquiry</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f8fafc;font-family:Arial,Helvetica,sans-serif;color:#1f2937;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f8fafc;padding:24px 0;">
@@ -19,7 +19,7 @@
                                     <td style="font-size:28px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">HOTESCORT</td>
                                 </tr>
                                 <tr>
-                                    <td style="font-size:14px;color:#fdf2f8;padding-top:6px;font-family:Arial,Helvetica,sans-serif;">New booking enquiry received</td>
+                                    <td style="font-size:14px;color:#fdf2f8;padding-top:6px;font-family:Arial,Helvetica,sans-serif;">New contact enquiry received</td>
                                 </tr>
                             </table>
                         </td>
@@ -31,12 +31,12 @@
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                                 <tr>
                                     <td style="font-size:22px;font-weight:700;color:#111827;padding-bottom:10px;font-family:Arial,Helvetica,sans-serif;">
-                                        New Booking Request
+                                        New Contact Request
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="font-size:14px;color:#4b5563;padding-bottom:20px;font-family:Arial,Helvetica,sans-serif;">
-                                        You have received a new booking enquiry. Details are below:
+                                        You have received a new contact enquiry. Details are below:
                                     </td>
                                 </tr>
                                 <tr>
@@ -135,7 +135,7 @@
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                                 <tr>
                                     <td style="font-size:12px;color:#6b7280;font-family:Arial,Helvetica,sans-serif;">
-                                        This email was sent from HOTESCORT booking system.
+                                        This email was sent from HOTESCORT notification system.
                                     </td>
                                 </tr>
                             </table>

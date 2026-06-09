@@ -35,7 +35,7 @@
             <div class="rounded-xl border border-pink-100 bg-pink-50/40 p-4 sm:p-5 mb-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-2">Credit system at a glance</h2>
                 <p class="text-gray-700 mb-3">Advertisers purchase prepaid advertising credits. Credits are used for profile visibility and promotional listing features only.</p>
-                <p class="text-gray-700 mb-3">The platform does not process bookings, deposits, appointment payments, escort payments, or payments between visitors and advertisers.</p>
+                <p class="text-gray-700 mb-3">All payments on this platform are exclusively for purchasing advertising credits and promotional listing packages. No payments are processed between visitors and advertisers.</p>
                 <ul class="list-disc pl-6 space-y-1 text-gray-700">
                     <li>1 credit keeps one approved profile visible for one day.</li>
                     <li>Credits are not deducted while a profile is hidden, suspended, or under review.</li>
