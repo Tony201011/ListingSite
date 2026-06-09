@@ -34,7 +34,7 @@
                 </button>
             </div>
 
-            <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+            <div class="mb-6 rounded-xl border border-pink-100 bg-pink-50 px-4 py-3 text-sm font-semibold text-gray-800">
                 This website is intended for adults only.
             </div>
 
