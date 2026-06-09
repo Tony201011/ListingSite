@@ -20,6 +20,8 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use UnitEnum;
 
 class ListingContentReportResource extends Resource
@@ -99,7 +101,7 @@ class ListingContentReportResource extends Resource
                     ->schema([
                         TextEntry::make('uploaded_evidence')
                             ->label('Files')
-                            ->formatStateUsing(function (mixed $state): string {
+                            ->formatStateUsing(function (mixed $state): HtmlString|string {
                                 if (blank($state)) {
                                     return 'No evidence uploaded';
                                 }
@@ -115,8 +117,37 @@ class ListingContentReportResource extends Resource
                                     return (string) $state;
                                 }
 
-                                return implode("\n", array_filter($state, fn (mixed $value): bool => filled($value)));
+                                $disk = Storage::disk(config('media.upload_disk', 'public'));
+                                $items = [];
+
+                                foreach ($state as $path) {
+                                    if (! filled($path)) {
+                                        continue;
+                                    }
+
+                                    $path = (string) $path;
+                                    $url = $disk->url($path);
+                                    $name = basename($path);
+                                    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                                    $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'], true);
+
+                                    if ($isImage) {
+                                        $items[] = '<div style="margin-bottom:1rem;">'
+                                            .'<a href="'.e($url).'" target="_blank" rel="noopener noreferrer">'
+                                            .'<img src="'.e($url).'" alt="'.e($name).'" style="max-width:260px;height:auto;border-radius:0.5rem;border:1px solid #e5e7eb;" />'
+                                            .'</a>'
+                                            .'<div><a href="'.e($url).'" target="_blank" rel="noopener noreferrer">'.e($name).'</a></div>'
+                                            .'</div>';
+                                    } else {
+                                        $items[] = '<div style="margin-bottom:0.75rem;"><a href="'.e($url).'" target="_blank" rel="noopener noreferrer">'.e($name).'</a></div>';
+                                    }
+                                }
+
+                                return new HtmlString(
+                                    $items === [] ? 'No evidence uploaded' : implode('', $items)
+                                );
                             })
+                            ->html()
                             ->columnSpanFull(),
                     ])
                     ->collapsed(),
