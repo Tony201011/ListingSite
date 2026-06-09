@@ -151,4 +151,16 @@ class PublicPagesAccessibilityTest extends TestCase
         $this->assertContains('/sample-listing', $footerNavigationUrls->all());
         $this->assertContains('/escorts/search', $footerNavigationUrls->all());
     }
+
+    public function test_processor_review_access_page_is_available(): void
+    {
+        $response = $this->get('/processor-review-access');
+
+        $response->assertOk();
+        $response->assertSeeText('Processor Review Access');
+        $response->assertSeeText('HotEscort is an Australian adult advertising/listing platform.');
+        $response->assertSeeText('Checkout/test payment page');
+        $response->assertSee(route('pricing'), false);
+        $response->assertSee(route('contact-us'), false);
+    }
 }
