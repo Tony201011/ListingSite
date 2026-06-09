@@ -51,6 +51,44 @@ class ReviewerModeTest extends TestCase
         $this->assertDatabaseCount('provider_profiles', 1);
     }
 
+    public function test_reviewer_cannot_update_account_details(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer)->put(route('my-account.update'), [
+            'name' => 'Changed Name',
+            'mobile' => '0400000000',
+            'email_notifications' => true,
+            'message_alerts' => true,
+            'marketing_emails' => false,
+            'weekly_summary' => false,
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_reviewer_cannot_initiate_credit_purchase_checkout(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer)->post(route('purchase-credit.checkout'), [
+            'credit_package_id' => 1,
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_reviewer_cannot_update_profile_settings(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer)->post(route('short-url.update'), [
+            'short_url' => 'reviewer-attempt',
+        ]);
+
+        $response->assertStatus(403);
+    }
+
     public function test_reviewer_direct_admin_url_access_is_blocked(): void
     {
         $reviewer = $this->createReviewer();

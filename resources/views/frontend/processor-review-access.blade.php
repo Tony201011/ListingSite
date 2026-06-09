@@ -56,18 +56,13 @@
                     </dl>
                 </div>
 
-                <div class="rounded-lg border border-gray-300 p-6">
-                    <h2 class="text-xl font-semibold text-gray-900">Test advertiser login</h2>
-                    <dl class="mt-4 space-y-4">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Email</dt>
-                            <dd class="mt-1 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-500">To be supplied securely for review.</dd>
-                        </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Password</dt>
-                            <dd class="mt-1 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-500">To be supplied securely for review.</dd>
-                        </div>
-                    </dl>
+                <div class="rounded-lg border border-amber-300 bg-amber-50 p-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Access restriction</h2>
+                    <p class="mt-3 text-sm leading-6 text-amber-900">
+                        Real admin access is not provided for processor review.
+                        If additional access is requested, only the limited read-only reviewer account may be shared.
+                        No credentials with write access to users, listings, payments, credits, or settings are provided for processor reviews.
+                    </p>
                 </div>
             </div>
 
