@@ -18,6 +18,13 @@ class ReviewerMode
      */
     private const MUTATION_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
+    /**
+     * Mutating routes that remain available for reviewer accounts.
+     *
+     * @var array<int, string>
+     */
+    private const ALLOWED_MUTATION_ROUTES = ['logout'];
+
     public function handle(Request $request, Closure $next): Response
     {
         /** @var User|null $user */
@@ -27,7 +34,20 @@ class ReviewerMode
             return $next($request);
         }
 
-        // Log every reviewer page access for auditing
+        $blockedReason = null;
+
+        if ($request->is('admin') || $request->is('admin/*')) {
+            $blockedReason = 'admin_access_blocked';
+        }
+
+        if (
+            $blockedReason === null
+            && in_array($request->method(), self::MUTATION_METHODS, true)
+            && ! in_array((string) $request->route()?->getName(), self::ALLOWED_MUTATION_ROUTES, true)
+        ) {
+            $blockedReason = 'mutation_blocked';
+        }
+
         Log::channel('reviewer')->info('Reviewer access', [
             'user_id' => $user->id,
             'email'   => $user->email,
@@ -35,10 +55,12 @@ class ReviewerMode
             'url'     => $request->fullUrl(),
             'ip'      => $request->ip(),
             'agent'   => $request->userAgent(),
+            'route'   => $request->route()?->getName(),
+            'blocked' => $blockedReason !== null,
+            'reason'  => $blockedReason,
         ]);
 
-        // Block all state-mutating requests at the backend level
-        if (in_array($request->method(), self::MUTATION_METHODS, true)) {
+        if ($blockedReason !== null) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Read-only access: this action is not permitted for reviewer accounts.'], 403);
             }

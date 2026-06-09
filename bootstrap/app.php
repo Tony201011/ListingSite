@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             SitePassword::class,
+            ReviewerMode::class,
         ]);
 
         $middleware->redirectUsersTo('/');
