@@ -61,7 +61,7 @@
         });
 
         Alpine.data('profileShowPage', (config = {}) => ({
-            favourites: Array.isArray(config.favourites) ? config.favourites : [],
+            favourites: Array.isArray(config.favourites) ? config.favourites.map(String) : [],
             reportUrl: config.reportUrl || '',
             profileId: config.profileId || null,
 
@@ -119,11 +119,19 @@
                 }, true);
             },
 
+            normalize(identifier) {
+                return String(identifier || '').trim();
+            },
+
             isFavourite(slug) {
+                slug = this.normalize(slug);
                 return this.favourites.includes(slug);
             },
 
             async toggleFavourite(slug) {
+                slug = this.normalize(slug);
+                if (!slug) return;
+
                 try {
                     const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
@@ -144,7 +152,7 @@
                             this.favourites.push(slug);
                         }
                     } else {
-                        this.favourites = this.favourites.filter((item) => item !== slug);
+                        this.favourites = this.favourites.filter((item) => this.normalize(item) !== slug);
                     }
                 } catch (error) {
                     console.error('Favourite toggle failed:', error);
