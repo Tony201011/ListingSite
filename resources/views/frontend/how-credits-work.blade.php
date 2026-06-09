@@ -18,19 +18,19 @@
             @else
                 <div class="space-y-6 text-gray-700">
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-900 mb-2">One credit per day your listing is online</h2>
-                        <p class="text-gray-600 leading-7">Credits are consumed only when your profile is live and visible on the platform. If your profile is offline, paused, or hidden — no credits are deducted. You stay in full control.</p>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2">What your credits pay for</h2>
+                        <p class="text-gray-600 leading-7">Advertisers buy prepaid advertising credits to keep approved profiles visible and to use promotional listing features.</p>
+                        <p class="text-gray-600 leading-7 mt-3">This platform does not process bookings, deposits, appointment payments, escort payments, or any payments between visitors and advertisers.</p>
                     </div>
 
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-900 mb-2">What's included with each credit</h2>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2">Main credit rules</h2>
                         <ul class="list-disc pl-6 space-y-1 text-gray-600">
-                            <li>2 × daily Available NOW windows (2 hours each)</li>
-                            <li>2 × daily Online NOW status (30 minutes each)</li>
-                            <li>Unlimited photos &amp; videos</li>
-                            <li>Unlimited touring profiles</li>
-                            <li>Daily social media promotions</li>
-                            <li>Your personalised short profile URL</li>
+                            <li>1 credit keeps one approved profile visible for one day.</li>
+                            <li>Credits are not deducted while a profile is hidden, suspended, or under review.</li>
+                            <li>If your credit balance reaches zero, your profile is paused automatically.</li>
+                            <li>Used credits are not refundable.</li>
+                            <li>Unused credits may be handled according to the <a href="{{ route('refund-policy') }}" class="text-pink-600 hover:text-pink-700">Refund Policy</a>.</li>
                         </ul>
                     </div>
 
