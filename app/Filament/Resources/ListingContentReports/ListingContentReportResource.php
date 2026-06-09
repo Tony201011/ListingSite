@@ -99,7 +99,24 @@ class ListingContentReportResource extends Resource
                     ->schema([
                         TextEntry::make('uploaded_evidence')
                             ->label('Files')
-                            ->formatStateUsing(fn (?array $state): string => blank($state) ? 'No evidence uploaded' : implode('\n', $state))
+                            ->formatStateUsing(function (mixed $state): string {
+                                if (blank($state)) {
+                                    return 'No evidence uploaded';
+                                }
+
+                                if (is_string($state)) {
+                                    $decoded = json_decode($state, true);
+                                    if (is_array($decoded)) {
+                                        $state = $decoded;
+                                    }
+                                }
+
+                                if (! is_array($state)) {
+                                    return (string) $state;
+                                }
+
+                                return implode("\n", array_filter($state, fn (mixed $value): bool => filled($value)));
+                            })
                             ->columnSpanFull(),
                     ])
                     ->collapsed(),
