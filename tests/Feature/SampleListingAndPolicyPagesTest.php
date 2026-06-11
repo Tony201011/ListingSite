@@ -6,6 +6,9 @@ use App\Models\PrivacyPolicy;
 use App\Models\ProviderProfile;
 use App\Models\RefundPolicy;
 use App\Models\TermCondition;
+use App\Models\AgeAndConsentPolicy;
+use App\Models\AntiSpamPolicy;
+use App\Models\ContentModerationPolicy;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -119,5 +122,47 @@ class SampleListingAndPolicyPagesTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Refund Policy');
+    }
+
+    public function test_credit_usage_and_expiry_policy_page_loads(): void
+    {
+        AntiSpamPolicy::query()->create([
+            'title' => 'Credit Usage and Expiry Policy',
+            'content' => '<p>Credit usage content here.</p>',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('credit-usage-and-expiry-policy'));
+
+        $response->assertOk();
+        $response->assertSeeText('Credit Usage and Expiry Policy');
+    }
+
+    public function test_content_moderation_policy_page_loads(): void
+    {
+        ContentModerationPolicy::query()->create([
+            'title' => 'Content Moderation Policy',
+            'content' => '<p>Moderation content here.</p>',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('content-moderation-policy'));
+
+        $response->assertOk();
+        $response->assertSeeText('Content Moderation Policy');
+    }
+
+    public function test_age_and_consent_policy_page_loads(): void
+    {
+        AgeAndConsentPolicy::query()->create([
+            'title' => 'Age and Consent Policy',
+            'content' => '<p>Age and consent content here.</p>',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('age-and-consent-policy'));
+
+        $response->assertOk();
+        $response->assertSeeText('Age and Consent Policy');
     }
 }
