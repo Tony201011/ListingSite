@@ -4,6 +4,8 @@ namespace App\Providers\Filament;
 
 use App\Filament\Admin\Pages\Dashboard;
 use App\Filament\Pages\Auth\EditProfile;
+use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -14,12 +16,15 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Assets\Css;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\RenderHookScopes;
+use Filament\Support\Facades\FilamentView;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -84,5 +89,38 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    public function register(): void
+    {
+        parent::register();
+    }
+
+    public function boot(): void
+    {
+        parent::boot();
+
+        // Inject a read-only banner at the top of every admin page for reviewer accounts.
+        FilamentView::registerRenderHook(
+            RenderHookScopes::BODY_START,
+            fn (): HtmlString|string => $this->reviewerBannerHtml(),
+        );
+    }
+
+    private function reviewerBannerHtml(): HtmlString|string
+    {
+        /** @var User|null $user */
+        $user = Filament::auth()->user();
+
+        if (! $user || ! $user->isReviewer()) {
+            return '';
+        }
+
+        return new HtmlString(
+            '<div style="position:sticky;top:0;z-index:9999;background:#d97706;color:#fff;'
+            . 'text-align:center;padding:8px 16px;font-size:0.85rem;font-weight:600;letter-spacing:0.02em;">'
+            . '&#128274; Read-Only Reviewer Mode — You have view-only access. All modifications are disabled.'
+            . '</div>'
+        );
     }
 }

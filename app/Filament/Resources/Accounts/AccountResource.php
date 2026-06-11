@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
@@ -46,6 +47,15 @@ class AccountResource extends Resource
     protected static ?string $slug = 'account-management/account';
 
     protected static ?int $navigationSort = 1;
+
+    public static function canAccess(): bool
+    {
+        if (Filament::auth()->user()?->isReviewer()) {
+            return false;
+        }
+
+        return Filament::getCurrentPanel()?->getId() === 'admin';
+    }
 
     public static function getEloquentQuery(): Builder
     {
