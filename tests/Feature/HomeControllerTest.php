@@ -758,7 +758,7 @@ class HomeControllerTest extends TestCase
             'created_at' => Carbon::now()->subHour(),
         ]);
 
-        $response = $this->get('/girls/new');
+        $response = $this->get('/escorts/new');
 
         $response->assertViewHas('girlsMode', 'new');
         $profiles = $response->viewData('profiles');
@@ -778,7 +778,7 @@ class HomeControllerTest extends TestCase
         ProfileView::query()->create(['user_id' => $popularUser->id, 'provider_profile_id' => $popularProfile->id, 'viewer_ip' => '1.1.1.2']);
         ProfileView::query()->create(['user_id' => $lessPopularUser->id, 'provider_profile_id' => $lessPopularProfile->id, 'viewer_ip' => '1.1.1.3']);
 
-        $response = $this->get('/girls/popular');
+        $response = $this->get('/escorts/popular');
 
         $response->assertViewHas('girlsMode', 'popular');
         $profiles = $response->viewData('profiles');

@@ -141,6 +141,13 @@ Route::get('/escorts/search/location/{suburb}', [HomeController::class, 'index']
 Route::get('/escorts', [HomeController::class, 'index'])->name('escorts.browse');
 Route::get('/escorts/location/{location}', [HomeController::class, 'index'])
     ->name('escorts.location');
+Route::get('/escorts/{type}/page/{page}', [HomeController::class, 'index'])
+    ->whereIn('type', ['all', 'new', 'popular'])
+    ->whereNumber('page')
+    ->name('escorts.page');
+Route::get('/escorts/{type}', [HomeController::class, 'index'])
+    ->whereIn('type', ['all', 'new', 'popular'])
+    ->name('escorts.index');
 Route::get('/sample-listing', [HomeController::class, 'sampleListing'])->name('sample-listing');
 Route::get('/featured', [HomeController::class, 'featuredListings'])->name('featured.escorts');
 Route::get('/advanced-search', [HomeController::class, 'advancedSearch'])->name('advanced-search.legacy');
