@@ -101,7 +101,7 @@
 
                             <div class="mt-4 grid gap-4 sm:grid-cols-[120px_minmax(0,1fr)]">
                                 <div class="overflow-hidden rounded-2xl bg-gray-100">
-                                    @if($profile->primaryProfileImage)
+                                    @if($profile->primaryProfileImage && $profile->primaryProfileImage->thumbnail_url)
                                         <img src="{{ $profile->primaryProfileImage->thumbnail_url }}" alt="{{ $profile->name }}" class="h-32 w-full object-cover">
                                     @else
                                         <div class="flex h-32 items-center justify-center text-gray-500">No photo</div>

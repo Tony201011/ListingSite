@@ -23,7 +23,7 @@
         <div class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
             <div class="grid gap-6 p-6 lg:grid-cols-[320px_minmax(0,1fr)]">
                 <div class="rounded-3xl bg-gray-100 p-4">
-                    @if($profile->primaryProfileImage)
+                    @if($profile->primaryProfileImage && $profile->primaryProfileImage->thumbnail_url)
                         <img src="{{ $profile->primaryProfileImage->thumbnail_url }}" alt="{{ $profile->name }}" class="h-full w-full rounded-3xl object-cover">
                     @else
                         <div class="flex h-80 items-center justify-center rounded-3xl bg-gray-200 text-gray-500">No photo available</div>
