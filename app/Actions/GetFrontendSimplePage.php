@@ -16,6 +16,7 @@ use App\Models\ProhibitedContentPolicy;
 use App\Models\RefundPolicy;
 use App\Models\ReportAListingPage;
 use App\Models\TermCondition;
+use Illuminate\Support\Facades\Schema;
 
 class GetFrontendSimplePage
 {
@@ -101,6 +102,10 @@ class GetFrontendSimplePage
 
     public function reportAListing(): ?ReportAListingPage
     {
+        if (! Schema::hasTable('report_a_listing_pages')) {
+            return null;
+        }
+
         return ReportAListingPage::query()
             ->where('is_active', true)
             ->latest('updated_at')
@@ -117,6 +122,10 @@ class GetFrontendSimplePage
 
     public function prohibitedContentPolicy(): ?ProhibitedContentPolicy
     {
+        if (! Schema::hasTable('prohibited_content_policies')) {
+            return null;
+        }
+
         return ProhibitedContentPolicy::query()
             ->where('is_active', true)
             ->latest('updated_at')

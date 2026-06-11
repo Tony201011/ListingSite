@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\ContactUsPage;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Schema;
 
 class SubmitContactUsRequest extends FormRequest
 {
@@ -14,10 +15,13 @@ class SubmitContactUsRequest extends FormRequest
 
     public function rules(): array
     {
-        $contactPage = ContactUsPage::query()
-            ->where('is_active', true)
-            ->latest('updated_at')
-            ->first();
+        $contactPage = null;
+        if (Schema::hasTable('contact_us_pages')) {
+            $contactPage = ContactUsPage::query()
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->first();
+        }
 
         $enableName = $contactPage?->enable_name_field ?? true;
         $enableEmail = $contactPage?->enable_email_field ?? true;
