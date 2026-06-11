@@ -137,7 +137,7 @@ class AdminPanelTest extends TestCase
         $this->assertStringContainsString('2', $html);
     }
 
-    public function test_admin_dashboard_registration_chart_shows_account_and_provider_series(): void
+    public function test_admin_dashboard_registration_chart_shows_daily_registration_and_login_series(): void
     {
         $this->createAdmin();
         $this->createProvider();
@@ -152,6 +152,8 @@ class AdminPanelTest extends TestCase
 
         $this->assertStringContainsString('Account Registrations', $html);
         $this->assertStringContainsString('Provider Registrations', $html);
+        $this->assertStringContainsString('Account Logins', $html);
+        $this->assertStringContainsString('Provider Logins', $html);
     }
 
     public function test_admin_dashboard_registers_all_summary_and_chart_widgets(): void

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\LoginLog;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -10,7 +11,7 @@ use Illuminate\Support\Carbon;
 
 class ProviderRegistrationsChart extends ChartWidget
 {
-    protected ?string $heading = 'Registration Trends';
+    protected ?string $heading = 'Daily Registration & Login Trends';
 
     protected static ?int $sort = 3;
 
@@ -25,51 +26,75 @@ class ProviderRegistrationsChart extends ChartWidget
 
     protected function getFilters(): ?array
     {
-        $currentYear = (int) Carbon::now()->year;
-        $years = [];
+        $currentMonth = Carbon::now()->startOfMonth();
+        $months = [];
 
-        for ($year = $currentYear; $year >= $currentYear - 4; $year--) {
-            $years[(string) $year] = (string) $year;
+        for ($offset = 0; $offset < 12; $offset++) {
+            $month = $currentMonth->copy()->subMonths($offset);
+            $months[$month->format('Y-m')] = $month->format('M Y');
         }
 
-        return $years;
+        return $months;
     }
 
     protected function getData(): array
     {
-        $selectedYear = (int) ($this->filter ?? Carbon::now()->year);
+        $selectedMonth = Carbon::createFromFormat('Y-m', (string) ($this->filter ?? Carbon::now()->format('Y-m')))
+            ->startOfMonth();
+        $startDate = $selectedMonth->copy()->startOfMonth();
+        $endDate = $selectedMonth->copy()->endOfMonth();
+        $daysInMonth = $selectedMonth->daysInMonth;
 
-        $accountRows = User::query()
+        $accountRegistrationRows = User::query()
             ->withoutTrashed()
-            ->whereYear('created_at', $selectedYear)
+            ->where('role', '!=', User::ROLE_PROVIDER)
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->pluck('created_at')
-            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m'))
+            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
             ->map(fn ($group) => $group->count());
 
-        $providerRows = ProviderProfile::query()
+        $providerRegistrationRows = ProviderProfile::query()
             ->withoutTrashed()
-            ->whereYear('created_at', $selectedYear)
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->pluck('created_at')
-            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m'))
+            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
             ->map(fn ($group) => $group->count());
 
-        $accountData = [];
-        $providerData = [];
+        $accountLoginRows = LoginLog::query()
+            ->whereHas('user', fn ($query) => $query->where('role', '!=', User::ROLE_PROVIDER))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->pluck('created_at')
+            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
+            ->map(fn ($group) => $group->count());
+
+        $providerLoginRows = LoginLog::query()
+            ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->pluck('created_at')
+            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
+            ->map(fn ($group) => $group->count());
+
+        $accountRegistrationData = [];
+        $providerRegistrationData = [];
+        $accountLoginData = [];
+        $providerLoginData = [];
         $labels = [];
 
-        for ($m = 1; $m <= 12; $m++) {
-            $month = Carbon::createFromDate($selectedYear, $m, 1);
-            $key = $month->format('Y-m');
-            $labels[] = $month->format('M Y');
-            $accountData[] = (int) $accountRows->get($key, 0);
-            $providerData[] = (int) $providerRows->get($key, 0);
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $date = $startDate->copy()->day($day);
+            $key = $date->format('Y-m-d');
+            $labels[] = $date->format('d M');
+            $accountRegistrationData[] = (int) $accountRegistrationRows->get($key, 0);
+            $providerRegistrationData[] = (int) $providerRegistrationRows->get($key, 0);
+            $accountLoginData[] = (int) $accountLoginRows->get($key, 0);
+            $providerLoginData[] = (int) $providerLoginRows->get($key, 0);
         }
 
         return [
             'datasets' => [
                 [
                     'label' => 'Account Registrations',
-                    'data' => $accountData,
+                    'data' => $accountRegistrationData,
                     'backgroundColor' => 'rgba(16, 185, 129, 0.15)',
                     'borderColor' => 'rgba(16, 185, 129, 1)',
                     'borderWidth' => 2,
@@ -78,11 +103,29 @@ class ProviderRegistrationsChart extends ChartWidget
                 ],
                 [
                     'label' => 'Provider Registrations',
-                    'data' => $providerData,
+                    'data' => $providerRegistrationData,
                     'backgroundColor' => 'rgba(59, 130, 246, 0.15)',
                     'borderColor' => 'rgba(59, 130, 246, 1)',
                     'borderWidth' => 2,
                     'fill' => true,
+                    'tension' => 0.35,
+                ],
+                [
+                    'label' => 'Account Logins',
+                    'data' => $accountLoginData,
+                    'backgroundColor' => 'rgba(245, 158, 11, 0.15)',
+                    'borderColor' => 'rgba(245, 158, 11, 1)',
+                    'borderWidth' => 2,
+                    'fill' => false,
+                    'tension' => 0.35,
+                ],
+                [
+                    'label' => 'Provider Logins',
+                    'data' => $providerLoginData,
+                    'backgroundColor' => 'rgba(168, 85, 247, 0.15)',
+                    'borderColor' => 'rgba(168, 85, 247, 1)',
+                    'borderWidth' => 2,
+                    'fill' => false,
                     'tension' => 0.35,
                 ],
             ],
