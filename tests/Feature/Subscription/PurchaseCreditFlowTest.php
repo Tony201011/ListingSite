@@ -212,19 +212,19 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertSessionHasErrors('invoice_name');
     }
 
-    public function test_checkout_without_stripe_redirects_to_purchase_history_with_flash(): void
+    public function test_checkout_without_processor_approval_redirects_back_with_error(): void
     {
         $user = $this->createProvider();
         $package = $this->createActivePackage(['credits' => 50, 'price' => '19.99']);
 
-        // No SiteSetting row => Stripe is disabled => checkout completes without Stripe redirect
         $response = $this->actingAsProvider($user)->post('/purchase-credit/checkout', [
             'package_id' => $package->id,
             'invoice_name' => 'My Invoice',
         ]);
 
-        $response->assertRedirect('/purchase-history');
-        $response->assertSessionHas('checkout_success');
+        $response->assertRedirect('/purchase-credit');
+        $response->assertSessionHasErrors();
+        $this->assertDatabaseCount('purchase_transactions', 0);
     }
 
     public function test_checkout_uses_db_price_not_frontend_input(): void
@@ -282,13 +282,9 @@ class PurchaseCreditFlowTest extends TestCase
             'invoice_name' => 'Locked Invoice',
         ]);
 
-        $response->assertRedirect('/purchase-history');
-        $response->assertSessionHas(
-            'checkout_success',
-            "Checkout started for {$lockedPackage->credits} credits (AUD $".
-            number_format((float) $lockedPackage->price, 2).
-            ") for {$user->name} under invoice name 'Locked Invoice'."
-        );
+        $response->assertRedirect('/purchase-credit');
+        $response->assertSessionHasErrors();
+        $this->assertDatabaseCount('purchase_transactions', 0);
     }
 
     public function test_plain_purchase_credit_page_clears_membership_package_lock(): void
@@ -318,13 +314,9 @@ class PurchaseCreditFlowTest extends TestCase
             'invoice_name' => 'Unlocked Invoice',
         ]);
 
-        $response->assertRedirect('/purchase-history');
-        $response->assertSessionHas(
-            'checkout_success',
-            "Checkout started for {$otherPackage->credits} credits (AUD $".
-            number_format((float) $otherPackage->price, 2).
-            ") for {$user->name} under invoice name 'Unlocked Invoice'."
-        );
+        $response->assertRedirect('/purchase-credit');
+        $response->assertSessionHasErrors();
+        $this->assertDatabaseCount('purchase_transactions', 0);
     }
 
     // ---------------------------------------------------------------
