@@ -278,16 +278,16 @@
             @endif
         </a>
 
-        <form action="{{ url('/provider/content-listings') }}" method="GET" class="{{ $showSearch ? 'hidden flex-1 xl:block' : 'hidden' }}">
+        <form action="{{ route('escorts.search') }}" method="GET" class="{{ $showSearch ? 'hidden flex-1 xl:block' : 'hidden' }}">
             <div class="flex max-w-2xl items-center rounded-xl border border-gray-700 bg-gray-800/80 p-1.5">
                 <div class="flex min-w-0 flex-1 items-center gap-2 px-2">
                     <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
-                    <input type="text" name="q" placeholder="Search by name or keyword" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                    <input type="text" name="escort_name" placeholder="Search by name or keyword" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
                 </div>
 
                 <div class="hidden items-center gap-2 border-l border-gray-700 px-3 lg:flex">
                     <i class="fa-solid fa-location-dot text-gray-500"></i>
-                    <input type="text" name="city" placeholder="City" class="w-28 border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                    <input type="text" name="location" placeholder="City" class="w-28 border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
                 </div>
 
                 <button type="submit" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">
