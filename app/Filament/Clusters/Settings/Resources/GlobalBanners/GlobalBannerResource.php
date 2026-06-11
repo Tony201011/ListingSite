@@ -80,7 +80,6 @@ class GlobalBannerResource extends Resource
                     ->multiple()
                     ->options(self::getPageOptions())
                     ->searchable()
-                    ->required()
                     ->live()
                     ->afterStateHydrated(function ($state, ?GlobalBanner $record, callable $set): void {
                         if (! empty($state)) {
