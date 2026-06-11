@@ -85,24 +85,16 @@
         $brandPrimary = ($headerWidget ?? null)?->brand_primary ?: 'HOT';
         $brandAccent = ($headerWidget ?? null)?->brand_accent ?: 'ESCORTS';
 
-        $enabledMenuWidgetCount = collect([
-            $showNavigationWidget,
-            $showAdvertisersWidget,
-            $showLegalWidget,
-        ])->filter()->count();
-
-        $footerMenuGridClass = match ($enabledMenuWidgetCount) {
-            1 => 'grid gap-12 text-sm grid-cols-1 max-w-sm',
-            2 => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2 max-w-3xl',
-            default => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl',
-        };
+        $hasFooterColumns = $showBrandWidget
+            || $showNavigationWidget
+            || $showAdvertisersWidget
+            || $showLegalWidget;
 @endphp
 
 <footer id="main-footer" class="border-t border-gray-800 bg-gray-950 pt-10 pb-6" style="{{ $footerStyle }}">
-
-    <div class="mx-auto w-full max-w-12xl px-4 sm:px-6 lg:px-8">
+    <div class="site-container">
         @if($showPromoSection)
-            <div class="mx-auto mb-8 max-w-6xl rounded-2xl border border-pink-500/20 bg-gradient-to-r from-gray-900 to-gray-900/60 p-5 sm:flex sm:items-center sm:justify-between sm:p-6">
+            <div class="footer-cta rounded-2xl border border-pink-500/20 bg-gradient-to-r from-gray-900 to-gray-900/60 p-5 sm:flex sm:items-center sm:justify-between sm:gap-8 sm:p-6">
                 <div>
                     <h3 class="text-base font-semibold text-white sm:text-lg">{{ $promoHeading }}</h3>
                     <p class="mt-1 text-sm text-gray-400">{{ $promoDescription }}</p>
@@ -114,22 +106,22 @@
             </div>
         @endif
 
-        @if($showBrandWidget)
-            <div class="mx-auto mb-8 max-w-6xl text-center">
-                <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
-                <p class="mt-4 leading-relaxed text-gray-500">{{ $brandDescription }}</p>
-                <div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400">
-                    @foreach($badges as $badge)
-                        <span class="rounded-full border border-gray-700 px-2 py-1">{{ $badge['label'] }}</span>
-                    @endforeach
-                </div>
-            </div>
-        @endif
+        @if($hasFooterColumns)
+            <div class="footer-grid text-sm">
+            @if($showBrandWidget)
+                <section class="footer-col footer-col-brand text-center sm:text-left">
+                    <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
+                    <p class="mt-4 leading-relaxed text-gray-500">{{ $brandDescription }}</p>
+                    <div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400 sm:justify-start">
+                        @foreach($badges as $badge)
+                            <span class="rounded-full border border-gray-700 px-2 py-1">{{ $badge['label'] }}</span>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
 
-        @if($enabledMenuWidgetCount > 0)
-            <div class="{{ $footerMenuGridClass }} mx-auto">
             @if($showNavigationWidget)
-                <div>
+                <nav class="footer-col">
                     <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $navigationHeading }}</h4>
                     <ul class="space-y-2 text-gray-500">
                         @foreach($navigationLinks as $link)
@@ -137,11 +129,11 @@
                             <li><a href="{{ $link['url'] }}" class="transition {{ $isActive ? 'text-pink-400 font-medium' : 'hover:text-pink-400' }}">{{ $link['label'] }}</a></li>
                         @endforeach
                     </ul>
-                </div>
+                </nav>
             @endif
 
             @if($showAdvertisersWidget)
-                <div>
+                <nav class="footer-col">
                     <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $advertisersHeading }}</h4>
                     <ul class="space-y-2 text-gray-500">
                         @foreach($advertiserLinks as $link)
@@ -149,11 +141,11 @@
                             <li><a href="{{ $link['url'] }}" class="transition {{ $isActive ? 'text-pink-400 font-medium' : 'hover:text-pink-400' }}">{{ $link['label'] }}</a></li>
                         @endforeach
                     </ul>
-                </div>
+                </nav>
             @endif
 
             @if($showLegalWidget)
-                <div>
+                <section class="footer-col">
                     <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $legalHeading }}</h4>
                     <ul class="space-y-2 text-gray-500">
                         @foreach($legalLinks as $link)
@@ -167,7 +159,7 @@
                         <a href="{{ $twitterUrl }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-x-twitter"></i></a>
                         <a href="{{ $facebookUrl }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-facebook-f"></i></a>
                     </div>
-                </div>
+                </section>
             @endif
             </div>
         @endif
@@ -185,9 +177,9 @@
             $disclaimerText = $footerText?->disclaimer_text ?? 'This platform is for adults only (18+) and provides advertising listings only.';
         @endphp
 
-        <div class="mx-auto mt-8 max-w-6xl border-t border-gray-800 pt-5 text-xs text-gray-500 sm:flex sm:items-center sm:justify-between">
+        <div class="footer-bottom text-xs text-gray-500">
             <p>{{ $copyrightText }}</p>
-            <div class="mt-2 text-right sm:mt-0">
+            <div class="text-left sm:text-right">
                 <p class="font-semibold text-amber-300">{{ $footerText?->adults_only_text ?? 'This website is intended for adults only.' }}</p>
                 <p>{{ $disclaimerText }}</p>
             </div>
