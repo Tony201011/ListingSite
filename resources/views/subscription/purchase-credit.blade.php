@@ -19,6 +19,7 @@
     processing: false,
     paymentError: null,
     stripeReady: false,
+    termsAccepted: false,
     get selected() {
         return this.packages.find(p => p.id === this.selectedPackageId) ?? null;
     }
@@ -55,6 +56,18 @@
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
+            </div>
+        @endif
+
+        {{-- Advertising credits purpose notice --}}
+        <div class="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800 shadow-sm">
+            You are purchasing advertising credits for use on {{ config('app.name') }}. Credits are used for profile visibility and promotional listing features only.
+        </div>
+
+        @if(!($paymentEnabled ?? false))
+            <div class="mb-5 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800 shadow-sm">
+                <p class="font-semibold">Test Mode</p>
+                <p class="mt-1">Payment processing is currently in test mode for processor review.</p>
             </div>
         @endif
 
@@ -170,7 +183,7 @@
                                     type="button"
                                     id="proceed-to-payment"
                                     @click="window.proceedToPayment($event)"
-                                    :disabled="processing"
+                                    :disabled="processing || !termsAccepted"
                                     class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
                                     <span x-show="!processing">Continue to payment</span>
@@ -183,7 +196,7 @@
                                     </span>
                                 </button>
                             @else
-                                <button type="submit" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]">
+                                <button type="submit" :disabled="!termsAccepted" class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed">
                                     Continue to checkout
                                 </button>
                             @endif
@@ -192,6 +205,32 @@
                                 Checkout disabled (read-only)
                             </span>
                         @endif
+                    </div>
+
+                    {{-- Terms and policies --}}
+                    <div class="border-t border-gray-100 pt-4 space-y-3">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                x-model="termsAccepted"
+                                class="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#e04ecb] focus:ring-pink-200 shrink-0"
+                            >
+                            <span class="text-xs text-gray-600 leading-relaxed">
+                                I have read and agree to the
+                                <a href="{{ route('refund-policy') }}" target="_blank" class="font-medium text-[#e04ecb] hover:underline">Refund Policy</a>
+                                and understand that credits are used for profile visibility and promotional listing features only.
+                            </span>
+                        </label>
+                        <p class="text-xs text-gray-500">
+                            By proceeding you acknowledge the
+                            <a href="{{ route('credit-usage-and-expiry-policy') }}" target="_blank" class="text-[#e04ecb] hover:underline">Credit Usage &amp; Expiry Policy</a>
+                            and
+                            <a href="{{ route('terms-and-conditions') }}" target="_blank" class="text-[#e04ecb] hover:underline">Terms &amp; Conditions</a>.
+                        </p>
+                        <p class="text-xs text-gray-500">
+                            For billing enquiries or support, please
+                            <a href="{{ route('contact-us') }}" class="text-[#e04ecb] hover:underline">contact us</a>.
+                        </p>
                     </div>
                 </form>
             </div>
