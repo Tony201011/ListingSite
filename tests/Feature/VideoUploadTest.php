@@ -25,8 +25,8 @@ class VideoUploadTest extends TestCase
 
     protected function tearDown(): void
     {
-        parent::tearDown();
         Mockery::close();
+        parent::tearDown();
     }
 
     private function providerWithProfile(): User
