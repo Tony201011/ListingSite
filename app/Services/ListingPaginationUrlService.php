@@ -87,13 +87,18 @@ class ListingPaginationUrlService
 
     public function canonicalUrlForRequest(Request $request, array $validated, bool $advancedSearch = false): ?string
     {
+        // Use the raw QUERY_STRING (before FormRequest::prepareForValidation merges defaults
+        // into the GET query bag) so that a plain "/" request is never incorrectly treated
+        // as having an explicit "girls" or "page" parameter.
+        parse_str((string) $request->server('QUERY_STRING', ''), $rawQuery);
+
         if (
             ! $advancedSearch
             && trim($request->getPathInfo(), '/') === ''
             && $this->resolveCurrentPage($request) === 1
             && ! $this->hasSearchFilters($validated)
-            && ! $request->query->has('girls')
-            && ! $request->query->has('page')
+            && ! isset($rawQuery['girls'])
+            && ! isset($rawQuery['page'])
         ) {
             return null;
         }
