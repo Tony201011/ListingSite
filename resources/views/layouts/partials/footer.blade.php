@@ -88,10 +88,13 @@
             $showLegalWidget,
         ])->filter()->count();
 
-        $footerMenuGridClass = match ($enabledMenuWidgetCount) {
+        $totalColumnCount = ($showBrandWidget ? 1 : 0) + $enabledMenuWidgetCount;
+
+        $footerMenuGridClass = match ($totalColumnCount) {
             1 => 'grid gap-12 text-sm grid-cols-1',
             2 => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2',
-            default => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+            3 => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+            default => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
         };
 @endphp
 
@@ -111,20 +114,19 @@
             </div>
         @endif
 
-        @if($showBrandWidget)
-            <div class="mx-auto mb-8 text-center">
-                <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
-                <p class="mt-4 leading-relaxed text-gray-500">{{ $brandDescription }}</p>
-                <div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400">
-                    @foreach($badges as $badge)
-                        <span class="rounded-full border border-gray-700 px-2 py-1">{{ $badge['label'] }}</span>
-                    @endforeach
+        @if($showBrandWidget || $enabledMenuWidgetCount > 0)
+            <div class="{{ $footerMenuGridClass }} mx-auto mb-8">
+            @if($showBrandWidget)
+                <div>
+                    <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
+                    <p class="mt-4 leading-relaxed text-gray-500">{{ $brandDescription }}</p>
+                    <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                        @foreach($badges as $badge)
+                            <span class="rounded-full border border-gray-700 px-2 py-1">{{ $badge['label'] }}</span>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-        @endif
-
-        @if($enabledMenuWidgetCount > 0)
-            <div class="{{ $footerMenuGridClass }} mx-auto">
+            @endif
             @if($showNavigationWidget)
                 <div>
                     <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $navigationHeading }}</h4>
