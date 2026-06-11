@@ -67,7 +67,7 @@ class ListingPaginationUrlService
         }
 
         return [
-            'base_url' => route('girls.index', ['type' => $this->resolveGirlsMode($validated)]),
+            'base_url' => route('escorts.index', ['type' => $this->resolveGirlsMode($validated)]),
             'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: true, encodeLocationInPath: false),
         ];
     }
@@ -106,11 +106,11 @@ class ListingPaginationUrlService
         $currentPage = $this->resolveCurrentPage($request);
         $targetUrl = $this->buildUrl($validated, $currentPage, $advancedSearch);
 
-        // /girls/all on page 1 with no filters is canonically the home page (/).
+        // /escorts/all on page 1 with no filters is canonically the home page (/).
         if (
             ! $advancedSearch
             && $currentPage === 1
-            && $targetUrl === route('girls.index', ['type' => 'all'])
+            && $targetUrl === route('escorts.index', ['type' => 'all'])
         ) {
             $targetUrl = route('home');
         }

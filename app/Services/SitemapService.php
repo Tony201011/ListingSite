@@ -56,7 +56,7 @@ class SitemapService
         $blogLastModified = $this->latestModelTimestamp(BlogPost::query()->where('is_active', true));
 
         $urls = collect([
-            $this->urlEntry(route('girls.index', ['type' => 'all']), $profilesLastModified, 'daily', '1.0'),
+            $this->urlEntry(route('escorts.index', ['type' => 'all']), $profilesLastModified, 'daily', '1.0'),
             $this->urlEntry(route('advanced-search'), $profilesLastModified, 'daily', '0.9'),
             $this->urlEntry(route('blog'), $blogLastModified, 'daily', '0.8'),
             $this->urlEntry(route('about-us'), $this->latestModelTimestamp(AboutUsPage::query()->where('is_active', true)), 'monthly', '0.7'),

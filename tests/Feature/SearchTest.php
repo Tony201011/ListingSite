@@ -266,7 +266,7 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/?girls=all&page=2');
 
-        $response->assertRedirect('/girls/all/page/2');
+        $response->assertRedirect('/escorts/all/page/2');
     }
 
     public function test_girls_route_respects_query_mode_and_redirects_to_matching_girls_path(): void
@@ -274,7 +274,7 @@ class SearchTest extends TestCase
         $response = $this->get('/girls/all?girls=popular');
 
         $response->assertStatus(301);
-        $response->assertRedirect('/girls/popular');
+        $response->assertRedirect('/escorts/popular');
     }
 
     public function test_advanced_search_query_string_pagination_redirects_to_seo_friendly_search_url(): void
@@ -284,7 +284,15 @@ class SearchTest extends TestCase
         $response->assertRedirect('/search/page/2');
     }
 
-    public function test_girls_route_uses_route_page_segment_for_pagination(): void
+    public function test_legacy_girls_route_redirects_to_escorts_route(): void
+    {
+        $response = $this->get('/girls/all/page/2');
+
+        $response->assertStatus(301);
+        $response->assertRedirect('/escorts/all/page/2');
+    }
+
+    public function test_escorts_route_uses_route_page_segment_for_pagination(): void
     {
         foreach (range(1, 13) as $index) {
             $this->createApprovedProvider([
@@ -293,14 +301,14 @@ class SearchTest extends TestCase
             ]);
         }
 
-        $response = $this->get('/girls/all/page/2');
+        $response = $this->get('/escorts/all/page/2');
 
         $response->assertOk();
         $profiles = $response->viewData('profiles');
         $this->assertSame(2, $profiles->currentPage());
-        $this->assertSame(url('/girls/all'), $profiles->previousPageUrl());
-        $response->assertSee('<link rel="canonical" href="'.url('/girls/all/page/2').'">', false);
-        $response->assertSee('<link rel="prev" href="'.url('/girls/all').'">', false);
+        $this->assertSame(url('/escorts/all'), $profiles->previousPageUrl());
+        $response->assertSee('<link rel="canonical" href="'.url('/escorts/all/page/2').'">', false);
+        $response->assertSee('<link rel="prev" href="'.url('/escorts/all').'">', false);
     }
 
     public function test_search_location_paginator_generates_seo_friendly_page_urls(): void
