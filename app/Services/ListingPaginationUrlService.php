@@ -103,7 +103,17 @@ class ListingPaginationUrlService
             return null;
         }
 
-        $targetUrl = $this->buildUrl($validated, $this->resolveCurrentPage($request), $advancedSearch);
+        $currentPage = $this->resolveCurrentPage($request);
+        $targetUrl = $this->buildUrl($validated, $currentPage, $advancedSearch);
+
+        // /girls/all on page 1 with no filters is canonically the home page (/).
+        if (
+            ! $advancedSearch
+            && $currentPage === 1
+            && $targetUrl === route('girls.index', ['type' => 'all'])
+        ) {
+            $targetUrl = route('home');
+        }
 
         return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
     }
