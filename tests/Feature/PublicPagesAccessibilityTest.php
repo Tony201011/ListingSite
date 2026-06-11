@@ -20,6 +20,7 @@ use Database\Seeders\RefundPolicySeeder;
 use Database\Seeders\ReportAListingPageSeeder;
 use Database\Seeders\TermConditionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PublicPagesAccessibilityTest extends TestCase
@@ -162,5 +163,66 @@ class PublicPagesAccessibilityTest extends TestCase
         $response->assertSeeText('Checkout/test payment page');
         $response->assertSee(route('pricing'), false);
         $response->assertSee(route('contact-us'), false);
+    }
+
+    public function test_header_and_footer_navigation_links_are_resolvable(): void
+    {
+        $this->seed([
+            AboutUsPageSeeder::class,
+            ContactUsPageSeeder::class,
+            HelpPageSeeder::class,
+            HowCreditsWorkPageSeeder::class,
+            PricingPageSeeder::class,
+            TermConditionSeeder::class,
+            PrivacyPolicySeeder::class,
+            RefundPolicySeeder::class,
+            AntiSpamPolicySeeder::class,
+            ContentModerationPolicySeeder::class,
+            AgeAndConsentPolicySeeder::class,
+            ProhibitedContentPolicySeeder::class,
+            ReportAListingPageSeeder::class,
+            HeaderWidgetSeeder::class,
+            FooterWidgetSeeder::class,
+        ]);
+
+        $homeResponse = $this->get('/');
+        $homeResponse->assertOk();
+        $homeResponse->assertSee('action="'.route('escorts.search').'"', false);
+        $homeResponse->assertSee('name="escort_name"', false);
+        $homeResponse->assertSee('name="location"', false);
+
+        $headerWidget = HeaderWidget::query()->firstOrFail();
+        $footerWidget = FooterWidget::query()->firstOrFail();
+
+        $paths = collect([
+            ...collect($headerWidget->top_right_links ?? [])->pluck('url')->all(),
+            ...collect($headerWidget->action_links ?? [])->pluck('url')->all(),
+            ...collect($headerWidget->main_nav_links ?? [])->pluck('url')->all(),
+            ...collect($headerWidget->mobile_extra_links ?? [])->pluck('url')->all(),
+            ...collect($footerWidget->navigation_links ?? [])->pluck('url')->all(),
+            ...collect($footerWidget->advertisers_links ?? [])->pluck('url')->all(),
+            ...collect($footerWidget->legal_links ?? [])->pluck('url')->all(),
+        ])
+            ->filter(fn ($url) => filled($url))
+            ->map(function (string $url): ?string {
+                $path = parse_url($url, PHP_URL_PATH);
+
+                if ($path === false || $path === null || ! Str::startsWith($path, '/')) {
+                    return null;
+                }
+
+                return $path;
+            })
+            ->filter()
+            ->unique()
+            ->values();
+
+        foreach ($paths as $path) {
+            $response = $this->get($path);
+            $this->assertTrue(
+                $response->isSuccessful() || $response->isRedirect(),
+                "Expected navigation/footer path [{$path}] to resolve with success or redirect, got status [{$response->status()}]."
+            );
+        }
     }
 }
