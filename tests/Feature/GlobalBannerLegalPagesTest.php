@@ -157,6 +157,25 @@ class GlobalBannerLegalPagesTest extends TestCase
         }
     }
 
+    public function test_global_banner_does_not_render_on_unselected_page(): void
+    {
+        GlobalBanner::create([
+            'page_keys' => ['home'],
+            'banner_image_path' => null,
+            'banner_title' => 'Home Only Banner',
+            'banner_subtitle' => 'Shown only on home',
+            'is_active' => true,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Home Only Banner');
+
+        $this->get(route('signin'))
+            ->assertOk()
+            ->assertDontSee('Home Only Banner');
+    }
+
     public function test_admin_can_open_global_banner_page_without_errors_when_no_legal_pages_exist(): void
     {
         $admin = User::factory()->create([
