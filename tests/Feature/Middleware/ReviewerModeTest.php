@@ -89,14 +89,63 @@ class ReviewerModeTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_reviewer_direct_admin_url_access_is_blocked(): void
+    /**
+     * A reviewer visiting /admin while only authenticated on the web guard (not the admin
+     * guard used by the Filament panel) is redirected to the admin login page.
+     * The admin panel is accessible to reviewer accounts only after authenticating via
+     * /admin/login with the admin guard.
+     */
+    public function test_reviewer_without_admin_guard_session_is_redirected_to_admin_login(): void
     {
         $reviewer = $this->createReviewer();
 
+        // actingAs uses the web guard by default — the admin panel requires the 'admin' guard.
         $response = $this->actingAs($reviewer)->get('/admin');
 
-        $response->assertStatus(403);
-        $response->assertSee('read-only access', false);
+        // Filament's Authenticate middleware redirects unauthenticated (on admin guard) users
+        // to the admin login page rather than serving the dashboard.
+        $response->assertRedirect();
+        $this->assertStringContainsString('/admin', $response->headers->get('Location'));
+    }
+
+    /**
+     * A reviewer authenticated on the admin guard can access the admin panel dashboard.
+     * canAccessPanel returns true for ROLE_REVIEWER on the 'admin' panel.
+     */
+    public function test_reviewer_authenticated_on_admin_guard_can_access_admin_panel(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer, 'admin')->get('/admin');
+
+        // Filament renders the dashboard (or redirects internally to /admin/dashboard).
+        $response->assertSuccessful();
+    }
+
+    /**
+     * A reviewer authenticated on the admin guard cannot access user account management,
+     * which exposes personally identifiable information (PII).
+     */
+    public function test_reviewer_cannot_access_account_management_in_admin_panel(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer, 'admin')->get('/admin/account-management/account');
+
+        // canAccess() returns false for reviewer → Filament throws AuthorizationException (403).
+        $response->assertForbidden();
+    }
+
+    /**
+     * A reviewer authenticated on the admin guard cannot access financial transaction data.
+     */
+    public function test_reviewer_cannot_access_purchase_transactions_in_admin_panel(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer, 'admin')->get('/admin/purchase-transactions');
+
+        $response->assertForbidden();
     }
 
     public function test_reviewer_can_still_logout(): void

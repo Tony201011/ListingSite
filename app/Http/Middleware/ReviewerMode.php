@@ -34,15 +34,29 @@ class ReviewerMode
             return $next($request);
         }
 
-        $blockedReason = null;
+        // Make reviewer mode available to all views rendered in this request
+        view()->share('reviewerMode', true);
 
+        // Admin panel routes: let Filament and Gate authorization handle all access control.
+        // ReviewerMode must not block Livewire POST requests that Filament needs for its UI.
         if ($request->is('admin') || $request->is('admin/*')) {
-            $blockedReason = 'admin_access_blocked';
+            Log::channel('reviewer')->info('Reviewer admin panel access', [
+                'user_id' => $user->id,
+                'email'   => $user->email,
+                'method'  => $request->method(),
+                'url'     => $request->fullUrl(),
+                'ip'      => $request->ip(),
+                'agent'   => $request->userAgent(),
+                'route'   => $request->route()?->getName(),
+            ]);
+
+            return $next($request);
         }
 
+        $blockedReason = null;
+
         if (
-            $blockedReason === null
-            && in_array($request->method(), self::MUTATION_METHODS, true)
+            in_array($request->method(), self::MUTATION_METHODS, true)
             && ! in_array((string) $request->route()?->getName(), self::ALLOWED_MUTATION_ROUTES, true)
         ) {
             $blockedReason = 'mutation_blocked';
@@ -67,9 +81,6 @@ class ReviewerMode
 
             return response()->view('errors.reviewer-readonly', [], 403);
         }
-
-        // Make reviewer mode available to all views rendered in this request
-        view()->share('reviewerMode', true);
 
         return $next($request);
     }
