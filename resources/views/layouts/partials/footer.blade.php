@@ -3,12 +3,9 @@
 
         $footerBackgroundColor = trim((string) ($footerWidget?->footer_background_color ?? ''));
         $footerHeight = max((int) ($footerWidget?->footer_height ?? 0), 0);
-        $footerWidth = max((int) ($footerWidget?->footer_width ?? 0), 0);
-
         $footerStyle = collect([
             filled($footerBackgroundColor) ? "background-color: {$footerBackgroundColor};" : null,
             $footerHeight > 0 ? "min-height: {$footerHeight}px;" : null,
-            $footerWidth > 0 ? "max-width: {$footerWidth}px; margin-left: auto; margin-right: auto;" : null,
         ])->filter()->implode(' ');
 
         $badges = collect($footerWidget?->badges ?? [
