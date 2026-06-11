@@ -169,7 +169,7 @@ class DummyProviderProfileSeeder extends Seeder
             $user = User::updateOrCreate(
                 ['email' => $email],
                 [
-                    'name' => $this->pickName($accountIndex),
+                    'name' => $this->pickUniqueUserName($accountIndex),
                     'password' => bcrypt('Provider@12345'),
                     'role' => User::ROLE_PROVIDER,
                     'is_blocked' => false,
@@ -400,6 +400,11 @@ class DummyProviderProfileSeeder extends Seeder
         // The first provider to use a name gets profile_sequence=1 (clean URL),
         // subsequent providers get profile_sequence=2+ (sequence URL: /slug/001, /002 …).
         return $names[($index - 1) % count($names)];
+    }
+
+    private function pickUniqueUserName(int $accountIndex): string
+    {
+        return $this->pickName($accountIndex).' '.$accountIndex;
     }
 
     private function pickFrom(array $items, int $index): mixed
