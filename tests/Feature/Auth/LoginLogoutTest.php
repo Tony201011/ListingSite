@@ -101,6 +101,23 @@ class LoginLogoutTest extends TestCase
         $this->assertGuest('web');
     }
 
+    public function test_admin_login_ignores_frontend_intended_url_and_redirects_to_admin_panel(): void
+    {
+        $admin = $this->createVerifiedUser([
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $response = $this
+            ->withSession(['url.intended' => '/my-profile'])
+            ->from('/signin')
+            ->post('/signin', [
+                'email' => $admin->email,
+                'password' => 'CorrectPass123',
+            ]);
+
+        $response->assertRedirect('/admin');
+    }
+
     // ---------------------------------------------------------------
     // Login failure scenarios
     // ---------------------------------------------------------------

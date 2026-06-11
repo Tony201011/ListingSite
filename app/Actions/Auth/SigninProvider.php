@@ -43,6 +43,10 @@ class SigninProvider
                 default => '/my-profiles',
             };
 
+            if ($user->role === User::ROLE_ADMIN) {
+                return redirect()->to('/admin');
+            }
+
             return redirect()->intended($destination);
         }
 
