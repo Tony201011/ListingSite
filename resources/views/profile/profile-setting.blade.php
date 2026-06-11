@@ -484,7 +484,7 @@
 
                             <div>
                                 <label for="bk-duration" class="mb-1 block text-sm font-medium text-gray-700">Duration</label>
-                                <input id="bk-duration" type="text" name="duration" value="{{ old('duration') }}" placeholder="How long would you like to book" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
+                                <input id="bk-duration" type="text" name="duration" value="{{ old('duration') }}" placeholder="e.g. 1 hour" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500">
                             </div>
                         </div>
 

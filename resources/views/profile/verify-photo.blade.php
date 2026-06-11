@@ -366,8 +366,8 @@
 
             <p class="mt-6 text-sm text-gray-600">
                 We do <span class="font-semibold">not</span> publish verification photos. If needed, you can also contact support:
-                <a href="mailto:alice@hotescorts.com.au" class="font-medium text-pink-700 hover:text-pink-800">
-                    alice@hotescorts.com.au
+                <a href="mailto:support@hotescorts.com.au" class="font-medium text-pink-700 hover:text-pink-800">
+                    support@hotescorts.com.au
                 </a>
             </p>
 
