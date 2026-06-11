@@ -395,7 +395,11 @@ class DummyProviderProfileSeeder extends Seeder
     {
         $names = self::FEMALE_NAMES;
 
-        return $names[($index - 1) % count($names)].sprintf('%03d', $index);
+        // Cycle through the name list without a unique numeric suffix so that
+        // different provider accounts can share the same profile name (and slug).
+        // The first provider to use a name gets profile_sequence=1 (clean URL),
+        // subsequent providers get profile_sequence=2+ (sequence URL: /slug/001, /002 …).
+        return $names[($index - 1) % count($names)];
     }
 
     private function pickFrom(array $items, int $index): mixed

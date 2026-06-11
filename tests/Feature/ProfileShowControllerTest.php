@@ -45,7 +45,8 @@ class ProfileShowControllerTest extends TestCase
         ];
 
         if ($includeSequence) {
-            $params['sequence_id'] = str_pad((string) $sequence, 3, '0', STR_PAD_LEFT);
+            // URL sequence_id = profile_sequence - 1 (so seq=2 → "001", seq=3 → "002")
+            $params['sequence_id'] = str_pad((string) max($sequence - 1, 0), 3, '0', STR_PAD_LEFT);
 
             return route('profile.show', $params);
         }
@@ -66,25 +67,41 @@ class ProfileShowControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_sequence_url_redirects_to_clean_canonical_url_when_single_profile_exists(): void
+    public function test_sequence_url_redirects_to_clean_canonical_url_when_lone_secondary_profile_exists(): void
     {
-        $this->createApprovedProvider(['slug' => 'jade-single']);
+        // A lone profile with sequence=2 (no other profile for this slug) should still
+        // resolve via the clean URL because shouldIncludeSequenceInUrl() is false when
+        // there is only one profile for a slug.
+        $this->createApprovedProvider(['slug' => 'jade-single', 'profile_sequence' => 2]);
 
-        $response = $this->get($this->profileUrl('jade-single', 1, true));
+        // /jade-single/001 → profile_sequence=2 (URL seq_id+1), single profile → canonical is clean URL
+        $response = $this->get($this->profileUrl('jade-single', 2, true));
 
         $response->assertRedirect($this->profileUrl('jade-single'));
         $response->assertStatus(301);
     }
 
-    public function test_clean_url_redirects_to_sequence_url_when_multiple_profiles_share_slug_and_location(): void
+    public function test_clean_url_shows_primary_profile_when_multiple_profiles_share_slug_and_location(): void
     {
+        // Primary profile (seq=1) always owns the clean URL, even when multiple exist.
         $this->createApprovedProvider(['slug' => 'jade-multi', 'profile_sequence' => 1]);
         $this->createApprovedProvider(['slug' => 'jade-multi', 'profile_sequence' => 2]);
 
         $response = $this->get($this->profileUrl('jade-multi'));
 
-        $response->assertRedirect($this->profileUrl('jade-multi', 1, true));
-        $response->assertStatus(301);
+        $response->assertStatus(200);
+    }
+
+    public function test_secondary_profile_url_includes_sequence_segment_when_multiple_profiles_share_slug(): void
+    {
+        // Secondary profile (seq=2) uses /slug/001 when another profile (seq=1) shares the slug.
+        $this->createApprovedProvider(['slug' => 'jade-multi2', 'profile_sequence' => 1]);
+        $this->createApprovedProvider(['slug' => 'jade-multi2', 'profile_sequence' => 2]);
+
+        // /jade-multi2/001 → profile_sequence=2
+        $response = $this->get($this->profileUrl('jade-multi2', 2, true));
+
+        $response->assertStatus(200);
     }
 
     public function test_profile_show_redirects_legacy_slug_with_embedded_sequence_to_canonical_url(): void
@@ -119,11 +136,12 @@ class ProfileShowControllerTest extends TestCase
             'slug' => 'jade010',
         ]));
 
-        $response->assertRedirect(route('profile.show', [
-            'state' => 'wa',
+        // Falls back to the primary profile (seq=1) which uses the clean URL.
+        // Profiles have no state relation so getStateSlug() returns 'au'.
+        $response->assertRedirect(route('profile.show.no-sequence', [
+            'state' => 'au',
             'suburb' => 'fremantle',
             'slug' => 'jade',
-            'sequence_id' => '001',
         ]));
         $response->assertStatus(301);
     }
