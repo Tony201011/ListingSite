@@ -403,20 +403,31 @@ class ProviderProfile extends Model
     }
 
     /**
-     * Return the zero-padded 3-digit sequence string used in the URL
-     * (e.g. "001", "012", "123").
+     * Return the zero-padded 3-digit sequence string used in the URL.
+     * The URL segment is (profile_sequence - 1), so the second profile
+     * (profile_sequence = 2) maps to "001", the third to "002", etc.
+     * The primary profile (profile_sequence = 1) always uses the clean URL
+     * and never calls this method.
      */
     public function getSequenceFormatted(): string
     {
-        return str_pad((string) ($this->profile_sequence ?? 1), 3, '0', STR_PAD_LEFT);
+        return str_pad((string) max(($this->profile_sequence ?? 1) - 1, 0), 3, '0', STR_PAD_LEFT);
     }
 
     /**
      * Determine whether this profile needs the sequence segment to keep the URL
      * unique for the current slug + location.
+     *
+     * The primary profile (profile_sequence = 1) always uses the clean URL,
+     * regardless of how many profiles share the same slug.
      */
     public function shouldIncludeSequenceInUrl(): bool
     {
+        // Primary profile never needs a sequence segment in the URL
+        if (($this->profile_sequence ?? 1) <= 1) {
+            return false;
+        }
+
         $slug = trim((string) $this->slug);
 
         if ($slug === '') {

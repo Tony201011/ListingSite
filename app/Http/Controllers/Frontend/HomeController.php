@@ -184,7 +184,8 @@ class HomeController extends Controller
     ): ProviderProfile
     {
         if ($sequenceId !== null) {
-            $sequence = (int) $sequenceId;
+            // URL sequence_id "001" maps to profile_sequence 2, "002" → 3, etc.
+            $sequence = (int) $sequenceId + 1;
             $profile = $profiles->firstWhere('profile_sequence', $sequence);
 
             abort_if($profile === null, 404);
