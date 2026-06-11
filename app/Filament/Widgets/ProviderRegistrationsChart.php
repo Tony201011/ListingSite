@@ -37,10 +37,20 @@ class ProviderRegistrationsChart extends ChartWidget
         return $months;
     }
 
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+        ];
+    }
+
     protected function getData(): array
     {
-        $selectedMonth = Carbon::createFromFormat('Y-m', (string) ($this->filter ?? Carbon::now()->format('Y-m')))
-            ->startOfMonth();
+        // Always parse as the 1st of the month to avoid day-overflow issues
+        // (e.g. createFromFormat on March 31 selecting February would roll to March 3).
+        $yearMonth = $this->filter ?? Carbon::now()->format('Y-m');
+        $selectedMonth = Carbon::parse($yearMonth . '-01');
         $startDate = $selectedMonth->copy()->startOfMonth();
         $endDate = $selectedMonth->copy()->endOfMonth();
         $daysInMonth = $selectedMonth->daysInMonth;
@@ -49,30 +59,30 @@ class ProviderRegistrationsChart extends ChartWidget
             ->withoutTrashed()
             ->where('role', '!=', User::ROLE_PROVIDER)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->pluck('created_at')
-            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
-            ->map(fn ($group) => $group->count());
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+            ->groupBy('day')
+            ->pluck('count', 'day');
 
         $providerRegistrationRows = ProviderProfile::query()
             ->withoutTrashed()
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->pluck('created_at')
-            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
-            ->map(fn ($group) => $group->count());
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+            ->groupBy('day')
+            ->pluck('count', 'day');
 
         $accountLoginRows = LoginLog::query()
             ->whereHas('user', fn ($query) => $query->where('role', '!=', User::ROLE_PROVIDER))
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->pluck('created_at')
-            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
-            ->map(fn ($group) => $group->count());
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+            ->groupBy('day')
+            ->pluck('count', 'day');
 
         $providerLoginRows = LoginLog::query()
             ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_PROVIDER))
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->pluck('created_at')
-            ->groupBy(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
-            ->map(fn ($group) => $group->count());
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+            ->groupBy('day')
+            ->pluck('count', 'day');
 
         $accountRegistrationData = [];
         $providerRegistrationData = [];
@@ -107,7 +117,7 @@ class ProviderRegistrationsChart extends ChartWidget
                     'backgroundColor' => 'rgba(59, 130, 246, 0.15)',
                     'borderColor' => 'rgba(59, 130, 246, 1)',
                     'borderWidth' => 2,
-                    'fill' => true,
+                    'fill' => false,
                     'tension' => 0.35,
                 ],
                 [
