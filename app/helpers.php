@@ -3,7 +3,9 @@
 use App\Models\MenuItem;
 use App\Models\MetaDescription;
 use App\Models\MetaKeyword;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 if (! function_exists('resolve_meta_page_candidates')) {
     function resolve_meta_page_candidates(?string $slug = null): array
@@ -66,6 +68,14 @@ if (! function_exists('get_meta_description_for_slug')) {
             }
         }
 
+        // Fall back to the global site-settings meta description
+        if (Schema::hasTable('site_settings')) {
+            $globalDescription = SiteSetting::query()->value('meta_description');
+            if (! empty($globalDescription)) {
+                return $globalDescription;
+            }
+        }
+
         return null;
     }
 }
@@ -74,16 +84,21 @@ if (! function_exists('get_meta_keywords_for_slug')) {
     function get_meta_keywords_for_slug($slug = null)
     {
         foreach (resolve_meta_page_candidates($slug) as $candidate) {
+            // ->value() returns the raw DB scalar, bypassing Eloquent accessors
             $keywords = MetaKeyword::where('page_name', $candidate)
                 ->where('is_active', true)
                 ->value('meta_keyword');
 
-            if (is_array($keywords)) {
-                return implode(',', $keywords);
-            }
-
             if (! empty($keywords)) {
                 return $keywords;
+            }
+        }
+
+        // Fall back to the global site-settings meta keywords
+        if (Schema::hasTable('site_settings')) {
+            $globalKeywords = SiteSetting::query()->value('meta_key');
+            if (! empty($globalKeywords)) {
+                return $globalKeywords;
             }
         }
 

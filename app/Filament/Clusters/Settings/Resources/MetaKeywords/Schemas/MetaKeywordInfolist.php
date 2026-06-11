@@ -15,6 +15,7 @@ class MetaKeywordInfolist
             ->components([
                 TextEntry::make('page_name'),
                 TextEntry::make('meta_keyword')
+                    ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : (string) $state)
                     ->placeholder('-'),
                 IconEntry::make('is_active')
                     ->boolean(),
