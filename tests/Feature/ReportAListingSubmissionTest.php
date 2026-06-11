@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ListingContentReport;
+use App\Models\ReportAListingPage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,21 @@ class ReportAListingSubmissionTest extends TestCase
         $response->assertSee('value="https://hotescort.com.au/escorts/vic/melbourne/example"', false);
         $response->assertSee('value="12345"', false);
         $response->assertSee('value="Example Advertiser"', false);
+    }
+
+    public function test_report_a_listing_page_uses_admin_managed_page_content_when_available(): void
+    {
+        ReportAListingPage::query()->create([
+            'title' => 'Safety Report Center',
+            'content' => '<p>Custom report guidance from admin.</p>',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('report-a-listing'));
+
+        $response->assertOk();
+        $response->assertSeeText('Safety Report Center');
+        $response->assertSee('Custom report guidance from admin.', false);
     }
 
     public function test_user_can_submit_report_a_listing_with_evidence_upload(): void
