@@ -20,6 +20,149 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleScrollTopButton();
     }
 
+    const listingScrollControllers = new WeakMap();
+
+    const setHiddenState = function (element, hidden) {
+        if (!element) {
+            return;
+        }
+
+        element.classList.toggle('hidden', hidden);
+    };
+
+    const initListingsInfiniteScroll = function () {
+        const container = document.getElementById('listings-content');
+        if (!container) {
+            return;
+        }
+
+        const existingController = listingScrollControllers.get(container);
+        existingController?.destroy();
+
+        const grid = container.querySelector('[data-listings-grid]');
+        const pagination = container.querySelector('[data-listings-pagination]');
+        const sentinel = container.querySelector('[data-listings-sentinel]');
+        const loadingMessage = container.querySelector('[data-listings-loading]');
+        const errorMessage = container.querySelector('[data-listings-error]');
+        const endMessage = container.querySelector('[data-listings-end]');
+
+        if (!grid || !pagination || !sentinel) {
+            return;
+        }
+
+        let loading = false;
+        let observer = null;
+        let scrollHandler = null;
+        let nextPageUrl = pagination.querySelector('a[rel="next"]')?.getAttribute('href') || null;
+
+        const updateTerminalState = function () {
+            const hasMore = Boolean(nextPageUrl);
+            sentinel.hidden = !hasMore;
+            setHiddenState(endMessage, hasMore || loading);
+        };
+
+        const appendProfiles = function (incomingGrid) {
+            const incomingChildren = Array.from(incomingGrid.children);
+            incomingChildren.forEach(function (child) {
+                const clone = child.cloneNode(true);
+                grid.appendChild(clone);
+                if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                    window.Alpine.initTree(clone);
+                }
+            });
+        };
+
+        const loadMore = async function () {
+            if (!nextPageUrl || loading) {
+                return;
+            }
+
+            loading = true;
+            setHiddenState(errorMessage, true);
+            setHiddenState(loadingMessage, false);
+            setHiddenState(endMessage, true);
+
+            try {
+                const response = await fetch(nextPageUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load profiles. Status: ${response.status}`);
+                }
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const documentNode = parser.parseFromString(html, 'text/html');
+                const incomingContainer = documentNode.getElementById('listings-content');
+                const incomingGrid = incomingContainer?.querySelector('[data-listings-grid]');
+                const incomingPagination = incomingContainer?.querySelector('[data-listings-pagination]');
+
+                if (!incomingGrid || !incomingPagination) {
+                    throw new Error('Failed to locate listing markup in the next page response.');
+                }
+
+                appendProfiles(incomingGrid);
+                pagination.innerHTML = incomingPagination.innerHTML;
+                nextPageUrl = pagination.querySelector('a[rel="next"]')?.getAttribute('href') || null;
+                updateTerminalState();
+            } catch (error) {
+                setHiddenState(errorMessage, false);
+                console.error('listingInfiniteScroll error:', error);
+            } finally {
+                loading = false;
+                setHiddenState(loadingMessage, true);
+                updateTerminalState();
+            }
+        };
+
+        if ('IntersectionObserver' in window) {
+            observer = new IntersectionObserver(
+                function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            loadMore();
+                        }
+                    });
+                },
+                {
+                    root: null,
+                    rootMargin: '200px 0px',
+                    threshold: 0,
+                }
+            );
+
+            observer.observe(sentinel);
+        } else {
+            scrollHandler = function () {
+                const nearBottom =
+                    window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 250;
+                if (nearBottom) {
+                    loadMore();
+                }
+            };
+
+            window.addEventListener('scroll', scrollHandler, { passive: true });
+        }
+
+        updateTerminalState();
+
+        listingScrollControllers.set(container, {
+            destroy() {
+                observer?.disconnect();
+
+                if (scrollHandler) {
+                    window.removeEventListener('scroll', scrollHandler);
+                }
+            },
+        });
+    };
+
+    initListingsInfiniteScroll();
+    window.addEventListener('listings:content-refreshed', initListingsInfiniteScroll);
+
     document.querySelectorAll('[data-featured-slider]').forEach(function (slider) {
         const track = slider.querySelector('[data-slider-track]');
         const prevButton = slider.querySelector('[data-slider-prev]');
