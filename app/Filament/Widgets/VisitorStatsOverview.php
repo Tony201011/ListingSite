@@ -14,6 +14,8 @@ class VisitorStatsOverview extends StatsOverviewWidget
 
     protected static ?int $sort = 1;
 
+    protected static bool $isLazy = true;
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';

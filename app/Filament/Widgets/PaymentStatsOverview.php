@@ -14,6 +14,8 @@ class PaymentStatsOverview extends StatsOverviewWidget
 
     protected static ?int $sort = 7;
 
+    protected static bool $isLazy = true;
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
