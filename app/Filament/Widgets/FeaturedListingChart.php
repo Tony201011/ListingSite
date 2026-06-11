@@ -17,6 +17,8 @@ class FeaturedListingChart extends ChartWidget
 
     protected int|string|array $columnSpan = 1;
 
+    protected static bool $isLazy = true;
+
     protected ?string $maxHeight = '360px';
 
     protected array $featuredPurchaseSummaryByFilter = [];

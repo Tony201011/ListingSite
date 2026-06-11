@@ -16,6 +16,8 @@ class ProviderStatsOverview extends StatsOverviewWidget
 
     protected static ?int $sort = 2;
 
+    protected static bool $isLazy = true;
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';

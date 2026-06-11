@@ -17,6 +17,8 @@ class ProviderRegistrationsChart extends ChartWidget
 
     protected int|string|array $columnSpan = 2;
 
+    protected static bool $isLazy = true;
+
     protected ?string $maxHeight = '420px';
 
     public static function canView(): bool
