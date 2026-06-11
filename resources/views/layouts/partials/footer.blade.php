@@ -1,5 +1,5 @@
 @php
-        $brandDescription = $footerWidget?->brand_description ?? 'Australia’s independent adult directory for discovery, profile promotion, and secure advertiser management.';
+        $brandDescription = $footerWidget?->brand_description ?? 'Australia\'s independent adult directory for discovery, profile promotion, and secure advertiser management.';
 
         $footerBackgroundColor = trim((string) ($footerWidget?->footer_background_color ?? ''));
         $footerHeight = max((int) ($footerWidget?->footer_height ?? 0), 0);
@@ -90,106 +90,131 @@
             $showLegalWidget,
         ])->filter()->count();
 
-        $footerMenuGridClass = match ($enabledMenuWidgetCount) {
-            1 => 'grid gap-8 text-sm md:grid-cols-1',
-            2 => 'grid gap-8 text-sm md:grid-cols-2',
-            default => 'grid gap-8 text-sm md:grid-cols-2 lg:grid-cols-3',
-        };
+        // Build the main footer grid class: brand column (wider) + menu columns
+        if ($showBrandWidget) {
+            $footerMainGridClass = match ($enabledMenuWidgetCount) {
+                3 => 'grid gap-x-10 gap-y-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]',
+                2 => 'grid gap-x-10 gap-y-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]',
+                1 => 'grid gap-x-10 gap-y-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2',
+                default => 'grid gap-x-10 gap-y-10',
+            };
+        } else {
+            $footerMainGridClass = match ($enabledMenuWidgetCount) {
+                3 => 'grid gap-x-10 gap-y-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+                2 => 'grid gap-x-10 gap-y-10 grid-cols-1 sm:grid-cols-2',
+                1 => 'grid gap-x-10 gap-y-10',
+                default => '',
+            };
+        }
+
+        $rawCopyrightText = $footerText?->copyright_text ?? '© {year} Hotescorts Directory. All rights reserved.';
+        $currentYear = (string) now()->year;
+
+        $copyrightText = str_replace(['{year}', '{YEAR}'], $currentYear, $rawCopyrightText);
+
+        if ($copyrightText === $rawCopyrightText) {
+            $copyrightText = preg_replace('/(©\s*)\d{4}/u', '$1' . $currentYear, $rawCopyrightText, 1) ?? $rawCopyrightText;
+        }
+
+        $disclaimerText = $footerText?->disclaimer_text ?? 'This platform is for adults only (18+) and provides advertising listings only.';
 @endphp
 
-<footer id="main-footer" class="border-t border-gray-800 bg-gray-950 pt-10 pb-6" style="{{ $footerStyle }}">
+<footer id="main-footer" class="border-t border-gray-800 bg-gray-950" style="{{ $footerStyle }}">
 
     <div class="mx-auto w-full max-w-12xl px-4 sm:px-6 lg:px-8">
+
+        {{-- Promo Banner --}}
         @if($showPromoSection)
-            <div class="mb-8 rounded-2xl border border-pink-500/20 bg-gradient-to-r from-gray-900 to-gray-900/60 p-5 sm:flex sm:items-center sm:justify-between sm:p-6">
-                <div>
-                    <h3 class="text-base font-semibold text-white sm:text-lg">{{ $promoHeading }}</h3>
-                    <p class="mt-1 text-sm text-gray-400">{{ $promoDescription }}</p>
-                </div>
-                <div class="mt-4 flex gap-2 sm:mt-0">
-                    <a href="{{ $promoButtonOneUrl }}" class="inline-flex rounded-lg border border-pink-500 px-4 py-2 text-sm font-semibold text-pink-400 transition hover:bg-pink-500/10">{{ $promoButtonOneLabel }}</a>
-                    <a href="{{ $promoButtonTwoUrl }}" class="inline-flex rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">{{ $promoButtonTwoLabel }}</a>
-                </div>
-            </div>
-        @endif
-
-        @if($showBrandWidget)
-            <div class="mx-auto mb-8 max-w-4xl text-center">
-                <span class="text-xl font-bold text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
-                <p class="mt-4 leading-relaxed text-gray-500">{{ $brandDescription }}</p>
-                <div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400">
-                    @foreach($badges as $badge)
-                        <span class="rounded-full border border-gray-700 px-2 py-1">{{ $badge['label'] }}</span>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        @if($enabledMenuWidgetCount > 0)
-            <div class="{{ $footerMenuGridClass }} mx-auto">
-            @if($showNavigationWidget)
-                <div>
-                    <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $navigationHeading }}</h4>
-                    <ul class="space-y-2 text-gray-500">
-                        @foreach($navigationLinks as $link)
-                            @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
-                            <li><a href="{{ $link['url'] }}" class="transition {{ $isActive ? 'text-pink-400 font-medium' : 'hover:text-pink-400' }}">{{ $link['label'] }}</a></li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @if($showAdvertisersWidget)
-                <div>
-                    <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $advertisersHeading }}</h4>
-                    <ul class="space-y-2 text-gray-500">
-                        @foreach($advertiserLinks as $link)
-                            @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
-                            <li><a href="{{ $link['url'] }}" class="transition {{ $isActive ? 'text-pink-400 font-medium' : 'hover:text-pink-400' }}">{{ $link['label'] }}</a></li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @if($showLegalWidget)
-                <div>
-                    <h4 class="mb-4 font-semibold uppercase tracking-wider text-white">{{ $legalHeading }}</h4>
-                    <ul class="space-y-2 text-gray-500">
-                        @foreach($legalLinks as $link)
-                            @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
-                            <li><a href="{{ $link['url'] }}" class="transition {{ $isActive ? 'text-pink-400 font-medium' : 'hover:text-pink-400' }}">{{ $link['label'] }}</a></li>
-                        @endforeach
-                    </ul>
-
-                    <div class="mt-5 flex items-center gap-2 text-gray-400">
-                        <a href="{{ $instagramUrl }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="{{ $twitterUrl }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-x-twitter"></i></a>
-                        <a href="{{ $facebookUrl }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 transition hover:border-pink-500 hover:text-pink-400"><i class="fa-brands fa-facebook-f"></i></a>
+            <div class="border-b border-gray-800/60 py-6">
+                <div class="rounded-2xl border border-pink-500/20 bg-gradient-to-r from-gray-900 to-gray-900/60 p-5 sm:flex sm:items-center sm:justify-between sm:p-6">
+                    <div>
+                        <h3 class="text-base font-semibold text-white sm:text-lg">{{ $promoHeading }}</h3>
+                        <p class="mt-1 text-sm text-gray-400">{{ $promoDescription }}</p>
+                    </div>
+                    <div class="mt-4 flex flex-shrink-0 gap-3 sm:mt-0 sm:ml-6">
+                        <a href="{{ $promoButtonOneUrl }}" class="inline-flex items-center rounded-lg border border-pink-500 px-4 py-2 text-sm font-semibold text-pink-400 transition hover:bg-pink-500/10">{{ $promoButtonOneLabel }}</a>
+                        <a href="{{ $promoButtonTwoUrl }}" class="inline-flex items-center rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700">{{ $promoButtonTwoLabel }}</a>
                     </div>
                 </div>
-            @endif
             </div>
         @endif
 
-        @php
-            $rawCopyrightText = $footerText?->copyright_text ?? '© {year} Hotescorts Directory. All rights reserved.';
-            $currentYear = (string) now()->year;
+        {{-- Main Footer Content: brand column + link columns --}}
+        @if($showBrandWidget || $enabledMenuWidgetCount > 0)
+            <div class="{{ $footerMainGridClass }} py-12 text-sm">
 
-            $copyrightText = str_replace(['{year}', '{YEAR}'], $currentYear, $rawCopyrightText);
+                {{-- Brand Column --}}
+                @if($showBrandWidget)
+                    <div class="flex flex-col gap-5 sm:col-span-2 lg:col-span-1">
+                        <div>
+                            <span class="text-2xl font-bold tracking-tight text-white">{{ $brandPrimary }}<span class="text-pink-500">{{ $brandAccent }}</span></span>
+                        </div>
+                        <p class="max-w-xs leading-relaxed text-gray-400">{{ $brandDescription }}</p>
+                        <div class="flex flex-wrap gap-2 text-xs text-gray-400">
+                            @foreach($badges as $badge)
+                                <span class="rounded-full border border-gray-700/80 bg-gray-900 px-3 py-1 text-gray-400">{{ $badge['label'] }}</span>
+                            @endforeach
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <a href="{{ $instagramUrl }}" aria-label="Instagram" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-700 text-gray-400 transition hover:border-pink-500 hover:bg-pink-500/10 hover:text-pink-400"><i class="fa-brands fa-instagram text-sm"></i></a>
+                            <a href="{{ $twitterUrl }}" aria-label="X (Twitter)" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-700 text-gray-400 transition hover:border-pink-500 hover:bg-pink-500/10 hover:text-pink-400"><i class="fa-brands fa-x-twitter text-sm"></i></a>
+                            <a href="{{ $facebookUrl }}" aria-label="Facebook" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-700 text-gray-400 transition hover:border-pink-500 hover:bg-pink-500/10 hover:text-pink-400"><i class="fa-brands fa-facebook-f text-sm"></i></a>
+                        </div>
+                    </div>
+                @endif
 
-            if ($copyrightText === $rawCopyrightText) {
-                $copyrightText = preg_replace('/(©\s*)\d{4}/u', '$1' . $currentYear, $rawCopyrightText, 1) ?? $rawCopyrightText;
-            }
+                {{-- Navigation Column --}}
+                @if($showNavigationWidget)
+                    <div>
+                        <h4 class="mb-5 text-xs font-semibold uppercase tracking-widest text-gray-300">{{ $navigationHeading }}</h4>
+                        <ul class="space-y-3 text-gray-500">
+                            @foreach($navigationLinks as $link)
+                                @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
+                                <li><a href="{{ $link['url'] }}" class="transition-colors {{ $isActive ? 'font-medium text-pink-400' : 'hover:text-gray-200' }}">{{ $link['label'] }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-            $disclaimerText = $footerText?->disclaimer_text ?? 'This platform is for adults only (18+) and provides advertising listings only.';
-        @endphp
+                {{-- Advertisers Column --}}
+                @if($showAdvertisersWidget)
+                    <div>
+                        <h4 class="mb-5 text-xs font-semibold uppercase tracking-widest text-gray-300">{{ $advertisersHeading }}</h4>
+                        <ul class="space-y-3 text-gray-500">
+                            @foreach($advertiserLinks as $link)
+                                @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
+                                <li><a href="{{ $link['url'] }}" class="transition-colors {{ $isActive ? 'font-medium text-pink-400' : 'hover:text-gray-200' }}">{{ $link['label'] }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-        <div class="mt-8 border-t border-gray-800 pt-5 text-xs text-gray-500 sm:flex sm:items-center sm:justify-between">
-            <p>{{ $copyrightText }}</p>
-            <div class="mt-2 text-right sm:mt-0">
-                <p class="font-semibold text-amber-300">{{ $footerText?->adults_only_text ?? 'This website is intended for adults only.' }}</p>
-                <p>{{ $disclaimerText }}</p>
+                {{-- Legal Column --}}
+                @if($showLegalWidget)
+                    <div>
+                        <h4 class="mb-5 text-xs font-semibold uppercase tracking-widest text-gray-300">{{ $legalHeading }}</h4>
+                        <ul class="columns-2 gap-x-6 space-y-3 text-gray-500 sm:columns-1 lg:columns-2">
+                            @foreach($legalLinks as $link)
+                                @php $isActive = $isCurrentFooterUrl($link['url'] ?? null); @endphp
+                                <li class="break-inside-avoid"><a href="{{ $link['url'] }}" class="transition-colors {{ $isActive ? 'font-medium text-pink-400' : 'hover:text-gray-200' }}">{{ $link['label'] }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+            </div>
+        @endif
+
+        {{-- Footer Bottom Bar --}}
+        <div class="border-t border-gray-800 py-5">
+            <div class="flex flex-col gap-3 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                <p>{{ $copyrightText }}</p>
+                <div class="flex flex-col gap-2 sm:items-end">
+                    <p class="font-semibold text-amber-300/80">{{ $footerText?->adults_only_text ?? 'This website is intended for adults only.' }}</p>
+                    <p class="text-gray-600">{{ $disclaimerText }}</p>
+                </div>
             </div>
         </div>
+
     </div>
 </footer>
