@@ -253,13 +253,20 @@
                                 @click="openSlider(index)"
                                 class="group relative aspect-[3/4] rounded-lg bg-gray-100 border border-gray-200 overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-pink-500"
                             >
-                                <img
-                                    :src="photo.image_url"
-                                    :alt="'Profile Image ' + photo.id"
-                                    class="w-full h-full object-cover transition duration-500 ease-out group-hover:scale-110"
-                                    loading="lazy"
-                                    decoding="async"
-                                >
+                                <template x-if="photo.image_url">
+                                    <img
+                                        :src="photo.image_url"
+                                        :alt="'Profile Image ' + photo.id"
+                                        class="w-full h-full object-cover transition duration-500 ease-out group-hover:scale-110"
+                                        loading="lazy"
+                                        decoding="async"
+                                    >
+                                </template>
+                                <template x-if="!photo.image_url">
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <i class="fa-regular fa-image text-3xl text-gray-400"></i>
+                                    </div>
+                                </template>
 
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
 
@@ -566,13 +573,20 @@
                 class="max-w-5xl w-full flex flex-col items-center"
             >
                 <div class="relative overflow-hidden rounded-2xl">
-                    <img
-                        :src="photos[sliderIndex].image_url"
-                        :alt="'Photo ' + photos[sliderIndex].id"
-                        class="max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl"
-                        loading="lazy"
-                        decoding="async"
-                    >
+                    <template x-if="photos[sliderIndex].image_url">
+                        <img
+                            :src="photos[sliderIndex].image_url"
+                            :alt="'Photo ' + photos[sliderIndex].id"
+                            class="max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </template>
+                    <template x-if="!photos[sliderIndex].image_url">
+                        <div class="flex h-64 items-center justify-center text-gray-400">
+                            <i class="fa-regular fa-image text-5xl"></i>
+                        </div>
+                    </template>
                 </div>
 
                 <div class="mt-4 text-white text-sm sm:text-base font-medium flex items-center gap-2">

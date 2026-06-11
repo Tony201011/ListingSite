@@ -308,7 +308,7 @@
                                 <div class="flex gap-4">
                                     <div class="relative shrink-0">
                                         <div class="h-32 w-32 overflow-hidden rounded bg-gray-200">
-                                            @if($profile->primaryProfileImage)
+                                            @if($profile->primaryProfileImage && $profile->primaryProfileImage->thumbnail_url)
                                                 <img src="{{ $profile->primaryProfileImage->thumbnail_url }}"
                                                      alt="{{ $profile->name }}"
                                                      class="h-full w-full object-cover">

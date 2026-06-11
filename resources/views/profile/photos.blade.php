@@ -8,8 +8,8 @@
                 'id' => $photo->id,
                 'image_path' => $photo->image_path,
                 'thumbnail_path' => $photo->thumbnail_path,
-                'image_url' => $photo->image_url,
-                'thumbnail_url' => $photo->thumbnail_url,
+                'image_url' => $photo->image_url ?? '',
+                'thumbnail_url' => $photo->thumbnail_url ?? $photo->image_url ?? '',
                 'is_primary' => (bool) ($photo->is_primary ?? false),
             ])->values()),
             setCoverUrl: @js(url('/photos/__ID__/set-cover')),
@@ -81,13 +81,20 @@
                             class="aspect-[3/4] bg-gray-100 overflow-hidden cursor-pointer"
                             @click="openSlider(index)"
                         >
-                            <img
-                                :src="photo.image_url"
-                                :alt="'Photo ' + photo.id"
-                                class="w-full h-full object-cover hover:scale-105 transition duration-300"
-                                loading="lazy"
-                                decoding="async"
-                            >
+                            <template x-if="photo.image_url">
+                                <img
+                                    :src="photo.image_url"
+                                    :alt="'Photo ' + photo.id"
+                                    class="w-full h-full object-cover hover:scale-105 transition duration-300"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+                            </template>
+                            <template x-if="!photo.image_url">
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="fa-regular fa-image text-3xl text-gray-400"></i>
+                                </div>
+                            </template>
                         </div>
 
                         <div class="p-3 space-y-2">
@@ -201,13 +208,20 @@
 
         <template x-if="photos.length > 0 && photos[sliderIndex]">
             <div class="max-w-5xl w-full flex flex-col items-center">
-                <img
-                    :src="photos[sliderIndex].image_url"
-                    :alt="'Photo ' + photos[sliderIndex].id"
-                    class="max-h-[85vh] max-w-full object-contain rounded-lg"
-                    loading="eager"
-                    decoding="async"
-                >
+                <template x-if="photos[sliderIndex].image_url">
+                    <img
+                        :src="photos[sliderIndex].image_url"
+                        :alt="'Photo ' + photos[sliderIndex].id"
+                        class="max-h-[85vh] max-w-full object-contain rounded-lg"
+                        loading="eager"
+                        decoding="async"
+                    >
+                </template>
+                <template x-if="!photos[sliderIndex].image_url">
+                    <div class="flex h-64 items-center justify-center text-gray-400">
+                        <i class="fa-regular fa-image text-5xl"></i>
+                    </div>
+                </template>
 
                 <div class="mt-4 text-white text-sm sm:text-base font-medium">
                     <span x-text="'Photo #' + photos[sliderIndex].id"></span>
