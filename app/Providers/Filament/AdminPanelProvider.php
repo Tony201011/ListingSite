@@ -16,7 +16,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Assets\Css;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\RenderHookScopes;
 use Filament\Support\Facades\FilamentView;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -100,7 +99,7 @@ class AdminPanelProvider extends PanelProvider
     {
         // Inject a read-only banner at the top of every admin page for reviewer accounts.
         FilamentView::registerRenderHook(
-            RenderHookScopes::BODY_START,
+            'panels::body.start',
             fn (): HtmlString|string => $this->reviewerBannerHtml(),
         );
     }
