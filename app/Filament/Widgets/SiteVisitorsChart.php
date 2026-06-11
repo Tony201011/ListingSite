@@ -46,8 +46,11 @@ class SiteVisitorsChart extends ChartWidget
                 ->all();
 
             $rawCounts = DB::table('sessions')
-                ->selectRaw('MONTH(FROM_UNIXTIME(last_activity)) as month, COUNT(*) as count')
-                ->whereYear(DB::raw('FROM_UNIXTIME(last_activity)'), $year)
+                ->selectRaw($this->monthFromUnixExpr() . ' as month, COUNT(*) as count')
+                ->whereBetween('last_activity', [
+                    Carbon::createFromDate($year, 1, 1)->startOfYear()->timestamp,
+                    Carbon::createFromDate($year, 12, 31)->endOfYear()->timestamp,
+                ])
                 ->groupBy('month')
                 ->pluck('count', 'month');
 
@@ -57,7 +60,7 @@ class SiteVisitorsChart extends ChartWidget
         } else {
             $labels = [];
             $rawCounts = DB::table('sessions')
-                ->selectRaw('YEAR(FROM_UNIXTIME(last_activity)) as year, COUNT(*) as count')
+                ->selectRaw($this->yearFromUnixExpr() . ' as year, COUNT(*) as count')
                 ->groupBy('year')
                 ->orderBy('year')
                 ->pluck('count', 'year');
@@ -84,5 +87,19 @@ class SiteVisitorsChart extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    private function monthFromUnixExpr(): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%m', datetime(last_activity, 'unixepoch')) AS INTEGER)"
+            : 'MONTH(FROM_UNIXTIME(last_activity))';
+    }
+
+    private function yearFromUnixExpr(): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%Y', datetime(last_activity, 'unixepoch')) AS INTEGER)"
+            : 'YEAR(FROM_UNIXTIME(last_activity))';
     }
 }

@@ -46,7 +46,7 @@ class UniqueUsersChart extends ChartWidget
                 ->all();
 
             $rawCounts = DB::table('login_logs')
-                ->selectRaw('MONTH(created_at) as month, COUNT(DISTINCT user_id) as count')
+                ->selectRaw($this->monthExpr('created_at') . ' as month, COUNT(DISTINCT user_id) as count')
                 ->whereYear('created_at', $year)
                 ->groupBy('month')
                 ->pluck('count', 'month');
@@ -56,7 +56,7 @@ class UniqueUsersChart extends ChartWidget
                 ->all();
         } else {
             $rawCounts = DB::table('login_logs')
-                ->selectRaw('YEAR(created_at) as year, COUNT(DISTINCT user_id) as count')
+                ->selectRaw($this->yearExpr('created_at') . ' as year, COUNT(DISTINCT user_id) as count')
                 ->groupBy('year')
                 ->orderBy('year')
                 ->pluck('count', 'year');
@@ -83,5 +83,19 @@ class UniqueUsersChart extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    private function monthExpr(string $column): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%m', {$column}) AS INTEGER)"
+            : "MONTH({$column})";
+    }
+
+    private function yearExpr(string $column): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%Y', {$column}) AS INTEGER)"
+            : "YEAR({$column})";
     }
 }
