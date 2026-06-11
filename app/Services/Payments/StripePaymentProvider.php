@@ -19,7 +19,11 @@ class StripePaymentProvider implements PaymentProviderInterface
     {
         $settings = $this->settings();
 
-        return (bool) ($settings?->stripe_enabled && $settings?->stripe_secret_key);
+        return (bool) (
+            $settings?->stripe_enabled
+            && $settings?->stripe_secret_key
+            && $settings?->stripe_mode === 'live'
+        );
     }
 
     public function publicKey(): ?string

@@ -53,6 +53,10 @@ class PurchaseCreditController extends Controller
         $activeProfile = $this->getActiveProviderProfile->execute($request->user());
         $profileName = $activeProfile?->name ?? 'selected profile';
 
+        if (isset($result['error'])) {
+            return redirect('/purchase-credit')->withErrors($result['error']);
+        }
+
         if (isset($result['checkout_url'])) {
             return redirect($result['checkout_url']);
         }

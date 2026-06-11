@@ -14,7 +14,7 @@ class ProcessCreditCheckout
     ) {}
 
     /**
-     * @return array{credits: int, price: float, invoice_name: string, checkout_url?: string}
+     * @return array{credits: int, price: float, invoice_name: string, checkout_url?: string, error?: string}
      */
     public function execute(array $validated): array
     {
@@ -33,6 +33,8 @@ class ProcessCreditCheckout
         ];
 
         if (! $provider->isConfigured()) {
+            $result['error'] = 'Payment processing is unavailable until processor approval is completed.';
+
             return $result;
         }
 
