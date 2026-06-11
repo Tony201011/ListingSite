@@ -375,7 +375,7 @@ class SearchTest extends TestCase
             'usage_count' => 1,
         ]);
 
-        $response = $this->get('/?escort_name=Legacy+Offline+Home+Search');
+        $response = $this->followingRedirects()->get('/?escort_name=Legacy+Offline+Home+Search');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
@@ -446,7 +446,7 @@ class SearchTest extends TestCase
             'usage_count' => 1,
         ]);
 
-        $response = $this->get('/?location=Mount+Gambier%2C+SA');
+        $response = $this->followingRedirects()->get('/?location=Mount+Gambier%2C+SA');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
@@ -547,7 +547,7 @@ class SearchTest extends TestCase
 
     public function test_advanced_search_view_data_includes_location_query(): void
     {
-        $response = $this->get(route('advanced-search').'?location=Brisbane');
+        $response = $this->followingRedirects()->get(route('advanced-search').'?location=Brisbane');
 
         $response->assertViewHas('locationQuery', 'Brisbane');
     }
@@ -561,7 +561,7 @@ class SearchTest extends TestCase
         $this->createApprovedProvider(['name' => 'Young Provider', 'slug' => 'young-adv', 'age' => 20]);
         $this->createApprovedProvider(['name' => 'Older Provider', 'slug' => 'old-adv', 'age' => 38]);
 
-        $response = $this->get(route('advanced-search').'?min_age=18&max_age=25');
+        $response = $this->followingRedirects()->get(route('advanced-search').'?min_age=18&max_age=25');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
