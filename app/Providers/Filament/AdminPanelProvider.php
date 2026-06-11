@@ -98,8 +98,6 @@ class AdminPanelProvider extends PanelProvider
 
     public function boot(): void
     {
-        parent::boot();
-
         // Inject a read-only banner at the top of every admin page for reviewer accounts.
         FilamentView::registerRenderHook(
             RenderHookScopes::BODY_START,
