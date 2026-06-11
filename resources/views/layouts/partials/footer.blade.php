@@ -97,9 +97,9 @@
         };
 @endphp
 
-<footer id="main-footer" class="border-t border-gray-800 bg-gray-950 px-4 pt-10 pb-6" style="{{ $footerStyle }}">
+<footer id="main-footer" class="border-t border-gray-800 bg-gray-950 pt-10 pb-6" style="{{ $footerStyle }}">
 
-    <div class="mx-auto max-w-12xl">
+    <div class="mx-auto w-full max-w-12xl px-4 sm:px-6 lg:px-8">
         @if($showPromoSection)
             <div class="mb-8 rounded-2xl border border-pink-500/20 bg-gradient-to-r from-gray-900 to-gray-900/60 p-5 sm:flex sm:items-center sm:justify-between sm:p-6">
                 <div>
