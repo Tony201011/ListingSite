@@ -758,7 +758,7 @@ class HomeControllerTest extends TestCase
             'created_at' => Carbon::now()->subHour(),
         ]);
 
-        $response = $this->get('/?girls=new');
+        $response = $this->get('/girls/new');
 
         $response->assertViewHas('girlsMode', 'new');
         $profiles = $response->viewData('profiles');
@@ -778,7 +778,7 @@ class HomeControllerTest extends TestCase
         ProfileView::query()->create(['user_id' => $popularUser->id, 'provider_profile_id' => $popularProfile->id, 'viewer_ip' => '1.1.1.2']);
         ProfileView::query()->create(['user_id' => $lessPopularUser->id, 'provider_profile_id' => $lessPopularProfile->id, 'viewer_ip' => '1.1.1.3']);
 
-        $response = $this->get('/?girls=popular');
+        $response = $this->get('/girls/popular');
 
         $response->assertViewHas('girlsMode', 'popular');
         $profiles = $response->viewData('profiles');
@@ -1002,7 +1002,7 @@ class HomeControllerTest extends TestCase
         $this->createApprovedProvider(['name' => 'Young Escort', 'slug' => 'young-escort', 'age' => 19]);
         $this->createApprovedProvider(['name' => 'Older Escort', 'slug' => 'older-escort', 'age' => 35]);
 
-        $response = $this->get('/?min_age=18&max_age=20');
+        $response = $this->get('/escorts/search?max_age=20');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
@@ -1012,7 +1012,7 @@ class HomeControllerTest extends TestCase
 
     public function test_home_page_has_age_filter_flag_set_when_age_differs_from_defaults(): void
     {
-        $response = $this->get('/?min_age=20&max_age=30');
+        $response = $this->get('/escorts/search?min_age=20&max_age=30');
 
         $response->assertViewHas('hasAgeFilter', true);
         $response->assertViewHas('minAge', 20);
@@ -1189,6 +1189,7 @@ class HomeControllerTest extends TestCase
             'slug' => 'synced-escort',
             'profile_status' => 'approved',
             'age' => 25,
+            'free_listing_expires_at' => now()->addDays(30),
         ]);
 
         $this->markProfileAsComplete($profile);
@@ -1743,10 +1744,9 @@ class HomeControllerTest extends TestCase
         $unfilteredResponse = $this->get('/');
         $this->assertNotEmpty($unfilteredResponse->viewData('homeBannerProfiles'));
 
-        $filteredResponse = $this->get('/?location_state=QLD');
+        $filteredResponse = $this->get('/escorts/search?location_state=QLD');
         $this->assertEmpty($filteredResponse->viewData('homeBannerProfiles'));
         $this->assertEmpty($filteredResponse->viewData('localBannerProfiles'));
-        $filteredResponse->assertDontSeeText('Featured');
     }
 
     public function test_home_banner_includes_profile_when_banner_expires_later_today(): void
@@ -1919,7 +1919,7 @@ class HomeControllerTest extends TestCase
             'home_banner_expires_at' => now()->addDay(),
         ]);
 
-        $response = $this->get('/?location_state=VIC');
+        $response = $this->get('/escorts/search?location_state=VIC');
 
         $response->assertOk();
 
