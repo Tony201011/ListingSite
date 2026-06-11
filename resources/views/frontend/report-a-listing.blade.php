@@ -241,13 +241,20 @@
             </button>
 
             <div class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-900">Report a Listing</h1>
-                <p class="mt-3 text-gray-600">
-                    Use this form to report a listing, image, profile, advertiser, review, or content that may violate our policies, contain misleading information, involve non-consensual content, impersonation, scams, or other prohibited activity.
-                </p>
-                <p class="mt-3 text-sm font-semibold text-red-600">
-                    If someone is in immediate danger, call 000. This form is not monitored as an emergency service.
-                </p>
+                <h1 class="text-3xl font-bold text-gray-900">{{ $page?->title ?: 'Report a Listing' }}</h1>
+
+                @if(!empty($page?->content))
+                    <div class="mt-3 text-gray-600 leading-relaxed max-w-none [&_*]:text-gray-600 [&_h1]:text-gray-900 [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_h4]:text-gray-900 [&_h5]:text-gray-900 [&_h6]:text-gray-900 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-semibold [&_h4]:font-semibold [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_h1]:mt-6 [&_h2]:mt-5 [&_h3]:mt-4 [&_h1]:mb-3 [&_h2]:mb-3 [&_h3]:mb-2 [&_p]:mb-4 [&_li]:mb-1 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-pink-600 hover:[&_a]:text-pink-700 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4">
+                        {!! $page->content !!}
+                    </div>
+                @else
+                    <p class="mt-3 text-gray-600">
+                        Use this form to report a listing, image, profile, advertiser, review, or content that may violate our policies, contain misleading information, involve non-consensual content, impersonation, scams, or other prohibited activity.
+                    </p>
+                    <p class="mt-3 text-sm font-semibold text-red-600">
+                        If someone is in immediate danger, call 000. This form is not monitored as an emergency service.
+                    </p>
+                @endif
             </div>
 
             @if(session('success'))
