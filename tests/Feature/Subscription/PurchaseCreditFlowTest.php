@@ -93,15 +93,16 @@ class PurchaseCreditFlowTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('id="purchase-credit-flow"', false);
-        $response->assertSee("document.getElementById('purchase-credit-flow')", false);
+        $response->assertDontSee("document.getElementById('purchase-credit-flow')", false);
         $response->assertDontSee("paymentMethodTypes: ['card']", false);
+        $response->assertSeeText('Payment processing is currently in test mode for processor review.');
     }
 
     public function test_purchase_credit_page_shows_only_active_packages(): void
     {
         $user = $this->createProvider();
         $active = $this->createActivePackage(['name' => 'Active Pack', 'sort_order' => 1]);
-        $this->createActivePackage(['name' => 'Inactive Pack', 'status' => 'inactive', 'sort_order' => 2]);
+        $this->createActivePackage(['name' => 'Inactive Pack', 'status' => 'inactive', 'is_active' => false, 'sort_order' => 2]);
 
         $response = $this->actingAsProvider($user)->get('/purchase-credit');
 
@@ -164,7 +165,7 @@ class PurchaseCreditFlowTest extends TestCase
     public function test_checkout_rejects_inactive_package(): void
     {
         $user = $this->createProvider();
-        $inactivePackage = $this->createActivePackage(['status' => 'inactive']);
+        $inactivePackage = $this->createActivePackage(['status' => 'inactive', 'is_active' => false]);
 
         $response = $this->actingAsProvider($user)->post('/purchase-credit/checkout', [
             'package_id' => $inactivePackage->id,
