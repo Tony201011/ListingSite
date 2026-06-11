@@ -35,6 +35,7 @@
                 if (window.Alpine && typeof window.Alpine.initTree === 'function') {
                     window.Alpine.initTree(container);
                 }
+                window.dispatchEvent(new CustomEvent('listings:content-refreshed'));
             })
             .catch(function () {
                 /* silently ignore network errors */
