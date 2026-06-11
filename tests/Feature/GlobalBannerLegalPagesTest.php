@@ -176,6 +176,26 @@ class GlobalBannerLegalPagesTest extends TestCase
             ->assertDontSee('Home Only Banner');
     }
 
+    public function test_global_banner_normalizes_multi_select_page_state_before_saving(): void
+    {
+        $banner = GlobalBanner::create([
+            'page_keys' => [
+                'home' => true,
+                'signin' => true,
+                'signup' => false,
+            ],
+            'banner_image_path' => null,
+            'banner_title' => 'State Normalization Banner',
+            'banner_subtitle' => 'Testing normalized pages',
+            'is_active' => true,
+        ]);
+
+        $banner->refresh();
+
+        $this->assertSame(['home', 'signin'], $banner->page_keys);
+        $this->assertSame('home', $banner->page_key);
+    }
+
     public function test_admin_can_open_global_banner_page_without_errors_when_no_legal_pages_exist(): void
     {
         $admin = User::factory()->create([

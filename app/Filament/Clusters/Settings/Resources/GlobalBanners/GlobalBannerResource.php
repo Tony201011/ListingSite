@@ -106,7 +106,24 @@ class GlobalBannerResource extends Resource
                             $set('page_keys', ['all-pages']);
                         }
                     })
-                    ->dehydrateStateUsing(fn ($state) => array_values(array_unique((array) $state)))
+                    ->dehydrateStateUsing(function ($state): array {
+                        return collect((array) $state)
+                            ->flatMap(function ($value, $key): array {
+                                if (! is_int($key)) {
+                                    return filled($value) && $value !== false
+                                        ? [trim((string) $key)]
+                                        : [];
+                                }
+
+                                return filled($value)
+                                    ? [trim((string) $value)]
+                                    : [];
+                            })
+                            ->filter(fn (string $key): bool => $key !== '')
+                            ->unique()
+                            ->values()
+                            ->all();
+                    })
                     ->helperText('Select one or more pages. Choose All Pages (Global) to apply one banner site-wide.'),
                 FileUpload::make('banner_image_path')
                     ->label('Banner Image')

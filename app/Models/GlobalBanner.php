@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,22 +13,10 @@ class GlobalBanner extends Model
     protected static function booted(): void
     {
         static::saving(function (GlobalBanner $banner): void {
-            $pageKeys = collect($banner->page_keys ?? [])
-                ->filter(fn ($key) => filled($key))
-                ->map(fn ($key) => trim((string) $key))
-                ->unique()
-                ->values();
+            $pageKeys = self::normalizePageKeys($banner->page_keys);
 
             if ($pageKeys->isEmpty()) {
-                if (is_array($banner->page_key)) {
-                    $pageKeys = collect($banner->page_key)
-                        ->filter(fn ($key) => filled($key))
-                        ->map(fn ($key) => trim((string) $key))
-                        ->unique()
-                        ->values();
-                } elseif (filled($banner->page_key)) {
-                    $pageKeys = collect([trim((string) $banner->page_key)]);
-                }
+                $pageKeys = self::normalizePageKeys($banner->page_key);
             }
 
             if ($pageKeys->contains('all-pages')) {
@@ -37,6 +26,25 @@ class GlobalBanner extends Model
             $banner->page_keys = $pageKeys->all();
             $banner->page_key = $pageKeys->first();
         });
+    }
+
+    private static function normalizePageKeys(mixed $state): Collection
+    {
+        return collect((array) $state)
+            ->flatMap(function ($value, $key): array {
+                if (! is_int($key)) {
+                    return filled($value) && $value !== false
+                        ? [trim((string) $key)]
+                        : [];
+                }
+
+                return filled($value)
+                    ? [trim((string) $value)]
+                    : [];
+            })
+            ->filter(fn (string $key): bool => $key !== '')
+            ->unique()
+            ->values();
     }
 
     protected $fillable = [
