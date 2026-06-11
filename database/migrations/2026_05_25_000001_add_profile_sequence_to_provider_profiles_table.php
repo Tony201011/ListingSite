@@ -88,6 +88,23 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (Schema::hasColumn('provider_profiles', 'profile_sequence')) {
+            $profiles = DB::table('provider_profiles')
+                ->orderBy('id')
+                ->get(['id', 'slug', 'profile_sequence']);
+
+            foreach ($profiles as $profile) {
+                $baseSlug = $profile->slug ?: 'profile';
+                $sequence = max((int) ($profile->profile_sequence ?? 1), 1);
+
+                DB::table('provider_profiles')
+                    ->where('id', $profile->id)
+                    ->update([
+                        'slug' => $sequence === 1 ? $baseSlug : "{$baseSlug}-{$sequence}",
+                    ]);
+            }
+        }
+
         if ($this->hasIndex('provider_profiles', 'provider_profiles_slug_profile_sequence_unique')) {
             Schema::table('provider_profiles', function (Blueprint $table): void {
                 $table->dropUnique(['slug', 'profile_sequence']);
