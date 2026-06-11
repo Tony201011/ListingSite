@@ -91,10 +91,10 @@
         $totalColumnCount = ($showBrandWidget ? 1 : 0) + $enabledMenuWidgetCount;
 
         $footerMenuGridClass = match ($totalColumnCount) {
-            1 => 'grid gap-12 text-sm grid-cols-1',
-            2 => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2',
-            3 => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-            default => 'grid gap-16 text-sm grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+            1 => 'grid gap-8 text-sm grid-cols-1',
+            2 => 'grid gap-8 text-sm grid-cols-1 md:grid-cols-2',
+            3 => 'grid gap-8 text-sm grid-cols-1 sm:grid-cols-3',
+            default => 'grid gap-8 text-sm grid-cols-2 md:grid-cols-4',
         };
 @endphp
 
