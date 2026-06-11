@@ -580,7 +580,7 @@ class SearchTest extends TestCase
 
     public function test_advanced_search_age_filter_flag_false_when_defaults_used(): void
     {
-        $response = $this->get(route('advanced-search').'?min_age=18&max_age=40');
+        $response = $this->followingRedirects()->get(route('advanced-search').'?min_age=18&max_age=40');
 
         $response->assertViewHas('hasAgeFilter', false);
     }
@@ -594,7 +594,7 @@ class SearchTest extends TestCase
 
     public function test_advanced_search_price_filter_flag_false_when_defaults_used(): void
     {
-        $response = $this->get(route('advanced-search').'?min_price=150&max_price=400');
+        $response = $this->followingRedirects()->get(route('advanced-search').'?min_price=150&max_price=400');
 
         $response->assertViewHas('hasPriceFilter', false);
     }
@@ -623,7 +623,7 @@ class SearchTest extends TestCase
         $this->createApprovedProvider(['name' => 'Tia Young', 'slug' => 'tia-young', 'age' => 22]);
         $this->createApprovedProvider(['name' => 'Tia Older', 'slug' => 'tia-older', 'age' => 36]);
 
-        $response = $this->get(route('advanced-search').'?escort_name=Tia&min_age=18&max_age=25');
+        $response = $this->followingRedirects()->get(route('advanced-search').'?escort_name=Tia&min_age=18&max_age=25');
 
         $profiles = $response->viewData('profiles');
         $names = collect($profiles->items())->pluck('name');
@@ -635,7 +635,7 @@ class SearchTest extends TestCase
     {
         $this->createApprovedProvider(['name' => 'Nina', 'slug' => 'nina', 'age' => 28]);
 
-        $response = $this->get(route('advanced-search').'?escort_name=Nina&min_age=18&max_age=20');
+        $response = $this->followingRedirects()->get(route('advanced-search').'?escort_name=Nina&min_age=18&max_age=20');
 
         $profiles = $response->viewData('profiles');
         $this->assertSame(0, $profiles->total());
@@ -998,7 +998,7 @@ class SearchTest extends TestCase
         $this->createApprovedProvider(['name' => 'Remote Escort', 'slug' => 'remote-escort', 'suburb' => 'Sydney, NSW 2000']);
 
         // Searching by location only (no lat/lng/distance) applies exact text filter.
-        $response = $this->get('/?location=Mount+Gambier%2C+SA');
+        $response = $this->followingRedirects()->get('/?location=Mount+Gambier%2C+SA');
 
         $response->assertOk();
         $profiles = $response->viewData('profiles');

@@ -31,7 +31,7 @@ class TestAdvertiserAccountSeeder extends Seeder
             ['email' => self::EMAIL],
             [
                 'name' => 'Test Advertiser',
-                'role' => User::ROLE_TEST_ADVERTISER,
+                'role' => User::ROLE_PROVIDER,
                 'password' => self::PASSWORD,
                 'mobile' => null,
                 'mobile_verified' => false,
@@ -47,7 +47,7 @@ class TestAdvertiserAccountSeeder extends Seeder
 
         $advertiser->update([
             'name' => 'Test Advertiser',
-            'role' => User::ROLE_TEST_ADVERTISER,
+            'role' => User::ROLE_PROVIDER,
             'password' => self::PASSWORD,
             'mobile' => null,
             'mobile_verified' => false,
