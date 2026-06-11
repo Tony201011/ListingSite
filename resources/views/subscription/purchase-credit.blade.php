@@ -61,7 +61,7 @@
 
         {{-- Advertising credits purpose notice --}}
         <div class="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800 shadow-sm">
-            You are purchasing advertising credits for use on {{ config('app.name') }}. Credits are used for profile visibility and promotional listing features only.
+            You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only.
         </div>
 
         @if(!($paymentEnabled ?? false))
@@ -93,7 +93,7 @@
                         <div class="rounded-xl border border-pink-100 bg-pink-50 p-4">
                             <p class="text-xs font-semibold uppercase tracking-wide text-[#e04ecb]">Selected membership</p>
                             <p class="mt-2 text-lg font-bold text-gray-900">{{ $selectedPackage->total_credits }} credits</p>
-                            <p class="mt-1 text-sm text-gray-700">Up to {{ $selectedPackage->total_credits }} days online &mdash; {{ $selectedPackage->currency }} ${{ number_format($selectedPackage->price, 2) }} (incl. GST)</p>
+                            <p class="mt-1 text-sm text-gray-700">Up to {{ $selectedPackage->total_credits }} days online &mdash; AUD ${{ number_format($selectedPackage->price, 2) }} (incl. GST)</p>
                             @if($selectedPackage->description)
                                 <p class="mt-1 text-xs text-gray-500">{{ $selectedPackage->description }}</p>
                             @elseif($selectedPackage->name)
@@ -122,7 +122,7 @@
                                          >
                                          <div>
                                             <p class="text-sm font-semibold text-gray-900">{{ $package->total_credits }} credits</p>
-                                            <p class="text-xs text-gray-700">Up to {{ $package->total_credits }} days online &mdash; {{ $package->currency }} ${{ number_format($package->price, 2) }} (incl. GST)</p>
+                                            <p class="text-xs text-gray-700">Up to {{ $package->total_credits }} days online &mdash; AUD ${{ number_format($package->price, 2) }} (incl. GST)</p>
                                             @if($package->bonus_credits > 0)
                                                 <p class="text-xs font-medium text-emerald-600">Includes {{ $package->bonus_credits }} bonus credits</p>
                                             @endif
@@ -166,7 +166,7 @@
                                 <div>
                                     <p class="mt-2 text-xl font-bold text-gray-900" x-text="selected.credits + ' credits'"></p>
                                     <p class="mt-1 text-sm text-gray-700" x-text="'Up to ' + selected.credits + ' days online'"></p>
-                                    <p class="mt-0.5 text-sm font-semibold text-gray-900" x-text="selected.currency + ' $' + selected.price"></p>
+                                    <p class="mt-0.5 text-sm font-semibold text-gray-900" x-text="'AUD $' + selected.price"></p>
                                     <p class="mt-1 text-xs font-medium text-emerald-600" x-show="selected.bonus_credits > 0" x-text="'Includes ' + selected.bonus_credits + ' bonus credits'"></p>
                                     <p class="mt-1 text-xs text-gray-500" x-text="selected.name"></p>
                                 </div>
@@ -228,8 +228,9 @@
                             <a href="{{ route('terms-and-conditions') }}" target="_blank" class="text-[#e04ecb] hover:underline">Terms &amp; Conditions</a>.
                         </p>
                         <p class="text-xs text-gray-500">
-                            For billing enquiries or support, please
-                            <a href="{{ route('contact-us') }}" class="text-[#e04ecb] hover:underline">contact us</a>.
+                            For business/support contact details, please email support@hotescorts.com.au or use our
+                            <a href="{{ route('contact-us') }}" class="text-[#e04ecb] hover:underline">contact us</a>
+                            page.
                         </p>
                     </div>
                 </form>

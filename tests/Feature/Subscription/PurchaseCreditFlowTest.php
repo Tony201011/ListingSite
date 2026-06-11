@@ -142,6 +142,21 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertSeeText('2 x daily Available NOW (2 x 2 hours)');
     }
 
+    public function test_purchase_credit_page_shows_test_mode_checkout_information_when_payments_are_disabled(): void
+    {
+        $user = $this->createProvider();
+        $this->createActivePackage();
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSeeText('You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only.');
+        $response->assertSeeText('Payment processing is currently in test mode for processor review.');
+        $response->assertSeeText('AUD $9.99');
+        $response->assertSeeText('For business/support contact details, please email support@hotescorts.com.au');
+        $response->assertSee(route('refund-policy'));
+    }
+
     // ---------------------------------------------------------------
     // Checkout validation
     // ---------------------------------------------------------------
