@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\VideoLogs;
 
-use App\Filament\Clusters\Logs;
 use App\Filament\Resources\VideoLogs\Pages\ListVideoLogs;
 use App\Models\SiteSetting;
 use App\Models\UserVideo;
 use BackedEnum;
+use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -30,7 +30,7 @@ class VideoLogResource extends Resource
 
     protected static ?string $slug = 'video-logs';
 
-    protected static ?string $cluster = Logs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Logs';
 
     protected static ?int $navigationSort = 9;
 

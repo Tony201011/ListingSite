@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\OnlineLogs;
 
-use App\Filament\Clusters\Logs;
 use App\Filament\Resources\OnlineLogs\Pages\ListOnlineLogs;
 use App\Models\OnlineUser;
 use App\Models\SiteSetting;
 use BackedEnum;
+use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -28,7 +28,7 @@ class OnlineLogResource extends Resource
 
     protected static ?string $slug = 'online-logs';
 
-    protected static ?string $cluster = Logs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Logs';
 
     protected static ?int $navigationSort = 5;
 

@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\EmailLogs;
 
-use App\Filament\Clusters\Logs;
 use App\Filament\Resources\EmailLogs\Pages\ListEmailLogs;
 use App\Models\EmailLog;
 use App\Models\SiteSetting;
 use BackedEnum;
+use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -28,7 +28,7 @@ class EmailLogResource extends Resource
 
     protected static ?string $slug = 'email-logs';
 
-    protected static ?string $cluster = Logs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Logs';
 
     protected static ?int $navigationSort = 1;
 

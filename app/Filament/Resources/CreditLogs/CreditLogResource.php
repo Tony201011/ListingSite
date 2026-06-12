@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\CreditLogs;
 
-use App\Filament\Clusters\Logs;
 use App\Filament\Resources\CreditLogs\Pages\ListCreditLogs;
 use App\Models\CreditLog;
 use App\Models\SiteSetting;
 use BackedEnum;
+use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -29,9 +29,9 @@ class CreditLogResource extends Resource
 
     protected static ?string $slug = 'credit-logs';
 
-    protected static ?string $cluster = Logs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Logs';
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 10;
 
     public static function canAccess(): bool
     {
