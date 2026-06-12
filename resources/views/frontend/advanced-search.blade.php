@@ -14,6 +14,7 @@
 
 @php
     $locationQuery = (string) ($locationQuery ?? '');
+    $escortNameQuery = (string) ($escortNameQuery ?? '');
     $hasAgeFilter = $hasAgeFilter ?? false;
     $hasPriceFilter = $hasPriceFilter ?? false;
     $hasDistanceFilter = $hasDistanceFilter ?? false;
@@ -24,7 +25,7 @@
     $userLng = $userLng ?? null;
     $girlsMode = (string) ($girlsMode ?? 'all');
     $selectedCategoryItems = $selectedCategoryItems ?? collect();
-    $hasActiveFilters = $locationQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
+    $hasActiveFilters = $locationQuery !== '' || $escortNameQuery !== '' || collect($selectedCategoryItems)->isNotEmpty() || $hasAgeFilter || $hasPriceFilter || $hasDistanceFilter;
 @endphp
 
 @section('content')
@@ -61,6 +62,7 @@
 
                 distance: {{ $distanceFilter }},
                 maxDistance: {{ $maxSearchDistance }},
+                distanceTouched: {{ $hasDistanceFilter ? 'true' : 'false' }},
 
                 labelStyle(percent) {
                     const safePercent = Math.min(100, Math.max(0, percent));
@@ -261,12 +263,13 @@
 
                         <input
                             id="distance"
-                            name="distance"
+                            :name="distanceTouched ? 'distance' : null"
                             type="range"
                             min="0"
                             max="{{ $maxSearchDistance }}"
                             step="1"
                             x-model.number="distance"
+                            @input="distanceTouched = true"
                             class="range-thumb absolute left-0 top-8 z-20 h-2 w-full -translate-y-1/2 appearance-none bg-transparent"
                         >
                     </div>
@@ -514,6 +517,11 @@
                     @if($locationQuery !== '')
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
                             <i class="fa-solid fa-location-dot text-pink-500 text-[10px]"></i> {{ $locationQuery }}
+                        </span>
+                    @endif
+                    @if($escortNameQuery !== '')
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1 text-xs text-gray-700">
+                            <i class="fa-solid fa-user text-pink-500 text-[10px]"></i> {{ $escortNameQuery }}
                         </span>
                     @endif
                     @foreach(collect($selectedCategoryItems) as $item)
