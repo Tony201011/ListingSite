@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const response = await fetch(nextPageUrl, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
+                        'X-Listing-Page': '1',
                     },
                 });
 
