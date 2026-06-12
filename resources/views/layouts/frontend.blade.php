@@ -15,7 +15,7 @@
     @endphp
 
     <meta name="description" content="{{ $metaDescription ?? '' }}">
-    <meta name="keywords" content="{{ $metaKeywords ?? '' }}">
+    <meta name="keywords" content="{{ is_array($metaKeywords ?? null) ? implode(', ', $metaKeywords) : ($metaKeywords ?? '') }}">
     <link rel="canonical" href="@yield('canonical', url()->current())">
     @stack('head')
     <title>@yield('title', 'Premium Directory')</title>
