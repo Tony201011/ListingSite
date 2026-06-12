@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\SmtpSettings;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Resources\SmtpSettings\Pages\ManageSmtpSettings;
 use App\Models\SmtpSetting;
 use BackedEnum;
@@ -34,9 +33,9 @@ class SmtpSettingResource extends Resource
 
     protected static ?string $slug = 'smtp-settings';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 7;
 
     public static function canAccess(): bool
     {

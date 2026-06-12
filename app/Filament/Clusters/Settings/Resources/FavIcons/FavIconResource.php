@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Settings\Resources\FavIcons;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\FavIcons\Pages\CreateFavIcon;
 use App\Filament\Clusters\Settings\Resources\FavIcons\Pages\EditFavIcon;
 use App\Filament\Clusters\Settings\Resources\FavIcons\Pages\ListFavIcons;
@@ -23,7 +22,11 @@ class FavIconResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
+
+    protected static ?string $navigationLabel = 'Fav Icons';
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

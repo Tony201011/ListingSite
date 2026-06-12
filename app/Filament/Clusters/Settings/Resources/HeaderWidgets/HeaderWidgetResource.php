@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Settings\Resources\HeaderWidgets;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\HeaderWidgets\Pages\ManageHeaderWidgets;
 use App\Models\HeaderWidget;
 use BackedEnum;
@@ -36,9 +35,9 @@ class HeaderWidgetResource extends Resource
 
     protected static ?string $slug = 'header-widgets';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 52;
+    protected static ?int $navigationSort = 12;
 
     public static function canAccess(): bool
     {

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\GoogleRecaptchaSetting;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Resources\GoogleRecaptchaSetting\Pages\ManageGoogleRecaptchaSettings;
 use App\Filament\Resources\GoogleRecaptchaSetting\Schemas\GoogleRecaptchaSettingForm;
 use App\Filament\Resources\GoogleRecaptchaSetting\Tables\GoogleRecaptchaSettingsTable;
@@ -28,7 +27,9 @@ class GoogleRecaptchaSettingResource extends Resource
 
     protected static ?string $slug = 'google-recaptcha-settings';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 5;
 
     public static function canAccess(): bool
     {

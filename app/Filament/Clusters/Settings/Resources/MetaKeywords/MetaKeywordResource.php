@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Settings\Resources\MetaKeywords;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\MetaKeywords\Pages\CreateMetaKeyword;
 use App\Filament\Clusters\Settings\Resources\MetaKeywords\Pages\EditMetaKeyword;
 use App\Filament\Clusters\Settings\Resources\MetaKeywords\Pages\ListMetaKeywords;
@@ -25,7 +24,11 @@ class MetaKeywordResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
+
+    protected static ?string $navigationLabel = 'Meta Keywords';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Schema $schema): Schema
     {

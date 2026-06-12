@@ -56,6 +56,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Account Management')->collapsed(),
                 NavigationGroup::make('Financial')->collapsed(),
                 NavigationGroup::make('Support')->collapsed(),
+                NavigationGroup::make('Settings')->collapsed(),
                 NavigationGroup::make('System')->collapsed(),
             ])
             ->sidebarCollapsibleOnDesktop()
@@ -68,6 +69,7 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('admin')
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->discoverResources(in: app_path('Filament/Clusters/Settings/Resources'), for: 'App\\Filament\\Clusters\\Settings\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,

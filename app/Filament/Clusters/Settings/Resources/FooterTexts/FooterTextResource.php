@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Settings\Resources\FooterTexts;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\FooterTexts\Pages\ManageFooterTexts;
 use App\Models\FooterText;
 use BackedEnum;
@@ -32,9 +31,9 @@ class FooterTextResource extends Resource
 
     protected static ?string $slug = 'footer-text';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 10;
 
     public static function canAccess(): bool
     {
