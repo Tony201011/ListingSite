@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class FaqResource extends Resource
 {
@@ -32,7 +33,7 @@ class FaqResource extends Resource
 
     protected static ?string $slug = 'faq';
 
-    protected static ?string $navigationGroup = 'Pages';
+    protected static string|UnitEnum|null $navigationGroup = 'Pages';
 
     protected static ?int $navigationSort = 5;
 

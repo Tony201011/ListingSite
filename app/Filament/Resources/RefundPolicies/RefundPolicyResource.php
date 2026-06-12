@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class RefundPolicyResource extends Resource
 {
@@ -32,7 +33,7 @@ class RefundPolicyResource extends Resource
 
     protected static ?string $slug = 'refund-policy';
 
-    protected static ?string $navigationGroup = 'Pages';
+    protected static string|UnitEnum|null $navigationGroup = 'Pages';
 
     protected static ?int $navigationSort = 3;
 
