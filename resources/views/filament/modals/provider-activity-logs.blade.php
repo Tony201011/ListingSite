@@ -171,11 +171,15 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach ($activity['days'] as $day)
+                    @foreach ($activity['days'] as $day)
+                        <tbody x-data="{ open: true }">
                             {{-- Day header row --}}
-                            <tr class="pa-day-row">
+                            <tr
+                                class="pa-day-row"
+                                @click="open = !open"
+                            >
                                 <td colspan="2" class="pa-day-header">
+                                    <span class="pa-chevron" :class="{ 'pa-chevron--collapsed': !open }">&#9660;</span>
                                     {{ $day['date'] }}
                                     <span class="pa-day-sessions">{{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}</span>
                                 </td>
@@ -186,7 +190,7 @@
                             </tr>
                             {{-- Individual session rows --}}
                             @foreach ($day['sessions'] as $session)
-                                <tr class="pa-session-row">
+                                <tr class="pa-session-row" x-show="open">
                                     <td>{{ $session['date'] ?? $day['date'] }}</td>
                                     <td></td>
                                     <td>{{ $session['login_at'] }}</td>
@@ -199,8 +203,8 @@
                                     </td>
                                 </tr>
                             @endforeach
-                        @endforeach
-                    </tbody>
+                        </tbody>
+                    @endforeach
                 </table>
             </div>
         </div>
@@ -327,6 +331,27 @@
         background: #f0f4ff;
         border-top: 2px solid #c7d2fe;
         border-bottom: 1px solid #c7d2fe;
+    }
+
+    .pa-day-row {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .pa-day-row:hover td {
+        filter: brightness(0.97);
+    }
+
+    .pa-chevron {
+        display: inline-block;
+        font-size: 10px;
+        margin-right: 6px;
+        transition: transform 0.2s ease;
+        color: #6366f1;
+    }
+
+    .pa-chevron--collapsed {
+        transform: rotate(-90deg);
     }
 
     .pa-day-header {

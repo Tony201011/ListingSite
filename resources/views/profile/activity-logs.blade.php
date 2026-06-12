@@ -103,14 +103,16 @@
                         </thead>
 
                         <tbody>
-                            @foreach ($activity['days'] as $day)
+                            @foreach ($activity['days'] as $dayIndex => $day)
                                 @php
                                     $dailyTotal = $day['total_duration'] ?? '00h 00m 00s';
+                                    $dayId      = 'al-day-' . $dayIndex;
                                 @endphp
 
                                 {{-- Day header --}}
-                                <tr class="al-day-row">
+                                <tr class="al-day-row al-day-toggle" data-target="{{ $dayId }}" onclick="alToggleDay(this)" style="cursor:pointer">
                                     <td colspan="2" class="al-day-header">
+                                        <span class="al-chevron">&#9660;</span>
                                         {{ $day['date'] }}
                                         <span class="al-day-count">
                                             {{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}
@@ -126,7 +128,7 @@
 
                                 {{-- Individual sessions --}}
                                 @foreach ($day['sessions'] as $session)
-                                    <tr class="al-session-row">
+                                    <tr class="al-session-row" data-day="{{ $dayId }}">
                                         <td>{{ $session['date'] ?? $day['date'] }}</td>
                                         <td></td>
                                         <td>{{ $session['login_at'] }}</td>
@@ -190,6 +192,23 @@
                 window.location.reload();
             });
         })();
+
+        function alToggleDay(toggleRow) {
+            var dayId   = toggleRow.getAttribute('data-target');
+            var rows    = document.querySelectorAll('[data-day="' + dayId + '"]');
+            var chevron = toggleRow.querySelector('.al-chevron');
+            var isOpen  = toggleRow.getAttribute('data-open') !== 'false';
+
+            rows.forEach(function (row) {
+                row.style.display = isOpen ? 'none' : '';
+            });
+
+            toggleRow.setAttribute('data-open', isOpen ? 'false' : 'true');
+
+            if (chevron) {
+                chevron.classList.toggle('al-chevron--collapsed', isOpen);
+            }
+        }
     </script>
 @endpush
 
@@ -297,6 +316,22 @@
 
     .al-range-input {
         accent-color: #e04ecb;
+    }
+
+    .al-day-toggle:hover td {
+        filter: brightness(0.97);
+    }
+
+    .al-chevron {
+        display: inline-block;
+        font-size: 10px;
+        margin-right: 6px;
+        transition: transform 0.2s ease;
+        color: #6366f1;
+    }
+
+    .al-chevron--collapsed {
+        transform: rotate(-90deg);
     }
 
     .al-table-scroll {
