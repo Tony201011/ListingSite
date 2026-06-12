@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AboutUsPages;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\AboutUsPages\Pages\ManageAboutUsPages;
 use App\Models\AboutUsPage;
 use BackedEnum;
@@ -33,9 +32,9 @@ class AboutUsPageResource extends Resource
 
     protected static ?string $slug = 'about-us';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 4;
 
     public static function canAccess(): bool
     {

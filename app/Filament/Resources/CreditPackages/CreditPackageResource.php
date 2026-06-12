@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\CreditPackages;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\CreditPackages\Pages\ManageCreditPackages;
 use App\Models\CreditPackage;
 use BackedEnum;
@@ -33,7 +32,7 @@ class CreditPackageResource extends Resource
 
     protected static ?string $slug = 'credit-packages';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
     protected static ?int $navigationSort = 10;
 

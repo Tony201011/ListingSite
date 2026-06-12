@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\PricingPackages;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\PricingPackages\Pages\ManagePricingPackages;
 use App\Models\PricingPackage;
 use BackedEnum;
@@ -33,7 +32,7 @@ class PricingPackageResource extends Resource
 
     protected static ?string $slug = 'pricing-packages';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
     protected static ?int $navigationSort = 9;
 

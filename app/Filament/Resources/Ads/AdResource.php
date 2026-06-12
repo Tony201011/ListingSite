@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Ads;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\Ads\Pages\ManageAds;
 use App\Models\Ad;
 use BackedEnum;
@@ -36,9 +35,9 @@ class AdResource extends Resource
 
     protected static ?string $slug = 'ads';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 13;
 
     public static function canAccess(): bool
     {

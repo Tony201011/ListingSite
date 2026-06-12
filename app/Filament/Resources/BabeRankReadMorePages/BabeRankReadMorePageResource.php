@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\BabeRankReadMorePages;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\BabeRankReadMorePages\Pages\ManageBabeRankReadMorePages;
 use App\Models\BabeRankReadMorePage;
 use BackedEnum;
@@ -34,9 +33,9 @@ class BabeRankReadMorePageResource extends Resource
 
     protected static ?string $slug = 'babe-rank-read-more';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 14;
 
     public static function canAccess(): bool
     {

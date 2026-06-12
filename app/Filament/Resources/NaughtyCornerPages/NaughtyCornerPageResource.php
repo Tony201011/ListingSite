@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\NaughtyCornerPages;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\NaughtyCornerPages\Pages\ManageNaughtyCornerPages;
 use App\Models\NaughtyCornerPage;
 use BackedEnum;
@@ -33,9 +32,9 @@ class NaughtyCornerPageResource extends Resource
 
     protected static ?string $slug = 'naughty-corner';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 12;
 
     public static function canAccess(): bool
     {

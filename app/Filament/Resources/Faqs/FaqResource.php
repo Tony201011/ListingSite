@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Faqs;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\Faqs\Pages\ManageFaqs;
 use App\Models\Faq;
 use BackedEnum;
@@ -33,9 +32,9 @@ class FaqResource extends Resource
 
     protected static ?string $slug = 'faq';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 5;
 
     public static function canAccess(): bool
     {

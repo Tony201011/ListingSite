@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ProhibitedContentPolicies;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\ProhibitedContentPolicies\Pages\ManageProhibitedContentPolicies;
 use App\Models\ProhibitedContentPolicy;
 use BackedEnum;
@@ -33,9 +32,9 @@ class ProhibitedContentPolicyResource extends Resource
 
     protected static ?string $slug = 'prohibited-content-policy';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 15;
+    protected static ?int $navigationSort = 18;
 
     public static function canAccess(): bool
     {
