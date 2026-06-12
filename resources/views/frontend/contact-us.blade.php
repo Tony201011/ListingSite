@@ -5,7 +5,7 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div class="rounded-lg bg-white p-6 shadow-sm sm:p-8">
+        <div class="min-h-[600px] rounded-lg bg-white p-6 shadow-sm sm:p-8">
         @php
             $enableNameField = $contactPage?->enable_name_field ?? true;
             $enableEmailField = $contactPage?->enable_email_field ?? true;
@@ -29,7 +29,7 @@
             <span class="mr-1">&lt;</span> back
         </button>
 
-        <div class="mb-6">
+        <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900">{{ $contactPage?->title ?? 'Contact Us' }}</h1>
             <p class="mt-3 text-gray-600">{{ $contactPage?->subtitle ?? 'Have a question or need support? Send us a message and our team will get back to you.' }}</p>
         </div>
@@ -51,14 +51,15 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div class="rounded-lg border border-gray-300 p-6 lg:col-span-2">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <div class="rounded-lg border border-gray-300 p-6 lg:col-span-8">
                 <form method="POST" action="{{ route('contact-us.submit') }}" class="space-y-4">
                     @csrf
 
                     @if($enableNameField)
                         <div>
-                            <input type="text" name="name" value="{{ old('name') }}" placeholder="Your name" class="w-full rounded border px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 {{ $errors->has('name') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}">
+                            <label for="contact-name" class="mb-1 block text-sm font-medium text-gray-700">Your name</label>
+                            <input id="contact-name" type="text" name="name" value="{{ old('name') }}" placeholder="Your name" class="w-full rounded-md border px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 {{ $errors->has('name') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}">
                             @error('name')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -67,7 +68,8 @@
 
                     @if($enableEmailField)
                         <div>
-                            <input type="email" name="email" value="{{ old('email') }}" placeholder="Your email" class="w-full rounded border px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 {{ $errors->has('email') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}">
+                            <label for="contact-email" class="mb-1 block text-sm font-medium text-gray-700">Your email</label>
+                            <input id="contact-email" type="email" name="email" value="{{ old('email') }}" placeholder="Your email" class="w-full rounded-md border px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 {{ $errors->has('email') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}">
                             @error('email')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -76,7 +78,8 @@
 
                     @if($enableSubjectField)
                         <div>
-                            <input type="text" name="subject" value="{{ old('subject') }}" placeholder="Subject" class="w-full rounded border px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 {{ $errors->has('subject') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}">
+                            <label for="contact-subject" class="mb-1 block text-sm font-medium text-gray-700">Subject</label>
+                            <input id="contact-subject" type="text" name="subject" value="{{ old('subject') }}" placeholder="Subject" class="w-full rounded-md border px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 {{ $errors->has('subject') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}">
                             @error('subject')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -85,7 +88,8 @@
 
                     @if($enableMessageField)
                         <div>
-                            <textarea rows="5" name="message" placeholder="Write your message..." class="w-full rounded border px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 {{ $errors->has('message') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}">{{ old('message') }}</textarea>
+                            <label for="contact-message" class="mb-1 block text-sm font-medium text-gray-700">Message</label>
+                            <textarea id="contact-message" rows="6" name="message" placeholder="Write your message..." class="w-full rounded-md border px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 {{ $errors->has('message') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-pink-500' }}">{{ old('message') }}</textarea>
                             @error('message')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -98,16 +102,27 @@
                         </div>
                     @endunless
 
-                    <button type="submit" @disabled(! $canSubmitForm) class="rounded bg-pink-500 px-6 py-2 text-white transition hover:bg-pink-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600">Send message</button>
+                    <button type="submit" @disabled(! $canSubmitForm) class="inline-flex w-full items-center justify-center rounded-md bg-pink-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-pink-600 sm:w-auto disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600">Send message</button>
                 </form>
             </div>
 
-            <div class="space-y-6">
+            <div class="space-y-6 lg:col-span-4">
                 <div class="rounded-lg border border-gray-300 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ $contactPage?->support_heading ?? 'Support Info' }}</h2>
-                    <p class="text-sm text-gray-600 mb-2">Response time: {{ $contactPage?->response_time ?? 'within 24 hours' }}</p>
-                    <p class="text-sm text-gray-600 mb-2">Support email: {{ $contactEmail ?? 'support@hotescorts.com.au' }}</p>
-                    <p class="text-sm text-gray-600">Category: {{ $contactPage?->category_label ?? 'contact-us' }}</p>
+                    <dl class="space-y-3 text-sm text-gray-600">
+                        <div>
+                            <dt class="font-medium text-gray-700">Response time</dt>
+                            <dd>{{ $contactPage?->response_time ?? 'within 24 hours' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-700">Support email</dt>
+                            <dd class="break-all">{{ $contactEmail ?? 'support@hotescorts.com.au' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-700">Category</dt>
+                            <dd>{{ $contactPage?->category_label ?? 'contact-us' }}</dd>
+                        </div>
+                    </dl>
                 </div>
 
                 @if($showMap)
