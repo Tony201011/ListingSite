@@ -218,6 +218,25 @@
     word-break: break-word;
 }
 
+/* Ensure clickable controls consistently show pointer cursor in admin panel and login */
+.fi a[href],
+.fi button,
+.fi [role="button"],
+.fi [onclick],
+.fi input[type="button"],
+.fi input[type="submit"],
+.fi input[type="reset"] {
+    cursor: pointer;
+}
+
+.fi button:disabled,
+.fi [aria-disabled="true"],
+.fi input[type="button"]:disabled,
+.fi input[type="submit"]:disabled,
+.fi input[type="reset"]:disabled {
+    cursor: not-allowed;
+}
+
 @media (max-width: 1024px) {
     .fi-sidebar-nav {
         max-height: calc(100vh - 4rem);

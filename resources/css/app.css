@@ -19,4 +19,23 @@
 	input[type="reset"]:not([class*="rounded"]) {
 		border-radius: 0.5rem;
 	}
+
+	a[href],
+	button,
+	input[type="button"],
+	input[type="submit"],
+	input[type="reset"],
+	[role="button"],
+	[onclick],
+	summary {
+		cursor: pointer;
+	}
+
+	button:disabled,
+	input[type="button"]:disabled,
+	input[type="submit"]:disabled,
+	input[type="reset"]:disabled,
+	[aria-disabled="true"] {
+		cursor: not-allowed;
+	}
 }
