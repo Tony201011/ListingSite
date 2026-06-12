@@ -33,7 +33,7 @@ class AgeGroupCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Age Group Categories';
 
     protected static ?string $slug = 'age-group';
-    protected static ?string $navigationGroup = 'Categories';
+    protected static \UnitEnum|string|null $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 5;
 
