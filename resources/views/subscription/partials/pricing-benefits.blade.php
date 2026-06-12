@@ -12,7 +12,10 @@
         </article>
     @else
         <p class="mt-5 text-sm leading-7 text-gray-600">
-            We don't believe in basic, pro and premium packages. Every babe gets the same features. Just one credit for every day you advertise. Not advertising, taking a break, or hiding your profile? No charge, no worries.
+            We don't believe in basic, pro and premium packages. Every babe gets the same features. Just one credit for every day you advertise.
+        </p>
+        <p class="mt-4 text-sm leading-7 text-gray-600">
+            Not advertising, taking a break, or hiding your profile? No charge, no worries! You can still upload new pictures and update your profile content without paying extra. On the days your profile is offline, you don't pay &mdash; you only pay when your profile is online.
         </p>
         <p class="mt-4 text-sm font-semibold text-gray-700">
             This includes:

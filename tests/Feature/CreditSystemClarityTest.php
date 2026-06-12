@@ -22,6 +22,8 @@ class CreditSystemClarityTest extends TestCase
 
         $pricingResponse = $this->get('/pricing');
         $pricingResponse->assertOk();
+        $pricingResponse->assertSeeText("We don't believe in basic, pro and premium packages.");
+        $pricingResponse->assertSeeText("Not advertising, taking a break, or hiding your profile? No charge, no worries!");
         $pricingResponse->assertSeeText('Advertisers purchase prepaid advertising credits.');
         $pricingResponse->assertSeeText('Credits are used for profile visibility and promotional listing features');
         $pricingResponse->assertSeeText('All payments on this platform are exclusively for purchasing advertising credits and promotional listing packages. No payments are processed between visitors and advertisers.');
