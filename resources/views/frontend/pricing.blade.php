@@ -53,9 +53,9 @@
                 </div>
 
                 @auth
-                    <a href="{{ url('/purchase-credit') }}" class="inline-flex rounded-md bg-pink-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-600">Buy credits</a>
+                    <a href="{{ url('/purchase-credit') }}" class="inline-flex rounded-md bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600">Buy credits</a>
                 @else
-                    <a href="{{ route('signin') }}" class="inline-flex rounded-md bg-pink-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-600">Login to buy credits</a>
+                    <a href="{{ route('signin') }}" class="inline-flex rounded-md bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600">Login to buy credits</a>
                 @endauth
 
                 <h3 class="text-xl font-bold text-gray-900 tracking-tight mt-10 mb-3">{{ $page?->packages_title ?: 'Packages' }}</h3>
@@ -131,9 +131,9 @@
                 @endif
 
                 @auth
-                    <a href="{{ url('/purchase-credit') }}" class="mt-6 inline-flex rounded-md bg-pink-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-600">Buy credits</a>
+                    <a href="{{ url('/purchase-credit') }}" class="mt-6 inline-flex rounded-md bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600">Buy credits</a>
                 @else
-                    <a href="{{ route('signin') }}" class="mt-6 inline-flex rounded-md bg-pink-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-pink-600">Login to buy credits</a>
+                    <a href="{{ route('signin') }}" class="mt-6 inline-flex rounded-md bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600">Login to buy credits</a>
                 @endauth
             </div>
         </div>
