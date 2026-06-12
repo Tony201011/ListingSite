@@ -61,6 +61,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureAdminSlideOverActions();
 
         FilamentView::registerRenderHook(
+            'panels::head.start',
+            fn (): string => '<script>!function(){try{var v=localStorage.getItem("collapsedGroups");if(v===null||v==="null"){localStorage.setItem("collapsedGroups","[]")}else{var p;try{p=JSON.parse(v)}catch(e){p=null}if(!Array.isArray(p)){localStorage.setItem("collapsedGroups","[]")}}}catch(e){}}();</script>',
+        );
+
+        FilamentView::registerRenderHook(
             'panels::head.end',
             fn (): string => '<style>.fi-sidebar{min-height:0!important;}.fi-body-has-topbar .fi-sidebar{max-height:calc(100dvh - 4rem)!important;}.fi-sidebar-nav{min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;scrollbar-gutter:stable;}</style>',
         );

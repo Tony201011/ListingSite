@@ -45,12 +45,14 @@
 .fi-sidebar-nav,
 .fi-sidebar-group-items,
 .fi-sidebar-sub-group-items {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 0.25rem;
 }
 
 .fi-sidebar-group {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 0.25rem;
 }
 
