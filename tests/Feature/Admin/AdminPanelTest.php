@@ -123,6 +123,32 @@ class AdminPanelTest extends TestCase
         $this->assertStringContainsString('/admin/providers?tableFilters%5Bavailable_now_status%5D%5Bvalue%5D=online', $html);
     }
 
+    public function test_available_now_users_chart_counts_profile_linked_rows_when_user_id_is_null(): void
+    {
+        $this->createAdmin();
+        $provider = $this->createProvider();
+        $profile = $provider->providerProfiles()->firstOrFail();
+
+        AvailableNow::query()->create([
+            'user_id' => null,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+            'usage_date' => today(),
+            'usage_count' => 1,
+            'available_started_at' => now()->subMinutes(5),
+            'available_expires_at' => now()->addMinutes(55),
+        ]);
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+
+        $component = Livewire::test(AvailabilityChart::class)->instance();
+        $method = (new \ReflectionClass($component))->getMethod('getData');
+        $method->setAccessible(true);
+        $data = $method->invoke($component);
+
+        $this->assertContains(1, $data['datasets'][0]['data']);
+    }
+
     public function test_admin_dashboard_shows_total_providers_card(): void
     {
         $this->createAdmin();
