@@ -88,82 +88,28 @@ class ListingPaginationUrlService
     public function canonicalUrlForRequest(Request $request, array $validated, bool $advancedSearch = false): ?string
     {
         // Use the raw QUERY_STRING (before FormRequest::prepareForValidation merges defaults
-        // into the GET query bag) so that explicit "girls" or "page" parameters can be detected.
+        // into the GET query bag) so that a plain "/" request is never incorrectly treated
+        // as having an explicit "girls" or "page" parameter.
         parse_str((string) $request->server('QUERY_STRING', ''), $rawQuery);
 
-        $routeName = (string) ($request->route()?->getName() ?? '');
+        if (
+            ! $advancedSearch
+            && trim($request->getPathInfo(), '/') === ''
+            && $this->resolveCurrentPage($request) === 1
+            && ! $this->hasSearchFilters($validated)
+            && ! isset($rawQuery['girls'])
+            && ! isset($rawQuery['page'])
+        ) {
+            return null;
+        }
+
         $currentPage = $this->resolveCurrentPage($request);
-
-        if ($advancedSearch) {
-            // Only the legacy /advanced-search route needs redirecting to the canonical /search path.
-            // All canonical /search/* routes render directly regardless of query parameters.
-            if ($routeName !== 'advanced-search.legacy') {
-                return null;
-            }
-
-            $targetUrl = $this->buildUrl($validated, $currentPage, advancedSearch: true);
-
-            return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
-        }
-
-        // Legacy /escorts/search/location/... routes redirect to /escorts/location/{text}.
-        if (in_array($routeName, ['escorts.search.location', 'escorts.search.location.no-state', 'escorts.search.location.legacy'], true)) {
-            $location = trim((string) ($validated['location'] ?? ''));
-
-            if ($location !== '') {
-                return url('/escorts/location/'.rawurlencode($location));
-            }
-
-            return null;
-        }
-
-        // /escorts/search with a location filter in the query redirects to the advanced-search canonical URL.
-        if ($routeName === 'escorts.search') {
-            if ($this->resolveLocationData($validated) !== null) {
-                $targetUrl = $this->buildUrl($validated, $currentPage, advancedSearch: true);
-
-                return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
-            }
-
-            return null;
-        }
-
-        // /escorts/location/{text} renders directly. If legacy query params are present they are
-        // stripped by redirecting to the canonical /search/{slug} advanced-search URL.
-        if ($routeName === 'escorts.location') {
-            if (! empty($rawQuery)) {
-                $targetUrl = $this->buildUrl($validated, $currentPage, advancedSearch: true);
-
-                return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
-            }
-
-            return null;
-        }
-
-        // The home page (/) renders directly for any filter combination.
-        // Only redirect when explicit girls or page pagination parameters are present.
-        if ($routeName === 'home') {
-            if (! isset($rawQuery['girls']) && ! isset($rawQuery['page'])) {
-                return null;
-            }
-        }
-
-        // All other canonical SEO home routes render directly without redirect.
-        if (in_array($routeName, [
-            'escorts.search.page',
-            'escorts.search.slug', 'escorts.search.slug.page',
-            'escorts.search.name', 'escorts.search.name.page',
-        ], true)) {
-            return null;
-        }
-
-        // For all remaining routes (girls.*, escorts.browse, escorts.index, etc.)
-        // apply the existing canonical URL redirect logic.
-        $targetUrl = $this->buildUrl($validated, $currentPage, advancedSearch: false);
+        $targetUrl = $this->buildUrl($validated, $currentPage, $advancedSearch);
 
         // /escorts/all on page 1 with no filters is canonically the home page (/).
         if (
-            $currentPage === 1
+            ! $advancedSearch
+            && $currentPage === 1
             && $targetUrl === route('escorts.index', ['type' => 'all'])
         ) {
             $targetUrl = route('home');
