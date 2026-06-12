@@ -20,6 +20,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class AdResource extends Resource
 {
@@ -35,7 +36,7 @@ class AdResource extends Resource
 
     protected static ?string $slug = 'ads';
 
-    protected static ?string $navigationGroup = 'Pages';
+    protected static string|UnitEnum|null $navigationGroup = 'Pages';
 
     protected static ?int $navigationSort = 13;
 

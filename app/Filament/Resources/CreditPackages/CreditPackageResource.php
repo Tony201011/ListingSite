@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class CreditPackageResource extends Resource
 {
@@ -32,7 +33,7 @@ class CreditPackageResource extends Resource
 
     protected static ?string $slug = 'credit-packages';
 
-    protected static ?string $navigationGroup = 'Pages';
+    protected static string|UnitEnum|null $navigationGroup = 'Pages';
 
     protected static ?int $navigationSort = 10;
 
