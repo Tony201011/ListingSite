@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ContactInquiries;
 
 use App\Actions\SendContactInquiryReplyEmail;
+use App\Filament\Clusters\ContactUs;
 use App\Filament\Resources\ContactInquiries\Pages\ListContactInquiries;
 use App\Filament\Resources\ContactInquiries\Pages\ViewContactInquiry;
 use App\Models\ContactInquiry;
@@ -42,7 +43,7 @@ class ContactInquiryResource extends Resource
 
     protected static ?string $slug = 'contact-inquiries';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+    protected static ?string $cluster = ContactUs::class;
 
     protected static ?int $navigationSort = 1;
 
