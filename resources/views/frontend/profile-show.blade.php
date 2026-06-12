@@ -1135,7 +1135,7 @@ $profileTags = array_values(array_unique(array_merge(
                 </button>
                 <button type="submit" id="booking-submit-btn"
                     class="flex-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl px-4 py-2 text-sm font-semibold transition">
-                    Send Enquiry
+                    Send booking enquiry
                 </button>
             </div>
         </form>
