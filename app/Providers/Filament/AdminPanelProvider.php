@@ -52,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Dashboard')->collapsed(),
                 NavigationGroup::make('Content Management')->collapsed(),
-                NavigationGroup::make('Pages')->collapsed(false),
+                NavigationGroup::make('Pages')->collapsed(),
                 NavigationGroup::make('Categories')->collapsed(),
                 NavigationGroup::make('Provider Management')->collapsed(),
                 NavigationGroup::make('Account Management')->collapsed(),
