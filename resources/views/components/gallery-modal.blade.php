@@ -22,7 +22,7 @@
             <button
                 type="button"
                 @click="toggleZoom()"
-                class="w-10 h-10 flex items-center justify-center bg-[#2b2b2b] rounded hover:bg-[#3a3a3a] transition"
+                class="w-10 h-10 flex items-center justify-center bg-[#2b2b2b] rounded hover:bg-[#3a3a3a] transition cursor-pointer"
                 title="Zoom"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@
             <button
                 type="button"
                 @click="toggleSlideshow()"
-                class="w-10 h-10 flex items-center justify-center bg-[#2b2b2b] rounded hover:bg-[#3a3a3a] transition"
+                class="w-10 h-10 flex items-center justify-center bg-[#2b2b2b] rounded hover:bg-[#3a3a3a] transition cursor-pointer"
                 title="Play / Pause"
             >
                 <svg
@@ -65,7 +65,7 @@
             <button
                 type="button"
                 @click="toggleGrid()"
-                class="hover:text-white text-2xl"
+                class="hover:text-white text-2xl cursor-pointer"
                 title="Toggle grid"
             >
                 ▦
@@ -75,7 +75,7 @@
             <button
                 type="button"
                 @click="close()"
-                class="hover:text-white text-2xl"
+                class="hover:text-white text-2xl cursor-pointer"
                 title="Close"
             >
                 ✕
@@ -84,14 +84,14 @@
     </div>
 
     <!-- MAIN AREA -->
-    <div class="flex flex-col sm:flex-row w-full h-full pt-16">
+    <div class="flex flex-col sm:flex-row w-full h-full pt-16 relative z-10">
         <div class="flex-1 flex items-center justify-center relative overflow-hidden mb-4 sm:mb-0">
             <!-- LEFT ARROW -->
             <button
                 type="button"
                 @click="prev()"
                 x-show="images.length > 1"
-                class="absolute left-1 sm:left-4 lg:left-6 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40"
+                class="absolute left-1 sm:left-4 lg:left-6 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40 cursor-pointer"
                 title="Previous"
             >
                 ❮
@@ -123,7 +123,7 @@
                 <button
                     type="button"
                     @click="next()"
-                    class="absolute right-1 sm:right-4 lg:right-6 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40"
+                    class="absolute right-1 sm:right-4 lg:right-6 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40 cursor-pointer"
                     title="Next"
                 >
                     ❯
@@ -153,7 +153,7 @@
                 <button
                     type="button"
                     @click="next()"
-                    class="absolute right-1 top-1/2 -translate-y-1/2 sm:translate-y-0 sm:right-80 lg:sm:right-96 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40"
+                    class="absolute right-1 top-1/2 -translate-y-1/2 sm:translate-y-0 sm:right-80 lg:right-96 text-white text-2xl sm:text-3xl lg:text-4xl hover:scale-125 transition z-40 cursor-pointer"
                     title="Next"
                 >
                     ❯
