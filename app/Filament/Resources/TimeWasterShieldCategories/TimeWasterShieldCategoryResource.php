@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\TimeWasterShieldCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\TimeWasterShieldCategories\Pages\ManageTimeWasterShieldCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,10 +33,9 @@ class TimeWasterShieldCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Time Waster Shield Categories';
 
     protected static ?string $slug = 'time-waster-shield';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 15;
+    protected static ?int $navigationSort = 18;
 
     public static function canAccess(): bool
     {

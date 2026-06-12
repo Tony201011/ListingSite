@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ServiceStyleCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\ServiceStyleCategories\Pages\ManageServiceStyleCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,8 +33,7 @@ class ServiceStyleCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Service & Style Categories';
 
     protected static ?string $slug = 'services-style';
-
-    protected static ?string $cluster = Categories::class;
+    protected static ?string $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 3;
 

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\EthnicityCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\EthnicityCategories\Pages\ManageEthnicityCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,8 +33,7 @@ class EthnicityCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Ethnicity Categories';
 
     protected static ?string $slug = 'ethnicity';
-
-    protected static ?string $cluster = Categories::class;
+    protected static ?string $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 8;
 

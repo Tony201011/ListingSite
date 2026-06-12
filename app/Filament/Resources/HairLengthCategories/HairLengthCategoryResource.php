@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\HairLengthCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\HairLengthCategories\Pages\ManageHairLengthCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,8 +33,7 @@ class HairLengthCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Hair Length Categories';
 
     protected static ?string $slug = 'hair-length';
-
-    protected static ?string $cluster = Categories::class;
+    protected static ?string $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 7;
 

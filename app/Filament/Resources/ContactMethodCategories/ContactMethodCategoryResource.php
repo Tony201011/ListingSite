@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ContactMethodCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\ContactMethodCategories\Pages\ManageContactMethodCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,10 +33,9 @@ class ContactMethodCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Contact Method Categories';
 
     protected static ?string $slug = 'contact-method';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 13;
+    protected static ?int $navigationSort = 16;
 
     public static function canAccess(): bool
     {

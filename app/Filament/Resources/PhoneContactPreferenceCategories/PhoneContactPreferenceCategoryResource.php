@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\PhoneContactPreferenceCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\PhoneContactPreferenceCategories\Pages\ManagePhoneContactPreferenceCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,10 +33,9 @@ class PhoneContactPreferenceCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Phone Contact Preference Categories';
 
     protected static ?string $slug = 'phone-contact-preferences';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 14;
+    protected static ?int $navigationSort = 17;
 
     public static function canAccess(): bool
     {

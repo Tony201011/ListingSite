@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ServicesProvideCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\ServicesProvideCategories\Pages\ManageServicesProvideCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,8 +33,7 @@ class ServicesProvideCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Service Provided Categories';
 
     protected static ?string $slug = 'services-you-provide';
-
-    protected static ?string $cluster = Categories::class;
+    protected static ?string $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 4;
 

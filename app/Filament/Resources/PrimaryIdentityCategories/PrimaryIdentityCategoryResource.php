@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\PrimaryIdentityCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\PrimaryIdentityCategories\Pages\ManagePrimaryIdentityCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,8 +33,7 @@ class PrimaryIdentityCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Primary Identity Categories';
 
     protected static ?string $slug = 'primary-identity';
-
-    protected static ?string $cluster = Categories::class;
+    protected static ?string $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 1;
 

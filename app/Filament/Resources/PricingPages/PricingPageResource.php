@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\PricingPages;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\PricingPages\Pages\ManagePricingPages;
 use App\Models\PricingPage;
 use BackedEnum;
@@ -32,10 +31,9 @@ class PricingPageResource extends Resource
     protected static ?string $pluralModelLabel = 'Pricing Page';
 
     protected static ?string $slug = 'pricing';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 9;
 
     public static function canAccess(): bool
     {
