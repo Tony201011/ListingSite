@@ -487,7 +487,14 @@
             <div class="mb-5 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4">
                 @php
                     $currentQuery = request()->query();
-                    $girlsUrl = fn (string $mode): string => route('advanced-search', array_merge($currentQuery, ['girls' => $mode]));
+                    unset($currentQuery['girls']);
+                    $girlsUrl = function (string $mode) use ($currentQuery): string {
+                        $baseUrl = $mode === 'all'
+                            ? route('advanced-search')
+                            : route('search.girls.index', ['type' => $mode]);
+
+                        return $baseUrl.(! empty($currentQuery) ? '?'.http_build_query($currentQuery) : '');
+                    };
                 @endphp
                 <div class="flex items-center gap-2">
                     <a

@@ -22,6 +22,7 @@ class ListingPaginationUrlService
     public function buildContext(array $validated, bool $advancedSearch = false): array
     {
         $locationData = $this->resolveLocationData($validated);
+        $girlsMode = $this->resolveGirlsMode($validated);
         $usesLocationPath = $locationData !== null && ! empty($locationData['slug']);
         $usesSearchPath = $usesLocationPath || $advancedSearch || $this->hasSearchFilters($validated);
 
@@ -35,9 +36,13 @@ class ListingPaginationUrlService
             }
 
             if ($usesSearchPath) {
+                $encodeGirlsInPath = $girlsMode !== 'all';
+
                 return [
-                    'base_url' => route('advanced-search'),
-                    'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: false),
+                    'base_url' => $encodeGirlsInPath
+                        ? route('search.girls.index', ['type' => $girlsMode])
+                        : route('advanced-search'),
+                    'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: $encodeGirlsInPath, encodeLocationInPath: false),
                 ];
             }
         } else {

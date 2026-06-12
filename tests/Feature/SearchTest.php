@@ -284,6 +284,22 @@ class SearchTest extends TestCase
         $response->assertRedirect('/search/page/2');
     }
 
+    public function test_advanced_search_girls_query_mode_redirects_to_seo_friendly_girls_path(): void
+    {
+        $response = $this->get('/search?girls=new');
+
+        $response->assertStatus(301);
+        $response->assertRedirect('/search/girls/new');
+    }
+
+    public function test_advanced_search_girls_query_string_pagination_redirects_to_seo_friendly_girls_page_url(): void
+    {
+        $response = $this->get('/search/girls/new?page=2');
+
+        $response->assertStatus(301);
+        $response->assertRedirect('/search/girls/new/page/2');
+    }
+
     public function test_legacy_girls_route_redirects_to_escorts_route(): void
     {
         $response = $this->get('/girls/all/page/2');

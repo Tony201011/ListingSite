@@ -105,6 +105,13 @@ Route::get('/girls/{type}', [HomeController::class, 'index'])
 Route::get('/search/page/{page}', [HomeController::class, 'advancedSearch'])
     ->whereNumber('page')
     ->name('advanced-search.page');
+Route::get('/search/girls/{type}/page/{page}', [HomeController::class, 'advancedSearch'])
+    ->whereIn('type', ['all', 'new', 'popular'])
+    ->whereNumber('page')
+    ->name('search.girls.page');
+Route::get('/search/girls/{type}', [HomeController::class, 'advancedSearch'])
+    ->whereIn('type', ['all', 'new', 'popular'])
+    ->name('search.girls.index');
 Route::get('/search/{location_slug}/page/{page}', [HomeController::class, 'advancedSearch'])
     ->where('location_slug', '(?!page$)[a-z0-9-]+')
     ->whereNumber('page')
