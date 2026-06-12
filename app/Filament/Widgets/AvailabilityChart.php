@@ -9,6 +9,8 @@ use Illuminate\Support\Carbon;
 
 class AvailabilityChart extends ChartWidget
 {
+    private const DISTINCT_PROFILE_KEY = 'COALESCE(provider_profile_id, user_id)';
+
     protected ?string $heading = 'Available Now Users';
 
     protected static ?int $sort = 11;
@@ -50,7 +52,7 @@ class AvailabilityChart extends ChartWidget
                 ->all();
 
             $rawCounts = AvailableNow::query()
-                ->selectRaw('MONTH(usage_date) as month, COUNT(DISTINCT user_id) as count')
+                ->selectRaw('MONTH(usage_date) as month, COUNT(DISTINCT '.self::DISTINCT_PROFILE_KEY.') as count')
                 ->whereYear('usage_date', $year)
                 ->groupBy('month')
                 ->pluck('count', 'month');
@@ -60,7 +62,7 @@ class AvailabilityChart extends ChartWidget
                 ->all();
         } else {
             $rawCounts = AvailableNow::query()
-                ->selectRaw('YEAR(usage_date) as year, COUNT(DISTINCT user_id) as count')
+                ->selectRaw('YEAR(usage_date) as year, COUNT(DISTINCT '.self::DISTINCT_PROFILE_KEY.') as count')
                 ->whereNotNull('usage_date')
                 ->groupBy('year')
                 ->orderBy('year')
