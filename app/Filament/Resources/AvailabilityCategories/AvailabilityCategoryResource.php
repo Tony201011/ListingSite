@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AvailabilityCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\AvailabilityCategories\Pages\ManageAvailabilityCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,10 +33,9 @@ class AvailabilityCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Availability Categories';
 
     protected static ?string $slug = 'availability';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 12;
+    protected static ?int $navigationSort = 15;
 
     public static function canAccess(): bool
     {

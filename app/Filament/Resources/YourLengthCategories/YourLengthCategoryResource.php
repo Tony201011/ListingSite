@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\YourLengthCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\YourLengthCategories\Pages\ManageYourLengthCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,10 +33,9 @@ class YourLengthCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Your Length Categories';
 
     protected static ?string $slug = 'your-length';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 14;
 
     public static function canAccess(): bool
     {

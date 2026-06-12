@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\TourCityCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\TourCityCategories\Pages\ManageAttributeTourCity;
 use App\Models\TourCity;
 use BackedEnum;
@@ -30,10 +29,9 @@ class TourCityCategoriesResource extends Resource
     protected static ?string $pluralModelLabel = 'Tour Cities';
 
     protected static ?string $slug = 'cities';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 13;
 
     public static function canAccess(): bool
     {

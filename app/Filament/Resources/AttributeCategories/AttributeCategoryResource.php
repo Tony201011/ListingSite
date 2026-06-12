@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AttributeCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\AttributeCategories\Pages\ManageAttributeCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,8 +33,7 @@ class AttributeCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Attribute Categories';
 
     protected static ?string $slug = 'attributes';
-
-    protected static ?string $cluster = Categories::class;
+    protected static ?string $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 2;
 

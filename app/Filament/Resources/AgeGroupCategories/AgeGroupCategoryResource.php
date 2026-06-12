@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AgeGroupCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\AgeGroupCategories\Pages\ManageAgeGroupCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,8 +33,7 @@ class AgeGroupCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Age Group Categories';
 
     protected static ?string $slug = 'age-group';
-
-    protected static ?string $cluster = Categories::class;
+    protected static ?string $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 5;
 

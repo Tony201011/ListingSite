@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\PrimarySuburbCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\PrimarySuburbCategories\Pages\ManageAttributePrimarySuburbCategories;
 use App\Models\Postcode;
 use BackedEnum;
@@ -30,10 +29,9 @@ class PrimarySuburbCategoriesResource extends Resource
     protected static ?string $pluralModelLabel = 'Primary Suburbs';
 
     protected static ?string $slug = 'primary-suburb-categories';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 12;
 
     public static function canAccess(): bool
     {

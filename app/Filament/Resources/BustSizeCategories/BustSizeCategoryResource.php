@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\BustSizeCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\BustSizeCategories\Pages\ManageBustSizeCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,10 +33,9 @@ class BustSizeCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Bust Size Categories';
 
     protected static ?string $slug = 'bust-size';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 11;
 
     public static function canAccess(): bool
     {

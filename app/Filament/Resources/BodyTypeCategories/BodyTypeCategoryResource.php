@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\BodyTypeCategories;
 
-use App\Filament\Clusters\Categories;
 use App\Filament\Resources\BodyTypeCategories\Pages\ManageBodyTypeCategories;
 use App\Models\Category;
 use BackedEnum;
@@ -34,10 +33,9 @@ class BodyTypeCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Body Type Categories';
 
     protected static ?string $slug = 'body-type';
+    protected static ?string $navigationGroup = 'Categories';
 
-    protected static ?string $cluster = Categories::class;
-
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 10;
 
     public static function canAccess(): bool
     {
