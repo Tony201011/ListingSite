@@ -118,7 +118,7 @@
                                     </td>
 
                                     <td colspan="3" class="al-day-total">
-                                        Daily total: <strong>{{ $dailyTotal }}</strong>
+                                        Daily total: {{ $dailyTotal }}
                                     </td>
 
                                     <td></td>
