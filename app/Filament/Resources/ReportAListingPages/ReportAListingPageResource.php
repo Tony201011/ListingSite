@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ReportAListingPages;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\ReportAListingPages\Pages\ManageReportAListingPages;
 use App\Models\ReportAListingPage;
 use BackedEnum;
@@ -33,9 +32,9 @@ class ReportAListingPageResource extends Resource
 
     protected static ?string $slug = 'report-a-listing';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 13;
+    protected static ?int $navigationSort = 16;
 
     public static function canAccess(): bool
     {

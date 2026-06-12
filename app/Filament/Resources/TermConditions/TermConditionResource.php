@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\TermConditions;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\TermConditions\Pages\ManageTermConditions;
 use App\Models\TermCondition;
 use BackedEnum;
@@ -33,9 +32,9 @@ class TermConditionResource extends Resource
 
     protected static ?string $slug = 'terms-and-conditions';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool
     {

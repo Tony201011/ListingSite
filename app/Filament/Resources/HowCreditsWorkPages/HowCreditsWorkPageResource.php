@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\HowCreditsWorkPages;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\HowCreditsWorkPages\Pages\ManageHowCreditsWorkPages;
 use App\Models\HowCreditsWorkPage;
 use BackedEnum;
@@ -33,9 +32,9 @@ class HowCreditsWorkPageResource extends Resource
 
     protected static ?string $slug = 'how-credits-work';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 11;
 
     public static function canAccess(): bool
     {

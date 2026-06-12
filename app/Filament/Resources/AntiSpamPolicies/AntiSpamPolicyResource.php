@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AntiSpamPolicies;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\AntiSpamPolicies\Pages\ManageAntiSpamPolicies;
 use App\Models\AntiSpamPolicy;
 use BackedEnum;
@@ -33,9 +32,9 @@ class AntiSpamPolicyResource extends Resource
 
     protected static ?string $slug = 'credit-usage-and-expiry-policy';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 6;
 
     public static function canAccess(): bool
     {

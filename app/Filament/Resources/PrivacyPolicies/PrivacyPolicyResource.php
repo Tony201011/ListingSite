@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\PrivacyPolicies;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\PrivacyPolicies\Pages\ManagePrivacyPolicies;
 use App\Models\PrivacyPolicy;
 use BackedEnum;
@@ -33,9 +32,9 @@ class PrivacyPolicyResource extends Resource
 
     protected static ?string $slug = 'privacy-policy';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
     {

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\RefundPolicies;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\RefundPolicies\Pages\ManageRefundPolicies;
 use App\Models\RefundPolicy;
 use BackedEnum;
@@ -33,9 +32,9 @@ class RefundPolicyResource extends Resource
 
     protected static ?string $slug = 'refund-policy';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 3;
 
     public static function canAccess(): bool
     {

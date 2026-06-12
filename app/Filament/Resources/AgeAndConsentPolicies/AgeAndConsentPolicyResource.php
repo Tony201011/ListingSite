@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AgeAndConsentPolicies;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\AgeAndConsentPolicies\Pages\ManageAgeAndConsentPolicies;
 use App\Models\AgeAndConsentPolicy;
 use BackedEnum;
@@ -33,9 +32,9 @@ class AgeAndConsentPolicyResource extends Resource
 
     protected static ?string $slug = 'age-and-consent-policy';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 14;
+    protected static ?int $navigationSort = 17;
 
     public static function canAccess(): bool
     {

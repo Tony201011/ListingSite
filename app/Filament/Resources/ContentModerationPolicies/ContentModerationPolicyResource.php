@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ContentModerationPolicies;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\ContentModerationPolicies\Pages\ManageContentModerationPolicies;
 use App\Models\ContentModerationPolicy;
 use BackedEnum;
@@ -33,9 +32,9 @@ class ContentModerationPolicyResource extends Resource
 
     protected static ?string $slug = 'content-moderation-policy';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 12;
+    protected static ?int $navigationSort = 15;
 
     public static function canAccess(): bool
     {

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\BlogPosts;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\BlogPosts\Pages\ManageBlogPosts;
 use App\Models\BlogPost;
 use BackedEnum;
@@ -37,9 +36,9 @@ class BlogPostResource extends Resource
 
     protected static ?string $slug = 'blog-posts';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 7;
 
     protected static function isAdminPanel(): bool
     {

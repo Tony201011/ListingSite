@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\HelpPages;
 
-use App\Filament\Clusters\Pages;
 use App\Filament\Resources\HelpPages\Pages\ManageHelpPages;
 use App\Models\HelpPage;
 use BackedEnum;
@@ -33,9 +32,9 @@ class HelpPageResource extends Resource
 
     protected static ?string $slug = 'help';
 
-    protected static ?string $cluster = Pages::class;
+    protected static ?string $navigationGroup = 'Pages';
 
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 8;
 
     public static function canAccess(): bool
     {
