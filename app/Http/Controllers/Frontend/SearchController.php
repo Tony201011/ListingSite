@@ -75,6 +75,7 @@ class SearchController extends Controller
     private function queryScoutSuggestions(string $term)
     {
         return ProviderProfile::search($term)
+            ->options(['query_by' => 'name'])
             ->where('profile_status', 'approved')
             ->query(fn ($query) => $query
                 ->whereNotNull('slug')

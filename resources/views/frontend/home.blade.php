@@ -92,7 +92,9 @@
                                             >
                                                 <i :class="item.type === 'suburb' ? 'fa-solid fa-location-dot' : 'fa-solid fa-user'" class="text-gray-500 text-xs shrink-0"></i>
                                                 <span class="truncate" x-text="item.name"></span>
-                                                <span class="ml-auto shrink-0 text-xs text-gray-500" x-show="item.type === 'suburb' && item.label" x-text="item.label"></span>
+                                                <template x-if="item.type === 'suburb' && item.label">
+                                                    <span class="ml-auto shrink-0 text-xs text-gray-500" x-text="item.label"></span>
+                                                </template>
                                             </button>
                                         </li>
                                     </template>
