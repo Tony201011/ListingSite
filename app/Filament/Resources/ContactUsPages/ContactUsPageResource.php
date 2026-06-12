@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\ContactUsPages;
 
-use App\Filament\Clusters\ContactUs;
 use App\Filament\Resources\ContactUsPages\Pages\ManageContactUsPages;
 use App\Models\ContactUsPage;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
@@ -35,9 +35,9 @@ class ContactUsPageResource extends Resource
 
     protected static ?string $slug = 'contact-us';
 
-    protected static ?string $cluster = ContactUs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Support';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     public static function canAccess(): bool
     {

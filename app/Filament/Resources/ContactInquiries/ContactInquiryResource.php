@@ -3,12 +3,12 @@
 namespace App\Filament\Resources\ContactInquiries;
 
 use App\Actions\SendContactInquiryReplyEmail;
-use App\Filament\Clusters\ContactUs;
 use App\Filament\Resources\ContactInquiries\Pages\ListContactInquiries;
 use App\Filament\Resources\ContactInquiries\Pages\ViewContactInquiry;
 use App\Models\ContactInquiry;
 use App\Models\ContactInquiryReply;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -43,9 +43,9 @@ class ContactInquiryResource extends Resource
 
     protected static ?string $slug = 'contact-inquiries';
 
-    protected static ?string $cluster = ContactUs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Support';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 4;
 
     public static function canAccess(): bool
     {
