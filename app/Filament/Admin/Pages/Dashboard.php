@@ -3,7 +3,6 @@
 namespace App\Filament\Admin\Pages;
 
 use App\Filament\Widgets\AccountStatusChart;
-use App\Filament\Widgets\AvailabilityChart;
 use App\Filament\Widgets\FeaturedListingChart;
 use App\Filament\Widgets\OnlineUsersChart;
 use App\Filament\Widgets\PaymentPurchasesChart;
@@ -46,7 +45,6 @@ class Dashboard extends BaseDashboard
             PaymentSalesChart::class,
             PaymentPurchasesChart::class,
             OnlineUsersChart::class,
-            AvailabilityChart::class,
             FeaturedListingChart::class,
         ];
     }

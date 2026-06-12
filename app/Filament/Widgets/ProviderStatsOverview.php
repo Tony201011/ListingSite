@@ -48,11 +48,6 @@ class ProviderStatsOverview extends StatsOverviewWidget
         $anonymizedProviders = (clone $providerProfiles)->whereNotNull('anonymized_at')->count();
         $blockedProviders = (clone $providerProfilesWithoutTrashed)->where('is_blocked', true)->count();
         $totalProviders = (clone $providerProfiles)->withTrashed()->count();
-        $availableNow = (clone $providerProfilesWithoutTrashed)->where(function ($query) {
-            $query->whereCurrentlyOnline()
-                ->orWhere(fn ($orQuery) => $orQuery->whereCurrentlyAvailableNow());
-        })->count();
-
         $accountsUrl = fn (array $filters): string => AccountResource::getUrl('index', [
             'filters' => $filters,
         ]);
@@ -69,10 +64,6 @@ class ProviderStatsOverview extends StatsOverviewWidget
                 ->color('info')
                 ->icon('heroicon-o-identification')
                 ->url($profilesUrl([])),
-            Stat::make('Available Now', (string) $availableNow)
-                ->color('success')
-                ->icon('heroicon-o-bolt')
-                ->url($profilesUrl(['available_now_status' => ['value' => 'online']])),
             Stat::make('Active', (string) $activeProviders)
                 ->color('success')
                 ->icon('heroicon-o-check-circle')

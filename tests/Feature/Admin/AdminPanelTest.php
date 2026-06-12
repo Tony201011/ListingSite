@@ -4,7 +4,6 @@ namespace Tests\Feature\Admin;
 
 use App\Filament\Admin\Pages\Dashboard;
 use App\Filament\Widgets\AccountStatusChart;
-use App\Filament\Widgets\AvailabilityChart;
 use App\Filament\Widgets\FeaturedListingChart;
 use App\Filament\Widgets\OnlineUsersChart;
 use App\Filament\Widgets\PaymentPurchasesChart;
@@ -16,7 +15,6 @@ use App\Filament\Widgets\ProviderStatsOverview;
 use App\Filament\Widgets\SiteVisitorsChart;
 use App\Filament\Widgets\UniqueUsersChart;
 use App\Filament\Widgets\VisitorStatsOverview;
-use App\Models\AvailableNow;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -97,58 +95,6 @@ class AdminPanelTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_admin_dashboard_shows_available_now_card(): void
-    {
-        $this->createAdmin();
-        $provider = $this->createProvider();
-        $profile = $provider->providerProfiles()->firstOrFail();
-
-        AvailableNow::query()->create([
-            'user_id' => $provider->id,
-            'provider_profile_id' => $profile->id,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-            'available_started_at' => now()->subMinutes(5),
-            'available_expires_at' => now()->addMinutes(55),
-        ]);
-
-        Filament::setCurrentPanel(Filament::getPanel('admin'));
-
-        $this->assertContains(ProviderStatsOverview::class, app(Dashboard::class)->getWidgets());
-
-        $html = Livewire::test(ProviderStatsOverview::class)->html();
-
-        $this->assertStringContainsString('Available Now', $html);
-        $this->assertStringContainsString('/admin/providers?tableFilters%5Bavailable_now_status%5D%5Bvalue%5D=online', $html);
-    }
-
-    public function test_available_now_users_chart_counts_profile_linked_rows_when_user_id_is_null(): void
-    {
-        $this->createAdmin();
-        $provider = $this->createProvider();
-        $profile = $provider->providerProfiles()->firstOrFail();
-
-        AvailableNow::query()->create([
-            'user_id' => null,
-            'provider_profile_id' => $profile->id,
-            'status' => 'online',
-            'usage_date' => today(),
-            'usage_count' => 1,
-            'available_started_at' => now()->subMinutes(5),
-            'available_expires_at' => now()->addMinutes(55),
-        ]);
-
-        Filament::setCurrentPanel(Filament::getPanel('admin'));
-
-        $component = Livewire::test(AvailabilityChart::class)->instance();
-        $method = (new \ReflectionClass($component))->getMethod('getData');
-        $method->setAccessible(true);
-        $data = $method->invoke($component);
-
-        $this->assertContains(1, $data['datasets'][0]['data']);
-    }
-
     public function test_admin_dashboard_shows_total_providers_card(): void
     {
         $this->createAdmin();
@@ -196,7 +142,6 @@ class AdminPanelTest extends TestCase
             PaymentSalesChart::class,
             PaymentPurchasesChart::class,
             OnlineUsersChart::class,
-            AvailabilityChart::class,
             FeaturedListingChart::class,
         ], app(Dashboard::class)->getWidgets());
     }
