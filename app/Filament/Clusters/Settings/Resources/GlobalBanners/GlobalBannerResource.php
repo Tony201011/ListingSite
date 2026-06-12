@@ -5,7 +5,6 @@ namespace App\Filament\Clusters\Settings\Resources\GlobalBanners;
 use App\Models\AgeAndConsentPolicy;
 use App\Models\ContactUsPage;
 use App\Models\ContentModerationPolicy;
-use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\GlobalBanners\Pages\ManageGlobalBanners;
 use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\FrontendPageController;
@@ -62,9 +61,9 @@ class GlobalBannerResource extends Resource
 
     protected static ?string $slug = 'global-banners';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 53;
+    protected static ?int $navigationSort = 13;
 
     public static function canAccess(): bool
     {

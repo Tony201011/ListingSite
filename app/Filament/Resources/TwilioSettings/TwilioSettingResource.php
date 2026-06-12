@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\TwilioSettings;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Resources\TwilioSettings\Pages\ManageTwilioSettings;
 use App\Filament\Resources\TwilioSettings\Schemas\TwilioSettingForm;
 use App\Filament\Resources\TwilioSettings\Tables\TwilioSettingsTable;
@@ -28,7 +27,9 @@ class TwilioSettingResource extends Resource
 
     protected static ?string $slug = 'twilio-settings';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 6;
 
     public static function canAccess(): bool
     {

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Settings\Resources\MetaDescriptions;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\MetaDescriptions\Pages\CreateMetaDescription;
 use App\Filament\Clusters\Settings\Resources\MetaDescriptions\Pages\EditMetaDescription;
 use App\Filament\Clusters\Settings\Resources\MetaDescriptions\Pages\ListMetaDescriptions;
@@ -23,7 +22,11 @@ class MetaDescriptionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
+
+    protected static ?string $navigationLabel = 'Meta Descriptions';
+
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {

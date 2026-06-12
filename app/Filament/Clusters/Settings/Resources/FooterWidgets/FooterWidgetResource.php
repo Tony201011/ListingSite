@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Settings\Resources\FooterWidgets;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\FooterWidgets\Pages\ManageFooterWidgets;
 use App\Models\FooterWidget;
 use BackedEnum;
@@ -35,9 +34,9 @@ class FooterWidgetResource extends Resource
 
     protected static ?string $slug = 'footer-widgets';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 51;
+    protected static ?int $navigationSort = 11;
 
     public static function canAccess(): bool
     {

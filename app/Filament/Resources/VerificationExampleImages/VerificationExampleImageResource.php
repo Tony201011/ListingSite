@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\VerificationExampleImages;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Resources\VerificationExampleImages\Pages\ManageVerificationExampleImages;
 use App\Models\VerificationExampleImage;
 use BackedEnum;
@@ -35,9 +34,9 @@ class VerificationExampleImageResource extends Resource
 
     protected static ?string $slug = 'verification-example-images';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 12;
+    protected static ?int $navigationSort = 9;
 
     public static function canAccess(): bool
     {

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Settings\Resources;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
 use BackedEnum;
@@ -29,7 +28,7 @@ class SiteSettingResource extends Resource
 
     protected static ?string $slug = 'site-settings';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 

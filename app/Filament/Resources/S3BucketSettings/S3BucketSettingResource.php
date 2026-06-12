@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\S3BucketSettings;
 
-use App\Filament\Clusters\Settings;
 use App\Filament\Resources\S3BucketSettings\Pages\ManageS3BucketSettings;
 use App\Models\S3BucketSetting;
 use BackedEnum;
@@ -33,9 +32,9 @@ class S3BucketSettingResource extends Resource
 
     protected static ?string $slug = 's3-bucket-settings';
 
-    protected static ?string $cluster = Settings::class;
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 8;
 
     public static function canAccess(): bool
     {
