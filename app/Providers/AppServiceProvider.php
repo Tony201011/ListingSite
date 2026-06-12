@@ -100,8 +100,11 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->shareFooterText();
-        $this->configureSmtpFromDatabase();
-        $this->configureStorageFromDatabase();
+
+        if (! $this->shouldSkipDatabaseConfiguredServicesForConsoleCommand()) {
+            $this->configureSmtpFromDatabase();
+            $this->configureStorageFromDatabase();
+        }
 
         Event::listen(Login::class, RecordUserLogin::class);
         Event::listen(Logout::class, RecordUserLogout::class);
@@ -195,14 +198,14 @@ class AppServiceProvider extends ServiceProvider
             if (! Schema::hasTable('smtp_settings')) {
                 return;
             }
+
+            $setting = SmtpSetting::query()
+                ->where('is_enabled', true)
+                ->latest('updated_at')
+                ->first();
         } catch (QueryException|\PDOException) {
             return;
         }
-
-        $setting = SmtpSetting::query()
-            ->where('is_enabled', true)
-            ->latest('updated_at')
-            ->first();
 
         if (! $setting) {
             return;
@@ -240,11 +243,11 @@ class AppServiceProvider extends ServiceProvider
             if (! Schema::hasTable('s3_bucket_settings')) {
                 return;
             }
+
+            $setting = S3BucketSetting::query()->latest('updated_at')->first();
         } catch (QueryException|\PDOException) {
             return;
         }
-
-        $setting = S3BucketSetting::query()->latest('updated_at')->first();
 
         if (! $setting || ! $setting->is_enabled) {
             Config::set('filesystems.default', 'public');
@@ -297,5 +300,33 @@ class AppServiceProvider extends ServiceProvider
         Storage::disk('s3')->buildTemporaryUrlsUsing(
             fn (string $path, \DateTimeInterface $expiration, array $options): string => route('media.show', ['path' => $path])
         );
+    }
+
+    private function shouldSkipDatabaseConfiguredServicesForConsoleCommand(): bool
+    {
+        if (! app()->runningInConsole()) {
+            return false;
+        }
+
+        $command = $_SERVER['argv'][1] ?? null;
+
+        if (! is_string($command) || $command === '') {
+            return false;
+        }
+
+        return in_array($command, [
+            'optimize',
+            'optimize:clear',
+            'cache:clear',
+            'config:cache',
+            'config:clear',
+            'event:cache',
+            'event:clear',
+            'package:discover',
+            'route:cache',
+            'route:clear',
+            'view:cache',
+            'view:clear',
+        ], true);
     }
 }
