@@ -36,6 +36,16 @@ class HomeController extends Controller
             return redirect()->to($canonicalUrl, 301);
         }
 
+        // Infinite-scroll pagination requests send X-Listing-Page: 1.
+        // Return a minimal partial (grid + pagination only) to skip the heavy
+        // filter-category and banner-profile queries that are not needed for
+        // subsequent pages.
+        if ($request->header('X-Listing-Page')) {
+            $pageData = $this->buildProfileFilterViewData->executePageOnly($validated, syncWithAdminOnlineListing: true);
+
+            return view('frontend.partials.listings-page', $pageData);
+        }
+
         $viewData = $this->buildProfileFilterViewData->execute($validated, syncWithAdminOnlineListing: true);
 
         $viewData['userFavourites'] = $this->favouriteBookmarkService->getFavourites();
