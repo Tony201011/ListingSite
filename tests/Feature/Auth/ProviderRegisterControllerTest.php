@@ -55,6 +55,7 @@ class ProviderRegisterControllerTest extends TestCase
             'password_confirmation' => 'secret123',
             'mobile' => '0412345678',
             'age_confirm' => '1',
+            'content_policy_confirm' => '1',
         ];
 
         $redirectResponse = redirect('/otp-verification')
