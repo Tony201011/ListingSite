@@ -19,6 +19,8 @@ class OnlineUsersChart extends ChartWidget
 
     protected ?string $maxHeight = '360px';
 
+    protected ?string $pollingInterval = '30s';
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';

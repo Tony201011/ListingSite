@@ -16,6 +16,8 @@ class PaymentStatsOverview extends StatsOverviewWidget
 
     protected static bool $isLazy = true;
 
+    protected ?string $pollingInterval = '60s';
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
