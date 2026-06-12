@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\PhotoLogs;
 
-use App\Filament\Clusters\Logs;
 use App\Filament\Resources\PhotoLogs\Pages\ListPhotoLogs;
 use App\Models\ProfileImage;
 use App\Models\SiteSetting;
 use BackedEnum;
+use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -32,7 +32,7 @@ class PhotoLogResource extends Resource
 
     protected static ?string $slug = 'photo-logs';
 
-    protected static ?string $cluster = Logs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Logs';
 
     protected static ?int $navigationSort = 8;
 

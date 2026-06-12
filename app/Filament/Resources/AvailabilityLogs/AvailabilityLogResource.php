@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\AvailabilityLogs;
 
-use App\Filament\Clusters\Logs;
 use App\Filament\Resources\AvailabilityLogs\Pages\ListAvailabilityLogs;
 use App\Models\Availability;
 use App\Models\SiteSetting;
 use BackedEnum;
+use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -30,7 +30,7 @@ class AvailabilityLogResource extends Resource
 
     protected static ?string $slug = 'availability-logs';
 
-    protected static ?string $cluster = Logs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Logs';
 
     protected static ?int $navigationSort = 4;
 

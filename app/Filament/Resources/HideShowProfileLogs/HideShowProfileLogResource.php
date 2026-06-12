@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\HideShowProfileLogs;
 
-use App\Filament\Clusters\Logs;
 use App\Filament\Resources\HideShowProfileLogs\Pages\ListHideShowProfileLogs;
 use App\Models\HideShowProfile;
 use App\Models\SiteSetting;
 use BackedEnum;
+use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -28,7 +28,7 @@ class HideShowProfileLogResource extends Resource
 
     protected static ?string $slug = 'show-hide-profile-logs';
 
-    protected static ?string $cluster = Logs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Logs';
 
     protected static ?int $navigationSort = 3;
 

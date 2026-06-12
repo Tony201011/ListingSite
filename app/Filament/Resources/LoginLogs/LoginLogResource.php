@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\LoginLogs;
 
-use App\Filament\Clusters\Logs;
 use App\Filament\Resources\LoginLogs\Pages\ListLoginLogs;
 use App\Models\LoginLog;
 use App\Models\SiteSetting;
 use BackedEnum;
+use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -28,7 +28,7 @@ class LoginLogResource extends Resource
 
     protected static ?string $slug = 'login-logs';
 
-    protected static ?string $cluster = Logs::class;
+    protected static UnitEnum|string|null $navigationGroup = 'Logs';
 
     protected static ?int $navigationSort = 6;
 
