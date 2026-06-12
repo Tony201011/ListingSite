@@ -34,7 +34,7 @@ class FooterWidgetResource extends Resource
 
     protected static ?string $slug = 'footer-widgets';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 11;
 

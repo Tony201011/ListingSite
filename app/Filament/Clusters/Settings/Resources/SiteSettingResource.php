@@ -28,7 +28,7 @@ class SiteSettingResource extends Resource
 
     protected static ?string $slug = 'site-settings';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 

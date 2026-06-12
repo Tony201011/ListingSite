@@ -61,7 +61,7 @@ class GlobalBannerResource extends Resource
 
     protected static ?string $slug = 'global-banners';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 13;
 
