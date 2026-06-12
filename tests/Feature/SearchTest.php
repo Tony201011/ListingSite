@@ -482,6 +482,24 @@ class SearchTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $profiles->total());
     }
 
+    public function test_advanced_search_uses_default_listing_page_size_instead_of_homepage_setting(): void
+    {
+        SiteSetting::query()->create([
+            'home_page_records' => 2,
+        ]);
+
+        $this->createApprovedProvider(['name' => 'Advanced Visible One', 'slug' => 'advanced-visible-one']);
+        $this->createApprovedProvider(['name' => 'Advanced Visible Two', 'slug' => 'advanced-visible-two']);
+        $this->createApprovedProvider(['name' => 'Advanced Visible Three', 'slug' => 'advanced-visible-three']);
+        $this->createApprovedProvider(['name' => 'Advanced Visible Four', 'slug' => 'advanced-visible-four']);
+
+        $response = $this->get(route('advanced-search'));
+
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(4, $profiles);
+        $this->assertSame(4, $profiles->total());
+    }
+
     public function test_advanced_search_hides_pending_profiles(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);

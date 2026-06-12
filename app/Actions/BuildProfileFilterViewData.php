@@ -290,8 +290,12 @@ class BuildProfileFilterViewData
         );
     }
 
-    private function resolveProfilesPerPage(): int
+    private function resolveProfilesPerPage(bool $advancedSearch = false): int
     {
+        if ($advancedSearch) {
+            return self::DEFAULT_PROFILES_PER_PAGE;
+        }
+
         $value = (int) cache()->remember(
             'site_setting.home_page_records',
             now()->addHour(),
@@ -684,7 +688,7 @@ class BuildProfileFilterViewData
                 break;
         }
 
-        $profilesPerPage = $this->resolveProfilesPerPage();
+        $profilesPerPage = $this->resolveProfilesPerPage($advancedSearch);
         $currentPage = max(1, (int) request()->route('page', request()->integer('page', 1)));
         $paginationContext = $this->listingPaginationUrlService->buildContext($validated, $advancedSearch);
 
