@@ -46,6 +46,34 @@ class ProviderRegistrationsChart extends ChartWidget
         return [
             'responsive' => true,
             'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => [
+                    'display' => true,
+                    'position' => 'bottom',
+                    'labels' => [
+                        'usePointStyle' => true,
+                        'pointStyle' => 'circle',
+                        'padding' => 20,
+                        'boxWidth' => 8,
+                        'boxHeight' => 8,
+                    ],
+                ],
+            ],
+            'scales' => [
+                'x' => [
+                    'ticks' => [
+                        'maxTicksLimit' => 15,
+                        'maxRotation' => 45,
+                        'minRotation' => 0,
+                    ],
+                ],
+                'y' => [
+                    'beginAtZero' => true,
+                    'ticks' => [
+                        'precision' => 0,
+                    ],
+                ],
+            ],
         ];
     }
 
