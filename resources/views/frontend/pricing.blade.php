@@ -15,7 +15,7 @@
             </button>
 
             <h1 class="text-3xl font-bold text-gray-900">{{ $page?->title ?: 'Pricing' }}</h1>
-            <p class="mt-2 mb-8 text-gray-600">{{ $page?->subtitle ?: 'Simple and fair credits pricing for all profiles.' }}</p>
+            <p class="mt-2 mb-8 text-gray-600">{{ $page?->subtitle ?: 'One credit for every day your profile is online, simple and fair for all.' }}</p>
 
             <div class="border border-gray-300 rounded-lg p-6">
                 @if(!empty($page?->intro_content))
@@ -24,7 +24,10 @@
                     </article>
                 @else
                     <p class="text-gray-600 leading-7 mb-4">
-                        We dont believe in basic, pro and premium packages. Every babe will get the same features. Just one credit for every day you advertise. Not advertising, taking a break or hide your profile? No charge, no worries! And you will still be able to upload new pictures and update your profile content without having to pay for doing so. The days your profile is offline you don't pay, you only pay when your profile is online.
+                        We don't believe in basic, pro and premium packages. Every babe gets the same features. Just one credit for every day you advertise.
+                    </p>
+                    <p class="text-gray-600 leading-7 mb-4">
+                        Not advertising, taking a break, or hiding your profile? No charge, no worries! You can still upload new pictures and update your profile content without paying extra. On the days your profile is offline, you don't pay &mdash; you only pay when your profile is online.
                     </p>
                     <p class="font-semibold text-gray-700 mb-2">One credit for every day your profile is online, simple and fair for all.</p>
 
