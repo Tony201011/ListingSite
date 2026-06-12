@@ -92,24 +92,85 @@ class ListingPaginationUrlService
         // as having an explicit "girls" or "page" parameter.
         parse_str((string) $request->server('QUERY_STRING', ''), $rawQuery);
 
+        $currentPath = trim($request->getPathInfo(), '/');
+        $routeName = $request->route()?->getName() ?? '';
+        $currentPage = $this->resolveCurrentPage($request);
+
+        // === ADVANCED SEARCH ===
+        if ($advancedSearch) {
+            // /search and /search/* are already canonical — never redirect for filter-param
+            // changes (e.g. stripping defaults) when already on the correct path family.
+            if ($currentPath === 'search' || str_starts_with($currentPath, 'search/')) {
+                return null;
+            }
+
+            // Any other path (e.g. /advanced-search) → compute canonical and redirect.
+            $targetUrl = $this->buildUrl($validated, $currentPage, advancedSearch: true);
+
+            return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
+        }
+
+        // === HOME / ESCORTS ROUTES ===
+
+        // Home page root (/) with no page/girls redirect triggers → always canonical.
         if (
-            ! $advancedSearch
-            && trim($request->getPathInfo(), '/') === ''
-            && $this->resolveCurrentPage($request) === 1
-            && ! $this->hasSearchFilters($validated)
+            $currentPath === ''
+            && $currentPage === 1
             && ! isset($rawQuery['girls'])
             && ! isset($rawQuery['page'])
         ) {
             return null;
         }
 
-        $currentPage = $this->resolveCurrentPage($request);
-        $targetUrl = $this->buildUrl($validated, $currentPage, $advancedSearch);
+        // /escorts/search with location query → redirect to advanced-search canonical.
+        if ($routeName === 'escorts.search' && trim((string) ($validated['location'] ?? '')) !== '') {
+            $targetUrl = $this->buildUrl($validated, 1, advancedSearch: true);
+
+            return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
+        }
+
+        // /escorts/search without location (and /escorts/search/name/*) → canonical.
+        if (in_array($routeName, [
+            'escorts.search',
+            'escorts.search.name',
+            'escorts.search.name.page',
+        ], true)) {
+            return null;
+        }
+
+        // /escorts/location/{location} without a query string → canonical.
+        if ($routeName === 'escorts.location' && $request->server('QUERY_STRING', '') === '') {
+            return null;
+        }
+
+        // /escorts/location/{location} with query params → redirect to advanced-search canonical.
+        if ($routeName === 'escorts.location') {
+            $targetUrl = $this->buildUrl($validated, 1, advancedSearch: true);
+
+            return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
+        }
+
+        // Old /escorts/search/location/* routes → redirect to the /escorts/location/{location} canonical.
+        // Note: /escorts/search/{slug} (escorts.search.slug) is itself canonical and is NOT redirected.
+        if (in_array($routeName, [
+            'escorts.search.location',
+            'escorts.search.location.no-state',
+            'escorts.search.location.legacy',
+        ], true)) {
+            $location = trim((string) ($validated['location'] ?? ''));
+            if ($location !== '') {
+                $targetUrl = route('escorts.location', ['location' => $location]);
+
+                return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
+            }
+        }
+
+        // General case: build canonical URL and redirect when the path/query differs.
+        $targetUrl = $this->buildUrl($validated, $currentPage, advancedSearch: false);
 
         // /escorts/all on page 1 with no filters is canonically the home page (/).
         if (
-            ! $advancedSearch
-            && $currentPage === 1
+            $currentPage === 1
             && $targetUrl === route('escorts.index', ['type' => 'all'])
         ) {
             $targetUrl = route('home');
