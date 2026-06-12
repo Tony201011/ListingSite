@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class PricingPageResource extends Resource
 {
@@ -31,7 +32,7 @@ class PricingPageResource extends Resource
     protected static ?string $pluralModelLabel = 'Pricing Page';
 
     protected static ?string $slug = 'pricing';
-    protected static ?string $navigationGroup = 'Categories';
+    protected static string|UnitEnum|null $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 9;
 
