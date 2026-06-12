@@ -471,7 +471,7 @@ $profileTags = array_values(array_unique(array_merge(
                                 onclick="document.getElementById('booking-enquiry-modal').classList.remove('hidden')"
                                 class="w-full rounded-lg border border-pink-300 bg-pink-50 px-4 py-2 text-sm font-semibold text-pink-700 transition hover:bg-pink-100 sm:text-base"
                             >
-                                Send enquiry
+                                Send booking enquiry
                             </button>
                         </div>
 
@@ -1073,7 +1073,7 @@ $profileTags = array_values(array_unique(array_merge(
 <div id="booking-enquiry-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60" style="overflow-y:auto;">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 my-6 p-6 relative">
         <button onclick="document.getElementById('booking-enquiry-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold leading-none">&times;</button>
-        <h2 class="text-xl font-bold text-pink-600 mb-1 flex items-center gap-2"><i class="fa-regular fa-calendar-check"></i> Send Enquiry</h2>
+        <h2 class="text-xl font-bold text-pink-600 mb-1 flex items-center gap-2"><i class="fa-regular fa-calendar-check"></i> Send booking enquiry</h2>
         <p class="text-sm text-gray-500 mb-4">Fill in your details and we'll forward your enquiry to the provider.</p>
 
         <div id="booking-success" class="hidden mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium">
@@ -1135,7 +1135,7 @@ $profileTags = array_values(array_unique(array_merge(
                 </button>
                 <button type="submit" id="booking-submit-btn"
                     class="flex-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl px-4 py-2 text-sm font-semibold transition">
-                    Send Enquiry
+                    Send booking enquiry
                 </button>
             </div>
         </form>
