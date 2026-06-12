@@ -59,7 +59,6 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Financial')->collapsed(),
                 NavigationGroup::make('Support')->collapsed(),
                 NavigationGroup::make('Settings')->collapsed(),
-                NavigationGroup::make('System')->collapsed(),
                 NavigationGroup::make('Logs')->collapsed(false),
             ])
             ->sidebarCollapsibleOnDesktop()

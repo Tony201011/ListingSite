@@ -21,7 +21,7 @@ class Logs extends Cluster
 
     public static function shouldRegisterNavigation(): bool
     {
-        return SiteSetting::isLoggingEnabled();
+        return false;
     }
 
     public static function canAccess(): bool
