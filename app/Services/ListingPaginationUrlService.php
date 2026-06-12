@@ -91,11 +91,45 @@ class ListingPaginationUrlService
         // into the GET query bag) so that a plain "/" request is never incorrectly treated
         // as having an explicit "girls" or "page" parameter.
         parse_str((string) $request->server('QUERY_STRING', ''), $rawQuery);
+        $currentPath = trim($request->getPathInfo(), '/');
+        $currentPage = $this->resolveCurrentPage($request);
+
+        if (! $advancedSearch && $currentPath === '' && $currentPage === 1 && ! isset($rawQuery['page'])) {
+            return null;
+        }
+
+        if (! $advancedSearch && str_starts_with($currentPath, 'escorts/location/') && $rawQuery === []) {
+            return null;
+        }
 
         if (
             ! $advancedSearch
-            && trim($request->getPathInfo(), '/') === ''
-            && $this->resolveCurrentPage($request) === 1
+            && $currentPath === 'escorts/search'
+            && trim((string) ($rawQuery['location'] ?? '')) !== ''
+        ) {
+            $targetUrl = $this->buildUrl($validated, $currentPage, advancedSearch: true);
+
+            return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
+        }
+
+        if (
+            ! $advancedSearch
+            && str_starts_with($currentPath, 'escorts/location/')
+            && (array_key_exists('location_slug', $rawQuery) || array_key_exists('location_from_route', $rawQuery))
+        ) {
+            $targetUrl = $this->buildUrl($validated, $currentPage, advancedSearch: true);
+
+            return $this->urlsDiffer($request, $targetUrl) ? $targetUrl : null;
+        }
+
+        if ($advancedSearch && $currentPage === 1 && ($currentPath === 'search' || str_starts_with($currentPath, 'search/'))) {
+            return null;
+        }
+
+        if (
+            ! $advancedSearch
+            && $currentPath === ''
+            && $currentPage === 1
             && ! $this->hasSearchFilters($validated)
             && ! isset($rawQuery['girls'])
             && ! isset($rawQuery['page'])
@@ -103,7 +137,6 @@ class ListingPaginationUrlService
             return null;
         }
 
-        $currentPage = $this->resolveCurrentPage($request);
         $targetUrl = $this->buildUrl($validated, $currentPage, $advancedSearch);
 
         // /escorts/all on page 1 with no filters is canonically the home page (/).
