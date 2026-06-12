@@ -18,7 +18,7 @@ class TwilioSettingResource extends Resource
 {
     protected static ?string $model = TwilioSetting::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhone;
 
     protected static ?string $navigationLabel = 'Twilio Settings';
 

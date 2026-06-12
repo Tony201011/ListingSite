@@ -18,7 +18,7 @@ class GoogleRecaptchaSettingResource extends Resource
 {
     protected static ?string $model = GoogleRecaptchaSetting::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
     protected static ?string $navigationLabel = 'Google Recaptcha Settings';
 

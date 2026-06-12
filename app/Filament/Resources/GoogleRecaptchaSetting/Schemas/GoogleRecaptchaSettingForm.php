@@ -4,6 +4,7 @@ namespace App\Filament\Resources\GoogleRecaptchaSetting\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class GoogleRecaptchaSettingForm
@@ -12,25 +13,31 @@ class GoogleRecaptchaSettingForm
     {
         return $schema
             ->components([
-                TextInput::make('domain')
-                    ->label('Domain')
-                    ->required()
-                    ->maxLength(255),
+                Section::make('reCAPTCHA Configuration')
+                    ->compact()
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('domain')
+                            ->label('Domain')
+                            ->required()
+                            ->maxLength(255),
 
-                TextInput::make('site_key')
-                    ->label('Site Key')
-                    ->required()
-                    ->maxLength(255),
+                        TextInput::make('site_key')
+                            ->label('Site Key')
+                            ->required()
+                            ->maxLength(255),
 
-                TextInput::make('secret_key')
-                    ->label('Secret Key')
-                    ->password()
-                    ->required()
-                    ->maxLength(255),
+                        TextInput::make('secret_key')
+                            ->label('Secret Key')
+                            ->password()
+                            ->revealable()
+                            ->required()
+                            ->maxLength(255),
 
-                Toggle::make('is_active')
-                    ->label('Active')
-                    ->default(true),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true),
+                    ]),
             ]);
     }
 }
