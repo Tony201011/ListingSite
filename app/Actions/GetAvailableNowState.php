@@ -76,10 +76,10 @@ class GetAvailableNowState
     {
         $expiredAt = $profile->free_listing_expires_at;
 
-        if ($expiredAt !== null && $expiredAt->isFuture()) {
+        if ($expiredAt === null || $expiredAt->isFuture()) {
             return false;
         }
 
-        return $this->walletLedgerService->currentBalance($profile) <= 0;
+        return $this->walletLedgerService->currentBalance($profile) < 0;
     }
 }

@@ -141,7 +141,7 @@ class UpdateOnlineNowStatus
     {
         $expiredAt = $profile->free_listing_expires_at;
 
-        if ($expiredAt !== null && $expiredAt->isFuture()) {
+        if ($expiredAt === null || $expiredAt->isFuture()) {
             return false;
         }
 
