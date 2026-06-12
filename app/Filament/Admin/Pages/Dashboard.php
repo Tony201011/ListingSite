@@ -3,8 +3,9 @@
 namespace App\Filament\Admin\Pages;
 
 use App\Filament\Widgets\AccountStatusChart;
+use App\Filament\Widgets\AvailabilityChart;
+use App\Filament\Widgets\AvailabilityStatsOverview;
 use App\Filament\Widgets\FeaturedListingChart;
-use App\Filament\Widgets\OnlineUsersChart;
 use App\Filament\Widgets\PaymentPurchasesChart;
 use App\Filament\Widgets\PaymentSalesChart;
 use App\Filament\Widgets\PaymentStatsOverview;
@@ -36,6 +37,7 @@ class Dashboard extends BaseDashboard
         return [
             VisitorStatsOverview::class,
             ProviderStatsOverview::class,
+            AvailabilityStatsOverview::class,
             ProviderRegistrationsChart::class,
             ProfileStatusChart::class,
             AccountStatusChart::class,
@@ -44,7 +46,7 @@ class Dashboard extends BaseDashboard
             UniqueUsersChart::class,
             PaymentSalesChart::class,
             PaymentPurchasesChart::class,
-            OnlineUsersChart::class,
+            AvailabilityChart::class,
             FeaturedListingChart::class,
         ];
     }

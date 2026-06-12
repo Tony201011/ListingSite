@@ -11,7 +11,7 @@ class AvailabilityChart extends ChartWidget
 {
     private const DISTINCT_PROFILE_KEY = 'COALESCE(provider_profile_id, user_id)';
 
-    protected ?string $heading = 'Available Now Users';
+    protected ?string $heading = 'Available Now Providers';
 
     protected static ?int $sort = 11;
 
@@ -75,7 +75,7 @@ class AvailabilityChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Available Now Users',
+                    'label' => 'Available Now Providers',
                     'data' => $counts,
                     'backgroundColor' => 'rgba(245, 158, 11, 0.2)',
                     'borderColor' => 'rgba(217, 119, 6, 1)',
