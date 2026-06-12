@@ -39,12 +39,31 @@ class ContactUsTest extends TestCase
     private function createActiveContactPage(array $overrides = []): ContactUsPage
     {
         return ContactUsPage::create(array_merge([
+            'page_slug' => 'contact-us',
             'title' => 'Contact Us',
             'subtitle' => 'Send us a message.',
             'support_heading' => 'Support Info',
             'response_time' => 'within 24 hours',
             'support_email' => 'support@example.com',
             'category_label' => 'general',
+            'enable_name_field' => true,
+            'enable_email_field' => true,
+            'enable_subject_field' => true,
+            'enable_message_field' => true,
+            'is_active' => true,
+        ], $overrides));
+    }
+
+    private function createActiveComplaintsPage(array $overrides = []): ContactUsPage
+    {
+        return ContactUsPage::create(array_merge([
+            'page_slug' => 'complaints-contact',
+            'title' => 'Support & Complaints',
+            'subtitle' => 'Have a complaint or need support?',
+            'support_heading' => 'Support Info',
+            'response_time' => 'Within 24 hours',
+            'support_email' => 'support@hotescorts.com.au',
+            'category_label' => 'contact-support',
             'enable_name_field' => true,
             'enable_email_field' => true,
             'enable_subject_field' => true,
@@ -429,5 +448,100 @@ class ContactUsTest extends TestCase
         Bus::assertDispatched(SendContactInquiryReplyEmailJob::class, function ($job) use ($inquiry, $reply) {
             return $job->inquiryId === $inquiry->id && $job->replyId === $reply->id;
         });
+    }
+
+    // ---------------------------------------------------------------
+    // Frontend – GET /complaints-contact
+    // ---------------------------------------------------------------
+
+    public function test_complaints_contact_page_loads_successfully(): void
+    {
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertSee('Support');
+        $response->assertSee('Complaints');
+    }
+
+    public function test_complaints_contact_page_shows_default_title_without_db_record(): void
+    {
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertSee('Support &amp; Complaints', false);
+    }
+
+    public function test_complaints_contact_page_shows_default_category_contact_support(): void
+    {
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertSee('contact-support');
+    }
+
+    public function test_complaints_contact_page_shows_default_response_time(): void
+    {
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertSee('Within 24 hours');
+    }
+
+    public function test_complaints_contact_page_shows_default_support_email(): void
+    {
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertSee('support@hotescorts.com.au');
+    }
+
+    public function test_complaints_contact_page_shows_db_title_when_configured(): void
+    {
+        $this->createActiveComplaintsPage(['title' => 'Custom Complaints Title']);
+
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertSee('Custom Complaints Title');
+    }
+
+    public function test_complaints_contact_page_does_not_load_contact_us_record(): void
+    {
+        $this->createActiveContactPage(['title' => 'Contact Us Page']);
+
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertDontSee('Contact Us Page');
+    }
+
+    public function test_contact_us_page_does_not_load_complaints_record(): void
+    {
+        $this->createActiveComplaintsPage(['title' => 'Complaints Only Title']);
+
+        $response = $this->get(route('contact-us'));
+
+        $response->assertOk();
+        $response->assertDontSee('Complaints Only Title');
+    }
+
+    public function test_complaints_contact_page_shows_db_category_when_configured(): void
+    {
+        $this->createActiveComplaintsPage(['category_label' => 'custom-complaints']);
+
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertSee('custom-complaints');
+    }
+
+    public function test_complaints_contact_page_shows_db_support_email_when_configured(): void
+    {
+        $this->createActiveComplaintsPage(['support_email' => 'complaints@example.com']);
+
+        $response = $this->get(route('complaints-contact'));
+
+        $response->assertOk();
+        $response->assertSee('complaints@example.com');
     }
 }

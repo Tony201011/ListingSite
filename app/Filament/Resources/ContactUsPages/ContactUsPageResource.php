@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -27,17 +28,23 @@ class ContactUsPageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
-    protected static ?string $navigationLabel = 'Contact Us';
+    protected static ?string $navigationLabel = 'Contact Us / Complaints';
 
-    protected static ?string $modelLabel = 'Contact Us Page';
+    protected static ?string $modelLabel = 'Contact Page';
 
-    protected static ?string $pluralModelLabel = 'Contact Us Page';
+    protected static ?string $pluralModelLabel = 'Contact Pages';
 
     protected static ?string $slug = 'contact-us';
 
     protected static ?string $cluster = ContactUs::class;
 
     protected static ?int $navigationSort = 2;
+
+    /** All manageable page slugs */
+    public const PAGE_SLUG_OPTIONS = [
+        'contact-us'          => 'Contact Us (/contact-us)',
+        'complaints-contact'  => 'Support & Complaints (/complaints-contact)',
+    ];
 
     public static function canAccess(): bool
     {
@@ -46,13 +53,27 @@ class ContactUsPageResource extends Resource
 
     public static function canCreate(): bool
     {
-        return ContactUsPage::query()->doesntExist();
+        $existing = ContactUsPage::query()->pluck('page_slug')->all();
+
+        return count($existing) < count(self::PAGE_SLUG_OPTIONS);
     }
 
     public static function form(Schema $schema): Schema
     {
+        $existingSlugs = ContactUsPage::query()->pluck('page_slug')->all();
+
         return $schema
             ->components([
+                Section::make('Page Identity')
+                    ->schema([
+                        Select::make('page_slug')
+                            ->label('Page')
+                            ->options(self::PAGE_SLUG_OPTIONS)
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->disabledOn('edit')
+                            ->helperText('Select which frontend page this configuration applies to.'),
+                    ]),
                 Section::make('Page Content')
                     ->schema([
                         TextInput::make('title')
@@ -129,9 +150,13 @@ class ContactUsPageResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')
+                TextColumn::make('page_slug')
+                    ->label('Page')
+                    ->formatStateUsing(fn (string $state): string => self::PAGE_SLUG_OPTIONS[$state] ?? $state)
                     ->searchable()
                     ->weight('semibold'),
+                TextColumn::make('title')
+                    ->searchable(),
                 TextColumn::make('support_email')
                     ->label('Support email')
                     ->placeholder('Not set'),
@@ -152,8 +177,8 @@ class ContactUsPageResource extends Resource
             ])
             ->defaultSort('updated_at', 'desc')
             ->striped()
-            ->emptyStateHeading('No contact us page content added yet')
-            ->emptyStateDescription('Admin can create, edit, or delete contact us content from here.');
+            ->emptyStateHeading('No contact page content added yet')
+            ->emptyStateDescription('Admin can create, edit, or delete contact page content from here.');
     }
 
     public static function getPages(): array

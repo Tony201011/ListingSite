@@ -10,6 +10,7 @@ class ContactUsPage extends Model
     use HasFactory;
 
     protected $fillable = [
+        'page_slug',
         'title',
         'subtitle',
         'support_heading',

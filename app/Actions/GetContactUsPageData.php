@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Schema;
 
 class GetContactUsPageData
 {
-    public function execute(): array
+    public function execute(string $pageSlug = 'contact-us'): array
     {
         $contactPage = null;
         if (Schema::hasTable('contact_us_pages')) {
             $contactPage = ContactUsPage::query()
+                ->where('page_slug', $pageSlug)
                 ->where('is_active', true)
                 ->latest('updated_at')
                 ->first();
@@ -27,6 +28,7 @@ class GetContactUsPageData
         }
 
         return [
+            'pageSlug' => $pageSlug,
             'contactPage' => $contactPage,
             'contactEmail' => $contactPage?->support_email ?: ($siteContactEmail ?? 'support@hotescorts.com.au'),
         ];

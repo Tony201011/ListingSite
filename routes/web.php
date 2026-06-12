@@ -92,7 +92,7 @@ Route::get('api/listings/online-count', [HomeController::class, 'listingsOnlineC
 
 Route::get('/contact-us', [FrontendPageController::class, 'contactUs'])->name('contact-us');
 Route::post('/contact-us', [FrontendPageController::class, 'submitContactUs'])->name('contact-us.submit');
-Route::get('/complaints-contact', [FrontendPageController::class, 'contactUs'])->name('complaints-contact');
+Route::get('/complaints-contact', [FrontendPageController::class, 'complaintsContact'])->name('complaints-contact');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/girls/{type}/page/{page}', [HomeController::class, 'index'])
