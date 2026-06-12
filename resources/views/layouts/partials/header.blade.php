@@ -349,7 +349,7 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute left-0 z-50 mt-2 w-72 rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
+                            class="absolute left-0 z-50 mt-2 max-h-80 w-72 overflow-y-auto rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
                             style="display:none;"
                         >
                             <div class="px-3 pb-3">
