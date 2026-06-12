@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 class BustSizeCategoryResource extends Resource
 {
@@ -33,7 +34,7 @@ class BustSizeCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Bust Size Categories';
 
     protected static ?string $slug = 'bust-size';
-    protected static ?string $navigationGroup = 'Categories';
+    protected static string|UnitEnum|null $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 11;
 

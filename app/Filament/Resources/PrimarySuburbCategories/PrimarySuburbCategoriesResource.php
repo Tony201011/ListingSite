@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class PrimarySuburbCategoriesResource extends Resource
 {
@@ -29,7 +30,7 @@ class PrimarySuburbCategoriesResource extends Resource
     protected static ?string $pluralModelLabel = 'Primary Suburbs';
 
     protected static ?string $slug = 'primary-suburb-categories';
-    protected static ?string $navigationGroup = 'Categories';
+    protected static string|UnitEnum|null $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 12;
 

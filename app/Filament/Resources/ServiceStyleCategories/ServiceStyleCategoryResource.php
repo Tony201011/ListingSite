@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 class ServiceStyleCategoryResource extends Resource
 {
@@ -33,7 +34,7 @@ class ServiceStyleCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Service & Style Categories';
 
     protected static ?string $slug = 'services-style';
-    protected static ?string $navigationGroup = 'Categories';
+    protected static string|UnitEnum|null $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 3;
 

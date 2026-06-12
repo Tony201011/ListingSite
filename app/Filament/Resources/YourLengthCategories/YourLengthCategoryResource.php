@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 class YourLengthCategoryResource extends Resource
 {
@@ -33,7 +34,7 @@ class YourLengthCategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Your Length Categories';
 
     protected static ?string $slug = 'your-length';
-    protected static ?string $navigationGroup = 'Categories';
+    protected static string|UnitEnum|null $navigationGroup = 'Categories';
 
     protected static ?int $navigationSort = 14;
 
