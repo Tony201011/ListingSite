@@ -84,9 +84,10 @@ if (! function_exists('get_meta_keywords_for_slug')) {
     function get_meta_keywords_for_slug($slug = null)
     {
         foreach (resolve_meta_page_candidates($slug) as $candidate) {
-            // ->value() returns the raw DB scalar, bypassing Eloquent accessors
+            // ->toBase()->value() returns the raw DB scalar, bypassing Eloquent accessors
             $keywords = MetaKeyword::where('page_name', $candidate)
                 ->where('is_active', true)
+                ->toBase()
                 ->value('meta_keyword');
 
             if (! empty($keywords)) {
