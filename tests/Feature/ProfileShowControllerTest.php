@@ -24,7 +24,7 @@ class ProfileShowControllerTest extends TestCase
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
 
-        ProviderProfile::query()->create(array_merge([
+        $profile = ProviderProfile::query()->create(array_merge([
             'user_id' => $user->id,
             'name' => 'Jade',
             'slug' => 'jade010-10',
@@ -32,6 +32,12 @@ class ProfileShowControllerTest extends TestCase
             'profile_status' => 'approved',
             'age' => 24,
         ], $profileOverrides));
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+        ]);
 
         return $user;
     }
@@ -537,17 +543,11 @@ class ProfileShowControllerTest extends TestCase
         $onlineUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
         $offlineUser = $this->createApprovedProvider(['name' => 'Mia', 'slug' => 'mia-001']);
 
-        OnlineUser::query()->create([
-            'user_id' => $onlineUser->id,
-            'provider_profile_id' => $onlineUser->providerProfile->id,
-            'status' => 'online',
-        ]);
-
-        OnlineUser::query()->create([
-            'user_id' => $offlineUser->id,
-            'provider_profile_id' => $offlineUser->providerProfile->id,
-            'status' => 'offline',
-        ]);
+        // Set Mia's auto-created online record to offline so she does not appear in nearby profiles
+        OnlineUser::query()
+            ->where('user_id', $offlineUser->id)
+            ->where('provider_profile_id', $offlineUser->providerProfile->id)
+            ->update(['status' => 'offline']);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
