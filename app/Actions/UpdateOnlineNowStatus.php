@@ -145,6 +145,6 @@ class UpdateOnlineNowStatus
             return false;
         }
 
-        return $this->walletLedgerService->currentBalance($profile) <= 0;
+        return $this->walletLedgerService->currentBalance($profile) < 0;
     }
 }
