@@ -88,6 +88,15 @@
 
         {{-- Day-wise session table --}}
         @if (! empty($activity['days']))
+            <div class="mb-3 flex flex-wrap items-center justify-end gap-2">
+                <button type="button" class="al-bulk-toggle" data-action="collapse-all" onclick="alSetAllDays(false)">
+                    Collapse all
+                </button>
+                <button type="button" class="al-bulk-toggle" data-action="expand-all" onclick="alSetAllDays(true)">
+                    Expand all
+                </button>
+            </div>
+
             <div class="al-table-wrapper overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                 <div class="al-table-scroll overflow-x-auto">
                     <table class="al-table w-full border-collapse">
@@ -110,7 +119,7 @@
                                 @endphp
 
                                 {{-- Day header --}}
-                                <tr class="al-day-row al-day-toggle" data-target="{{ $dayId }}" onclick="alToggleDay(this)" style="cursor:pointer">
+                                <tr class="al-day-row al-day-toggle" data-target="{{ $dayId }}" data-open="true" aria-expanded="true" onclick="alToggleDay(this)" style="cursor:pointer">
                                     <td colspan="2" class="al-day-header">
                                         <span class="al-chevron">&#9660;</span>
                                         {{ $day['date'] }}
@@ -194,21 +203,55 @@
         })();
 
         function alToggleDay(toggleRow) {
+            var shouldOpen = toggleRow.getAttribute('data-open') === 'false';
+
+            alSetDayState(toggleRow, shouldOpen);
+        }
+
+        function alSetDayState(toggleRow, shouldOpen) {
             var dayId   = toggleRow.getAttribute('data-target');
             var rows    = document.querySelectorAll('[data-day="' + dayId + '"]');
             var chevron = toggleRow.querySelector('.al-chevron');
-            var isOpen  = toggleRow.getAttribute('data-open') !== 'false';
 
             rows.forEach(function (row) {
-                row.style.display = isOpen ? 'none' : '';
+                row.style.display = shouldOpen ? '' : 'none';
             });
 
-            toggleRow.setAttribute('data-open', isOpen ? 'false' : 'true');
+            toggleRow.setAttribute('data-open', shouldOpen ? 'true' : 'false');
+            toggleRow.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
 
             if (chevron) {
-                chevron.classList.toggle('al-chevron--collapsed', isOpen);
+                chevron.classList.toggle('al-chevron--collapsed', ! shouldOpen);
             }
+
+            alUpdateBulkButtons();
         }
+
+        function alSetAllDays(shouldOpen) {
+            document.querySelectorAll('.al-day-toggle').forEach(function (toggleRow) {
+                alSetDayState(toggleRow, shouldOpen);
+            });
+        }
+
+        function alUpdateBulkButtons() {
+            var toggles = Array.from(document.querySelectorAll('.al-day-toggle'));
+            var allOpen = toggles.length > 0 && toggles.every(function (toggleRow) {
+                return toggleRow.getAttribute('data-open') !== 'false';
+            });
+            var allCollapsed = toggles.length > 0 && toggles.every(function (toggleRow) {
+                return toggleRow.getAttribute('data-open') === 'false';
+            });
+
+            document.querySelectorAll('.al-bulk-toggle[data-action="collapse-all"]').forEach(function (button) {
+                button.disabled = allCollapsed;
+            });
+
+            document.querySelectorAll('.al-bulk-toggle[data-action="expand-all"]').forEach(function (button) {
+                button.disabled = allOpen;
+            });
+        }
+
+        alUpdateBulkButtons();
     </script>
 @endpush
 
@@ -316,6 +359,31 @@
 
     .al-range-input {
         accent-color: #e04ecb;
+    }
+
+    .al-bulk-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        border: 1px solid #e5e7eb;
+        border-radius: 9999px;
+        padding: 0 14px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #4b5563;
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+
+    .al-bulk-toggle:hover:not(:disabled) {
+        border-color: #d1d5db;
+        background: #f9fafb;
+    }
+
+    .al-bulk-toggle:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
     }
 
     .al-day-toggle:hover td {

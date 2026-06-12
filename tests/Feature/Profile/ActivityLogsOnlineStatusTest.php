@@ -285,6 +285,34 @@ class ActivityLogsOnlineStatusTest extends TestCase
             ->assertDontSee('18 May 2026');
     }
 
+    public function test_activity_logs_page_renders_expand_and_collapse_controls_when_sessions_exist(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Selected Profile',
+            'slug' => 'selected-profile',
+        ]);
+
+        Carbon::setTestNow('2026-05-22 11:30:00');
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => now()->copy()->subHour(),
+            'went_offline_at' => now(),
+            'duration_seconds' => 3600,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get(route('activity-logs'))
+            ->assertOk()
+            ->assertSee('Collapse all')
+            ->assertSee('Expand all');
+    }
+
     public function test_activity_logs_calculates_duration_from_timestamps_when_stored_duration_is_zero(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);

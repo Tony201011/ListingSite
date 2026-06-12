@@ -32,6 +32,7 @@
             $chartLabels  = $activity['chart_labels']  ?? [];
             $chartLogins  = $activity['chart_logins']  ?? [];
             $chartMinutes = $activity['chart_minutes'] ?? [];
+            $defaultOpenDays = array_fill(0, count($activity['days']), true);
         @endphp
 
         <div
@@ -158,54 +159,85 @@
             <canvas x-ref="canvas" id="{{ $chartId }}" class="pa-chart-canvas"></canvas>
         </div>
 
-        <div class="pa-table-wrapper">
-            <div class="pa-table-scroll">
-                <table class="pa-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Sessions</th>
-                            <th>Login Time</th>
-                            <th>Logout Time</th>
-                            <th>Duration</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    @foreach ($activity['days'] as $day)
-                        <tbody x-data="{ open: true }">
-                            {{-- Day header row --}}
-                            <tr
-                                class="pa-day-row"
-                                @click="open = !open"
-                            >
-                                <td colspan="2" class="pa-day-header">
-                                    <span class="pa-chevron" :class="{ 'pa-chevron--collapsed': !open }">&#9660;</span>
-                                    {{ $day['date'] }}
-                                    <span class="pa-day-sessions">{{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}</span>
-                                </td>
-                                <td colspan="3" class="pa-day-total">
-                                    Daily total: {{ $day['total_duration'] }}
-                                </td>
-                                <td></td>
+        <div
+            class="pa-table-actions"
+            x-data="{
+                openDays: {{ \Illuminate\Support\Js::from($defaultOpenDays) }},
+                setAll(value) {
+                    this.openDays = this.openDays.map(() => value);
+                },
+                toggle(index) {
+                    this.openDays[index] = !this.isOpen(index);
+                },
+                isOpen(index) {
+                    return this.openDays[index] ?? true;
+                },
+                allOpen() {
+                    return this.openDays.length > 0 && this.openDays.every((value) => value);
+                },
+                allCollapsed() {
+                    return this.openDays.length > 0 && this.openDays.every((value) => !value);
+                },
+            }"
+        >
+            <div class="pa-bulk-actions">
+                <button type="button" class="pa-bulk-toggle" @click="setAll(false)" x-bind:disabled="allCollapsed()">
+                    Collapse all
+                </button>
+                <button type="button" class="pa-bulk-toggle" @click="setAll(true)" x-bind:disabled="allOpen()">
+                    Expand all
+                </button>
+            </div>
+
+            <div class="pa-table-wrapper">
+                <div class="pa-table-scroll">
+                    <table class="pa-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Sessions</th>
+                                <th>Login Time</th>
+                                <th>Logout Time</th>
+                                <th>Duration</th>
+                                <th>Status</th>
                             </tr>
-                            {{-- Individual session rows --}}
-                            @foreach ($day['sessions'] as $session)
-                                <tr class="pa-session-row" x-show="open">
-                                    <td>{{ $session['date'] ?? $day['date'] }}</td>
-                                    <td></td>
-                                    <td>{{ $session['login_at'] }}</td>
-                                    <td>{{ $session['logout_at'] }}</td>
-                                    <td>{{ $session['duration'] }}</td>
-                                    <td>
-                                        <span class="pa-badge pa-badge--{{ $session['is_current'] ? 'online' : 'offline' }}">
-                                            {{ $session['status'] }}
-                                        </span>
+                        </thead>
+                        @foreach ($activity['days'] as $dayIndex => $day)
+                            <tbody>
+                                {{-- Day header row --}}
+                                <tr
+                                    class="pa-day-row"
+                                    @click="toggle({{ $dayIndex }})"
+                                >
+                                    <td colspan="2" class="pa-day-header">
+                                        <span class="pa-chevron" :class="{ 'pa-chevron--collapsed': !isOpen({{ $dayIndex }}) }">&#9660;</span>
+                                        {{ $day['date'] }}
+                                        <span class="pa-day-sessions">{{ $day['session_count'] }} {{ Str::plural('session', $day['session_count']) }}</span>
                                     </td>
+                                    <td colspan="3" class="pa-day-total">
+                                        Daily total: {{ $day['total_duration'] }}
+                                    </td>
+                                    <td></td>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    @endforeach
-                </table>
+                                {{-- Individual session rows --}}
+                                @foreach ($day['sessions'] as $session)
+                                    <tr class="pa-session-row" x-show="isOpen({{ $dayIndex }})" x-cloak>
+                                        <td>{{ $session['date'] ?? $day['date'] }}</td>
+                                        <td></td>
+                                        <td>{{ $session['login_at'] }}</td>
+                                        <td>{{ $session['logout_at'] }}</td>
+                                        <td>{{ $session['duration'] }}</td>
+                                        <td>
+                                            <span class="pa-badge pa-badge--{{ $session['is_current'] ? 'online' : 'offline' }}">
+                                                {{ $session['status'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        @endforeach
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -280,6 +312,49 @@
     .pa-chart-canvas {
         max-height: 260px;
         width: 100% !important;
+    }
+
+    .pa-table-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 0;
+    }
+
+    .pa-bulk-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .pa-bulk-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        border: 1px solid #e5e7eb;
+        border-radius: 9999px;
+        background: #fff;
+        padding: 0 14px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #4b5563;
+        transition: all 0.2s ease;
+    }
+
+    .pa-bulk-toggle:hover:not(:disabled) {
+        border-color: #d1d5db;
+        background: #f9fafb;
+    }
+
+    .pa-bulk-toggle:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    [x-cloak] {
+        display: none !important;
     }
 
     .pa-table-wrapper {
@@ -414,6 +489,8 @@
     .dark .pa-summary-value { color: #f9fafb; }
     .dark .pa-summary-meta { color: #f9fafb; }
     .dark .pa-chart-wrapper { border-color: #374151; background: #111827; }
+    .dark .pa-bulk-toggle { border-color: #374151; background: #111827; color: #d1d5db; }
+    .dark .pa-bulk-toggle:hover:not(:disabled) { background: #1f2937; border-color: #4b5563; }
     .dark .pa-table-wrapper { border-color: #374151; background: #111827; }
     .dark .pa-table th { background: #1f2937; color: #9ca3af; border-bottom-color: #374151; }
     .dark .pa-table td { color: #d1d5db; border-bottom-color: #1f2937; }

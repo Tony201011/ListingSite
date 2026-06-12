@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Actions\GetProviderActivityLogs;
 use App\Filament\Admin\Pages\Dashboard;
 use App\Filament\Widgets\AccountStatusChart;
 use App\Filament\Widgets\AvailabilityChart;
@@ -18,6 +19,7 @@ use App\Filament\Widgets\UniqueUsersChart;
 use App\Filament\Widgets\VisitorStatsOverview;
 use App\Models\AvailableNow;
 use App\Models\OnlineUser;
+use App\Models\ProviderOnlineLog;
 use App\Models\ProviderProfile;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -168,6 +170,29 @@ class AdminPanelTest extends TestCase
         $this->assertStringContainsString('Total Accounts Available Now', $html);
         $this->assertStringContainsString('Total Providers Available Now', $html);
         $this->assertStringContainsString('2', $html);
+    }
+
+    public function test_admin_provider_activity_logs_modal_renders_expand_and_collapse_controls(): void
+    {
+        $provider = $this->createProvider(['name' => 'Modal Provider']);
+        $profile = $provider->providerProfiles()->firstOrFail();
+
+        ProviderOnlineLog::query()->create([
+            'user_id' => $provider->id,
+            'provider_profile_id' => $profile->id,
+            'went_online_at' => now()->subHour(),
+            'went_offline_at' => now(),
+            'duration_seconds' => 3600,
+        ]);
+
+        $activity = app(GetProviderActivityLogs::class)->execute($profile);
+        $html = view('filament.modals.provider-activity-logs', [
+            'activity' => $activity,
+            'provider' => $profile,
+        ])->render();
+
+        $this->assertStringContainsString('Collapse all', $html);
+        $this->assertStringContainsString('Expand all', $html);
     }
 
     public function test_admin_dashboard_registers_all_summary_and_chart_widgets(): void
