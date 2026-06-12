@@ -541,6 +541,15 @@ class SearchTest extends TestCase
         $response->assertViewHas('escortNameQuery', 'Jasmine');
     }
 
+    public function test_advanced_search_shows_clear_filters_link_for_escort_name_filter(): void
+    {
+        $this->createApprovedProvider(['name' => 'Jasmine Star', 'slug' => 'jasmine-star']);
+
+        $response = $this->get(route('advanced-search').'?escort_name=Jasmine');
+
+        $response->assertSeeText('Clear filters');
+    }
+
     // ===============================================================
     // Advanced search – location filter
     // ===============================================================
