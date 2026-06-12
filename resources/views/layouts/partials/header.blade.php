@@ -334,8 +334,9 @@
                         class="relative"
                         x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
                         @click.outside="open = false; search = ''"
+                        @nav-dropdown-opened.window="if ($event.detail.id !== 'escorts') { open = false; search = ''; }"
                     >
-                        <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium hover:text-white">
+                        <button @click="open = !open; if (open) { $dispatch('nav-dropdown-opened', { id: 'escorts' }); } else { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium hover:text-white">
                             {{ $item['label'] }}
                             <i class="fa-solid fa-chevron-down ml-1 text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
                         </button>
@@ -389,9 +390,9 @@
             @endif
 
             @auth
-                <div x-data="{ open: false }" class="relative" @keydown.escape.window="open = false">
+                <div x-data="{ open: false }" class="relative" @keydown.escape.window="open = false" @nav-dropdown-opened.window="if ($event.detail.id !== 'auth') open = false">
     <button
-        @click="open = !open"
+        @click="open = !open; if (open) $dispatch('nav-dropdown-opened', { id: 'auth' })"
         type="button"
         class="bg-yellow-400 text-slate-900 px-3 py-1 rounded hover:bg-yellow-500 flex items-center gap-1"
     >
