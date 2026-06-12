@@ -48,7 +48,7 @@ class SearchController extends Controller
             'slug' => $profile->slug,
             'location' => $this->resolveLocationLabel($profile),
             'age' => $profile->age,
-        ])->values();
+        ])->unique(fn (array $s) => strtolower($s['name']))->values();
 
         return response()->json(['suggestions' => $suggestions]);
     }
@@ -112,14 +112,16 @@ class SearchController extends Controller
                 $this->applyActiveAvailabilityConstraint($query);
             })
             ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($term).'%'])
-            ->with('city')
-            ->orderBy('name')
-            ->take($limit)
             ->when(
                 ! empty($excludedProfileIds),
                 fn ($query) => $query->whereNotIn('id', $excludedProfileIds)
             )
-            ->get(['id', 'name', 'slug', 'city_id', 'suburb', 'age']);
+            ->selectRaw('MIN(id) as id, MIN(name) as name, MIN(slug) as slug, MIN(city_id) as city_id, MIN(suburb) as suburb, MIN(age) as age')
+            ->groupByRaw('LOWER(name)')
+            ->orderBy('name')
+            ->take($limit)
+            ->get()
+            ->load('city');
 
         return $query;
     }

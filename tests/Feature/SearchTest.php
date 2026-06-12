@@ -1086,4 +1086,43 @@ class SearchTest extends TestCase
         $this->assertEqualsWithDelta(-33.8688, (float) $viewUserLat, 0.001, 'userLat should resolve to Sydney latitude, not India GPS');
         $this->assertEqualsWithDelta(151.2093, (float) $viewUserLng, 0.001, 'userLng should resolve to Sydney longitude, not India GPS');
     }
+
+    // ===============================================================
+    // Search suggestions – duplicate name deduplication
+    // ===============================================================
+
+    public function test_search_suggestions_deduplicates_profiles_with_same_name(): void
+    {
+        config()->set('scout.driver', 'null');
+
+        $this->createApprovedProvider(['name' => 'Carmen', 'slug' => 'carmen-sydney']);
+        $this->createApprovedProvider(['name' => 'Carmen', 'slug' => 'carmen-melbourne']);
+        $this->createApprovedProvider(['name' => 'Carmen', 'slug' => 'carmen-brisbane']);
+        $this->createApprovedProvider(['name' => 'Carmen', 'slug' => 'carmen-gold-coast']);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Carmen');
+
+        $response->assertOk();
+        $names = array_column($response->json('suggestions'), 'name');
+
+        $this->assertSame(1, count(array_filter($names, fn ($n) => $n === 'Carmen')),
+            'Duplicate profile names should be collapsed to a single suggestion');
+    }
+
+    public function test_search_suggestions_deduplicates_case_insensitive_names(): void
+    {
+        config()->set('scout.driver', 'null');
+
+        $this->createApprovedProvider(['name' => 'Carmen', 'slug' => 'carmen-a']);
+        $this->createApprovedProvider(['name' => 'carmen', 'slug' => 'carmen-b']);
+
+        $response = $this->getJson(route('api.search.suggestions').'?q=Carmen');
+
+        $response->assertOk();
+        $suggestions = $response->json('suggestions');
+        $lowerNames = array_map('strtolower', array_column($suggestions, 'name'));
+
+        $this->assertSame(1, count(array_filter($lowerNames, fn ($n) => $n === 'carmen')),
+            'Case-insensitive duplicates should be collapsed to a single suggestion');
+    }
 }
