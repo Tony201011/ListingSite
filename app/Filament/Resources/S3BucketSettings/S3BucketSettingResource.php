@@ -12,6 +12,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -54,27 +55,33 @@ class S3BucketSettingResource extends Resource
     {
         return $schema
             ->components([
-                Toggle::make('is_enabled')
-                    ->label('Enable S3 Uploads')
-                    ->default(false),
-                Toggle::make('use_path_style_endpoint')
-                    ->label('Use Path Style Endpoint')
-                    ->default(false),
-                // Access key and secret removed from the form since they're optional
-                TextInput::make('region')
-                    ->label('Region')
-                    ->maxLength(255),
-                TextInput::make('bucket')
-                    ->label('Bucket')
-                    ->maxLength(255),
-                TextInput::make('url')
-                    ->label('Bucket URL')
-                    ->maxLength(255),
-                TextInput::make('endpoint')
-                    ->label('Endpoint')
-                    ->maxLength(255),
-            ])
-            ->columns(2);
+                Section::make('Storage Configuration')
+                    ->compact()
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('is_enabled')
+                            ->label('Enable S3 Uploads')
+                            ->default(false)
+                            ->columnSpanFull(),
+                        Toggle::make('use_path_style_endpoint')
+                            ->label('Use Path Style Endpoint')
+                            ->default(false)
+                            ->columnSpanFull(),
+                        // Access key and secret removed from the form since they're optional
+                        TextInput::make('region')
+                            ->label('Region')
+                            ->maxLength(255),
+                        TextInput::make('bucket')
+                            ->label('Bucket')
+                            ->maxLength(255),
+                        TextInput::make('url')
+                            ->label('Bucket URL')
+                            ->maxLength(255),
+                        TextInput::make('endpoint')
+                            ->label('Endpoint')
+                            ->maxLength(255),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
