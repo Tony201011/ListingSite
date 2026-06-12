@@ -20,6 +20,8 @@ class AccountStatusChart extends ChartWidget
 
     protected ?string $maxHeight = '360px';
 
+    protected ?string $pollingInterval = '5m';
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';

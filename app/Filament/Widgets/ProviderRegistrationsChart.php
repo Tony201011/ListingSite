@@ -21,6 +21,8 @@ class ProviderRegistrationsChart extends ChartWidget
 
     protected ?string $maxHeight = '420px';
 
+    protected ?string $pollingInterval = '5m';
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';

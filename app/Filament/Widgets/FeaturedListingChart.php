@@ -21,6 +21,8 @@ class FeaturedListingChart extends ChartWidget
 
     protected ?string $maxHeight = '360px';
 
+    protected ?string $pollingInterval = '5m';
+
     protected array $featuredPurchaseSummaryByFilter = [];
 
     public static function canView(): bool

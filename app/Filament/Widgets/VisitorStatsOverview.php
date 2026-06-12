@@ -16,6 +16,8 @@ class VisitorStatsOverview extends StatsOverviewWidget
 
     protected static bool $isLazy = true;
 
+    protected ?string $pollingInterval = '30s';
+
     public static function canView(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'admin';
