@@ -20,7 +20,7 @@ class GetPurchaseCreditPageData
     public function execute(): array
     {
         $user = Auth::user();
-        $profile = $this->getActiveProviderProfile->execute($user);
+
         $pricingPage = PricingPage::query()
             ->where('is_active', true)
             ->latest('updated_at')
@@ -40,12 +40,32 @@ class GetPurchaseCreditPageData
         }
 
         $selectedPackage = $packages->firstWhere('id', $selectedPackageId);
+        $paymentProvider = $this->paymentProviderManager->current();
+
+        // Guest mode: no authenticated user — show packages for preview only
+        if (! $user) {
+            return [
+                'currentBalance' => 0,
+                'userName' => 'Guest',
+                'activeProfile' => null,
+                'pricingPage' => $pricingPage,
+                'packages' => $packages,
+                'selectedPackageId' => $selectedPackageId,
+                'selectedPackage' => $selectedPackage,
+                'lockedPackageId' => null,
+                'paymentProvider' => $paymentProvider->name(),
+                'paymentPublicKey' => null,
+                'paymentEnabled' => false,
+                'guestMode' => true,
+            ];
+        }
+
+        $profile = $this->getActiveProviderProfile->execute($user);
+        $currentBalance = $profile ? $this->walletLedgerService->currentBalance($profile) : 0;
+
         $lockedPackageId = request()->boolean('lock_package') && $selectedPackage
             ? $selectedPackage->id
             : null;
-
-        $paymentProvider = $this->paymentProviderManager->current();
-        $currentBalance = $profile ? $this->walletLedgerService->currentBalance($profile) : 0;
 
         return [
             'currentBalance' => $currentBalance,
@@ -59,6 +79,7 @@ class GetPurchaseCreditPageData
             'paymentProvider' => $paymentProvider->name(),
             'paymentPublicKey' => $paymentProvider->publicKey(),
             'paymentEnabled' => $paymentProvider->isConfigured() && filled($paymentProvider->publicKey()),
+            'guestMode' => false,
         ];
     }
 }
