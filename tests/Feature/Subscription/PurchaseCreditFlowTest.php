@@ -176,6 +176,81 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertSee(route('refund-policy'));
     }
 
+    public function test_payment_page_shows_checkout_disabled_button_not_real_payment_button_in_test_mode(): void
+    {
+        // Without stripe_mode === 'live', paymentEnabled is false, so the
+        // "Checkout disabled (test mode)" span must appear instead of a real
+        // payment/checkout button.
+        $user = $this->createProvider();
+        $this->createActivePackage();
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSeeText('Checkout disabled (test mode)');
+        $response->assertDontSee('id="proceed-to-payment"', false);
+    }
+
+    public function test_payment_page_does_not_load_stripe_js_in_test_mode(): void
+    {
+        // Stripe.js must NOT be injected into the page when payment is disabled
+        // (i.e. when stripe_mode is not 'live').  Loading it would expose the
+        // publishable key and give visitors a false impression that card entry
+        // is active.
+        $user = $this->createProvider();
+        $this->createActivePackage();
+        SiteSetting::query()->create([
+            'stripe_enabled' => true,
+            'stripe_publishable_key' => 'pk_test_123',
+            'stripe_secret_key' => 'sk_test_123',
+            // stripe_mode deliberately omitted — defaults to null, not 'live'
+        ]);
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertDontSee('js.stripe.com', false);
+        $response->assertDontSee("Stripe('", false);
+    }
+
+    public function test_payment_page_contains_no_paypal_or_square_payment_buttons(): void
+    {
+        // The platform is approved only for Stripe card payments.  PayPal,
+        // Square, Braintree, and similar buttons must never appear on the
+        // checkout page regardless of configuration.
+        $user = $this->createProvider();
+        $this->createActivePackage();
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertDontSee('paypal.com', false);
+        $response->assertDontSee('squareup.com', false);
+        $response->assertDontSee('braintreepayments.com', false);
+        $response->assertDontSee('PayPal', false);
+        $response->assertDontSee('Square', false);
+    }
+
+    public function test_create_intent_endpoint_returns_error_when_payment_not_configured(): void
+    {
+        // POST /purchase-credit/create-intent must be rejected (HTTP 422) with
+        // an error payload when the payment provider is not in live mode.
+        // This ensures the embedded PaymentElement flow cannot be exploited to
+        // initiate a real charge before processor approval.
+        $user = $this->createProvider();
+        $package = $this->createActivePackage();
+
+        $response = $this->actingAsProvider($user)->postJson('/purchase-credit/create-intent', [
+            'package_id' => $package->id,
+            'invoice_name' => 'Test User',
+            'provider_profile_id' => $user->providerProfile->id,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonPath('error', 'Payment system is not configured.');
+        $this->assertDatabaseCount('purchase_transactions', 0);
+    }
+
     // ---------------------------------------------------------------
     // Checkout validation
     // ---------------------------------------------------------------
