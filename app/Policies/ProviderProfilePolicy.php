@@ -10,20 +10,23 @@ class ProviderProfilePolicy
     public function viewAny(User $user): bool
     {
         return $user->role === User::ROLE_ADMIN
-            || $user->role === User::ROLE_PROVIDER;
+            || $user->role === User::ROLE_PROVIDER
+            || $user->role === User::ROLE_TEST_ADVERTISER;
     }
 
     public function create(User $user): bool
     {
         return $user->role === User::ROLE_ADMIN
-            || $user->role === User::ROLE_PROVIDER;
+            || $user->role === User::ROLE_PROVIDER
+            || $user->role === User::ROLE_TEST_ADVERTISER;
     }
 
     public function view(User $user, ?ProviderProfile $profile = null): bool
     {
         if (! $profile) {
             return $user->role === User::ROLE_ADMIN
-                || $user->role === User::ROLE_PROVIDER;
+                || $user->role === User::ROLE_PROVIDER
+                || $user->role === User::ROLE_TEST_ADVERTISER;
         }
 
         return $this->ownsProfile($user, $profile);
@@ -33,7 +36,8 @@ class ProviderProfilePolicy
     {
         if (! $profile) {
             return $user->role === User::ROLE_ADMIN
-                || $user->role === User::ROLE_PROVIDER;
+                || $user->role === User::ROLE_PROVIDER
+                || $user->role === User::ROLE_TEST_ADVERTISER;
         }
 
         return $this->ownsProfile($user, $profile);
