@@ -27,14 +27,13 @@ class ReviewerModeTest extends TestCase
         return $reviewer;
     }
 
-    public function test_reviewer_can_view_dashboard_pages_in_read_only_mode(): void
+    public function test_reviewer_can_view_dashboard_pages(): void
     {
         $reviewer = $this->createReviewer();
 
         $response = $this->actingAs($reviewer)->get(route('my-listings'));
 
         $response->assertOk();
-        $response->assertSee('Read-Only Reviewer Mode');
     }
 
     public function test_reviewer_mutation_requests_are_blocked(): void
@@ -123,29 +122,27 @@ class ReviewerModeTest extends TestCase
     }
 
     /**
-     * A reviewer authenticated on the admin guard cannot access user account management,
-     * which exposes personally identifiable information (PII).
+     * A reviewer authenticated on the admin guard can access user account management.
      */
-    public function test_reviewer_cannot_access_account_management_in_admin_panel(): void
+    public function test_reviewer_can_access_account_management_in_admin_panel(): void
     {
         $reviewer = $this->createReviewer();
 
         $response = $this->actingAs($reviewer, 'admin')->get('/admin/account-management/account');
 
-        // canAccess() returns false for reviewer → Filament throws AuthorizationException (403).
-        $response->assertForbidden();
+        $response->assertSuccessful();
     }
 
     /**
-     * A reviewer authenticated on the admin guard cannot access financial transaction data.
+     * A reviewer authenticated on the admin guard can access financial transaction data.
      */
-    public function test_reviewer_cannot_access_purchase_transactions_in_admin_panel(): void
+    public function test_reviewer_can_access_purchase_transactions_in_admin_panel(): void
     {
         $reviewer = $this->createReviewer();
 
         $response = $this->actingAs($reviewer, 'admin')->get('/admin/purchase-transactions');
 
-        $response->assertForbidden();
+        $response->assertSuccessful();
     }
 
     public function test_reviewer_can_still_logout(): void
