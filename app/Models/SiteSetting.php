@@ -24,6 +24,7 @@ class SiteSetting extends Model
         'max_search_distance',
         'distance_search_enabled',
         'home_page_records',
+        'search_page_records',
         'online_filter_enabled',
         'online_status_max_uses',
         'online_status_duration_minutes',
@@ -64,6 +65,7 @@ class SiteSetting extends Model
         'max_search_distance' => 'integer',
         'distance_search_enabled' => 'boolean',
         'home_page_records' => 'integer',
+        'search_page_records' => 'integer',
         'online_filter_enabled' => 'boolean',
         'online_status_max_uses' => 'integer',
         'online_status_duration_minutes' => 'integer',
@@ -147,6 +149,7 @@ class SiteSetting extends Model
     {
         static::saved(function (): void {
             cache()->forget('site_setting.home_page_records');
+            cache()->forget('site_setting.search_page_records');
             cache()->forget('site_setting.online_filter_enabled');
             cache()->forget('site_setting.status_settings');
             cache()->forget('site_setting.featured_settings');

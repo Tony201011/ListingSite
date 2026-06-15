@@ -67,6 +67,13 @@ class SiteSettingResource extends Resource
                                         ->maxValue(100)
                                         ->default(12)
                                         ->helperText('Profiles shown per page on the home page. Default: 12.'),
+                                    TextInput::make('search_page_records')
+                                        ->label('Search Page Records Per Page')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->maxValue(100)
+                                        ->default(12)
+                                        ->helperText('Profiles shown per page on the advanced search page. Default: 12.'),
                                     Toggle::make('online_filter_enabled')
                                         ->label('Require Online Status')
                                         ->default(false)

@@ -482,10 +482,11 @@ class SearchTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $profiles->total());
     }
 
-    public function test_advanced_search_uses_default_listing_page_size_instead_of_homepage_setting(): void
+    public function test_advanced_search_uses_search_page_records_admin_setting(): void
     {
         SiteSetting::query()->create([
             'home_page_records' => 2,
+            'search_page_records' => 2,
         ]);
 
         $this->createApprovedProvider(['name' => 'Advanced Visible One', 'slug' => 'advanced-visible-one']);
@@ -496,7 +497,26 @@ class SearchTest extends TestCase
         $response = $this->get(route('advanced-search'));
 
         $profiles = $response->viewData('profiles');
-        $this->assertCount(4, $profiles);
+        $this->assertCount(2, $profiles);
+        $this->assertSame(4, $profiles->total());
+    }
+
+    public function test_advanced_search_ignores_homepage_setting_and_uses_search_setting(): void
+    {
+        SiteSetting::query()->create([
+            'home_page_records' => 2,
+            'search_page_records' => 3,
+        ]);
+
+        $this->createApprovedProvider(['name' => 'Advanced Visible One', 'slug' => 'advanced-visible-one']);
+        $this->createApprovedProvider(['name' => 'Advanced Visible Two', 'slug' => 'advanced-visible-two']);
+        $this->createApprovedProvider(['name' => 'Advanced Visible Three', 'slug' => 'advanced-visible-three']);
+        $this->createApprovedProvider(['name' => 'Advanced Visible Four', 'slug' => 'advanced-visible-four']);
+
+        $response = $this->get(route('advanced-search'));
+
+        $profiles = $response->viewData('profiles');
+        $this->assertCount(3, $profiles);
         $this->assertSame(4, $profiles->total());
     }
 
