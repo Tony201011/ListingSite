@@ -29,6 +29,7 @@ use App\Http\Controllers\SiteAccess\SitePasswordController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Subscription\MemberShipController;
+use App\Http\Controllers\Subscription\PurchaseCreditController;
 /**subscription controller end */
 
 /*******site access controller start here  */
@@ -193,6 +194,10 @@ Route::get('/blog/load-more', [BlogController::class, 'loadMore'])->name('blog.l
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/pricing', [FrontendPageController::class, 'pricing'])->name('pricing');
+
+// Checkout/payment page — publicly viewable for processor review (no auth required for GET)
+Route::get('/purchase-credit', [PurchaseCreditController::class, 'purchaseCredit'])->name('purchase-credit');
+
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('/sitemaps/static.xml', [SitemapController::class, 'static'])->name('sitemap.static');

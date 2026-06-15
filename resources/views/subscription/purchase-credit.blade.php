@@ -30,18 +30,22 @@
                 <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Add Wallet Credits</h1>
                 <p class="mt-3 text-gray-600">One credit for every day your profile is online.</p>
             </div>
-            <a href="{{ route('my-profile') }}" class="text-xs sm:text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
+            @if(!($guestMode ?? false))
+                <a href="{{ route('my-profile') }}" class="text-xs sm:text-sm font-medium text-[#e04ecb] transition hover:text-[#c13ab0] hover:underline">&larr; Back to dashboard</a>
+            @endif
         </div>
 
         <div class="mb-5">
             @include('subscription.partials.pricing-benefits', ['pricingPage' => $pricingPage ?? null])
         </div>
 
+        @if(!($guestMode ?? false))
         <div class="mb-5 rounded-2xl border border-pink-100 bg-pink-50 p-4 text-xs sm:text-sm text-gray-700 shadow-sm">
             <div class="font-semibold text-gray-900">Selected profile: {{ $activeProfile?->name ?? 'Not selected' }}</div>
             Your current credits balance is <span class="font-semibold text-gray-900">{{ $currentBalance }}</span>.
             You are charged <span class="font-semibold text-gray-900">1 credit per day</span> while your profile is visible.
         </div>
+        @endif
 
         @if(session('checkout_success'))
             <div class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700 shadow-sm">
@@ -146,6 +150,7 @@
                     @endif
 
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        @if(!($guestMode ?? false))
                         <div class="lg:col-span-2">
                             <label for="invoice_name" class="mb-2 block text-sm font-semibold text-gray-700">
                                 Invoice Name
@@ -159,8 +164,9 @@
                                 class="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                             >
                         </div>
+                        @endif
 
-                        <div class="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                        <div class="rounded-xl border border-gray-100 bg-gray-50 p-4 {{ ($guestMode ?? false) ? 'md:col-span-2 lg:col-span-3' : '' }}">
                             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Selected package</p>
                             <template x-if="selected">
                                 <div>
@@ -177,7 +183,14 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
                         <p class="text-xs text-gray-500">All prices are in Australian Dollars (AUD) and include GST.</p>
-                        @if(!($reviewerMode ?? false))
+                        @if($guestMode ?? false)
+                            <a
+                                href="{{ route('signin') }}"
+                                class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0]"
+                            >
+                                Sign in to purchase credits
+                            </a>
+                        @elseif(!($reviewerMode ?? false))
                             @if($paymentEnabled && $paymentProvider === 'stripe')
                                 <button
                                     type="button"

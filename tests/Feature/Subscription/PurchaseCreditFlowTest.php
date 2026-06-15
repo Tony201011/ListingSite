@@ -112,11 +112,29 @@ class PurchaseCreditFlowTest extends TestCase
         });
     }
 
-    public function test_purchase_credit_page_requires_authentication(): void
+    public function test_purchase_credit_page_is_publicly_accessible_without_authentication(): void
     {
+        $this->createActivePackage();
+
         $response = $this->get('/purchase-credit');
 
-        $response->assertRedirect('/signin');
+        $response->assertOk();
+        $response->assertViewIs('subscription.purchase-credit');
+        $response->assertViewHas('guestMode', true);
+    }
+
+    public function test_purchase_credit_page_shows_sign_in_prompt_for_unauthenticated_users(): void
+    {
+        $this->createActivePackage();
+
+        $response = $this->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSeeText('You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only.');
+        $response->assertSeeText('Payment processing is currently in test mode for processor review.');
+        $response->assertSee(route('refund-policy'));
+        $response->assertSeeText('For business/support contact details, please email support@hotescorts.com.au');
+        $response->assertSee('Sign in to purchase credits');
     }
 
     public function test_purchase_credit_page_shows_user_current_balance(): void
