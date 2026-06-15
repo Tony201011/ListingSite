@@ -35,8 +35,8 @@
                     <h2 class="text-xl font-semibold text-gray-900">Business model</h2>
                     <p class="mt-3 leading-7 text-gray-600">
                         HotEscort is an Australian adult advertising/listing platform. Advertisers purchase prepaid advertising credits.
-                        Credits are used for profile visibility and promotional listing features. The platform does not process direct
-                        bookings or service payments between visitors and advertisers.
+                        Credits are used for profile visibility and promotional listing features. The platform does not process bookings,
+                        deposits, appointment payments, escort payments, or payments between visitors and advertisers.
                     </p>
                 </div>
             </div>

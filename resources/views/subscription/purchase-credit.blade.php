@@ -65,7 +65,7 @@
 
         {{-- Advertising credits purpose notice --}}
         <div class="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800 shadow-sm">
-            You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only.
+            You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only. The platform does not process bookings, deposits, appointment payments, escort payments, or payments between visitors and advertisers.
         </div>
 
         @if(!($paymentEnabled ?? false))
