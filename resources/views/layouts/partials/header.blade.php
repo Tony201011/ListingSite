@@ -48,7 +48,7 @@
 
     $currentUser = auth()->user();
     $isAuthenticated = filled($currentUser);
-    $isAdminAuthenticated = $isAuthenticated && (($currentUser->role ?? null) === \App\Models\User::ROLE_ADMIN);
+    $isAdminAuthenticated = $isAuthenticated && in_array($currentUser->role ?? null, [\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_REVIEWER], true);
     $primaryAuthUrl = $isAdminAuthenticated ? filament()->getUrl() : url('/my-profile');
     $primaryAuthLabel = $isAdminAuthenticated ? 'Dashboard' : 'My Profile';
     $isAddAdvertisementLink = function ($item): bool {
@@ -389,7 +389,7 @@
             @endif
 
             @auth
-                <div x-data="{ open: false }" @keydown.escape.window="open = false">
+                <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
     <button
         @click="open = !open"
         type="button"
@@ -409,7 +409,7 @@
         x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-        class="absolute right-0 top-full z-50 w-[340px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
+        class="absolute top-full z-50 w-[340px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
         style="display:none;"
     >
         @foreach($authDropdownItems as $item)
