@@ -300,7 +300,7 @@ class ProfileShowControllerTest extends TestCase
         $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertSee('name="user_id" value="'.$user->id.'"', false);
-        $response->assertSee('Send booking enquiry');
+        $response->assertSee('Send enquiry');
     }
 
     public function test_profile_view_data_defaults_rate_to_contact_for_rate_when_no_rates(): void
@@ -482,11 +482,6 @@ class ProfileShowControllerTest extends TestCase
     {
         $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10', 'is_featured' => true]);
         $rubyUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
-        OnlineUser::query()->create([
-            'user_id' => $rubyUser->id,
-            'provider_profile_id' => $rubyUser->providerProfile->id,
-            'status' => 'online',
-        ]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -500,12 +495,7 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider(['slug' => 'jade010-10', 'is_featured' => true]);
 
         for ($i = 1; $i <= 6; $i++) {
-            $escortUser = $this->createApprovedProvider(['name' => "Escort {$i}", 'slug' => "escort-{$i}"]);
-            OnlineUser::query()->create([
-                'user_id' => $escortUser->id,
-                'provider_profile_id' => $escortUser->providerProfile->id,
-                'status' => 'online',
-            ]);
+            $this->createApprovedProvider(['name' => "Escort {$i}", 'slug' => "escort-{$i}"]);
         }
 
         $response = $this->get($this->profileUrl('jade010-10'));
@@ -516,12 +506,7 @@ class ProfileShowControllerTest extends TestCase
     public function test_each_nearby_profile_has_expected_keys(): void
     {
         $this->createApprovedProvider(['slug' => 'jade010-10', 'is_featured' => true]);
-        $rubyUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
-        OnlineUser::query()->create([
-            'user_id' => $rubyUser->id,
-            'provider_profile_id' => $rubyUser->providerProfile->id,
-            'status' => 'online',
-        ]);
+        $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
