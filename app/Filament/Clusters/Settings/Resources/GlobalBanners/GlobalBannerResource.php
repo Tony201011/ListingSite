@@ -2,6 +2,7 @@
 
 namespace App\Filament\Clusters\Settings\Resources\GlobalBanners;
 
+use App\Filament\Clusters\Settings;
 use App\Models\AgeAndConsentPolicy;
 use App\Models\ContactUsPage;
 use App\Models\ContentModerationPolicy;
@@ -48,6 +49,8 @@ class GlobalBannerResource extends Resource
         'age-and-consent-policy' => ['label' => 'Age and Consent Policy', 'model' => AgeAndConsentPolicy::class],
         'prohibited-content-policy' => ['label' => 'Prohibited Content/Services Policy', 'model' => ProhibitedContentPolicy::class],
     ];
+
+    protected static ?string $cluster = Settings::class;
 
     protected static ?string $model = GlobalBanner::class;
 

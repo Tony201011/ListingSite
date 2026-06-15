@@ -2,6 +2,8 @@
 
 namespace App\Filament\Clusters\Settings\Resources;
 
+use App\Filament\Clusters\Settings;
+use App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\CreateSiteSetting;
 use App\Filament\Clusters\Settings\Resources\SiteSettingResource\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
 use BackedEnum;
@@ -22,6 +24,8 @@ use Filament\Tables\Columns\TextColumn;
 
 class SiteSettingResource extends Resource
 {
+    protected static ?string $cluster = Settings::class;
+
     protected static ?string $model = SiteSetting::class;
 
     protected static ?string $navigationLabel = 'Site Settings';
@@ -387,6 +391,7 @@ class SiteSettingResource extends Resource
     {
         return [
             'index' => ManageSiteSettings::route('/'),
+            'create' => CreateSiteSetting::route('/create'),
         ];
     }
 }

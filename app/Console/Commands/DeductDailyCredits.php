@@ -97,15 +97,6 @@ class DeductDailyCredits extends Command
                     'debit',
                 );
 
-                if ($currentBalance - 1 <= 0) {
-                    HideShowProfile::updateOrCreate(
-                        ['user_id' => $locked->user_id, 'provider_profile_id' => $locked->id],
-                        ['user_id' => $locked->user_id, 'status' => 'hide']
-                    );
-
-                    return [1, 1];
-                }
-
                 return [1, 0];
             });
 

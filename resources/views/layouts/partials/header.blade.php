@@ -332,7 +332,7 @@
                 @if(strtolower($item['label']) === 'escorts')
                     <div
                         class="relative"
-                        x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
+                        x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all(), JSON_UNESCAPED_SLASHES) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
                         @click.outside="open = false; search = ''"
                     >
                         <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium hover:text-white">
@@ -506,7 +506,7 @@
                         </button>
                     </form>
                 @elseif(strtolower($item['label']) === 'escorts')
-                    <div x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all()) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }">
+                    <div x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all(), JSON_UNESCAPED_SLASHES) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }">
                         <button @click="open = !open" class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">
                             <span>{{ $item['label'] }}</span>
                             <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>

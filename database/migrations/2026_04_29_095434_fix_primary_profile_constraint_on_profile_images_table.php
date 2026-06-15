@@ -17,8 +17,13 @@ return new class extends Migration
     public function up(): void
     {
         if (DB::getDriverName() === 'sqlite') {
-            // SQLite does not support ALTER TABLE … DROP COLUMN for generated columns
-            // or DROP INDEX via the standard path; skip on SQLite (test environment).
+            DB::statement('DROP INDEX IF EXISTS "uq_one_primary_per_user"');
+            DB::statement('
+                CREATE UNIQUE INDEX IF NOT EXISTS "uq_one_primary_per_profile"
+                ON "profile_images" ("provider_profile_id")
+                WHERE "is_primary" = 1 AND "deleted_at" IS NULL
+            ');
+
             return;
         }
 
@@ -43,6 +48,13 @@ return new class extends Migration
     public function down(): void
     {
         if (DB::getDriverName() === 'sqlite') {
+            DB::statement('DROP INDEX IF EXISTS "uq_one_primary_per_profile"');
+            DB::statement('
+                CREATE UNIQUE INDEX IF NOT EXISTS "uq_one_primary_per_user"
+                ON "profile_images" ("user_id")
+                WHERE "is_primary" = 1 AND "deleted_at" IS NULL
+            ');
+
             return;
         }
 
