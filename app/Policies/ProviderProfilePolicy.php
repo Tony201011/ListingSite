@@ -10,6 +10,7 @@ class ProviderProfilePolicy
     public function viewAny(User $user): bool
     {
         return $user->role === User::ROLE_ADMIN
+            || $user->role === User::ROLE_REVIEWER
             || $user->role === User::ROLE_PROVIDER
             || $user->role === User::ROLE_TEST_ADVERTISER;
     }
@@ -17,6 +18,7 @@ class ProviderProfilePolicy
     public function create(User $user): bool
     {
         return $user->role === User::ROLE_ADMIN
+            || $user->role === User::ROLE_REVIEWER
             || $user->role === User::ROLE_PROVIDER
             || $user->role === User::ROLE_TEST_ADVERTISER;
     }
@@ -25,6 +27,7 @@ class ProviderProfilePolicy
     {
         if (! $profile) {
             return $user->role === User::ROLE_ADMIN
+                || $user->role === User::ROLE_REVIEWER
                 || $user->role === User::ROLE_PROVIDER
                 || $user->role === User::ROLE_TEST_ADVERTISER;
         }
@@ -36,6 +39,7 @@ class ProviderProfilePolicy
     {
         if (! $profile) {
             return $user->role === User::ROLE_ADMIN
+                || $user->role === User::ROLE_REVIEWER
                 || $user->role === User::ROLE_PROVIDER
                 || $user->role === User::ROLE_TEST_ADVERTISER;
         }
@@ -59,12 +63,16 @@ class ProviderProfilePolicy
             return false;
         }
 
+        if ($user->role === User::ROLE_REVIEWER) {
+            return false;
+        }
+
         return $this->ownsProfile($user, $profile);
     }
 
     private function ownsProfile(User $user, ProviderProfile $profile): bool
     {
-        if ($user->role === User::ROLE_ADMIN) {
+        if ($user->role === User::ROLE_ADMIN || $user->role === User::ROLE_REVIEWER) {
             return true;
         }
 

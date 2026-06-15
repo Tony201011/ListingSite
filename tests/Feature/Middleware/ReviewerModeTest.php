@@ -145,6 +145,57 @@ class ReviewerModeTest extends TestCase
         $response->assertSuccessful();
     }
 
+    /**
+     * A reviewer authenticated on the admin guard can access the provider profiles list.
+     * ProviderProfilePolicy::viewAny() now includes ROLE_REVIEWER.
+     */
+    public function test_reviewer_can_access_provider_profiles_in_admin_panel(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer, 'admin')->get('/admin/providers');
+
+        $response->assertSuccessful();
+    }
+
+    /**
+     * ProviderProfilePolicy allows a reviewer to view and update any provider profile,
+     * matching admin-level access within the panel.
+     */
+    public function test_reviewer_policy_allows_view_and_update_of_any_profile(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $provider = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $provider->id,
+            'name'    => 'Provider Profile',
+            'slug'    => 'provider-profile-'.$provider->id,
+        ]);
+
+        $this->assertTrue($reviewer->can('viewAny', ProviderProfile::class));
+        $this->assertTrue($reviewer->can('view', $profile));
+        $this->assertTrue($reviewer->can('update', $profile));
+    }
+
+    /**
+     * ProviderProfilePolicy does NOT allow a reviewer to delete profiles.
+     * Deletion remains an admin-only operation.
+     */
+    public function test_reviewer_policy_blocks_delete_of_profile(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $provider = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $provider->id,
+            'name'    => 'Provider Profile',
+            'slug'    => 'provider-profile-'.$provider->id,
+        ]);
+
+        $this->assertFalse($reviewer->can('delete', $profile));
+    }
+
     public function test_reviewer_can_still_logout(): void
     {
         $reviewer = $this->createReviewer();
