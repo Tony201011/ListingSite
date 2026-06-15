@@ -159,10 +159,10 @@ class ReviewerModeTest extends TestCase
     }
 
     /**
-     * ProviderProfilePolicy allows a reviewer to view and update any provider profile,
-     * matching admin-level access within the panel.
+     * ProviderProfilePolicy allows a reviewer to view any provider profile,
+     * but NOT to create or update — reviewers are strictly read-only.
      */
-    public function test_reviewer_policy_allows_view_and_update_of_any_profile(): void
+    public function test_reviewer_policy_allows_view_but_not_update_of_any_profile(): void
     {
         $reviewer = $this->createReviewer();
 
@@ -175,7 +175,8 @@ class ReviewerModeTest extends TestCase
 
         $this->assertTrue($reviewer->can('viewAny', ProviderProfile::class));
         $this->assertTrue($reviewer->can('view', $profile));
-        $this->assertTrue($reviewer->can('update', $profile));
+        $this->assertFalse($reviewer->can('update', $profile));
+        $this->assertFalse($reviewer->can('create', ProviderProfile::class));
     }
 
     /**

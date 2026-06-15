@@ -59,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureAdminSlideOverActions();
+        $this->configureReviewerReadOnlyActions();
 
         FilamentView::registerRenderHook(
             'panels::head.start',
@@ -107,6 +108,26 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Logout::class, RecordUserLogout::class);
         Event::listen(NotificationSent::class, LogPasswordResetNotificationEmail::class);
         Event::listen(NotificationFailed::class, LogPasswordResetNotificationEmail::class);
+    }
+
+    private function configureReviewerReadOnlyActions(): void
+    {
+        $denyForReviewer = function (Action $action): void {
+            if (Filament::getCurrentPanel()?->getId() !== 'admin') {
+                return;
+            }
+
+            $action->hidden(fn (): bool => (bool) auth('admin')->user()?->isReviewer());
+        };
+
+        CreateAction::configureUsing($denyForReviewer);
+        EditAction::configureUsing($denyForReviewer);
+        DeleteAction::configureUsing($denyForReviewer);
+        DeleteBulkAction::configureUsing($denyForReviewer);
+        ForceDeleteAction::configureUsing($denyForReviewer);
+        ForceDeleteBulkAction::configureUsing($denyForReviewer);
+        RestoreAction::configureUsing($denyForReviewer);
+        RestoreBulkAction::configureUsing($denyForReviewer);
     }
 
     private function configureAdminSlideOverActions(): void

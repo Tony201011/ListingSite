@@ -2,6 +2,7 @@
 
 namespace App\Filament\Clusters\Settings\Resources\MetaDescriptions\Pages;
 
+use App\Filament\Concerns\ReviewerReadOnly;
 use App\Filament\Clusters\Settings\Resources\MetaDescriptions\MetaDescriptionResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -10,6 +11,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditMetaDescription extends EditRecord
 {
+    use ReviewerReadOnly;
+
     protected static string $resource = MetaDescriptionResource::class;
 
     protected function getHeaderActions(): array

@@ -157,7 +157,7 @@ class UserReportResource extends Resource
                     ->label('Reply')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('primary')
-                    ->visible(fn (UserReport $record): bool => filled($record->reporter_email))
+                    ->visible(fn (UserReport $record): bool => filled($record->reporter_email) && ! auth('admin')->user()?->isReviewer())
                     ->modalHeading(fn (UserReport $record): string => 'Reply to '.($record->reporter_name ?? $record->reporter_email))
                     ->modalSubmitActionLabel('Send Reply')
                     ->form([
@@ -203,7 +203,7 @@ class UserReportResource extends Resource
                     ->label('Mark read')
                     ->icon('heroicon-o-check')
                     ->color('gray')
-                    ->visible(fn (UserReport $record): bool => ! $record->is_read)
+                    ->visible(fn (UserReport $record): bool => ! $record->is_read && ! auth('admin')->user()?->isReviewer())
                     ->requiresConfirmation(false)
                     ->action(fn (UserReport $record): bool => $record->update(['is_read' => true])),
 
@@ -211,7 +211,7 @@ class UserReportResource extends Resource
                     ->label('Mark reviewed')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (UserReport $record): bool => $record->status === 'pending')
+                    ->visible(fn (UserReport $record): bool => $record->status === 'pending' && ! auth('admin')->user()?->isReviewer())
                     ->requiresConfirmation()
                     ->modalHeading('Mark as Reviewed')
                     ->modalDescription('Mark this report as reviewed?')
@@ -221,7 +221,7 @@ class UserReportResource extends Resource
                     ->label('Dismiss')
                     ->icon('heroicon-o-x-circle')
                     ->color('gray')
-                    ->visible(fn (UserReport $record): bool => $record->status !== 'dismissed')
+                    ->visible(fn (UserReport $record): bool => $record->status !== 'dismissed' && ! auth('admin')->user()?->isReviewer())
                     ->requiresConfirmation()
                     ->modalHeading('Dismiss Report')
                     ->modalDescription('Are you sure you want to dismiss this report?')

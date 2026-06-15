@@ -106,7 +106,7 @@ class ManageTwilioSettings extends ManageRecords
             Action::make('testSms')
                 ->label('Test SMS')
                 ->icon('heroicon-o-chat-bubble-left-right')
-                ->visible(fn (): bool => TwilioSetting::query()->exists())
+                ->visible(fn (): bool => TwilioSetting::query()->exists() && ! auth('admin')->user()?->isReviewer())
                 ->modalHeading('Send Test SMS')
                 ->form([
                     TextInput::make('mobile')

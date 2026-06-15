@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Concerns\LoadsProviderMediaBeforeFill;
+use App\Filament\Concerns\ReviewerReadOnly;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\ProfileMessage;
 use App\Models\ProviderProfile;
@@ -18,7 +19,7 @@ use Illuminate\Support\Str;
 
 class EditUser extends EditRecord
 {
-    use LoadsProviderMediaBeforeFill;
+    use LoadsProviderMediaBeforeFill, ReviewerReadOnly;
 
     protected static string $resource = UserResource::class;
 

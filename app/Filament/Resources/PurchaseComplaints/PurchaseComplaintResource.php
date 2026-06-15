@@ -174,7 +174,7 @@ class PurchaseComplaintResource extends Resource
                     ->label('Reply')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('primary')
-                    ->visible(fn (PurchaseComplaint $record): bool => filled($record->user?->email))
+                    ->visible(fn (PurchaseComplaint $record): bool => filled($record->user?->email) && ! auth('admin')->user()?->isReviewer())
                     ->modalHeading(fn (PurchaseComplaint $record): string => 'Reply to '.($record->user?->name ?? $record->user?->email ?? 'Provider'))
                     ->modalSubmitActionLabel('Send Reply')
                     ->form([
@@ -220,7 +220,7 @@ class PurchaseComplaintResource extends Resource
                     ->label('Mark read')
                     ->icon('heroicon-o-check')
                     ->color('gray')
-                    ->visible(fn (PurchaseComplaint $record): bool => ! $record->is_read)
+                    ->visible(fn (PurchaseComplaint $record): bool => ! $record->is_read && ! auth('admin')->user()?->isReviewer())
                     ->requiresConfirmation(false)
                     ->action(fn (PurchaseComplaint $record): bool => $record->update(['is_read' => true])),
 
@@ -228,7 +228,7 @@ class PurchaseComplaintResource extends Resource
                     ->label('Close')
                     ->icon('heroicon-o-x-circle')
                     ->color('gray')
-                    ->visible(fn (PurchaseComplaint $record): bool => $record->status !== 'closed')
+                    ->visible(fn (PurchaseComplaint $record): bool => $record->status !== 'closed' && ! auth('admin')->user()?->isReviewer())
                     ->requiresConfirmation()
                     ->modalHeading('Close Complaint')
                     ->modalDescription('Are you sure you want to close this complaint? This will mark it as resolved.')
