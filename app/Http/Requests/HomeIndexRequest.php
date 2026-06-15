@@ -74,6 +74,7 @@ class HomeIndexRequest extends FormRequest
             'user_lng' => $this->input('user_lng'),
             'distance' => $this->input('distance'),
             'girls' => $girlsMode,
+            'per_page' => $this->input('per_page'),
         ]);
     }
 
@@ -98,6 +99,7 @@ class HomeIndexRequest extends FormRequest
             'user_lng' => ['nullable', 'numeric', 'between:-180,180'],
             'distance' => ['nullable', 'integer', 'min:0', 'max:20000'],
             'girls' => ['nullable', Rule::in(['all', 'new', 'popular'])],
+            'per_page' => ['nullable', 'integer', Rule::in([12, 24, 48])],
         ];
     }
 
