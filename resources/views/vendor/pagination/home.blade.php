@@ -47,11 +47,11 @@
                 @if (is_array($element))
                     @foreach ($element as $page => $url)
                         @if ($page == $paginator->currentPage())
-                            <span aria-current="page" class="inline-flex h-11 min-w-11 items-center justify-center rounded-xl border border-pink-600 bg-pink-600 px-4 text-sm font-semibold text-white shadow-sm">
+                            <a href="{{ $url }}" data-page-link="{{ $page }}" aria-current="page" class="inline-flex h-11 min-w-11 items-center justify-center rounded-xl border border-pink-600 bg-pink-600 px-4 text-sm font-semibold text-white shadow-sm" aria-label="Go to page {{ $page }}">
                                 {{ $page }}
-                            </span>
+                            </a>
                         @else
-                            <a href="{{ $url }}" class="inline-flex h-11 min-w-11 items-center justify-center rounded-xl border border-pink-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600" aria-label="Go to page {{ $page }}">
+                            <a href="{{ $url }}" data-page-link="{{ $page }}" class="inline-flex h-11 min-w-11 items-center justify-center rounded-xl border border-pink-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-pink-300 hover:bg-pink-50 hover:text-pink-600" aria-label="Go to page {{ $page }}">
                                 {{ $page }}
                             </a>
                         @endif

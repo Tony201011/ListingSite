@@ -549,6 +549,9 @@
 
             <div id="listings-content" x-cloak>
                 <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" data-listings-grid>
+                    <div class="col-span-full" style="height:0;padding:0;margin:0;line-height:0" aria-hidden="true"
+                        data-page-section="{{ $profiles->currentPage() }}"
+                        data-page-url="{{ $profiles->url($profiles->currentPage()) }}"></div>
                     @forelse($profiles as $profile)
                         @include('frontend.partials.profile-card', ['profile' => $profile])
                     @empty
@@ -568,7 +571,7 @@
                             <a href="{{ route('advanced-search') }}" class="text-pink-500 hover:text-pink-400 underline underline-offset-2">Clear filters</a>
                         </p>
                     @endif
-                    {{ $profiles->links() }}
+                    {{ $profiles->onEachSide(1)->links('vendor.pagination.home') }}
                 </div>
                 <div class="mt-4 hidden text-center text-sm text-gray-500" data-listings-loading>
                     Loading more profiles...
@@ -579,7 +582,7 @@
                 <div class="mt-4 hidden text-center text-sm text-gray-400" data-listings-end>
                     No more profiles to load.
                 </div>
-                <div class="h-2 w-full" data-listings-sentinel @if(! $profiles->hasMorePages()) hidden @endif></div>
+                <div class="h-2 w-full" data-listings-sentinel data-next-url="{{ $profiles->nextPageUrl() ?? '' }}" @if(! $profiles->hasMorePages()) hidden @endif></div>
             </div>
         </div>
         </div>
