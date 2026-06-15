@@ -18,6 +18,13 @@ class EditProfile extends BaseEditProfile
 {
     use ReviewerReadOnly;
 
+    public function mount(): void
+    {
+        $this->authorizeAccess();
+
+        parent::mount();
+    }
+
     protected function getEmailFormComponent(): Component
     {
         return parent::getEmailFormComponent()

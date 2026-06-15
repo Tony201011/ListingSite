@@ -13,8 +13,8 @@ class PricingPageSeeder extends Seeder
     public function run(): void
     {
         $introContent = <<<'HTML'
-<p>We don't believe in basic, pro and premium packages. Every babe gets the same features. Just one credit for every day you advertise.</p>
-<p>Not advertising, taking a break, or hiding your profile? No charge, no worries! You can still upload new pictures and update your profile content without paying extra. On the days your profile is offline, you don't pay &mdash; you only pay when your profile is online.</p>
+<p>We don&#039;t believe in basic, pro and premium packages. Every babe gets the same features. Just one credit for every day you advertise.</p>
+<p>Not advertising, taking a break, or hiding your profile? No charge, no worries! You can still upload new pictures and update your profile content without paying extra. On the days your profile is offline, you don&#039;t pay &mdash; you only pay when your profile is online.</p>
 <p><strong>One credit for every day your profile is online, simple and fair for all.</strong></p>
 <p>This includes:</p>
 <ul>

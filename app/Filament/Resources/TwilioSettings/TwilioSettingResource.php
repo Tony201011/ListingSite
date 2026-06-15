@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TwilioSettings;
 
+use App\Filament\Resources\TwilioSettings\Pages\CreateTwilioSetting;
 use App\Filament\Resources\TwilioSettings\Pages\ManageTwilioSettings;
 use App\Filament\Resources\TwilioSettings\Schemas\TwilioSettingForm;
 use App\Filament\Resources\TwilioSettings\Tables\TwilioSettingsTable;
@@ -55,6 +56,7 @@ class TwilioSettingResource extends Resource
     {
         return [
             'index' => ManageTwilioSettings::route('/'),
+            'create' => CreateTwilioSetting::route('/create'),
         ];
     }
 }
