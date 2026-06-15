@@ -34,10 +34,6 @@ class EmailLogResource extends Resource
 
     public static function canAccess(): bool
     {
-        if (Filament::auth()->user()?->isReviewer()) {
-            return false;
-        }
-
         return Filament::getCurrentPanel()?->getId() === 'admin'
             && SiteSetting::isLoggingEnabled();
     }
