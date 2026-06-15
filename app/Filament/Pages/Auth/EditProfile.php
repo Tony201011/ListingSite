@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Filament\Concerns\ReviewerReadOnly;
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
@@ -15,6 +16,8 @@ use Illuminate\Validation\Rules\Password;
 
 class EditProfile extends BaseEditProfile
 {
+    use ReviewerReadOnly;
+
     protected function getEmailFormComponent(): Component
     {
         return parent::getEmailFormComponent()
