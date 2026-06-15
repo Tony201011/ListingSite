@@ -31,7 +31,7 @@ class TestAdvertiserAccountSeederTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame('Test Advertiser', $user->name);
-        $this->assertSame(User::ROLE_PROVIDER, $user->role);
+        $this->assertSame(User::ROLE_TEST_ADVERTISER, $user->role);
         $this->assertFalse($user->is_blocked);
         $this->assertTrue($user->hasVerifiedEmail());
         $this->assertSame('approved', $profile->profile_status);
