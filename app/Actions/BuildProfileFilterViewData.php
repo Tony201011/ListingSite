@@ -300,7 +300,13 @@ class BuildProfileFilterViewData
         }
 
         if ($advancedSearch) {
-            return self::DEFAULT_PROFILES_PER_PAGE;
+            $value = (int) cache()->remember(
+                'site_setting.search_page_records',
+                now()->addHour(),
+                fn () => SiteSetting::query()->value('search_page_records') ?? self::DEFAULT_PROFILES_PER_PAGE
+            );
+
+            return $value >= 1 ? $value : self::DEFAULT_PROFILES_PER_PAGE;
         }
 
         $value = (int) cache()->remember(
