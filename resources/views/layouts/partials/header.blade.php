@@ -389,57 +389,105 @@
             @endif
 
             @auth
-                <div x-data="{ open: false }" @keydown.escape.window="open = false">
-    <button
-        @click="open = !open"
-        type="button"
-        class="bg-yellow-400 text-slate-900 px-3 py-1 rounded hover:bg-yellow-500 flex items-center gap-1"
-    >
-        {{ $authDisplayName }}
-        <i class="fa-solid fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
-    </button>
-
-    <div
-        x-cloak
-        x-show="open"
-        @click.outside="open = false"
-        x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
-        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-        x-transition:leave="transition ease-in duration-100"
-        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-        class="absolute right-0 top-full z-50 w-[340px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
-        style="display:none;"
-    >
-        @foreach($authDropdownItems as $item)
-            @if($item['divider_before'] ?? false)
-                <div class="my-3 border-t border-gray-200"></div>
-            @endif
-
-            <a
-                href="{{ $item['url'] }}"
-                @click="open = false"
-                class="block whitespace-nowrap px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50 {{ ($item['is_active'] ?? false) ? 'font-bold' : 'font-normal' }}"
-            >
-                {{ $item['label'] }}
-            </a>
-        @endforeach
-
-        <div class="my-3 border-t border-gray-200"></div>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
+                <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
                     <button
+                        @click="open = !open"
                         type="button"
-                        class="block w-full px-5 py-3 text-left text-[18px] font-normal leading-tight text-red-600 transition hover:bg-gray-50"
-                        @click="open = false; confirmSignOut($el.closest('form'))"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-amber-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
                     >
-                        Sign Out
+                        <i class="fa-solid fa-circle-user text-base"></i>
+                        <span class="max-w-[120px] truncate">{{ $authDisplayName }}</span>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
                     </button>
-                </form>
-            </div>
-        </div>
+
+                    <div
+                        x-cloak
+                        x-show="open"
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 -translate-y-1 scale-95"
+                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 -translate-y-1 scale-95"
+                        class="absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-[0_10px_25px_rgba(0,0,0,.12)]"
+                        style="display:none;"
+                    >
+                        {{-- User info --}}
+                        <div class="border-b border-gray-100 bg-gray-50 px-4 py-3">
+                            <p class="truncate text-sm font-semibold text-gray-900">{{ $authDisplayName }}</p>
+                            @if(filled($currentUser->email ?? null))
+                                <p class="truncate text-xs text-gray-500">{{ $currentUser->email }}</p>
+                            @endif
+                        </div>
+
+                        {{-- Account --}}
+                        <div class="p-1.5">
+                            <p class="px-3 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Account</p>
+                            <a href="{{ route('my-account') }}" @click="open = false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 active:bg-gray-100">
+                                <i class="fa-solid fa-user w-4 shrink-0 text-center text-xs text-gray-400"></i>
+                                My Account
+                            </a>
+                            <a href="{{ route('profiles.index') }}" @click="open = false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 active:bg-gray-100">
+                                <i class="fa-solid fa-id-card w-4 shrink-0 text-center text-xs text-gray-400"></i>
+                                My Profiles
+                            </a>
+                            <a href="{{ route('my-listings') }}" @click="open = false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition hover:bg-gray-50 active:bg-gray-100 {{ request()->routeIs('my-listings') ? 'font-semibold text-gray-900' : 'text-gray-700' }}">
+                                <i class="fa-solid fa-list w-4 shrink-0 text-center text-xs text-gray-400"></i>
+                                My Listings
+                            </a>
+                        </div>
+
+                        <div class="mx-3 border-t border-gray-100"></div>
+
+                        {{-- Billing --}}
+                        <div class="p-1.5">
+                            <p class="px-3 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Billing</p>
+                            <a href="{{ route('payment-subscription') }}" @click="open = false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 active:bg-gray-100">
+                                <i class="fa-solid fa-credit-card w-4 shrink-0 text-center text-xs text-gray-400"></i>
+                                Billing & Payments
+                            </a>
+                        </div>
+
+                        <div class="mx-3 border-t border-gray-100"></div>
+
+                        {{-- Settings --}}
+                        <div class="p-1.5">
+                            <p class="px-3 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Settings</p>
+                            <a href="{{ route('privacy-policy') }}" @click="open = false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 active:bg-gray-100">
+                                <i class="fa-solid fa-shield-halved w-4 shrink-0 text-center text-xs text-gray-400"></i>
+                                Privacy Settings
+                            </a>
+                        </div>
+
+                        <div class="mx-3 border-t border-gray-100"></div>
+
+                        {{-- Support --}}
+                        <div class="p-1.5">
+                            <p class="px-3 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Support</p>
+                            <a href="{{ route('help') }}" @click="open = false" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 active:bg-gray-100">
+                                <i class="fa-solid fa-circle-question w-4 shrink-0 text-center text-xs text-gray-400"></i>
+                                Help & Support
+                            </a>
+                        </div>
+
+                        <div class="mx-3 border-t border-gray-100"></div>
+
+                        {{-- Session --}}
+                        <div class="p-1.5">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button
+                                    type="button"
+                                    @click="open = false; confirmSignOut($el.closest('form'))"
+                                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-600 transition hover:bg-red-50 active:bg-red-100"
+                                >
+                                    <i class="fa-solid fa-right-from-bracket w-4 shrink-0 text-center text-xs"></i>
+                                    Sign Out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                     @else
                 <a href="{{ route('signin') }}" class="mx-4 text-sm font-medium text-white transition hover:text-white">
                     Sign In
