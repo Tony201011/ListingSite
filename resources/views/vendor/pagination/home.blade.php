@@ -3,18 +3,6 @@
         $from = $paginator->firstItem() ?? 0;
         $to = $paginator->lastItem() ?? 0;
         $total = $paginator->total();
-        $currentPerPage = $paginator->perPage();
-        $allowedPerPage = collect([12, 24, 48]);
-        if (! $allowedPerPage->contains($currentPerPage)) {
-            $allowedPerPage = $allowedPerPage->push($currentPerPage)->sort()->values();
-        }
-
-        // Build the page-1 URL with per_page stripped, for the per_page selector navigation
-        $pageOneUrl = $paginator->url(1);
-        $parsedPageOne = parse_url($pageOneUrl);
-        parse_str($parsedPageOne['query'] ?? '', $pageOneQuery);
-        unset($pageOneQuery['per_page']);
-        $perPageBaseUrl = ($parsedPageOne['path'] ?? '/') . ($pageOneQuery ? '?' . http_build_query($pageOneQuery) : '');
     @endphp
     <nav
         role="navigation"
@@ -24,7 +12,6 @@
             maxPage: {{ $paginator->lastPage() }},
             pageTwoUrl: '{{ addslashes($paginator->url(2)) }}',
             pageOneUrl: '{{ addslashes($paginator->url(1)) }}',
-            perPageBaseUrl: '{{ addslashes($perPageBaseUrl) }}',
             pageUrl(page) {
                 const n = parseInt(page, 10);
                 if (isNaN(n) || n < 1) return this.pageOneUrl;
@@ -36,32 +23,13 @@
                 if (isNaN(n) || n < 1 || n > this.maxPage) return;
                 window.location.href = this.pageUrl(n);
             },
-            changePerPage(value) {
-                const url = new URL(this.perPageBaseUrl, window.location.origin);
-                url.searchParams.set('per_page', value);
-                window.location.href = url.href;
-            },
         }"
         class="mt-6 flex flex-col gap-3"
     >
         {{-- Main pagination row --}}
         <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 shadow-sm">
 
-            {{-- Left: Show rows selector --}}
-            <div class="flex items-center gap-2">
-                <label for="home-per-page" class="text-sm font-medium text-gray-600 whitespace-nowrap">Show rows</label>
-                <select
-                    id="home-per-page"
-                    x-on:change="changePerPage($event.target.value)"
-                    class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-                >
-                    @foreach ($allowedPerPage as $option)
-                        <option value="{{ $option }}" @selected($option === $currentPerPage)>{{ $option }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- Centre: Range text --}}
+            {{-- Left: Range text --}}
             <span class="text-sm font-medium text-gray-600">
                 @if ($total > 0)
                     {{ number_format($from) }}&nbsp;–&nbsp;{{ number_format($to) }} of {{ number_format($total) }}
