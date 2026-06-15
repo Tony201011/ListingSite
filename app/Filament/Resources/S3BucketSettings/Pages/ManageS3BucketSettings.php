@@ -30,6 +30,7 @@ class ManageS3BucketSettings extends ManageRecords
                 ->label('Test Upload')
                 ->icon('heroicon-o-cloud-arrow-up')
                 ->color('info')
+                ->hidden(fn (): bool => (bool) auth('admin')->user()?->isReviewer())
                 ->modalHeading('Upload a file to test your storage')
                 ->modalDescription('Select an image or video file from your computer. It will be uploaded to the configured disk.')
                 ->form([

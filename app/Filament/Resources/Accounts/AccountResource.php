@@ -229,6 +229,7 @@ class AccountResource extends Resource
                         ->icon(fn (User $record): string => $record->is_blocked ? 'heroicon-o-check-circle' : 'heroicon-o-no-symbol')
                         ->color(fn (User $record): string => $record->is_blocked ? 'success' : 'danger')
                         ->requiresConfirmation()
+                        ->hidden(fn (): bool => (bool) auth('admin')->user()?->isReviewer())
                         ->action(function (User $record): void {
                             $record->update(['is_blocked' => ! $record->is_blocked]);
                         }),

@@ -1335,7 +1335,7 @@ class UserResource extends Resource
                         ->label('Photo Verification')
                         ->icon('heroicon-o-camera')
                         ->color('gray')
-                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && $record->photoVerification->isNotEmpty())
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && $record->photoVerification->isNotEmpty() && ! auth('admin')->user()?->isReviewer())
                         ->modalHeading(fn (ProviderProfile $record): string => 'Photo Verification · '.($record->name ?? 'Provider'))
                         ->modalSubmitActionLabel('Save')
                         ->modalCancelActionLabel('Close')
@@ -1551,7 +1551,7 @@ class UserResource extends Resource
                         ->label('Edit')
                         ->icon('heroicon-o-pencil-square')
                         ->url(fn (ProviderProfile $record): string => static::getUrl('edit', ['record' => $record]))
-                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed()),
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && ! auth('admin')->user()?->isReviewer()),
 
                     Action::make('delete')
                         ->label('Delete')
@@ -1560,7 +1560,7 @@ class UserResource extends Resource
                         ->requiresConfirmation()
                         ->modalHeading('Delete profile')
                         ->modalDescription('Delete this provider profile? This soft-deletes the profile and removes it from listings.')
-                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed())
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->trashed() && ! auth('admin')->user()?->isReviewer())
                         ->action(function (ProviderProfile $record): void {
                             $record->delete();
                         })
@@ -1571,7 +1571,7 @@ class UserResource extends Resource
                         ->color('danger')
                         ->icon('heroicon-o-lock-closed')
                         ->requiresConfirmation()
-                        ->visible(fn (ProviderProfile $record): bool => ! $record->is_blocked && ! $record->trashed())
+                        ->visible(fn (ProviderProfile $record): bool => ! $record->is_blocked && ! $record->trashed() && ! auth('admin')->user()?->isReviewer())
                         ->action(function (ProviderProfile $record): void {
                             $record->update(['is_blocked' => true]);
                             SendAdminProviderEmailJob::dispatch($record->user?->id, 'blocked');
@@ -1582,7 +1582,7 @@ class UserResource extends Resource
                         ->color('success')
                         ->icon('heroicon-o-lock-open')
                         ->requiresConfirmation()
-                        ->visible(fn (ProviderProfile $record): bool => $record->is_blocked && ! $record->trashed())
+                        ->visible(fn (ProviderProfile $record): bool => $record->is_blocked && ! $record->trashed() && ! auth('admin')->user()?->isReviewer())
                         ->action(function (ProviderProfile $record): void {
                             $record->update(['is_blocked' => false]);
                             SendAdminProviderEmailJob::dispatch($record->user?->id, 'unblocked');
@@ -1595,7 +1595,7 @@ class UserResource extends Resource
                         ->requiresConfirmation()
                         ->modalHeading('Restore profile')
                         ->modalDescription('Are you sure you want to restore this provider profile?')
-                        ->visible(fn (ProviderProfile $record): bool => $record->trashed())
+                        ->visible(fn (ProviderProfile $record): bool => $record->trashed() && ! auth('admin')->user()?->isReviewer())
                         ->action(function (ProviderProfile $record): void {
                             $record->restore();
                         })

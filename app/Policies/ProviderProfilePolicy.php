@@ -18,7 +18,6 @@ class ProviderProfilePolicy
     public function create(User $user): bool
     {
         return $user->role === User::ROLE_ADMIN
-            || $user->role === User::ROLE_REVIEWER
             || $user->role === User::ROLE_PROVIDER
             || $user->role === User::ROLE_TEST_ADVERTISER;
     }
@@ -37,9 +36,12 @@ class ProviderProfilePolicy
 
     public function update(User $user, ?ProviderProfile $profile = null): bool
     {
+        if ($user->role === User::ROLE_REVIEWER) {
+            return false;
+        }
+
         if (! $profile) {
             return $user->role === User::ROLE_ADMIN
-                || $user->role === User::ROLE_REVIEWER
                 || $user->role === User::ROLE_PROVIDER
                 || $user->role === User::ROLE_TEST_ADVERTISER;
         }

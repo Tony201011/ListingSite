@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Concerns\ChecksEmailSendingOutcome;
+use App\Filament\Concerns\ReviewerReadOnly;
 use App\Filament\Resources\Users\UserResource;
 use App\Jobs\SendAdminProviderEmailJob;
 use App\Models\ProfileMessage;
@@ -16,7 +17,7 @@ use Illuminate\Support\Str;
 
 class CreateUser extends CreateRecord
 {
-    use ChecksEmailSendingOutcome;
+    use ChecksEmailSendingOutcome, ReviewerReadOnly;
 
     protected static string $resource = UserResource::class;
 

@@ -34,8 +34,8 @@ class ViewUser extends ViewRecord
 
         $actions = [];
 
-        // Edit button – always shown for non-trashed profiles.
-        if (! $record->trashed()) {
+        // Edit button – always shown for non-trashed profiles, but not for reviewers.
+        if (! $record->trashed() && ! auth('admin')->user()?->isReviewer()) {
             $actions[] = Action::make('edit')
                 ->label('Edit')
                 ->icon('heroicon-o-pencil-square')
@@ -69,8 +69,8 @@ class ViewUser extends ViewRecord
                 });
         }
 
-        // Approve / Reject – only shown for non-trashed profiles not already in that state.
-        if (! $record->trashed()) {
+        // Approve / Reject – only shown for non-trashed profiles not already in that state, and not for reviewers.
+        if (! $record->trashed() && ! auth('admin')->user()?->isReviewer()) {
             if ($record->profile_status !== 'approved') {
                 $actions[] = Action::make('approve')
                     ->label('Approve')
@@ -100,8 +100,8 @@ class ViewUser extends ViewRecord
             }
         }
 
-        // Block / Unblock – toggle the profile block state.
-        if (! $record->trashed()) {
+        // Block / Unblock – toggle the profile block state, not available to reviewers.
+        if (! $record->trashed() && ! auth('admin')->user()?->isReviewer()) {
             if (! $record->is_blocked) {
                 $actions[] = Action::make('block')
                     ->label('Block Profile')

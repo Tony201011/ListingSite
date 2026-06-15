@@ -37,7 +37,7 @@ class ViewContactInquiry extends ViewRecord
                 ->label('Send Reply')
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
-                ->visible(fn (): bool => filled($this->getRecord()->email))
+                ->visible(fn (): bool => filled($this->getRecord()->email) && ! auth('admin')->user()?->isReviewer())
                 ->modalHeading(fn (): string => 'Reply to '.($this->getRecord()->name ?? $this->getRecord()->email))
                 ->modalSubmitActionLabel('Send Reply')
                 ->form([
@@ -96,7 +96,7 @@ class ViewContactInquiry extends ViewRecord
                 ->label('Mark read')
                 ->icon('heroicon-o-check')
                 ->color('gray')
-                ->visible(fn (): bool => ! $this->getRecord()->is_read)
+                ->visible(fn (): bool => ! $this->getRecord()->is_read && ! auth('admin')->user()?->isReviewer())
                 ->requiresConfirmation(false)
                 ->action(function (): void {
                     $this->getRecord()->update(['is_read' => true]);
@@ -107,7 +107,7 @@ class ViewContactInquiry extends ViewRecord
                 ->label('Close Inquiry')
                 ->icon('heroicon-o-x-circle')
                 ->color('gray')
-                ->visible(fn (): bool => $this->getRecord()->status !== 'closed')
+                ->visible(fn (): bool => $this->getRecord()->status !== 'closed' && ! auth('admin')->user()?->isReviewer())
                 ->requiresConfirmation()
                 ->modalHeading('Close Inquiry')
                 ->modalDescription('Are you sure you want to close this inquiry? This will mark it as resolved.')

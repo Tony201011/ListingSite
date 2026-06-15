@@ -200,7 +200,7 @@ class ContactInquiryResource extends Resource
                     ->label('Reply')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('primary')
-                    ->visible(fn (ContactInquiry $record): bool => filled($record->email))
+                    ->visible(fn (ContactInquiry $record): bool => filled($record->email) && ! auth('admin')->user()?->isReviewer())
                     ->modalHeading(fn (ContactInquiry $record): string => 'Reply to '.($record->name ?? $record->email))
                     ->modalSubmitActionLabel('Send Reply')
                     ->form([
@@ -252,7 +252,7 @@ class ContactInquiryResource extends Resource
                     ->label('Mark read')
                     ->icon('heroicon-o-check')
                     ->color('gray')
-                    ->visible(fn (ContactInquiry $record): bool => ! $record->is_read)
+                    ->visible(fn (ContactInquiry $record): bool => ! $record->is_read && ! auth('admin')->user()?->isReviewer())
                     ->requiresConfirmation(false)
                     ->action(fn (ContactInquiry $record): bool => $record->update(['is_read' => true])),
 
@@ -260,7 +260,7 @@ class ContactInquiryResource extends Resource
                     ->label('Close')
                     ->icon('heroicon-o-x-circle')
                     ->color('gray')
-                    ->visible(fn (ContactInquiry $record): bool => $record->status !== 'closed')
+                    ->visible(fn (ContactInquiry $record): bool => $record->status !== 'closed' && ! auth('admin')->user()?->isReviewer())
                     ->requiresConfirmation()
                     ->modalHeading('Close Inquiry')
                     ->modalDescription('Are you sure you want to close this inquiry? This will mark it as resolved.')

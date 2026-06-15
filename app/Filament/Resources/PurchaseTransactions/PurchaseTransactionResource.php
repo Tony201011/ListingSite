@@ -264,7 +264,7 @@ class PurchaseTransactionResource extends Resource
                         ->modalHeading('Refund Transaction')
                         ->modalDescription(fn (PurchaseTransaction $record): string => "Refund transaction for {$record->providerProfile?->name}? The provider refund amount and wallet deduction will be calculated from this profile's unused balance.")
                         ->modalSubmitActionLabel('Yes, Refund')
-                        ->visible(fn (PurchaseTransaction $record): bool => $record->status === 'paid')
+                        ->visible(fn (PurchaseTransaction $record): bool => $record->status === 'paid' && ! auth('admin')->user()?->isReviewer())
                         ->action(function (PurchaseTransaction $record, ProcessStripeRefund $processStripeRefund): void {
                             try {
                                 $processStripeRefund->execute($record);

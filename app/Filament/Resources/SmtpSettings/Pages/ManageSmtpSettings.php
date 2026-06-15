@@ -105,7 +105,7 @@ class ManageSmtpSettings extends ManageRecords
             Action::make('testMail')
                 ->label('Test Mail')
                 ->icon('heroicon-o-paper-airplane')
-                ->visible(fn (): bool => SmtpSetting::query()->exists())
+                ->visible(fn (): bool => SmtpSetting::query()->exists() && ! auth('admin')->user()?->isReviewer())
                 ->modalHeading('Send Test Email')
                 ->form([
                     TextInput::make('email')

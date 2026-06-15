@@ -201,6 +201,7 @@ class ListingContentReportResource extends Resource
                     ->label('Update')
                     ->icon('heroicon-o-pencil-square')
                     ->color('primary')
+                    ->hidden(fn (): bool => (bool) auth('admin')->user()?->isReviewer())
                     ->form([
                         Select::make('status')
                             ->label('Status')
