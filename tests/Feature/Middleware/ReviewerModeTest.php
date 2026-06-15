@@ -206,4 +206,43 @@ class ReviewerModeTest extends TestCase
         $response->assertRedirect('/');
         $this->assertGuest();
     }
+
+    /**
+     * A reviewer authenticated on the admin guard is blocked from the Twilio settings
+     * create page — the ReviewerReadOnly trait aborts with 403.
+     */
+    public function test_reviewer_cannot_access_twilio_settings_create_page(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer, 'admin')->get('/admin/twilio-settings/create');
+
+        $response->assertForbidden();
+    }
+
+    /**
+     * A reviewer authenticated on the admin guard is blocked from the site settings
+     * create page — the ReviewerReadOnly trait aborts with 403.
+     */
+    public function test_reviewer_cannot_access_site_settings_create_page(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer, 'admin')->get('/admin/settings/site-settings/create');
+
+        $response->assertForbidden();
+    }
+
+    /**
+     * A reviewer authenticated on the admin guard is blocked from the admin profile
+     * edit page — the ReviewerReadOnly trait aborts with 403.
+     */
+    public function test_reviewer_cannot_access_admin_profile_edit_page(): void
+    {
+        $reviewer = $this->createReviewer();
+
+        $response = $this->actingAs($reviewer, 'admin')->get('/admin/profile');
+
+        $response->assertForbidden();
+    }
 }
