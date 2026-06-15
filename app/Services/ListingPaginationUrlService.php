@@ -183,6 +183,11 @@ class ListingPaginationUrlService
             $query['girls'] = $girlsMode;
         }
 
+        $perPage = isset($validated['per_page']) ? (int) $validated['per_page'] : null;
+        if ($perPage !== null && in_array($perPage, [12, 24, 48], true)) {
+            $query['per_page'] = $perPage;
+        }
+
         return $query;
     }
 
