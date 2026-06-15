@@ -26,10 +26,11 @@ class CreditSystemClarityTest extends TestCase
         $pricingResponse->assertSeeText("Not advertising, taking a break, or hiding your profile? No charge, no worries!");
         $pricingResponse->assertSeeText('Advertisers purchase prepaid advertising credits.');
         $pricingResponse->assertSeeText('Credits are used for profile visibility and promotional listing features');
-        $pricingResponse->assertSeeText('All payments on this platform are exclusively for purchasing advertising credits and promotional listing packages. No payments are processed between visitors and advertisers.');
+        $pricingResponse->assertSeeText('The platform does not process bookings, deposits, appointment payments, escort payments, or payments between visitors and advertisers.');
 
         $howCreditsWorkResponse = $this->get('/how-credits-work');
         $howCreditsWorkResponse->assertOk();
+        $howCreditsWorkResponse->assertSeeText('The platform does not process bookings, deposits, appointment payments, escort payments, or payments between visitors and advertisers.');
         $howCreditsWorkResponse->assertSeeText('1 credit keeps one approved profile visible for one day.');
         $howCreditsWorkResponse->assertSeeText('Credits are not deducted while a profile is hidden, suspended, or under review.');
         $howCreditsWorkResponse->assertSeeText('If the credit balance reaches zero, the profile is paused automatically.');

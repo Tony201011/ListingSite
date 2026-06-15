@@ -26,7 +26,27 @@
                         {!! $policy->content !!}
                     </article>
                 @else
-                    <p class="text-gray-500">Credit usage and expiry policy is not available yet.</p>
+                    <div class="space-y-6 text-gray-700">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900 mb-2">Scope of credits and platform payments</h2>
+                            <p class="text-gray-600 leading-7">Advertisers purchase prepaid advertising credits for profile visibility and promotional listing features.</p>
+                            <p class="text-gray-600 leading-7 mt-3">All payments on this platform are exclusively for purchasing advertising credits and promotional listing packages. The platform does not process bookings, deposits, appointment payments, escort payments, or payments between visitors and advertisers.</p>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900 mb-2">Main credit rules</h2>
+                            <ul class="list-disc pl-6 space-y-1 text-gray-600">
+                                <li>1 credit keeps one approved profile visible for one day.</li>
+                                <li>Credits are not deducted while a profile is hidden, suspended, or under review.</li>
+                                <li>If the credit balance reaches zero, the profile is paused automatically.</li>
+                                <li>Used credits are not refundable.</li>
+                                <li>Unused credits may be handled according to the <a href="{{ route('refund-policy') }}" class="text-pink-600 hover:text-pink-700">refund policy</a>.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900 mb-2">Support</h2>
+                            <p class="text-gray-600 leading-7">For credit usage disputes or expiry questions, please <a href="{{ route('contact-us') }}" class="text-pink-600 hover:text-pink-700">contact support</a> with your account and transaction details.</p>
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>
