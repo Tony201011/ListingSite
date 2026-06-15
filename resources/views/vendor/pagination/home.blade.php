@@ -45,7 +45,7 @@
         class="mt-6 flex flex-col gap-3"
     >
         {{-- Main pagination row --}}
-        <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 shadow-sm">
 
             {{-- Left: Show rows selector --}}
             <div class="flex items-center gap-2">
