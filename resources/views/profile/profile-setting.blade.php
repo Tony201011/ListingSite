@@ -386,7 +386,7 @@
         </div>
     </div>
 
-    <!-- Booking Enquiry Modal -->
+    <!-- Contact Enquiry Modal -->
     <div
         x-show="bookingOpen"
         x-cloak
