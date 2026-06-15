@@ -12,6 +12,7 @@ use App\Http\Requests\ShowProfileRequest;
 use App\Models\ProviderProfile;
 use App\Services\FavouriteBookmarkService;
 use App\Services\ListingPaginationUrlService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
@@ -67,13 +68,15 @@ class HomeController extends Controller
 
     public function sampleListing(): RedirectResponse
     {
-        $profile = ProviderProfile::query()
+        $profile = $this->applySampleListingSafetyFilter(
+            ProviderProfile::query()
             ->where('profile_status', 'approved')
             ->whereNotNull('slug')
             ->where('slug', '!=', '')
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($query) => $query->where('status', 'hide'))
             ->with(['state', 'city'])
+        )
             ->orderBy('id')
             ->first();
 
@@ -82,6 +85,27 @@ class HomeController extends Controller
         }
 
         return redirect()->to($profile->getEscortUrl());
+    }
+
+    private function applySampleListingSafetyFilter(Builder $query): Builder
+    {
+        return $query
+            ->whereNull('phone')
+            ->whereNull('whatsapp')
+            ->where(function (Builder $safeCopy): void {
+                $safeCopy
+                    ->whereRaw("LOWER(COALESCE(description, '')) LIKE ?", ['%demo%'])
+                    ->orWhereRaw("LOWER(COALESCE(description, '')) LIKE ?", ['%sample%'])
+                    ->orWhereRaw("LOWER(COALESCE(introduction_line, '')) LIKE ?", ['%demo%'])
+                    ->orWhereRaw("LOWER(COALESCE(introduction_line, '')) LIKE ?", ['%sample%'])
+                    ->orWhereRaw("LOWER(COALESCE(profile_text, '')) LIKE ?", ['%demo%'])
+                    ->orWhereRaw("LOWER(COALESCE(profile_text, '')) LIKE ?", ['%sample%']);
+            })
+            ->whereDoesntHave('rates', function (Builder $rateQuery): void {
+                $rateQuery
+                    ->whereRaw("LOWER(TRIM(COALESCE(incall, ''))) NOT IN ('', 'demo')")
+                    ->orWhereRaw("LOWER(TRIM(COALESCE(outcall, ''))) NOT IN ('', 'demo')");
+            });
     }
 
     public function favourites(): View

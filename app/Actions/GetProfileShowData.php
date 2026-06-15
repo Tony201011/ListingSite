@@ -183,6 +183,7 @@ class GetProfileShowData
             ->all();
 
         $rates = $providerProfile->rates ?? collect();
+        $isDemoListing = $this->isDemoListingProfile($providerProfile);
 
         $priceList = $rates->map(fn ($rate) => [
             'description' => $rate->description ?? '',
@@ -197,9 +198,9 @@ class GetProfileShowData
         $availabilities = $providerProfile->availabilities ?? collect();
         $availabilityList = $availabilities
             ->sortBy(fn ($avail) => $dayOrder[$avail->day] ?? 99)
-            ->map(function ($avail) {
+            ->map(function ($avail) use ($isDemoListing) {
                 if ($avail->by_appointment) {
-                    $time = 'By appointment';
+                    $time = $isDemoListing ? 'Unavailable' : 'By appointment';
                 } elseif ($avail->all_day) {
                     $time = 'All day';
                 } elseif (! $avail->enabled) {
@@ -287,6 +288,7 @@ class GetProfileShowData
             'contact_method' => $providerProfile->contact_method ?? '',
             'phone_contact_preference' => $providerProfile->phone_contact_preference ?? '',
             'photos_verified' => $providerProfile->photoVerification->isNotEmpty(),
+            'is_demo_listing' => $isDemoListing,
         ];
     }
 
@@ -456,5 +458,20 @@ class GetProfileShowData
         }
 
         return asset(ltrim($path, '/'));
+    }
+
+    private function isDemoListingProfile(ProviderProfile $providerProfile): bool
+    {
+        $copy = strtolower(trim(implode(' ', [
+            (string) ($providerProfile->description ?? ''),
+            (string) ($providerProfile->introduction_line ?? ''),
+            (string) ($providerProfile->profile_text ?? ''),
+        ])));
+
+        if ($copy === '' || (! str_contains($copy, 'demo') && ! str_contains($copy, 'sample'))) {
+            return false;
+        }
+
+        return blank($providerProfile->phone) && blank($providerProfile->whatsapp);
     }
 }

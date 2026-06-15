@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\PrivacyPolicy;
+use App\Models\Availability;
+use App\Models\OnlineUser;
 use App\Models\ProviderProfile;
 use App\Models\RefundPolicy;
 use App\Models\TermCondition;
@@ -21,16 +23,31 @@ class SampleListingAndPolicyPagesTest extends TestCase
     // Sample listing
     // ---------------------------------------------------------------
 
-    public function test_sample_listing_page_redirects_to_first_approved_profile(): void
+    public function test_sample_listing_page_redirects_to_first_demo_safe_profile(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
-
-        $profile = ProviderProfile::query()->create([
-            'user_id' => $user->id,
-            'name' => 'Sample Escort',
-            'slug' => 'sample-escort',
+        $liveUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+        ProviderProfile::query()->create([
+            'user_id' => $liveUser->id,
+            'name' => 'Live Profile',
+            'slug' => 'live-profile',
             'profile_sequence' => 1,
             'profile_status' => 'approved',
+            'description' => 'Real profile copy',
+            'age' => 25,
+            'phone' => '+61400111222',
+        ]);
+
+        $demoUser = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $demoUser->id,
+            'name' => 'Sample Demo Escort',
+            'slug' => 'sample-demo-escort',
+            'profile_sequence' => 1,
+            'profile_status' => 'approved',
+            'description' => 'Demo profile for review only.',
+            'introduction_line' => 'Sample listing',
+            'profile_text' => 'Sample data for layout preview only.',
             'age' => 25,
         ]);
 
@@ -39,11 +56,70 @@ class SampleListingAndPolicyPagesTest extends TestCase
         $response->assertRedirect($profile->getEscortUrl());
     }
 
-    public function test_sample_listing_page_redirects_to_search_when_no_approved_profiles_exist(): void
+    public function test_sample_listing_page_redirects_to_search_when_no_demo_safe_profiles_exist(): void
     {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Approved Profile',
+            'slug' => 'approved-profile',
+            'profile_sequence' => 1,
+            'profile_status' => 'approved',
+            'description' => 'Approved profile without demo markers.',
+            'age' => 25,
+            'phone' => '+61400111222',
+        ]);
+
         $response = $this->get(route('sample-listing'));
 
         $response->assertRedirect(route('escorts.search'));
+    }
+
+    public function test_demo_profile_view_hides_booking_and_appointment_wording(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_PROVIDER]);
+
+        $profile = ProviderProfile::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Demo Safe Profile',
+            'slug' => 'demo-safe-profile',
+            'profile_sequence' => 1,
+            'profile_status' => 'approved',
+            'description' => 'Demo profile for review.',
+            'introduction_line' => 'Sample listing only',
+            'profile_text' => 'Demo data for layout visibility only.',
+            'age' => 25,
+            'phone' => null,
+            'whatsapp' => null,
+        ]);
+
+        OnlineUser::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'status' => 'online',
+        ]);
+
+        Availability::query()->create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'day' => 'Monday',
+            'enabled' => false,
+            'all_day' => false,
+            'till_late' => false,
+            'by_appointment' => true,
+        ]);
+
+        $response = $this->get(route('profile.show.no-sequence', [
+            'state' => 'au',
+            'suburb' => 'australia',
+            'slug' => $profile->slug,
+        ]));
+
+        $response->assertOk();
+        $response->assertDontSee('Send booking enquiry');
+        $response->assertDontSee('By appointment');
+        $response->assertSee('Unavailable');
     }
 
     // ---------------------------------------------------------------

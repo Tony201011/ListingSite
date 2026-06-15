@@ -465,15 +465,17 @@ $profileTags = array_values(array_unique(array_merge(
                                 >SAVE</span>
                             </button>
                         </div>
-                        <div class="mt-3 sm:mt-4">
-                            <button
-                                type="button"
-                                onclick="document.getElementById('booking-enquiry-modal').classList.remove('hidden')"
-                                class="w-full rounded-lg border border-pink-300 bg-pink-50 px-4 py-2 text-sm font-semibold text-pink-700 transition hover:bg-pink-100 sm:text-base"
-                            >
-                                Send booking enquiry
-                            </button>
-                        </div>
+                        @unless($profile['is_demo_listing'] ?? false)
+                            <div class="mt-3 sm:mt-4">
+                                <button
+                                    type="button"
+                                    onclick="document.getElementById('booking-enquiry-modal').classList.remove('hidden')"
+                                    class="w-full rounded-lg border border-pink-300 bg-pink-50 px-4 py-2 text-sm font-semibold text-pink-700 transition hover:bg-pink-100 sm:text-base"
+                                >
+                                    Send booking enquiry
+                                </button>
+                            </div>
+                        @endunless
 
                     </div>
                     @if(!empty($profile['ethnicity']) || !empty($profile['hair_color']) || !empty($profile['hair_length']) || !empty($profile['body_type']) || !empty($profile['age_group']) || !empty($profile['bust_size']) || !empty($profile['your_length']) || !empty($profile['city']) || !empty($profileTags))
@@ -1069,28 +1071,29 @@ $profileTags = array_values(array_unique(array_merge(
     }
 </script>
 
-<!-- Booking Enquiry Modal -->
-<div id="booking-enquiry-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60" style="overflow-y:auto;">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 my-6 p-6 relative">
-        <button onclick="document.getElementById('booking-enquiry-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold leading-none">&times;</button>
-        <h2 class="text-xl font-bold text-pink-600 mb-1 flex items-center gap-2"><i class="fa-regular fa-calendar-check"></i> Send booking enquiry</h2>
-        <p class="text-sm text-gray-500 mb-4">Fill in your details and we'll forward your enquiry to the provider.</p>
+@unless($profile['is_demo_listing'] ?? false)
+    <!-- Booking Enquiry Modal -->
+    <div id="booking-enquiry-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60" style="overflow-y:auto;">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 my-6 p-6 relative">
+            <button onclick="document.getElementById('booking-enquiry-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold leading-none">&times;</button>
+            <h2 class="text-xl font-bold text-pink-600 mb-1 flex items-center gap-2"><i class="fa-regular fa-calendar-check"></i> Send booking enquiry</h2>
+            <p class="text-sm text-gray-500 mb-4">Fill in your details and we'll forward your enquiry to the provider.</p>
 
-        <div id="booking-success" class="hidden mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium">
-            Your enquiry has been sent successfully!
-        </div>
-        <div id="booking-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
+            <div id="booking-success" class="hidden mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium">
+                Your enquiry has been sent successfully!
+            </div>
+            <div id="booking-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
 
-        <form id="booking-enquiry-form" onsubmit="submitBookingEnquiry(event)">
-            @csrf
-            <input type="hidden" name="user_id" value="{{ $profile['user_id'] }}">
+            <form id="booking-enquiry-form" onsubmit="submitBookingEnquiry(event)">
+                @csrf
+                <input type="hidden" name="user_id" value="{{ $profile['user_id'] }}">
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Your Name <span class="text-gray-400 font-normal">(optional)</span></label>
                     <input type="text" name="name" placeholder="Enter your name" maxlength="255"
                         class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300">
-                </div>
+                    </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Your Email <span class="text-red-500">*</span></label>
                     <input type="email" name="email" placeholder="Enter your email" maxlength="255" required
@@ -1128,89 +1131,92 @@ $profileTags = array_values(array_unique(array_merge(
                 </div>
             </div>
 
-            <div class="flex gap-3 mt-4">
-                <button type="button" onclick="document.getElementById('booking-enquiry-modal').classList.add('hidden')"
-                    class="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
-                    Cancel
-                </button>
-                <button type="submit" id="booking-submit-btn"
-                    class="flex-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl px-4 py-2 text-sm font-semibold transition">
-                    Send booking enquiry
-                </button>
-            </div>
-        </form>
+                <div class="flex gap-3 mt-4">
+                    <button type="button" onclick="document.getElementById('booking-enquiry-modal').classList.add('hidden')"
+                        class="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="booking-submit-btn"
+                        class="flex-1 bg-pink-600 hover:bg-pink-700 text-white rounded-xl px-4 py-2 text-sm font-semibold transition">
+                        Send booking enquiry
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+@endunless
 
-<script>
-    function submitBookingEnquiry(event) {
-        event.preventDefault();
+@unless($profile['is_demo_listing'] ?? false)
+    <script>
+        function submitBookingEnquiry(event) {
+            event.preventDefault();
 
-        const form = document.getElementById('booking-enquiry-form');
-        const submitBtn = document.getElementById('booking-submit-btn');
-        const successEl = document.getElementById('booking-success');
-        const errorEl = document.getElementById('booking-error');
+            const form = document.getElementById('booking-enquiry-form');
+            const submitBtn = document.getElementById('booking-submit-btn');
+            const successEl = document.getElementById('booking-success');
+            const errorEl = document.getElementById('booking-error');
 
-        successEl.classList.add('hidden');
-        errorEl.classList.add('hidden');
-        errorEl.textContent = '';
+            successEl.classList.add('hidden');
+            errorEl.classList.add('hidden');
+            errorEl.textContent = '';
 
-        const originalText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending…';
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending…';
 
-        const formData = new FormData(form);
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+            const formData = new FormData(form);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
-        fetch('{{ route('booking.enquiry') }}', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken,
-            },
-            body: formData,
-        })
-        .then(function (response) {
-            const isOk = response.ok;
-            const contentType = response.headers.get('Content-Type') ?? '';
-            const isJson = contentType.includes('application/json');
+            fetch('{{ route('booking.enquiry') }}', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: formData,
+            })
+            .then(function (response) {
+                const isOk = response.ok;
+                const contentType = response.headers.get('Content-Type') ?? '';
+                const isJson = contentType.includes('application/json');
 
-            const bodyPromise = isJson ? response.json().catch(function () { return {}; }) : Promise.resolve({});
+                const bodyPromise = isJson ? response.json().catch(function () { return {}; }) : Promise.resolve({});
 
-            return bodyPromise.then(function (data) {
-                return { ok: isOk, data: data };
-            });
-        })
-        .then(function (result) {
-            if (result.ok) {
-                form.reset();
-                successEl.classList.remove('hidden');
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            } else {
-                let message = 'Something went wrong. Please try again.';
+                return bodyPromise.then(function (data) {
+                    return { ok: isOk, data: data };
+                });
+            })
+            .then(function (result) {
+                if (result.ok) {
+                    form.reset();
+                    successEl.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                } else {
+                    let message = 'Something went wrong. Please try again.';
 
-                if (result.data && result.data.errors) {
-                    const firstKey = Object.keys(result.data.errors)[0];
-                    message = result.data.errors[firstKey][0] ?? message;
-                } else if (result.data && result.data.message) {
-                    message = result.data.message;
+                    if (result.data && result.data.errors) {
+                        const firstKey = Object.keys(result.data.errors)[0];
+                        message = result.data.errors[firstKey][0] ?? message;
+                    } else if (result.data && result.data.message) {
+                        message = result.data.message;
+                    }
+
+                    errorEl.textContent = message;
+                    errorEl.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
                 }
-
-                errorEl.textContent = message;
+            })
+            .catch(function () {
+                errorEl.textContent = 'A network error occurred. Please check your connection and try again.';
                 errorEl.classList.remove('hidden');
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
-            }
-        })
-        .catch(function () {
-            errorEl.textContent = 'A network error occurred. Please check your connection and try again.';
-            errorEl.classList.remove('hidden');
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        });
-    }
-</script>
+            });
+        }
+    </script>
+@endunless
 
 @endpush
