@@ -242,7 +242,7 @@
     ]) : collect();
 @endphp
 
-<header id="main-header" class="border-b border-gray-800 bg-gray-950" style="{{ $headerStyle }}">
+<header id="main-header" class="sticky top-0 z-50 relative border-b border-gray-800 bg-gray-950" style="{{ $headerStyle }}">
 @if($showTopBar)
     <div class="hidden border-b border-gray-800 bg-gray-950 lg:block">
         <div class="mx-auto flex w-full max-w-12xl items-center justify-between bg-slate-900 px-4 py-2 text-sm text-white sm:px-6 lg:px-8">
@@ -389,7 +389,7 @@
             @endif
 
             @auth
-                <div x-data="{ open: false }" class="relative" @keydown.escape.window="open = false">
+                <div x-data="{ open: false }" @keydown.escape.window="open = false">
     <button
         @click="open = !open"
         type="button"
@@ -409,7 +409,7 @@
         x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-        class="absolute right-0 top-full z-50 mt-2 w-[340px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
+        class="absolute right-0 top-full z-50 w-[340px] overflow-hidden rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
         style="display:none;"
     >
         @foreach($authDropdownItems as $item)
@@ -578,4 +578,11 @@
         </div>
     </div>
 </div>
+
+@if($reviewerMode ?? false)
+    <div class="flex items-center justify-center gap-2 bg-amber-500 px-4 py-2 text-center text-sm font-semibold text-white shadow-md">
+        <i class="fa-solid fa-eye"></i>
+        <span>Read-Only Reviewer Mode — You are viewing a demo account. No changes can be made.</span>
+    </div>
+@endif
 </header>
