@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Suppress the browser's built-in password-reveal icon (Edge `::-ms-reveal`,
+    // Chrome/Safari autofill buttons) so only our custom toggle is visible.
+    if (!document.getElementById('password-toggle-suppress-native')) {
+        var style = document.createElement('style');
+        style.id = 'password-toggle-suppress-native';
+        style.textContent = 'input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }';
+        document.head.appendChild(style);
+    }
+
     const passwordInputs = document.querySelectorAll('input[type="password"]:not([data-no-toggle="true"])');
 
     passwordInputs.forEach(function (input) {
