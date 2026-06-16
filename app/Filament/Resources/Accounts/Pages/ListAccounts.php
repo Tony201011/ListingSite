@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Accounts\Pages;
 
 use App\Filament\Resources\Accounts\AccountResource;
 use App\Filament\Resources\Pages\ListRecordsWithPageJump;
-use App\Filament\Widgets\ProviderStatsOverview;
+use App\Filament\Widgets\AccountStatsOverview;
 use Filament\Actions\CreateAction;
 
 class ListAccounts extends ListRecordsWithPageJump
@@ -21,7 +21,7 @@ class ListAccounts extends ListRecordsWithPageJump
     protected function getHeaderWidgets(): array
     {
         return [
-            ProviderStatsOverview::class,
+            AccountStatsOverview::class,
         ];
     }
 
