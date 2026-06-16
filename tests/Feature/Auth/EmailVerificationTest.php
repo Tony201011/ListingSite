@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Jobs\SendAccountCreatedEmailJob;
+use App\Models\SmtpSetting;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
@@ -28,6 +31,7 @@ class EmailVerificationTest extends TestCase
 
     public function test_unauthenticated_user_can_verify_email_via_signed_link(): void
     {
+        Bus::fake();
         $user = User::factory()->create(['email_verified_at' => null]);
 
         $url = $this->makeVerificationUrl($user);
@@ -40,8 +44,41 @@ class EmailVerificationTest extends TestCase
         $this->assertNotNull($user->fresh()->email_verified_at);
     }
 
+    public function test_account_created_email_is_dispatched_on_first_verification(): void
+    {
+        Bus::fake();
+        SmtpSetting::create([
+            'is_enabled' => true,
+            'mail_mailer' => 'mailgun',
+            'mailgun_domain' => 'example.com',
+            'mailgun_secret' => 'key-test',
+            'mail_from_address' => 'no-reply@example.com',
+            'mail_from_name' => 'Test',
+        ]);
+        $user = User::factory()->create(['email_verified_at' => null]);
+
+        $url = $this->makeVerificationUrl($user);
+        $this->get($url);
+
+        Bus::assertDispatched(SendAccountCreatedEmailJob::class, function ($job) use ($user) {
+            return $job->userId === $user->id;
+        });
+    }
+
+    public function test_account_created_email_is_not_dispatched_when_already_verified(): void
+    {
+        Bus::fake();
+        $user = User::factory()->create(['email_verified_at' => now()]);
+
+        $url = $this->makeVerificationUrl($user);
+        $this->get($url);
+
+        Bus::assertNotDispatched(SendAccountCreatedEmailJob::class);
+    }
+
     public function test_already_verified_user_visiting_link_is_redirected_to_profile_selection_and_logged_in(): void
     {
+        Queue::fake();
         $user = User::factory()->create(['email_verified_at' => now()]);
 
         $url = $this->makeVerificationUrl($user);

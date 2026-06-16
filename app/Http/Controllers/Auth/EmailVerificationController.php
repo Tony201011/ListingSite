@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendAccountCreatedEmailJob;
 use App\Models\EmailLog;
+use App\Models\SmtpSetting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,6 +37,7 @@ class EmailVerificationController extends Controller
 
         if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
+            $this->dispatchAccountCreatedEmail($user);
         }
 
         if (Auth::check()) {
@@ -67,6 +70,26 @@ class EmailVerificationController extends Controller
         }
 
         return back()->with('success', 'A new verification email has been sent.');
+    }
+
+    private function dispatchAccountCreatedEmail(User $user): void
+    {
+        $mailSetting = SmtpSetting::query()
+            ->where('is_enabled', true)
+            ->latest('updated_at')
+            ->first()
+            ?? SmtpSetting::query()->latest('updated_at')->first();
+
+        if (! $mailSetting) {
+            Log::error('Account created email skipped: no mail setting found.', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+
+            return;
+        }
+
+        SendAccountCreatedEmailJob::dispatchSync($user->id, $mailSetting->id);
     }
 
     private function resendEmailVerification(User $user): bool
