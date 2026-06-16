@@ -50,8 +50,8 @@ class AccountStatsOverviewTest extends TestCase
         $response = $this->actingAs($admin, 'admin')->get('/admin/account-management/account');
 
         $response->assertOk();
-        $response->assertSeeText('Account Insights');
-        $response->assertDontSeeText('Provider Insights');
+        $response->assertSee('app.filament.widgets.account-stats-overview', false);
+        $response->assertDontSee('app.filament.widgets.provider-stats-overview', false);
     }
 
     public function test_account_insights_counts_provider_accounts_not_provider_profiles(): void
