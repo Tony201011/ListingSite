@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Filament\Widgets\AccountStatsOverview;
+use App\Filament\Widgets\ProviderStatsOverview;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -50,8 +51,8 @@ class AccountStatsOverviewTest extends TestCase
         $response = $this->actingAs($admin, 'admin')->get('/admin/account-management/account');
 
         $response->assertOk();
-        $response->assertSee('app.filament.widgets.account-stats-overview', false);
-        $response->assertDontSee('app.filament.widgets.provider-stats-overview', false);
+        $response->assertSeeLivewire(AccountStatsOverview::class);
+        $response->assertDontSeeLivewire(ProviderStatsOverview::class);
     }
 
     public function test_account_insights_counts_provider_accounts_not_provider_profiles(): void
