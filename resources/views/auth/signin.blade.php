@@ -2,6 +2,13 @@
 
 @push('styles')
     <style>
+        /* Suppress the browser's built-in password-reveal icon to avoid duplicating
+           the custom toggle button added by password-toggle.js */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
         .signin-invalid-focus {
             outline: 2px solid rgba(220, 38, 38, 0.35);
             outline-offset: 2px;
