@@ -52,6 +52,7 @@ class ListingPaginationUrlService
             $escortName = trim((string) ($validated['escort_name'] ?? ''));
             if ($escortName !== '') {
                 $nameSlug = Str::slug($escortName);
+
                 return [
                     'base_url' => route('escorts.search.name', ['search_name' => $nameSlug]),
                     'query' => $this->buildQueryParameters($validated, encodeGirlsInPath: false, encodeLocationInPath: false, excludeEscortName: true),
