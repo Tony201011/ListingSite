@@ -481,12 +481,7 @@ class ProfileShowControllerTest extends TestCase
     public function test_nearby_profiles_excludes_current_profile(): void
     {
         $this->createApprovedProvider(['name' => 'Jade', 'slug' => 'jade010-10', 'is_featured' => true]);
-        $rubyUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
-        OnlineUser::query()->create([
-            'user_id' => $rubyUser->id,
-            'provider_profile_id' => $rubyUser->providerProfile->id,
-            'status' => 'online',
-        ]);
+        $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 
@@ -500,12 +495,7 @@ class ProfileShowControllerTest extends TestCase
         $this->createApprovedProvider(['slug' => 'jade010-10', 'is_featured' => true]);
 
         for ($i = 1; $i <= 6; $i++) {
-            $escortUser = $this->createApprovedProvider(['name' => "Escort {$i}", 'slug' => "escort-{$i}"]);
-            OnlineUser::query()->create([
-                'user_id' => $escortUser->id,
-                'provider_profile_id' => $escortUser->providerProfile->id,
-                'status' => 'online',
-            ]);
+            $this->createApprovedProvider(['name' => "Escort {$i}", 'slug' => "escort-{$i}"]);
         }
 
         $response = $this->get($this->profileUrl('jade010-10'));
@@ -516,12 +506,7 @@ class ProfileShowControllerTest extends TestCase
     public function test_each_nearby_profile_has_expected_keys(): void
     {
         $this->createApprovedProvider(['slug' => 'jade010-10', 'is_featured' => true]);
-        $rubyUser = $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
-        OnlineUser::query()->create([
-            'user_id' => $rubyUser->id,
-            'provider_profile_id' => $rubyUser->providerProfile->id,
-            'status' => 'online',
-        ]);
+        $this->createApprovedProvider(['name' => 'Ruby', 'slug' => 'ruby-001']);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 

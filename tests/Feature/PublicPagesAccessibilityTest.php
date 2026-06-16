@@ -70,7 +70,7 @@ class PublicPagesAccessibilityTest extends TestCase
         $this->get('/about-us')->assertOk();
         $this->get('/contact-us')->assertOk();
         $this->get('/complaints-contact')->assertOk();
-        $this->get('/escorts/search')->assertOk();
+        $this->get('/escorts/search')->assertRedirect(route('home'));
         $this->get('/sample-listing')->assertRedirect(route('escorts.search'));
         $this->get('/signup')->assertOk();
         $this->get('/signin')->assertOk();
