@@ -100,6 +100,15 @@ class ListingPaginationUrlService
 
         $targetUrl = $this->buildUrl($validated, $currentPage, $advancedSearch);
 
+        if (
+            ! $advancedSearch
+            && $currentPage === 1
+            && $currentPath === 'escorts/search'
+            && $targetUrl === route('escorts.index', ['type' => 'all'])
+        ) {
+            return null;
+        }
+
         // /escorts/all on page 1 with no filters is canonically the home page (/).
         if (
             ! $advancedSearch
