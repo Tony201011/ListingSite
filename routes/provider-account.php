@@ -11,6 +11,7 @@ Route::get('/my-account', [AccountController::class, 'myAccount'])->name('my-acc
 Route::put('/my-account', [AccountController::class, 'updateAccount'])->name('my-account.update');
 Route::get('/delete-account', [AccountController::class, 'deleteAccountPage'])->name('account.delete-page');
 Route::delete('/delete-account', [AccountController::class, 'destroy'])->name('account.destroy');
+Route::get('/account-restore-requests', [AccountController::class, 'accountRestoreRequests'])->name('account.restore-requests');
 Route::middleware(['profile.steps'])->group(function () {
     Route::get('/change-password', [ProviderRegisterController::class, 'changePassword'])->name('change-password');
     Route::post('/change-password', [ProviderRegisterController::class, 'updatePassword'])->name('change-password.update');

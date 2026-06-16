@@ -5,12 +5,14 @@ namespace App\Filament\Resources\SoftDeletedAccounts;
 use App\Actions\LogAccountLifecycleEvent;
 use App\Actions\RestoreSoftDeletedAccount;
 use App\Filament\Resources\SoftDeletedAccounts\Pages\ListSoftDeletedAccounts;
+use App\Jobs\SendRestoreAccountEmailJob;
 use App\Models\AccountRestoreRequest;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -85,22 +87,36 @@ class SoftDeletedAccountResource extends Resource
                         }),
                     Action::make('approveRestoreRequest')
                         ->label('Approve Restore Request')
+                        ->form([
+                            Textarea::make('admin_reply')
+                                ->label('Reply Message (optional)')
+                                ->rows(3),
+                        ])
                         ->requiresConfirmation()
-                        ->action(function (User $record, RestoreSoftDeletedAccount $restoreSoftDeletedAccount): void {
+                        ->action(function (User $record, array $data, RestoreSoftDeletedAccount $restoreSoftDeletedAccount): void {
                             $request = $record->accountRestoreRequests()
                                 ->where('status', AccountRestoreRequest::STATUS_PENDING)
                                 ->latest('id')
                                 ->first();
 
                             if ($request) {
+                                if (filled($data['admin_reply'] ?? null)) {
+                                    $request->forceFill(['admin_reply' => $data['admin_reply']])->save();
+                                }
+
                                 $restoreSoftDeletedAccount->execute($record, auth('admin')->id() ?? auth()->id(), $request);
                             }
                         }),
                     Action::make('rejectRestoreRequest')
                         ->label('Reject Restore Request')
                         ->color('warning')
+                        ->form([
+                            Textarea::make('admin_reply')
+                                ->label('Reply Message (optional)')
+                                ->rows(3),
+                        ])
                         ->requiresConfirmation()
-                        ->action(function (User $record, LogAccountLifecycleEvent $logAccountLifecycleEvent): void {
+                        ->action(function (User $record, array $data, LogAccountLifecycleEvent $logAccountLifecycleEvent): void {
                             $request = $record->accountRestoreRequests()
                                 ->where('status', AccountRestoreRequest::STATUS_PENDING)
                                 ->latest('id')
@@ -112,6 +128,7 @@ class SoftDeletedAccountResource extends Resource
 
                             $request->forceFill([
                                 'status' => AccountRestoreRequest::STATUS_REJECTED,
+                                'admin_reply' => $data['admin_reply'] ?? null,
                                 'reviewed_by' => auth('admin')->id() ?? auth()->id(),
                                 'reviewed_at' => now(),
                             ])->save();
@@ -122,6 +139,8 @@ class SoftDeletedAccountResource extends Resource
                                 adminId: auth('admin')->id() ?? auth()->id(),
                                 metadata: ['restore_request_id' => $request->id]
                             );
+
+                            SendRestoreAccountEmailJob::dispatch($record->id, 'restore_request_rejected', $request->id);
                         }),
                     Action::make('permanentDelete')
                         ->label('Permanently Delete Account')
