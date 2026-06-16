@@ -172,12 +172,12 @@ class SearchTest extends TestCase
         $this->assertTrue($seoNames->contains('Sara-Jane'));
     }
 
-    public function test_escorts_search_base_route_returns_home_view(): void
+    public function test_escorts_search_base_route_redirects_to_home(): void
     {
         $response = $this->get('/escorts/search/');
 
-        $response->assertStatus(200);
-        $response->assertViewHas('locationQuery', '');
+        $response->assertRedirect(route('home'));
+        $response->assertStatus(301);
     }
 
     public function test_escorts_search_location_route_with_suburb_and_state(): void
