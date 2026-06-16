@@ -101,7 +101,7 @@
     @if($siteSetting && $siteSetting->enable_cookies)
         <div
             x-data="{
-                show: window.safeStorage.getLocal('ageVerified') !== 'yes',
+                show: true,
                 init() {
                     this.$watch('show', (isVisible) => {
                         document.body.classList.toggle('overflow-hidden', isVisible);
@@ -109,7 +109,6 @@
                     document.body.classList.toggle('overflow-hidden', this.show);
                 },
                 enter() {
-                    window.safeStorage.setLocal('ageVerified', 'yes');
                     this.show = false;
                 }
             }"
