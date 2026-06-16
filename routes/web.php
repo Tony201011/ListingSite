@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ProviderRegisterController;
 /*******auth Controllers start */
 use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\FavouriteBookmarkController;
+use App\Http\Controllers\Frontend\AgeVerificationController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ReportUserController;
@@ -85,6 +86,7 @@ Route::post('/report-a-listing', [FrontendPageController::class, 'submitReportAL
     ->middleware('throttle:'.config('security.throttles.booking_enquiry', '5,1'))
     ->name('report-a-listing.submit');
 Route::get('/age-and-consent-policy', [FrontendPageController::class, 'ageAndConsentPolicy'])->name('age-and-consent-policy');
+Route::post('/age-verify', [AgeVerificationController::class, 'store'])->name('age.verify');
 Route::get('/prohibited-content-policy', [FrontendPageController::class, 'prohibitedContentPolicy'])->name('prohibited-content-policy');
 
 Route::get('api/suburbs/search', [SuburbController::class, 'search'])->name('api.suburbs.search');
