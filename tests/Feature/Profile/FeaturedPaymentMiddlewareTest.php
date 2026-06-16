@@ -176,6 +176,7 @@ class FeaturedPaymentMiddlewareTest extends TestCase
             'user_id'             => $user->id,
             'provider_profile_id' => $profile->id,
             'image_path'          => 'photo.jpg',
+            'thumbnail_path'      => 'thumbnails/photo.jpg',
         ]);
 
         $purchaseFeatured = Mockery::mock(PurchaseFeatured::class);
@@ -197,4 +198,3 @@ class FeaturedPaymentMiddlewareTest extends TestCase
         $response->assertJson(['success' => true]);
     }
 }
-

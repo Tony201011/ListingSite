@@ -300,7 +300,7 @@ class ProfileShowControllerTest extends TestCase
         $response = $this->get($this->profileUrl('jade010-10'));
 
         $response->assertSee('name="user_id" value="'.$user->id.'"', false);
-        $response->assertSee('Send booking enquiry');
+        $response->assertSee('Send enquiry');
     }
 
     public function test_profile_view_data_defaults_rate_to_contact_for_rate_when_no_rates(): void

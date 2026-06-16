@@ -41,6 +41,7 @@ class FeaturedControllerTest extends TestCase
             'user_id' => $user->id,
             'name' => $user->name,
             'slug' => 'provider-'.$user->id,
+            'credits' => $credits,
         ]);
 
         return $user;

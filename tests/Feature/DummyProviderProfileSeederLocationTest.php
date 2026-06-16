@@ -31,6 +31,8 @@ class DummyProviderProfileSeederLocationTest extends TestCase
 
         $allowedLocations = collect(EscortLocationData::profileLocations())
             ->map(fn (array $location) => EscortLocationData::formatProfileSuburb($location))
+            ->sort()
+            ->values()
             ->all();
 
         $distinctSeededLocations = ProviderProfile::query()
