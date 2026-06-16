@@ -78,7 +78,7 @@ class EmailVerificationTest extends TestCase
 
     public function test_already_verified_user_visiting_link_is_redirected_to_profile_selection_and_logged_in(): void
     {
-        Queue::fake();
+        Bus::fake();
         $user = User::factory()->create(['email_verified_at' => now()]);
 
         $url = $this->makeVerificationUrl($user);
