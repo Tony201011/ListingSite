@@ -117,7 +117,7 @@
         };
     </script>
 
-    @if($siteSetting && $siteSetting->enable_cookies)
+    @if($siteSetting && $siteSetting->enable_cookies && !session('age_verified'))
         <div
             x-data="{
                 show: false,
@@ -131,6 +131,13 @@
                 enter() {
                     window.safeStorage.setLocal('age_verified', '1');
                     window.safeStorage.setCookie('age_verified', '1', 365);
+                    fetch('{{ route('age.verify') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').getAttribute('content'),
+                            'Accept': 'application/json',
+                        },
+                    }).catch(function () {});
                     this.show = false;
                 }
             }"
