@@ -217,7 +217,7 @@ class SearchTest extends TestCase
         $this->createApprovedProvider(['name' => 'Melbourne Escort', 'slug' => 'melbourne-escort', 'suburb' => 'Melbourne, VIC 3000']);
         $this->createApprovedProvider(['name' => 'Sydney Escort', 'slug' => 'sydney-escort', 'suburb' => 'Sydney, NSW 2000']);
 
-        $response = $this->get('/escorts/location/Melbourne%2C%20VIC');
+        $response = $this->followingRedirects()->get('/escorts/location/Melbourne%2C%20VIC');
 
         $response->assertStatus(200);
         $profiles = $response->viewData('profiles');
@@ -231,7 +231,7 @@ class SearchTest extends TestCase
         $response = $this->get('/escorts/search?location=Melbourne%2C+VIC&distance=250&user_lat=-37.81&user_lng=144.96');
 
         $response->assertStatus(301);
-        $response->assertRedirect('/search/melbourne-vic?distance=250');
+        $response->assertRedirect('/escorts/search/melbourne-vic?distance=250');
     }
 
     public function test_escorts_search_slug_route_strips_legacy_location_query_params(): void
@@ -239,12 +239,20 @@ class SearchTest extends TestCase
         $response = $this->get('/escorts/location/Melbourne%2C%20VIC?min_age=18&max_age=40&min_price=150&max_price=400&location_slug=melbourne-vic&location_from_route=1&escort_name=&girls=all');
 
         $response->assertStatus(301);
-        $response->assertRedirect('/search/melbourne-vic');
+        $response->assertRedirect('/escorts/search/melbourne-vic');
     }
 
     public function test_search_location_route_with_filters_uses_canonical_location_path(): void
     {
         $response = $this->get('/search/melbourne-vic?distance=500&min_age=18&max_age=40&min_price=150&max_price=400');
+
+        $response->assertStatus(301);
+        $response->assertRedirect('/search/melbourne-vic?distance=500');
+    }
+
+    public function test_search_location_route_with_filters_resolves_location_after_canonical_redirect(): void
+    {
+        $response = $this->followingRedirects()->get('/search/melbourne-vic?distance=500&min_age=18&max_age=40&min_price=150&max_price=400');
 
         $response->assertStatus(200);
         $response->assertViewHas('locationQuery', 'Melbourne, VIC');
