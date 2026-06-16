@@ -117,7 +117,7 @@
         };
     </script>
 
-    @if($siteSetting && $siteSetting->enable_cookies && !session('age_verified') && empty($_COOKIE['age_verified']))
+    @if($siteSetting && $siteSetting->enable_cookies)
         <div
             x-data="{
                 show: false,
