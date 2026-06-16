@@ -42,43 +42,106 @@ class PasswordChangeTest extends TestCase
 
     public function test_password_change_with_valid_data_succeeds(): void
     {
-        $this->markTestSkipped('Password change controller not available - route references non-existent controller');
+        $user = $this->createUser();
+
+        $response = $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($user)
+            ->post(route('change-password.update'), [
+                'current_password' => 'OldPassword123',
+                'new_password' => 'NewPassword456!',
+                'new_password_confirmation' => 'NewPassword456!',
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertTrue(Hash::check('NewPassword456!', $user->fresh()->password));
     }
 
     public function test_password_change_with_wrong_current_password_fails(): void
     {
-        $this->markTestSkipped('Password change controller not available - route references non-existent controller');
+        $user = $this->createUser();
+
+        $response = $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($user)
+            ->post(route('change-password.update'), [
+                'current_password' => 'WrongPassword999',
+                'new_password' => 'NewPassword456!',
+                'new_password_confirmation' => 'NewPassword456!',
+            ]);
+
+        $response->assertSessionHasErrors('current_password');
+        $this->assertTrue(Hash::check('OldPassword123', $user->fresh()->password));
     }
 
     public function test_password_change_requires_confirmation(): void
     {
-        $this->markTestSkipped('Password change controller not available - route references non-existent controller');
+        $user = $this->createUser();
+
+        $response = $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($user)
+            ->post(route('change-password.update'), [
+                'current_password' => 'OldPassword123',
+                'new_password' => 'NewPassword456!',
+                'new_password_confirmation' => 'DifferentPassword789!',
+            ]);
+
+        $response->assertSessionHasErrors('new_password');
+        $this->assertTrue(Hash::check('OldPassword123', $user->fresh()->password));
     }
 
     public function test_password_change_requires_all_fields(): void
     {
-        $this->markTestSkipped('Password change controller not available - route references non-existent controller');
+        $user = $this->createUser();
+
+        $response = $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($user)
+            ->post(route('change-password.update'), []);
+
+        $response->assertSessionHasErrors(['current_password', 'new_password']);
     }
 
     public function test_guest_cannot_change_password(): void
     {
-        $this->markTestSkipped('Password change controller not available - route references non-existent controller');
+        $response = $this->post(route('change-password.update'), [
+            'current_password' => 'OldPassword123',
+            'new_password' => 'NewPassword456!',
+            'new_password_confirmation' => 'NewPassword456!',
+        ]);
+
+        $response->assertRedirect(route('signin'));
     }
 
     public function test_password_change_page_is_accessible_to_authenticated_user(): void
     {
-        $this->markTestSkipped('Password change controller not available - route references non-existent controller');
+        $user = $this->createUser();
+
+        $response = $this->withoutMiddleware(CheckProfileSteps::class)
+            ->actingAs($user)
+            ->get(route('change-password'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.change-password');
     }
 
     public function test_password_change_is_blocked_when_profile_steps_are_incomplete(): void
     {
-        $this->markTestSkipped('Password change controller not available - route references non-existent controller');
+        $user = $this->createUser();
+
+        $response = $this->actingAs($user)
+            ->get(route('change-password'));
+
+        $response->assertRedirect(route('my-profile'));
+        $response->assertSessionHas('error', 'Please complete your profile first.');
     }
 
     public function test_change_email_page_is_blocked_when_profile_steps_are_incomplete(): void
     {
-        $this->markTestSkipped('Password change controller not available - route references non-existent controller');
+        $user = $this->createUser();
 
+        $response = $this->actingAs($user)
+            ->get(route('change-email'));
+
+        $response->assertRedirect(route('my-profile'));
         $response->assertSessionHas('error', 'Please complete your profile first.');
     }
 }

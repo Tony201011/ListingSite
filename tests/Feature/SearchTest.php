@@ -1077,22 +1077,23 @@ class SearchTest extends TestCase
 
     public function test_distance_search_with_location_includes_profiles_without_coordinates(): void
     {
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            $this->markTestSkipped('Distance+location combined search uses MySQL-specific SQL (SUBSTRING_INDEX, COALESCE subquery).');
-        }
+        // Seed postcodes so the distance join can resolve suburb strings to coordinates.
+        DB::table('postcodes')->insert([
+            ['suburb' => 'Melbourne', 'state' => 'VIC', 'postcode' => '3000', 'latitude' => -37.8136, 'longitude' => 144.9631, 'created_at' => now(), 'updated_at' => now()],
+            ['suburb' => 'Sydney',    'state' => 'NSW', 'postcode' => '2000', 'latitude' => -33.8688, 'longitude' => 151.2093, 'created_at' => now(), 'updated_at' => now()],
+        ]);
 
         // Profile in Melbourne – no direct lat/lng on the profile row.
         $this->createApprovedProvider(
             ['name' => 'Melbourne Escort', 'slug' => 'melbourne-escort', 'suburb' => 'Melbourne, VIC 3000']
         );
-        // Profile in Sydney – should be excluded.
+        // Profile in Sydney – should be excluded (>500 km from Melbourne).
         $this->createApprovedProvider(
             ['name' => 'Sydney Escort', 'slug' => 'sydney-escort', 'suburb' => 'Sydney, NSW 2000']
         );
 
         // When lat/lng + distance + location are all provided, profiles whose
-        // suburb matches the parsed location should appear even if they have no
-        // stored GPS coordinates (exact-location fallback).
+        // suburb matches the parsed location should appear; remote profiles are excluded.
         $response = $this->get('/?user_lat=-37.8136&user_lng=144.9631&distance=500&location=Melbourne%2C+VIC');
 
         $response->assertOk();
@@ -1112,10 +1113,6 @@ class SearchTest extends TestCase
 
     public function test_facility_location_name_resolves_geocoded_location_for_distance_search(): void
     {
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            $this->markTestSkipped('Distance search uses MySQL-specific SQL (SUBSTRING_INDEX, COALESCE subquery).');
-        }
-
         // Create a postcodes row for "Sydney, NSW" so the fuzzy lookup finds
         // it after stripping "GATEWAY FACILITY" from the input suburb.
         DB::table('postcodes')->insert([

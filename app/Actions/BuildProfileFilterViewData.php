@@ -767,19 +767,38 @@ class BuildProfileFilterViewData
             ))
         ))';
 
+        // Cross-platform suburb/state extraction (works in both MySQL and SQLite).
+        // Suburb format: "City, STATE POSTCODE" (e.g. "Sydney, NSW 2000").
+        // suburbNameSql extracts the part before the first comma ("Sydney").
+        // stateAbbrevSql extracts the first word after the comma ("NSW").
+        $suburbNameSql = "CASE WHEN INSTR(provider_profiles.suburb, ',') > 0
+            THEN SUBSTR(provider_profiles.suburb, 1, INSTR(provider_profiles.suburb, ',') - 1)
+            ELSE provider_profiles.suburb
+        END";
+
+        $afterCommaSql = "TRIM(SUBSTR(provider_profiles.suburb, INSTR(provider_profiles.suburb, ',') + 1))";
+        $stateAbbrevSql = "CASE WHEN provider_profiles.suburb LIKE '%,%' THEN
+            SUBSTR(
+                {$afterCommaSql},
+                1,
+                CASE WHEN INSTR({$afterCommaSql}, ' ') > 0
+                     THEN INSTR({$afterCommaSql}, ' ') - 1
+                     ELSE LENGTH({$afterCommaSql})
+                END
+            )
+            ELSE NULL
+        END";
+
         return DB::table('provider_profiles')
             ->leftJoin('states', 'states.id', '=', 'provider_profiles.state_id')
             ->leftJoin('hide_show_profiles', 'hide_show_profiles.provider_profile_id', '=', 'provider_profiles.id')
-            ->join('postcodes as profile_postcodes', function ($join) use ($stateCaseSql) {
-                $join->whereRaw('UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM(SUBSTRING_INDEX(provider_profiles.suburb, ",", 1)))')
+            ->join('postcodes as profile_postcodes', function ($join) use ($stateCaseSql, $suburbNameSql, $stateAbbrevSql) {
+                $join->whereRaw("UPPER(TRIM(profile_postcodes.suburb)) = UPPER(TRIM({$suburbNameSql}))")
                     ->whereRaw("
                         UPPER(TRIM(profile_postcodes.state)) = UPPER(TRIM(
                             COALESCE(
                                 NULLIF(
-                                    CASE
-                                        WHEN provider_profiles.suburb LIKE '%,%' THEN SUBSTRING_INDEX(TRIM(SUBSTRING_INDEX(provider_profiles.suburb, ',', -1)), ' ', 1)
-                                        ELSE NULL
-                                    END,
+                                    {$stateAbbrevSql},
                                     ''
                                 ),
                                 {$stateCaseSql}
