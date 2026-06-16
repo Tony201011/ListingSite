@@ -20,6 +20,7 @@ class AccountRestoreRequest extends Model
         'user_id',
         'status',
         'request_reason',
+        'admin_reply',
         'reviewed_by',
         'reviewed_at',
     ];

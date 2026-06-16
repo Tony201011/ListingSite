@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendRestoreAccountEmailJob;
 use App\Models\AccountRestoreRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -52,5 +53,7 @@ class RestoreSoftDeletedAccount
                 metadata: ['restore_request_id' => $restoreRequest?->id]
             );
         });
+
+        SendRestoreAccountEmailJob::dispatch($user->id, 'restore_request_approved', $restoreRequest?->id);
     }
 }

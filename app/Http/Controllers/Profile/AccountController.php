@@ -55,6 +55,14 @@ class AccountController extends Controller
         return view('auth.delete-account');
     }
 
+    public function accountRestoreRequests()
+    {
+        $user = Auth::user();
+        $requests = $user->accountRestoreRequests()->latest('id')->get();
+
+        return view('profile.account-restore-requests', compact('requests'));
+    }
+
     public function destroy(DeleteAccountRequest $request)
     {
         $user = $request->user();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Actions\LogAccountLifecycleEvent;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendRestoreAccountEmailJob;
 use App\Models\AccountRestoreRequest;
 use App\Models\User;
 use Filament\Notifications\Notification;
@@ -63,6 +64,8 @@ class RestoreAccountController extends Controller
                 ->body("{$user->email} requested account restoration.")
                 ->sendToDatabase($admins);
         }
+
+        SendRestoreAccountEmailJob::dispatch($user->id, 'restore_request_received', $restoreRequest->id);
 
         session()->forget('restore_candidate_user_id');
 

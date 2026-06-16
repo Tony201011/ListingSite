@@ -6,11 +6,13 @@ use App\Actions\LogAccountLifecycleEvent;
 use App\Actions\RestoreSoftDeletedAccount;
 use App\Filament\Resources\Pages\ListRecordsWithPageJump;
 use App\Filament\Resources\RestoreAccountRequests\Pages\ListRestoreAccountRequests;
+use App\Jobs\SendRestoreAccountEmailJob;
 use App\Models\AccountRestoreRequest;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -46,11 +48,14 @@ class RestoreAccountRequestResource extends Resource
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('user.name')->label('Name')->searchable(),
                 TextColumn::make('user.email')->label('Email')->searchable(),
-                TextColumn::make('status')->badge()->sortable(),
+                TextColumn::make('user.role')->label('Account Type')->badge(),
+                TextColumn::make('user.deleted_at')->label('Deleted Date')->dateTime()->placeholder('-')->sortable(),
                 TextColumn::make('request_reason')->label('Reason')->limit(80)->toggleable(),
+                TextColumn::make('admin_reply')->label('Admin Reply')->limit(80)->placeholder('-')->toggleable(),
+                TextColumn::make('status')->badge()->sortable(),
                 TextColumn::make('reviewer.name')->label('Reviewed By')->placeholder('-'),
                 TextColumn::make('reviewed_at')->dateTime()->placeholder('-')->sortable(),
-                TextColumn::make('created_at')->dateTime()->sortable(),
+                TextColumn::make('created_at')->label('Submitted Date')->dateTime()->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')->options([
@@ -62,16 +67,49 @@ class RestoreAccountRequestResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->recordActions([
                 ActionGroup::make([
+                    Action::make('reply')
+                        ->label('Add Reply')
+                        ->icon('heroicon-o-chat-bubble-left-ellipsis')
+                        ->color('info')
+                        ->form([
+                            Textarea::make('admin_reply')
+                                ->label('Reply Message')
+                                ->required()
+                                ->rows(4),
+                        ])
+                        ->action(function (AccountRestoreRequest $record, array $data, LogAccountLifecycleEvent $logAccountLifecycleEvent): void {
+                            $record->forceFill([
+                                'admin_reply' => $data['admin_reply'],
+                            ])->save();
+
+                            $logAccountLifecycleEvent->execute(
+                                userId: $record->user_id,
+                                actionType: 'admin_reply_added',
+                                adminId: auth('admin')->id() ?? auth()->id(),
+                                metadata: ['restore_request_id' => $record->id]
+                            );
+
+                            SendRestoreAccountEmailJob::dispatch($record->user_id, 'restore_request_replied', $record->id);
+                        }),
                     Action::make('approve')
                         ->label('Approve')
                         ->color('success')
                         ->visible(fn (AccountRestoreRequest $record): bool => $record->status === AccountRestoreRequest::STATUS_PENDING)
+                        ->form([
+                            Textarea::make('admin_reply')
+                                ->label('Reply Message (optional)')
+                                ->rows(3),
+                        ])
                         ->requiresConfirmation()
-                        ->action(function (AccountRestoreRequest $record, RestoreSoftDeletedAccount $restoreSoftDeletedAccount): void {
+                        ->action(function (AccountRestoreRequest $record, array $data, RestoreSoftDeletedAccount $restoreSoftDeletedAccount): void {
                             $user = $record->user;
 
                             if (! $user || ! $user->trashed()) {
                                 return;
+                            }
+
+                            if (filled($data['admin_reply'] ?? null)) {
+                                $record->forceFill(['admin_reply' => $data['admin_reply']])->save();
                             }
 
                             $restoreSoftDeletedAccount->execute(
@@ -84,10 +122,16 @@ class RestoreAccountRequestResource extends Resource
                         ->label('Reject')
                         ->color('danger')
                         ->visible(fn (AccountRestoreRequest $record): bool => $record->status === AccountRestoreRequest::STATUS_PENDING)
+                        ->form([
+                            Textarea::make('admin_reply')
+                                ->label('Reply Message (optional)')
+                                ->rows(3),
+                        ])
                         ->requiresConfirmation()
-                        ->action(function (AccountRestoreRequest $record, LogAccountLifecycleEvent $logAccountLifecycleEvent): void {
+                        ->action(function (AccountRestoreRequest $record, array $data, LogAccountLifecycleEvent $logAccountLifecycleEvent): void {
                             $record->forceFill([
                                 'status' => AccountRestoreRequest::STATUS_REJECTED,
+                                'admin_reply' => $data['admin_reply'] ?? null,
                                 'reviewed_by' => auth('admin')->id() ?? auth()->id(),
                                 'reviewed_at' => now(),
                             ])->save();
@@ -98,6 +142,8 @@ class RestoreAccountRequestResource extends Resource
                                 adminId: auth('admin')->id() ?? auth()->id(),
                                 metadata: ['restore_request_id' => $record->id]
                             );
+
+                            SendRestoreAccountEmailJob::dispatch($record->user_id, 'restore_request_rejected', $record->id);
                         }),
                 ]),
             ]);

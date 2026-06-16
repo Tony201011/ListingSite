@@ -334,6 +334,27 @@
                 </div>
                 @endif
 
+                {{-- Account Restoration Requests --}}
+                @php
+                    $hasRestoreRequests = auth()->user()->accountRestoreRequests()->exists();
+                @endphp
+                @if($hasRestoreRequests)
+                <div class="border border-gray-300 rounded-lg p-6">
+                    <div class="flex items-start justify-between flex-wrap gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Account Restoration Requests</h2>
+                            <p class="text-sm text-gray-600 mt-1">View your submitted account restoration requests and admin responses.</p>
+                        </div>
+                        <a
+                            href="{{ route('account.restore-requests') }}"
+                            class="bg-pink-500 hover:bg-pink-600 text-white px-5 py-2 rounded transition text-sm font-medium"
+                        >
+                            View Requests
+                        </a>
+                    </div>
+                </div>
+                @endif
+
             </div>
         </div>
     </main>
