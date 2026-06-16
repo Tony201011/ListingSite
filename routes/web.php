@@ -20,6 +20,7 @@ use App\Http\Controllers\MediaController;
 
 /***profile Controllers start*/
 use App\Http\Controllers\Profile\AccountController;
+use App\Http\Controllers\Auth\RestoreAccountController;
 use App\Http\Controllers\Profile\BookingController;
 use App\Http\Controllers\Profile\SuburbController;
 use App\Http\Controllers\Profile\UrlController;
@@ -61,10 +62,6 @@ Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware(['signed'])
     ->name('verification.verify');
-
-Route::get('/delete-account/confirm/{id}/{hash}', [AccountController::class, 'confirmDestroy'])
-    ->middleware(['signed'])
-    ->name('account.confirm-destroy');
 
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
     ->middleware(['auth:web', 'throttle:'.config('security.throttles.verification_send', '6,1')])
@@ -222,6 +219,7 @@ Route::middleware('guest')->group(function (): void {
 
     Route::get('/signin', [ProviderRegisterController::class, 'showSigninForm'])->name('signin');
     Route::post('/signin', [ProviderRegisterController::class, 'signin'])->name('signin.submit');
+    Route::post('/account/restore-request', [RestoreAccountController::class, 'store'])->name('account.restore.request');
 
     Route::get('/otp-verification', [ProviderRegisterController::class, 'otpVerificationForm'])->name('otp-verification');
     Route::post('/verify-otp', [ProviderRegisterController::class, 'verifyOtp'])->middleware('throttle:'.config('security.throttles.verify_otp', '5,1'))->name('verify.otp');

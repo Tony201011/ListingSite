@@ -14,7 +14,7 @@
 
             <h1 class="text-3xl font-bold mb-3 text-gray-900">Delete Account</h1>
             <p class="text-sm text-gray-600 mb-6">
-                This action is permanent. Once deleted, your profile, photos, videos, and account data cannot be recovered.
+                Your account and related data will be kept for 30 days. You can request account restoration within this period. After 30 days, your account and related data will be permanently deleted or anonymised where legally required or legally allowed.
             </p>
 
             @if(session('error'))
@@ -38,20 +38,6 @@
                 @method('DELETE')
 
                 <div>
-                    <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                        Confirm your password
-                    </label>
-                    <input
-                        type="password"
-                        name="password"
-                        id="password"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-                        placeholder="Enter your password"
-                        required
-                    >
-                </div>
-
-                <div>
                     <label for="confirmation_text" class="block text-sm font-semibold text-gray-700 mb-2">
                         Type <span class="text-red-600 font-bold">DELETE</span> to confirm
                     </label>
@@ -66,7 +52,7 @@
                 </div>
 
                 <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    Deleting your account will permanently remove all your account data, uploaded images, videos, and profile information.
+                    After 30 days, your account and related data will be permanently deleted or anonymised where legally required or legally allowed.
                 </div>
 
                 <div class="flex flex-wrap gap-3">
@@ -74,7 +60,7 @@
                         type="submit"
                         class="inline-flex items-center px-5 py-2.5 rounded bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition"
                     >
-                        Send account delete email
+                        Delete my account
                     </button>
 
                     <a href="{{ route('contact-us') }}" class="inline-flex items-center px-5 py-2.5 rounded bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold transition">
@@ -101,11 +87,11 @@
                     event.preventDefault();
 
                     const result = await Swal.fire({
-                        title: 'Send delete confirmation email?',
-                        text: 'We will send a secure confirmation link to your email. Your account will be deleted only after you click that link.',
+                        title: 'Delete account now?',
+                        text: 'This will immediately soft-delete your account and start a 30-day restoration period.',
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonText: 'Send email',
+                        confirmButtonText: 'Delete account',
                         cancelButtonText: 'Cancel',
                         confirmButtonColor: '#dc2626',
                     });
@@ -122,7 +108,7 @@
         <script>
             Swal.fire({
                 icon: 'success',
-                title: 'Email sent',
+                title: 'Account deleted',
                 text: @json(session('success')),
                 confirmButtonColor: '#db2777',
             });

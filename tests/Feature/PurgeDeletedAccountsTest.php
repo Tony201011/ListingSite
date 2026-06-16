@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AccountRestoreRequest;
 use App\Models\ProfileImage;
 use App\Models\ProviderProfile;
 use App\Models\Rate;
@@ -363,6 +364,43 @@ class PurgeDeletedAccountsTest extends TestCase
     {
         $this->artisan('accounts:purge-deleted')
             ->assertSuccessful();
+    }
+
+
+
+    public function test_purge_removes_restore_requests_before_force_delete(): void
+    {
+        $user = $this->deletedUserDueForPurge();
+
+        AccountRestoreRequest::create([
+            'user_id' => $user->id,
+            'status' => AccountRestoreRequest::STATUS_PENDING,
+        ]);
+
+        $this->artisan('accounts:purge-deleted')
+            ->assertSuccessful();
+
+        $this->assertDatabaseMissing('account_restore_requests', [
+            'user_id' => $user->id,
+        ]);
+    }
+
+    public function test_purge_logs_anonymization_and_permanent_deletion_audits(): void
+    {
+        $user = $this->deletedUserDueForPurge();
+
+        $this->artisan('accounts:purge-deleted')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('account_lifecycle_audits', [
+            'user_id' => $user->id,
+            'action_type' => 'account_anonymized',
+        ]);
+
+        $this->assertDatabaseHas('account_lifecycle_audits', [
+            'user_id' => $user->id,
+            'action_type' => 'account_permanently_deleted',
+        ]);
     }
 
     public function test_user_at_exact_purge_boundary_is_purged(): void

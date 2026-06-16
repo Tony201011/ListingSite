@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class SigninProvider
 {
@@ -14,6 +15,22 @@ class SigninProvider
         $user = User::query()->where('email', $request->email)->first();
 
         if (! $user) {
+            $trashedUser = User::withTrashed()->where('email', $request->email)->first();
+
+            if (
+                $trashedUser
+                && $trashedUser->trashed()
+                && $trashedUser->account_status === 'soft_deleted'
+                && $trashedUser->scheduled_purge_at?->isFuture()
+                && Hash::check((string) $request->password, (string) $trashedUser->password)
+            ) {
+                $request->session()->put('restore_candidate_user_id', $trashedUser->id);
+
+                return back()->withErrors([
+                    'email' => 'This account has been deleted and is currently within the restoration period.',
+                ])->withInput($request->only('email'))->with('show_restore_account', true);
+            }
+
             return back()->withErrors([
                 'email' => 'Invalid email or password',
             ])->withInput();

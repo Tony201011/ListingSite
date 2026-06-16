@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class EdgeCaseTest extends TestCase
@@ -511,17 +510,10 @@ class EdgeCaseTest extends TestCase
     {
         $user = $this->providerWithProfile();
 
-        $confirmUrl = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
-
         $this->actingAs($user)
-            ->get($confirmUrl)
+            ->delete(route('account.destroy'), [
+                'confirmation_text' => 'DELETE',
+            ])
             ->assertRedirect('/signin');
 
         $this->assertSoftDeleted('users', ['id' => $user->id]);
@@ -545,17 +537,10 @@ class EdgeCaseTest extends TestCase
 
         ShortUrl::create(['user_id' => $user->id, 'short_url' => 'slug-'.$user->id]);
 
-        $confirmUrl = URL::temporarySignedRoute(
-            'account.confirm-destroy',
-            now()->addMinutes(60),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
-
         $this->actingAs($user)
-            ->get($confirmUrl)
+            ->delete(route('account.destroy'), [
+                'confirmation_text' => 'DELETE',
+            ])
             ->assertRedirect('/signin');
 
         // Account uses soft-delete with scheduled purge — resources still exist
