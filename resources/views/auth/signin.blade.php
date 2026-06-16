@@ -101,6 +101,21 @@
                 </div>
             @endif
 
+
+
+            @if (session('show_restore_account'))
+                <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
+                    <p class="text-sm font-semibold">This account has been deleted and is currently within the restoration period.</p>
+                    <form method="POST" action="{{ route('account.restore.request') }}" class="mt-3 space-y-3">
+                        @csrf
+                        <textarea name="request_reason" rows="3" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" placeholder="Optional reason for restoration request"></textarea>
+                        <button type="submit" class="inline-flex items-center rounded bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700">
+                            Restore Account
+                        </button>
+                    </form>
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
                     <ul class="list-disc pl-5 text-sm">

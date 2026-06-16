@@ -2,15 +2,22 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\LogAccountLifecycleEvent;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PurgeDeletedAccounts extends Command
 {
     protected $signature = 'accounts:purge-deleted';
 
-    protected $description = 'Anonymize and permanently delete soft-deleted accounts whose retention period has expired';
+    protected $description = 'Permanently delete or anonymise soft-deleted accounts after retention expires';
+
+    public function __construct(private LogAccountLifecycleEvent $logAccountLifecycleEvent)
+    {
+        parent::__construct();
+    }
 
     public function handle(): int
     {
@@ -21,7 +28,7 @@ class PurgeDeletedAccounts extends Command
             ->whereNotNull('scheduled_purge_at')
             ->where('scheduled_purge_at', '<=', now())
             ->whereDoesntHave('providerProfiles', fn ($q) => $q->withTrashed()->whereNotNull('hold_reason'))
-            ->chunkById(100, function ($users) use (&$processed, &$failed) {
+            ->chunkById(100, function ($users) use (&$processed, &$failed): void {
                 foreach ($users as $user) {
                     try {
                         $this->purgeUser($user);
@@ -42,27 +49,49 @@ class PurgeDeletedAccounts extends Command
 
     protected function purgeUser(User $user): void
     {
-        $random = Str::uuid()->toString();
+        DB::transaction(function () use ($user): void {
+            $random = Str::lower(Str::random(10));
+            $anonymizedEmail = "deleted_user_{$user->id}_{$random}@example.deleted";
 
-        // Anonymize PII before hard-deleting so audit logs / backups
-        // don't retain identifiable data.
-        $user->forceFill([
-            'name' => 'Deleted User',
-            'email' => "deleted+{$random}@example.invalid",
-            'password' => '',
-            'mobile' => null,
-            'profile_image' => null,
-            'referral_code' => null,
-            'email_verified_at' => null,
-            'mobile_verified' => false,
-            'remember_token' => null,
-            'account_status' => 'anonymized',
-        ])->save();
+            $user->forceFill([
+                'name' => 'Deleted User',
+                'email' => $anonymizedEmail,
+                'password' => '',
+                'mobile' => null,
+                'profile_image' => null,
+                'referral_code' => null,
+                'email_verified_at' => null,
+                'mobile_verified' => false,
+                'remember_token' => null,
+                'account_status' => 'anonymized',
+            ])->save();
 
-        $user->providerProfiles()->withTrashed()->update(['anonymized_at' => now()]);
+            $user->providerProfiles()->withTrashed()->update([
+                'name' => 'Deleted Profile',
+                'phone' => null,
+                'whatsapp' => null,
+                'twitter_handle' => null,
+                'website' => null,
+                'onlyfans_username' => null,
+                'suburb' => null,
+                'anonymized_at' => now(),
+            ]);
 
-        // Hard-delete the user; FK cascades remove profile_images, rates,
-        // rate_groups, tours, short_urls, provider_profile, etc.
-        $user->forceDelete();
+            $user->accountRestoreRequests()->delete();
+
+            $this->logAccountLifecycleEvent->execute(
+                userId: $user->id,
+                actionType: 'account_anonymized',
+                metadata: ['anonymized_email' => $anonymizedEmail]
+            );
+
+            $this->logAccountLifecycleEvent->execute(
+                userId: $user->id,
+                actionType: 'account_permanently_deleted',
+                metadata: ['deleted_at' => now()->toIso8601String()]
+            );
+
+            $user->forceDelete();
+        });
     }
 }
