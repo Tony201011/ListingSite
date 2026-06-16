@@ -184,7 +184,7 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/escorts/search/location/melbourne/vic');
 
-        $response->assertRedirect('/escorts/location/Melbourne%2C%20VIC');
+        $response->assertRedirect('/escorts/search/melbourne-vic');
         $response->assertStatus(301);
     }
 
@@ -192,7 +192,7 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/escorts/search/location/sydney');
 
-        $response->assertRedirect('/escorts/location/Sydney');
+        $response->assertRedirect('/escorts/search/sydney');
         $response->assertStatus(301);
     }
 
@@ -200,13 +200,13 @@ class SearchTest extends TestCase
     {
         $response = $this->get('/escorts/search/location/mount-gambier/sa');
 
-        $response->assertRedirect('/escorts/location/Mount%20Gambier%2C%20SA');
+        $response->assertRedirect('/escorts/search/mount-gambier-sa');
         $response->assertStatus(301);
     }
 
     public function test_escorts_search_slug_route_with_suburb_and_state(): void
     {
-        $response = $this->get('/escorts/location/Mount%20Gambier%2C%20SA');
+        $response = $this->get('/escorts/search/mount-gambier-sa');
 
         $response->assertStatus(200);
         $response->assertViewHas('locationQuery', 'Mount Gambier, SA');
