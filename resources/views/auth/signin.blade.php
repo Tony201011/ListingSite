@@ -142,7 +142,7 @@
             >
                 @csrf
                 <input type="text" name="fake_username" autocomplete="username" tabindex="-1" class="hidden" aria-hidden="true">
-                <input type="password" name="fake_password" autocomplete="current-password" tabindex="-1" class="hidden" aria-hidden="true">
+                <input type="password" name="fake_password" autocomplete="current-password" tabindex="-1" class="hidden" aria-hidden="true" data-no-toggle="true">
 
                 <!-- Email -->
                 <div class="mb-6" data-field-group>
