@@ -14,6 +14,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (input.dataset.toggleBound === 'true') {
             return;
         }
+		
+		// Skip hidden inputs (e.g. anti-autofill honeypots); their toggle
+        // button would otherwise render as a stray, duplicate eye icon.
+        if (input.offsetParent === null) {
+            return;
+        }
 
         input.dataset.toggleBound = 'true';
 
