@@ -94,7 +94,7 @@
         >
             @csrf
             <input type="text" name="fake_username" autocomplete="username" tabindex="-1" class="hidden" aria-hidden="true">
-            <input type="password" name="fake_password" autocomplete="new-password" tabindex="-1" class="hidden" aria-hidden="true">
+              <input type="password" name="fake_password" autocomplete="new-password" tabindex="-1" class="hidden" aria-hidden="true" data-no-toggle="true">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="min-w-0">
