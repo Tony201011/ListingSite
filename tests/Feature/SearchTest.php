@@ -226,6 +226,20 @@ class SearchTest extends TestCase
         $this->assertFalse($names->contains('Sydney Escort'));
     }
 
+    public function test_escorts_search_location_slug_matches_suburb_without_comma_separator(): void
+    {
+        $this->createApprovedProvider(['name' => 'Melbourne Format Escort', 'slug' => 'melbourne-format-escort', 'suburb' => 'Melbourne VIC 3000']);
+        $this->createApprovedProvider(['name' => 'Sydney Escort', 'slug' => 'sydney-escort-2', 'suburb' => 'Sydney NSW 2000']);
+
+        $response = $this->get('/escorts/search/melbourne-vic?distance=500&min_age=18&max_age=40&min_price=150&max_price=400&escort_name=&girls=all');
+
+        $response->assertStatus(200);
+        $profiles = $response->viewData('profiles');
+        $names = collect($profiles->items())->pluck('name');
+        $this->assertTrue($names->contains('Melbourne Format Escort'));
+        $this->assertFalse($names->contains('Sydney Escort'));
+    }
+
     public function test_escorts_search_query_location_redirects_to_canonical_slug_url(): void
     {
         $response = $this->get('/escorts/search?location=Melbourne%2C+VIC&distance=250&user_lat=-37.81&user_lng=144.96');
