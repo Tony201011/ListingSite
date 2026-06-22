@@ -40,7 +40,9 @@ class DatabaseSeeder extends Seeder
             SiteSettingSeeder::class,
             TestAdvertiserAccountSeeder::class,
             FavIconSeeder::class,
-            DummyProviderProfileSeeder::class,
+            DummyProviderProfileSeeder2::class,
+           // DummyProviderProfileSeeder::class,
+
             DummyProviderListingSeeder::class,
             OnlineUserSeeder::class,
             VerificationExampleImageSeeder::class,
