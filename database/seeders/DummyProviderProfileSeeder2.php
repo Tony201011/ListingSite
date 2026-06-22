@@ -292,23 +292,26 @@ class DummyProviderProfileSeeder2 extends Seeder
                 ]);
             }
 
-            // 8. AvailableNow + OnlineUser (keep profiles publicly visible)
-            AvailableNow::updateOrCreate(
-                ['provider_profile_id' => $providerProfile->id],
-                ['user_id' => $user->id, 'status' => 'offline'],
-            );
+           // 8. AvailableNow + OnlineUser (make all profiles available now)
+                AvailableNow::updateOrCreate(
+                    ['provider_profile_id' => $providerProfile->id],
+                    [
+                        'user_id' => $user->id,
+                        'status' => 'online',
+                    ],
+                );
 
-            OnlineUser::updateOrCreate(
-                ['provider_profile_id' => $providerProfile->id],
-                [
-                    'user_id' => $user->id,
-                    'status' => 'online',
-                    'usage_date' => today(),
-                    'usage_count' => 1,
-                    'online_started_at' => now(),
-                    'online_expires_at' => now()->addMinutes(60),
-                ],
-            );
+                OnlineUser::updateOrCreate(
+                    ['provider_profile_id' => $providerProfile->id],
+                    [
+                        'user_id' => $user->id,
+                        'status' => 'online',
+                        'usage_date' => today(),
+                        'usage_count' => 1,
+                        'online_started_at' => now(),
+                        'online_expires_at' => now()->addYears(10), // keep online for testing
+                    ],
+                );
         }
 
         $this->command?->info('Seeded '.count($records).' provider profiles from '.self::DATA_FILE);
