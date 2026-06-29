@@ -147,46 +147,6 @@ class PurchaseCreditController extends Controller
             };
         }
 
-        private function handleWooCommerceSuccess(Request $request): RedirectResponse
-        {
-            $purchaseUuid = (string) $request->get('purchase_uuid', '');
-
-            if ($purchaseUuid === '') {
-                return redirect('/purchase-credit')->withErrors('Invalid WooCommerce purchase.');
-            }
-
-            $purchase = CreditPurchase::query()
-                ->with('providerProfile')
-                ->where('uuid', $purchaseUuid)
-                ->first();
-
-            if (! $purchase) {
-                return redirect('/purchase-credit')->withErrors('WooCommerce purchase not found.');
-            }
-
-            if ($request->user() && $purchase->user_id !== $request->user()->id) {
-                return redirect('/purchase-credit')->withErrors('WooCommerce purchase not found.');
-            }
-
-            $profileName = $purchase->providerProfile?->name ?? 'selected profile';
-
-            return match ($purchase->status) {
-                'paid' => redirect('/purchase-history')->with(
-                    'checkout_success',
-                    "Payment successful! {$purchase->credits} credits have been added to {$profileName}."
-                ),
-                'pending' => redirect('/purchase-credit')->with(
-                    'checkout_success',
-                    'Your WooCommerce payment is being processed. Credits will appear shortly.'
-                ),
-                'cancelled', 'refunded' => redirect('/purchase-credit')->withErrors('This WooCommerce order was not completed.'),
-                default => redirect('/purchase-credit')->with(
-                    'checkout_success',
-                    'Your WooCommerce payment has been received and is being processed.'
-                ),
-            };
-        }
-
         // Handle Stripe hosted checkout flow
         $sessionId = $request->get('session_id');
 
@@ -208,6 +168,46 @@ class PurchaseCreditController extends Controller
             'unpaid' => redirect('/purchase-credit')->withErrors('Payment was not completed.'),
             'error' => redirect('/purchase-credit')->withErrors('Failed to verify payment: '.$result['error']),
             default => redirect('/purchase-credit')->withErrors('An unexpected error occurred.'),
+        };
+    }
+
+    private function handleWooCommerceSuccess(Request $request): RedirectResponse
+    {
+        $purchaseUuid = (string) $request->get('purchase_uuid', '');
+
+        if ($purchaseUuid === '') {
+            return redirect('/purchase-credit')->withErrors('Invalid WooCommerce purchase.');
+        }
+
+        $purchase = CreditPurchase::query()
+            ->with('providerProfile')
+            ->where('uuid', $purchaseUuid)
+            ->first();
+
+        if (! $purchase) {
+            return redirect('/purchase-credit')->withErrors('WooCommerce purchase not found.');
+        }
+
+        if ($request->user() && $purchase->user_id !== $request->user()->id) {
+            return redirect('/purchase-credit')->withErrors('WooCommerce purchase not found.');
+        }
+
+        $profileName = $purchase->providerProfile?->name ?? 'selected profile';
+
+        return match ($purchase->status) {
+            'paid' => redirect('/purchase-history')->with(
+                'checkout_success',
+                "Payment successful! {$purchase->credits} credits have been added to {$profileName}."
+            ),
+            'pending' => redirect('/purchase-credit')->with(
+                'checkout_success',
+                'Your WooCommerce payment is being processed. Credits will appear shortly.'
+            ),
+            'cancelled', 'refunded' => redirect('/purchase-credit')->withErrors('This WooCommerce order was not completed.'),
+            default => redirect('/purchase-credit')->with(
+                'checkout_success',
+                'Your WooCommerce payment has been received and is being processed.'
+            ),
         };
     }
 
