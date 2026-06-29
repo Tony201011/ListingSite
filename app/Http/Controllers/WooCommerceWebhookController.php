@@ -52,10 +52,16 @@ final class WooCommerceWebhookController extends Controller
             $purchaseUuid = $this->extractPurchaseUuid($order);
 
             if ($purchaseUuid) {
-                $this->processRefund($order, $purchaseUuid);
+                $purchase = CreditPurchase::where('uuid', $purchaseUuid)->first();
+
+                if ($purchase && $purchase->status === 'paid') {
+                    $this->processRefund($order, $purchaseUuid);
+
+                    return response()->json(['ok' => true]);
+                }
             }
 
-            return response()->json(['ok' => true]);
+            return response()->json(['ignored' => true]);
         }
 
         return response()->json(['ignored' => true, 'status' => $status]);
