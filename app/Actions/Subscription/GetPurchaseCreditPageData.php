@@ -47,10 +47,13 @@ class GetPurchaseCreditPageData
         $stripeMode = $setting?->stripe_mode ?: 'sandbox';
         $stripeTestMode = $paymentProvider->name() === 'stripe' && $stripeMode !== 'live';
 
+        $effectiveWooBaseUrl = $setting?->woocommerce_base_url ?: config('services.woocommerce.base_url');
+        $effectiveWooCheckoutSecret = $setting?->woocommerce_checkout_secret ?: config('services.woocommerce.checkout_secret');
+
         $woocommerceEnabled = $setting
             && $setting->woocommerce_enabled
-            && filled($setting->woocommerce_base_url)
-            && filled($setting->woocommerce_checkout_secret);
+            && filled($effectiveWooBaseUrl)
+            && filled($effectiveWooCheckoutSecret);
 
         // Guest mode: no authenticated user — show packages for preview only
         if (! $user) {

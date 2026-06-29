@@ -985,4 +985,26 @@ class PurchaseCreditFlowTest extends TestCase
             $response->getSession()->get('errors')?->all() ?? []
         );
     }
+
+    public function test_woocommerce_button_shows_when_base_url_and_secret_come_from_config_only(): void
+    {
+        // When woocommerce_enabled is true in DB but base_url/checkout_secret are
+        // only set via config (not in DB), the WooCommerce button must still be shown.
+        \Illuminate\Support\Facades\Config::set('services.woocommerce.base_url', 'https://hotadvertising.com.au');
+        \Illuminate\Support\Facades\Config::set('services.woocommerce.checkout_secret', 'test-secret');
+
+        $user = $this->createProvider();
+        $this->createActivePackage(['woo_product_id' => 42]);
+
+        SiteSetting::query()->create([
+            'woocommerce_enabled' => true,
+            // woocommerce_base_url and woocommerce_checkout_secret intentionally omitted (come from config)
+        ]);
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSee('Pay with WooCommerce');
+        $response->assertDontSeeText('Checkout unavailable');
+    }
 }
