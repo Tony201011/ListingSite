@@ -86,15 +86,43 @@ final class WooCommerceWebhookController extends Controller
 
     private function extractPurchaseUuid(array $order): ?string
     {
-        $meta = $order['meta_data'] ?? [];
+        foreach ($order['meta_data'] ?? [] as $item) {
+            $purchaseUuid = $this->extractPurchaseUuidFromMetaItem($item);
+            if ($purchaseUuid) {
+                return $purchaseUuid;
+            }
+        }
 
-        foreach ($meta as $item) {
-            if (($item['key'] ?? '') === '_hotescort_purchase_uuid') {
-                return $item['value'] ?? null;
+        foreach ($order['line_items'] ?? [] as $lineItem) {
+            foreach (($lineItem['meta_data'] ?? []) as $item) {
+                $purchaseUuid = $this->extractPurchaseUuidFromMetaItem($item);
+                if ($purchaseUuid) {
+                    return $purchaseUuid;
+                }
             }
         }
 
         return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $metaItem
+     */
+    private function extractPurchaseUuidFromMetaItem(array $metaItem): ?string
+    {
+        $key = (string) ($metaItem['key'] ?? '');
+
+        if (! in_array($key, ['_hotescort_purchase_uuid', 'hotescort_purchase_uuid', 'purchase_uuid'], true)) {
+            return null;
+        }
+
+        $value = $metaItem['value'] ?? null;
+
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        return $value;
     }
 
     private function processOrder(array $order, string $purchaseUuid): void

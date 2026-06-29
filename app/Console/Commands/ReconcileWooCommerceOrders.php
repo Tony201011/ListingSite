@@ -78,14 +78,7 @@ class ReconcileWooCommerceOrders extends Command
             return 'skipped';
         }
 
-        $purchaseUuid = null;
-
-        foreach ($order['meta_data'] ?? [] as $item) {
-            if (($item['key'] ?? '') === '_hotescort_purchase_uuid') {
-                $purchaseUuid = $item['value'] ?? null;
-                break;
-            }
-        }
+        $purchaseUuid = $this->extractPurchaseUuid($order);
 
         if (! $purchaseUuid) {
             return 'skipped';
@@ -153,5 +146,49 @@ class ReconcileWooCommerceOrders extends Command
         });
 
         return 'credited';
+    }
+
+    /**
+     * @param  array<string, mixed>  $order
+     */
+    private function extractPurchaseUuid(array $order): ?string
+    {
+        foreach ($order['meta_data'] ?? [] as $item) {
+            $purchaseUuid = $this->extractPurchaseUuidFromMetaItem($item);
+            if ($purchaseUuid) {
+                return $purchaseUuid;
+            }
+        }
+
+        foreach ($order['line_items'] ?? [] as $lineItem) {
+            foreach (($lineItem['meta_data'] ?? []) as $item) {
+                $purchaseUuid = $this->extractPurchaseUuidFromMetaItem($item);
+                if ($purchaseUuid) {
+                    return $purchaseUuid;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $metaItem
+     */
+    private function extractPurchaseUuidFromMetaItem(array $metaItem): ?string
+    {
+        $key = (string) ($metaItem['key'] ?? '');
+
+        if (! in_array($key, ['_hotescort_purchase_uuid', 'hotescort_purchase_uuid', 'purchase_uuid'], true)) {
+            return null;
+        }
+
+        $value = $metaItem['value'] ?? null;
+
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        return $value;
     }
 }
