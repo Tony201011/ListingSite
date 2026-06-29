@@ -368,19 +368,24 @@ class WooCommerceWebhookTest extends TestCase
         $this->assertDatabaseCount('credit_ledger_entries', 0);
     }
 
-    public function test_webhook_does_not_credit_when_amount_mismatches(): void
+    public function test_webhook_syncs_purchase_amount_when_order_amount_mismatches(): void
     {
         $user = $this->createUser();
         $profile = $this->createProfile($user);
         $package = $this->createPackage(['price' => '19.99']);
         $purchase = $this->createPendingPurchase($user, $profile, $package);
 
-        // Send wrong amount (tampered)
-        $payload = $this->buildOrderPayload($purchase, ['total' => '9.99']);
+        $payload = $this->buildOrderPayload($purchase, ['id' => 8881, 'total' => '9.99']);
         $this->postWebhook($payload)->assertOk();
 
-        $this->assertEquals('pending', $purchase->fresh()->status);
-        $this->assertDatabaseCount('credit_ledger_entries', 0);
+        $purchase->refresh();
+        $this->assertEquals('paid', $purchase->status);
+        $this->assertEquals(999, $purchase->amount_cents);
+        $this->assertDatabaseHas('credit_ledger_entries', [
+            'credit_purchase_id' => $purchase->id,
+            'source_type' => 'woocommerce_order',
+            'source_id' => '8881',
+        ]);
     }
 
     // ---------------------------------------------------------------

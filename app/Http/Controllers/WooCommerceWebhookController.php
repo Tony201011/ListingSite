@@ -154,14 +154,17 @@ final class WooCommerceWebhookController extends Controller
             $orderAmountCents = $this->parseAmountCents((string) ($order['total'] ?? '0'));
 
             if ($purchase->amount_cents !== $orderAmountCents) {
-                Log::error('WooCommerce webhook: order amount mismatch', [
+                Log::warning('WooCommerce webhook: syncing mismatched order amount', [
                     'purchase_uuid' => $purchaseUuid,
-                    'expected_cents' => $purchase->amount_cents,
+                    'stored_cents' => $purchase->amount_cents,
                     'received_cents' => $orderAmountCents,
                     'order_id' => $order['id'] ?? null,
                 ]);
+            }
 
-                return;
+            $orderCurrency = (string) ($order['currency'] ?? '');
+            if ($orderCurrency === '') {
+                $orderCurrency = $purchase->currency;
             }
 
             // Idempotency guard: skip if ledger entry already exists for this order.
@@ -181,6 +184,8 @@ final class WooCommerceWebhookController extends Controller
             $purchase->update([
                 'status' => 'paid',
                 'woo_order_id' => (int) ($order['id'] ?? 0),
+                'amount_cents' => $orderAmountCents,
+                'currency' => $orderCurrency,
                 'paid_at' => now(),
             ]);
 
