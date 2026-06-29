@@ -24,7 +24,7 @@ class ProcessCreditCheckout
 
         $selectedCredits = $package->total_credits;
         $selectedPrice = (float) $package->price;
-        $provider = $this->paymentProviderManager->current();
+        $provider = $this->paymentProviderManager->for('stripe');
 
         $result = [
             'credits' => $selectedCredits,

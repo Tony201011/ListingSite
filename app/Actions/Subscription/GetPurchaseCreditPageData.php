@@ -20,6 +20,7 @@ class GetPurchaseCreditPageData
     public function execute(): array
     {
         $user = Auth::user();
+        $setting = \App\Models\SiteSetting::query()->first();
 
         $pricingPage = PricingPage::query()
             ->where('is_active', true)
@@ -38,14 +39,12 @@ class GetPurchaseCreditPageData
         if (! $packages->contains('id', $selectedPackageId)) {
             $selectedPackageId = $defaultPackageId;
         }
-
         $selectedPackage = $packages->firstWhere('id', $selectedPackageId);
-        $paymentProvider = $this->paymentProviderManager->current();
-
-        $setting = \App\Models\SiteSetting::query()->first();
+        $paymentProvider = $setting?->default_payment_provider ?: 'stripe';
+        $stripeProvider = $this->paymentProviderManager->for('stripe');
         $checkoutEnabled = $setting ? (bool) $setting->checkout_enabled : true;
         $stripeMode = $setting?->stripe_mode ?: 'sandbox';
-        $stripeTestMode = $paymentProvider->name() === 'stripe' && $stripeMode !== 'live';
+        $stripeTestMode = $paymentProvider === 'stripe' && $stripeMode !== 'live';
 
         $woocommerceEnabled = $setting
             && $setting->woocommerce_enabled
@@ -63,7 +62,7 @@ class GetPurchaseCreditPageData
                 'selectedPackageId' => $selectedPackageId,
                 'selectedPackage' => $selectedPackage,
                 'lockedPackageId' => null,
-                'paymentProvider' => $paymentProvider->name(),
+                'paymentProvider' => $paymentProvider,
                 'paymentPublicKey' => null,
                 'paymentEnabled' => false,
                 'checkoutEnabled' => $checkoutEnabled,
@@ -89,9 +88,12 @@ class GetPurchaseCreditPageData
             'selectedPackageId' => $selectedPackageId,
             'selectedPackage' => $selectedPackage,
             'lockedPackageId' => $lockedPackageId,
-            'paymentProvider' => $paymentProvider->name(),
-            'paymentPublicKey' => $paymentProvider->publicKey(),
-            'paymentEnabled' => $paymentProvider->isConfigured() && filled($paymentProvider->publicKey()),
+            'paymentProvider' => $paymentProvider,
+            'paymentPublicKey' => $paymentProvider === 'stripe' ? $stripeProvider->publicKey() : null,
+            'paymentEnabled' => match ($paymentProvider) {
+                'woocommerce' => $woocommerceEnabled,
+                default => $stripeProvider->isConfigured() && filled($stripeProvider->publicKey()),
+            },
             'checkoutEnabled' => $checkoutEnabled,
             'stripeTestMode' => $stripeTestMode,
             'woocommerceEnabled' => $woocommerceEnabled,

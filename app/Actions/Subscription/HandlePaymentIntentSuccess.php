@@ -34,7 +34,7 @@ class HandlePaymentIntentSuccess
             return ['status' => 'paid', 'credits' => $transaction->total_credits];
         }
 
-        $provider = $this->paymentProviderManager->current();
+        $provider = $this->paymentProviderManager->for('stripe');
 
         if (! $provider->isConfigured()) {
             return ['status' => 'not_configured'];
