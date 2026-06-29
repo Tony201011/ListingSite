@@ -45,12 +45,18 @@ class InitiateWooCommerceCheckout
         ]);
 
         $signature = $this->sign($purchase->uuid, $package->slug, $purchase->amount_cents, $checkoutSecret);
+        $returnUrl = URL::route('purchase-credit.success', [
+            'provider' => 'woocommerce',
+            'purchase_uuid' => $purchase->uuid,
+        ]);
 
         $checkoutUrl = $baseUrl.'/cart/?'.http_build_query([
             'add-to-cart' => $package->woo_product_id,
             'purchase_uuid' => $purchase->uuid,
             'package' => $package->slug,
             'sig' => $signature,
+            'return_url' => $returnUrl,
+            'redirect_to' => $returnUrl,
         ]);
 
         return [
