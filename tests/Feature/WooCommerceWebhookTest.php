@@ -345,7 +345,7 @@ class WooCommerceWebhookTest extends TestCase
 
         $this->assertArrayHasKey('checkout_url', $result);
         $this->assertArrayHasKey('purchase', $result);
-        $this->assertStringContainsString('hotadvertising.com.au/checkout/', $result['checkout_url']);
+        $this->assertStringContainsString('hotadvertising.com.au/cart/', $result['checkout_url']);
         $this->assertStringContainsString('add-to-cart=42', $result['checkout_url']);
         $this->assertStringContainsString('package=starter', $result['checkout_url']);
 
