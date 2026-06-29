@@ -350,6 +350,35 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertSessionHas('purchase_credit_locked_package_id', $package->id);
     }
 
+    public function test_locked_package_purchase_credit_link_redirects_to_woocommerce_when_enabled(): void
+    {
+        SiteSetting::query()->create([
+            'woocommerce_enabled' => true,
+            'woocommerce_base_url' => 'https://hotadvertising.com.au',
+            'woocommerce_checkout_secret' => 'test-checkout-secret',
+        ]);
+
+        $user = $this->createProvider();
+        $package = $this->createActivePackage([
+            'credits' => 60,
+            'price' => '24.99',
+            'slug' => 'starter-pack',
+            'woo_product_id' => 42,
+        ]);
+
+        $response = $this->actingAsProvider($user)
+            ->get('/purchase-credit?package_id='.$package->id.'&lock_package=1');
+
+        $response->assertRedirect();
+        $this->assertStringContainsString('hotadvertising.com.au/cart/', $response->headers->get('Location'));
+        $this->assertDatabaseHas('credit_purchases', [
+            'user_id' => $user->id,
+            'provider_profile_id' => $user->providerProfile?->id,
+            'credit_package_id' => $package->id,
+            'status' => 'pending',
+        ]);
+    }
+
     public function test_locked_membership_package_cannot_be_changed_during_checkout(): void
     {
         $user = $this->createProvider();
