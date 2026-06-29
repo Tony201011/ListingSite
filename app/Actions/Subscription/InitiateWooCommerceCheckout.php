@@ -46,7 +46,7 @@ class InitiateWooCommerceCheckout
 
         $signature = $this->sign($purchase->uuid, $package->slug, $purchase->amount_cents, $checkoutSecret);
 
-        $checkoutUrl = $baseUrl.'/checkout/?'.http_build_query([
+        $checkoutUrl = $baseUrl.'/cart/?'.http_build_query([
             'add-to-cart' => $package->woo_product_id,
             'purchase_uuid' => $purchase->uuid,
             'package' => $package->slug,
