@@ -47,6 +47,11 @@ class GetPurchaseCreditPageData
         $stripeMode = $setting?->stripe_mode ?: 'sandbox';
         $stripeTestMode = $paymentProvider->name() === 'stripe' && $stripeMode !== 'live';
 
+        $woocommerceEnabled = $setting
+            && $setting->woocommerce_enabled
+            && filled($setting->woocommerce_base_url)
+            && filled($setting->woocommerce_checkout_secret);
+
         // Guest mode: no authenticated user — show packages for preview only
         if (! $user) {
             return [
@@ -63,6 +68,7 @@ class GetPurchaseCreditPageData
                 'paymentEnabled' => false,
                 'checkoutEnabled' => $checkoutEnabled,
                 'stripeTestMode' => $stripeTestMode,
+                'woocommerceEnabled' => false,
                 'guestMode' => true,
             ];
         }
@@ -88,6 +94,7 @@ class GetPurchaseCreditPageData
             'paymentEnabled' => $paymentProvider->isConfigured() && filled($paymentProvider->publicKey()),
             'checkoutEnabled' => $checkoutEnabled,
             'stripeTestMode' => $stripeTestMode,
+            'woocommerceEnabled' => $woocommerceEnabled,
             'guestMode' => false,
         ];
     }
