@@ -21,7 +21,7 @@ class CreatePaymentIntent
         $package = CreditPackage::query()
             ->active()
             ->findOrFail($validated['package_id']);
-        $provider = $this->paymentProviderManager->current();
+        $provider = $this->paymentProviderManager->for('stripe');
 
         if (! $provider->isConfigured()) {
             return ['error' => 'Payment system is not configured.'];

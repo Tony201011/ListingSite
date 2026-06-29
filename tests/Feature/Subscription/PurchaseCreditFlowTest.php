@@ -353,6 +353,7 @@ class PurchaseCreditFlowTest extends TestCase
     public function test_locked_package_purchase_credit_link_redirects_to_woocommerce_when_enabled(): void
     {
         SiteSetting::query()->create([
+            'default_payment_provider' => 'woocommerce',
             'woocommerce_enabled' => true,
             'woocommerce_base_url' => 'https://hotadvertising.com.au',
             'woocommerce_checkout_secret' => 'test-checkout-secret',
@@ -377,6 +378,27 @@ class PurchaseCreditFlowTest extends TestCase
             'credit_package_id' => $package->id,
             'status' => 'pending',
         ]);
+    }
+
+    public function test_purchase_credit_page_is_accessible_when_woocommerce_is_the_default_provider(): void
+    {
+        SiteSetting::query()->create([
+            'default_payment_provider' => 'woocommerce',
+            'woocommerce_enabled' => true,
+            'woocommerce_base_url' => 'https://hotadvertising.com.au',
+            'woocommerce_checkout_secret' => 'test-checkout-secret',
+        ]);
+
+        $user = $this->createProvider();
+        $this->createActivePackage([
+            'woo_product_id' => 42,
+        ]);
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSeeText('Pay with WooCommerce');
+        $response->assertDontSeeText('Payment processing is currently unavailable. Please contact support.');
     }
 
     public function test_locked_membership_package_cannot_be_changed_during_checkout(): void
