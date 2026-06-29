@@ -319,7 +319,7 @@
 </div>
 @endsection
 
-@if($paymentEnabled && $paymentProvider === 'stripe' && !($stripeTestMode ?? false))
+@if($paymentEnabled && $paymentProvider === 'stripe')
 @push('scripts')
 <script src="https://js.stripe.com/v3/"></script>
 <script>

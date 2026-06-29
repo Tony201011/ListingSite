@@ -210,6 +210,7 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertOk();
         $response->assertSee('js.stripe.com', false);
         $response->assertSee("Stripe('", false);
+        $response->assertSee('window.proceedToPayment = async function ()', false);
     }
 
     public function test_payment_page_contains_no_paypal_or_square_payment_buttons(): void
