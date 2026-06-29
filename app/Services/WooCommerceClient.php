@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\SiteSetting;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -14,9 +15,14 @@ class WooCommerceClient
 
     public function __construct()
     {
-        $this->baseUrl = rtrim((string) config('services.woocommerce.base_url'), '/');
-        $this->consumerKey = (string) config('services.woocommerce.consumer_key');
-        $this->consumerSecret = (string) config('services.woocommerce.consumer_secret');
+        $setting = SiteSetting::query()->first();
+
+        $this->baseUrl = rtrim(
+            (string) ($setting?->woocommerce_base_url ?: config('services.woocommerce.base_url')),
+            '/'
+        );
+        $this->consumerKey = (string) ($setting?->woocommerce_consumer_key ?: config('services.woocommerce.consumer_key'));
+        $this->consumerSecret = (string) ($setting?->woocommerce_consumer_secret ?: config('services.woocommerce.consumer_secret'));
     }
 
     public function isConfigured(): bool

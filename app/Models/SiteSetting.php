@@ -46,6 +46,12 @@ class SiteSetting extends Model
         'stripe_secret_key',
         'stripe_webhook_secret',
         'stripe_enabled',
+        'woocommerce_enabled',
+        'woocommerce_base_url',
+        'woocommerce_consumer_key',
+        'woocommerce_consumer_secret',
+        'woocommerce_webhook_secret',
+        'woocommerce_checkout_secret',
         'default_payment_provider',
         'reward_receiver',
         'reward_trigger',
@@ -82,6 +88,7 @@ class SiteSetting extends Model
         'max_video_upload_mb' => 'integer',
         'stripe_mode' => 'string',
         'stripe_enabled' => 'boolean',
+        'woocommerce_enabled' => 'boolean',
         'default_payment_provider' => 'string',
         'reward_value' => 'decimal:2',
         'referred_user_bonus_enabled' => 'boolean',
@@ -137,6 +144,82 @@ class SiteSetting extends Model
                     return Crypt::decryptString($value);
                 } catch (DecryptException $e) {
                     logger()->warning('SiteSetting: failed to decrypt stripe_webhook_secret, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
+
+                    return $value;
+                }
+            },
+            set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
+        );
+    }
+
+    protected function woocommerceConsumerKey(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    logger()->warning('SiteSetting: failed to decrypt woocommerce_consumer_key, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
+
+                    return $value;
+                }
+            },
+            set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
+        );
+    }
+
+    protected function woocommerceConsumerSecret(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    logger()->warning('SiteSetting: failed to decrypt woocommerce_consumer_secret, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
+
+                    return $value;
+                }
+            },
+            set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
+        );
+    }
+
+    protected function woocommerceWebhookSecret(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    logger()->warning('SiteSetting: failed to decrypt woocommerce_webhook_secret, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
+
+                    return $value;
+                }
+            },
+            set: fn (?string $value): ?string => ($value !== null && $value !== '') ? Crypt::encryptString($value) : null,
+        );
+    }
+
+    protected function woocommerceCheckoutSecret(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    logger()->warning('SiteSetting: failed to decrypt woocommerce_checkout_secret, treating as plain text (key rotation may be needed).', ['exception' => $e->getMessage()]);
 
                     return $value;
                 }
