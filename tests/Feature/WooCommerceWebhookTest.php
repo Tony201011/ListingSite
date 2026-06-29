@@ -209,6 +209,59 @@ class WooCommerceWebhookTest extends TestCase
         ]);
     }
 
+    public function test_webhook_marks_purchase_paid_when_uuid_is_sent_as_purchase_uuid_meta_key(): void
+    {
+        $user = $this->createUser();
+        $profile = $this->createProfile($user);
+        $package = $this->createPackage();
+        $purchase = $this->createPendingPurchase($user, $profile, $package);
+
+        $payload = $this->buildOrderPayload($purchase, [
+            'id' => 5556,
+            'meta_data' => [
+                ['key' => 'purchase_uuid', 'value' => $purchase->uuid],
+            ],
+        ]);
+        $this->postWebhook($payload)->assertOk();
+
+        $purchase->refresh();
+        $this->assertEquals('paid', $purchase->status);
+        $this->assertDatabaseHas('credit_ledger_entries', [
+            'credit_purchase_id' => $purchase->id,
+            'source_type' => 'woocommerce_order',
+            'source_id' => '5556',
+        ]);
+    }
+
+    public function test_webhook_marks_purchase_paid_when_uuid_is_on_line_item_meta(): void
+    {
+        $user = $this->createUser();
+        $profile = $this->createProfile($user);
+        $package = $this->createPackage();
+        $purchase = $this->createPendingPurchase($user, $profile, $package);
+
+        $payload = $this->buildOrderPayload($purchase, [
+            'id' => 5557,
+            'meta_data' => [],
+            'line_items' => [
+                [
+                    'meta_data' => [
+                        ['key' => 'hotescort_purchase_uuid', 'value' => $purchase->uuid],
+                    ],
+                ],
+            ],
+        ]);
+        $this->postWebhook($payload)->assertOk();
+
+        $purchase->refresh();
+        $this->assertEquals('paid', $purchase->status);
+        $this->assertDatabaseHas('credit_ledger_entries', [
+            'credit_purchase_id' => $purchase->id,
+            'source_type' => 'woocommerce_order',
+            'source_id' => '5557',
+        ]);
+    }
+
     public function test_webhook_updates_wallet_balance_for_provider_profile(): void
     {
         $user = $this->createUser();
