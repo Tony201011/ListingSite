@@ -36,9 +36,27 @@ class PurchaseCreditController extends Controller
         private InitiateWooCommerceCheckout $initiateWooCommerceCheckout,
     ) {}
 
-    public function purchaseCredit(): View
+    public function purchaseCredit(Request $request): View|RedirectResponse
     {
         $data = $this->getPurchaseCreditPageData->execute();
+
+        if (
+            $request->boolean('lock_package')
+            && $request->user()
+            && ($data['woocommerceEnabled'] ?? false)
+            && ($data['selectedPackage'] ?? null)?->hasWooProduct()
+            && ($data['activeProfile'] ?? null)
+        ) {
+            $result = $this->initiateWooCommerceCheckout->execute(
+                $request->user(),
+                $data['selectedPackage'],
+                $data['activeProfile'],
+            );
+
+            if (isset($result['checkout_url'])) {
+                return redirect()->away($result['checkout_url']);
+            }
+        }
 
         if ($data['lockedPackageId'] ?? null) {
             request()->session()->put('purchase_credit_locked_package_id', $data['lockedPackageId']);
