@@ -42,6 +42,9 @@ class GetPurchaseCreditPageData
         $selectedPackage = $packages->firstWhere('id', $selectedPackageId);
         $paymentProvider = $this->paymentProviderManager->current();
 
+        $setting = \App\Models\SiteSetting::query()->first();
+        $checkoutEnabled = $setting ? (bool) $setting->checkout_enabled : true;
+
         // Guest mode: no authenticated user — show packages for preview only
         if (! $user) {
             return [
@@ -56,6 +59,7 @@ class GetPurchaseCreditPageData
                 'paymentProvider' => $paymentProvider->name(),
                 'paymentPublicKey' => null,
                 'paymentEnabled' => false,
+                'checkoutEnabled' => $checkoutEnabled,
                 'guestMode' => true,
             ];
         }
@@ -79,6 +83,7 @@ class GetPurchaseCreditPageData
             'paymentProvider' => $paymentProvider->name(),
             'paymentPublicKey' => $paymentProvider->publicKey(),
             'paymentEnabled' => $paymentProvider->isConfigured() && filled($paymentProvider->publicKey()),
+            'checkoutEnabled' => $checkoutEnabled,
             'guestMode' => false,
         ];
     }

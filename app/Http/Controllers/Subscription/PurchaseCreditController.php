@@ -51,6 +51,11 @@ class PurchaseCreditController extends Controller
 
     public function checkout(CheckoutPurchaseCreditRequest $request): RedirectResponse
     {
+        $setting = \App\Models\SiteSetting::query()->first();
+        if ($setting && ! $setting->checkout_enabled) {
+            return redirect('/purchase-credit')->withErrors('Checkout is currently disabled. Please try again later.');
+        }
+
         $validated = $request->validated();
         $result = $this->processCreditCheckout->execute($validated);
         $activeProfile = $this->getActiveProviderProfile->execute($request->user());
@@ -74,6 +79,11 @@ class PurchaseCreditController extends Controller
 
     public function wooCheckout(CheckoutPurchaseCreditRequest $request): RedirectResponse
     {
+        $setting = \App\Models\SiteSetting::query()->first();
+        if ($setting && ! $setting->checkout_enabled) {
+            return redirect('/purchase-credit')->withErrors('Checkout is currently disabled. Please try again later.');
+        }
+
         $validated = $request->validated();
 
         $package = CreditPackage::query()->active()->findOrFail($validated['package_id']);
