@@ -68,10 +68,18 @@
             You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only. The platform does not process bookings, deposits, appointment payments, escort payments, or payments between visitors and advertisers.
         </div>
 
-        @if(!($paymentEnabled ?? false) || !($checkoutEnabled ?? true))
+        @if(!($checkoutEnabled ?? true) || !($paymentEnabled ?? false) || ($stripeTestMode ?? false))
             <div class="mb-5 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800 shadow-sm">
-                <p class="font-semibold">Test Mode</p>
-                <p class="mt-1">Payment processing is currently in test mode for processor review.</p>
+                @if(!($checkoutEnabled ?? true))
+                    <p class="font-semibold">Checkout Disabled</p>
+                    <p class="mt-1">Checkout is currently disabled by admin. Please try again later.</p>
+                @elseif(!($paymentEnabled ?? false))
+                    <p class="font-semibold">Payment Unavailable</p>
+                    <p class="mt-1">Payment processing is currently unavailable. Please contact support.</p>
+                @else
+                    <p class="font-semibold">Test Mode</p>
+                    <p class="mt-1">Test checkout mode is enabled. Use test card details to complete checkout safely.</p>
+                @endif
             </div>
         @endif
 
@@ -196,10 +204,10 @@
                                     type="button"
                                     id="proceed-to-payment"
                                     @click="window.proceedToPayment($event)"
-                                    :disabled="processing || !termsAccepted"
+                                    :disabled="processing || !termsAccepted || !selectedPackageId"
                                     class="inline-flex h-11 items-center rounded-full bg-[#e04ecb] px-6 text-sm font-semibold text-white transition hover:bg-[#c13ab0] disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
-                                    <span x-show="!processing">Continue to payment</span>
+                                    <span x-show="!processing">{{ ($stripeTestMode ?? false) ? 'Continue to test payment' : 'Continue to payment' }}</span>
                                     <span x-show="processing" class="flex items-center gap-2">
                                         <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -208,9 +216,13 @@
                                         Processing&hellip;
                                     </span>
                                 </button>
+                            @elseif(!($checkoutEnabled ?? true))
+                                <span class="inline-flex h-11 items-center rounded-full border border-amber-400 bg-amber-50 px-6 text-sm font-semibold text-amber-700 cursor-not-allowed opacity-75">
+                                    Checkout disabled by admin
+                                </span>
                             @else
                                 <span class="inline-flex h-11 items-center rounded-full border border-amber-400 bg-amber-50 px-6 text-sm font-semibold text-amber-700 cursor-not-allowed opacity-75">
-                                    Checkout disabled (test mode)
+                                    Checkout unavailable
                                 </span>
                             @endif
                         @else

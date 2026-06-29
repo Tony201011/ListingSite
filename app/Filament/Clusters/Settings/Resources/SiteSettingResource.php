@@ -206,7 +206,7 @@ class SiteSettingResource extends Resource
                                     Toggle::make('checkout_enabled')
                                         ->label('Enable Checkout')
                                         ->default(true)
-                                        ->helperText('When disabled, the purchase-credit page enters test/maintenance mode and users cannot complete a checkout.')
+                                        ->helperText('Controls the purchase-credit checkout button. Turn off to disable checkout for all users.')
                                         ->columnSpanFull(),
                                 ]),
                             Section::make('Payment Provider')

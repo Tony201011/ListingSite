@@ -95,7 +95,7 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertSee('id="purchase-credit-flow"', false);
         $response->assertDontSee("document.getElementById('purchase-credit-flow')", false);
         $response->assertDontSee("paymentMethodTypes: ['card']", false);
-        $response->assertSeeText('Payment processing is currently in test mode for processor review.');
+        $response->assertSeeText('Test checkout mode is enabled. Use test card details to complete checkout safely.');
     }
 
     public function test_purchase_credit_page_shows_only_active_packages(): void
@@ -131,7 +131,7 @@ class PurchaseCreditFlowTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only.');
-        $response->assertSeeText('Payment processing is currently in test mode for processor review.');
+        $response->assertSeeText('Payment processing is currently unavailable. Please contact support.');
         $response->assertSee(route('refund-policy'));
         $response->assertSeeText('For business/support contact details, please email support@hotescorts.com.au');
         $response->assertSee('Sign in to purchase credits');
@@ -170,47 +170,46 @@ class PurchaseCreditFlowTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only.');
-        $response->assertSeeText('Payment processing is currently in test mode for processor review.');
+        $response->assertSeeText('Payment processing is currently unavailable. Please contact support.');
         $response->assertSeeText('AUD $9.99');
         $response->assertSeeText('For business/support contact details, please email support@hotescorts.com.au');
         $response->assertSee(route('refund-policy'));
     }
 
-    public function test_payment_page_shows_checkout_disabled_button_not_real_payment_button_in_test_mode(): void
+    public function test_payment_page_shows_active_test_checkout_button_when_stripe_is_configured_in_sandbox(): void
     {
-        // Without stripe_mode === 'live', paymentEnabled is false, so the
-        // "Checkout disabled (test mode)" span must appear instead of a real
-        // payment/checkout button.
-        $user = $this->createProvider();
-        $this->createActivePackage();
-
-        $response = $this->actingAsProvider($user)->get('/purchase-credit');
-
-        $response->assertOk();
-        $response->assertSeeText('Checkout disabled (test mode)');
-        $response->assertDontSee('id="proceed-to-payment"', false);
-    }
-
-    public function test_payment_page_does_not_load_stripe_js_in_test_mode(): void
-    {
-        // Stripe.js must NOT be injected into the page when payment is disabled
-        // (i.e. when stripe_mode is not 'live').  Loading it would expose the
-        // publishable key and give visitors a false impression that card entry
-        // is active.
         $user = $this->createProvider();
         $this->createActivePackage();
         SiteSetting::query()->create([
             'stripe_enabled' => true,
             'stripe_publishable_key' => 'pk_test_123',
             'stripe_secret_key' => 'sk_test_123',
-            // stripe_mode deliberately omitted — defaults to null, not 'live'
+            'stripe_mode' => 'sandbox',
         ]);
 
         $response = $this->actingAsProvider($user)->get('/purchase-credit');
 
         $response->assertOk();
-        $response->assertDontSee('js.stripe.com', false);
-        $response->assertDontSee("Stripe('", false);
+        $response->assertSeeText('Continue to test payment');
+        $response->assertSee('id="proceed-to-payment"', false);
+    }
+
+    public function test_payment_page_loads_stripe_js_in_test_mode_when_stripe_is_configured(): void
+    {
+        $user = $this->createProvider();
+        $this->createActivePackage();
+        SiteSetting::query()->create([
+            'stripe_enabled' => true,
+            'stripe_publishable_key' => 'pk_test_123',
+            'stripe_secret_key' => 'sk_test_123',
+            'stripe_mode' => 'sandbox',
+        ]);
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSee('js.stripe.com', false);
+        $response->assertSee("Stripe('", false);
     }
 
     public function test_payment_page_contains_no_paypal_or_square_payment_buttons(): void
@@ -234,9 +233,7 @@ class PurchaseCreditFlowTest extends TestCase
     public function test_create_intent_endpoint_returns_error_when_payment_not_configured(): void
     {
         // POST /purchase-credit/create-intent must be rejected (HTTP 422) with
-        // an error payload when the payment provider is not in live mode.
-        // This ensures the embedded PaymentElement flow cannot be exploited to
-        // initiate a real charge before processor approval.
+        // an error payload when the payment provider is not configured.
         $user = $this->createProvider();
         $package = $this->createActivePackage();
 
@@ -909,8 +906,8 @@ class PurchaseCreditFlowTest extends TestCase
         $response = $this->actingAsProvider($user)->get('/purchase-credit');
 
         $response->assertOk();
-        $response->assertSeeText('Test Mode');
-        $response->assertSeeText('Payment processing is currently in test mode for processor review.');
+        $response->assertSeeText('Checkout Disabled');
+        $response->assertSeeText('Checkout is currently disabled by admin. Please try again later.');
     }
 
     public function test_purchase_credit_page_shows_checkout_disabled_button_when_checkout_is_disabled_by_admin(): void
@@ -923,7 +920,7 @@ class PurchaseCreditFlowTest extends TestCase
         $response = $this->actingAsProvider($user)->get('/purchase-credit');
 
         $response->assertOk();
-        $response->assertSeeText('Checkout disabled (test mode)');
+        $response->assertSeeText('Checkout disabled by admin');
         $response->assertDontSee('id="proceed-to-payment"', false);
     }
 

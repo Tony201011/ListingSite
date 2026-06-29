@@ -18,11 +18,12 @@ class StripePaymentProvider implements PaymentProviderInterface
     public function isConfigured(): bool
     {
         $settings = $this->settings();
+        $stripeMode = $settings?->stripe_mode ?: 'sandbox';
 
         return (bool) (
             $settings?->stripe_enabled
             && $settings?->stripe_secret_key
-            && $settings?->stripe_mode === 'live'
+            && in_array($stripeMode, ['sandbox', 'live'], true)
         );
     }
 
