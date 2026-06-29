@@ -22,6 +22,7 @@ Route::middleware(['profile.steps'])->group(function () {
 // Balance / credit routes — profile scoped
 Route::middleware('profile.selected')->group(function () {
     Route::post('/purchase-credit/checkout', [PurchaseCreditController::class, 'checkout'])->name('purchase-credit.checkout');
+    Route::post('/purchase-credit/woo-checkout', [PurchaseCreditController::class, 'wooCheckout'])->name('purchase-credit.woo-checkout');
     Route::post('/purchase-credit/create-intent', [PurchaseCreditController::class, 'createPaymentIntent'])->name('purchase-credit.create-intent');
     Route::get('/credit-history', [PurchaseCreditController::class, 'creditHistory'])->name('credit-history');
     Route::get('/credit-history-last-month', [PurchaseCreditController::class, 'creditHistoryLastMonth'])->name('credit-history-last-month');

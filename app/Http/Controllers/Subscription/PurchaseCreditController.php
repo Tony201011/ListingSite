@@ -10,9 +10,11 @@ use App\Actions\Subscription\GetPurchaseCreditPageData;
 use App\Actions\Subscription\GetPurchaseHistory;
 use App\Actions\Subscription\HandleCheckoutSuccess;
 use App\Actions\Subscription\HandlePaymentIntentSuccess;
+use App\Actions\Subscription\InitiateWooCommerceCheckout;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
+use App\Models\CreditPackage;
 use App\Models\PurchaseTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -31,6 +33,7 @@ class PurchaseCreditController extends Controller
         private GetCreditHistory $getCreditHistory,
         private CreatePaymentIntent $createPaymentIntent,
         private GetActiveProviderProfile $getActiveProviderProfile,
+        private InitiateWooCommerceCheckout $initiateWooCommerceCheckout,
     ) {}
 
     public function purchaseCredit(): View
@@ -67,6 +70,26 @@ class PurchaseCreditController extends Controller
             number_format($result['price'], 2).
             ") for {$profileName} under invoice name '{$result['invoice_name']}'."
         );
+    }
+
+    public function wooCheckout(CheckoutPurchaseCreditRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        $package = CreditPackage::query()->active()->findOrFail($validated['package_id']);
+        $profile = $this->getActiveProviderProfile->execute($request->user());
+
+        if (! $profile) {
+            return redirect('/purchase-credit')->withErrors('No active provider profile found.');
+        }
+
+        $result = $this->initiateWooCommerceCheckout->execute($request->user(), $package, $profile);
+
+        if (isset($result['error'])) {
+            return redirect('/purchase-credit')->withErrors($result['error']);
+        }
+
+        return redirect($result['checkout_url']);
     }
 
     public function checkoutSuccess(Request $request): RedirectResponse
