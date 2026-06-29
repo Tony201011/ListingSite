@@ -4,12 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class CreditPurchase extends Model
 {
+    protected static function booted(): void
+    {
+        static::creating(function (self $purchase): void {
+            if (empty($purchase->uuid)) {
+                $purchase->uuid = (string) Str::uuid();
+            }
+        });
+    }
     protected $fillable = [
         'uuid',
         'user_id',
+        'provider_profile_id',
         'credit_package_id',
         'credits',
         'amount_cents',
@@ -22,6 +32,7 @@ class CreditPurchase extends Model
     protected $casts = [
         'credits' => 'integer',
         'amount_cents' => 'integer',
+        'provider_profile_id' => 'integer',
         'woo_order_id' => 'integer',
         'paid_at' => 'datetime',
     ];
@@ -29,6 +40,11 @@ class CreditPurchase extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function providerProfile(): BelongsTo
+    {
+        return $this->belongsTo(ProviderProfile::class);
     }
 
     public function package(): BelongsTo

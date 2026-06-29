@@ -28,6 +28,11 @@ Schedule::command('featured:expire')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('woocommerce:reconcile --hours=1')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('online-sessions:rollover')
     ->dailyAt('00:00')
     ->withoutOverlapping()

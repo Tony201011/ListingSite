@@ -30,6 +30,7 @@ use App\Http\Controllers\SiteAccess\SitePasswordController;
 /**subscription controller start */
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Http\Controllers\WooCommerceWebhookController;
 use App\Http\Controllers\Subscription\MemberShipController;
 use App\Http\Controllers\Subscription\PurchaseCreditController;
 /**subscription controller end */
@@ -43,6 +44,11 @@ use Illuminate\Support\Facades\Route;
 // Stripe webhook — must be outside all auth/session middleware and CSRF-exempt
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
     ->name('stripe.webhook')
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+// WooCommerce webhook — must be outside all auth/session middleware and CSRF-exempt
+Route::post('/woocommerce/webhook', [WooCommerceWebhookController::class, 'handle'])
+    ->name('woocommerce.webhook')
     ->withoutMiddleware([VerifyCsrfToken::class]);
 
 Route::get('/site-password', [SitePasswordController::class, 'showForm'])
