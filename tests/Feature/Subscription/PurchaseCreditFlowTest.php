@@ -894,4 +894,98 @@ class PurchaseCreditFlowTest extends TestCase
 
         $method->invoke($controller, $session);
     }
+
+    // ---------------------------------------------------------------
+    // checkout_enabled admin toggle
+    // ---------------------------------------------------------------
+
+    public function test_purchase_credit_page_shows_test_mode_notice_when_checkout_is_disabled_by_admin(): void
+    {
+        $user = $this->createProvider();
+        $this->createActivePackage();
+
+        SiteSetting::query()->create(['checkout_enabled' => false]);
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSeeText('Test Mode');
+        $response->assertSeeText('Payment processing is currently in test mode for processor review.');
+    }
+
+    public function test_purchase_credit_page_shows_checkout_disabled_button_when_checkout_is_disabled_by_admin(): void
+    {
+        $user = $this->createProvider();
+        $this->createActivePackage();
+
+        SiteSetting::query()->create(['checkout_enabled' => false]);
+
+        $response = $this->actingAsProvider($user)->get('/purchase-credit');
+
+        $response->assertOk();
+        $response->assertSeeText('Checkout disabled (test mode)');
+        $response->assertDontSee('id="proceed-to-payment"', false);
+    }
+
+    public function test_checkout_is_blocked_when_checkout_disabled_by_admin(): void
+    {
+        $user = $this->createProvider();
+        $package = $this->createActivePackage();
+
+        SiteSetting::query()->create(['checkout_enabled' => false]);
+
+        $response = $this->actingAsProvider($user)->post('/purchase-credit/checkout', [
+            'package_id' => $package->id,
+            'provider_profile_id' => $user->providerProfile->id,
+            'invoice_name' => 'Test User',
+        ]);
+
+        $response->assertRedirect('/purchase-credit');
+        $response->assertSessionHasErrors();
+        $this->assertStringContainsString(
+            'Checkout is currently disabled',
+            $response->getSession()->get('errors')->first()
+        );
+    }
+
+    public function test_woo_checkout_is_blocked_when_checkout_disabled_by_admin(): void
+    {
+        $user = $this->createProvider();
+        $package = $this->createActivePackage(['slug' => 'starter', 'woo_product_id' => 42]);
+
+        SiteSetting::query()->create(['checkout_enabled' => false]);
+
+        $response = $this->actingAsProvider($user)->post('/purchase-credit/woo-checkout', [
+            'package_id' => $package->id,
+            'provider_profile_id' => $user->providerProfile->id,
+            'invoice_name' => 'Test User',
+        ]);
+
+        $response->assertRedirect('/purchase-credit');
+        $response->assertSessionHasErrors();
+        $this->assertStringContainsString(
+            'Checkout is currently disabled',
+            $response->getSession()->get('errors')->first()
+        );
+    }
+
+    public function test_checkout_proceeds_normally_when_checkout_enabled(): void
+    {
+        $user = $this->createProvider();
+        $package = $this->createActivePackage();
+
+        SiteSetting::query()->create(['checkout_enabled' => true]);
+
+        $response = $this->actingAsProvider($user)->post('/purchase-credit/checkout', [
+            'package_id' => $package->id,
+            'provider_profile_id' => $user->providerProfile->id,
+            'invoice_name' => 'Test User',
+        ]);
+
+        // Should NOT redirect back with "checkout disabled" error
+        $this->assertNotContains(
+            'Checkout is currently disabled',
+            $response->getSession()->get('errors')?->all() ?? []
+        );
+    }
 }

@@ -199,6 +199,16 @@ class SiteSettingResource extends Resource
                     Tab::make('Payments & Pricing')
                         ->icon('heroicon-o-credit-card')
                         ->schema([
+                            Section::make('Checkout')
+                                ->compact()
+                                ->columns(2)
+                                ->schema([
+                                    Toggle::make('checkout_enabled')
+                                        ->label('Enable Checkout')
+                                        ->default(true)
+                                        ->helperText('When disabled, the purchase-credit page enters test/maintenance mode and users cannot complete a checkout.')
+                                        ->columnSpanFull(),
+                                ]),
                             Section::make('Payment Provider')
                                 ->compact()
                                 ->columns(2)
@@ -415,6 +425,9 @@ class SiteSettingResource extends Resource
                     ->boolean(),
                 IconColumn::make('stripe_enabled')
                     ->label('Stripe')
+                    ->boolean(),
+                IconColumn::make('checkout_enabled')
+                    ->label('Checkout')
                     ->boolean(),
                 IconColumn::make('logging_enabled')
                     ->label('Logs')

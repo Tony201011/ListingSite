@@ -68,7 +68,7 @@
             You are purchasing advertising credits for use on hotescort.com.au. Credits are used for profile visibility and promotional listing features only. The platform does not process bookings, deposits, appointment payments, escort payments, or payments between visitors and advertisers.
         </div>
 
-        @if(!($paymentEnabled ?? false))
+        @if(!($paymentEnabled ?? false) || !($checkoutEnabled ?? true))
             <div class="mb-5 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800 shadow-sm">
                 <p class="font-semibold">Test Mode</p>
                 <p class="mt-1">Payment processing is currently in test mode for processor review.</p>
@@ -191,7 +191,7 @@
                                 Sign in to purchase credits
                             </a>
                         @elseif(!($reviewerMode ?? false))
-                            @if($paymentEnabled && $paymentProvider === 'stripe')
+                            @if($paymentEnabled && ($checkoutEnabled ?? true) && $paymentProvider === 'stripe')
                                 <button
                                     type="button"
                                     id="proceed-to-payment"
