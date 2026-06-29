@@ -44,6 +44,8 @@ class GetPurchaseCreditPageData
 
         $setting = \App\Models\SiteSetting::query()->first();
         $checkoutEnabled = $setting ? (bool) $setting->checkout_enabled : true;
+        $stripeMode = $setting?->stripe_mode ?: 'sandbox';
+        $stripeTestMode = $paymentProvider->name() === 'stripe' && $stripeMode !== 'live';
 
         // Guest mode: no authenticated user — show packages for preview only
         if (! $user) {
@@ -60,6 +62,7 @@ class GetPurchaseCreditPageData
                 'paymentPublicKey' => null,
                 'paymentEnabled' => false,
                 'checkoutEnabled' => $checkoutEnabled,
+                'stripeTestMode' => $stripeTestMode,
                 'guestMode' => true,
             ];
         }
@@ -84,6 +87,7 @@ class GetPurchaseCreditPageData
             'paymentPublicKey' => $paymentProvider->publicKey(),
             'paymentEnabled' => $paymentProvider->isConfigured() && filled($paymentProvider->publicKey()),
             'checkoutEnabled' => $checkoutEnabled,
+            'stripeTestMode' => $stripeTestMode,
             'guestMode' => false,
         ];
     }
