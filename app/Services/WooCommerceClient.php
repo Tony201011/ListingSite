@@ -9,12 +9,19 @@ use Illuminate\Support\Facades\Log;
 
 class WooCommerceClient
 {
-    private string $baseUrl;
-    private string $consumerKey;
-    private string $consumerSecret;
+    private ?string $baseUrl = null;
+    private ?string $consumerKey = null;
+    private ?string $consumerSecret = null;
+    private bool $initialized = false;
 
-    public function __construct()
+    public function __construct() {}
+
+    private function initialize(): void
     {
+        if ($this->initialized) {
+            return;
+        }
+
         $setting = SiteSetting::query()->first();
 
         $this->baseUrl = rtrim(
@@ -23,10 +30,13 @@ class WooCommerceClient
         );
         $this->consumerKey = (string) ($setting?->woocommerce_consumer_key ?: config('services.woocommerce.consumer_key'));
         $this->consumerSecret = (string) ($setting?->woocommerce_consumer_secret ?: config('services.woocommerce.consumer_secret'));
+        $this->initialized = true;
     }
 
     public function isConfigured(): bool
     {
+        $this->initialize();
+
         return $this->baseUrl && $this->consumerKey && $this->consumerSecret;
     }
 
@@ -81,6 +91,8 @@ class WooCommerceClient
 
     private function get(string $path, array $query = []): Response
     {
+        $this->initialize();
+
         return Http::withBasicAuth($this->consumerKey, $this->consumerSecret)
             ->timeout(15)
             ->get($this->baseUrl.$path, $query);
