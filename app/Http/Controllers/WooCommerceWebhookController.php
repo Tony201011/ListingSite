@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CreditLedgerEntry;
 use App\Models\CreditPurchase;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Services\WalletLedgerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -62,7 +63,8 @@ final class WooCommerceWebhookController extends Controller
 
     private function verifySignature(Request $request, string $payload): bool
     {
-        $secret = (string) config('services.woocommerce.webhook_secret');
+        $setting = SiteSetting::query()->first();
+        $secret = (string) ($setting?->woocommerce_webhook_secret ?: config('services.woocommerce.webhook_secret'));
 
         if (! $secret) {
             Log::error('WooCommerce webhook: webhook_secret is not configured');

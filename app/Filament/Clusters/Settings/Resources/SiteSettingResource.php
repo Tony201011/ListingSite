@@ -203,10 +203,11 @@ class SiteSettingResource extends Resource
                                 ->compact()
                                 ->columns(2)
                                 ->schema([
-                                    Select::make('default_payment_provider')
+                                     Select::make('default_payment_provider')
                                         ->label('Default Provider')
                                         ->options([
                                             'stripe' => 'Stripe',
+                                            'woocommerce' => 'WooCommerce',
                                         ])
                                         ->default('stripe')
                                         ->required()
@@ -243,6 +244,45 @@ class SiteSettingResource extends Resource
                                         ->revealable()
                                         ->placeholder('whsec_...')
                                         ->helperText('Used to verify Stripe webhook signatures.'),
+                                ]),
+                            Section::make('WooCommerce Integration')
+                                ->compact()
+                                ->columns(2)
+                                ->schema([
+                                    Toggle::make('woocommerce_enabled')
+                                        ->label('Enable WooCommerce Gateway')
+                                        ->default(false)
+                                        ->helperText('Enable WooCommerce as a payment gateway.')
+                                        ->columnSpanFull(),
+                                    TextInput::make('woocommerce_base_url')
+                                        ->label('Store URL')
+                                        ->placeholder('https://hotadvertising.com.au')
+                                        ->url()
+                                        ->helperText('Base URL of your WooCommerce store.')
+                                        ->columnSpanFull(),
+                                    TextInput::make('woocommerce_consumer_key')
+                                        ->label('Consumer Key')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('ck_...')
+                                        ->helperText('WooCommerce REST API consumer key (Settings → Advanced → REST API).'),
+                                    TextInput::make('woocommerce_consumer_secret')
+                                        ->label('Consumer Secret')
+                                        ->password()
+                                        ->revealable()
+                                        ->placeholder('cs_...')
+                                        ->helperText('WooCommerce REST API consumer secret.'),
+                                    TextInput::make('woocommerce_webhook_secret')
+                                        ->label('Webhook Secret')
+                                        ->password()
+                                        ->revealable()
+                                        ->helperText('Secret used to verify incoming WooCommerce webhook signatures.'),
+                                    TextInput::make('woocommerce_checkout_secret')
+                                        ->label('Checkout Secret')
+                                        ->password()
+                                        ->revealable()
+                                        ->helperText('Shared secret for signing WooCommerce checkout redirect URLs.')
+                                        ->columnSpanFull(),
                                 ]),
                             Section::make('Ad Tier Pricing')
                                 ->description('Daily credit costs for featured listings and sponsored placements.')

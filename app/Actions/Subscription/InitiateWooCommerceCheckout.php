@@ -5,6 +5,7 @@ namespace App\Actions\Subscription;
 use App\Models\CreditPackage;
 use App\Models\CreditPurchase;
 use App\Models\ProviderProfile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
 
@@ -17,8 +18,13 @@ class InitiateWooCommerceCheckout
      */
     public function execute(User $user, CreditPackage $package, ProviderProfile $profile): array
     {
-        $baseUrl = rtrim((string) config('services.woocommerce.base_url'), '/');
-        $checkoutSecret = (string) config('services.woocommerce.checkout_secret');
+        $setting = SiteSetting::query()->first();
+
+        $baseUrl = rtrim(
+            (string) ($setting?->woocommerce_base_url ?: config('services.woocommerce.base_url')),
+            '/'
+        );
+        $checkoutSecret = (string) ($setting?->woocommerce_checkout_secret ?: config('services.woocommerce.checkout_secret'));
 
         if (! $baseUrl || ! $checkoutSecret) {
             return ['error' => 'WooCommerce checkout is not configured.'];
