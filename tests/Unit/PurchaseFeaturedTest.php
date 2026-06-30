@@ -211,6 +211,9 @@ class PurchaseFeaturedTest extends TestCase
         $this->assertTrue((bool) $profile->is_featured);
         $this->assertNotNull($profile->featured_expires_at);
         $this->assertTrue($profile->featured_expires_at->isFuture());
+        // Free listing period must be terminated so the profile appears in paid sections.
+        $this->assertNotNull($profile->free_listing_expires_at);
+        $this->assertTrue($profile->free_listing_expires_at->lessThanOrEqualTo(now()));
     }
 
     public function test_purchase_home_banner_ends_active_free_listing_period(): void
