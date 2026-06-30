@@ -89,6 +89,34 @@ class WooCommerceClient
         return $response->json();
     }
 
+    /**
+     * Find a WooCommerce order by purchase UUID stored in order meta.
+     * Tries all known meta-key variants.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findOrderByPurchaseUuid(string $uuid): ?array
+    {
+        $this->initialize();
+
+        foreach (['_hotescort_purchase_uuid', 'hotescort_purchase_uuid', 'purchase_uuid'] as $metaKey) {
+            $response = $this->get('/wp-json/wc/v3/orders', [
+                'meta_key' => $metaKey,
+                'meta_value' => $uuid,
+            ]);
+
+            if ($response->successful()) {
+                $orders = $response->json() ?? [];
+
+                if (! empty($orders)) {
+                    return $orders[0];
+                }
+            }
+        }
+
+        return null;
+    }
+
     private function get(string $path, array $query = []): Response
     {
         $this->initialize();

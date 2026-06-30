@@ -10,11 +10,11 @@ use App\Actions\Subscription\GetPurchaseCreditPageData;
 use App\Actions\Subscription\GetPurchaseHistory;
 use App\Actions\Subscription\HandleCheckoutSuccess;
 use App\Actions\Subscription\HandlePaymentIntentSuccess;
+use App\Actions\Subscription\HandleWooCommerceCheckoutSuccess;
 use App\Actions\Subscription\InitiateWooCommerceCheckout;
 use App\Actions\Subscription\ProcessCreditCheckout;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutPurchaseCreditRequest;
-use App\Models\CreditPurchase;
 use App\Models\CreditPackage;
 use App\Models\PurchaseTransaction;
 use Illuminate\Http\JsonResponse;
@@ -35,6 +35,7 @@ class PurchaseCreditController extends Controller
         private CreatePaymentIntent $createPaymentIntent,
         private GetActiveProviderProfile $getActiveProviderProfile,
         private InitiateWooCommerceCheckout $initiateWooCommerceCheckout,
+        private HandleWooCommerceCheckoutSuccess $handleWooCommerceCheckoutSuccess,
     ) {}
 
     public function purchaseCredit(Request $request): View|RedirectResponse
@@ -194,25 +195,14 @@ class PurchaseCreditController extends Controller
             return redirect('/purchase-credit')->withErrors('Invalid WooCommerce purchase.');
         }
 
-        $purchase = CreditPurchase::query()
-            ->with('providerProfile')
-            ->where('uuid', $purchaseUuid)
-            ->first();
+        $result = $this->handleWooCommerceCheckoutSuccess->execute($purchaseUuid, $request->user());
 
-        if (! $purchase) {
-            return redirect('/purchase-credit')->withErrors('WooCommerce purchase not found.');
-        }
+        $profileName = $result['profile_name'] ?? 'selected profile';
 
-        if ($request->user() && $purchase->user_id !== $request->user()->id) {
-            return redirect('/purchase-credit')->withErrors('WooCommerce purchase not found.');
-        }
-
-        $profileName = $purchase->providerProfile?->name ?? 'selected profile';
-
-        return match ($purchase->status) {
+        return match ($result['status']) {
             'paid' => redirect('/purchase-history')->with(
                 'checkout_success',
-                "Payment successful! {$purchase->credits} credits have been added to {$profileName}."
+                "Payment successful! {$result['credits']} credits have been added to {$profileName}."
             ),
             'pending' => redirect('/purchase-credit')->with(
                 'checkout_success',

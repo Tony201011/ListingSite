@@ -2,13 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\Subscription\ProcessWooCommerceOrder;
 use App\Models\CreditLedgerEntry;
-use App\Models\CreditPurchase;
-use App\Models\ProviderProfile;
-use App\Services\WalletLedgerService;
 use App\Services\WooCommerceClient;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ReconcileWooCommerceOrders extends Command
@@ -21,7 +18,7 @@ class ReconcileWooCommerceOrders extends Command
 
     public function __construct(
         private WooCommerceClient $wooCommerceClient,
-        private WalletLedgerService $walletLedgerService,
+        private ProcessWooCommerceOrder $processWooCommerceOrder,
     ) {
         parent::__construct();
     }
@@ -98,62 +95,19 @@ class ReconcileWooCommerceOrders extends Command
             return 'credited';
         }
 
-        DB::transaction(function () use ($orderId, $purchaseUuid, $order): void {
-            /** @var CreditPurchase|null $purchase */
-            $purchase = CreditPurchase::where('uuid', $purchaseUuid)
-                ->lockForUpdate()
-                ->first();
+        $result = $this->processWooCommerceOrder->execute($order, $purchaseUuid);
 
-            if (! $purchase || $purchase->status === 'paid') {
-                return;
-            }
+        if ($result === 'credited') {
+            return 'credited';
+        }
 
-            $orderAmountCents = $this->parseAmountCents((string) ($order['total'] ?? '0'));
-            $orderCurrency = (string) ($order['currency'] ?? '');
-            if ($orderCurrency === '') {
-                $orderCurrency = $purchase->currency;
-            }
+        Log::info('WooCommerce reconciliation: skipped order', [
+            'order_id' => $orderId,
+            'purchase_uuid' => $purchaseUuid,
+            'result' => $result,
+        ]);
 
-            $purchase->update([
-                'status' => 'paid',
-                'woo_order_id' => $orderId,
-                'amount_cents' => $orderAmountCents,
-                'currency' => $orderCurrency,
-                'paid_at' => now(),
-            ]);
-
-            CreditLedgerEntry::create([
-                'user_id' => $purchase->user_id,
-                'credit_purchase_id' => $purchase->id,
-                'type' => 'purchase',
-                'credits_delta' => $purchase->credits,
-                'source_type' => 'woocommerce_order',
-                'source_id' => (string) $orderId,
-                'description' => "Reconciled: {$purchase->credits} advertising credits from WooCommerce order #{$orderId}",
-            ]);
-
-            $profile = ProviderProfile::withTrashed()->find($purchase->provider_profile_id);
-
-            if ($profile instanceof ProviderProfile) {
-                $this->walletLedgerService->record(
-                    $profile,
-                    $purchase->credits,
-                    'purchase_credit',
-                    "Reconciled: {$purchase->credits} advertising credits from WooCommerce order #{$orderId}",
-                    null,
-                    'purchase',
-                );
-            }
-
-            Log::info('WooCommerce reconciliation: credits applied', [
-                'order_id' => $orderId,
-                'purchase_uuid' => $purchaseUuid,
-                'user_id' => $purchase->user_id,
-                'credits' => $purchase->credits,
-            ]);
-        });
-
-        return 'credited';
+        return 'skipped';
     }
 
     /**
@@ -199,9 +153,5 @@ class ReconcileWooCommerceOrders extends Command
 
         return $value;
     }
-
-    private function parseAmountCents(string $total): int
-    {
-        return (int) round((float) $total * 100);
-    }
 }
+
