@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use UnitEnum;
 
 class CreditPackageResource extends Resource
@@ -48,7 +49,17 @@ class CreditPackageResource extends Resource
             ->components([
                 TextInput::make('name')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state, callable $set, callable $get): void {
+                        if (blank($get('slug'))) {
+                            $set('slug', Str::slug((string) $state));
+                        }
+                    }),
+                TextInput::make('slug')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 TextInput::make('credits')
                     ->numeric()
                     ->required()
@@ -72,13 +83,19 @@ class CreditPackageResource extends Resource
                     ])
                     ->default('AUD')
                     ->required(),
+                TextInput::make('woo_product_id')
+                    ->label('Woo Product ID')
+                    ->numeric()
+                    ->minValue(1)
+                    ->nullable(),
                 Textarea::make('description')
                     ->nullable()
                     ->maxLength(500)
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label('Active')
-                    ->default(true),
+                    ->default(true)
+                    ->required(),
                 TextInput::make('sort_order')
                     ->numeric()
                     ->default(0)
@@ -95,6 +112,9 @@ class CreditPackageResource extends Resource
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('slug')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('credits')
                     ->sortable(),
                 TextColumn::make('bonus_credits')
@@ -104,6 +124,10 @@ class CreditPackageResource extends Resource
                     ->label('Price')
                     ->money(fn (CreditPackage $record) => $record->currency ?: 'AUD')
                     ->sortable(),
+                TextColumn::make('woo_product_id')
+                    ->label('Woo Product ID')
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('description')
                     ->limit(50)
                     ->toggleable(),

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -38,11 +39,14 @@ class CreditPackage extends Model
         return $this->hasMany(CreditPurchase::class);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
-        return $query->where(function ($builder): void {
+        return $query->where(function (Builder $builder): void {
             $builder->where('is_active', true)
-                ->orWhere('status', 'active');
+                ->orWhere(function (Builder $legacyBuilder): void {
+                    $legacyBuilder->whereNull('is_active')
+                        ->where('status', 'active');
+                });
         });
     }
 
@@ -53,6 +57,18 @@ class CreditPackage extends Model
         return $active === null
             ? $this->status === 'active'
             : (bool) $active;
+    }
+
+    public function setIsActiveAttribute(bool|int|string|null $value): void
+    {
+        $active = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        if ($active === null) {
+            $active = (bool) $value;
+        }
+
+        $this->attributes['is_active'] = $active;
+        $this->attributes['status'] = $active ? 'active' : 'inactive';
     }
 
     public function getTotalCreditsAttribute(): int
