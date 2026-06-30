@@ -812,8 +812,8 @@ class BuildProfileFilterViewData
             ->whereBetween('profile_postcodes.longitude', [$minLng, $maxLng])
             ->select('provider_profiles.id as provider_profile_id')
             ->selectRaw("{$distanceSql} as distance_km", [$searchLat, $searchLng, $searchLat])
-            ->having('distance_km', '<=', $distanceKm)
-            ->orderBy('distance_km')
+            ->whereRaw("{$distanceSql} <= ?", [$searchLat, $searchLng, $searchLat, $distanceKm])
+            ->orderByRaw("{$distanceSql}", [$searchLat, $searchLng, $searchLat])
             ->get()
             ->map(fn ($row) => [
                 'provider_profile_id' => (int) $row->provider_profile_id,
