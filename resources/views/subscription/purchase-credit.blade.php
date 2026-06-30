@@ -23,7 +23,7 @@
     get selected() {
         return this.packages.find(p => p.id === this.selectedPackageId) ?? null;
     }
-}">
+}" x-init="window.purchaseCreditFlowData = $data">
     <div class="mx-auto w-full max-w-5xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -330,9 +330,7 @@
     let clientSecret = null;
 
     function getAlpineData() {
-        const purchaseCreditFlow = document.getElementById('purchase-credit-flow');
-
-        return purchaseCreditFlow ? Alpine.$data(purchaseCreditFlow) : null;
+        return window.purchaseCreditFlowData ?? null;
     }
 
     window.proceedToPayment = async function () {
