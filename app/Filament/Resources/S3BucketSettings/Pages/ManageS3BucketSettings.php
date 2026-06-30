@@ -18,30 +18,41 @@ class ManageS3BucketSettings extends ManageRecords
 {
     protected static string $resource = S3BucketSettingResource::class;
 
+    public function getTitle(): string
+    {
+        return 'S3 Bucket Settings';
+    }
+
+    public function getSubheading(): ?string
+    {
+        return 'Manage cloud storage configuration and verify uploads from the admin panel.';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Add S3 Bucket Setting')
+                ->label('Add S3 Configuration')
+                ->icon('heroicon-o-plus')
                 ->createAnother(false)
                 ->visible(fn (): bool => S3BucketSetting::query()->doesntExist()),
 
             Action::make('test_upload')
-                ->label('Test Upload')
+                ->label('Test Cloud Upload')
                 ->icon('heroicon-o-cloud-arrow-up')
                 ->color('info')
                 ->hidden(fn (): bool => (bool) auth('admin')->user()?->isReviewer())
-                ->modalHeading('Upload a file to test your storage')
-                ->modalDescription('Select an image or video file from your computer. It will be uploaded to the configured disk.')
+                ->modalHeading('Test storage upload')
+                ->modalDescription('Upload an image or video to verify your current cloud storage configuration is working.')
                 ->form([
 
                     Select::make('upload_type')
-                        ->label('File type (optional)')
+                        ->label('Expected file type (optional)')
                         ->options([
                             'image' => 'Image',
                             'video' => 'Video',
                         ])
-                        ->helperText('If selected, the uploaded file will be validated against it.'),
+                        ->helperText('If selected, validation ensures the uploaded file matches this type.'),
 
                     FileUpload::make('file')
                         ->label('Choose file')
@@ -54,13 +65,14 @@ class ManageS3BucketSettings extends ManageRecords
                             'image/*',
                             'video/*',
                         ])
-                        ->helperText('Accepted: images and videos up to 10MB.'),
+                        ->helperText('Accepted formats: image or video files up to 10MB.'),
                 ])
 
                 ->action(function (array $data): void {
 
                     $type = $data['upload_type'] ?? null;
                     $tempPath = $data['file'];
+                    $diskName = config('filesystems.default', 'public');
 
                     $tempDisk = Storage::disk('local');
 
@@ -91,7 +103,6 @@ class ManageS3BucketSettings extends ManageRecords
                             throw new \Exception('The selected file is not a video.');
                         }
 
-                        $diskName = config('filesystems.default', 'public');
                         $disk = Storage::disk($diskName);
 
                         $timestamp = now()->format('YmdHis');
@@ -123,7 +134,7 @@ class ManageS3BucketSettings extends ManageRecords
                         }
 
                         Notification::make()
-                            ->title('Upload test successful')
+                            ->title('Storage upload successful')
                             ->body($body)
                             ->success()
                             ->persistent()
@@ -131,7 +142,7 @@ class ManageS3BucketSettings extends ManageRecords
                     } catch (Throwable $exception) {
 
                         Notification::make()
-                            ->title('Upload test failed')
+                            ->title('Storage upload failed')
                             ->body(
                                 "Disk: {$diskName}\nError: ".$exception->getMessage()
                             )
