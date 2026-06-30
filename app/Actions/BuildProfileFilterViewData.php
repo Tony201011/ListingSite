@@ -423,19 +423,21 @@ class BuildProfileFilterViewData
     }
 
     /**
-     * Apply is_featured ordering so that profiles with the featured badge
-     * appear before non-featured profiles.
+     * Apply featured-badge ordering so that profiles with an active
+     * featured_expires_at appear before non-featured profiles.
      * Profiles still within their free listing period are excluded from this
      * ordering boost — they must pay to benefit from the featured badge.
+     * Works with both MySQL (NOW()) and SQLite (parameterized datetime string).
      */
     private function applyFeaturedBadgeOrdering(Builder $query): void
     {
+        $now = now()->toDateTimeString();
         $query->orderByRaw(
-            'CASE WHEN provider_profiles.is_featured = 1
+            'CASE WHEN provider_profiles.featured_expires_at > ?
                   AND (provider_profiles.free_listing_expires_at IS NULL
                        OR provider_profiles.free_listing_expires_at <= ?)
              THEN 1 ELSE 0 END DESC',
-            [now()->toDateTimeString()]
+            [$now, $now]
         );
     }
 
@@ -1076,7 +1078,7 @@ class BuildProfileFilterViewData
             'active' => $isOnline,
             'available_now' => $isOnline || $isAvailableNow,
             'verified' => $isPhotoVerified,
-            'featured' => (bool) $profile->is_featured,
+            'featured' => $profile->featured_expires_at && $profile->featured_expires_at->isFuture(),
             'home_featured' => $profile->home_featured_expires_at && $profile->home_featured_expires_at->isFuture(),
             'local_banner' => $profile->local_banner_expires_at && $profile->local_banner_expires_at->isFuture(),
             'home_banner' => $profile->home_banner_expires_at && $profile->home_banner_expires_at->isFuture(),

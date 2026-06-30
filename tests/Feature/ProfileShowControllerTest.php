@@ -407,7 +407,7 @@ class ProfileShowControllerTest extends TestCase
 
     public function test_profile_is_featured_flag_is_present_in_view_data(): void
     {
-        $this->createApprovedProvider(['is_featured' => true]);
+        $this->createApprovedProvider(['is_featured' => true, 'featured_expires_at' => now()->addDay()]);
 
         $response = $this->get($this->profileUrl('jade010-10'));
 

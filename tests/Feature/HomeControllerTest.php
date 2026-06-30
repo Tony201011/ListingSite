@@ -736,7 +736,7 @@ class HomeControllerTest extends TestCase
     public function test_featured_profiles_appear_before_non_featured(): void
     {
         $this->createApprovedProvider(['name' => 'Regular', 'slug' => 'regular', 'is_featured' => false]);
-        $this->createApprovedProvider(['name' => 'Featured', 'slug' => 'featured', 'is_featured' => true]);
+        $this->createApprovedProvider(['name' => 'Featured', 'slug' => 'featured', 'is_featured' => true, 'featured_expires_at' => now()->addDay()]);
 
         $response = $this->get('/');
 
