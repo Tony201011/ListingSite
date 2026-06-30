@@ -38,8 +38,8 @@ class HeaderEscortMenuTest extends TestCase
             'View All Escorts',
         ], false);
 
-        $response->assertSee(route('escorts.location', ['location' => 'Melbourne, VIC']), false);
-        $response->assertSee(route('escorts.location', ['location' => 'Tasmania, TAS']), false);
+        $response->assertSee(route('escorts.search.slug', ['location_slug' => 'melbourne-vic']), false);
+        $response->assertSee(route('escorts.search.slug', ['location_slug' => 'tasmania-tas']), false);
         $response->assertSee(route('escorts.browse'), false);
         $response->assertSee(route('escorts.search'), false);
         $response->assertDontSee('BAYVIEW HEIGHTS escorts');
