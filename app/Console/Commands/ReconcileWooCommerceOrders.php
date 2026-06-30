@@ -108,9 +108,17 @@ class ReconcileWooCommerceOrders extends Command
                 return;
             }
 
+            $orderAmountCents = $this->parseAmountCents((string) ($order['total'] ?? '0'));
+            $orderCurrency = (string) ($order['currency'] ?? '');
+            if ($orderCurrency === '') {
+                $orderCurrency = $purchase->currency;
+            }
+
             $purchase->update([
                 'status' => 'paid',
                 'woo_order_id' => $orderId,
+                'amount_cents' => $orderAmountCents,
+                'currency' => $orderCurrency,
                 'paid_at' => now(),
             ]);
 
@@ -190,5 +198,10 @@ class ReconcileWooCommerceOrders extends Command
         }
 
         return $value;
+    }
+
+    private function parseAmountCents(string $total): int
+    {
+        return (int) round((float) $total * 100);
     }
 }
