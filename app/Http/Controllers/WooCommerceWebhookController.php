@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Referral\ReverseReferralRewardForRefund;
 use App\Actions\Subscription\ProcessWooCommerceOrder;
 use App\Models\CreditLedgerEntry;
 use App\Models\CreditPurchase;
 use App\Models\ProviderProfile;
+use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use App\Services\WalletLedgerService;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +20,7 @@ final class WooCommerceWebhookController extends Controller
     public function __construct(
         private ProcessWooCommerceOrder $processWooCommerceOrder,
         private WalletLedgerService $walletLedgerService,
+        private ReverseReferralRewardForRefund $reverseReferralRewardForRefund,
     ) {}
 
     public function handle(Request $request): JsonResponse
@@ -161,6 +164,18 @@ final class WooCommerceWebhookController extends Controller
 
             $purchase->update(['status' => 'refunded']);
 
+            // Mark the linked PurchaseTransaction as refunded so purchase history reflects the refund.
+            $transaction = $purchase->purchase_transaction_id
+                ? PurchaseTransaction::lockForUpdate()->find($purchase->purchase_transaction_id)
+                : PurchaseTransaction::where('provider', 'woocommerce')
+                    ->where('provider_checkout_id', $purchase->uuid)
+                    ->lockForUpdate()
+                    ->first();
+
+            if ($transaction && $transaction->status === 'paid') {
+                $transaction->update(['status' => 'refunded']);
+            }
+
             CreditLedgerEntry::create([
                 'user_id' => $purchase->user_id,
                 'credit_purchase_id' => $purchase->id,
@@ -182,6 +197,11 @@ final class WooCommerceWebhookController extends Controller
                     null,
                     'refund',
                 );
+            }
+
+            // Reverse any referral reward that was granted for this WooCommerce payment.
+            if ($transaction) {
+                $this->reverseReferralRewardForRefund->execute($transaction);
             }
 
             Log::info('WooCommerce webhook: credits reversed for refund', [
