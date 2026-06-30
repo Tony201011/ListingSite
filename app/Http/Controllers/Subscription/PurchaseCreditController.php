@@ -55,6 +55,10 @@ class PurchaseCreditController extends Controller
             );
 
             if (isset($result['checkout_url'])) {
+                // Store the UUID in session so checkoutSuccess can recover it
+                // if WooCommerce redirects back without query params.
+                $request->session()->put('woocommerce_purchase_uuid', $result['purchase']->uuid);
+
                 return redirect()->away($result['checkout_url']);
             }
         }
@@ -118,12 +122,23 @@ class PurchaseCreditController extends Controller
             return redirect('/purchase-credit')->withErrors($result['error']);
         }
 
+        $request->session()->put('woocommerce_purchase_uuid', $result['purchase']->uuid);
+
         return redirect($result['checkout_url']);
     }
 
     public function checkoutSuccess(Request $request): RedirectResponse
     {
         if ($request->string('provider')->toString() === 'woocommerce' || $request->filled('purchase_uuid')) {
+            return $this->handleWooCommerceSuccess($request);
+        }
+
+        // Fallback: WooCommerce may redirect back without query params if the
+        // WordPress plugin uses a static return URL.  Recover from session.
+        $sessionUuid = $request->session()->pull('woocommerce_purchase_uuid');
+        if ($sessionUuid) {
+            $request->merge(['purchase_uuid' => $sessionUuid]);
+
             return $this->handleWooCommerceSuccess($request);
         }
 
