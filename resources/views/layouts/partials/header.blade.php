@@ -144,11 +144,11 @@
         ->map(function ($city) {
             $suburb = trim((string) ($city->suburb ?? $city['suburb'] ?? ''));
             $state = trim((string) ($city->state ?? $city['state'] ?? ''));
-            $location = trim(collect([$suburb, $state])->filter()->implode(', '));
+            $locationSlug = \Illuminate\Support\Str::slug($suburb).($state !== '' ? '-'.strtolower($state) : '');
 
             return [
                 'label' => "{$suburb} Escorts",
-                'url' => route('escorts.location', ['location' => $location]),
+                'url' => route('escorts.search.slug', ['location_slug' => $locationSlug]),
                 'search' => \Illuminate\Support\Str::lower(trim("{$suburb} {$state} escorts")),
             ];
         })
