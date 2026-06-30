@@ -54,7 +54,6 @@ class S3BucketSettingResource extends Resource
                 Section::make('Storage Configuration')
                     ->description('Configure where profile images and videos are stored when cloud uploads are enabled.')
                     ->compact()
-                    ->columns(2)
                     ->schema([
                         Toggle::make('is_enabled')
                             ->label('Enable S3 Uploads')
