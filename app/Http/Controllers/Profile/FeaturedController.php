@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Profile;
 use App\Actions\GetActiveProviderProfile;
 use App\Actions\GetFeaturedState;
 use App\Actions\PurchaseFeatured;
+use App\Actions\Subscription\HandleWooCommerceCheckoutSuccess;
 use App\Http\Controllers\Controller;
-use App\Models\CreditPurchase;
 use App\Models\ProviderProfile;
 use App\Services\WalletLedgerService;
 use Carbon\Carbon;
@@ -23,6 +23,7 @@ class FeaturedController extends Controller
         private PurchaseFeatured $purchaseFeatured,
         private GetActiveProviderProfile $getActiveProviderProfile,
         private WalletLedgerService $walletLedgerService,
+        private HandleWooCommerceCheckoutSuccess $handleWooCommerceCheckoutSuccess,
     ) {}
 
     public function featured(Request $request): View
@@ -31,33 +32,31 @@ class FeaturedController extends Controller
         $profile = $this->getActiveProviderProfile->execute($user);
 
         // WooCommerce redirects to this page after payment instead of using
-        // the return_url we pass. Consume the session UUID and flash feedback.
+        // the return_url we pass. Consume the session UUID and verify the
+        // order via the WooCommerce API so credits are applied immediately.
         $sessionUuid = $request->session()->pull('woocommerce_purchase_uuid');
         if ($sessionUuid) {
-            $purchase = CreditPurchase::where('uuid', $sessionUuid)->first();
+            $result = $this->handleWooCommerceCheckoutSuccess->execute($sessionUuid, $user);
+            $profileName = $result['profile_name'] ?? 'your profile';
 
-            if ($purchase) {
-                $profileName = $purchase->providerProfile?->name ?? 'your profile';
-
-                match ($purchase->status) {
-                    'paid' => session()->flash(
-                        'checkout_success',
-                        "Payment successful! {$purchase->credits} credits have been added to {$profileName}."
-                    ),
-                    'pending' => session()->flash(
-                        'checkout_success',
-                        'Your WooCommerce payment is being processed. Credits will appear shortly — please refresh in a moment.'
-                    ),
-                    'cancelled', 'refunded' => session()->flash(
-                        'checkout_error',
-                        'This WooCommerce order was not completed. Please try again or contact support.'
-                    ),
-                    default => session()->flash(
-                        'checkout_success',
-                        'Your WooCommerce payment has been received and is being processed.'
-                    ),
-                };
-            }
+            match ($result['status']) {
+                'paid' => session()->flash(
+                    'checkout_success',
+                    "Payment successful! {$result['credits']} credits have been added to {$profileName}."
+                ),
+                'pending' => session()->flash(
+                    'checkout_success',
+                    'Your WooCommerce payment is being processed. Credits will appear shortly — please refresh in a moment.'
+                ),
+                'cancelled', 'refunded' => session()->flash(
+                    'checkout_error',
+                    'This WooCommerce order was not completed. Please try again or contact support.'
+                ),
+                default => session()->flash(
+                    'checkout_success',
+                    'Your WooCommerce payment has been received and is being processed.'
+                ),
+            };
         }
 
         $data = $this->getFeaturedState->execute($profile);
