@@ -4,6 +4,7 @@ namespace App\Actions\Subscription;
 
 use App\Actions\GetActiveProviderProfile;
 use App\Models\CreditLog;
+use App\Models\CreditPurchase;
 use App\Models\ProviderProfile;
 use App\Models\PurchaseTransaction;
 use App\Services\WalletLedgerService;
@@ -109,6 +110,14 @@ class GetPurchaseHistory
             ->where('status', 'paid')
             ->get()
             ->sum(fn (PurchaseTransaction $payment) => $payment->total_credits);
+
+        // Also count WooCommerce credits that were paid before the PurchaseTransaction
+        // link was introduced (legacy CreditPurchase records without a linked transaction).
+        $totalPurchased += CreditPurchase::where('user_id', $user->id)
+            ->where('provider_profile_id', $profileId)
+            ->where('status', 'paid')
+            ->whereNull('purchase_transaction_id')
+            ->sum('credits');
         $totalSpent = abs(
             CreditLog::where('user_id', $user->id)
                 ->where('reference_type', ProviderProfile::class)

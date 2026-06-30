@@ -5,6 +5,7 @@ namespace App\Actions\Subscription;
 use App\Models\CreditPackage;
 use App\Models\CreditPurchase;
 use App\Models\ProviderProfile;
+use App\Models\PurchaseTransaction;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
@@ -12,7 +13,8 @@ use Illuminate\Support\Facades\URL;
 class InitiateWooCommerceCheckout
 {
     /**
-     * Create a pending CreditPurchase and build a signed WooCommerce checkout URL.
+     * Create a pending CreditPurchase (and linked PurchaseTransaction) and
+     * build a signed WooCommerce checkout URL.
      *
      * @return array{checkout_url: string, purchase: CreditPurchase}|array{error: string}
      */
@@ -43,6 +45,29 @@ class InitiateWooCommerceCheckout
             'currency' => $package->currency ?: 'AUD',
             'status' => 'pending',
         ]);
+
+        // Create a PurchaseTransaction so the purchase appears in purchase history.
+        $transaction = PurchaseTransaction::create([
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+            'provider' => 'woocommerce',
+            'provider_checkout_id' => $purchase->uuid,
+            'credit_package_id' => $package->id,
+            'credits' => (int) $package->credits,
+            'bonus_credits' => (int) $package->bonus_credits,
+            'amount' => $package->price,
+            'currency' => $package->currency ?: 'AUD',
+            'status' => 'pending',
+            'invoice_name' => $package->name,
+            'metadata' => [
+                'credit_purchase_uuid' => $purchase->uuid,
+                'package_name' => $package->name,
+                'base_credits' => (int) $package->credits,
+                'bonus_credits' => (int) $package->bonus_credits,
+            ],
+        ]);
+
+        $purchase->update(['purchase_transaction_id' => $transaction->id]);
 
         $signature = $this->sign($purchase->uuid, $package->slug, $purchase->amount_cents, $checkoutSecret);
         $returnUrl = URL::route('purchase-credit.success', [

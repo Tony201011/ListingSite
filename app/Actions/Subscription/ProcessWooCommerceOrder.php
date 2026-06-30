@@ -5,6 +5,7 @@ namespace App\Actions\Subscription;
 use App\Models\CreditLedgerEntry;
 use App\Models\CreditPurchase;
 use App\Models\ProviderProfile;
+use App\Models\PurchaseTransaction;
 use App\Services\WalletLedgerService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -77,6 +78,9 @@ class ProcessWooCommerceOrder
                 'paid_at' => now(),
             ]);
 
+            // Sync the linked PurchaseTransaction so it appears in purchase history.
+            $this->syncPurchaseTransaction($purchase, $wooOrderId, $orderAmountCents, $orderCurrency);
+
             if ($sourceId !== '') {
                 $orderLabel = "WooCommerce order #{$sourceId}";
 
@@ -116,6 +120,52 @@ class ProcessWooCommerceOrder
 
             return 'credited';
         });
+    }
+
+    /**
+     * Mark the linked PurchaseTransaction as paid so it shows in purchase history.
+     * If no linked transaction exists (e.g. orders created before this fix), create one.
+     */
+    private function syncPurchaseTransaction(CreditPurchase $purchase, ?int $wooOrderId, int $orderAmountCents, string $currency): void
+    {
+        $transaction = $purchase->purchase_transaction_id
+            ? PurchaseTransaction::find($purchase->purchase_transaction_id)
+            : PurchaseTransaction::where('provider', 'woocommerce')
+                ->where('provider_checkout_id', $purchase->uuid)
+                ->first();
+
+        if (! $transaction) {
+            // No linked transaction — create one so the purchase appears in history.
+            $transaction = PurchaseTransaction::create([
+                'user_id' => $purchase->user_id,
+                'provider_profile_id' => $purchase->provider_profile_id,
+                'provider' => 'woocommerce',
+                'provider_checkout_id' => $purchase->uuid,
+                'credit_package_id' => $purchase->credit_package_id,
+                'credits' => $purchase->credits,
+                'bonus_credits' => 0,
+                'amount' => $orderAmountCents / 100,
+                'currency' => $currency,
+                'status' => 'pending',
+                'invoice_name' => $purchase->package?->name,
+                'metadata' => [
+                    'credit_purchase_uuid' => $purchase->uuid,
+                ],
+                'paid_at' => now(),
+            ]);
+
+            $purchase->update(['purchase_transaction_id' => $transaction->id]);
+        }
+
+        if ($transaction->status !== 'paid') {
+            $transaction->update([
+                'status' => 'paid',
+                'provider_transaction_id' => $wooOrderId ? (string) $wooOrderId : null,
+                'amount' => $orderAmountCents / 100,
+                'currency' => $currency,
+                'paid_at' => now(),
+            ]);
+        }
     }
 
     private function parseAmountCents(string $total): int

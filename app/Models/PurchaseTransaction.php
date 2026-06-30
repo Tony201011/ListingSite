@@ -147,6 +147,11 @@ class PurchaseTransaction extends Model
         return $this->hasMany(Refund::class, 'payment_id');
     }
 
+    public function creditPurchase(): HasOne
+    {
+        return $this->hasOne(CreditPurchase::class, 'purchase_transaction_id');
+    }
+
     public function getTotalCreditsAttribute(): int
     {
         return (int) $this->credits + (int) $this->bonus_credits;

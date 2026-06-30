@@ -27,6 +27,7 @@ class CreditPurchase extends Model
         'status',
         'woo_order_id',
         'paid_at',
+        'purchase_transaction_id',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class CreditPurchase extends Model
         'amount_cents' => 'integer',
         'provider_profile_id' => 'integer',
         'woo_order_id' => 'integer',
+        'purchase_transaction_id' => 'integer',
         'paid_at' => 'datetime',
     ];
 
@@ -50,6 +52,11 @@ class CreditPurchase extends Model
     public function package(): BelongsTo
     {
         return $this->belongsTo(CreditPackage::class, 'credit_package_id');
+    }
+
+    public function purchaseTransaction(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseTransaction::class, 'purchase_transaction_id');
     }
 
     public function getAmountAttribute(): float
