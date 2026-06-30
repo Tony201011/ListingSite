@@ -147,17 +147,13 @@
             $locationSlug = \Illuminate\Support\Str::slug($suburb).($state !== '' ? '-'.strtolower($state) : '');
 
             return [
-                'type' => 'city',
                 'label' => "{$suburb} Escorts",
-                'suburb' => $suburb,
-                'state' => $state,
                 'url' => route('escorts.search.slug', ['location_slug' => $locationSlug]),
                 'search' => \Illuminate\Support\Str::lower(trim("{$suburb} {$state} escorts")),
             ];
         })
         ->concat(collect(\App\Support\EscortLocationData::extraMenuLinks())->map(fn (array $item) => [
             ...$item,
-            'type' => 'link',
             'search' => \Illuminate\Support\Str::lower($item['label']),
         ]))
         ->values();
@@ -336,7 +332,7 @@
                 @if(strtolower($item['label']) === 'escorts')
                     <div
                         class="relative"
-                        x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all(), JSON_UNESCAPED_SLASHES) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; }, get filteredCityLinks() { return this.filteredLinks.filter(l => l.type === 'city'); }, get filteredExtraLinks() { return this.filteredLinks.filter(l => l.type === 'link'); } }"
+                        x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all(), JSON_UNESCAPED_SLASHES) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }"
                         @click.outside="open = false; search = ''"
                     >
                         <button @click="open = !open; if (! open) { search = ''; }" type="button" class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium hover:text-white">
@@ -353,58 +349,27 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute left-0 z-50 mt-2 w-[560px] max-h-[520px] overflow-y-auto rounded-xl bg-white shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
+                            class="absolute left-0 z-50 mt-2 max-h-80 w-72 overflow-y-auto rounded-xl bg-white py-3 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-black/5"
                             style="display:none;"
                         >
-                            {{-- Search Input --}}
-                            <div class="sticky top-0 bg-white px-4 pt-4 pb-3 z-10">
+                            <div class="px-3 pb-3">
                                 <label for="escort-menu-search" class="sr-only">Search escorts menu</label>
-                                <div class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                                <div class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
                                     <i class="fa-solid fa-magnifying-glass text-xs text-gray-400"></i>
-                                    <input id="escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search by city…" class="w-full border-0 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-0">
-                                    <button x-show="search !== ''" @click="search = ''" type="button" class="text-gray-400 hover:text-gray-600">
-                                        <i class="fa-solid fa-xmark text-xs"></i>
-                                    </button>
+                                    <input id="escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search escorts menu" class="w-full border-0 bg-transparent text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-0">
                                 </div>
                             </div>
 
-                            {{-- Location Cards --}}
-                            <div class="border-t border-gray-100 px-4 pt-3 pb-4">
-                                <p x-show="filteredCityLinks.length === 0 && filteredExtraLinks.length === 0" class="py-4 text-center text-sm text-gray-500">
-                                    No matching locations found.
+                            <div class="border-t border-gray-200 pt-2">
+                                <template x-for="link in filteredLinks" :key="`${link.label}-${link.url}`">
+                                    <a @click="open = false; search = ''" :href="link.url" class="block px-5 py-3 text-[18px] leading-tight text-black transition hover:bg-gray-50">
+                                        <span x-text="link.label"></span>
+                                    </a>
+                                </template>
+
+                                <p x-show="filteredLinks.length === 0" class="px-5 py-3 text-sm text-gray-500">
+                                    No matching escorts found.
                                 </p>
-
-                                <div x-show="filteredCityLinks.length > 0">
-                                    <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Browse by City</p>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <template x-for="link in filteredCityLinks" :key="link.url">
-                                            <a
-                                                @click="open = false; search = ''"
-                                                :href="link.url"
-                                                class="flex items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 transition hover:border-pink-300 hover:bg-pink-50"
-                                            >
-                                                <i class="fa-solid fa-location-dot mt-0.5 shrink-0 text-pink-500 text-xs"></i>
-                                                <span>
-                                                    <span x-text="link.suburb" class="block text-sm font-medium text-gray-800 leading-tight"></span>
-                                                    <span x-text="link.state" class="text-[11px] text-gray-500"></span>
-                                                </span>
-                                            </a>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                {{-- Extra / Quick Links --}}
-                                <div x-show="filteredExtraLinks.length > 0" :class="filteredCityLinks.length > 0 ? 'mt-4 border-t border-gray-100 pt-4' : ''">
-                                    <p x-show="filteredCityLinks.length > 0" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Quick Links</p>
-                                    <div class="grid grid-cols-2 gap-1">
-                                        <template x-for="link in filteredExtraLinks" :key="link.url">
-                                            <a @click="open = false; search = ''" :href="link.url" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 hover:text-pink-700">
-                                                <i class="fa-solid fa-arrow-right text-xs text-gray-400"></i>
-                                                <span x-text="link.label"></span>
-                                            </a>
-                                        </template>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -541,7 +506,7 @@
                         </button>
                     </form>
                 @elseif(strtolower($item['label']) === 'escorts')
-                    <div x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all(), JSON_UNESCAPED_SLASHES) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; }, get filteredCityLinks() { return this.filteredLinks.filter(l => l.type === 'city'); }, get filteredExtraLinks() { return this.filteredLinks.filter(l => l.type === 'link'); } }">
+                    <div x-data="{ open: false, search: '', links: {{ \Illuminate\Support\Js::from($escortMenuLinks->all(), JSON_UNESCAPED_SLASHES) }}, get filteredLinks() { const term = this.search.toLowerCase().trim(); return term ? this.links.filter((link) => link.search.includes(term)) : this.links; } }">
                         <button @click="open = !open" class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-gray-200 hover:bg-gray-800">
                             <span>{{ $item['label'] }}</span>
                             <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
@@ -552,33 +517,18 @@
                                 <label for="mobile-escort-menu-search" class="sr-only">Search escorts menu</label>
                                 <div class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2">
                                     <i class="fa-solid fa-magnifying-glass text-xs text-gray-500"></i>
-                                    <input id="mobile-escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search by city…" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
+                                    <input id="mobile-escort-menu-search" x-model.live.debounce.150ms="search" type="text" placeholder="Search escorts menu" class="w-full border-0 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-0">
                                 </div>
                             </div>
 
-                            <template x-for="link in filteredCityLinks" :key="link.url">
-                                <a @click="mobileMenu = false; open = false; search = ''" :href="link.url" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">
-                                    <i class="fa-solid fa-location-dot shrink-0 text-pink-500 text-xs"></i>
-                                    <span>
-                                        <span x-text="link.suburb" class="font-medium"></span>
-                                        <span x-text="link.state ? ' · ' + link.state : ''" class="text-xs text-gray-500"></span>
-                                    </span>
+                            <template x-for="link in filteredLinks" :key="`${link.label}-${link.url}`">
+                                <a @click="mobileMenu = false; open = false; search = ''" :href="link.url" class="block rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-800">
+                                    <span x-text="link.label"></span>
                                 </a>
                             </template>
 
-                            <template x-if="filteredExtraLinks.length > 0">
-                                <div :class="filteredCityLinks.length > 0 ? 'mt-1 border-t border-gray-700 pt-1' : ''">
-                                    <template x-for="link in filteredExtraLinks" :key="link.url">
-                                        <a @click="mobileMenu = false; open = false; search = ''" :href="link.url" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-400 hover:bg-gray-800 hover:text-gray-200">
-                                            <i class="fa-solid fa-arrow-right text-xs"></i>
-                                            <span x-text="link.label"></span>
-                                        </a>
-                                    </template>
-                                </div>
-                            </template>
-
-                            <p x-show="filteredCityLinks.length === 0 && filteredExtraLinks.length === 0" class="rounded-lg px-3 py-2 text-sm text-gray-500">
-                                No matching locations found.
+                            <p x-show="filteredLinks.length === 0" class="rounded-lg px-3 py-2 text-sm text-gray-500">
+                                No matching escorts found.
                             </p>
                         </div>
                     </div>
