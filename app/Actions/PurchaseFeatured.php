@@ -65,9 +65,11 @@ class PurchaseFeatured
             $isExtension = $isCurrent;
             $now = now();
 
-            // Extend from current expiry when still active, otherwise start fresh
+            // Extend from current expiry when still active, otherwise start fresh.
+            // Use copy() to avoid mutating $now, which is referenced later to set
+            // free_listing_expires_at to the current moment.
             $baseDate = $isCurrent ? $currentExpiry : $now;
-            $newExpiry = $baseDate->addDays($durationDays);
+            $newExpiry = $baseDate->copy()->addDays($durationDays);
 
             if ($profile->free_listing_expires_at?->isFuture()) {
                 $profile->free_listing_expires_at = $now;

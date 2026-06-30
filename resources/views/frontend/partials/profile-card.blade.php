@@ -26,6 +26,7 @@
     } elseif (!empty($profile['featured'])) {
         $featuredBadgeVariant = 'glow';
         $featuredBadgeLabel = 'Featured';
+        $featuredBadgeIcon = 'star';
     }
 
     $hasFeaturedBadge = $featuredBadgeVariant !== null;
