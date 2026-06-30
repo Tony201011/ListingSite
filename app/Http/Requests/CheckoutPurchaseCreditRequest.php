@@ -43,7 +43,10 @@ class CheckoutPurchaseCreditRequest extends FormRequest
                 Rule::exists(CreditPackage::class, 'id')->where(
                     fn ($query) => $query->where(function ($builder): void {
                         $builder->where('is_active', true)
-                            ->orWhere('status', 'active');
+                            ->orWhere(function ($legacyBuilder): void {
+                                $legacyBuilder->whereNull('is_active')
+                                    ->where('status', 'active');
+                            });
                     })
                 ),
             ],

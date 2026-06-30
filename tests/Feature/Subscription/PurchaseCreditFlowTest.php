@@ -266,6 +266,19 @@ class PurchaseCreditFlowTest extends TestCase
         $response->assertSessionHasErrors('package_id');
     }
 
+    public function test_checkout_rejects_package_when_is_active_is_false_even_if_legacy_status_is_active(): void
+    {
+        $user = $this->createProvider();
+        $inactivePackage = $this->createActivePackage(['status' => 'active', 'is_active' => false]);
+
+        $response = $this->actingAsProvider($user)->post('/purchase-credit/checkout', [
+            'package_id' => $inactivePackage->id,
+            'invoice_name' => 'Test User',
+        ]);
+
+        $response->assertSessionHasErrors('package_id');
+    }
+
     public function test_checkout_rejects_non_existent_package(): void
     {
         $user = $this->createProvider();
