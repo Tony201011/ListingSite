@@ -63,10 +63,15 @@ class PurchaseFeatured
             $currentExpiry = $profile->{$expiryColumn};
             $isCurrent = $currentExpiry && $currentExpiry->isFuture();
             $isExtension = $isCurrent;
+            $now = now();
 
             // Extend from current expiry when still active, otherwise start fresh
-            $baseDate = $isCurrent ? $currentExpiry : now();
+            $baseDate = $isCurrent ? $currentExpiry : $now;
             $newExpiry = $baseDate->addDays($durationDays);
+
+            if ($profile->free_listing_expires_at?->isFuture()) {
+                $profile->free_listing_expires_at = $now;
+            }
 
             if ($tier === self::TIER_NORMAL) {
                 $profile->is_featured = true;
