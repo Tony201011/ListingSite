@@ -48,12 +48,8 @@
                     distanceSearchEnabled: {{ $distanceSearchEnabled ? 'true' : 'false' }}
                 })" x-init="if (distanceSearchEnabled && !locationEnabled) requestLocation()" @keydown.escape="closeSuggestions()" @click.outside="closeSuggestions()">
                 <form method="GET" action="{{ route('escorts.search') }}" @submit="handleFormSubmit($event)">
-                    <template x-if="distanceSearchEnabled">
-                        <span>
-                            <template x-if="searchMode === 'suburb' && (locationEnabled || term.trim() !== '')">
-                                <input type="hidden" name="distance" :value="distance">
-                            </template>
-                        </span>
+                    <template x-if="distanceSearchEnabled && searchMode === 'suburb' && locationEnabled">
+                        <input type="hidden" name="distance" :value="distance">
                     </template>
 
                     <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
