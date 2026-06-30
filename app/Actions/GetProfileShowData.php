@@ -41,7 +41,7 @@ class GetProfileShowData
         abort_if($providerProfile === null, 404);
         abort_if($providerProfile->hideShowProfile?->status === 'hide', 404);
 
-        $isFeatured = (bool) $providerProfile->is_featured;
+        $isFeatured = (bool) ($providerProfile->featured_expires_at && $providerProfile->featured_expires_at->isFuture());
 
         if (
             $providerProfile->is_blocked
@@ -256,7 +256,7 @@ class GetProfileShowData
             'twitter' => $providerProfile->twitter_handle ? "https://twitter.com/{$providerProfile->twitter_handle}" : '',
             'onlyfans' => $providerProfile->onlyfans_username ? "https://onlyfans.com/{$providerProfile->onlyfans_username}" : '',
             'is_verified' => $providerProfile->is_verified,
-            'is_featured' => $providerProfile->is_featured,
+            'is_featured' => (bool) ($providerProfile->featured_expires_at && $providerProfile->featured_expires_at->isFuture()),
             'image' => $primaryImageUrl ?? ($images[0] ?? ''),
             'images' => $images,
             'videos' => $videos,
