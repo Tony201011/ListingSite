@@ -6,7 +6,11 @@ use App\Actions\Subscription\InitiateWooCommerceCheckout;
 use App\Models\CreditLedgerEntry;
 use App\Models\CreditPackage;
 use App\Models\CreditPurchase;
+use App\Models\CreditLog;
 use App\Models\ProviderProfile;
+use App\Models\PurchaseTransaction;
+use App\Models\Referral;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
@@ -555,5 +559,103 @@ class WooCommerceWebhookTest extends TestCase
         $this->assertDatabaseCount('credit_ledger_entries', 2); // 1 purchase + 1 refund
         $profile->refresh();
         $this->assertEquals(0, $profile->credits);
+    }
+
+    public function test_webhook_refund_marks_linked_purchase_transaction_as_refunded(): void
+    {
+        $user = $this->createUser();
+        $profile = $this->createProfile($user);
+        $package = $this->createPackage(['credits' => 40]);
+        $purchase = $this->createPendingPurchase($user, $profile, $package);
+
+        // Pay the order — this creates and links a PurchaseTransaction.
+        $payPayload = $this->buildOrderPayload($purchase, ['id' => 8100, 'status' => 'processing']);
+        $this->postWebhook($payPayload)->assertOk();
+
+        $purchase->refresh();
+        $transaction = PurchaseTransaction::find($purchase->purchase_transaction_id);
+        $this->assertNotNull($transaction);
+        $this->assertEquals('paid', $transaction->status);
+
+        // Refund the order.
+        $refundPayload = [
+            'id' => 8100,
+            'status' => 'refunded',
+            'total' => number_format($purchase->amount_cents / 100, 2, '.', ''),
+            'meta_data' => [['key' => '_hotescort_purchase_uuid', 'value' => $purchase->uuid]],
+        ];
+        $this->postWebhook($refundPayload)->assertOk();
+
+        $purchase->refresh();
+        $this->assertEquals('refunded', $purchase->status);
+        $transaction->refresh();
+        $this->assertEquals('refunded', $transaction->status);
+    }
+
+    public function test_webhook_refund_reverses_referral_reward(): void
+    {
+        $referrer = User::factory()->create(['credits' => 0]);
+        $user = $this->createUser();
+        $profile = $this->createProfile($user);
+        $package = $this->createPackage(['credits' => 50]);
+        $purchase = $this->createPendingPurchase($user, $profile, $package);
+
+        SiteSetting::query()->create([
+            'reward_receiver' => 'referrer',
+            'reward_trigger' => 'successful_payment',
+            'reward_type' => 'fixed',
+            'reward_value' => 10,
+            'referred_user_bonus_enabled' => false,
+            'credit_destination' => 'wallet',
+        ]);
+
+        // Pay the order so a PurchaseTransaction is created.
+        $payPayload = $this->buildOrderPayload($purchase, ['id' => 8200, 'status' => 'processing']);
+        $this->postWebhook($payPayload)->assertOk();
+
+        $purchase->refresh();
+        $transaction = PurchaseTransaction::find($purchase->purchase_transaction_id);
+        $this->assertNotNull($transaction);
+
+        // Simulate a referral reward that was granted for this transaction.
+        $referral = Referral::query()->create([
+            'referrer_id' => $referrer->id,
+            'referred_user_id' => $user->id,
+            'referral_code' => 'CODE1',
+            'status' => 'rewarded',
+            'payment_id' => $transaction->id,
+        ]);
+
+        $creditLog = CreditLog::query()->create([
+            'user_id' => $referrer->id,
+            'amount' => 10,
+            'type' => 'referral_reward',
+            'transaction_type' => 'referral_reward',
+            'status' => 'completed',
+            'description' => 'Referral reward',
+            'reference_type' => Referral::class,
+            'reference_id' => $referral->id,
+        ]);
+
+        $referrer->update(['credits' => 10]);
+
+        // Refund the order.
+        $refundPayload = [
+            'id' => 8200,
+            'status' => 'refunded',
+            'total' => number_format($purchase->amount_cents / 100, 2, '.', ''),
+            'meta_data' => [['key' => '_hotescort_purchase_uuid', 'value' => $purchase->uuid]],
+        ];
+        $this->postWebhook($refundPayload)->assertOk();
+
+        // Referral should be cancelled and the reward log reversed.
+        $referral->refresh();
+        $this->assertEquals('cancelled', $referral->status);
+
+        $creditLog->refresh();
+        $this->assertEquals('reversed', $creditLog->status);
+
+        $referrer->refresh();
+        $this->assertEquals(0, $referrer->credits);
     }
 }
