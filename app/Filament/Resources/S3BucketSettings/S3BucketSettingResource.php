@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -51,30 +52,46 @@ class S3BucketSettingResource extends Resource
         return $schema
             ->components([
                 Section::make('Storage Configuration')
+                    ->description('Configure where profile images and videos are stored when cloud uploads are enabled.')
                     ->compact()
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_enabled')
                             ->label('Enable S3 Uploads')
                             ->default(false)
+                            ->helperText('When disabled, uploads continue using local storage.')
+                            ->live()
                             ->columnSpanFull(),
                         Toggle::make('use_path_style_endpoint')
                             ->label('Use Path Style Endpoint')
                             ->default(false)
+                            ->helperText('Enable this for S3-compatible providers that require path-style URLs.')
                             ->columnSpanFull(),
-                        // Access key and secret removed from the form since they're optional
                         TextInput::make('region')
                             ->label('Region')
-                            ->maxLength(255),
+                            ->placeholder('ap-southeast-2')
+                            ->required(fn (Get $get): bool => (bool) $get('is_enabled'))
+                            ->maxLength(255)
+                            ->helperText('AWS region where the bucket exists.'),
                         TextInput::make('bucket')
                             ->label('Bucket')
-                            ->maxLength(255),
+                            ->placeholder('listing-site-media')
+                            ->required(fn (Get $get): bool => (bool) $get('is_enabled'))
+                            ->maxLength(255)
+                            ->helperText('Bucket name used to store uploaded media files.'),
                         TextInput::make('url')
-                            ->label('Bucket URL')
-                            ->maxLength(255),
+                            ->label('Custom Bucket URL')
+                            ->placeholder('https://cdn.example.com')
+                            ->url()
+                            ->maxLength(255)
+                            ->helperText('Optional CDN or custom domain URL for public files.'),
                         TextInput::make('endpoint')
-                            ->label('Endpoint')
-                            ->maxLength(255),
+                            ->label('Endpoint URL')
+                            ->placeholder('https://s3.ap-southeast-2.amazonaws.com')
+                            ->url()
+                            ->maxLength(255)
+                            ->helperText('Optional for AWS S3, required for S3-compatible providers like Cloudflare R2.')
+                            ->columnSpanFull(),
                     ]),
             ]);
     }
@@ -88,23 +105,29 @@ class S3BucketSettingResource extends Resource
                     ->boolean(),
                 TextColumn::make('bucket')
                     ->label('Bucket')
+                    ->badge()
                     ->searchable(),
                 TextColumn::make('region')
                     ->label('Region')
+                    ->badge()
                     ->searchable(),
+                TextColumn::make('endpoint')
+                    ->label('Endpoint')
+                    ->limit(40)
+                    ->placeholder('Default AWS endpoint'),
                 TextColumn::make('updated_at')
                     ->label('Updated')
                     ->since()
                     ->sortable(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->slideOver(),
                 DeleteAction::make()->requiresConfirmation(),
             ])
             ->defaultSort('updated_at', 'desc')
             ->striped()
-            ->emptyStateHeading('No S3 settings added yet')
-            ->emptyStateDescription('Enable this to upload images and videos to S3, otherwise local storage is used.');
+            ->emptyStateHeading('No cloud storage configuration yet')
+            ->emptyStateDescription('Add your S3 bucket configuration to enable cloud uploads for profile media.');
     }
 
     public static function getPages(): array
