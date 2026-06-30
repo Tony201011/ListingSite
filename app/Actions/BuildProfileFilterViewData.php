@@ -335,10 +335,26 @@ class BuildProfileFilterViewData
             ->where('provider_profiles.is_blocked', false)
             ->whereHas('user')
             ->whereDoesntHave('hideShowProfile', fn ($q) => $q->where('status', 'hide'))
-            ->whereNotNull("provider_profiles.{$expiryColumn}")
             ->where(function (Builder $q) use ($expiryColumn): void {
-                $q->where("provider_profiles.{$expiryColumn}", '>', now())
-                    ->orWhereDate("provider_profiles.{$expiryColumn}", today());
+                if ($expiryColumn === 'featured_expires_at') {
+                    // Include indefinitely-featured profiles (is_featured=true, no expiry set by admin)
+                    $q->where(function (Builder $inner): void {
+                        $inner->where('provider_profiles.is_featured', true)
+                            ->whereNull('provider_profiles.featured_expires_at');
+                    })->orWhere(function (Builder $inner) use ($expiryColumn): void {
+                        $inner->whereNotNull("provider_profiles.{$expiryColumn}")
+                            ->where(function (Builder $q2) use ($expiryColumn): void {
+                                $q2->where("provider_profiles.{$expiryColumn}", '>', now())
+                                    ->orWhereDate("provider_profiles.{$expiryColumn}", today());
+                            });
+                    });
+                } else {
+                    $q->whereNotNull("provider_profiles.{$expiryColumn}")
+                        ->where(function (Builder $inner) use ($expiryColumn): void {
+                            $inner->where("provider_profiles.{$expiryColumn}", '>', now())
+                                ->orWhereDate("provider_profiles.{$expiryColumn}", today());
+                        });
+                }
             })
             ->where(function (Builder $q): void {
                 $q->whereNull('provider_profiles.free_listing_expires_at')
