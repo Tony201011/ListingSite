@@ -121,7 +121,7 @@ class S3BucketSettingResource extends Resource
                     ->sortable(),
             ])
             ->recordActions([
-                EditAction::make()->slideOver(),
+                EditAction::make()->modalWidth('3xl'),
                 DeleteAction::make()->requiresConfirmation(),
             ])
             ->defaultSort('updated_at', 'desc')
