@@ -112,9 +112,6 @@ class CreditPackageResource extends Resource
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('slug')
-                    ->searchable()
-                    ->toggleable(),
                 TextColumn::make('credits')
                     ->sortable(),
                 TextColumn::make('bonus_credits')
