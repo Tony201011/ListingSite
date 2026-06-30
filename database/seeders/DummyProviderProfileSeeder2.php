@@ -56,6 +56,9 @@ class DummyProviderProfileSeeder2 extends Seeder
         'NT' => 'Northern Territory',
     ];
 
+    /** Days that seeded featured/banner placements remain active. */
+    private const FEATURED_LISTING_DAYS = 30;
+
     public function run(): void
     {
         $path = database_path('seeders/'.self::DATA_FILE);
@@ -135,6 +138,16 @@ class DummyProviderProfileSeeder2 extends Seeder
             );
 
             // 2. ProviderProfile
+            // Assign ad-tier placements to a representative subset of profiles so that
+            // every featured/banner section is populated after seeding.
+            // Profiles with an active paid tier have free_listing_expires_at cleared
+            // because queryBannerProfiles() excludes profiles still in their free period.
+            $isFeatured = ($i % 5 === 0);
+            $isHomeFeatured = ($i % 10 === 0);
+            $isLocalBanner = ($i % 20 === 0);
+            $isHomeBanner = ($i % 25 === 0);
+            $hasPaidTier = $isFeatured || $isHomeFeatured || $isLocalBanner || $isHomeBanner;
+
             $slug = Str::slug($name) ?: 'profile';
             $existingProfile = ProviderProfile::withTrashed()
                 ->where('user_id', $user->id)
@@ -180,12 +193,12 @@ class DummyProviderProfileSeeder2 extends Seeder
                     'phone' => $record['Phone'] ?? null,
                     'whatsapp' => null,
                     'is_verified' => true,
-                    'is_featured' => false,
-                    'featured_expires_at' => null,
-                    'home_featured_expires_at' => null,
-                    'local_banner_expires_at' => null,
-                    'home_banner_expires_at' => null,
-                    'free_listing_expires_at' => now()->addDays($freeListingDays),
+                    'is_featured' => $isFeatured,
+                    'featured_expires_at' => $isFeatured ? now()->addDays(self::FEATURED_LISTING_DAYS) : null,
+                    'home_featured_expires_at' => $isHomeFeatured ? now()->addDays(self::FEATURED_LISTING_DAYS) : null,
+                    'local_banner_expires_at' => $isLocalBanner ? now()->addDays(self::FEATURED_LISTING_DAYS) : null,
+                    'home_banner_expires_at' => $isHomeBanner ? now()->addDays(self::FEATURED_LISTING_DAYS) : null,
+                    'free_listing_expires_at' => $hasPaidTier ? null : now()->addDays($freeListingDays),
                     'profile_status' => 'approved',
                     'expires_at' => now()->addMonths(6),
                 ],
