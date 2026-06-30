@@ -54,6 +54,28 @@
     <div class="mx-auto max-w-5xl">
         @include('profile.partials.back-to-settings')
 
+        @if(session('checkout_success'))
+            <div class="mb-6 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700 shadow-sm">
+                {{ session('checkout_success') }}
+            </div>
+        @endif
+
+        @if(session('checkout_error'))
+            <div class="mb-6 rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm">
+                {{ session('checkout_error') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="mb-6 rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm">
+                <ul class="list-disc pl-5 space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
             <h1 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">Boost Your Profile</h1>
             <p class="text-gray-600">Choose one or more ad placements to increase your visibility. Each placement is charged per day.</p>
