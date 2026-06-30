@@ -406,6 +406,10 @@ class WooCommerceWebhookTest extends TestCase
         $this->assertStringContainsString('hotadvertising.com.au/cart/', $result['checkout_url']);
         $this->assertStringContainsString('add-to-cart=42', $result['checkout_url']);
         $this->assertStringContainsString('package=starter', $result['checkout_url']);
+        $this->assertStringContainsString(urlencode(route('purchase-credit.success', [
+            'provider' => 'woocommerce',
+            'purchase_uuid' => $result['purchase']->uuid,
+        ])), $result['checkout_url']);
 
         /** @var CreditPurchase $purchase */
         $purchase = $result['purchase'];
