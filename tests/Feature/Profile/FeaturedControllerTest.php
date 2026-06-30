@@ -4,6 +4,7 @@ namespace Tests\Feature\Profile;
 
 use App\Actions\GetFeaturedState;
 use App\Actions\PurchaseFeatured;
+use App\Actions\Subscription\HandleWooCommerceCheckoutSuccess;
 use App\Actions\Support\ActionResult;
 use App\Http\Middleware\CheckProfileSteps;
 use App\Http\Middleware\EnsureProfileSelected;
@@ -226,5 +227,139 @@ class FeaturedControllerTest extends TestCase
         // Must succeed even though the profile has no photos uploaded.
         $response->assertOk();
         $response->assertJson(['success' => true]);
+    }
+
+    // ---------------------------------------------------------------
+    // WooCommerce session-UUID handling on the featured page
+    // ---------------------------------------------------------------
+
+    private function mockFeaturedState(): void
+    {
+        $mock = Mockery::mock(GetFeaturedState::class);
+        $mock->shouldReceive('execute')->andReturn([
+            'isFeatured' => false,
+            'expiresAt' => null,
+            'creditCost' => 5,
+            'durationDays' => 1,
+            'homeFeaturedExpiresAt' => null,
+            'localBannerExpiresAt' => null,
+            'homeBannerExpiresAt' => null,
+            'freeListingExpiresAt' => null,
+            'settings' => [
+                'free_listing_days' => 21,
+                'featured_duration_days' => 1,
+                'normal_featured_credit_cost' => 1,
+                'home_featured_credit_cost' => 3,
+                'local_banner_credit_cost' => 2,
+                'home_banner_credit_cost' => 5,
+            ],
+        ]);
+        $this->app->instance(GetFeaturedState::class, $mock);
+    }
+
+    public function test_featured_page_applies_credits_and_shows_success_when_woo_purchase_is_paid(): void
+    {
+        $user = $this->createProvider(credits: 0);
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
+
+        $this->mockFeaturedState();
+
+        $wooSuccess = Mockery::mock(HandleWooCommerceCheckoutSuccess::class);
+        $wooSuccess->shouldReceive('execute')
+            ->once()
+            ->with('test-uuid-paid', $user)
+            ->andReturn(['status' => 'paid', 'credits' => 30, 'profile_name' => $profile->name]);
+
+        $this->app->instance(HandleWooCommerceCheckoutSuccess::class, $wooSuccess);
+
+        $response = $this->actingAs($user)
+            ->withSession([
+                'active_provider_profile_id' => $profile->id,
+                'woocommerce_purchase_uuid' => 'test-uuid-paid',
+            ])
+            ->get(route('featured'));
+
+        $response->assertOk();
+        $response->assertSessionHas('checkout_success');
+        $successMsg = $response->getSession()->get('checkout_success') ?? '';
+        $this->assertStringContainsString('Payment successful', $successMsg);
+        $this->assertStringContainsString('30 credits', $successMsg);
+        // Session UUID must be consumed (pulled)
+        $response->assertSessionMissing('woocommerce_purchase_uuid');
+    }
+
+    public function test_featured_page_shows_processing_message_when_woo_purchase_is_pending(): void
+    {
+        $user = $this->createProvider(credits: 0);
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
+
+        $this->mockFeaturedState();
+
+        $wooSuccess = Mockery::mock(HandleWooCommerceCheckoutSuccess::class);
+        $wooSuccess->shouldReceive('execute')
+            ->once()
+            ->with('test-uuid-pending', $user)
+            ->andReturn(['status' => 'pending', 'profile_name' => $profile->name]);
+
+        $this->app->instance(HandleWooCommerceCheckoutSuccess::class, $wooSuccess);
+
+        $response = $this->actingAs($user)
+            ->withSession([
+                'active_provider_profile_id' => $profile->id,
+                'woocommerce_purchase_uuid' => 'test-uuid-pending',
+            ])
+            ->get(route('featured'));
+
+        $response->assertOk();
+        $response->assertSessionHas('checkout_success');
+        $pendingMsg = $response->getSession()->get('checkout_success') ?? '';
+        $this->assertStringContainsString('being processed', $pendingMsg);
+    }
+
+    public function test_featured_page_shows_error_when_woo_purchase_is_cancelled(): void
+    {
+        $user = $this->createProvider(credits: 0);
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
+
+        $this->mockFeaturedState();
+
+        $wooSuccess = Mockery::mock(HandleWooCommerceCheckoutSuccess::class);
+        $wooSuccess->shouldReceive('execute')
+            ->once()
+            ->with('test-uuid-cancelled', $user)
+            ->andReturn(['status' => 'cancelled', 'profile_name' => $profile->name]);
+
+        $this->app->instance(HandleWooCommerceCheckoutSuccess::class, $wooSuccess);
+
+        $response = $this->actingAs($user)
+            ->withSession([
+                'active_provider_profile_id' => $profile->id,
+                'woocommerce_purchase_uuid' => 'test-uuid-cancelled',
+            ])
+            ->get(route('featured'));
+
+        $response->assertOk();
+        $response->assertSessionHas('checkout_error');
+    }
+
+    public function test_featured_page_loads_normally_when_no_woo_session_uuid(): void
+    {
+        $user = $this->createProvider(credits: 5);
+        $profile = ProviderProfile::where('user_id', $user->id)->first();
+
+        $this->mockFeaturedState();
+
+        // HandleWooCommerceCheckoutSuccess must NOT be called when no session UUID
+        $wooSuccess = Mockery::mock(HandleWooCommerceCheckoutSuccess::class);
+        $wooSuccess->shouldNotReceive('execute');
+        $this->app->instance(HandleWooCommerceCheckoutSuccess::class, $wooSuccess);
+
+        $response = $this->actingAs($user)
+            ->withSession(['active_provider_profile_id' => $profile->id])
+            ->get(route('featured'));
+
+        $response->assertOk();
+        $response->assertSessionMissing('checkout_success');
+        $response->assertSessionMissing('checkout_error');
     }
 }
