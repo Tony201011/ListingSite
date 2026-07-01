@@ -13,6 +13,8 @@ use App\Actions\Auth\SignupProvider;
 use App\Actions\Auth\VerifyProviderSignupOtp;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProviderSigninRequest;
+use App\Models\User;
+use App\Services\SocialAuthService;
 use App\Http\Requests\ProviderSignupRequest;
 use App\Http\Requests\UpdateEmailRequest;
 use App\Http\Requests\UpdatePasswordRequest;
@@ -20,6 +22,9 @@ use App\Http\Requests\VerifyOtpRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProviderRegisterController extends Controller
@@ -33,7 +38,8 @@ class ProviderRegisterController extends Controller
         private VerifyProviderSignupOtp $verifyProviderSignupOtp,
         private LogoutProvider $logoutProvider,
         private ChangeProviderPassword $changeProviderPassword,
-        private ChangeProviderEmail $changeProviderEmail
+        private ChangeProviderEmail $changeProviderEmail,
+        private SocialAuthService $socialAuthService
     ) {}
 
     public function showSignupForm(): View
@@ -81,9 +87,100 @@ class ProviderRegisterController extends Controller
         return response()->json($result->toPayload(), $result->status());
     }
 
-    public function logout(Request $request): RedirectResponse
+    public function redirectToProvider(Request $request, string $provider): RedirectResponse
     {
-        return $this->logoutProvider->execute($request);
+        $provider = strtolower($provider);
+
+        if (! in_array($provider, ['facebook', 'twitter', 'instagram'], true)) {
+            abort(404);
+        }
+
+        if (Auth::check() && ($request->boolean('connect') || $request->input('intent') === 'connect')) {
+            session()->put("social_oauth_intent.{$provider}", 'connect');
+        } else {
+            session()->forget("social_oauth_intent.{$provider}");
+        }
+
+        $redirectUrl = $this->socialAuthService->redirectUrl($provider)['url'];
+
+        return redirect($redirectUrl);
+    }
+
+    public function handleProviderCallback(Request $request, string $provider): RedirectResponse
+    {
+        $provider = strtolower($provider);
+
+        if (! in_array($provider, ['facebook', 'twitter', 'instagram'], true)) {
+            abort(404);
+        }
+
+        $profile = $this->socialAuthService->handleCallback($provider, $request);
+        $email = trim((string) ($profile['email'] ?? ''));
+
+        if ($email === '') {
+            $email = strtolower($provider).'_'.Str::random(8).'@example.invalid';
+        }
+
+        $connectIntent = session()->get("social_oauth_intent.{$provider}");
+
+        if (Auth::check() && $connectIntent === 'connect') {
+            $currentUser = Auth::user();
+
+            if (! $currentUser instanceof User) {
+                abort(401);
+            }
+
+            $existingProviderUser = User::query()->where('provider', $provider)->where('provider_id', (string) ($profile['id'] ?? ''))->first();
+
+            if ($existingProviderUser && $existingProviderUser->getKey() !== $currentUser->getKey()) {
+                session()->forget("social_oauth_intent.{$provider}");
+
+                return redirect('/my-account')->withErrors([
+                    'social' => 'This social account is already connected to another user.',
+                ]);
+            }
+
+            $currentUser->forceFill([
+                'provider' => $provider,
+                'provider_id' => (string) ($profile['id'] ?? ''),
+                'avatar_url' => $profile['avatar_url'] ?? $currentUser->avatar_url,
+            ])->save();
+
+            session()->forget("social_oauth_intent.{$provider}");
+
+            return redirect('/my-account')->with('success', ucfirst($provider).' account connected successfully.');
+        }
+
+        $existingUser = User::query()->where('provider', $provider)->where('provider_id', (string) ($profile['id'] ?? ''))->first();
+
+        if (! $existingUser) {
+            $existingUser = User::query()->where('email', $email)->first();
+        }
+
+        if (! $existingUser) {
+            $existingUser = User::create([
+                'name' => (string) ($profile['name'] ?? explode('@', $email)[0]),
+                'email' => $email,
+                'password' => Hash::make(Str::random(40)),
+                'role' => User::ROLE_PROVIDER,
+                'provider' => $provider,
+                'provider_id' => (string) ($profile['id'] ?? ''),
+                'avatar_url' => $profile['avatar_url'] ?? null,
+                'email_verified_at' => now(),
+            ]);
+        } else {
+            $existingUser->forceFill([
+                'provider' => $provider,
+                'provider_id' => (string) ($profile['id'] ?? ''),
+                'avatar_url' => $profile['avatar_url'] ?? $existingUser->avatar_url,
+            ])->save();
+        }
+
+        Auth::login($existingUser, true);
+        $request->session()->regenerate();
+        session()->forget("social_oauth_intent.{$provider}");
+
+        return redirect('/my-profiles');
     }
 
     public function changePassword(): View

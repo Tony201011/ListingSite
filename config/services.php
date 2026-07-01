@@ -48,6 +48,24 @@ return [
         'phone' => env('TWILIO_PHONE'),
     ],
 
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env('FACEBOOK_REDIRECT_URI', env('APP_URL').'/auth/facebook/callback'),
+    ],
+
+    'twitter' => [
+        'client_id' => env('X_CLIENT_ID'),
+        'client_secret' => env('X_CLIENT_SECRET'),
+        'redirect' => env('X_REDIRECT_URI', env('APP_URL').'/auth/twitter/callback'),
+    ],
+
+    'instagram' => [
+        'client_id' => env('INSTAGRAM_CLIENT_ID'),
+        'client_secret' => env('INSTAGRAM_CLIENT_SECRET'),
+        'redirect' => env('INSTAGRAM_REDIRECT_URI', env('APP_URL').'/auth/instagram/callback'),
+    ],
+
     'stripe' => [
         'model' => env('STRIPE_MODEL', 'User'),
         'key' => env('STRIPE_KEY'),

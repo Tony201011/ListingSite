@@ -76,6 +76,28 @@ class EmailVerificationTest extends TestCase
         Bus::assertNotDispatched(SendAccountCreatedEmailJob::class);
     }
 
+    public function test_account_created_email_is_not_dispatched_for_older_accounts_when_email_is_verified(): void
+    {
+        Bus::fake();
+        SmtpSetting::create([
+            'is_enabled' => true,
+            'mail_mailer' => 'mailgun',
+            'mailgun_domain' => 'example.com',
+            'mailgun_secret' => 'key-test',
+            'mail_from_address' => 'no-reply@example.com',
+            'mail_from_name' => 'Test',
+        ]);
+        $user = User::factory()->create([
+            'email_verified_at' => null,
+            'created_at' => now()->subDays(7),
+        ]);
+
+        $url = $this->makeVerificationUrl($user);
+        $this->get($url);
+
+        Bus::assertNotDispatched(SendAccountCreatedEmailJob::class);
+    }
+
     public function test_already_verified_user_visiting_link_is_redirected_to_profile_selection_and_logged_in(): void
     {
         Bus::fake();

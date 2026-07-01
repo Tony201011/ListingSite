@@ -117,6 +117,8 @@ class VerifyProviderSignupOtp
 
         $this->sendProviderAccountEmails->execute($user);
 
+        request()->session()->put('signup_account_created_pending', true);
+
         Auth::login($user);
         request()->session()->regenerate();
 

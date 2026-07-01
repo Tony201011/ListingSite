@@ -219,6 +219,9 @@ Route::get('/403', function () {
 Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout');
 /** auth routes end */
+Route::get('/auth/{provider}', [ProviderRegisterController::class, 'redirectToProvider'])->name('social.redirect');
+Route::get('/auth/{provider}/callback', [ProviderRegisterController::class, 'handleProviderCallback'])->name('social.callback');
+
 Route::middleware('guest')->group(function (): void {
     Route::get('/signup', [ProviderRegisterController::class, 'showSignupForm'])->middleware('throttle:'.config('security.throttles.signup_page', '5,1'))->name('signup');
     Route::post('/signup', [ProviderRegisterController::class, 'signup'])->name('signup.submit');

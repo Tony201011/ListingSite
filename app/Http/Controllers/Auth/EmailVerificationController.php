@@ -37,7 +37,10 @@ class EmailVerificationController extends Controller
 
         if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
-            $this->dispatchAccountCreatedEmail($user);
+
+            if ($this->shouldDispatchAccountCreatedEmail($user, $request)) {
+                $this->dispatchAccountCreatedEmail($user);
+            }
         }
 
         if (Auth::check()) {
@@ -70,6 +73,21 @@ class EmailVerificationController extends Controller
         }
 
         return back()->with('success', 'A new verification email has been sent.');
+    }
+
+    private function shouldDispatchAccountCreatedEmail(User $user, Request $request): bool
+    {
+        if ((bool) $request->session()->pull('signup_account_created_pending', false)) {
+            return true;
+        }
+
+        if ($user->role !== User::ROLE_PROVIDER) {
+            return false;
+        }
+
+        $createdAt = $user->created_at;
+
+        return $createdAt instanceof \Illuminate\Support\Carbon && $createdAt->between(now()->subHours(24), now());
     }
 
     private function dispatchAccountCreatedEmail(User $user): void

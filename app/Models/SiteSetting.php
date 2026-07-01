@@ -6,6 +6,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Schema;
 
 class SiteSetting extends Model
 {
@@ -46,6 +47,15 @@ class SiteSetting extends Model
         'stripe_secret_key',
         'stripe_webhook_secret',
         'stripe_enabled',
+        'facebook_client_id',
+        'facebook_client_secret',
+        'facebook_redirect_uri',
+        'twitter_client_id',
+        'twitter_client_secret',
+        'twitter_redirect_uri',
+        'instagram_client_id',
+        'instagram_client_secret',
+        'instagram_redirect_uri',
         'woocommerce_enabled',
         'woocommerce_base_url',
         'woocommerce_consumer_key',
@@ -232,7 +242,9 @@ class SiteSetting extends Model
 
     protected static function booted(): void
     {
-        static::saved(function (): void {
+        static::saved(function (self $settings): void {
+            $settings->ensureSocialAuthColumns();
+
             cache()->forget('site_setting.home_page_records');
             cache()->forget('site_setting.search_page_records');
             cache()->forget('site_setting.online_filter_enabled');
@@ -243,6 +255,38 @@ class SiteSetting extends Model
             cache()->forget('site_setting.site_password_config');
             cache()->forget('site_setting.max_video_upload_mb');
         });
+    }
+
+    public function ensureSocialAuthColumns(): void
+    {
+        if (! Schema::hasTable($this->getTable())) {
+            return;
+        }
+
+        $columns = [
+            'facebook_client_id',
+            'facebook_client_secret',
+            'facebook_redirect_uri',
+            'twitter_client_id',
+            'twitter_client_secret',
+            'twitter_redirect_uri',
+            'instagram_client_id',
+            'instagram_client_secret',
+            'instagram_redirect_uri',
+        ];
+
+        foreach ($columns as $column) {
+            if (Schema::hasColumn($this->getTable(), $column)) {
+                continue;
+            }
+
+            Schema::table($this->getTable(), function ($table) use ($column): void {
+                match ($column) {
+                    'facebook_client_secret', 'twitter_client_secret', 'instagram_client_secret' => $table->text($column)->nullable(),
+                    default => $table->string($column)->nullable(),
+                };
+            });
+        }
     }
 
     public static function getSitePasswordConfig(): array

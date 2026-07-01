@@ -16,6 +16,11 @@
 
     $currentPlan = $user->plan_name ?? 'Premium';
     $renewalDate = optional($user->plan_expires_at ?? null)->format('M d, Y') ?? 'Auto renewal active';
+    $socialProviders = [
+        ['key' => 'facebook', 'label' => 'Facebook'],
+        ['key' => 'twitter', 'label' => 'X / Twitter'],
+        ['key' => 'instagram', 'label' => 'Instagram'],
+    ];
 @endphp
 
 <div class="min-h-screen bg-gray-50" x-data="{}">
@@ -144,6 +149,40 @@
                         </button>
                         @endif
                     </form>
+                </div>
+
+                {{-- Social Accounts --}}
+                <div class="border border-gray-300 rounded-lg p-6">
+                    <h2 class="text-xl font-bold mb-4 text-gray-900">Social Accounts</h2>
+                    <p class="mb-4 text-sm text-gray-600">Connect your account with Facebook, X, or Instagram for faster sign-in in the future.</p>
+
+                    <div class="space-y-3">
+                        @foreach($socialProviders as $provider)
+                            @php
+                                $isConnected = filled($user->provider_id) && $user->provider === $provider['key'];
+                            @endphp
+                            <div class="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <h3 class="font-medium text-gray-900">{{ $provider['label'] }}</h3>
+                                    <p class="text-sm text-gray-600">
+                                        {{ $isConnected ? 'Connected to this account.' : 'Not connected yet.' }}
+                                    </p>
+                                </div>
+                                @if($isConnected)
+                                    <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                                        Connected
+                                    </span>
+                                @else
+                                    <a
+                                        href="{{ route('social.redirect', ['provider' => $provider['key'], 'intent' => 'connect']) }}"
+                                        class="inline-flex items-center justify-center rounded bg-pink-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-600"
+                                    >
+                                        Connect
+                                    </a>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
 
                 {{-- Password & Security --}}
