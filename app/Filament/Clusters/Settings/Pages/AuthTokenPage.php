@@ -186,7 +186,3 @@ class AuthTokenPage extends Page implements HasForms
         ];
     }
 }
-
-
-
-
