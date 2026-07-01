@@ -14,6 +14,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use UnitEnum;
 
 class AuthTokenPage extends Page implements HasForms
 {
@@ -29,13 +30,25 @@ class AuthTokenPage extends Page implements HasForms
 
     protected static ?string $slug = 'auth-token';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 2;
 
     protected string $view = 'filament.pages.auth-token';
 
     public ?array $data = [];
+
+    protected array $authTokenFields = [
+        'facebook_client_id',
+        'facebook_client_secret',
+        'facebook_redirect_uri',
+        'twitter_client_id',
+        'twitter_client_secret',
+        'twitter_redirect_uri',
+        'instagram_client_id',
+        'instagram_client_secret',
+        'instagram_redirect_uri',
+    ];
 
     public static function canAccess(): bool
     {
@@ -57,43 +70,51 @@ class AuthTokenPage extends Page implements HasForms
                         TextInput::make('facebook_client_id')
                             ->label('Facebook App ID')
                             ->maxLength(255),
+
                         TextInput::make('facebook_client_secret')
                             ->label('Facebook App Secret')
                             ->password()
                             ->revealable()
                             ->maxLength(255),
+
                         TextInput::make('facebook_redirect_uri')
                             ->label('Facebook Redirect URI')
                             ->url()
                             ->maxLength(255),
                     ]),
+
                 Section::make('X / Twitter')
                     ->description('Credentials used for X / Twitter sign-up and sign-in.')
                     ->schema([
                         TextInput::make('twitter_client_id')
                             ->label('X Client ID')
                             ->maxLength(255),
+
                         TextInput::make('twitter_client_secret')
                             ->label('X Client Secret')
                             ->password()
                             ->revealable()
                             ->maxLength(255),
+
                         TextInput::make('twitter_redirect_uri')
                             ->label('X Redirect URI')
                             ->url()
                             ->maxLength(255),
                     ]),
+
                 Section::make('Instagram')
                     ->description('Credentials used for Instagram sign-up and sign-in.')
                     ->schema([
                         TextInput::make('instagram_client_id')
                             ->label('Instagram App ID')
                             ->maxLength(255),
+
                         TextInput::make('instagram_client_secret')
                             ->label('Instagram App Secret')
                             ->password()
                             ->revealable()
                             ->maxLength(255),
+
                         TextInput::make('instagram_redirect_uri')
                             ->label('Instagram Redirect URI')
                             ->url()
@@ -107,29 +128,43 @@ class AuthTokenPage extends Page implements HasForms
     {
         $settings = SiteSetting::query()->first();
 
-        $this->form->fill($settings?->only([
-            'facebook_client_id',
-            'facebook_client_secret',
-            'facebook_redirect_uri',
-            'twitter_client_id',
-            'twitter_client_secret',
-            'twitter_redirect_uri',
-            'instagram_client_id',
-            'instagram_client_secret',
-            'instagram_redirect_uri',
-        ]) ?? []);
+        $data = [];
+
+        foreach ($this->authTokenFields as $field) {
+            $value = $settings?->{$field};
+
+            $data[$field] = $this->convertToString($value);
+        }
+
+        $this->form->fill($data);
     }
 
     public function save(): void
     {
         $settings = SiteSetting::query()->firstOrNew();
-        $settings->fill($this->form->getState());
+
+        $data = $this->form->getState();
+
+        foreach ($this->authTokenFields as $field) {
+            $data[$field] = $this->convertToString($data[$field] ?? null);
+        }
+
+        $settings->fill($data);
         $settings->save();
 
         Notification::make()
             ->title('Auth token settings saved')
             ->success()
             ->send();
+    }
+
+    protected function convertToString(mixed $value): string
+    {
+        if (is_array($value)) {
+            return implode(',', array_filter($value, fn ($item) => ! is_array($item)));
+        }
+
+        return (string) ($value ?? '');
     }
 
     protected function getFormActions(): array
