@@ -69,18 +69,21 @@ class AuthTokenPage extends Page implements HasForms
                     ->schema([
                         TextInput::make('facebook_client_id')
                             ->label('Facebook App ID')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
 
                         TextInput::make('facebook_client_secret')
                             ->label('Facebook App Secret')
                             ->password()
                             ->revealable()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
 
                         TextInput::make('facebook_redirect_uri')
                             ->label('Facebook Redirect URI')
                             ->url()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
                     ]),
 
                 Section::make('X / Twitter')
@@ -88,18 +91,21 @@ class AuthTokenPage extends Page implements HasForms
                     ->schema([
                         TextInput::make('twitter_client_id')
                             ->label('X Client ID')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
 
                         TextInput::make('twitter_client_secret')
                             ->label('X Client Secret')
                             ->password()
                             ->revealable()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
 
                         TextInput::make('twitter_redirect_uri')
                             ->label('X Redirect URI')
                             ->url()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
                     ]),
 
                 Section::make('Instagram')
@@ -107,18 +113,21 @@ class AuthTokenPage extends Page implements HasForms
                     ->schema([
                         TextInput::make('instagram_client_id')
                             ->label('Instagram App ID')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
 
                         TextInput::make('instagram_client_secret')
                             ->label('Instagram App Secret')
                             ->password()
                             ->revealable()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
 
                         TextInput::make('instagram_redirect_uri')
                             ->label('Instagram Redirect URI')
                             ->url()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->dehydrateStateUsing(fn ($state) => $this->convertToString($state)),
                     ]),
             ])
             ->statePath('data');
@@ -131,9 +140,7 @@ class AuthTokenPage extends Page implements HasForms
         $data = [];
 
         foreach ($this->authTokenFields as $field) {
-            $value = $settings?->{$field};
-
-            $data[$field] = $this->convertToString($value);
+            $data[$field] = $this->convertToString($settings?->{$field});
         }
 
         $this->form->fill($data);
@@ -161,7 +168,10 @@ class AuthTokenPage extends Page implements HasForms
     protected function convertToString(mixed $value): string
     {
         if (is_array($value)) {
-            return implode(',', array_filter($value, fn ($item) => ! is_array($item)));
+            return collect($value)
+                ->flatten()
+                ->filter(fn ($item) => filled($item))
+                ->implode(',');
         }
 
         return (string) ($value ?? '');
@@ -176,3 +186,7 @@ class AuthTokenPage extends Page implements HasForms
         ];
     }
 }
+
+
+
+
