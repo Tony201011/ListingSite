@@ -1,12 +1,20 @@
 @extends('layouts.frontend')
 
-@section('title', 'Contact Us')
+@section('title', $contactPage?->title ?? ($pageSlug === 'complaints-contact' ? 'Support & Complaints' : 'Contact Us'))
 
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div class="rounded-lg bg-white p-6 shadow-sm sm:p-8">
         @php
+            $isComplaintsPage = $pageSlug === 'complaints-contact';
+            $defaultTitle = $isComplaintsPage ? 'Support & Complaints' : 'Contact Us';
+            $defaultSubtitle = $isComplaintsPage
+                ? 'Have a complaint or need support? Send us a message and our team will get back to you.'
+                : 'Have a question or need support? Send us a message and our team will get back to you.';
+            $defaultCategory = $isComplaintsPage ? 'contact-support' : 'contact-us';
+            $defaultResponseTime = $isComplaintsPage ? 'Within 24 hours' : 'within 24 hours';
+
             $enableNameField = $contactPage?->enable_name_field ?? true;
             $enableEmailField = $contactPage?->enable_email_field ?? true;
             $enableSubjectField = $contactPage?->enable_subject_field ?? true;
@@ -30,8 +38,8 @@
         </button>
 
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">{{ $contactPage?->title ?? 'Contact Us' }}</h1>
-            <p class="mt-3 text-gray-600">{{ $contactPage?->subtitle ?? 'Have a question or need support? Send us a message and our team will get back to you.' }}</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ $contactPage?->title ?? $defaultTitle }}</h1>
+            <p class="mt-3 text-gray-600">{{ $contactPage?->subtitle ?? $defaultSubtitle }}</p>
         </div>
 
         @if(session('success'))
@@ -105,9 +113,9 @@
             <div class="space-y-6">
                 <div class="rounded-lg border border-gray-300 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ $contactPage?->support_heading ?? 'Support Info' }}</h2>
-                    <p class="text-sm text-gray-600 mb-2">Response time: {{ $contactPage?->response_time ?? 'within 24 hours' }}</p>
+                    <p class="text-sm text-gray-600 mb-2">Response time: {{ $contactPage?->response_time ?? $defaultResponseTime }}</p>
                     <p class="text-sm text-gray-600 mb-2">Support email: {{ $contactEmail ?? 'support@hotescorts.com.au' }}</p>
-                    <p class="text-sm text-gray-600">Category: {{ $contactPage?->category_label ?? 'contact-us' }}</p>
+                    <p class="text-sm text-gray-600">Category: {{ $contactPage?->category_label ?? $defaultCategory }}</p>
                 </div>
 
                 @if($showMap)

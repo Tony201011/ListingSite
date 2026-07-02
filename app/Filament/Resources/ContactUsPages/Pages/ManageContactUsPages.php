@@ -15,9 +15,9 @@ class ManageContactUsPages extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->label('Add Contact Us Content')
+                ->label('Add Contact Page')
                 ->createAnother(false)
-                ->visible(fn (): bool => ContactUsPage::query()->doesntExist()),
+                ->visible(fn (): bool => ContactUsPageResource::canCreate()),
         ];
     }
 }

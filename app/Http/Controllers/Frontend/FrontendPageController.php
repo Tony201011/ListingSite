@@ -198,7 +198,12 @@ class FrontendPageController extends Controller
 
     public function contactUs(): View
     {
-        return view('frontend.contact-us', $this->getContactUsPageData->execute());
+        return view('frontend.contact-us', $this->getContactUsPageData->execute('contact-us'));
+    }
+
+    public function complaintsContact(): View
+    {
+        return view('frontend.contact-us', $this->getContactUsPageData->execute('complaints-contact'));
     }
 
     public function submitContactUs(SubmitContactUsRequest $request): RedirectResponse
