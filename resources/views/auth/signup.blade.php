@@ -78,7 +78,7 @@
             </ul>
         </div>
 
-        <div class="mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+        {{-- <div class="mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
             <p class="mb-3 text-sm font-semibold text-gray-700">Sign up faster with</p>
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('social.redirect', ['provider' => 'facebook']) }}" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-[#1877f2] hover:text-[#1877f2]">
@@ -91,7 +91,7 @@
                     <span class="text-base">◎</span> Instagram
                 </a>
             </div>
-        </div>
+        </div> --}}
 
         <form
             x-data="signupForm({
